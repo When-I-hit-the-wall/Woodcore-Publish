@@ -1,8 +1,9 @@
 """Woodcore's copyright, its licence and the third-party notices (legal/, packaging/notices.py, calc/tools/legal.py, packaging/woodcore.iss).
 
-The engineer's choice (23.09.2026): «© 2026 Florian Lamprecht», woodcore@pineo.ch, a short proprietary licence in French, German and English -- not open source for now --, and the licences of what the installer carries, shipped with the program and published on the site. What is held here: the three licences say the same thing in their three languages, the notices are the ones the pinned versions call for, the installer shows the licence and names its holder, the program carries the files, and the window shows the line and the dialog.
+The engineer's choice (23.09.2026): «© 2026 Florian Lamprecht», woodcore@pineo.ch, and the licences of what the installer carries, shipped with the program and published on the site. The licence, a short proprietary one until then, is the GNU GPL version 3 or later since 14.10.2026 (the engineer: «License: GPL», GPL-3.0-or-later chosen): its official text in legal/licenses/GPL-3.0.txt and as the repository's LICENSE, presented in French, German and English by legal/LICENSE-*.txt, the source published in Woodcore-Publish. What is held here: the three licences say the same thing in their three languages, the notices are the ones the pinned versions call for, the installer shows the licence and names its holder, the program carries the files, and the window shows the line and the dialog.
 """
 
+import hashlib
 import os
 import re
 import sys
@@ -28,9 +29,20 @@ def test_the_three_licences_name_the_holder_and_say_the_same_things():
         assert "© 2026 Florian Lamprecht" in text and "woodcore@pineo.ch" in text, lang
         assert "Art. 100" in text or "art. 100" in text, f"{lang}: the reservation of gross negligence is gone"
         assert "THIRD-PARTY-NOTICES.txt" in text and '"updates": {"enabled": false}' in text, lang
+        # GPL-3.0-or-later since 14.10.2026: the licence named, its official text a file the program carries, the source where it is published
+        assert "GPL-3.0-or-later" in text and "licenses/GPL-3.0.txt" in text and "https://www.gnu.org/licenses/gpl-3.0.html" in text, lang
+        assert "https://github.com/When-I-hit-the-wall/Woodcore-Publish" in text, f"{lang}: where the source is"
         sections[lang] = re.findall(r"^(\d+)\. ", text, re.M)
-    assert sections["fr"] == sections["de"] == sections["en"] == [str(n) for n in range(1, 11)], sections
+    assert sections["fr"] == sections["de"] == sections["en"] == [str(n) for n in range(1, 10)], sections
     assert "ß" not in _licence("de"), "Swiss German writes ss"
+
+
+def test_the_licence_is_the_gpl_s_own_text_and_github_finds_it():
+    """The official GPL version 3, once in legal/licenses/ (which the program and the site carry) and once as the repository's LICENSE (which GitHub reads): the two the same to the byte, so the copy cannot age without saying so."""
+    official = (LEGAL / "licenses" / "GPL-3.0.txt").read_bytes()
+    assert official.startswith(b"                    GNU GENERAL PUBLIC LICENSE\n                       Version 3, 29 June 2007\n")
+    assert hashlib.sha256(official).hexdigest() == "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986", "not the FSF's text"
+    assert (ROOT / "LICENSE").read_bytes() == official, "LICENSE differs from legal/licenses/GPL-3.0.txt"
 
 
 def test_the_notices_are_what_the_pinned_versions_call_for():
@@ -144,5 +156,6 @@ def test_the_site_publishes_the_licence_the_notices_and_a_legal_page():
         page = (ROOT / "website" / "content" / lang / "legal.md").read_text(encoding="utf-8")
         assert "© 2026 Florian Lamprecht" in page and "woodcore@pineo.ch" in page and "version.json" in page, lang
         for target in re.findall(r"\]\((/legal/[^)]+)\)", page):
-            assert (LEGAL / target.split("/")[-1]).is_file(), (lang, target)
+            assert (LEGAL / target[len("/legal/"):]).is_file(), (lang, target)
+        assert "/legal/licenses/GPL-3.0.txt" in page and "GPL-3.0-or-later" in page, lang
         assert f"/legal/LICENSE-{lang}.txt" in page and "/legal/THIRD-PARTY-NOTICES.txt" in page, lang

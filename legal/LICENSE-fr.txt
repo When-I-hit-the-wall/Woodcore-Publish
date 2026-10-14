@@ -1,40 +1,34 @@
-﻿WOODCORE — CONDITIONS DE LICENCE
+﻿WOODCORE — LICENCE
 
 © 2026 Florian Lamprecht — woodcore@pineo.ch
-Tous droits réservés.
 
-Woodcore (le programme, sa fenêtre, sa ligne de commande, son moteur Typst, sa documentation et son site internet) est protégé par la loi fédérale sur le droit d'auteur (LDA). Ce n'est pas un logiciel libre. En installant ou en utilisant Woodcore, vous acceptez les conditions qui suivent.
+Woodcore (le programme, sa fenêtre, sa ligne de commande, son moteur Typst, sa documentation et son site internet) est un logiciel libre : vous pouvez le redistribuer et le modifier selon les termes de la Licence publique générale GNU (GNU General Public License) publiée par la Free Software Foundation, soit la version 3 de cette licence, soit (à votre choix) toute version ultérieure. SPDX : GPL-3.0-or-later.
 
-1. Droit d'utilisation
-   Le titulaire vous accorde gratuitement un droit d'utilisation non exclusif et non transférable de Woodcore, si vous l'avez reçu du titulaire ou téléchargé depuis son site (https://woodcore.pages.dev/). Vous pouvez l'installer sur vos propres ordinateurs et l'utiliser pour établir vos notes de calcul, y compris dans votre activité professionnelle. Vous pouvez faire les copies de sauvegarde nécessaires.
+1. Licence
+   Vous pouvez utiliser Woodcore pour tout usage, y compris dans votre activité professionnelle, l'étudier, le modifier et le redistribuer, modifié ou non, gratuitement ou contre paiement, aux conditions de la GPL : en particulier, une version que vous distribuez reste sous la GPL, accompagnée de son code source ou de l'indication de l'endroit où l'obtenir, et garde les mentions de droit d'auteur et de licence.
 
-2. Ce qui n'est pas permis sans l'accord écrit du titulaire
-   - redistribuer, publier, vendre, louer ou mettre Woodcore à disposition de tiers, en tout ou en partie, par exemple sur un partage réseau ou un site internet ;
-   - modifier le programme ou en tirer une œuvre dérivée, sauf dans les limites que la loi autorise impérativement (en particulier l'art. 21 LDA) ;
-   - retirer ou modifier les mentions de droit d'auteur et de licence.
+2. Texte de la licence
+   Le texte complet de la GPL version 3 est dans le fichier licenses/GPL-3.0.txt, livré avec le programme et publié sur le site, ainsi qu'à l'adresse https://www.gnu.org/licenses/gpl-3.0.html. Seul ce texte anglais fait foi ; le présent fichier n'en est qu'une présentation et ne le remplace pas.
 
-3. Vos projets et vos rapports
-   Les projets, les données, les calculs et les rapports que vous établissez avec Woodcore vous appartiennent ; le titulaire ne revendique aucun droit sur eux. La copie du moteur que Woodcore place dans le dossier d'un projet (_woodcore/) peut accompagner ce projet et être remise avec lui — à un mandant, à un vérificateur, à un collègue — dans le seul but de compiler ou de vérifier ce projet.
+3. Code source
+   Le code source complet de chaque version de Woodcore, y compris les scripts qui construisent l'installateur, est publié à l'adresse https://github.com/When-I-hit-the-wall/Woodcore-Publish, sous l'étiquette de la version (par exemple v0.118.0).
 
-4. Version préliminaire
+4. Vos projets et vos rapports
+   Les projets, les données, les calculs et les rapports que vous établissez avec Woodcore vous appartiennent ; la GPL ne s'étend pas à eux. La copie du moteur que Woodcore place dans le dossier d'un projet (_woodcore/) est sous la GPL : elle peut accompagner ce projet et être remise avec lui — à un mandant, à un vérificateur, à un collègue —, qui reçoit les mêmes droits.
+
+5. Version préliminaire
    Woodcore est en développement actif. Des fonctions peuvent changer ou disparaître d'une version à l'autre, et une version peut contenir des erreurs. Le titulaire n'est pas tenu de fournir des mises à jour, un support ou des corrections.
 
-5. Responsabilité de l'utilisateur
+6. Responsabilité de l'utilisateur
    Woodcore est un outil d'aide au calcul et à la rédaction. Il ne remplace ni le jugement ni la responsabilité de l'ingénieur. Vous êtes seul responsable de vérifier les données saisies, les hypothèses, les résultats et les rapports produits, et de leur conformité aux normes applicables. Woodcore ne contient pas les normes SIA ni d'autres normes : vous devez disposer vous-même des éditions que vous appliquez.
 
-6. Exclusion de garantie et limitation de responsabilité
-   Woodcore est fourni gratuitement, « tel quel », sans aucune garantie, expresse ou tacite, notamment d'exactitude, d'absence d'erreurs, d'adéquation à un usage particulier ou de conformité aux normes. Dans toute la mesure permise par la loi, le titulaire exclut toute responsabilité pour les dommages directs ou indirects résultant de l'utilisation de Woodcore ou de l'impossibilité de l'utiliser, y compris les erreurs de calcul, les pertes de données et les dommages consécutifs. La responsabilité pour un dommage causé intentionnellement ou par négligence grave (art. 100 CO) demeure réservée.
+7. Absence de garantie
+   Woodcore est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE, sans même la garantie implicite de QUALITÉ MARCHANDE ou d'ADÉQUATION À UN USAGE PARTICULIER (articles 15 et 16 de la GPL). Dans toute la mesure permise par la loi, le titulaire n'est pas responsable des dommages résultant de l'utilisation de Woodcore ou de l'impossibilité de l'utiliser, y compris les erreurs de calcul et les pertes de données. La responsabilité pour un dommage causé intentionnellement ou par négligence grave (art. 100 CO) demeure réservée.
 
-7. Composants tiers
-   Woodcore contient des logiciels de tiers (notamment Python, Qt/PySide6, Typst, openpyxl et pypdf), qui restent soumis à leurs propres licences. Elles sont reproduites dans le fichier THIRD-PARTY-NOTICES.txt livré avec le programme et publié sur le site. Rien dans les présentes conditions ne restreint les droits que ces licences vous accordent.
+8. Composants tiers
+   Woodcore contient des logiciels de tiers (notamment Python, Qt/PySide6, Typst, openpyxl et pypdf), qui restent soumis à leurs propres licences. Elles sont reproduites dans le fichier THIRD-PARTY-NOTICES.txt livré avec le programme et publié sur le site.
 
-8. Vérification des mises à jour
+9. Vérification des mises à jour
    Au démarrage, une version installée de Woodcore lit le fichier version.json sur le site de Woodcore pour savoir si une nouvelle version existe. Aucune donnée de vos projets n'est transmise. Comme pour toute requête internet, le serveur qui héberge le site (Cloudflare) reçoit l'adresse IP de votre ordinateur et peut l'enregistrer dans ses journaux ; il en va de même de GitHub, qui sert l'installateur lorsque vous le téléchargez. La vérification peut être désactivée en inscrivant "updates": {"enabled": false} dans le fichier %APPDATA%\Woodcore\settings.json.
 
-9. Fin du droit d'utilisation
-   Le droit d'utilisation prend fin automatiquement si vous ne respectez pas ces conditions. Le titulaire peut modifier les conditions applicables aux versions futures ; chaque version reste soumise aux conditions livrées avec elle.
-
-10. Droit applicable
-   Ces conditions sont régies par le droit suisse. Elles existent en français, en allemand et en anglais ; en cas de divergence, la version française fait foi.
-
-Contact : Florian Lamprecht — woodcore@pineo.ch
+Ce fichier existe en français, en allemand et en anglais. Contact : Florian Lamprecht — woodcore@pineo.ch

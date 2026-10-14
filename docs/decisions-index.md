@@ -39,7 +39,8 @@
 - *[in force]* «The commands tab reads the website's data, settled (v0.94).»
 - *[in force]* «The website's sidebar follows the kind of page, settled (v0.94).»
 - *[in force]* «One Typst tokeniser, Qt-free, for the website and the window, settled (v0.92).»
-- *[in force]* «Woodcore is proprietary for now, © 2026 Florian Lamprecht, settled (v0.91.1).»
+- *[in force]* «Woodcore is free software, GPL-3.0-or-later, its source published in Woodcore-Publish, settled (v0.118).»
+- *[superseded in v0.118]* «Woodcore is proprietary for now, © 2026 Florian Lamprecht, settled (v0.91.1).»
 - *[in force]* «Every colour of Woodcore is written once, for the site and the window, settled (v0.90).»
 - *[in force]* «The typography is the site's as a browser resolves it, settled (v0.90).»
 - *[superseded in v0.117]* «The installer is published on GitLab Pages, through the Package Registry, settled (v0.89)…»

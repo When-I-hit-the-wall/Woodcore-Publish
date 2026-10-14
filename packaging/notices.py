@@ -90,8 +90,8 @@ def render():
     lines = [
         "WOODCORE — THIRD-PARTY NOTICES",
         "",
-        "Woodcore is © 2026 Florian Lamprecht (woodcore@pineo.ch), all rights reserved; its own terms are in LICENSE-fr.txt, LICENSE-de.txt and LICENSE-en.txt.",
-        "The installed program also contains the third-party software listed below, each under its own licence, reproduced in full after the list. Nothing in Woodcore's terms restricts the rights these licences grant.",
+        "Woodcore is © 2026 Florian Lamprecht (woodcore@pineo.ch), free software under the GNU General Public License version 3 or later (GPL-3.0-or-later): the licence's text is licenses/GPL-3.0.txt, presented in LICENSE-fr.txt, LICENSE-de.txt and LICENSE-en.txt; its source is at https://github.com/When-I-hit-the-wall/Woodcore-Publish.",
+        "The installed program also contains the third-party software listed below, each under its own licence, reproduced in full after the list. Nothing in Woodcore's licence restricts the rights these licences grant.",
         "",
         "This file is written by packaging/notices.py; do not edit it by hand.",
         "",

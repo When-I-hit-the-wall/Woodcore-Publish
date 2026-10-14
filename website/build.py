@@ -60,7 +60,7 @@ STRINGS = json.loads((HERE / "strings.json").read_text(encoding="utf-8"))
 RELEASES = HERE / "releases.json"
 CONTENT = HERE / "content"
 LEGAL = ROOT / "legal"   # the licence in three languages and the third-party notices, published under legal/ (packaging/notices.py writes the notices)
-LEGAL_FILES = ("LICENSE-fr.txt", "LICENSE-de.txt", "LICENSE-en.txt", "THIRD-PARTY-NOTICES.txt")
+LEGAL_FILES = ("LICENSE-fr.txt", "LICENSE-de.txt", "LICENSE-en.txt", "licenses/GPL-3.0.txt", "THIRD-PARTY-NOTICES.txt")   # the GPL's own text beside the three presentations of it, under the path they name
 ASSETS = HERE / "assets"
 ICON = ROOT / "calc" / "tools" / "woodcore.svg"
 SCRATCH = bex.EXAMPLES / ".site"   # the MWEs compiled to SVG, beside the frozen engine they import (gitignored)
@@ -515,8 +515,8 @@ class Site:
                 else:
                     shutil.copy2(path, self.out / "assets" / path.name)
         shutil.copy2(ICON, self.out / "assets" / "logo.svg")
-        (self.out / "legal").mkdir(parents=True, exist_ok=True)
         for name in LEGAL_FILES:
+            (self.out / "legal" / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(LEGAL / name, self.out / "legal" / name)
 
     # -- the examples --
@@ -764,7 +764,7 @@ class Site:
       <a href="{esc(page.url(f'{lang}/legal/'))}">{esc(t(lang, 'footer_legal'))}</a>
     </div>
     <p class="footer-note">{esc(t(lang, 'footer_note', version=version or '—'))}</p>
-    <p class="footer-legal">© 2026 Florian Lamprecht — {esc(t(lang, 'footer_reserved'))} · <a href="mailto:woodcore@pineo.ch">woodcore@pineo.ch</a> · <a href="{esc(page.url(f'legal/LICENSE-{lang}.txt'))}">{esc(t(lang, 'footer_licence'))}</a> · <a href="{esc(page.url('legal/THIRD-PARTY-NOTICES.txt'))}">{esc(t(lang, 'footer_notices'))}</a></p>
+    <p class="footer-legal">© 2026 Florian Lamprecht — {esc(t(lang, 'footer_licensed'))} · <a href="mailto:woodcore@pineo.ch">woodcore@pineo.ch</a> · <a href="{esc(page.url(f'legal/LICENSE-{lang}.txt'))}">{esc(t(lang, 'footer_licence'))}</a> · <a href="{esc(page.url('legal/THIRD-PARTY-NOTICES.txt'))}">{esc(t(lang, 'footer_notices'))}</a></p>
   </div>
 </footer>
 </body>

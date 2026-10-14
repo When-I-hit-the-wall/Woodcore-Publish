@@ -2,13 +2,13 @@
 
 ## Kontakt
 
-Woodcore wird von **Florian Lamprecht** entwickelt. Für eine Frage, einen Fehler oder eine Anfrage um Erlaubnis: woodcore@pineo.ch.
+Woodcore wird von **Florian Lamprecht** entwickelt. Für eine Frage oder einen Fehler: woodcore@pineo.ch.
 
 ## Urheberrecht und Lizenz
 
-© 2026 Florian Lamprecht. Alle Rechte vorbehalten.
+© 2026 Florian Lamprecht.
 
-Woodcore ist keine freie Software. Es wird unentgeltlich nach seinen [Lizenzbedingungen](/legal/LICENSE-de.txt) zur Verfügung gestellt, die das Installationsprogramm akzeptieren lässt, bevor es etwas installiert: Sie dürfen es auf Ihren Computern installieren und für Ihre statischen Berechnungen verwenden, auch beruflich, aber es ohne schriftliche Zustimmung weder weitergeben noch verändern. Die Projekte und Berichte, die Sie mit Woodcore erstellen, gehören Ihnen. Die Bedingungen liegen auch auf [Französisch](/legal/LICENSE-fr.txt) und [Englisch](/legal/LICENSE-en.txt) vor; massgebend ist die französische Fassung.
+Woodcore ist freie Software: Sie können es unter den Bedingungen der [GNU General Public License](/legal/licenses/GPL-3.0.txt) weitergeben und verändern, gemäss Version 3 oder (nach Ihrer Wahl) jeder späteren Version (GPL-3.0-or-later). Sie dürfen es also für jeden Zweck nutzen, auch beruflich, es untersuchen, verändern und weitergeben, sofern eine weitergegebene Version unter der GPL bleibt und von ihrem Quellcode begleitet wird. Der Quellcode jeder Version ist auf [GitHub](https://github.com/When-I-hit-the-wall/Woodcore-Publish) veröffentlicht. Die Projekte und Berichte, die Sie mit Woodcore erstellen, gehören Ihnen: Die GPL erstreckt sich nicht auf sie. Die Lizenz wird auf [Französisch](/legal/LICENSE-fr.txt), [Deutsch](/legal/LICENSE-de.txt) und [Englisch](/legal/LICENSE-en.txt) vorgestellt; massgebend ist allein der englische Text der GPL.
 
 ## Hinweis
 

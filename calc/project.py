@@ -24,7 +24,7 @@ import proc
 import validation
 
 # The program's version: what a project's engine copy and its export record, and what lets a program refuse a project a newer one wrote.
-VERSION = "0.117.0"
+VERSION = "0.118.0"
 
 EXTENSION = ".woodcore"
 FORMAT = "woodcore-project"

@@ -2,13 +2,13 @@
 
 ## Contact
 
-Woodcore is developed by **Florian Lamprecht**. For a question, an error or a request for permission: woodcore@pineo.ch.
+Woodcore is developed by **Florian Lamprecht**. For a question or an error: woodcore@pineo.ch.
 
 ## Copyright and licence
 
-© 2026 Florian Lamprecht. All rights reserved.
+© 2026 Florian Lamprecht.
 
-Woodcore is not free software. It is made available free of charge under its [licence terms](/legal/LICENSE-en.txt), which the installer has you accept before it installs anything: you may install it on your computers and use it for your structural calculations, including in your professional work, but not redistribute or modify it without written consent. The projects and reports you prepare with Woodcore are yours. The terms also exist in [French](/legal/LICENSE-fr.txt) and [German](/legal/LICENSE-de.txt); the French version prevails.
+Woodcore is free software: you can redistribute it and/or modify it under the terms of the [GNU General Public License](/legal/licenses/GPL-3.0.txt), version 3 or (at your option) any later version (GPL-3.0-or-later). You may therefore use it for any purpose, including professional work, study it, change it and pass it on, provided a version you distribute stays under the GPL and comes with its source code. The source code of every version is published on [GitHub](https://github.com/When-I-hit-the-wall/Woodcore-Publish). The projects and reports you prepare with Woodcore are yours: the GPL does not extend to them. The licence is presented in [French](/legal/LICENSE-fr.txt), [German](/legal/LICENSE-de.txt) and [English](/legal/LICENSE-en.txt); the GPL's English text alone is binding.
 
 ## Disclaimer
 

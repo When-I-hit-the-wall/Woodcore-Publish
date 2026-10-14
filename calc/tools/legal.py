@@ -1,6 +1,6 @@
 """Woodcore's copyright, its licence and the third-party notices, as the window shows them: a line at the foot of the start page, and *Fichier → À propos de Woodcore…*.
 
-The texts themselves are legal/LICENSE-fr.txt, -de.txt, -en.txt and legal/THIRD-PARTY-NOTICES.txt (packaging/notices.py writes the last), beside the code in a checkout and in the program's _internal\\legal folder once installed (packaging/woodcore.spec), so `project.APP_ROOT / "legal"` finds them either way. The installer shows the licence before it installs anything (packaging/woodcore.iss) and the website publishes the four files (website/build.py). This module carries its own words in three languages, apart from the window's STRINGS, so that the start page and the window share them.
+Woodcore is free software, GPL-3.0-or-later (14.10.2026): the official text is legal/licenses/GPL-3.0.txt, presented in three languages by legal/LICENSE-fr.txt, -de.txt and -en.txt, beside legal/THIRD-PARTY-NOTICES.txt (packaging/notices.py writes the last), beside the code in a checkout and in the program's _internal\\legal folder once installed (packaging/woodcore.spec), so `project.APP_ROOT / "legal"` finds them either way. The installer shows the licence before it installs anything (packaging/woodcore.iss) and the website publishes the four files (website/build.py). This module carries its own words in three languages, apart from the window's STRINGS, so that the start page and the window share them.
 """
 
 from PySide6.QtCore import Qt, QUrl
@@ -16,6 +16,8 @@ EMAIL = "woodcore@pineo.ch"
 YEAR = "2026"
 COPYRIGHT = f"© {YEAR} {HOLDER}"
 SITE = "https://woodcore.pages.dev/"
+# Where the source of every version is published (GPL-3.0 section 6: whoever receives the program can obtain its source; legal/LICENSE-*.txt section 3)
+SOURCE = "https://github.com/When-I-hit-the-wall/Woodcore-Publish"
 LEGAL_DIR = project.APP_ROOT / "legal"
 LANGUAGES = ("fr", "de", "en")
 
@@ -23,10 +25,11 @@ TEXTS = {
     "fr": {
         "about_menu": "À propos de Woodcore…",
         "about_title": "À propos de Woodcore",
-        "reserved": "Tous droits réservés.",
+        "licensed": "Logiciel libre, sous licence GNU GPL v3 ou ultérieure.",
         "disclaimer": "Woodcore est une version préliminaire, fournie gratuitement et sans garantie. C'est un outil d'aide : l'ingénieur qui signe un rapport reste seul responsable de vérifier les données, les hypothèses et les résultats.",
         "updates": "Au démarrage, une version installée lit version.json sur le site de Woodcore pour savoir si une nouvelle version existe ; aucune donnée de vos projets n'est transmise.",
-        "licence": "Conditions de licence…",
+        "licence": "Licence…",
+        "source": "Code source",
         "notices": "Composants tiers…",
         "site": "Site internet",
         "missing": "Le fichier {file} est introuvable.",
@@ -34,10 +37,11 @@ TEXTS = {
     "de": {
         "about_menu": "Über Woodcore…",
         "about_title": "Über Woodcore",
-        "reserved": "Alle Rechte vorbehalten.",
+        "licensed": "Freie Software unter der GNU GPL v3 oder später.",
         "disclaimer": "Woodcore ist eine Vorabversion, unentgeltlich und ohne Gewährleistung zur Verfügung gestellt. Es ist ein Hilfsmittel: Der Ingenieur, der einen Bericht unterzeichnet, bleibt allein dafür verantwortlich, Daten, Annahmen und Ergebnisse zu prüfen.",
         "updates": "Beim Start liest eine installierte Version version.json auf der Website von Woodcore, um festzustellen, ob eine neue Version besteht; es werden keine Daten Ihrer Projekte übermittelt.",
-        "licence": "Lizenzbedingungen…",
+        "licence": "Lizenz…",
+        "source": "Quellcode",
         "notices": "Komponenten Dritter…",
         "site": "Website",
         "missing": "Die Datei {file} ist nicht auffindbar.",
@@ -45,10 +49,11 @@ TEXTS = {
     "en": {
         "about_menu": "About Woodcore…",
         "about_title": "About Woodcore",
-        "reserved": "All rights reserved.",
+        "licensed": "Free software under the GNU GPL v3 or later.",
         "disclaimer": "Woodcore is a preliminary version, provided free of charge and without warranty. It is an aid: the engineer who signs a report remains solely responsible for checking the data, the assumptions and the results.",
         "updates": "At start-up, an installed version reads version.json on Woodcore's website to find out whether a newer version exists; no data from your projects is sent.",
-        "licence": "Licence terms…",
+        "licence": "Licence…",
+        "source": "Source code",
         "notices": "Third-party components…",
         "site": "Website",
         "missing": "The file {file} cannot be found.",
@@ -94,7 +99,7 @@ def open_file(path, parent=None, lang="en"):
 
 
 class AboutDialog(QDialog):
-    """Woodcore's version, its copyright and contact, the disclaimer, the update check, and the licence and the notices a click away."""
+    """Woodcore's version, its copyright, licence and contact, where its source is, the disclaimer, the update check, and the licence and the notices a click away."""
 
     def __init__(self, parent=None, lang="fr", version=None):
         super().__init__(parent)
@@ -104,7 +109,7 @@ class AboutDialog(QDialog):
         title = QLabel(f"<b>Woodcore {version or project.VERSION}</b>")
         title.setTextFormat(Qt.TextFormat.RichText)
         layout.addWidget(title)
-        owner = QLabel(f'{COPYRIGHT} — {text(lang, "reserved")}<br><a href="mailto:{EMAIL}">{EMAIL}</a> · <a href="{SITE}">{text(lang, "site")}</a>')
+        owner = QLabel(f'{COPYRIGHT} — {text(lang, "licensed")}<br><a href="mailto:{EMAIL}">{EMAIL}</a> · <a href="{SITE}">{text(lang, "site")}</a> · <a href="{SOURCE}">{text(lang, "source")}</a>')
         owner.setTextFormat(Qt.TextFormat.RichText)
         owner.setOpenExternalLinks(True)
         layout.addWidget(owner)
