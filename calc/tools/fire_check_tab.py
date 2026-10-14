@@ -34,7 +34,7 @@ KINDS = (
 )
 SIDE_WORDS = {"bottom": "mc_fire_side_bottom", "top": "mc_fire_side_top", "left": "mc_fire_side_left", "right": "mc_fire_side_right"}
 WOODS = ((None, "mc_fire_wood_auto"), ("beech", "mc_fire_wood_beech"), ("oak", "mc_fire_wood_oak"), ("cladding", "mc_fire_wood_cladding"))
-# The words of VKF 15-15's lists, by the ids of calc/norms/vkf-2015-15-15-tab01-03-tragwerk.json -- tests/test_fire_check_tab.py holds that every id has its word
+# The words of VKF 15-15's lists, by the ids of calc/norms/vkf-2017-3.7.1-15-15-tragwerk.json -- tests/test_fire_check_tab.py holds that every id has its word
 AEAI_WORDS = {
     "height": {"low": "mc_aeai_height_low", "medium": "mc_aeai_height_medium", "high": "mc_aeai_height_high"},
     "use": {"housing": "mc_aeai_use_housing", "office": "mc_aeai_use_office", "school": "mc_aeai_use_school", "retail": "mc_aeai_use_retail",

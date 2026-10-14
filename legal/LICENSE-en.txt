@@ -29,6 +29,6 @@ Woodcore (the program, its window, its command line, its Typst engine, its docum
    Woodcore contains third-party software (in particular Python, Qt/PySide6, Typst, openpyxl and pypdf), which remains subject to its own licences. They are reproduced in the file THIRD-PARTY-NOTICES.txt shipped with the program and published on the website.
 
 9. Update check
-   At start-up, an installed Woodcore reads the file version.json on Woodcore's website to find out whether a newer version exists. No data from your projects is sent. As with any internet request, the server hosting the website (Cloudflare) receives your computer's IP address and may record it in its logs; so does GitHub, which serves the installer when you download it. The check can be turned off by writing "updates": {"enabled": false} into the file %APPDATA%\Woodcore\settings.json.
+   At start-up, an installed Woodcore reads the file version.json on Woodcore's website (https://woodcore.pages.dev/) to find out whether a newer version exists. No data from your projects is sent. As with any internet request, the server hosting the website (Cloudflare) receives your computer's IP address and may record it in its logs; so does GitHub, which serves the installer when you download it. The check can be turned off by writing "updates": {"enabled": false} into the file %APPDATA%\Woodcore\settings.json.
 
 This file exists in French, German and English. Contact: Florian Lamprecht — woodcore@pineo.ch

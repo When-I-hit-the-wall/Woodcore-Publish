@@ -17,7 +17,7 @@ _STATE = {}
 # The engineer's list (T22) as the window names its tabs; the six checks not built yet get their views when they are built on MemberCheckTab, as «Flexion» did (08.10.2026).
 LISTED = ("tab_plan", "tab_fire", "tab_positions", "tab_journal", "tab_statics", "tab_schema", "tab_connections",
           "tab_polar", "tab_mc_tension", "tab_mc_compression", "tab_mc_bending", "tab_mc_shear",
-          "tab_mc_buckling", "tab_mc_ltb", "tab_variables")
+          "tab_mc_buckling", "tab_mc_ltb", "tab_mc_fire", "tab_variables")
 
 
 def _qt():

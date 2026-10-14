@@ -74,7 +74,7 @@ Réponses de l'ingénieur aux questions de /issue (2026-10-12) :
 - **Exigence** : Woodcore doit proposer la résistance exigée du système porteur (R 30, R 60, R 90, R 120 ou aucune) selon la directive AEAI 15-15, tableaux 1 à 3 et notes [1], [5], [8], [9]. Les entrées sont saisies une fois par projet (Q-007) : la catégorie de hauteur, l'affectation, le concept (construction ou installation d'extinction) et la note [5] (deux niveaux, ≤ 2400 m²). Chaque vérification ajoute « dernier niveau » (notes [1], [8]). La durée t en découle ; chaque vérification peut l'écrire par-dessus, en orange avec « Reprendre ».
 - **Source** : T5, T9 « Exigence R requise »
 - **Priorité** : doit
-- **Critère d'acceptation** : `calc/norms/vkf-2015-15-15-tab01-03-tragwerk.json` (nom du plan §14) transcrit les tableaux 1 à 3 depuis `VKF-AEAI-15-15-…pdf`, pages 12 à 15. Un test redonne au moins : habitation, faible hauteur, construction → R 30 ; moyenne hauteur → R 60 ; élevé → R 90 ; industrie > 1000 MJ/m², moyenne hauteur, installation d'extinction → R 60.
+- **Critère d'acceptation** : `calc/norms/vkf-2017-3.7.1-15-15-tragwerk.json` (nom du plan §14) transcrit les tableaux 1 à 3 depuis `VKF-AEAI-15-15-…pdf`, pages 12 à 15. Un test redonne au moins : habitation, faible hauteur, construction → R 30 ; moyenne hauteur → R 60 ; élevé → R 90 ; industrie > 1000 MJ/m², moyenne hauteur, installation d'extinction → R 60.
 
 ### REQ-007 — Lien au plan de protection incendie : par la position
 - **Exigence** : une vérification au feu nomme sa position comme les autres vérifications ; la position est le lien avec les plans (le plan feu suit le plan de positions où elle est dessinée). Le plan feu et son schéma ne changent pas (Q-008).
@@ -292,7 +292,7 @@ Deux `architecture-reviewer` en parallèle (domaine/contrat/Typst ; fenêtre), 2
 
 1. **Normes.**
    - `calc/norms/sia265-2021-4.5-brandfall.json` : Tabelle 13 avec les lignes `softwood_solid` 0.8, `softwood_glulam` 0.7, `oak` 0.5, `cladding` 0.9 ; d_red 7 mm jusqu'à 90 min ; 4.5.2.4 80/140 ; (51) 1.8 ; 0.6 de 4.5.2.2 pour mémoire. Lecteur dans `sia265.py` (`fire_clause()`, `charring_rate(grade, wood)`), avec un contrôle de forme.
-   - `calc/norms/vkf-2015-15-15-tab01-03-tragwerk.json` : tableaux 1 à 3, pp. 12–15, notes [1] [5] [8] [9] comme données. `vkf.required_resistance(building, top_level)` rend `(minutes|None, table, row, notes)`.
+   - `calc/norms/vkf-2017-3.7.1-15-15-tragwerk.json` : tableaux 1 à 3, pp. 12–15, notes [1] [5] [8] [9] comme données. `vkf.required_resistance(building, top_level)` rend `(minutes|None, table, row, notes)`.
    - Entrée AEAI 15-15 dans `norms.json`.
    - Réalise REQ-003, REQ-004, REQ-006, ARCH-002. Tests : `tests/test_fire_resistance.py` (Tabelle 13, les quatre cas AEAI).
 2. **Contrat et domaine.**
@@ -353,7 +353,7 @@ Deux `architecture-reviewer` en parallèle (domaine/contrat/Typst ; fenêtre), 2
 | 2026-10-12 | specified | 9 réponses (Q-008 précisée une fois) ; D-04 à D-12 ; REQ-001/002/005/006/007 et UI-002 réécrits |
 | 2026-10-12 | reviewed | deux revues APPROUVER AVEC RÉSERVES ; Q-010 (objet `fire` sur les genres existants) ; §13 et §14 écrits |
 | 2026-10-12 | approved | approuvé par l'ingénieur (« Approuver et implémenter ») |
-| 2026-10-12 | implementation | étape 1 faite : sia265-2021-4.5-brandfall.json + sia265.fire/charring_rate/family/FIRE_WOODS/FIRE_SIDES ; vkf-2015-15-15-tab01-03-tragwerk.json + vkf.requirement/check_building/required_resistance (REQ-003, REQ-006 partiel, ARCH-002) |
+| 2026-10-12 | implementation | étape 1 faite : sia265-2021-4.5-brandfall.json + sia265.fire/charring_rate/family/FIRE_WOODS/FIRE_SIDES ; vkf-2017-3.7.1-15-15-tragwerk.json + vkf.requirement/check_building/required_resistance (REQ-003, REQ-006 partiel, ARCH-002) |
 | 2026-10-12 | implementation | étapes 2–5 faites : schémas 1.2 et fire-building 1.0, project.building_file, member_check (check_source/_check_fire, stamp_version, resolve/_fire_block, read/write_building, fire_duration, draft_typst/fire_typst, compute en situation d'incendie, prepare), validation, units.json (min), #member(fire:) et show-check-member, shown-variables, fire_check_tab.py (+ words, NAV, WRITERS save_building, GUARDED_TABS, icône) ; tests test_fire_resistance (18) et test_fire_check_tab (8) verts, test_timber vert ; reste : marqueur du résumé, exemple, build_reference, commands.json, docs |
 | 2026-10-12 | testing | étape 6 faite : marqueur du résumé (summary.fire), exemple FE-01/FE-02 + building.json et export de l'exemple régénéré, exemptions AEAI 15-15 3.2.3 al. 2 c/d ajoutées (trouvées en relisant la directive), commands.json (fire:, paragraphe de show-check-member), exemples member-8/9, docs (fire-resistance.md, tab-fire-resistance.md, README, window, member-checks, open-questions, deux décisions), catalogue, CHANGELOG, Nouveautés 0.118.0 fr/de/en ; reste : tests liés, puis vérification indépendante |
 | 2026-10-12 | verification | tour 1 du vérificateur : 1 ❌ (checks.json de l'exemple périmé) et 6 ⚠️ — corrigés (réexport, test d'égalité scindé, test ARCH-001, tailles du README, noms de fichiers des critères) |

@@ -155,9 +155,9 @@ def colour(rgb):
 
 # --- The fire resistance a load-bearing structure is required to have: VKF / AEAI 15-15, 3.7.1, tables 1 to 3 (issue #46) ---
 #
-# `calc/norms/vkf-2015-15-15-tab01-03-tragwerk.json`, the column «Système porteur» of the three tables and the four notes that change it, as data: the rules of the notes are never written here as `if`s on a use or a table, only applied as the file states them.
+# `calc/norms/vkf-2017-3.7.1-15-15-tragwerk.json`, the column «Système porteur» of the three tables and the four notes that change it, as data: the rules of the notes are never written here as `if`s on a use or a table, only applied as the file states them.
 
-REQUIREMENT_NAME = "vkf-2015-15-15-tab01-03-tragwerk"
+REQUIREMENT_NAME = "vkf-2017-3.7.1-15-15-tragwerk"
 REQUIREMENT_PATH = Path(__file__).resolve().parent / (REQUIREMENT_NAME + ".json")
 
 # The keys of a building's data (Woodcore-Datei/building.json, schemas/fire-building.schema.json), the lists of the file each is one of, and the conditions a note may be stated for.

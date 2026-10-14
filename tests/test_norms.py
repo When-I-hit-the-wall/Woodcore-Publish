@@ -83,6 +83,7 @@ def test_every_norm_file_is_named_and_read():
     read.add(szs_c5.NAME + ".json")
     read |= {n + ".json" for n in szs_c5.TABLE_NAMES}   # the profile tables (issue #50)
     read.add(vkf.NAME + ".json")
+    read.add(vkf.REQUIREMENT_NAME + ".json")   # VKF 15-15's resistances of the load-bearing structure (issue #46)
     read.add(CATALOGUE)
     assert on_disk == read, "read by no module: %s; named by a module, not on disk: %s" % (sorted(on_disk - read), sorted(read - on_disk))
 

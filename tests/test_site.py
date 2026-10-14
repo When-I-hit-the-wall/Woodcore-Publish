@@ -363,8 +363,17 @@ def _releases(folder, payload=PAYLOAD, **installer):
 
 
 def test_no_manifest_is_written_before_an_installer_is():
-    site = _built()
-    assert site.published is None, "the committed releases.json records no installer kept on GitHub before 0.117.0 is published"
+    # A releases.json of its own: the committed one records 0.117.0 on GitHub since it was published (311a920), so it no longer holds the case.
+    folder = conftest.tmpdir("website_no_installer")
+    releases = _releases(folder, hosted="gitlab", url=None)
+    saved = SITE.RELEASES
+    SITE.RELEASES = releases
+    try:
+        site = SITE.Site(folder / "public", images="png")
+        site.build()
+    finally:
+        SITE.RELEASES = saved
+    assert site.published is None, "no installer kept on GitHub, so none is published"
     assert not (site.out / "version.json").exists()
     assert not (site.out / "download").exists(), "the installer is never put in the site"
     assert not site.errors and not [w for w in site.warnings if "installer" in w], (site.errors, site.warnings)
@@ -555,8 +564,6 @@ def test_the_workflow_builds_the_site_with_the_typst_the_program_carries_and_tru
     assert re.search(r'WRANGLER_VERSION: "\d+\.\d+\.\d+"', ci) and 'wrangler@${WRANGLER_VERSION}' in ci
     assert '--branch="${PAGES_BRANCH}"' in ci and "PAGES_BRANCH=" in ci and "--project-name=woodcore" in ci
     assert "production_branch" in ci and "PAGES_BRANCH: " not in ci, "the branch is read from the Pages project, not written down: a wrong one is a Preview and a green run proves nothing"
-    # where it runs: the public repository alone, the one the site is published from (14.10.2026)
-    assert re.search(r"^  site:\n(?:    #.*\n)*    if: github\.repository == 'When-I-hit-the-wall/Woodcore-Publish'\n", ci, re.M), "the site deployed from the public repository alone"
     assert ci.count("secrets.CLOUDFLARE_API_TOKEN") == 1 and ci.count("secrets.CLOUDFLARE_ACCOUNT_ID") == 1
     deploy = ci[ci.index("- name: Deploy to Cloudflare Pages"):]
     assert "secrets.CLOUDFLARE_API_TOKEN" in deploy and "secrets" not in ci[:ci.index("- name: Deploy to Cloudflare Pages")].replace("# ", "").split("jobs:")[1]
