@@ -1,0 +1,617 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-structure",
+  "document": "bp",
+  "headings": "absolute",
+  "sections": [
+    {
+      "id": "general",
+      "title": {
+        "fr": "Généralités",
+        "de": "Allgemeines",
+        "en": "General"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "purpose-of-basis-of-design",
+          "file": "Sections/purpose-of-basis-of-design.typ",
+          "enabled": true
+        },
+        {
+          "id": "scope-and-limits",
+          "file": "Sections/scope-and-limits.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bases",
+      "title": {
+        "fr": "Bases",
+        "de": "Grundlagen",
+        "en": "Bases"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "project-documents",
+          "file": "Sections/project-documents.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        },
+        {
+          "id": "norms",
+          "file": "Sections/norms.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "use-and-logistics",
+      "title": {
+        "fr": "Objectifs généraux d'utilisation et logistique",
+        "de": "Allgemeine Nutzungsziele und Logistik",
+        "en": "General aims for the use and logistics"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "building-description",
+          "file": "Sections/building-description.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        },
+        {
+          "id": "service-life",
+          "file": "Sections/service-life.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        },
+        {
+          "id": "sustainability-certification",
+          "file": "Sections/sustainability-certification.typ",
+          "enabled": false,
+          "shared_with": [
+            "cu"
+          ]
+        },
+        {
+          "id": "transport-dimensions",
+          "file": "Sections/transport-dimensions.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "structural-concept",
+      "title": {
+        "fr": "Concept de la structure",
+        "de": "Tragwerkskonzept",
+        "en": "Structural concept"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "load-bearing-system",
+          "file": "Sections/load-bearing-system.typ",
+          "enabled": true
+        },
+        {
+          "id": "horizontal-stability",
+          "file": "Sections/horizontal-stability.typ",
+          "enabled": true
+        },
+        {
+          "id": "main-dimensions",
+          "file": "Sections/main-dimensions.typ",
+          "enabled": true
+        },
+        {
+          "id": "construction-details",
+          "file": "Sections/construction-details.typ",
+          "enabled": true
+        },
+        {
+          "id": "prefabrication-and-erection",
+          "file": "Sections/prefabrication-and-erection.typ",
+          "enabled": true
+        },
+        {
+          "id": "structural-concept-drawings",
+          "file": "Sections/structural-concept-drawings.typ",
+          "enabled": true
+        },
+        {
+          "id": "waterproofing-concept",
+          "file": "Sections/waterproofing-concept.typ",
+          "enabled": false
+        },
+        {
+          "id": "open-points",
+          "file": "Sections/open-points.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "ground",
+      "title": {
+        "fr": "Terrain de fondation",
+        "de": "Baugrundverhältnisse",
+        "en": "Ground conditions"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "ground-conditions",
+          "file": "Sections/ground-conditions.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        },
+        {
+          "id": "ground-parameters",
+          "file": "Sections/ground-parameters.typ",
+          "enabled": true
+        },
+        {
+          "id": "foundation-and-excavation",
+          "file": "Sections/foundation-and-excavation.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "materials",
+      "title": {
+        "fr": "Propriétés des matériaux",
+        "de": "Baustoffe und Baustoffeigenschaften",
+        "en": "Material properties"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "concrete",
+          "file": "Sections/concrete.typ",
+          "enabled": true
+        },
+        {
+          "id": "reinforcing-steel",
+          "file": "Sections/reinforcing-steel.typ",
+          "enabled": true
+        },
+        {
+          "id": "structural-steel",
+          "file": "Sections/structural-steel.typ",
+          "enabled": true
+        },
+        {
+          "id": "timber",
+          "file": "Sections/timber.typ",
+          "enabled": true
+        },
+        {
+          "id": "moisture-class-and-creep",
+          "file": "Sections/moisture-class-and-creep.typ",
+          "enabled": true
+        },
+        {
+          "id": "masonry",
+          "file": "Sections/masonry.typ",
+          "enabled": false
+        }
+      ]
+    },
+    {
+      "id": "actions",
+      "title": {
+        "fr": "Actions",
+        "de": "Einwirkungen",
+        "en": "Actions"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "permanent-actions",
+          "title": {
+            "fr": "Actions permanentes",
+            "de": "Ständige Einwirkungen",
+            "en": "Permanent actions"
+          },
+          "enabled": true,
+          "children": [
+            {
+              "id": "self-weight-and-unit-weights",
+              "file": "Sections/self-weight-and-unit-weights.typ",
+              "enabled": true
+            },
+            {
+              "id": "superimposed-dead-loads",
+              "file": "Sections/superimposed-dead-loads.typ",
+              "enabled": true,
+              "shared_with": [
+                "cu"
+              ]
+            },
+            {
+              "id": "earth-and-water-pressure",
+              "file": "Sections/earth-and-water-pressure.typ",
+              "enabled": false
+            }
+          ]
+        },
+        {
+          "id": "variable-actions",
+          "title": {
+            "fr": "Actions variables",
+            "de": "Veränderliche Einwirkungen",
+            "en": "Variable actions"
+          },
+          "enabled": true,
+          "children": [
+            {
+              "id": "live-loads",
+              "file": "Sections/live-loads.typ",
+              "enabled": true,
+              "shared_with": [
+                "cu"
+              ]
+            },
+            {
+              "id": "snow-load",
+              "file": "Sections/snow-load.typ",
+              "enabled": true
+            },
+            {
+              "id": "wind-load",
+              "file": "Sections/wind-load.typ",
+              "enabled": true
+            },
+            {
+              "id": "guardrail-loads",
+              "file": "Sections/guardrail-loads.typ",
+              "enabled": true
+            },
+            {
+              "id": "temperature-actions",
+              "file": "Sections/temperature-actions.typ",
+              "enabled": false
+            }
+          ]
+        },
+        {
+          "id": "accidental-actions",
+          "title": {
+            "fr": "Actions accidentelles",
+            "de": "Aussergewöhnliche Einwirkungen",
+            "en": "Accidental actions"
+          },
+          "enabled": true,
+          "children": [
+            {
+              "id": "earthquake",
+              "file": "Sections/earthquake.typ",
+              "enabled": true,
+              "shared_with": [
+                "cu"
+              ]
+            },
+            {
+              "id": "impact",
+              "file": "Sections/impact.typ",
+              "enabled": false,
+              "shared_with": [
+                "cu"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "design-values",
+      "title": {
+        "fr": "Facteurs de charge et coefficients de réduction",
+        "de": "Lastbeiwerte und Reduktionsbeiwerte",
+        "en": "Load factors and reduction factors"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "load-factors",
+          "file": "Sections/load-factors.typ",
+          "enabled": true
+        },
+        {
+          "id": "reduction-factors",
+          "file": "Sections/reduction-factors.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "structural-safety",
+      "title": {
+        "fr": "Exigences relatives à la sécurité structurale",
+        "de": "Anforderungen an die Tragsicherheit",
+        "en": "Structural safety requirements"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "ultimate-limit-states",
+          "file": "Sections/ultimate-limit-states.typ",
+          "enabled": true
+        },
+        {
+          "id": "reliability-differentiation",
+          "file": "Sections/reliability-differentiation.typ",
+          "enabled": true
+        },
+        {
+          "id": "hazard-scenarios",
+          "file": "Sections/hazard-scenarios.typ",
+          "enabled": true
+        },
+        {
+          "id": "ultimate-load-cases",
+          "file": "Sections/ultimate-load-cases.typ",
+          "enabled": true
+        },
+        {
+          "id": "omitted-verifications",
+          "file": "Sections/omitted-verifications.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "serviceability",
+      "title": {
+        "fr": "Exigences relatives à l'aptitude au service",
+        "de": "Anforderungen an die Gebrauchstauglichkeit",
+        "en": "Serviceability requirements"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "serviceability-criteria",
+          "file": "Sections/serviceability-criteria.typ",
+          "enabled": true
+        },
+        {
+          "id": "deformation-limits",
+          "file": "Sections/deformation-limits.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        },
+        {
+          "id": "horizontal-displacement-limits",
+          "file": "Sections/horizontal-displacement-limits.typ",
+          "enabled": true
+        },
+        {
+          "id": "vibrations",
+          "file": "Sections/vibrations.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        },
+        {
+          "id": "settlements",
+          "file": "Sections/settlements.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        },
+        {
+          "id": "durability",
+          "file": "Sections/durability.typ",
+          "enabled": true,
+          "shared_with": [
+            "cu"
+          ]
+        },
+        {
+          "id": "serviceability-load-cases",
+          "file": "Sections/serviceability-load-cases.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "analysis-assumptions",
+      "title": {
+        "fr": "Hypothèses de l'analyse structurale",
+        "de": "Annahmen der Tragwerksanalyse",
+        "en": "Assumptions of the structural analysis"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "design-situations",
+          "file": "Sections/design-situations.typ",
+          "enabled": true
+        },
+        {
+          "id": "structural-model",
+          "file": "Sections/structural-model.typ",
+          "enabled": true
+        },
+        {
+          "id": "geometrical-deviations",
+          "file": "Sections/geometrical-deviations.typ",
+          "enabled": true
+        },
+        {
+          "id": "construction-states",
+          "file": "Sections/construction-states.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "measures-and-controls",
+      "title": {
+        "fr": "Mesures, contrôles et plans",
+        "de": "Massnahmen, Kontrollen und Pläne",
+        "en": "Measures, controls and plans"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "quality-assurance-and-controls",
+          "file": "Sections/quality-assurance-and-controls.typ",
+          "enabled": true
+        },
+        {
+          "id": "monitoring-and-maintenance",
+          "file": "Sections/monitoring-and-maintenance.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "accepted-risks",
+      "file": "Sections/accepted-risks.typ",
+      "enabled": true,
+      "shared_with": [
+        "cu"
+      ]
+    },
+    {
+      "id": "fire-protection",
+      "title": {
+        "fr": "Protection incendie",
+        "de": "Brandschutz",
+        "en": "Fire protection"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "fire-protection-bases",
+          "file": "Sections/fire-protection-bases.typ",
+          "enabled": true
+        },
+        {
+          "id": "fire-object-description",
+          "file": "Sections/fire-object-description.typ",
+          "enabled": true
+        },
+        {
+          "id": "fire-protection-plans",
+          "file": "Sections/fire-protection-plans.typ",
+          "enabled": true
+        },
+        {
+          "id": "fire-resistance-of-elements",
+          "file": "Sections/fire-resistance-of-elements.typ",
+          "enabled": true
+        },
+        {
+          "id": "fire-classification-of-materials",
+          "file": "Sections/fire-classification-of-materials.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "building-physics",
+      "title": {
+        "fr": "Protection thermique, protection contre l'humidité et étanchéité à l'air",
+        "de": "Wärmeschutz, Feuchteschutz und Luftdichtheit",
+        "en": "Thermal insulation, moisture protection and airtightness"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "building-physics-bases",
+          "file": "Sections/building-physics-bases.typ",
+          "enabled": true
+        },
+        {
+          "id": "thermal-and-moisture-protection",
+          "file": "Sections/thermal-and-moisture-protection.typ",
+          "enabled": true
+        },
+        {
+          "id": "airtightness",
+          "file": "Sections/airtightness.typ",
+          "enabled": true
+        },
+        {
+          "id": "ventilation-and-cooling",
+          "file": "Sections/ventilation-and-cooling.typ",
+          "enabled": true
+        },
+        {
+          "id": "heating",
+          "file": "Sections/heating.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "noise-protection",
+      "title": {
+        "fr": "Protection contre le bruit",
+        "de": "Schallschutz",
+        "en": "Noise protection"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "noise-protection-bases",
+          "file": "Sections/noise-protection-bases.typ",
+          "enabled": true
+        },
+        {
+          "id": "noise-exposure",
+          "file": "Sections/noise-exposure.typ",
+          "enabled": true
+        },
+        {
+          "id": "noise-sensitivity",
+          "file": "Sections/noise-sensitivity.typ",
+          "enabled": true
+        },
+        {
+          "id": "sound-insulation-requirements",
+          "file": "Sections/sound-insulation-requirements.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "basis-signatures",
+      "file": "Sections/basis-signatures.typ",
+      "enabled": true
+    },
+    {
+      "id": "journal",
+      "file": "Sections/journal.typ",
+      "enabled": true
+    }
+  ]
+}

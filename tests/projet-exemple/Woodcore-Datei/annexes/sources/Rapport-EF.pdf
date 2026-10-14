@@ -1,0 +1,312 @@
+%PDF-1.3
+%‚„œ”
+1 0 obj
+<<
+/Producer (pypdf)
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Count 3
+/Kids [ 5 0 R 7 0 R 9 0 R ]
+>>
+endobj
+3 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+/Outlines 13 0 R
+>>
+endobj
+4 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+>>
+endobj
+5 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 595.28 841.89 ]
+/Parent 2 0 R
+/Contents 6 0 R
+>>
+endobj
+6 0 obj
+<<
+/Length 44
+>>
+stream
+BT /F1 12 Tf 60 767.89 Td (Couverture) Tj ET
+endstream
+endobj
+7 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 595.28 841.89 ]
+/Parent 2 0 R
+/Contents 8 0 R
+>>
+endobj
+8 0 obj
+<<
+/Length 470
+>>
+stream
+BT /F1 12 Tf 60 767.89 Td (1 Charges) Tj ET
+BT /F1 12 Tf 60 727.89 Td (1.1 CC1 - Poids propre) Tj ET
+BT /F1 12 Tf 60 697.89 Td (1.1.1 Charges de barre) Tj ET
+0.2 0.4 0.8 RG 1 w 60 461.89 470 220 re S
+BT /F1 9 Tf 70 661.89 Td (diagram of Charges de barre) Tj ET
+BT /F1 12 Tf 60 407.89 Td (1.2 CC2 - Neige) Tj ET
+BT /F1 12 Tf 60 377.89 Td (1.2.1 Charges de barre) Tj ET
+0.2 0.4 0.8 RG 1 w 60 141.89 470 220 re S
+BT /F1 9 Tf 70 341.89 Td (diagram of Charges de barre) Tj ET
+endstream
+endobj
+9 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 595.28 841.89 ]
+/Parent 2 0 R
+/Contents 10 0 R
+>>
+endobj
+10 0 obj
+<<
+/Length 1375
+>>
+stream
+BT /F1 12 Tf 60 767.89 Td (2 RÈsultats) Tj ET
+BT /F1 12 Tf 60 727.89 Td (2.1 CO1: Efforts internes N) Tj ET
+0.2 0.4 0.8 RG 1 w 60 491.89 470 220 re S
+BT /F1 9 Tf 70 691.89 Td (diagram of CO1: Efforts internes N) Tj ET
+0.85 0.45 0.1 RG 2 w 110 631.89 m 480 631.89 l S
+0.1 0.6 0.2 rg 102 617.89 m 118 617.89 l 110 631.89 l f
+0.1 0.6 0.2 rg 287 617.89 m 303 617.89 l 295 631.89 l f
+0.1 0.6 0.2 rg 472 617.89 m 488 617.89 l 480 631.89 l f
+0.9 0.4 0.4 rg 0.6 0.2 0.2 RG 0.8 w 110 631.89 m 150 541.89 255 541.89 295 631.89 c 335 541.89 440 541.89 480 631.89 c h B
+0.4 0.55 0.8 rg 270 631.89 m 295 676.89 l 320 631.89 l h f
+0 0 0 rg BT /F1 8 Tf 185 556.89 Td (708.32) Tj ET
+BT /F1 8 Tf 282 681.89 Td (-979.26) Tj ET
+BT /F1 12 Tf 60 387.89 Td (2.2 CO1: Efforts internes M_y) Tj ET
+0.2 0.4 0.8 RG 1 w 60 151.89 470 220 re S
+BT /F1 9 Tf 70 351.89 Td (diagram of CO1: Efforts internes M_y) Tj ET
+0.85 0.45 0.1 RG 2 w 110 291.89 m 480 291.89 l S
+0.1 0.6 0.2 rg 102 277.89 m 118 277.89 l 110 291.89 l f
+0.1 0.6 0.2 rg 287 277.89 m 303 277.89 l 295 291.89 l f
+0.1 0.6 0.2 rg 472 277.89 m 488 277.89 l 480 291.89 l f
+0.9 0.4 0.4 rg 0.6 0.2 0.2 RG 0.8 w 110 291.89 m 150 201.89 255 201.89 295 291.89 c 335 201.89 440 201.89 480 291.89 c h B
+0.4 0.55 0.8 rg 270 291.89 m 295 336.89 l 320 291.89 l h f
+0 0 0 rg BT /F1 8 Tf 185 216.89 Td (708.32) Tj ET
+BT /F1 8 Tf 282 341.89 Td (-979.26) Tj ET
+endstream
+endobj
+11 0 obj
+<<
+/D [ 5 0 R /FitBH 781.89 ]
+/S /GoTo
+>>
+endobj
+12 0 obj
+<<
+/A 11 0 R
+/Title (Couverture)
+/Parent 13 0 R
+/Count 0
+/Next 15 0 R
+>>
+endobj
+13 0 obj
+<<
+/First 12 0 R
+/Count 9
+/Last 25 0 R
+>>
+endobj
+14 0 obj
+<<
+/D [ 7 0 R /FitBH 781.89 ]
+/S /GoTo
+>>
+endobj
+15 0 obj
+<<
+/A 14 0 R
+/Title (1 Charges)
+/Prev 12 0 R
+/Parent 13 0 R
+/Count 4
+/First 17 0 R
+/Last 21 0 R
+/Next 25 0 R
+>>
+endobj
+16 0 obj
+<<
+/D [ 7 0 R /FitBH 741.89 ]
+/S /GoTo
+>>
+endobj
+17 0 obj
+<<
+/A 16 0 R
+/Title (1\0561 CC1 \055 Poids propre)
+/Parent 15 0 R
+/Count 1
+/First 19 0 R
+/Last 19 0 R
+/Next 21 0 R
+>>
+endobj
+18 0 obj
+<<
+/D [ 7 0 R /FitBH 711.89 ]
+/S /GoTo
+>>
+endobj
+19 0 obj
+<<
+/A 18 0 R
+/Title (1\0561\0561 Charges de barre)
+/Parent 17 0 R
+/Count 0
+>>
+endobj
+20 0 obj
+<<
+/D [ 7 0 R /FitBH 421.89 ]
+/S /GoTo
+>>
+endobj
+21 0 obj
+<<
+/A 20 0 R
+/Title (1\0562 CC2 \055 Neige)
+/Prev 17 0 R
+/Parent 15 0 R
+/Count 1
+/First 23 0 R
+/Last 23 0 R
+>>
+endobj
+22 0 obj
+<<
+/D [ 7 0 R /FitBH 391.89 ]
+/S /GoTo
+>>
+endobj
+23 0 obj
+<<
+/A 22 0 R
+/Title (1\0562\0561 Charges de barre)
+/Parent 21 0 R
+/Count 0
+>>
+endobj
+24 0 obj
+<<
+/D [ 9 0 R /FitBH 781.89 ]
+/S /GoTo
+>>
+endobj
+25 0 obj
+<<
+/A 24 0 R
+/Title (2 R\351sultats)
+/Prev 15 0 R
+/Parent 13 0 R
+/Count 2
+/First 27 0 R
+/Last 29 0 R
+>>
+endobj
+26 0 obj
+<<
+/D [ 9 0 R /FitBH 741.89 ]
+/S /GoTo
+>>
+endobj
+27 0 obj
+<<
+/A 26 0 R
+/Title (2\0561 CO1\072 Efforts internes N)
+/Parent 25 0 R
+/Count 0
+/Next 29 0 R
+>>
+endobj
+28 0 obj
+<<
+/D [ 9 0 R /FitBH 401.89 ]
+/S /GoTo
+>>
+endobj
+29 0 obj
+<<
+/A 28 0 R
+/Title (2\0562 CO1\072 Efforts internes M\137y)
+/Prev 27 0 R
+/Parent 25 0 R
+/Count 0
+>>
+endobj
+xref
+0 30
+0000000000 65535 f 
+0000000015 00000 n 
+0000000054 00000 n 
+0000000125 00000 n 
+0000000191 00000 n 
+0000000288 00000 n 
+0000000426 00000 n 
+0000000520 00000 n 
+0000000658 00000 n 
+0000001179 00000 n 
+0000001318 00000 n 
+0000002746 00000 n 
+0000002804 00000 n 
+0000002893 00000 n 
+0000002951 00000 n 
+0000003009 00000 n 
+0000003137 00000 n 
+0000003195 00000 n 
+0000003329 00000 n 
+0000003387 00000 n 
+0000003481 00000 n 
+0000003539 00000 n 
+0000003666 00000 n 
+0000003724 00000 n 
+0000003818 00000 n 
+0000003876 00000 n 
+0000003996 00000 n 
+0000004054 00000 n 
+0000004166 00000 n 
+0000004224 00000 n 
+trailer
+<<
+/Size 30
+/Root 3 0 R
+/Info 1 0 R
+>>
+startxref
+4341
+%%EOF

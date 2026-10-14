@@ -1,0 +1,40 @@
+﻿WOODCORE — LICENCE TERMS
+
+© 2026 Florian Lamprecht — woodcore@pineo.ch
+All rights reserved.
+
+Woodcore (the program, its window, its command line, its Typst engine, its documentation and its website) is protected by the Swiss Federal Act on Copyright (CopA). It is not free software. By installing or using Woodcore you accept the following terms.
+
+1. Right of use
+   The rights holder grants you, free of charge, a non-exclusive and non-transferable right to use Woodcore, if you received it from the rights holder or downloaded it from his website (https://woodcore.pages.dev/). You may install it on your own computers and use it to prepare your structural calculations, including in your professional work. You may make the backup copies you need.
+
+2. What is not permitted without the rights holder's written consent
+   - redistributing, publishing, selling, renting or making Woodcore available to third parties, in whole or in part, for instance on a network share or a website;
+   - modifying the program or creating a derivative work from it, except within the limits the law mandatorily allows (in particular Art. 21 CopA);
+   - removing or altering copyright and licence notices.
+
+3. Your projects and your reports
+   The projects, data, calculations and reports you prepare with Woodcore are yours; the rights holder claims no rights in them. The copy of the engine Woodcore places in a project's folder (_woodcore/) may accompany that project and be handed over with it — to a client, a checking engineer, a colleague — solely to compile or check that project.
+
+4. Preliminary version
+   Woodcore is under active development. Features may change or disappear from one version to the next, and a version may contain errors. The rights holder is under no obligation to provide updates, support or corrections.
+
+5. The user's responsibility
+   Woodcore is an aid to calculation and report writing. It replaces neither the judgement nor the responsibility of the engineer. You alone are responsible for checking the data entered, the assumptions, the results and the reports produced, and their compliance with the applicable standards. Woodcore does not contain the SIA standards or any other standard: you must hold the editions you apply yourself.
+
+6. No warranty, limitation of liability
+   Woodcore is provided free of charge, "as is", without any warranty, express or implied, in particular of accuracy, freedom from errors, fitness for a particular purpose or compliance with standards. To the fullest extent permitted by law, the rights holder excludes all liability for direct or indirect damage arising from the use of Woodcore or the inability to use it, including calculation errors, loss of data and consequential damage. Liability for damage caused intentionally or through gross negligence (Art. 100 of the Swiss Code of Obligations) remains reserved.
+
+7. Third-party components
+   Woodcore contains third-party software (in particular Python, Qt/PySide6, Typst, openpyxl and pypdf), which remains subject to its own licences. They are reproduced in the file THIRD-PARTY-NOTICES.txt shipped with the program and published on the website. Nothing in these terms restricts the rights those licences grant you.
+
+8. Update check
+   At start-up, an installed Woodcore reads the file version.json on Woodcore's website to find out whether a newer version exists. No data from your projects is sent. As with any internet request, the server hosting the website (Cloudflare) receives your computer's IP address and may record it in its logs; so does GitHub, which serves the installer when you download it. The check can be turned off by writing "updates": {"enabled": false} into the file %APPDATA%\Woodcore\settings.json.
+
+9. End of the right of use
+   The right of use ends automatically if you do not comply with these terms. The rights holder may change the terms that apply to future versions; each version remains subject to the terms shipped with it.
+
+10. Governing law
+   These terms are governed by Swiss law. They exist in French, German and English; in case of discrepancy, the French version prevails.
+
+Contact: Florian Lamprecht — woodcore@pineo.ch

@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "name": "Exemple",
+  "number": "",
+  "client": "",
+  "address": "",
+  "company": "Musterbüro",
+  "author": "Max Muster",
+  "checker": "",
+  "woodcore": {
+    "version": "0.82.0",
+    "revision": ""
+  },
+  "typst": "0.14.2",
+  "workbooks": {},
+  "revision": {
+    "index": 3,
+    "date": "2026-09-25",
+    "label": "Prüfung",
+    "initials": "PPA"
+  }
+}

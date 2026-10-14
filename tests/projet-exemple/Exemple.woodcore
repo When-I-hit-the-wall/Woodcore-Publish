@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-project",
+  "name": "Exemple",
+  "company": "Musterbüro",
+  "author": "Max Muster",
+  "gui": {
+    "rfem_models": [
+      "RFEM-Export/Beispiel-Modell.xlsx"
+    ]
+  },
+  "layout": {
+    "typst_root": ".",
+    "report": "3_Statischer Bericht/Statischer Rapport.typ",
+    "pdf": "3_Statischer Bericht/Statischer Rapport.pdf",
+    "report_cu": "1_Nutzungsvereinbarung/Nutzungsvereinbarung.typ",
+    "pdf_cu": "1_Nutzungsvereinbarung/Nutzungsvereinbarung.pdf",
+    "report_bp": "2_Projektbasis/Projektbasis.typ",
+    "pdf_bp": "2_Projektbasis/Projektbasis.pdf",
+    "generated": "_woodcore",
+    "images": "Images",
+    "rfem_export": "RFEM-Export",
+    "sources": "Woodcore-Datei",
+    "archives": "_Archiv"
+  }
+}

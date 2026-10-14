@@ -1,0 +1,172 @@
+{
+  "_comment": "The versions published on the website, newest first (CLAUDE.md section 12). Before publishing a version, write its notes here in French, German and English: they are what Woodcore's update window shows and what the download page lists. packaging/publish.py then uploads the installer to a Release of the public repository website/site.json names (releases_repo) and writes its file, size, SHA-256, `hosted` (\"github\") and `url` into the entry; committing and pushing this file is what publishes it (.github/workflows/site.yml). An installer recorded with `hosted`: \"gitlab\" is one of the versions published before v0.117, left in GitLab's Package Registry, which is no longer updated: the site neither fetches nor offers it, but its notes and its page of changes remain.",
+  "schema_version": "1.0",
+  "releases": [
+    {
+      "version": "0.117.0",
+      "notes": {
+        "fr": "Les vérifications d'élément enregistrées dans Woodcore : Traction, Compression, Flexion, Flambage, Déversement et Effort tranchant (SIA 265 4.2), avec résultat instantané et #show-check-member ; Poids propre et surcharge (composition dessinée), Neige et Vent calculés dans Woodcore selon la SIA 261:2020 ; un nouvel onglet «Formules» (domaines, unités tapées dans le calcul, commandes en pastilles, sep:), un onglet «Variables» en trois colonnes avec la provenance de chaque valeur, et des champs qui suivent une variable ; au plan de positions, cotes, numérotation, déplacer/copier et métrés ; un outil Texte dans les quatre dessins ; un écran de démarrage, une fenêtre plus rapide et les erreurs en haut à droite. Le site a une nouvelle adresse, https://woodcore.pages.dev/, et l'installateur est publié sur GitHub.",
+        "de": "Die Bauteilnachweise in Woodcore gespeichert: Zug, Druck, Biegung, Knicken, Kippen und Querkraft (SIA 265 4.2), mit sofortigem Ergebnis und #show-check-member; Eigenlast und Auflast (gezeichneter Aufbau), Schnee und Wind in Woodcore nach SIA 261:2020 berechnet; ein neues Register «Formeln» (Bereiche, Einheiten in der Rechnung getippt, Befehle als Etiketten, sep:), ein Register «Variablen» in drei Spalten mit der Herkunft jedes Werts, und Felder, die einer Variable folgen; im Positionsplan Bemassung, Nummerierung, Verschieben/Kopieren und Ausmass; ein Textwerkzeug in den vier Zeichnungen; ein Startbildschirm, ein schnelleres Fenster und die Fehler oben rechts. Die Website hat eine neue Adresse, https://woodcore.pages.dev/, und das Installationsprogramm wird auf GitHub veröffentlicht.",
+        "en": "Member checks saved in Woodcore: Tension, Compression, Bending, Buckling, Lateral torsional buckling and Shear (SIA 265 4.2), with an instant result and #show-check-member; Self-weight and superimposed load (the build-up drawn), Snow and Wind calculated in Woodcore after SIA 261:2020; a new «Formulas» tab (domains, units typed in the calculation, commands as pills, sep:), a «Variables» tab in three columns with every value's provenance, and fields that follow a variable; in the position plan, dimensions, numbering, move/copy and quantities; a Text tool in the four drawings; a splash screen, a faster window and the errors at the top right. The website has a new address, https://woodcore.pages.dev/, and the installer is published on GitHub."
+      },
+      "installer": {
+        "file": "Woodcore-0.117.0-setup.exe",
+        "size": 106752617,
+        "sha256": "9b366dfb9b480e9e0e155ebd93e0e3cba7f3cee483f395c9373c4d019381f77e",
+        "hosted": "github",
+        "url": "https://github.com/When-I-hit-the-wall/woodcore-releases/releases/download/v0.117.0/Woodcore-0.117.0-setup.exe"
+      },
+      "date": "2026-10-12"
+    },
+    {
+      "version": "0.116.0",
+      "notes": {
+        "fr": "Les plans retravaillés : dossiers et fichiers distincts dans les listes (plusieurs fichiers glissés ensemble), chaque document propre à son onglet avec plusieurs cadres par page choisis et nommés dans le volet de droite, des calques presque instantanés, l'accroche des modèles statiques dans les deux plans, un volet de droite qui suit la sélection (cadrage et calibrage hors de la barre), des types de plan (coupe en plan, coupe en élévation avec niveau de reprise des charges, plan de descente de charges avec les six symboles de charge de la STE), la superposition d'un autre plan, des feuilles d'export d'un seul genre avec le titre du plan, des PDF groupés et la liste des positions (#show-position-list, sheet-position-list) ; le type d'une position suit la langue du projet. Le plan de protection incendie reçoit tout ce qui touche au moteur de dessin.",
+        "de": "Die überarbeiteten Pläne: Ordner und Dateien unterscheidbar in den Listen (mehrere Dateien zusammen gezogen), jedes Dokument gehört seinem Register, mit mehreren Ausschnitten pro Seite, in der rechten Spalte gewählt und benannt, fast sofortige Ebenen, das Einrasten der statischen Systeme in beiden Plänen, eine rechte Spalte, die der Auswahl folgt (Ausschnitt und Kalibrierung nicht mehr in der Leiste), Plantypen (Grundriss, Schnitt mit Lastübergabeniveau, Lastabtragungsplan mit den sechs Lastsymbolen der STE), die Überlagerung eines anderen Plans, Exportblätter von einer einzigen Art mit dem Plantitel, gebündelte PDF und die Positionsliste (#show-position-list, sheet-position-list); der Typ einer Position folgt der Sprache des Projekts. Der Brandschutzplan erhält alles, was die Zeichenmaschine betrifft.",
+        "en": "The plans reworked: folders told from files in the lists (several files dragged together), each document belonging to its tab with several frames per page chosen and named in the right pane, almost instant layers, the static models' snapping in both plans, a right pane that follows the selection (crop and calibration out of the bar), plan types (floor plan, elevation section with the load transfer level, load path plan with STE's six load symbols), another plan shown over the open one, export sheets of one kind with the plan's title, PDF bundles and the list of the positions (#show-position-list, sheet-position-list); a position's type follows the project's language. The fire protection plan gets everything that concerns the drawing engine."
+      },
+      "installer": {
+        "file": "Woodcore-0.116.0-setup.exe",
+        "size": 99513784,
+        "sha256": "8343625a09876ce8f6d9792f22499e8279cea589eb8805fb080f828b7be446ea",
+        "hosted": "gitlab"
+      },
+      "date": "2026-10-07"
+    },
+    {
+      "version": "0.115.0",
+      "notes": {
+        "fr": "Les annexes : un rapport d'impression externe (celui de RFEM par exemple) se copie dans le projet, ses diagrammes s'affichent en extraits qui suivent chaque nouvelle version du rapport (ancrés sur le signet de leur titre), et ses pages terminent chaque document ; deux objets dans « Structure du document » et une section « Annexes » désactivée dans les trois templates de fond. Le plan de protection incendie : un onglet « Plan de protection incendie » sous « Plan de position », sur les mêmes documents importés (cocher une page en fait un plan, suivre un plan de position ou cadre propre, rotation et calques pour les deux sortes de plans), dessin à la main des surfaces, murs par classe de résistance au feu, portes, longueurs, sortie de secours et largeurs de passage, avec légende ; #show-fire-plan, les feuilles d'export et l'objet « Plan de protection incendie ». Portage des travaux de Gian sur les trois documents.",
+        "de": "Die Anhänge: ein externes Druckprotokoll (etwa das von RFEM) wird ins Projekt kopiert, seine Diagramme erscheinen als Auszüge, die jeder neuen Fassung des Protokolls folgen (am Lesezeichen ihres Titels verankert), und seine Seiten schliessen jedes Dokument ab; zwei Objekte in «Dokumentstruktur» und ein abgeschalteter Abschnitt «Anhänge» in den drei Inhaltsvorlagen. Der Brandschutzplan: ein Register «Brandschutzplan» unter «Positionsplan», auf denselben importierten Dokumenten (das Ankreuzen einer Seite macht einen Plan daraus, Folgen eines Positionsplans oder eigener Rahmen, Drehung und Ebenen für beide Planarten), von Hand gezeichnete Flächen, Wände nach Feuerwiderstandsklasse, Türen, Längen, Notausgang und Durchgangsbreiten, mit Legende; #show-fire-plan, die Exportblätter und das Objekt «Brandschutzplan». Übernahme der Arbeiten von Gian auf die drei Dokumente.",
+        "en": "The annexes: an external print report (RFEM's, for example) is copied into the project, its diagrams are shown as excerpts that follow every new version of the report (anchored on the bookmark of their title), and its pages close each document; two objects in «Document structure» and a disabled «Appendices» section in the three content templates. The fire protection plan: a «Fire protection plan» tab under «Position plan», on the same imported documents (ticking a page makes a plan, following a position plan or a frame of its own, turning and layers for both kinds of plan), surfaces, walls by fire-resistance class, doors, lengths, the emergency exit and passage widths drawn by hand, with a legend; #show-fire-plan, the export sheets and the «Fire protection plan» object. Gian's work ported onto the three documents."
+      },
+      "installer": {
+        "file": "Woodcore-0.115.0-setup.exe",
+        "size": 99150739,
+        "sha256": "dbd0069b79f9f2ed4be950fa94e8740bf613f0998ad0e7ea21655ef3d5b5d7ca",
+        "hosted": "gitlab"
+      },
+      "date": "2026-10-06"
+    },
+    {
+      "version": "0.114.0",
+      "notes": {
+        "fr": "L'onglet « Plan de position » est refait : les documents importés (PDF, images, DXF, DWG) s'ouvrent dans une vue continue de leurs pages, on y coche les pages qui deviennent des plans, on les tourne et on choisit leurs calques, dans la fenêtre comme dans le rapport ; un plan s'enregistre tout seul, l'étage se choisit dans une liste, les plans de coupe portent des lignes d'étage, des feuilles de plans avec cartouche BFH s'exportent, et un générateur écrit la commande #show-plan. Les positions se saisissent dans Woodcore (Positionen.xlsx est importé une fois, puis archivé). Chaque tableau titré est numéroté. Templates de forme et templates de fond enfin distingués : la forme règle l'apparence (dossier Template/, page de titre dédiée ; la forme BFH met tout le texte en Lucida Sans), le fond les sections et textes de chaque document, rapport compris ; changer de template de fond ouvre une comparaison section par section, sans rien supprimer.",
+        "de": "Das Register «Positionsplan» ist neu: importierte Dokumente (PDF, Bilder, DXF, DWG) öffnen sich in einer durchgehenden Ansicht ihrer Seiten, angekreuzte Seiten werden zu Plänen, sie lassen sich drehen und ihre Ebenen wählen, im Fenster wie im Bericht; ein Plan speichert sich selbst, das Geschoss wird aus einer Liste gewählt, Schnittpläne tragen Geschosslinien, Planblätter mit BFH-Schriftfeld werden exportiert, und ein Generator schreibt den Befehl #show-plan. Positionen werden in Woodcore erfasst (Positionen.xlsx wird einmal importiert und archiviert). Jede betitelte Tabelle wird nummeriert. Form- und Inhaltsvorlagen sind endlich getrennt: die Formvorlage regelt das Aussehen (Ordner Template/, eigenes Titelblatt; die BFH-Form setzt den ganzen Text in Lucida Sans), die Inhaltsvorlage die Abschnitte und Texte jedes Dokuments, den Bericht eingeschlossen; der Wechsel der Inhaltsvorlage öffnet einen Vergleich Abschnitt für Abschnitt, ohne etwas zu löschen.",
+        "en": "The «Position plan» tab is reworked: imported documents (PDF, images, DXF, DWG) open in a continuous view of their pages, ticked pages become plans, they are turned and their layers chosen, in the window as in the report; a plan saves itself, the storey is picked from a list, section plans carry storey lines, drawing sheets with a BFH title block are exported, and a builder writes the #show-plan command. Positions are entered in Woodcore (Positionen.xlsx is imported once, then archived). Every titled table is numbered. Layout templates and content templates are finally told apart: the layout sets the look (a Template/ folder, a title page of its own; the BFH layout sets all text in Lucida Sans), the content the sections and text of each document, the report included; switching a content template opens a section-by-section comparison that deletes nothing."
+      },
+      "date": "2026-10-06",
+      "installer": {
+        "file": "Woodcore-0.114.0-setup.exe",
+        "size": 98480106,
+        "sha256": "dc846d313e3fa5fda50aa5e467bb9a37149083eb46a4707522f33695b204fa57",
+        "hosted": "gitlab"
+      }
+    },
+    {
+      "version": "0.113.0",
+      "notes": {
+        "fr": "Dans la convention d'utilisation et la base de projet, les titres s'écrivent au niveau où ils s'impriment (== pour une sous-section) et chaque chapitre a son propre fichier .typ ; un bouton convertit un projet existant sans changer le PDF. Les choix et les listes à cocher n'impriment plus que ce qui est choisi. En haut de l'arbre, une ligne « Document entier ». Un objet retiré reste visible, barré, et se réintègre à sa place d'un clic droit. La page de titre se règle dans un fichier title.typ partagé par les trois documents, dans la langue de chacun. Les paramètres réunissent tous les modèles dans un seul onglet (Intégré, Partagé, Mes modèles), avec l'import d'un dossier et un bouton Enregistrer. Un indicateur de chargement remplace la fenêtre figée.",
+        "de": "In der Nutzungsvereinbarung und der Projektbasis werden Überschriften auf der Ebene geschrieben, auf der sie gedruckt werden (== für einen Unterabschnitt), und jedes Kapitel hat seine eigene .typ-Datei; eine Schaltfläche wandelt ein bestehendes Projekt um, ohne das PDF zu ändern. Auswahlen und Ankreuzlisten drucken nur noch, was gewählt ist. Oben im Baum eine Zeile «Ganzes Dokument». Ein entferntes Objekt bleibt durchgestrichen sichtbar und wird per Rechtsklick an seiner Stelle wieder eingefügt. Das Titelblatt wird in einer Datei title.typ eingestellt, die alle drei Dokumente in ihrer Sprache teilen. Die Einstellungen fassen alle Vorlagen in einem Reiter zusammen (Mitgeliefert, Geteilt, Meine Vorlagen), mit Import eines Ordners und einer Schaltfläche Speichern. Eine Ladeanzeige ersetzt das eingefrorene Fenster.",
+        "en": "In the service criteria agreement and the basis of design, headings are written at the level they print at (== for a sub-section) and every chapter has a .typ file of its own; a button converts an existing project without changing the PDF. Choices and checklists print only what is chosen. A «Whole document» row at the top of the tree. An object taken out stays visible, struck through, and is put back where it stood by a right click. The title page is set in a title.typ file the three documents share, each in its own language. The settings gather every template in one tab (Builtin, Shared, My templates), with a folder import and a Save button. A loading indicator replaces the frozen window."
+      },
+      "date": "2026-10-06",
+      "installer": {
+        "file": "Woodcore-0.113.0-setup.exe",
+        "size": 84717178,
+        "sha256": "e9fc61b4363e9511963ee459b22ea1a200e6d0ceab2b1f35831aaacc27ad7a97",
+        "hosted": "gitlab"
+      }
+    },
+    {
+      "version": "0.112.0",
+      "notes": {
+        "fr": "Un projet contient désormais trois documents : la convention d'utilisation, la base de projet et le rapport de statique, chacun dans son dossier, choisis par un menu en tête de la navigation. Un projet existant est migré à son ouverture, sur votre accord, avec retour arrière. Des modèles complets de convention d'utilisation et de base de projet selon la SIA 260, en français, allemand et anglais. Un onglet « Structure du document » : l'arbre des chapitres, sections et objets, l'aperçu de l'élément choisi, et à droite ses options — les lignes d'un tableau, la catégorie d'une charge utile avec ses valeurs de la SIA 261 — sans jamais afficher de code Typst. Les sections partagées entre documents passent en orange quand l'autre copie a changé ; vous importez ou ignorez. Un document n'est recompilé que s'il a changé, et plus aucune fenêtre de terminal ne clignote. Le texte du rapport de statique ne change pas. Cette version installe aussi la 0.111.",
+        "de": "Ein Projekt enthält nun drei Dokumente: die Nutzungsvereinbarung, die Projektbasis und den statischen Bericht, jedes in seinem Ordner, gewählt über ein Menü zuoberst in der Navigation. Ein bestehendes Projekt wird beim Öffnen auf Ihre Zustimmung hin überführt, mit Rückweg. Vollständige Vorlagen für Nutzungsvereinbarung und Projektbasis nach SIA 260, auf Deutsch, Französisch und Englisch. Ein Register «Struktur des Dokuments»: der Baum der Kapitel, Abschnitte und Objekte, die Vorschau des gewählten Elements und rechts seine Optionen — die Zeilen einer Tabelle, die Kategorie einer Nutzlast mit ihren Werten nach SIA 261 — ohne je Typst-Code zu zeigen. Zwischen Dokumenten geteilte Abschnitte werden orange, wenn sich die andere Kopie geändert hat; Sie importieren oder ignorieren. Ein Dokument wird nur neu kompiliert, wenn es sich geändert hat, und kein Terminalfenster blitzt mehr auf. Der Text des statischen Berichts ändert sich nicht. Diese Version installiert auch die 0.111.",
+        "en": "A project now holds three documents: the service criteria agreement, the basis of design and the statical report, each in its own folder, chosen from a menu at the top of the navigation. An existing project is migrated when it is opened, on your word, and the migration can be undone. Complete templates of the service criteria agreement and the basis of design after SIA 260, in French, German and English. A “Document structure” tab: the tree of chapters, sections and objects, the preview of the element chosen, and on the right its options — a table's rows, a live load's category with its values from SIA 261 — without ever showing Typst code. Sections shared between documents turn orange when the other copy changed; you import or ignore. A document is recompiled only if it changed, and no terminal window flashes any more. The statical report's text does not change. This version also installs 0.111."
+      },
+      "installer": {
+        "file": "Woodcore-0.112.0-setup.exe",
+        "size": 84681876,
+        "sha256": "2234c91ebdb795d8435878703118382727f92a8f63c3cc721e585f487fa00616",
+        "hosted": "gitlab"
+      },
+      "date": "2026-10-02"
+    },
+    {
+      "version": "0.110.0",
+      "notes": {
+        "fr": "Les efforts internes d'un modèle RFEM s'affichent dans l'onglet RFEM et s'impriment dans le rapport : les extrêmes de chaque situation de projet avec la combinaison qui les a produits, et les courbes reconstruites depuis l'export seul. Un onglet Python où vous écrivez et lancez vos propres calculs, dont les résultats nommés entrent dans le rapport. Un onglet Formules qui traduit une phrase en clair en commandes de vérification. Le dossier du rapport est nommé à la création du projet, sans (typst). style: sur #var, #var-unit et #val, plus de blanc autour des titres, et le PDF porte désormais les variables du rapport. Aucun nombre ne change. Cette version installe aussi la 0.100.",
+        "de": "Die Schnittkräfte eines RFEM-Modells erscheinen im Register RFEM und lassen sich im Bericht drucken: die Extremwerte jeder Bemessungssituation mit der Kombination, die sie erzeugt hat, und die Kurven allein aus dem Export rekonstruiert. Ein Register Python, in dem Sie eigene Berechnungen schreiben und ausführen, deren benannte Ergebnisse in den Bericht eingehen. Ein Register Formeln, das einen Satz in Klartext in Nachweisbefehle übersetzt. Der Ordner des Berichts wird beim Anlegen des Projekts benannt, ohne (typst). style: auf #var, #var-unit und #val, mehr Weissraum um die Überschriften, und das PDF trägt nun die Variablen des Berichts. Keine Zahl ändert sich. Diese Version installiert auch die 0.100.",
+        "en": "An RFEM model's internal forces show in the RFEM tab and print in the report: each design situation's extremes with the combination that produced them, and the curves reconstructed from the export alone. A Python tab where you write and run your own calculations, whose named results reach the report. A Formulas tab that turns a sentence in plain words into check commands. The report's folder is named when the project is created, without (typst). style: on #var, #var-unit and #val, more white around the headings, and the PDF now carries the report's own variables. No number changes. This version also installs 0.100."
+      },
+      "date": "2026-09-29",
+      "installer": {
+        "file": "Woodcore-0.110.0-setup.exe",
+        "size": 83331677,
+        "sha256": "770bb416f4f885838677fce92680579b31fb4a1f8cd4a007e416e93b16100984",
+        "hosted": "gitlab"
+      }
+    },
+    {
+      "version": "0.99.0",
+      "notes": {
+        "fr": "Le rapport nomme en entier chaque norme qu'il cite, dans une bibliographie de fin, et tient un journal de ses révisions, écrit dans l'onglet Journal. Chaque entrée d'un plan, d'un modèle statique ou d'un schéma porte son propre facteur d'épaisseur, et les textes d'un schéma sont posés sur un pavé au lieu d'un halo en nuage. Trois récapitulatifs rassemblent les charges en kN/m², les charges linéaires en kN/m et les résultats principaux. Aucun nombre ne change et aucune page déjà imprimée ne bouge. Cette version installe aussi les 0.97 et 0.98.",
+        "de": "Der Bericht nennt jede zitierte Norm vollständig, in einem Literaturverzeichnis am Ende, und führt ein Journal seiner Revisionen, geschrieben im Register Journal. Jeder Eintrag eines Plans, eines statischen Systems oder eines Schemas trägt seinen eigenen Stärkefaktor, und die Texte eines Schemas stehen auf einem Feld statt in einem wolkigen Halo. Drei Übersichten fassen die Flächenlasten in kN/m², die Linienlasten in kN/m und die Hauptergebnisse zusammen. Keine Zahl ändert sich und keine bereits gedruckte Seite verschiebt sich. Diese Version installiert auch 0.97 und 0.98.",
+        "en": "The report names in full every norm it cites, in a bibliography at the end, and keeps a journal of its revisions, written in the Journal tab. Every entry of a plan, a static model or a schema carries a thickness factor of its own, and a schema's texts stand on a box instead of in a cloud-like halo. Three summaries gather the area loads in kN/m², the line loads in kN/m and the main results. No number changes and no page already printed moves. This version also installs 0.97 and 0.98."
+      },
+      "date": "2026-09-29",
+      "installer": {
+        "file": "Woodcore-0.99.0-setup.exe",
+        "size": 75101296,
+        "sha256": "5457c3103e342b801f38c31000ffb6c488485a875316a3a52f1e27fb384fc4e5",
+        "hosted": "gitlab"
+      }
+    },
+    {
+      "version": "0.96.0",
+      "notes": {
+        "fr": "Woodcore prend la forme de ce site : une navigation latérale, des formulaires en cartes, les appels Typst en couleur. Un onglet « Positions » écrit Positionen.xlsx, avec une colonne « section type », et Fichier › Paramètres gère vos modèles de projet. Le « Katalog » s'appelle désormais Woodcore. Dans vos rapports, remplacez #show-position par #member(id, level: 1, description: true) : les chiffres ne changent pas.",
+        "de": "Woodcore sieht aus wie diese Website: eine seitliche Navigation, Formulare in Karten, farbige Typst-Aufrufe. Ein Register «Positionen» schreibt Positionen.xlsx, mit einer Spalte «section type», und Datei › Einstellungen verwaltet Ihre Projektvorlagen. Der «Katalog» heisst nun Woodcore. Ersetzen Sie in Ihren Berichten #show-position durch #member(id, level: 1, description: true): die Zahlen ändern sich nicht.",
+        "en": "Woodcore looks like this website: a side navigation, forms in cards, coloured Typst calls. A «Positions» tab writes Positionen.xlsx, with a «section type» column, and File › Settings holds your project templates. The «Katalog» is now called Woodcore. In your reports, replace #show-position with #member(id, level: 1, description: true): the numbers do not change."
+      },
+      "installer": {
+        "file": "Woodcore-0.96.0-setup.exe",
+        "size": 69861063,
+        "sha256": "f42f33c32ea434c487c68e46491f26f223fd0141140dd78a43ddf38ef1784536",
+        "hosted": "gitlab"
+      },
+      "date": "2026-09-24"
+    },
+    {
+      "version": "0.90.0",
+      "notes": {
+        "fr": "La fenêtre de Woodcore prend les couleurs et la typographie du site, en clair ou en sombre : Fichier › Apparence (Comme Windows, Clair, Sombre). Un nouveau projet s'exporte sans classeur de charges, avec un avertissement. La fenêtre de mise à jour mène désormais aux pages de nouveautés. Rien ne change dans vos rapports.",
+        "de": "Das Fenster von Woodcore übernimmt die Farben und die Typografie der Website, hell oder dunkel: Datei › Darstellung (Wie Windows, Hell, Dunkel). Ein neues Projekt lässt sich ohne Lasten-Arbeitsmappe exportieren, mit einer Warnung. Das Aktualisierungsfenster führt nun zu den Seiten mit den Neuerungen. An Ihren Berichten ändert sich nichts.",
+        "en": "Woodcore's window takes the site's colours and typography, light or dark: File › Appearance (Like Windows, Light, Dark). A new project exports without a load workbook, with a warning. The update window now leads to the pages of what's new. Nothing changes in your reports."
+      },
+      "installer": {
+        "file": "Woodcore-0.90.0-setup.exe",
+        "size": 69292522,
+        "sha256": "add0321a350e9099e5cc0251c418a13f5b6092c90cd254a3cd8d1f694a73e167",
+        "hosted": "gitlab"
+      },
+      "date": "2026-09-23"
+    },
+    {
+      "version": "0.89.0",
+      "notes": {
+        "fr": "Première version publiée sur ce site. Woodcore vérifie désormais au démarrage si une nouvelle version est disponible et propose de l'installer. Vérifications des éléments en bois selon la SIA 265, chapitre 4.2 : #member et les commandes verify-… (traction, compression, flambage, flexion, déversement, cisaillement).",
+        "de": "Erste auf dieser Website veröffentlichte Version. Woodcore prüft nun beim Start, ob eine neue Version verfügbar ist, und bietet an, sie zu installieren. Nachweise von Holzbauteilen nach SIA 265, Kapitel 4.2: #member und die Befehle verify-… (Zug, Druck, Knicken, Biegung, Kippen, Schub).",
+        "en": "First version published on this site. Woodcore now checks at its start whether a new version is available and offers to install it. Checks of timber members after SIA 265, chapter 4.2: #member and the verify-… commands (tension, compression, buckling, bending, lateral torsional buckling, shear)."
+      },
+      "installer": {
+        "file": "Woodcore-0.89.0-setup.exe",
+        "size": 69289266,
+        "sha256": "b3ceac19ea3309b11b94763eb85d88374030ce2d49fec2ee7714bc21760c658a",
+        "hosted": "gitlab"
+      },
+      "date": "2026-09-23"
+    }
+  ]
+}

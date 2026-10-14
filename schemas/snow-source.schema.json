@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Snow load source",
+  "description": "Woodcore-Datei/loads/snow/<id>.json -- one roof whose characteristic snow loads Woodcore computes from SIA 261:2020 chapter 5 (calc/domains/snow_source.py, docs/domain/loads.md §3.3bis, issue #36). Read beside the SL-* sheets of a load workbook, under the same domain snow-load; an id both carry is refused.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "h_0",
+    "correction",
+    "exposure",
+    "c_t",
+    "roof",
+    "sliding"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "-- pinned. 1.1 (issue #42): 1.0 with `links`, written only where a field follows a variable. 1.2 (spec 2026-10-12-audit-issues-47-48-49, D-19): 1.1 with `height_step`, written only where the roof has a height step -- a superset of 1.1, links allowed.",
+      "enum": [
+        "1.0",
+        "1.1",
+        "1.2"
+      ]
+    },
+    "id": {
+      "type": "string",
+      "description": "The file name without .json, and the instance the report names."
+    },
+    "name": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "group": {
+      "type": "string"
+    },
+    "height_step": {
+      "type": "boolean",
+      "description": "SIA 261 5.3.6: the roof is stepped, or adjoins a taller building -- the report then says that the triangular extra load of Figur 5 applies on the lower roof. Written only when true (schema 1.2); absent is false."
+    },
+    "h_0": {
+      "type": "number",
+      "description": "The site's altitude above sea level, m."
+    },
+    "correction": {
+      "type": "number",
+      "description": "The correction of the map of SIA 261 Anhang D, m: -200, 0, 200, 400 or 500."
+    },
+    "exposure": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "exposed",
+        "sheltered"
+      ],
+      "description": "SIA 261 5.2.4: C_e 1.0, 0.8 or 1.2."
+    },
+    "c_t": {
+      "type": "number",
+      "description": "C_T, 1.0 unless the roof's heat speeds the melting (5.2.5): above 0 and at most 1."
+    },
+    "roof": {
+      "type": "string",
+      "enum": [
+        "flat",
+        "mono",
+        "duo",
+        "shed",
+        "curved"
+      ],
+      "description": "The roof form of SIA 261 Figur 3: flat, mono-pitch (half a duo-pitch, 5.3.2), duo-pitch, shed, curved (the third column)."
+    },
+    "length": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "A flat roof: its length, m (Figur 4 where both length and width exceed 20 m)."
+    },
+    "width": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "A flat roof: its width, m."
+    },
+    "alpha_1": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The slope of a mono-pitch roof, of the first side of a duo-pitch or a shed roof, or the alpha of a curved roof (Figur 3), degrees."
+    },
+    "alpha_2": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The slope of the second side of a duo-pitch or a shed roof, degrees."
+    },
+    "sliding": {
+      "type": "string",
+      "enum": [
+        "possible",
+        "hindered"
+      ],
+      "description": "SIA 261 5.3.4: hindered (snow guards, a parapet at the eaves) takes mu_1 = 0.8."
+    },
+    "links": {
+      "type": "object",
+      "description": "The fields of this entry that follow a variable of the export, by their key (h_0, c_t, length, width, alpha_1, alpha_2): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.1.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+          "required": [
+            "domain",
+            "instance",
+            "var"
+          ],
+          "properties": {
+            "domain": {
+              "type": "string"
+            },
+            "instance": {
+              "type": "string"
+            },
+            "var": {
+              "type": "string"
+            },
+            "factor": {
+              "type": "number"
+            },
+            "offset": {
+              "type": "number"
+            },
+            "origin": {
+              "type": "string",
+              "enum": [
+                "formulas"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

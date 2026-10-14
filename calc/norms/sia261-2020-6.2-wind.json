@@ -1,0 +1,684 @@
+{
+ "_source": "SIA 261:2020, clauses 6.2.1 to 6.3.5 «Vent» -- Tableau 4, equations (11) and (12) and Figur 9, transcribed from the French edition, Normen-Florian/SIA261-2020-FR.pdf pp. 30-34 (11.10.2026, issue #37). The curves of Figur 9 are read off the PDF's own vector paths -- the eight strokes of the figure, their Bézier segments sampled and mapped through the figure's frame (c_red 0.5 at its left edge, 1.0 at its right; h 0 at its foot, 100 m at its head) -- every 5 m from 5 m to where each curve ends, to three decimals.",
+ "_note": "Equation (11): q_p = c_h · q_p0. Equation (12): c_h = factor · ((z / z_g)^alpha_r + offset)^2, z at least z_min (z_min_IV for category IV), category IV above iv_as_iii_above m read with category III's profile. Figur 9: c_red by the height h and beta = b/h for the reference area b·h (resp. d/h for d·h), interpolated linearly in h and in log(beta) between the curves; 6.3.2: c_red = 1.0 for a roof's area and a bridge's superstructure; 6.3.3: the more unfavourable of the two values for directions more than 15° off the two reference directions. 6.3.5: c_d = 1.0 for buildings up to 15 m, and buildings with load-bearing walls or frames under 100 m and at most four times their dimension in the wind direction -- else SIA 261/1.",
+ "edition": "SIA 261:2020",
+ "clause": {
+  "norm": "SIA 261",
+  "norm_ref": "6.2",
+  "pages": [
+   30,
+   31,
+   32,
+   33,
+   34
+  ],
+  "label": "Wind",
+  "terrain": {
+   "norm_ref": "Tableau 4",
+   "categories": [
+    {
+     "id": "II",
+     "example": "rive lacustre",
+     "z_g": 300,
+     "alpha_r": 0.16
+    },
+    {
+     "id": "IIa",
+     "example": "grande plaine",
+     "z_g": 380,
+     "alpha_r": 0.19
+    },
+    {
+     "id": "III",
+     "example": "localité, milieu rural",
+     "z_g": 450,
+     "alpha_r": 0.23
+    },
+    {
+     "id": "IV",
+     "example": "zone urbaine étendue",
+     "z_g": 526,
+     "alpha_r": 0.3
+    }
+   ]
+  },
+  "c_h": {
+   "factor": 1.6,
+   "offset": 0.375,
+   "equation": "12",
+   "norm_ref": "6.2.1.2",
+   "z_min": 5,
+   "z_min_IV": 10,
+   "iv_as_iii_above": 30
+  },
+  "q_p": {
+   "equation": "11",
+   "norm_ref": "6.2.1.1"
+  },
+  "c_red": {
+   "norm_ref": "Figur 9",
+   "roof": 1.0,
+   "directions": {
+    "norm_ref": "6.3.3",
+    "reference": [
+     0,
+     90,
+     180,
+     270
+    ],
+    "band": 15,
+    "note": "6.3.3 (p. 33): the two values hold for wind directions deviating «um weniger als 15°» / «de moins de 15°» from the reference directions; for every other direction the more unfavourable of the two. A direction exactly 15° off is not «less than 15°» (the engineer, 12.10.2026, spec 2026-10-12-audit-issues-47-48-49 D-03)."
+   },
+   "curves": [
+    {
+     "beta": 0.1,
+     "points": [
+      [
+       5,
+       0.968
+      ],
+      [
+       10,
+       0.948
+      ],
+      [
+       15,
+       0.932
+      ],
+      [
+       20,
+       0.919
+      ],
+      [
+       25,
+       0.908
+      ],
+      [
+       30,
+       0.898
+      ],
+      [
+       35,
+       0.89
+      ],
+      [
+       40,
+       0.883
+      ],
+      [
+       45,
+       0.876
+      ],
+      [
+       50,
+       0.87
+      ],
+      [
+       55,
+       0.864
+      ],
+      [
+       60,
+       0.859
+      ],
+      [
+       65,
+       0.854
+      ],
+      [
+       70,
+       0.849
+      ],
+      [
+       75,
+       0.845
+      ],
+      [
+       80,
+       0.841
+      ],
+      [
+       85,
+       0.837
+      ],
+      [
+       90,
+       0.833
+      ],
+      [
+       95,
+       0.83
+      ],
+      [
+       100,
+       0.826
+      ]
+     ]
+    },
+    {
+     "beta": 0.2,
+     "points": [
+      [
+       5,
+       0.96
+      ],
+      [
+       10,
+       0.937
+      ],
+      [
+       15,
+       0.919
+      ],
+      [
+       20,
+       0.905
+      ],
+      [
+       25,
+       0.893
+      ],
+      [
+       30,
+       0.882
+      ],
+      [
+       35,
+       0.873
+      ],
+      [
+       40,
+       0.865
+      ],
+      [
+       45,
+       0.858
+      ],
+      [
+       50,
+       0.851
+      ],
+      [
+       55,
+       0.845
+      ],
+      [
+       60,
+       0.84
+      ],
+      [
+       65,
+       0.834
+      ],
+      [
+       70,
+       0.829
+      ],
+      [
+       75,
+       0.825
+      ],
+      [
+       80,
+       0.82
+      ],
+      [
+       85,
+       0.816
+      ],
+      [
+       90,
+       0.812
+      ],
+      [
+       95,
+       0.809
+      ],
+      [
+       100,
+       0.805
+      ]
+     ]
+    },
+    {
+     "beta": 0.5,
+     "points": [
+      [
+       5,
+       0.941
+      ],
+      [
+       10,
+       0.913
+      ],
+      [
+       15,
+       0.891
+      ],
+      [
+       20,
+       0.873
+      ],
+      [
+       25,
+       0.859
+      ],
+      [
+       30,
+       0.847
+      ],
+      [
+       35,
+       0.837
+      ],
+      [
+       40,
+       0.827
+      ],
+      [
+       45,
+       0.819
+      ],
+      [
+       50,
+       0.812
+      ],
+      [
+       55,
+       0.805
+      ],
+      [
+       60,
+       0.799
+      ],
+      [
+       65,
+       0.793
+      ],
+      [
+       70,
+       0.788
+      ],
+      [
+       75,
+       0.783
+      ],
+      [
+       80,
+       0.778
+      ],
+      [
+       85,
+       0.774
+      ],
+      [
+       90,
+       0.77
+      ],
+      [
+       95,
+       0.766
+      ],
+      [
+       100,
+       0.763
+      ]
+     ]
+    },
+    {
+     "beta": 1,
+     "points": [
+      [
+       5,
+       0.918
+      ],
+      [
+       10,
+       0.883
+      ],
+      [
+       15,
+       0.857
+      ],
+      [
+       20,
+       0.837
+      ],
+      [
+       25,
+       0.82
+      ],
+      [
+       30,
+       0.807
+      ],
+      [
+       35,
+       0.796
+      ],
+      [
+       40,
+       0.786
+      ],
+      [
+       45,
+       0.777
+      ],
+      [
+       50,
+       0.769
+      ],
+      [
+       55,
+       0.762
+      ],
+      [
+       60,
+       0.756
+      ],
+      [
+       65,
+       0.75
+      ],
+      [
+       70,
+       0.745
+      ],
+      [
+       75,
+       0.74
+      ],
+      [
+       80,
+       0.735
+      ],
+      [
+       85,
+       0.731
+      ],
+      [
+       90,
+       0.727
+      ],
+      [
+       95,
+       0.723
+      ],
+      [
+       100,
+       0.72
+      ]
+     ]
+    },
+    {
+     "beta": 2,
+     "points": [
+      [
+       5,
+       0.884
+      ],
+      [
+       10,
+       0.841
+      ],
+      [
+       15,
+       0.811
+      ],
+      [
+       20,
+       0.788
+      ],
+      [
+       25,
+       0.77
+      ],
+      [
+       30,
+       0.756
+      ],
+      [
+       35,
+       0.744
+      ],
+      [
+       40,
+       0.734
+      ],
+      [
+       45,
+       0.725
+      ],
+      [
+       50,
+       0.718
+      ],
+      [
+       55,
+       0.711
+      ],
+      [
+       60,
+       0.705
+      ],
+      [
+       65,
+       0.699
+      ],
+      [
+       70,
+       0.694
+      ],
+      [
+       75,
+       0.69
+      ],
+      [
+       80,
+       0.686
+      ],
+      [
+       85,
+       0.682
+      ],
+      [
+       90,
+       0.678
+      ],
+      [
+       95,
+       0.675
+      ],
+      [
+       100,
+       0.672
+      ]
+     ]
+    },
+    {
+     "beta": 5,
+     "points": [
+      [
+       5,
+       0.82
+      ],
+      [
+       10,
+       0.767
+      ],
+      [
+       15,
+       0.732
+      ],
+      [
+       20,
+       0.708
+      ],
+      [
+       25,
+       0.69
+      ],
+      [
+       30,
+       0.676
+      ],
+      [
+       35,
+       0.665
+      ],
+      [
+       40,
+       0.656
+      ],
+      [
+       45,
+       0.649
+      ],
+      [
+       50,
+       0.643
+      ],
+      [
+       55,
+       0.637
+      ],
+      [
+       60,
+       0.632
+      ],
+      [
+       65,
+       0.628
+      ],
+      [
+       70,
+       0.624
+      ],
+      [
+       75,
+       0.621
+      ],
+      [
+       80,
+       0.618
+      ],
+      [
+       85,
+       0.616
+      ],
+      [
+       90,
+       0.613
+      ],
+      [
+       95,
+       0.611
+      ],
+      [
+       100,
+       0.609
+      ]
+     ]
+    },
+    {
+     "beta": 10,
+     "points": [
+      [
+       5,
+       0.755
+      ],
+      [
+       10,
+       0.699
+      ],
+      [
+       15,
+       0.664
+      ],
+      [
+       20,
+       0.642
+      ],
+      [
+       25,
+       0.626
+      ],
+      [
+       30,
+       0.614
+      ],
+      [
+       35,
+       0.605
+      ],
+      [
+       40,
+       0.598
+      ],
+      [
+       45,
+       0.592
+      ],
+      [
+       50,
+       0.587
+      ],
+      [
+       55,
+       0.584
+      ],
+      [
+       60,
+       0.58
+      ]
+     ]
+    },
+    {
+     "beta": 30,
+     "points": [
+      [
+       5,
+       0.638
+      ],
+      [
+       10,
+       0.582
+      ],
+      [
+       15,
+       0.556
+      ],
+      [
+       20,
+       0.54
+      ],
+      [
+       25,
+       0.531
+      ],
+      [
+       30,
+       0.524
+      ]
+     ]
+    }
+   ]
+  },
+  "c_d": {
+   "default": 1.0,
+   "norm_ref": "6.3.5",
+   "building_height": 15,
+   "frame_height": 100,
+   "frame_ratio": 4
+  },
+  "forces": {
+   "equation": "15",
+   "norm_ref": "6.2.3.2"
+  },
+  "pressures": {
+   "external": "13",
+   "internal": "14",
+   "norm_ref": "6.2.2.1"
+  }
+ }
+}

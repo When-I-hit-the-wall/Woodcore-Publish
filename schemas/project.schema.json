@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project record",
+  "description": "data/project.json -- the project as its .woodcore file describes it, and what produced this export: Woodcore's version and git revision, Typst's version, and the SHA-256 of every workbook read (calc/project.py record, v0.82). The report's title page and the PDF's metadata print from it (lib/calc-engine.typ project-info, woodcore-document), and every archive of an export keeps it. It carries no date, so an export repeated on the same inputs writes the same bytes.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "name",
+    "number",
+    "client",
+    "address",
+    "company",
+    "author",
+    "checker",
+    "woodcore",
+    "typst",
+    "workbooks"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a record written at another version is refused rather than read as this one."
+    },
+    "name": {
+      "type": "string"
+    },
+    "number": {
+      "type": "string"
+    },
+    "client": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "author": {
+      "type": "string"
+    },
+    "checker": {
+      "type": "string"
+    },
+    "woodcore": {
+      "type": "object",
+      "required": [
+        "version",
+        "revision"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "The program's version (calc/project.py VERSION)."
+        },
+        "revision": {
+          "type": "string",
+          "description": "`git describe --always --dirty` of the program's checkout; empty for a frozen program."
+        }
+      }
+    },
+    "typst": {
+      "type": "string",
+      "description": "The version of the Typst found to compile the report, empty where none answered."
+    },
+    "workbooks": {
+      "type": "object",
+      "description": "{file name: SHA-256} of Positionen.xlsx and of every load workbook the export read.",
+      "patternProperties": {
+        ".*": {
+          "type": "string"
+        }
+      }
+    },
+    "revision": {
+      "type": "object",
+      "description": "The report's latest revision, the newest entry of its journal (calc/journal.py, docs/domain/journal.md §3.3terdecies), which the PDF's keywords name -- «Rev. 3 (2026-09-27)». Optional and additive: absent where the journal is empty and from every record written before v0.99, so the schema version is deliberately NOT bumped for it and an older export still compiles (woodcore-document reads it with a default). Its date is the engineer's typed day, not a clock reading, so an unchanged journal writes the same bytes.",
+      "required": [
+        "index",
+        "date",
+        "label",
+        "initials"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer"
+        },
+        "date": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "initials": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

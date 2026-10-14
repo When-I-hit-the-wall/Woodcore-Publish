@@ -1,0 +1,54 @@
+{
+  "_source": "SIA 265:2021, clause 4.5 (Bemessungssituation Brand), Tabelle 13 and equations (48) to (51) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf pp. 38-40, Tabelle 13 and (51) read off a render of p. 40 (the table's rows and the sign of (51) do not extract as text). Checked against the French edition, SIA265-2021-FR.pdf (Tableau 13, «Vitesse de combustion théorique»).",
+  "_note": "The ideal residual cross-section of 4.5.2.2: d_ef = d_char,n + d_red (49), d_char,n = beta_n · t (50), the original section reduced by d_ef on every exposed face and taken as sharp-edged (Figur 13). d_red is «mindestens 7 mm» for a fire resistance up to 90 minutes; beyond 90 the clause states none, so a longer duration is not computed. 4.5.2.4's minimum width b holds for an action on several faces at once: 80 mm for R30, 140 mm for R60, and the clause states none above R60. (51) is R_d,fi ≈ 1.8 · R_d, R_d being the design resistance of the residual section at normal temperature; k_h (3.4.2.3) and k_sys (5.7.2.2) are not applied. 4.5.2.2's simplification E_d,fi = 0.6 · E_d (Kategorie A and B only) is kept for the record: Woodcore takes E_d,fi as the engineer writes it. The rows of Tabelle 13 are the norm's own: `woods` names which choice of the engineer each row is read for -- `softwood` is any grade SIA 265 lists as Nadelholz, `beech`, `oak` and `cladding` are asked of him --, `families` which family of Tabelle 8/9 (`Vollholz` stands for Vollholz, keilgezinktes Vollholz and Balkenschichtholz); Holzwerkstoffe are «siehe Lignum-Dokumentation Brandschutz» and absent here. The footnote 1) of the table (glued products: «Bei Einsatz von im Brandfall beständigen Klebstofftypen») is carried as `adhesive_note`.",
+  "edition": "SIA 265:2021",
+  "clause": {
+    "norm": "SIA 265",
+    "norm_ref": "4.5.2",
+    "pages": [38, 39, 40],
+    "label": "Bemessungssituation Brand",
+    "equations": {
+      "check": "48",
+      "d_ef": "49",
+      "d_char": "50",
+      "resistance": "51"
+    },
+    "charring": {
+      "norm_ref": "4.5.2.3",
+      "table": "13",
+      "page": 40,
+      "unit": "mm/min",
+      "rows": [
+        {"id": "softwood_beech_solid", "label": "Nadelholz oder Buche -- Vollholz, keilgezinktes Vollholz und Balkenschichtholz", "woods": ["softwood", "beech"], "families": ["Vollholz"], "beta_n": 0.8},
+        {"id": "softwood_beech_glulam", "label": "Nadelholz oder Buche -- Brettschichtholz", "woods": ["softwood", "beech"], "families": ["Brettschichtholz"], "beta_n": 0.7},
+        {"id": "oak_robinia", "label": "Eiche oder Robinie -- Vollholz und Brettschichtholz", "woods": ["oak"], "families": ["Vollholz", "Brettschichtholz"], "beta_n": 0.5},
+        {"id": "solid_cladding", "label": "Massivholzschalung", "woods": ["cladding"], "families": ["Vollholz", "Brettschichtholz"], "beta_n": 0.9}
+      ],
+      "adhesive_note": "Bei Einsatz von im Brandfall beständigen Klebstofftypen."
+    },
+    "d_red": {
+      "norm_ref": "4.5.2.2",
+      "value": 7,
+      "unit": "mm",
+      "max_duration": 90
+    },
+    "min_width": {
+      "norm_ref": "4.5.2.4",
+      "unit": "mm",
+      "rows": [
+        {"duration": 30, "b": 80},
+        {"duration": 60, "b": 140}
+      ]
+    },
+    "resistance_factor": {
+      "norm_ref": "4.5.2.5",
+      "value": 1.8,
+      "not_with": ["k_h", "k_sys"]
+    },
+    "simplified_action": {
+      "norm_ref": "4.5.2.2",
+      "value": 0.6,
+      "categories": ["A", "B"]
+    }
+  }
+}

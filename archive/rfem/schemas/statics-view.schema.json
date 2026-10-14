@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Woodcore-Datei/statics/views/<id>.json -- how an imported static model is presented",
+  "description": "The engineer's own presentation of a static model an RFEM import makes: which internal force or deformation is drawn over the system, for which loading, with what written beside it, and the three size factors the drawing is set with. The geometry stays RFEM's and is regenerated at every import (calc/rfem_import/import_controller.py); only the presentation is his. A view lives in a SUBFOLDER because statics.source_paths globs *.json at the top of the folder and would read a view as a model. A drawn model has no view: it carries its own style and its own everything.",
+  "type": "object",
+  "required": ["schema_version"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string"},
+    "diagram": {
+      "description": "What is drawn over the system, or null for the bare system. The loading is always named: an ELU combination and an ELS one differ by half, and a default would draw one under the other's name.",
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["quantity", "loading"],
+          "additionalProperties": false,
+          "properties": {
+            "quantity": {
+              "enum": ["N", "V_y", "V_z", "M_T", "M_y", "M_z"],
+              "description": "RFEM's own six internal forces."
+            },
+            "loading": {
+              "type": "string",
+              "description": "The load case or combination whose distribution is drawn -- «CC1», «CO3». A design situation (SP) has no single curve but a band, and is not drawn here (docs/open-questions.md §14)."
+            },
+            "show": {
+              "enum": ["none", "name", "value", "name+value"],
+              "description": "What is written beside the diagram, on a load's own four modes."
+            },
+            "labels": {"type": "boolean", "description": "Write the extreme values on the curve. On by default."}
+          }
+        }
+      ]
+    },
+    "style": {
+      "type": "object",
+      "description": "The drawing's own three size factors, replacing the import's (calc/domains/figure_style.py). A view states the drawing's own factors, where one ENTRY of a drawing states a factor multiplying them.",
+      "additionalProperties": false,
+      "properties": {
+        "line": {"type": "number"},
+        "point": {"type": "number"},
+        "text": {"type": "number"}
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "_source": "SIA 265:2021, clause 5.3.6.2.2 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 51.",
+  "_note": "The reduction of the connections of the Ausfachungsstäbe under the simplified truss calculation of 5.3.6.1.2.",
+  "edition": "SIA 265:2021",
+  "clause": {
+    "value": 0.75,
+    "unit": "",
+    "symbol": "",
+    "label": "Abminderung der Stabanschlüsse bei vereinfachter Fachwerkberechnung",
+    "norm": "SIA 265",
+    "norm_ref": "5.3.6.2.2",
+    "condition": "Anschlüsse der Ausfachungsstäbe mit grosser Biegesteifigkeit, bei vereinfachter Fachwerkberechnung nach 5.3.6.1.2.",
+    "note": "5.3.6.2.2 (p. 51): bei einer vereinfachten Berechnung nach 5.3.6.1.2 ist der Tragwiderstand aller Verbindungsmittel und des Holzes im Anschlussbereich der Ausfachungsstäbe zu reduzieren; «bei Anschlüssen mit grosser Biegesteifigkeit ist der Reduktionsfaktor mit 0,75 festzulegen». Für andere Anschlüsse nennt die Norm keine Zahl: die Reduktion ist dann vom Ingenieur festzulegen. `condition` ist der eine Satz, den das Fenster neben dem Kästchen und der Bericht unter R_d,Fachwerk drucken (spec 2026-10-12-audit-issues-47-48-49, D-08). Der Wert wird als zweites Ergebnis neben R_d,Verb ausgewiesen, nie stillschweigend in R_d hineingerechnet."
+  }
+}

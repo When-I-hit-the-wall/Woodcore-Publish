@@ -1,0 +1,13 @@
+{
+  "_source": "SIA 265:2021, clause 2.2.6 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 19.",
+  "_note": "The factor for stossartige Einwirkungen, stated in prose under its own symbol.",
+  "edition": "SIA 265:2021",
+  "eta_t": {
+    "norm": "SIA 265",
+    "norm_ref": "2.2.6",
+    "label": "Beiwert für stossartige Einwirkungen",
+    "normal": 1.0,
+    "impact": 1.4,
+    "note": "Im Allgemeinen gilt eta_t = 1,0. Für stossartige Einwirkungen (z. B. dynamische Einwirkungen von Strassenlasten sowie Erdbeben- und Anprallkräfte) darf bei Holz eta_t = 1,4 gesetzt werden."
+  }
+}

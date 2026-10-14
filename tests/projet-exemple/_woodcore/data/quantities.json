@@ -1,0 +1,263 @@
+{
+  "schema_version": "1.0",
+  "rows": [
+    {
+      "plan": "Fluchttreppe",
+      "position": "S001",
+      "kind": "point",
+      "material": "Fichte C24",
+      "section": "100/200 mm",
+      "section_type": "rec",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    {
+      "plan": "Fluchttreppe",
+      "position": "T001",
+      "kind": "line",
+      "material": "Fichte C24",
+      "section": "100/200 mm",
+      "section_type": "rec",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    {
+      "plan": "Fluchttreppe",
+      "position": "S001",
+      "kind": "point",
+      "material": "Fichte C24",
+      "section": "100/200 mm",
+      "section_type": "rec",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    {
+      "plan": "Geratehaus",
+      "position": "S001",
+      "kind": "point",
+      "material": "Fichte C24",
+      "section": "100/200 mm",
+      "section_type": "rec",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    {
+      "plan": "Geratehaus",
+      "position": "S001",
+      "kind": "point",
+      "material": "Fichte C24",
+      "section": "100/200 mm",
+      "section_type": "rec",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    {
+      "plan": "Geratehaus",
+      "position": "T001",
+      "kind": "line",
+      "material": "Fichte C24",
+      "section": "100/200 mm",
+      "section_type": "rec",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    {
+      "plan": "Pavillon",
+      "position": "S001",
+      "kind": "point",
+      "material": "Fichte C24",
+      "section": "100/200 mm",
+      "section_type": "rec",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    {
+      "plan": "Pavillon",
+      "position": "T001",
+      "kind": "line",
+      "material": "Fichte C24",
+      "section": "100/200 mm",
+      "section_type": "rec",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    {
+      "plan": "Pavillon",
+      "position": "S002",
+      "kind": "point",
+      "material": "Stahl S355",
+      "section": "101.6/10 mm",
+      "section_type": "ROR",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    {
+      "plan": "Velo-Unterstand",
+      "position": "S001",
+      "kind": "point",
+      "material": "Fichte C24",
+      "section": "100/200 mm",
+      "section_type": "rec",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    },
+    {
+      "plan": "Velo-Unterstand",
+      "position": "T001",
+      "kind": "line",
+      "material": "Fichte C24",
+      "section": "100/200 mm",
+      "section_type": "rec",
+      "length_m": null,
+      "area_m2": null,
+      "volume_m3": null
+    }
+  ],
+  "all": {
+    "groups": [
+      {
+        "material": "Fichte C24",
+        "section": "100/200 mm",
+        "pieces": 10,
+        "length_m": null,
+        "area_m2": null,
+        "volume_m3": null
+      },
+      {
+        "material": "Stahl S355",
+        "section": "101.6/10 mm",
+        "pieces": 1,
+        "length_m": null,
+        "area_m2": null,
+        "volume_m3": null
+      }
+    ],
+    "totals": [
+      {
+        "material": "Fichte C24",
+        "pieces": 10,
+        "length_m": null,
+        "area_m2": null,
+        "volume_m3": null
+      },
+      {
+        "material": "Stahl S355",
+        "pieces": 1,
+        "length_m": null,
+        "area_m2": null,
+        "volume_m3": null
+      }
+    ]
+  },
+  "plans": {
+    "Fluchttreppe": {
+      "groups": [
+        {
+          "material": "Fichte C24",
+          "section": "100/200 mm",
+          "pieces": 3,
+          "length_m": null,
+          "area_m2": null,
+          "volume_m3": null
+        }
+      ],
+      "totals": [
+        {
+          "material": "Fichte C24",
+          "pieces": 3,
+          "length_m": null,
+          "area_m2": null,
+          "volume_m3": null
+        }
+      ]
+    },
+    "Geratehaus": {
+      "groups": [
+        {
+          "material": "Fichte C24",
+          "section": "100/200 mm",
+          "pieces": 3,
+          "length_m": null,
+          "area_m2": null,
+          "volume_m3": null
+        }
+      ],
+      "totals": [
+        {
+          "material": "Fichte C24",
+          "pieces": 3,
+          "length_m": null,
+          "area_m2": null,
+          "volume_m3": null
+        }
+      ]
+    },
+    "Pavillon": {
+      "groups": [
+        {
+          "material": "Fichte C24",
+          "section": "100/200 mm",
+          "pieces": 2,
+          "length_m": null,
+          "area_m2": null,
+          "volume_m3": null
+        },
+        {
+          "material": "Stahl S355",
+          "section": "101.6/10 mm",
+          "pieces": 1,
+          "length_m": null,
+          "area_m2": null,
+          "volume_m3": null
+        }
+      ],
+      "totals": [
+        {
+          "material": "Fichte C24",
+          "pieces": 2,
+          "length_m": null,
+          "area_m2": null,
+          "volume_m3": null
+        },
+        {
+          "material": "Stahl S355",
+          "pieces": 1,
+          "length_m": null,
+          "area_m2": null,
+          "volume_m3": null
+        }
+      ]
+    },
+    "Velo-Unterstand": {
+      "groups": [
+        {
+          "material": "Fichte C24",
+          "section": "100/200 mm",
+          "pieces": 2,
+          "length_m": null,
+          "area_m2": null,
+          "volume_m3": null
+        }
+      ],
+      "totals": [
+        {
+          "material": "Fichte C24",
+          "pieces": 2,
+          "length_m": null,
+          "area_m2": null,
+          "volume_m3": null
+        }
+      ]
+    }
+  }
+}

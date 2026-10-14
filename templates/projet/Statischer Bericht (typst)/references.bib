@@ -1,0 +1,28 @@
+% Die Dokumente dieses Projekts, die der Bericht zitiert und die Woodcore nicht
+% von sich aus kennt: die Zulassung eines Herstellers, ein Bürohandbuch, ein
+% Kursdokument. Die Normen -- SIA 260, 261, 261/1, 263, 265, 265/1, SN EN 14592,
+% SZS C5, die VKF-Brandschutzrichtlinien -- stehen in calc/norms/norms.json und
+% gehoeren nicht hierher (CLAUDE.md 10bis).
+%
+% Der Schlüssel ist die Zeichenkette, die zitiert wird: `norm: "Sherpa"` findet
+% @misc{Sherpa, …}. Trägt die zitierte Zeichenkette ein Leerzeichen, nennt der
+% Eintrag sie unter `aliases`.
+%
+% Gelesen werden `title` (verlangt), `edition` oder `year`, `publisher`,
+% `organization` oder `institution`, `designation`, `aliases` und `kind`
+% (`norm` oder `literature`, was sonst die Eintragsart sagt). Jedes andere Feld
+% -- `author`, `url`, `isbn` -- wird überlesen. Was der Leser nicht lesen kann,
+% weist er unter Angabe der Zeile zurück; nichts wird stillschweigend verschluckt.
+%
+% ⚠️ Diese Datei darf leer bleiben, aber nicht gelöscht werden, solange
+% Sections/007-literatur.typ sie mit `project:` nennt -- sonst findet Typst sie
+% nicht. Wird sie nicht gebraucht, dort das Argument weglassen.
+%
+% Ein Beispiel, auskommentiert:
+%
+% @misc{Sherpa,
+%   title        = {SHERPA Verbindungssysteme – Europäische Technische Bewertung},
+%   designation  = {Sherpa, ETA-12/0197},
+%   publisher    = {ETA-Danmark A/S},
+%   year         = {2019},
+% }

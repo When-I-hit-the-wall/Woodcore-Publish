@@ -1,0 +1,1125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Static model source",
+  "description": "statics/<id>.json, schema 1.1 -- a 1.0 file, which carries no dimensions, is read exactly as it is -- one static model (statisches System) as Woodcore saves it, the source calc/domains/statics.py exports from (docs/domain/static-models.md §3.3octies). Written by Woodcore only. Coordinates are in metres, x to the right and z DOWN -- the connection module's frame (section 3.3quinquies), which the drawing needs no flip from. Angles are in degrees from +x turning towards +z, clockwise as the figure is read, so a load at 90 degrees points down. Every enum, every cross-reference between the collections and every rule about which field goes with which is checked by statics.check_source, which this walker cannot express.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "label",
+    "style",
+    "points",
+    "members",
+    "supports",
+    "releases",
+    "point_loads",
+    "line_loads"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.0",
+        "1.1",
+        "1.2"
+      ],
+      "description": "-- accepted: 1.0, 1.1; an older one is upgraded as it is read. 1.2 is 1.1 with `links`, a magnitude's `last` and `texts`, which Woodcore writes only where a field follows a variable or a text is placed."
+    },
+    "group": {
+      "type": "string",
+      "description": "The folder Woodcore files this source in, \"\" or absent at the root. A FIELD and never a directory: the ids stay flat, so the rule that the id is the file name is untouched and no show-* call changes (calc/tools/grouped_list.py). Optional and additive -- a file written before it existed reads as the root -- so schema_version is deliberately NOT bumped for it."
+    },
+    "name": {
+      "type": "string",
+      "description": "What the engineer calls this object, free text (Woodcore's «Nom»). Its ID is composed of it until the ID is written over (calc/tools/identity.py). Optional and additive: a source without one is named by its ID alone."
+    },
+    "id": {
+      "type": "string",
+      "description": "The model's id: its file name, and the string the report addresses it by (show-static-model(\"R01\"))."
+    },
+    "label": {
+      "type": "string",
+      "description": "Woodcore's «Description»: free text, printed in the figure's caption; may be empty."
+    },
+    "style": {
+      "type": "object",
+      "description": "The three sliders -- the DRAWING's own factors, on the strokes, on the symbols placed on a point, and on the texts, from 0.25 to 3 (calc/domains/figure_style.py). One entry of any collection may carry a `style` of its own, whose factors MULTIPLY these and which is documented on that collection (v0.99).",
+      "properties": {
+        "line": {
+          "type": "number"
+        },
+        "point": {
+          "type": "number"
+        },
+        "text": {
+          "type": "number"
+        }
+      }
+    },
+    "grid": {
+      "type": "object",
+      "description": "The editor's own grid preference, saved so that reopening the model keeps it. Nothing of it reaches the export or the report.",
+      "properties": {
+        "snap": {
+          "type": [
+            "string",
+            "number"
+          ],
+          "description": "'auto' -- the step follows the zoom -- or one of the steps in metres: 5, 1, 0.5, 0.1."
+        }
+      }
+    },
+    "points": {
+      "type": "array",
+      "description": "The model's nodes. Everything else names one: an id is unique across the whole model, so that the report's `highlight` never has to ask which collection it meant.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "x",
+          "z"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A letter, then letters, digits and _ (P1, P2, Firstpunkt)."
+          },
+          "x": {
+            "type": "number",
+            "description": "Metres, to the right."
+          },
+          "z": {
+            "type": "number",
+            "description": "Metres, down."
+          },
+          "label": {
+            "type": "string",
+            "description": "Printed beside the node; nothing is printed where it is empty -- the id alone is not written on the figure."
+          },
+          "label_offset": {
+            "type": "array",
+            "description": "[dx, dz] in metres, how far the label was moved by hand from its own place; absent where it was not.",
+            "items": {
+              "type": "number"
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "This point's own factor, MULTIPLYING the drawing's and never a size (calc/domains/figure_style.py, v0.99), from 0.25 to 3. A point draws its label and nothing else -- a node is never drawn in the report (v0.56) -- so `text` is the one factor it may state, and `line` or `point` on one is refused naming it. Optional and additive: absent, or a factor left out of it, means «follows the drawing», so schema_version is deliberately NOT bumped for it (the v0.69 rule).",
+            "properties": {
+              "text": {
+                "type": "number"
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "description": "The fields of this entry that follow a variable of the export, by their key (x, z): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.2.",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+                "required": [
+                  "domain",
+                  "instance",
+                  "var"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "instance": {
+                    "type": "string"
+                  },
+                  "var": {
+                    "type": "string"
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": [
+                      "formulas"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "members": {
+      "type": "array",
+      "description": "The bars, the cables and the springs, each one straight member between two points.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "p1",
+          "p2"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "'bar', 'cable' or 'spring'. A cable takes a positive normal force only and a spring acts along its own axis, which is why each is drawn its own way. A translational spring is a member, not a release."
+          },
+          "p1": {
+            "type": "string",
+            "description": "The id of the point it starts at."
+          },
+          "p2": {
+            "type": "string",
+            "description": "The id of the point it ends at; different from p1, and further away than a tenth of a millimetre."
+          },
+          "stiffness": {
+            "type": "object",
+            "description": "A spring member's stiffness along its axis, in kN/m; only a member of kind 'spring' carries one.",
+            "required": [
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          },
+          "label": {
+            "type": "string"
+          },
+          "label_offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "This member's own factors, each MULTIPLYING the drawing's and never a size (calc/domains/figure_style.py, v0.99), from 0.25 to 3. A member is drawn with `line` -- its own stroke, at its kind's width -- and `text` -- its label; a `point` on one is refused naming the two, a bar drawing no symbol on a node. ⚠️ A spring's zigzag amplitude is the symbol's and follows the DRAWING's `point` for that reason. Optional and additive: absent, or a factor left out of it, means «follows the drawing», so schema_version is not bumped for it.",
+            "properties": {
+              "line": {
+                "type": "number"
+              },
+              "text": {
+                "type": "number"
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "description": "The fields of this entry that follow a variable of the export, by their key (stiffness): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.2.",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+                "required": [
+                  "domain",
+                  "instance",
+                  "var"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "instance": {
+                    "type": "string"
+                  },
+                  "var": {
+                    "type": "string"
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": [
+                      "formulas"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "supports": {
+      "type": "array",
+      "description": "Where the model is held. At most one support per point.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "point",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "point": {
+            "type": "string",
+            "description": "The id of the point it holds."
+          },
+          "type": {
+            "type": "string",
+            "description": "'fixed' (Einspannung), 'pinned' (Festlager) or 'roller' (Loslager)."
+          },
+          "hinge": {
+            "type": "string",
+            "description": "Where a Festlager's or a Loslager's pin sits, which the model cannot tell by itself: 'shared' (the default) is the pin the bar itself turns about, drawn as a circle on the node; 'through' is a bar running over the support, its pin set back along the support's own axis until the circle just touches the bar, the support hanging under it. Not accepted on a 'fixed' support, which has no pin."
+          },
+          "angle": {
+            "type": "number",
+            "description": "Degrees, 0 by default: the ground lies below (+z) and the symbol stands upright. A non-zero angle turns the whole symbol from x towards z, which is how an inclined roller or a support against a wall is expressed."
+          },
+          "label": {
+            "type": "string"
+          },
+          "label_offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "This support's own factors, each MULTIPLYING the drawing's and never a size (calc/domains/figure_style.py, v0.99), from 0.25 to 3. A support is drawn with all three: `point` sizes its triangle, its rollers, its pin and its hatched wall, `line` their strokes, `text` its label. ⚠️ The break a release opens at a shared node keeps the drawing's factors, being the node's and not one member's (statics_svg._release_cuts). Optional and additive: absent, or a factor left out of it, means «follows the drawing», so schema_version is not bumped for it.",
+            "properties": {
+              "line": {
+                "type": "number"
+              },
+              "point": {
+                "type": "number"
+              },
+              "text": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "releases": {
+      "type": "array",
+      "description": "A degree of freedom set free at one end of a member: free in moment (a hinge), in shear or in normal force, and a `stiffness` on a moment release makes it a rotational spring. A translational spring is not a release at all -- it is a member of kind 'spring'. At most one release per member, end and dof. A release is drawn on the node it frees.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "member",
+          "end",
+          "dof"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "member": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string",
+            "description": "'start' (the member's p1) or 'end' (its p2)."
+          },
+          "dof": {
+            "type": "string",
+            "description": "'moment', 'shear' or 'normal'."
+          },
+          "stiffness": {
+            "type": "object",
+            "description": "A rotational spring's stiffness, in kNm/rad; absent for a free release. Only a moment release may be a spring -- a translational spring is a member of kind 'spring'.",
+            "required": [
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          },
+          "label": {
+            "type": "string"
+          },
+          "label_offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "This release's own factors, each MULTIPLYING the drawing's and never a size (calc/domains/figure_style.py, v0.99), from 0.25 to 3. A release is drawn with all three: `point` sizes the hinge's circle, the sleeve, the two bars or the coil, `line` their strokes, `text` its label; its extent, which the frame takes in and a halo covers, follows them. ⚠️ How far the members are drawn back from the node keeps the DRAWING's factors -- the break belongs to the node, and both ends meeting there must be cut alike (statics_svg._release_cuts). Optional and additive: absent, or a factor left out of it, means «follows the drawing», so schema_version is not bumped for it.",
+            "properties": {
+              "line": {
+                "type": "number"
+              },
+              "point": {
+                "type": "number"
+              },
+              "text": {
+                "type": "number"
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "description": "The fields of this entry that follow a variable of the export, by their key (stiffness): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.2.",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+                "required": [
+                  "domain",
+                  "instance",
+                  "var"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "instance": {
+                    "type": "string"
+                  },
+                  "var": {
+                    "type": "string"
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": [
+                      "formulas"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "point_loads": {
+      "type": "array",
+      "description": "A concentrated force applied at a point.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "point",
+          "direction",
+          "show"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "point": {
+            "type": "string",
+            "description": "The id of the point it is applied at."
+          },
+          "direction": {
+            "type": "string",
+            "description": "'vertical' (down, +z), 'horizontal' (along +x), 'angle' (the `angle` from +x towards +z) or 'member' (the `angle` from the axis of the member named in `reference`)."
+          },
+          "angle": {
+            "type": "number",
+            "description": "Degrees; required for 'angle' and 'member', and forbidden otherwise."
+          },
+          "reference": {
+            "type": "string",
+            "description": "The member this load is measured from and drawn along -- given by the second click when it is drawn. Required for direction 'member'; optional otherwise, where it only says what `along` is measured on."
+          },
+          "magnitude": {
+            "type": "object",
+            "description": "Exactly one of two shapes: {value, unit} for a number typed here, or {domain, instance, var} naming a var of data/calculations.json, which is read afresh at every export and may be taken with an optional `factor` and `offset` (0.8 x SL, SL + 10) and carry a `description` for the figure's notes. The whole field may be left out: a value is only ever shown and scaled by, never calculated with.",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "string"
+              },
+              "instance": {
+                "type": "string"
+              },
+              "var": {
+                "type": "string"
+              },
+              "factor": {
+                "type": "number",
+                "description": "What the var is multiplied by; 1 by default."
+              },
+              "offset": {
+                "type": "number",
+                "description": "What is added to it, in the var's own unit; 0 by default."
+              },
+              "description": {
+                "type": "string",
+                "description": "What this value is, printed under the drawing."
+              },
+              "last": {
+                "type": "object",
+                "description": "The value the variable gave when Woodcore's window last saved the model, and its unit: kept and drawn, with a warning, where the variable can no longer be read (D-06). Only beside a {domain, instance, var}, only at schema_version 1.2.",
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                }
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "formulas"
+                ],
+                "description": "\"formulas\" where the variable is a domain of the «Formule» tab, its id in `instance` (spec 2026-10-11-variables-liees-champs-et-textes, D-17); absent for the export. Only at schema_version 1.2."
+              }
+            }
+          },
+          "width": {
+            "type": "object",
+            "description": "The influence width b_e, in metres. On the model it stands for the whole drawing; on a load it overrides the model's for that one load. The magnitude is multiplied by it and one metre comes off the unit (kN/m2 -> kN/m, kN/m -> kN), which is how an action calculated per square metre becomes a load a system carries.",
+            "required": [
+              "value"
+            ],
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "description": "'m'."
+              },
+              "label": {
+                "type": "string",
+                "description": "What it is called on the figure; 'b_e' by default."
+              },
+              "description": {
+                "type": "string",
+                "description": "What the width is, printed under the drawing where `show` is true."
+              },
+              "show": {
+                "type": "boolean",
+                "description": "Whether the figure writes it beside the load (a load's own) and its description under the drawing."
+              }
+            }
+          },
+          "label": {
+            "type": "string",
+            "description": "The name printed on the figure (F_Ed, G_k) -- plain text, the figure sets no math."
+          },
+          "show": {
+            "type": "string",
+            "description": "'none', 'name', 'value' or 'name+value'."
+          },
+          "color": {
+            "type": "string",
+            "description": "The colour its arrows are drawn in: 'red', 'green', 'orange', 'blue' or 'violet' (statics.LOAD_COLOURS). Absent is red, the colour every load was drawn in before it could be chosen. Optional and additive, so schema_version is not bumped for it."
+          },
+          "label_offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "along": {
+            "type": [
+              "number",
+              "string"
+            ],
+            "description": "How far along the reference member the load is **drawn**, as a length in metres (2.5) or as a fraction of that member's own length ('0.5l' is its middle). It moves the drawing and nothing else: the load still acts at its point, which is what lets a load at midspan need no node there."
+          },
+          "style": {
+            "type": "object",
+            "description": "This load's own factors, each MULTIPLYING the drawing's and never a size (calc/domains/figure_style.py, v0.99), from 0.25 to 3. A load is drawn with `line` -- its arrow, head and stem, and **the arrow's own length** -- and `text` -- its label; a `point` on one is refused naming the two, an arrow being no symbol on a node. ⚠️ Scaling the length is deliberate: two loads of equal magnitude no longer draw equal arrows where the engineer asked for one of them to stand out, and a figure whose arrows are proportional to their magnitudes remains what a load states nothing gives. Optional and additive: absent, or a factor left out of it, means «follows the drawing», so schema_version is not bumped for it.",
+            "properties": {
+              "line": {
+                "type": "number"
+              },
+              "text": {
+                "type": "number"
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "description": "The fields of this entry that follow a variable of the export, by their key (width): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.2.",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+                "required": [
+                  "domain",
+                  "instance",
+                  "var"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "instance": {
+                    "type": "string"
+                  },
+                  "var": {
+                    "type": "string"
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": [
+                      "formulas"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "line_loads": {
+      "type": "array",
+      "description": "A distributed load running on a member. Triangular is a 'linear' load with one end zero and trapezoidal one with two ends, so the drawing and the check keep one path where Woodcore offers three buttons.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "member",
+          "shape",
+          "direction",
+          "show"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "member": {
+            "type": "string"
+          },
+          "from": {
+            "type": "number",
+            "description": "Where it starts along the member, 0 to 1; 0 by default."
+          },
+          "to": {
+            "type": "number",
+            "description": "Where it ends, greater than `from` and at most 1; 1 by default."
+          },
+          "shape": {
+            "type": "string",
+            "description": "'uniform' or 'linear'."
+          },
+          "magnitude": {
+            "type": "object",
+            "description": "Exactly one of two shapes: {value, unit} for a number typed here, or {domain, instance, var} naming a var of data/calculations.json, which is read afresh at every export and may be taken with an optional `factor` and `offset` (0.8 x SL, SL + 10) and carry a `description` for the figure's notes. The whole field may be left out: a value is only ever shown and scaled by, never calculated with.",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "string"
+              },
+              "instance": {
+                "type": "string"
+              },
+              "var": {
+                "type": "string"
+              },
+              "factor": {
+                "type": "number",
+                "description": "What the var is multiplied by; 1 by default."
+              },
+              "offset": {
+                "type": "number",
+                "description": "What is added to it, in the var's own unit; 0 by default."
+              },
+              "description": {
+                "type": "string",
+                "description": "What this value is, printed under the drawing."
+              },
+              "last": {
+                "type": "object",
+                "description": "The value the variable gave when Woodcore's window last saved the model, and its unit: kept and drawn, with a warning, where the variable can no longer be read (D-06). Only beside a {domain, instance, var}, only at schema_version 1.2.",
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                }
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "formulas"
+                ],
+                "description": "\"formulas\" where the variable is a domain of the «Formule» tab, its id in `instance` (spec 2026-10-11-variables-liees-champs-et-textes, D-17); absent for the export. Only at schema_version 1.2."
+              }
+            }
+          },
+          "magnitude_end": {
+            "type": "object",
+            "description": "The value at the far end; a linear load may carry one, a uniform one must not.",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "domain": {
+                "type": "string"
+              },
+              "instance": {
+                "type": "string"
+              },
+              "var": {
+                "type": "string"
+              },
+              "factor": {
+                "type": "number",
+                "description": "What the var is multiplied by; 1 by default."
+              },
+              "offset": {
+                "type": "number",
+                "description": "What is added to it, in the var's own unit; 0 by default."
+              },
+              "description": {
+                "type": "string",
+                "description": "What this value is, printed under the drawing."
+              },
+              "last": {
+                "type": "object",
+                "description": "The value the variable gave when Woodcore's window last saved the model, and its unit: kept and drawn, with a warning, where the variable can no longer be read (D-06). Only beside a {domain, instance, var}, only at schema_version 1.2.",
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                }
+              },
+              "origin": {
+                "type": "string",
+                "enum": [
+                  "formulas"
+                ],
+                "description": "\"formulas\" where the variable is a domain of the «Formule» tab, its id in `instance` (spec 2026-10-11-variables-liees-champs-et-textes, D-17); absent for the export. Only at schema_version 1.2."
+              }
+            }
+          },
+          "width": {
+            "type": "object",
+            "description": "The influence width b_e, in metres. On the model it stands for the whole drawing; on a load it overrides the model's for that one load. The magnitude is multiplied by it and one metre comes off the unit (kN/m2 -> kN/m, kN/m -> kN), which is how an action calculated per square metre becomes a load a system carries.",
+            "required": [
+              "value"
+            ],
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string",
+                "description": "'m'."
+              },
+              "label": {
+                "type": "string",
+                "description": "What it is called on the figure; 'b_e' by default."
+              },
+              "description": {
+                "type": "string",
+                "description": "What the width is, printed under the drawing where `show` is true."
+              },
+              "show": {
+                "type": "boolean",
+                "description": "Whether the figure writes it beside the load (a load's own) and its description under the drawing."
+              }
+            }
+          },
+          "direction": {
+            "type": "string",
+            "description": "As a point load's, except that 'member' needs no `reference`: a line load is measured from the member it runs on."
+          },
+          "angle": {
+            "type": "number"
+          },
+          "label": {
+            "type": "string"
+          },
+          "show": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "description": "As a point load's: 'red' (absent), 'green', 'orange', 'blue' or 'violet'."
+          },
+          "label_offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "As a point load's: this load's own `line` -- its band of arrows, its cap, and **how deep the band is drawn** -- and `text`, its label, each MULTIPLYING the drawing's, from 0.25 to 3 (calc/domains/figure_style.py, v0.99); a `point` on one is refused naming the two. Where two line loads are stacked on one member, the one below sets the room the one above starts beyond, so a band drawn deeper pushes its neighbour out rather than being drawn over it. Optional and additive: absent means «follows the drawing», so schema_version is not bumped for it.",
+            "properties": {
+              "line": {
+                "type": "number"
+              },
+              "text": {
+                "type": "number"
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "description": "The fields of this entry that follow a variable of the export, by their key (width): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.2.",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+                "required": [
+                  "domain",
+                  "instance",
+                  "var"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "instance": {
+                    "type": "string"
+                  },
+                  "var": {
+                    "type": "string"
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": [
+                      "formulas"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "width": {
+      "type": "object",
+      "description": "The influence width b_e, in metres. On the model it stands for the whole drawing; on a load it overrides the model's for that one load. The magnitude is multiplied by it and one metre comes off the unit (kN/m2 -> kN/m, kN/m -> kN), which is how an action calculated per square metre becomes a load a system carries.",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "description": "'m'."
+        },
+        "label": {
+          "type": "string",
+          "description": "What it is called on the figure; 'b_e' by default."
+        },
+        "description": {
+          "type": "string",
+          "description": "What the width is, printed under the drawing where `show` is true."
+        },
+        "show": {
+          "type": "boolean",
+          "description": "Whether the figure writes it beside the load (a load's own) and its description under the drawing."
+        }
+      }
+    },
+    "dimensions": {
+      "type": "array",
+      "description": "A dimension written on the drawing: a length between two ends, or the angle between two members. It measures the model and changes nothing in it.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "from",
+          "to"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "'horizontal' (the distance along x), 'vertical' (along z), 'parallel' (the true distance between the two ends) or 'angle' (between two members' axes, in degrees)."
+          },
+          "from": {
+            "type": "object",
+            "description": "One end of a dimension. For the three linear kinds: `point` names a point of the model, so the dimension follows it as it is moved, or `x`/`z` put the end at a place of its own. For `angle`: `member` names one of the two members the angle is between.",
+            "properties": {
+              "point": {
+                "type": "string"
+              },
+              "member": {
+                "type": "string"
+              },
+              "x": {
+                "type": "number"
+              },
+              "z": {
+                "type": "number"
+              }
+            }
+          },
+          "to": {
+            "type": "object",
+            "description": "One end of a dimension. For the three linear kinds: `point` names a point of the model, so the dimension follows it as it is moved, or `x`/`z` put the end at a place of its own. For `angle`: `member` names one of the two members the angle is between.",
+            "properties": {
+              "point": {
+                "type": "string"
+              },
+              "member": {
+                "type": "string"
+              },
+              "x": {
+                "type": "number"
+              },
+              "z": {
+                "type": "number"
+              }
+            }
+          },
+          "offset": {
+            "type": "number",
+            "description": "Where the dimension is drawn, in metres, signed: for a length, the distance of its line from the middle of the two ends, measured at right angles to that line; for an angle, the radius of the arc, a negative one drawing that sector's reflex instead -- which a click never writes, a click always falling inside a sector."
+          },
+          "bearing": {
+            "type": "number",
+            "description": "An angle dimension only: the direction of the third click from the corner, in degrees from +x turning towards +z -- which of the four sectors the two axes cut the plane into is the one being measured. A member's stored direction runs p1 -> p2 and is no ray of the corner, so without this only the two sectors those happened to bound could be drawn. Absent on a dimension written before it existed, which then takes the ray running from the corner towards each member's own body."
+          },
+          "label": {
+            "type": "string",
+            "description": "The dimension's name, which the figure writes where `show` asks for it (`l`, `h_1`). Empty -- the usual case -- names nothing."
+          },
+          "show": {
+            "type": "string",
+            "description": "What the figure writes beside it, a load's own four: 'none' (the dimension drawn with no text), 'name' (its label), 'value' (what it measured) or 'name+value' ('label = value'). A name asked for and not given writes nothing, and 'name+value' without one writes the value -- a load's own rule. Absent -- a dimension saved before it could be chosen -- reads as 'name' where it carries a label, which then took the value's place, and as 'value' where it does not (statics.dimension_show). Optional and additive, so schema_version is not bumped for it."
+          },
+          "label_offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "This dimension's own factors, each MULTIPLYING the drawing's and never a size (calc/domains/figure_style.py, v0.99), from 0.25 to 3. A dimension is drawn with `line` -- its witness lines, its dimension line, its two heads, its arc and their ties -- and `text`, its value; a `point` on one is refused naming the two. ⚠️ Where its line is DRAWN is `offset`, the model's own geometry in metres, and no factor reaches it: a heavier dimension is a heavier dimension in the same place. Optional and additive: absent means «follows the drawing», so schema_version is not bumped for it.",
+            "properties": {
+              "line": {
+                "type": "number"
+              },
+              "text": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "description": "The fields of this entry that follow a variable of the export, by their key (width): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.2.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+          "required": [
+            "domain",
+            "instance",
+            "var"
+          ],
+          "properties": {
+            "domain": {
+              "type": "string"
+            },
+            "instance": {
+              "type": "string"
+            },
+            "var": {
+              "type": "string"
+            },
+            "factor": {
+              "type": "number"
+            },
+            "offset": {
+              "type": "number"
+            },
+            "origin": {
+              "type": "string",
+              "enum": [
+                "formulas"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "texts": {
+      "type": "array",
+      "description": "The texts placed with the Text tool (issue #43, calc/domains/figure_text.py): each centred on its x and z, which a drag of it moves through `label_offset` as it moves a label. Written only by a source that holds one, whose schema_version says so.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "x",
+          "z",
+          "text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number",
+            "description": "Its centre, in metres, in the model's frame."
+          },
+          "z": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string",
+            "description": "What is printed, a line per line: `{1}` is a token, where the variable `vars[\"1\"]` is printed; a literal brace is written twice, `{{` and `}}`. A token naming no variable is a defect of the file (D-13). An underscore makes a subscript, as in every label of a figure."
+          },
+          "vars": {
+            "type": "object",
+            "description": "The variables the tokens name, by token: a link to a variable of the export, its `show` and its `last` value.",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "required": [
+                  "domain",
+                  "instance",
+                  "var"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "instance": {
+                    "type": "string"
+                  },
+                  "var": {
+                    "type": "string"
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "'formulas' for a domain of the «Formules» tab, whose id is `instance`; absent for the export."
+                  },
+                  "show": {
+                    "type": "string",
+                    "enum": [
+                      "value",
+                      "symbol"
+                    ],
+                    "description": "How it is printed (D-09): 'value', its value and unit; 'symbol', its symbol, '=', its value and unit."
+                  },
+                  "last": {
+                    "type": "object",
+                    "description": "What the variable gave when Woodcore's window last saved (D-14), printed where it can no longer be read, with a warning (D-06).",
+                    "properties": {
+                      "value": {},
+                      "unit": {
+                        "type": "string"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "The factor this text states over the drawing's: `text` only (figure_style.ENTRY_KEYS).",
+            "properties": {
+              "text": {
+                "type": "number"
+              }
+            }
+          },
+          "label_offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "How far it was dragged from its x and z, in metres."
+          }
+        }
+      }
+    }
+  }
+}

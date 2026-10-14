@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "id": "KI-01",
+  "name": "Kippen Träger",
+  "label": "Träger T001, Kipphalterungen alle 3 m",
+  "group": "",
+  "kind": "lateral-torsional",
+  "position": "T001",
+  "grade": null,
+  "section": null,
+  "moisture_class": null,
+  "impact": false,
+  "alpha": 0,
+  "N": {
+    "value": 0,
+    "unit": "kN"
+  },
+  "M_y": {
+    "value": 4.5,
+    "unit": "kNm"
+  },
+  "M_z": null,
+  "a": 3000,
+  "sigma_m_crit": null,
+  "l_y": null,
+  "l_z": null,
+  "beta_y": 1,
+  "beta_z": 1
+}

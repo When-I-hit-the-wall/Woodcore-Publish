@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Annex excerpt",
+  "description": "Woodcore-Datei/annexes/excerpts/<id>.json, schema 1.0 -- a region of one page of an annex source: a diagram, a table (docs/domain/documents.md §3.3octodecies). It is anchored on a BOOKMARK of its source, by the path of titles above it and its rank among the bookmarks that path does not tell apart, and its frame is kept relative to that bookmark's height -- so a new version of the print report, renumbered or longer, is followed. A source without bookmarks is anchored on a page instead, and then cannot be followed: the excerpt is refused until it is confirmed again. Written by Woodcore's «Annexes» tab only, read by calc/domains/annex.py.",
+  "type": "object",
+  "required": ["schema_version", "id", "name", "label", "source", "anchor", "frame"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0", "description": "-- pinned: a file written at another version is refused rather than read as this one."},
+    "id": {"type": "string", "description": "The file name, and the string #show-extract addresses the excerpt by."},
+    "name": {"type": "string"},
+    "label": {"type": "string", "description": "Its description, in free text."},
+    "group": {"type": "string", "description": "Kept for the window's own use; nothing in the report reads it."},
+    "source": {"type": "string", "description": "The id of the annex source the excerpt is taken from."},
+    "anchor": {
+      "type": "object",
+      "required": ["kind"],
+      "description": "Where the excerpt is found again in each version of its source.",
+      "properties": {
+        "kind": {"type": "string", "enum": ["bookmark", "page"]},
+        "path": {"type": "array", "items": {"type": "string"}, "description": "A bookmark anchor's titles, from the outermost to the bookmark itself, as the source wrote them. They are compared without their leading chapter number, which a print report renumbers (annex.title_key)."},
+        "occurrence": {"type": "integer", "description": "Which of the bookmarks the path does not tell apart: 1 for the first, in document order."},
+        "page": {"type": "integer", "description": "A page anchor's page, 1 for the first."}
+      }
+    },
+    "frame": {
+      "type": "object",
+      "required": ["x", "y", "w", "h"],
+      "description": "The region shown, in points: x from the page's left edge, y DOWN from the anchor's height (from the top of the page for a page anchor), w and h its size. Drawn by the engineer, the title included or not as he chooses.",
+      "properties": {
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "w": {"type": "number"},
+        "h": {"type": "number"}
+      }
+    },
+    "confirmed": {"type": "string", "description": "The SHA-256 of the source's PDF when the engineer last placed or confirmed the excerpt -- what a page anchor is refused by once the source has been replaced."}
+  }
+}

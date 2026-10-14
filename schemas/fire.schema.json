@@ -1,0 +1,547 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Fire-protection plans",
+  "description": "data/fire.json, schema 2.0 (1.0 plus `legend_lines`, and a background that may be a page of a document) -- every fire-protection plan drawn in Woodcore's «Plan de protection incendie» tab, as show-fire-plan reads it: the frame the report shows, the figure drawn over it once per language (data/fire/<id>-<lang>.svg), its background, its scale, and what it draws with what each measures. Written by calc/domains/fire.py (prepare, write), never by hand. Every rule the walker below cannot express is checked by validation.validate_fire_business.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "plans"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "2.0",
+        "2.1"
+      ],
+      "description": "-- 2.0, or 2.1 where a plan carries `texts` (issue #43): a file written at another version is refused rather than read as this one."
+    },
+    "plans": {
+      "type": "object",
+      "description": "One record per plan, keyed by its id -- the file name of its source and the string the report addresses it by --, in file-name order.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "name",
+          "label",
+          "source",
+          "sheet",
+          "crop",
+          "unit",
+          "style",
+          "figures",
+          "legend",
+          "zones",
+          "walls",
+          "doors",
+          "routes",
+          "exits",
+          "widths",
+          "legend_lines"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "What the engineer calls the plan; may be empty."
+          },
+          "label": {
+            "type": "string",
+            "description": "Its description, which the figure's caption prints; may be empty."
+          },
+          "source": {
+            "type": "string",
+            "description": "The source file it was built from, fire/<id>.json."
+          },
+          "plan": {
+            "type": "string",
+            "description": "The id of the position plan it follows; absent for a plan with a frame of its own."
+          },
+          "sheet": {
+            "type": "object",
+            "required": [
+              "width",
+              "height"
+            ],
+            "properties": {
+              "width": {
+                "type": "number"
+              },
+              "height": {
+                "type": "number"
+              }
+            },
+            "description": "The sheet it is drawn on, in the background's own units."
+          },
+          "crop": {
+            "type": "object",
+            "required": [
+              "x",
+              "y",
+              "w",
+              "h"
+            ],
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "w": {
+                "type": "number"
+              },
+              "h": {
+                "type": "number"
+              }
+            },
+            "description": "The part of the sheet the report shows: its own, or the position plan's it follows."
+          },
+          "unit": {
+            "type": "number",
+            "description": "The drawing's unit in sheet units, the crop's longer side over 850: what every size that is no length of the building is a multiple of."
+          },
+          "style": {
+            "type": "object",
+            "required": [
+              "line",
+              "text"
+            ],
+            "properties": {
+              "line": {
+                "type": "number"
+              },
+              "text": {
+                "type": "number"
+              }
+            },
+            "description": "The plan's own size factors, as the figure was drawn with them."
+          },
+          "figures": {
+            "type": "object",
+            "description": "The figure, drawn once per language since its legend carries words: the language -> its file under data/.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "legend": {
+            "type": "boolean",
+            "description": "Whether the figure carries a legend, which show-fire-plan may leave out."
+          },
+          "background": {
+            "type": "object",
+            "description": "The architect's plan under the figure: a file of its own under data/fire/ (fire/<id>-plan.<format>, a file of the project or a page of a document), or -- for a plan that follows a position plan -- that plan's own exported background under data/plans/. Absent for a plan drawn on an empty sheet.",
+            "required": [
+              "file",
+              "format",
+              "page",
+              "opacity"
+            ],
+            "properties": {
+              "file": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string"
+              },
+              "page": {
+                "type": "number"
+              },
+              "origin": {
+                "type": "string"
+              },
+              "origin_page": {
+                "type": "number"
+              },
+              "sha256": {
+                "type": "string"
+              },
+              "opacity": {
+                "type": "number"
+              },
+              "document": {
+                "type": "string",
+                "description": "The document of plans/documents/ the background was made from, for a plan drawn on one of its pages; absent otherwise."
+              },
+              "rotation": {
+                "type": "number",
+                "description": "The rotation the document's page was given, degrees clockwise."
+              },
+              "layers_off": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The layers of the document that were switched off when the page was flattened."
+              }
+            }
+          },
+          "scale": {
+            "type": "object",
+            "required": [
+              "mode",
+              "units_per_m"
+            ],
+            "properties": {
+              "mode": {
+                "type": "string"
+              },
+              "units_per_m": {
+                "type": "number"
+              },
+              "ratio": {
+                "type": "number"
+              }
+            },
+            "description": "Absent for a plan without a scale, on which nothing is measured."
+          },
+          "zones": {
+            "type": "array",
+            "description": "The surfaces of a kind, each with its area where the plan has a scale. A surface that states no kind is a draft and is not exported.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kind",
+                "label"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "area_m2": {
+                  "type": "number"
+                },
+                "style": {
+                  "type": "object",
+                  "description": "The factors this entry states over the plan's own (calc/domains/figure_style.py); absent, it states none.",
+                  "properties": {
+                    "line": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "opacity": {
+                  "type": "number",
+                  "description": "How opaque the entry is drawn, where it states it."
+                }
+              }
+            }
+          },
+          "walls": {
+            "type": "array",
+            "description": "The walls with their fire resistance and their length.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "class"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "class": {
+                  "type": "string"
+                },
+                "length_m": {
+                  "type": "number"
+                },
+                "style": {
+                  "type": "object",
+                  "description": "The factors this entry states over the plan's own (calc/domains/figure_style.py); absent, it states none.",
+                  "properties": {
+                    "line": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "opacity": {
+                  "type": "number",
+                  "description": "How opaque the entry is drawn, where it states it."
+                }
+              }
+            }
+          },
+          "doors": {
+            "type": "array",
+            "description": "The doors: how each opens, its fire resistance where it has one, its width.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kind"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "class": {
+                  "type": "string"
+                },
+                "width_m": {
+                  "type": "number"
+                },
+                "style": {
+                  "type": "object",
+                  "description": "The factors this entry states over the plan's own (calc/domains/figure_style.py); absent, it states none.",
+                  "properties": {
+                    "line": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "opacity": {
+                  "type": "number",
+                  "description": "How opaque the entry is drawn, where it states it."
+                }
+              }
+            }
+          },
+          "routes": {
+            "type": "array",
+            "description": "The escape routes' lengths: what each writes, and what it measures.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "text"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "length_m": {
+                  "type": "number"
+                },
+                "style": {
+                  "type": "object",
+                  "description": "The factors this entry states over the plan's own (calc/domains/figure_style.py); absent, it states none.",
+                  "properties": {
+                    "line": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "opacity": {
+                  "type": "number",
+                  "description": "How opaque the entry is drawn, where it states it."
+                }
+              }
+            }
+          },
+          "exits": {
+            "type": "array",
+            "description": "The emergency exits.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "style": {
+                  "type": "object",
+                  "description": "The factors this entry states over the plan's own (calc/domains/figure_style.py); absent, it states none.",
+                  "properties": {
+                    "line": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "opacity": {
+                  "type": "number",
+                  "description": "How opaque the entry is drawn, where it states it."
+                }
+              }
+            }
+          },
+          "widths": {
+            "type": "array",
+            "description": "The escape routes' widths: what each writes, and what it measures.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "text"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "width_m": {
+                  "type": "number"
+                },
+                "style": {
+                  "type": "object",
+                  "description": "The factors this entry states over the plan's own (calc/domains/figure_style.py); absent, it states none.",
+                  "properties": {
+                    "line": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "opacity": {
+                  "type": "number",
+                  "description": "How opaque the entry is drawn, where it states it."
+                }
+              }
+            }
+          },
+          "legend_lines": {
+            "type": "array",
+            "description": "The legend's lines, in the order the figure writes them, for the report's own: show-fire-plan's legend and an export sheet's sheet-fire-legend set each swatch beside its text in the report's typeface, as a position plan's legend is. Present for a plan that draws something the legend lists, empty otherwise.",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "text",
+                "swatch"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "description": "What the line is: wall:<class>, surface:<kind>, exit, length, width, door:<kind>:<class> (door:<kind> for one without a fire resistance)."
+                },
+                "text": {
+                  "type": "string",
+                  "description": "The line's words in the sheet's own German, or -- a door without a fire resistance -- the engine's; the report translates them through `term` or `engine`."
+                },
+                "term": {
+                  "type": "string",
+                  "description": "The German term of the glossary `text` stands for, where it is one (a word of the VKF sheet)."
+                },
+                "engine": {
+                  "type": "string",
+                  "description": "The glossary key of the engine's own word, where `text` is one (fire.door.<kind>)."
+                },
+                "swatch": {
+                  "type": "string",
+                  "description": "The symbol, as an SVG document of about 10 x 4 mm (fire_svg.legend_swatch)."
+                }
+              }
+            }
+          },
+          "texts": {
+            "type": "array",
+            "description": "The texts placed with the Text tool (issue #43): what each printed. Absent where the drawing has none.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "text",
+                "lines"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string",
+                  "description": "Its token text, as the source holds it."
+                },
+                "lines": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Its lines as printed, every token replaced by its variable."
+                },
+                "links": {
+                  "type": "array",
+                  "description": "Where each variable it printed came from (REQ-012).",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "token",
+                      "variable",
+                      "stale"
+                    ],
+                    "properties": {
+                      "token": {
+                        "type": "string"
+                      },
+                      "variable": {
+                        "type": "object",
+                        "properties": {
+                          "domain": {
+                            "type": "string"
+                          },
+                          "instance": {
+                            "type": "string"
+                          },
+                          "var": {
+                            "type": "string"
+                          },
+                          "factor": {
+                            "type": "number"
+                          },
+                          "offset": {
+                            "type": "number"
+                          },
+                          "origin": {
+                            "type": "string",
+                            "description": "'formulas' for a domain of the «Formules» tab, whose id is `instance`; absent for the export."
+                          }
+                        }
+                      },
+                      "value": {},
+                      "unit": {
+                        "type": "string"
+                      },
+                      "stale": {
+                        "type": "boolean",
+                        "description": "True where the variable could not be read and its last value was printed (D-06)."
+                      }
+                    }
+                  }
+                },
+                "point": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "Its centre on the sheet."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

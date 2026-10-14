@@ -1,0 +1,20 @@
+{
+  "_source": "SIA 263:2013, Tabelle 16 «Bemessungswerte der Tragwiderstände von Schrauben», block «Bemessungswert des Lochleibungswiderstands», equation (76), p. 67; 6.2.5 «Bolzenverbindungen», p. 70; 4.1.3, the resistance factors, p. 21 -- read in ExternalFiles/000-Normes/SIA263-2013-DE.pdf as text on 12.10.2026 (spec 2026-10-12-audit-issues-47-48-49, REQ-008). The only copy of these values in the project (docs/architecture/layout.md §11).",
+  "_note": "(76): F_b,Rd = 0.85 · e1/d0 · f_u · d · t / gamma_M2 <= 2.4 · f_u · d · t / gamma_M2, «unter der Voraussetzung, dass folgende Schraubenabstände senkrecht zur Kraftrichtung eingehalten sind: e2 >= 1.0 d0 und p2 >= 2.0 d0»; «bei kleinen Schraubenabständen in Kraftrichtung mit p1 < e1 + d0/2 ist anstelle von e1 der Wert (p1 − d0/2) in Gleichung (76) einzusetzen»; in slotted holes perpendicular to the force, 60 % (not used: a Stabdübel's hole is round). 6.2.5: for a Bolzenverbindung «der Bemessungswert des Lochleibungswiderstands ist jedoch auf 1,5 f_y d t / gamma_M2 zu beschränken» -- a Stabdübel in a steel plate is taken as a Bolzen (the engineer, 12.10.2026, D-16). f_u and f_y are the plate's, Tabelle 1 (sia263-2013-tab01-baustaehle.json), t the plate's thickness, d the dowel's diameter, d0 the hole's. 4.1.3: gamma_M2 = 1.25 for the strength checks of fasteners and the net section.",
+  "edition": "SIA 263:2013",
+  "table_16": {
+    "number": "16",
+    "title": "Bemessungswerte der Tragwiderstände von Schrauben -- Lochleibungswiderstand",
+    "norm": "SIA 263",
+    "norm_ref": "Tabelle 16",
+    "equation": "76",
+    "page": 67,
+    "factor": 0.85,
+    "limit": 2.4,
+    "e2_min": 1.0,
+    "p2_min": 2.0,
+    "p1_rule": "p1 < e1 + d0/2: (p1 − d0/2) instead of e1",
+    "pin": {"norm_ref": "6.2.5", "page": 70, "factor": 1.5},
+    "gamma_M2": {"value": 1.25, "norm_ref": "4.1.3", "page": 21}
+  }
+}

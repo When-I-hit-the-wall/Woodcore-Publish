@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Woodcore's icon (woodcore_gui.py, v0.83; the window's "T" until then): a "W" on the same blue-green, standing on a wood-coloured beam. Shapes only, no font, so it draws the same everywhere; kept bold enough to read at 16 px. The build turns it into packaging's woodcore.ico. No double hyphen in this comment: XML forbids it, and the file would not load. -->
+  <rect x="2" y="2" width="60" height="60" rx="13" fill="#239dad"/>
+  <path d="M9 12 H17 L22.5 33 L28 12 H36 L27 41 H18 Z" fill="#ffffff"/>
+  <path d="M28 12 H36 L41.5 33 L47 12 H55 L46 41 H37 Z" fill="#ffffff"/>
+  <rect x="9" y="46" width="46" height="7" rx="1.5" fill="#d4944f"/>
+</svg>

@@ -1,0 +1,167 @@
+{
+ "_source": "SIA 261:2020, Annexe C (normative) «Coefficients de force et de pression pour le vent», Tableau 64, p. 105 -- transcribed from the text layer of the French edition, Normen-Florian/SIA261-2020-FR.pdf, each row's values counted against the table's columns, and checked against a render of the page (11.10.2026, issue #37). Values are the norm's decimals with a point; ±x is the pair [x, -x], a/b the pair [a, b], null a cell the norm leaves empty (–), \"direct\" a cell whose force is computed directly (*).",
+ "edition": "SIA 261:2020",
+ "table": {
+  "number": "64",
+  "title": "Coefficients pour toits en forme semi-cylindrique",
+  "page": 105,
+  "ratio": "b, d",
+  "roof": "semi-cylindrique",
+  "columns": [
+   {
+    "key": "cpe:5°",
+    "group": "cpe",
+    "surface": "5°"
+   },
+   {
+    "key": "cpe:15°",
+    "group": "cpe",
+    "surface": "15°"
+   },
+   {
+    "key": "cpe:30°",
+    "group": "cpe",
+    "surface": "30°"
+   },
+   {
+    "key": "cpe:45°",
+    "group": "cpe",
+    "surface": "45°"
+   },
+   {
+    "key": "cpe:60°",
+    "group": "cpe",
+    "surface": "60°"
+   },
+   {
+    "key": "cpe:75°",
+    "group": "cpe",
+    "surface": "75°"
+   },
+   {
+    "key": "cpe:90°",
+    "group": "cpe",
+    "surface": "90°"
+   },
+   {
+    "key": "cpe:105°",
+    "group": "cpe",
+    "surface": "105°"
+   },
+   {
+    "key": "cpe:120°",
+    "group": "cpe",
+    "surface": "120°"
+   },
+   {
+    "key": "cpe:135°",
+    "group": "cpe",
+    "surface": "135°"
+   },
+   {
+    "key": "cpe:150°",
+    "group": "cpe",
+    "surface": "150°"
+   },
+   {
+    "key": "cpe:165°",
+    "group": "cpe",
+    "surface": "165°"
+   },
+   {
+    "key": "cpe:180°",
+    "group": "cpe",
+    "surface": "180°"
+   },
+   {
+    "key": "cf1:d·(b+d)/2",
+    "group": "cf",
+    "area": "d·(b+d)/2",
+    "index": 1
+   },
+   {
+    "key": "cf2:π·d²/8",
+    "group": "cf",
+    "area": "π·d²/8",
+    "index": 2
+   },
+   {
+    "key": "cf3:d·(b+d)",
+    "group": "cf",
+    "area": "d·(b+d)",
+    "index": 3
+   }
+  ],
+  "rows": [
+   {
+    "label": "mou, φ = 0°",
+    "values": [
+     0.4,
+     0.4,
+     0.3,
+     -0.3,
+     -0.7,
+     -1.1,
+     -1.2,
+     -0.75,
+     -0.3,
+     -0.3,
+     -0.3,
+     -0.3,
+     -0.3,
+     0.33,
+     0.0,
+     -0.56
+    ]
+   },
+   {
+    "label": "rigide, φ = 0°",
+    "values": [
+     0.45,
+     0.6,
+     0.3,
+     -0.3,
+     -0.7,
+     -1.2,
+     -1.1,
+     -0.8,
+     -0.3,
+     -0.3,
+     -0.3,
+     -0.3,
+     -0.3,
+     0.38,
+     0.0,
+     -0.56
+    ]
+   },
+   {
+    "label": "φ = 90°",
+    "values": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     0.0,
+     0.21,
+     -0.5
+    ]
+   }
+  ],
+  "cpe_peak": null,
+  "cfr": null,
+  "notes": [
+   "surfaces de référence de c_f1 et c_f3 : approximation",
+   "mou : membrane souple ; rigide : toiture rigide"
+  ]
+ }
+}

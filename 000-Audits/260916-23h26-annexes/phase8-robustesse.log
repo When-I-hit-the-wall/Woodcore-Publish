@@ -1,0 +1,66 @@
+[8.1 empty] export exit=0 11.0s
+     export_all: WARNING Positionen.xlsx still has a 'Positions Connectors' sheet, a 'data_connector' sheet, a 'data_assembly' sheet, a 'data_steel' sheet -- no longer read: the connectors are entered in the Typst-Katalog (connectors/<id>.json); delete them so they cannot be mistaken for a second source
+[p8-empty-as-is] typst exit=1 0.8s
+     error: assertion failed: show-plan: no plan "Velo-Unterstand" -- none saved yet (draw one in the Typst-Katalog's position plan tab)
+         ┌─ \\?\C:\Users\Quebec\AppData\Local\Temp\typst-audit-260916-2326\p8-empty\000-TypstRapport\000-Python\lib\calc-engine.typ:876:2
+         │  
+     876 │ ╭   assert(type(plan) == str and plan in plans,
+     877 │ │     message: "show-plan: no plan " + repr(plan) + " -- " + (if plans.len() == 0 { "none saved yet (draw one in the Typst-Katalog's position plan tab)" } else { "valid plans: " + plans.keys().join(", ") }))
+         │ ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────^
+     
+     help: error occurred in this call of function `show-plan`
+       ┌─ \\?\C:\Users\Quebec\AppData\Local\Temp\typst-audit-260916-2326\p8-empty\000-TypstRapport\Sections\002-grundlagen.typ:9:1
+       │
+     9 │ #show-plan("Velo-Unterstand", width: 70%)
+       │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     
+     help: error occurred while importing this module
+        ┌─ \\?\C:\Users\Quebec\AppData\Local\Temp\typst-audit-260916-2326\p8-empty\000-TypstRapport\Statischer Rapport.typ:56:9
+        │
+     56 │ #include "Sections/002-grundlagen.typ"
+        │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     
+[p8-empty-stripped] typst exit=0 2.4s
+[p8-empty-katalog] katalog tabs exit=0 11.8s exceptions=0
+    data figures left after empty export: []
+8.2a renamed position T001 -> T901 (used by schema elements: ['S001', 'T001'], positions: ['T001', 'S001', 'S002'])
+[8.2a position renamed] export exit=0 9.4s
+     export_all: WARNING Positionen.xlsx still has a 'Positions Connectors' sheet, a 'data_connector' sheet, a 'data_assembly' sheet, a 'data_steel' sheet -- no longer read: the connectors are entered in the Typst-Katalog (connectors/<id>.json); delete them so they cannot be mistaken for a second source
+     export_all: WARNING connectors/VU-SD-10.json: id 'VU-SD-10' does not start with 'SD', the symbol of a Stabdübel.
+     export_all: WARNING plan Fluchttreppe: T001 is not a position of Positionen.xlsx -- add it to its Positions Element sheet
+     export_all: WARNING plan Geratehaus: T001 is not a position of Positionen.xlsx -- add it to its Positions Element sheet
+     export_all: WARNING plan Pavillon: T001 is not a position of Positionen.xlsx -- add it to its Positions Element sheet
+     export_all: WARNING plan Velo-Unterstand: T001 is not a position of Positionen.xlsx -- add it to its Positions Element sheet
+     export_all: WARNING model Bankli-Fall1: point P2 carries nothing and holds nothing
+     export_all: WARNING model Bankli-Fall2: point P2 carries nothing and holds nothing
+     export_all: WARNING schema SD_01: element E1 refers to position 'T001' is not a row of Positionen.xlsx
+     export_all: WARNING schema SD_02: element E1 refers to position 'T001' is not a row of Positionen.xlsx
+     export_all: WARNING schema VU-Skizze: element E1 refers to position 'T001' is not a row of Positionen.xlsx
+     export_all: WARNING removed data/positions/T001.json: 'T001' is no longer a row of 'Positions Element' -- a report still calling show-position("T001") will now fail instead of printing it
+[p8-pos] typst exit=0 2.6s
+8.2b deleted schema VU-Skizze
+[8.2b schema deleted] export exit=1 13.9s
+     export_all: WARNING Positionen.xlsx still has a 'Positions Connectors' sheet, a 'data_connector' sheet, a 'data_assembly' sheet, a 'data_steel' sheet -- no longer read: the connectors are entered in the Typst-Katalog (connectors/<id>.json); delete them so they cannot be mistaken for a second source
+     export failed: connections.VU-MP-1: has no fastener
+[p8-schema] typst exit=0 3.4s
+[p8-schema-probe1] typst exit=0 0.6s
+[p8-schema-probe2] typst exit=0 0.5s
+[p8-schema-katalog] katalog tabs exit=0 9.9s exceptions=0
+8.2c deleted fastener A12 from VU-Skizze (connectors, aids) (0, 15) -> (0, 14); connector fasteners=['A12', 'A13', 'A14', 'A15']
+[8.2c marker deleted] export exit=1 9.2s
+     export_all: WARNING Positionen.xlsx still has a 'Positions Connectors' sheet, a 'data_connector' sheet, a 'data_assembly' sheet, a 'data_steel' sheet -- no longer read: the connectors are entered in the Typst-Katalog (connectors/<id>.json); delete them so they cannot be mistaken for a second source
+     export failed: connectors.VU-SD-10: n_tot is 4 and the drawing has 3 -- only an override may part the two
+[p8-marker] typst exit=0 3.1s
+8.3 sheet SL part xl/worksheets/sheet6.xml: H17 formula cell found=True
+[8.3 stale H17] export exit=1 7.4s
+     export_all: WARNING Positionen.xlsx still has a 'Positions Connectors' sheet, a 'data_connector' sheet, a 'data_assembly' sheet, a 'data_steel' sheet -- no longer read: the connectors are entered in the Typst-Katalog (connectors/<id>.json); delete them so they cannot be mistaken for a second source
+     export failed: Belastungsannahmen.xlsm!SL!H17 is empty -- open the workbook in Excel, check that cell, and save, so its computed value is cached
+[8.5 export all] export exit=0 9.4s
+     export_all: WARNING Positionen.xlsx still has a 'Positions Connectors' sheet, a 'data_connector' sheet, a 'data_assembly' sheet, a 'data_steel' sheet -- no longer read: the connectors are entered in the Typst-Katalog (connectors/<id>.json); delete them so they cannot be mistaken for a second source
+     export_all: WARNING connectors/VU-SD-10.json: id 'VU-SD-10' does not start with 'SD', the symbol of a Stabdübel.
+     export_all: WARNING model Bankli-Fall1: point P2 carries nothing and holds nothing
+     export_all: WARNING model Bankli-Fall2: point P2 carries nothing and holds nothing
+[8.5] connector.export alone: import 0.117 export 0.25 
+[p8-perf-tabs] katalog tabs exit=0 9.5s exceptions=0
+[p8-perf-save] katalog save exit=0 10.2s exceptions=0
+[p8-perf-plans] katalog plans exit=0 16.5s exceptions=0

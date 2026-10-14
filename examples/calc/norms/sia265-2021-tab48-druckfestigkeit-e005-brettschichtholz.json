@@ -1,0 +1,89 @@
+{
+  "_source": "SIA 265:2021, Anhang B (normativ), B.2, Tabelle 48 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 98, read off a render of the page.",
+  "_note": "Characteristic values for Brettschichtholz, as Tabelle 47's for Vollholz: Anhang B derives them from the lamella tensile strength and E_m,mean of Tabelle 9, and they govern over footnote 4 of Tabelle 9 (5/6 of E_0,mean; GL24h: 9583 against 9600). Footnote 2 is the table's own mark 1) on GL20h, GL32c and GL32h. Every grade of Tabelle 9 has a row, and no other.",
+  "edition": "SIA 265:2021",
+  "table_48": {
+    "number": "48",
+    "title": "Charakteristische Werte der Druckfestigkeit und 5 %-Fraktilwerte des Elastizitätsmoduls parallel zur Faserrichtung für Brettschichtholz",
+    "norm": "SIA 265",
+    "norm_ref": "Anhang B",
+    "clause": "B.2",
+    "page": 98,
+    "grades_from": "sia265-2021-tab09-brettschichtholz",
+    "family": "Brettschichtholz",
+    "units": {
+      "f_c_0_k": "N/mm²",
+      "E_0_05": "N/mm²"
+    },
+    "labels": {
+      "f_c_0_k": "Druckfestigkeit parallel zur Faserrichtung",
+      "E_0_05": "E-Modul parallel zur Faserrichtung (5 %-Fraktile)"
+    },
+    "grades": [
+      {
+        "id": "GL20h",
+        "family": "Brettschichtholz",
+        "f_c_0_k": 20,
+        "E_0_05": 7000,
+        "notes": {
+          "id": [
+            "2"
+          ]
+        }
+      },
+      {
+        "id": "GL24c",
+        "family": "Brettschichtholz",
+        "f_c_0_k": 21.5,
+        "E_0_05": 9100
+      },
+      {
+        "id": "GL24h",
+        "family": "Brettschichtholz",
+        "f_c_0_k": 24,
+        "E_0_05": 9600
+      },
+      {
+        "id": "GL28c",
+        "family": "Brettschichtholz",
+        "f_c_0_k": 24,
+        "E_0_05": 10400
+      },
+      {
+        "id": "GL28h",
+        "family": "Brettschichtholz",
+        "f_c_0_k": 28,
+        "E_0_05": 10500
+      },
+      {
+        "id": "GL32c",
+        "family": "Brettschichtholz",
+        "f_c_0_k": 24.5,
+        "E_0_05": 11200,
+        "notes": {
+          "id": [
+            "2"
+          ]
+        }
+      },
+      {
+        "id": "GL32h",
+        "family": "Brettschichtholz",
+        "f_c_0_k": 32,
+        "E_0_05": 11800,
+        "notes": {
+          "id": [
+            "2"
+          ]
+        }
+      }
+    ],
+    "notes": {
+      "1": "Die Werte beziehen sich auf eine Holzfeuchte von 12 %.",
+      "2": "Die Erhältlichkeit dieser Klassen ist abzuklären."
+    },
+    "table_notes": [
+      "1"
+    ]
+  }
+}

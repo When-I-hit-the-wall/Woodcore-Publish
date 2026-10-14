@@ -1,0 +1,264 @@
+{
+  "_source": "SIA 265:2021, Tabelle 9 (clause 3.4.2.2) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 27.",
+  "_note": "Brettschichtholz aus Nadelholz, for the strength classes commonly used in Switzerland. Same conventions as sia265-2021-tab08-vollholz.json. GL40h, GL48h, GL52h and the CLT classes are deliberately absent: SIA 265 does not give them, they belong to SN EN 14080 resp. SIA 265/1, and neither edition is in ExternalFiles/000-Normes/ (docs/architecture/principles.md §2 rule 13).",
+  "edition": "SIA 265:2021",
+  "table_9": {
+    "number": "9",
+    "title": "Kennzeichnende Eigenschaften und Bemessungswerte für Brettschichtholz aus Nadelholz für in der Schweiz häufig eingesetzte Festigkeitsklassen",
+    "norm": "SIA 265",
+    "norm_ref": "3.4.2.2",
+    "units": {
+      "f_m_k": "N/mm²",
+      "E_m_mean": "N/mm²",
+      "rho_k": "kg/m³",
+      "f_m_d": "N/mm²",
+      "f_t_0_d": "N/mm²",
+      "f_c_0_d": "N/mm²",
+      "f_t_90_d": "N/mm²",
+      "f_c_90_d": "N/mm²",
+      "f_v_d": "N/mm²",
+      "E_0_mean": "N/mm²",
+      "E_90_mean": "N/mm²",
+      "G_mean": "N/mm²"
+    },
+    "labels": {
+      "f_m_k": "Biegefestigkeit",
+      "E_m_mean": "mittlerer Biege-Elastizitätsmodul",
+      "rho_k": "Rohdichte",
+      "f_m_d": "Biegung",
+      "f_t_0_d": "Zug parallel zur Faserrichtung",
+      "f_c_0_d": "Druck parallel zur Faserrichtung",
+      "f_t_90_d": "Zug rechtwinklig zur Faserrichtung",
+      "f_c_90_d": "Druck rechtwinklig zur Faserrichtung",
+      "f_v_d": "Schub",
+      "E_0_mean": "E_0,mean in Faserrichtung",
+      "E_90_mean": "E_90,mean rechtwinklig zur Faserrichtung",
+      "G_mean": "Schubmodul"
+    },
+    "grades": [
+      {
+        "id": "GL20h",
+        "family": "Brettschichtholz",
+        "group": "normales BSH",
+        "species": "Nadelholz",
+        "f_m_k": 20,
+        "E_m_mean": 8400,
+        "rho_k": 340,
+        "f_m_d": 13.3,
+        "f_t_0_d": 10.7,
+        "f_c_0_d": 13.3,
+        "f_t_90_d": 0.15,
+        "f_c_90_d": {
+          "generell": 1.8,
+          "mit_vorholz": {
+            "value": 2.2,
+            "groessere_eindrueckungen": 3.5
+          },
+          "endauflagerung": {
+            "value": 2.2,
+            "groessere_eindrueckungen": 3.5
+          }
+        },
+        "f_v_d": 1.8,
+        "E_0_mean": 8400,
+        "E_90_mean": 300,
+        "G_mean": 650,
+        "notes": {
+          "id": [
+            "5"
+          ]
+        }
+      },
+      {
+        "id": "GL24c",
+        "family": "Brettschichtholz",
+        "group": "normales BSH",
+        "species": "Nadelholz",
+        "f_m_k": 24,
+        "E_m_mean": 11000,
+        "rho_k": 365,
+        "f_m_d": 16.0,
+        "f_t_0_d": 11.3,
+        "f_c_0_d": 14.3,
+        "f_t_90_d": 0.15,
+        "f_c_90_d": {
+          "generell": 1.9,
+          "mit_vorholz": {
+            "value": 2.5,
+            "groessere_eindrueckungen": 4.0
+          },
+          "endauflagerung": {
+            "value": 2.5,
+            "groessere_eindrueckungen": 4.0
+          }
+        },
+        "f_v_d": 1.8,
+        "E_0_mean": 11000,
+        "E_90_mean": 300,
+        "G_mean": 650,
+        "notes": {}
+      },
+      {
+        "id": "GL24h",
+        "family": "Brettschichtholz",
+        "group": "normales BSH",
+        "species": "Nadelholz",
+        "f_m_k": 24,
+        "E_m_mean": 11500,
+        "rho_k": 385,
+        "f_m_d": 16.0,
+        "f_t_0_d": 12.8,
+        "f_c_0_d": 16.0,
+        "f_t_90_d": 0.15,
+        "f_c_90_d": {
+          "generell": 1.9,
+          "mit_vorholz": {
+            "value": 2.5,
+            "groessere_eindrueckungen": 4.0
+          },
+          "endauflagerung": {
+            "value": 2.5,
+            "groessere_eindrueckungen": 4.0
+          }
+        },
+        "f_v_d": 1.8,
+        "E_0_mean": 11500,
+        "E_90_mean": 300,
+        "G_mean": 650,
+        "notes": {}
+      },
+      {
+        "id": "GL28c",
+        "family": "Brettschichtholz",
+        "group": "normales BSH",
+        "species": "Nadelholz",
+        "f_m_k": 28,
+        "E_m_mean": 12500,
+        "rho_k": 390,
+        "f_m_d": 18.7,
+        "f_t_0_d": 13.0,
+        "f_c_0_d": 16.0,
+        "f_t_90_d": 0.15,
+        "f_c_90_d": {
+          "generell": 2.0,
+          "mit_vorholz": {
+            "value": 2.7,
+            "groessere_eindrueckungen": 4.3
+          },
+          "endauflagerung": {
+            "value": 2.7,
+            "groessere_eindrueckungen": 4.3
+          }
+        },
+        "f_v_d": 1.8,
+        "E_0_mean": 12500,
+        "E_90_mean": 300,
+        "G_mean": 650,
+        "notes": {}
+      },
+      {
+        "id": "GL28h",
+        "family": "Brettschichtholz",
+        "group": "normales BSH",
+        "species": "Nadelholz",
+        "f_m_k": 28,
+        "E_m_mean": 12600,
+        "rho_k": 425,
+        "f_m_d": 18.7,
+        "f_t_0_d": 14.9,
+        "f_c_0_d": 18.7,
+        "f_t_90_d": 0.15,
+        "f_c_90_d": {
+          "generell": 2.0,
+          "mit_vorholz": {
+            "value": 2.7,
+            "groessere_eindrueckungen": 4.3
+          },
+          "endauflagerung": {
+            "value": 2.7,
+            "groessere_eindrueckungen": 4.3
+          }
+        },
+        "f_v_d": 1.8,
+        "E_0_mean": 12600,
+        "E_90_mean": 300,
+        "G_mean": 650,
+        "notes": {}
+      },
+      {
+        "id": "GL32c",
+        "family": "Brettschichtholz",
+        "group": "hochfestes BSH",
+        "species": "Nadelholz",
+        "f_m_k": 32,
+        "E_m_mean": 13500,
+        "rho_k": 400,
+        "f_m_d": 21.3,
+        "f_t_0_d": 13.0,
+        "f_c_0_d": 16.3,
+        "f_t_90_d": 0.15,
+        "f_c_90_d": {
+          "generell": 2.1,
+          "mit_vorholz": {
+            "value": 2.8,
+            "groessere_eindrueckungen": 4.4
+          },
+          "endauflagerung": {
+            "value": 2.8,
+            "groessere_eindrueckungen": 4.4
+          }
+        },
+        "f_v_d": 1.8,
+        "E_0_mean": 13500,
+        "E_90_mean": 300,
+        "G_mean": 650,
+        "notes": {
+          "id": [
+            "5"
+          ]
+        }
+      },
+      {
+        "id": "GL32h",
+        "family": "Brettschichtholz",
+        "group": "hochfestes BSH",
+        "species": "Nadelholz",
+        "f_m_k": 32,
+        "E_m_mean": 14200,
+        "rho_k": 440,
+        "f_m_d": 21.3,
+        "f_t_0_d": 17.1,
+        "f_c_0_d": 21.3,
+        "f_t_90_d": 0.15,
+        "f_c_90_d": {
+          "generell": 2.1,
+          "mit_vorholz": {
+            "value": 2.8,
+            "groessere_eindrueckungen": 4.4
+          },
+          "endauflagerung": {
+            "value": 2.8,
+            "groessere_eindrueckungen": 4.4
+          }
+        },
+        "f_v_d": 1.8,
+        "E_0_mean": 14200,
+        "E_90_mean": 300,
+        "G_mean": 650,
+        "notes": {
+          "id": [
+            "5"
+          ]
+        }
+      }
+    ],
+    "notes": {
+      "1": "Eigenschaften und Bemessungswerte beziehen sich auf eine Holzfeuchte von 12 %.",
+      "2": "Das Vorholz muss beidseitig mindestens 100 mm betragen. Andernfalls ist mit dem generellen Wert zu rechnen.",
+      "3": "Der höhere (Klammer-) Wert ist nur dort zulässig, wo die auftretenden grösseren Eindrückungen nachweisbar ohne Einfluss auf den Bestand des tragenden Bauteils sind.",
+      "4": "5 %-Fraktilwerte sind auf das 5/6-Fache der Mittelwerte festgelegt.",
+      "5": "Für diese Klassen ist die Erhältlichkeit abzuklären."
+    },
+    "elsewhere": "Brettschichtholz mit Universal-Keilzinkenverbindungen und Verbundbauteile: gemäss SN EN 14080, SIA 265 3.4.2.4. Für f_m,d darf bei einer Bauteilhöhe h < 600 mm der Beiwert k_h = (600/h)^0,1 <= 1,1 angesetzt werden (SIA 265 3.4.2.3)."
+  }
+}

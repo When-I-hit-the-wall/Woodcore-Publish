@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "id": "BI-03",
+  "name": "Biegung schräg zur Faser mit Zug",
+  "label": "Zugband aus Brettschichtholz, Faser 10° zur Stabachse",
+  "group": "",
+  "kind": "bending",
+  "position": null,
+  "grade": "GL24h",
+  "section": {
+    "type": "rec",
+    "b": 120,
+    "h": 280
+  },
+  "moisture_class": 1,
+  "impact": false,
+  "alpha": 10,
+  "N": {
+    "value": 25,
+    "unit": "kN"
+  },
+  "M_y": {
+    "value": 3,
+    "unit": "kNm"
+  },
+  "M_z": null
+}

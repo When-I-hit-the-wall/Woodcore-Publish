@@ -1,0 +1,442 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Connector source",
+  "description": "000-Python/connectors/<id>.json, schema 2.0 -- one connector (Verbindungsmittel), written by Woodcore's «Connecteurs» tab and read by calc/domains/connector.py alone (docs/domain/connectors.md §3.3nonies). One connector is one file is one calculation: to compare two layouts, duplicate the connector. The arrangement of connections/, plans/ and statics/, for the same reasons (section 13).\n\nThe descriptive half -- type, assembly, diameter, length, dimension, steel, elements, description -- is what Positionen.xlsx's Positions Connectors sheet carried until v0.68 and what show-connector still prints. The calculation half is the rest, and it is deliberately thin at the top: what is genuinely particular to a kind of fastener lives in its own block, named by connector.TYPE_BLOCK, so a second type adds a block rather than changing this file's shape.\n\n⚠️ Since 2.0 a connector CARRIES NO GEOMETRY OF ITS OWN. It names a detail schema (details/<id>.json, section 3.3decies) and the markers of that schema its fasteners sit on; each member names an element of that schema, and it is through that element that the member reaches its position, and so its strength class and its moisture class. The drawing fields -- b, h, view, angle, through, against, overhang -- the x/z table, `reference` and `orientation` are gone, and with them the second form of one physical joint that this tab and «Moments polaires» each used to carry (section 2, rule 1).\n\nWhat this schema cannot say, validation._validate_node understanding neither oneOf nor minimum, connector.check_source says instead: that `material` is exactly one of its two shapes, that the assembly is one SIA 265 gives a k_beta for, that a Laubholz member is predrilled, that n_tot agrees with the fastener count unless it says it does not, and that exactly the type's own block is present.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "variant",
+    "name",
+    "type",
+    "assembly",
+    "label",
+    "description",
+    "diameter",
+    "length",
+    "dimension",
+    "steel",
+    "elements",
+    "moisture_class",
+    "conditions",
+    "n_tot",
+    "schema",
+    "members",
+    "fasteners"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "2.0",
+        "2.1",
+        "2.2"
+      ],
+      "description": "-- accepted: 2.0. A 1.0 or 1.1 file carries its own geometry and is converted by calc/tools/migrate_to_schemas.py, which writes that geometry out as a schema of its own; reading one here is refused rather than guessed at. 2.1 (issue #42): 2.0 with `links`, written only where a field follows a variable. 2.2 (spec 2026-10-12-audit-issues-47-48-49, D-14): 2.1 with `plate`, written only by a Stahl-Holz connector that states one."
+    },
+    "group": {
+      "type": "string",
+      "description": "The folder Woodcore files this source in, \"\" or absent at the root. A FIELD and never a directory: the ids stay flat, so the rule that the id is the file name is untouched and no show-* call changes (calc/tools/grouped_list.py). Optional and additive -- a file written before it existed reads as the root -- so schema_version is deliberately NOT bumped for it."
+    },
+    "id": {
+      "type": "string",
+      "description": "The connector's id, which is the file's name and the string the report addresses it by: letters, digits and _ . + - (SD_01). A file whose id is not its name is refused."
+    },
+    "name": {
+      "type": "string",
+      "description": "What the engineer calls this connector, free text. With `variant` it composes the default id, which the engineer may write over -- so the id stays the file name and the name stays readable."
+    },
+    "variant": {
+      "type": "string",
+      "description": "Which variant of that name this is (\"8mm\", \"V2\"), free text; may be empty. It is part of the id's composition and nothing else: a connector is one file and one calculation, so a variant is not a level of its own (docs/decisions.md §13, v0.68)."
+    },
+    "type": {
+      "type": "string",
+      "description": "The kind of fastener, one of connector.TYPES (Stabdübel, Nagel, Vollgewindeschraube, ...). It chooses the calculation module, and it is what the tab's tool bar sets."
+    },
+    "assembly": {
+      "type": "string",
+      "description": "The kind of assembly, one of connector.ASSEMBLIES. Both descriptive and the calculation's own: it is what SIA 265 Tabellen 45 and 46 give a k_beta row for, and what decides how many shear planes a dowel has."
+    },
+    "label": {
+      "type": "string",
+      "description": "What the engineer calls this connector, free text; may be empty."
+    },
+    "description": {
+      "type": "string"
+    },
+    "diameter": {
+      "type": "object",
+      "description": "d, {value, unit} in mm. Descriptive AND the calculation's own diameter -- it is written once and read by both, so the printed line and the resistance cannot disagree. Required, unlike in the retired sheet: no fastener is calculated without it.",
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        }
+      }
+    },
+    "length": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The fastener's length, {value, unit} in mm, or null. Descriptive; the shear resistance does not read it.",
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        }
+      }
+    },
+    "dimension": {
+      "type": "string",
+      "description": "Any other dimension, as typed -- descriptive text, never parsed, like an element's (section 7); may be empty."
+    },
+    "steel": {
+      "type": "string",
+      "description": "The steel grade of the fastener or of the plates (S235, 8.8), or empty. A label: the dowel's own f_u,k is stated in its type block, because EN 14592 dowels are not the plate's grade."
+    },
+    "elements": {
+      "type": "array",
+      "description": "The ids of the Positions Element rows the connector joins, in the order typed. Descriptive; a member takes its timber from its own `material`, not from this list.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "moisture_class": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The connection's Feuchteklasse, 1, 2 or 3 -- ONE per connection since schema 1.1, because SIA 265 applies a single eta_w to R_d,Verb (Tabelle 4) and the classeur states one per sheet ('Stabduebel (Holz-Holz)'!C13, '(Stahl-Holz)'!C35). null takes it from the members' positions, the worst governing; a number states it here and wins, which is what an overridden field writes."
+    },
+    "conditions": {
+      "type": "object",
+      "description": "What the engineer states about the connection as a whole.",
+      "required": [
+        "seismic",
+        "truss"
+      ],
+      "properties": {
+        "seismic": {
+          "type": "boolean",
+          "description": "true: a stossartige Einwirkung, so eta_t = 1.4 (SIA 265 2.2.6)."
+        },
+        "truss": {
+          "type": "boolean",
+          "description": "true: the connection of an Ausfachungsstab under the simplified truss calculation of SIA 265 5.3.6.1.2, so the 0.75 of 5.3.6.2.2 is given as a second result beside R_d,Verb -- never folded into it."
+        }
+      }
+    },
+    "n_tot": {
+      "type": "object",
+      "description": "The total number of fasteners. Normally the drawing's own count; `override` true means the engineer set it by hand, which the tab says in yellow and the report prints.",
+      "required": [
+        "value",
+        "override"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "override": {
+          "type": "boolean"
+        }
+      }
+    },
+    "schema": {
+      "type": "string",
+      "description": "The detail schema this connector is drawn on -- a file name of details/ (section 3.3decies). Whether it exists is the export's question and not the file's: a connector naming a schema the export does not list is a WARNING, the descriptive half is still exported and the report says the resistance could not be calculated -- the v0.33 rule, because stopping would stop the schemas' export with it (section 13)."
+    },
+    "members": {
+      "type": "array",
+      "description": "The members meeting at the node, 2 to 6. The drawing fields are connection-source's; the rest is what SIA 265 6.2.1 reads.",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "element",
+          "role",
+          "material",
+          "predrilled",
+          "alpha",
+          "t",
+          "n",
+          "a_1",
+          "plates"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "element": {
+            "type": "string",
+            "description": "The id of the schema element this member is. It is what the member is DRAWN as, and the one way it reaches a position: the element's `position` names a row of Positions Element, and that row gives the strength class and the moisture class. An element the schema does not carry, or one that names no position, is a warning -- the connector is exported and its resistance is not."
+          },
+          "role": {
+            "type": "string",
+            "description": "'timber' or 'steel'. Only timber members carry a strength class and enter SIA 265 Tabelle 22; a steel member is drawn and nothing else."
+          },
+          "material": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "The strength class, in one of two shapes since 2.0. null FOLLOWS the element's position, resolved afresh at every export -- the static model's magnitude pattern (section 3.3octies), so «Importer Excel» is all it takes -- and is also what a steel member carries, having no timber at all. {\"grade\": \"GL24h\"} OVERRIDES that class: the override wins and STAYS, through the next import, and the element is still there for Woodcore to say what the position holds and offer to take the override back. ⚠️ The `position` key is gone: the element is the position reference now, so naming one here as well would be a second place for the same fact.",
+            "properties": {
+              "grade": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "predrilled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Vorbohrung, per member, because SIA 265 Tabelle 22 gives a row per (species, predrilling). A Laubholz member that is not predrilled is refused: the norm gives that combination no row at all. null for a steel member."
+          },
+          "alpha": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "The angle between the force and this member's grain, in degrees, folded into 0 to 90 (SIA 265 6.1.4.2). null for a steel member."
+          },
+          "t": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "The timber thickness this member brings to the joint, {value, unit} in mm. For a slotted-plate joint it is the whole member and `plates` says how the slots divide it. null for a steel member.",
+            "required": [
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          },
+          "n": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "How many fasteners follow one another in this member's grain direction -- k_red's n (SIA 265 6.1.4.2). Which fasteners count as «hintereinander» is a judgement, so it is stated and not read off the drawing."
+          },
+          "a_1": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Their spacing along the grain, {value, unit} in mm. Needed as soon as n is 2 or more; null with n = 1, where there is nothing to reduce.",
+            "required": [
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          },
+          "plates": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "For a Stahl-Holz joint, on the timber member the plates cut; null otherwise.",
+            "required": [
+              "arrangement",
+              "count",
+              "slot",
+              "ratio"
+            ],
+            "properties": {
+              "arrangement": {
+                "type": "string",
+                "description": "'schlitzblech' (slotted into the member) or 'laschen' (outside it)."
+              },
+              "count": {
+                "type": "number",
+                "description": "How many plates. Two shear planes each."
+              },
+              "slot": {
+                "type": "object",
+                "description": "Schlitzbreite, {value, unit} in mm -- the classeur's own `t` ('Stabduebel (Stahl-Holz)'!C16, label A16). The timber taken out per plate, which is what t_1 = (b - t)/2 and t_2 subtract; it is also the width the section figure draws the plate at. 0 for laschen. ⚠️ The plate's OWN thickness was here until schema 1.1 and nothing read it: it belongs to the plate's Lochleibung check (SIA 263 6.1.4), which is not built, and returns with it (section 14).",
+                "required": [
+                  "value",
+                  "unit"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  }
+                }
+              },
+              "ratio": {
+                "type": "number",
+                "description": "t_1/t_2, how the timber left over is shared between the two side pieces and the middle ones. SIA 265 Tabelle 46 holds equations (130)/(131) only for 0.35 <= ratio <= 0.5, which is reported rather than enforced."
+              }
+            }
+          },
+          "links": {
+            "type": "object",
+            "description": "The fields of this entry that follow a variable of the export, by their key (alpha, t, a_1, plates.slot, plates.ratio): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 2.1.",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+                "required": [
+                  "domain",
+                  "instance",
+                  "var"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "instance": {
+                    "type": "string"
+                  },
+                  "var": {
+                    "type": "string"
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": [
+                      "formulas"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "fasteners": {
+      "type": "array",
+      "description": "The ids of the schema's connector markers this connector's fasteners sit on, in the order they are numbered. ⚠️ Ids and not coordinates: the coordinates are the schema's, read afresh at every export, so moving a marker in the schema moves it here. A marker the schema no longer carries is dropped with a warning.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dowel": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The Stabdübel block: what is particular to this kind of fastener and to no other. Exactly the block named by connector.TYPE_BLOCK[type] must be present, and no other -- which is what lets a second type add a block instead of widening this file.",
+      "required": [
+        "f_u_k"
+      ],
+      "properties": {
+        "f_u_k": {
+          "type": "object",
+          "description": "The characteristic tensile strength of the dowel, {value, unit} in N/mm2 -- SIA 265 6.1.4.4, equation (87). An EN 14592 dowel's own value, which is not the plate's steel grade, so it is stated rather than looked up.",
+          "required": [
+            "value",
+            "unit"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "unit": {
+              "type": "string"
+            }
+          }
+        },
+        "steel": {
+          "type": "string",
+          "description": "Where f_u_k was taken from: a grade of SIA 263 Tabelle 1 (S235 .. S460, a plain round bar) or a class of Tabelle 2 (4.6 .. 10.9, a Bolzen being a Schraube), or empty for a value typed with no table behind it. A LABEL: f_u_k is what the calculation reads, and it stays writable, an SN EN 14592 fastener carrying a declared strength of its own (calc/norms/sia263)."
+        }
+      }
+    },
+    "plate": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The steel plate of a Stahl-Holz joint, for its bearing on the dowels after SIA 263:2013 Tabelle 16 (76) and 6.2.5 (D-13 to D-16): its thickness t, the end distance e1 in the force's direction (the smallest of the plate), the edge distance e2 across it, and the hole's diameter d0 -- each {value, unit} in mm, or null while not stated. The plate's grade is the source's `steel`; p1 and p2 are read off the drawing. Absent: the bearing is not checked, and the export says so. Only at schema_version 2.2.",
+      "additionalProperties": false,
+      "properties": {
+        "t": {"type": ["object", "null"]},
+        "e1": {"type": ["object", "null"]},
+        "e2": {"type": ["object", "null"]},
+        "d0": {"type": ["object", "null"]}
+      }
+    },
+    "links": {
+      "type": "object",
+      "description": "The fields of this entry that follow a variable of the export, by their key (diameter, dowel.f_u_k): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 2.1.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+          "required": [
+            "domain",
+            "instance",
+            "var"
+          ],
+          "properties": {
+            "domain": {
+              "type": "string"
+            },
+            "instance": {
+              "type": "string"
+            },
+            "var": {
+              "type": "string"
+            },
+            "factor": {
+              "type": "number"
+            },
+            "offset": {
+              "type": "number"
+            },
+            "origin": {
+              "type": "string",
+              "enum": [
+                "formulas"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

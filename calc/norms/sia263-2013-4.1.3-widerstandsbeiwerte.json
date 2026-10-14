@@ -1,0 +1,13 @@
+{
+  "_source": "SIA 263:2013, 4.1.3, the resistance factors «im Regelfall», p. 21 -- read in ExternalFiles/000-Normes/SIA263-2013-DE.pdf as text on 12.10.2026 (spec 2026-10-12-section-acier, REQ-006). The only copy of gamma_M1 in the project (docs/architecture/layout.md §11).",
+  "_note": "«gamma_M1 = 1,05 für Festigkeits- und Stabilitätsnachweise; gamma_M2 = 1,25 für Verbindungsmittel und Nachweise im Nettoquerschnitt. Hinweis: auf eine Unterscheidung zwischen gamma_M0 und gamma_M1 wie in SN EN 1993-1-1 wird verzichtet.» gamma_M2 is already transcribed with equation (76) in sia263-2013-tab16-lochleibung.json and is read from there (sia263.gamma_M2), never repeated here.",
+  "edition": "SIA 263:2013",
+  "factors": {
+    "number": "4.1.3",
+    "title": "Widerstandsbeiwerte",
+    "norm": "SIA 263",
+    "norm_ref": "4.1.3",
+    "page": 21,
+    "gamma_M1": {"value": 1.05, "use": "Festigkeits- und Stabilitätsnachweise"}
+  }
+}

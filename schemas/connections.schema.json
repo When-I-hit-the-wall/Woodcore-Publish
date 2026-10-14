@@ -1,0 +1,463 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Connections",
+  "description": "data/connections.json, schema 4.1 -- every polar-moment calculation saved in Woodcore, built by calc/domains/connection.py from connections/<id>.json (docs/domain/connections.md §3.3quinquies). Each carries its geometry in the x/z frame of the detail schema it is drawn on, which show-polar-moment distributes N, V and M with, the placement data of its figure, and the {vars, steps, checks, tables, results} record of its polar moment, which show-calc/var-of read as the 'connection' domain. Generated, never hand-edited.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "connections"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "-- pinned: an export written at another version is refused rather than read as this one. 4.1 adds `calculated` and `reason`: a connection its schema no longer draws whole is exported and refused by the report, where it stopped the export or was printed on what remained (periodic audit 260916). 4.0 drops `connector`: a polar moment names a schema and no connector (v0.76). 3.0 was the move to a detail schema: `schema` replaced `orientation`, and a member names an element and carries two angles -- `local` from the reference member, `axis` from the schema's x (v0.74). 4.2 (issue #42): a record may carry `links`.",
+      "enum": [
+        "4.1",
+        "4.2"
+      ]
+    },
+    "connections": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": [
+            "label",
+            "source",
+            "figure",
+            "norm",
+            "norm_ref",
+            "schema",
+            "reference",
+            "members",
+            "fasteners",
+            "center",
+            "directions",
+            "results",
+            "vars",
+            "steps",
+            "checks",
+            "calculated",
+            "reason"
+          ],
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string",
+              "description": "The source file, relative to 000-Python/ (connections/VU-MP-1.json)."
+            },
+            "figure": {
+              "type": "object",
+              "description": "The figure and what the report needs to draw the forces on it: the SVG file (relative to data/), the fasteners' positions in its coordinates, the directions of x and z there, and the length of the longest force arrow and the sizes of a head, a stroke and a label.",
+              "required": [
+                "files",
+                "points",
+                "ex",
+                "ez",
+                "arrow",
+                "head",
+                "stroke",
+                "font"
+              ],
+              "properties": {
+                "points": {
+                  "type": "array",
+                  "items": {
+                    "type": "array"
+                  }
+                },
+                "ex": {
+                  "type": "array"
+                },
+                "ez": {
+                  "type": "array"
+                },
+                "arrow": {
+                  "type": "number"
+                },
+                "head": {
+                  "type": "number"
+                },
+                "stroke": {
+                  "type": "number"
+                },
+                "font": {
+                  "type": "number"
+                },
+                "files": {
+                  "type": "object",
+                  "description": "The figure, once per language a report can be written in (docs/typst/language.md §4bis), keyed by its code: connections/<id>-<lang>.svg under data/. One per language because the legend is five sentences and the frame is sized from the widest of them; everything else in this block is geometry, and the same in all three.",
+                  "required": [
+                    "de",
+                    "fr",
+                    "en"
+                  ],
+                  "patternProperties": {
+                    ".*": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "norm": {
+              "type": "string"
+            },
+            "norm_ref": {
+              "type": "string"
+            },
+            "members": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "element",
+                  "position",
+                  "local",
+                  "axis"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "element": {
+                    "type": "string",
+                    "description": "The id of the schema element this member is; \"\" for one that names none yet."
+                  },
+                  "position": {
+                    "type": "string",
+                    "description": "The position that element names, resolved here so a reader need not open the schema."
+                  },
+                  "local": {
+                    "type": "number",
+                    "description": "This member's grain from the REFERENCE member's, in degrees from x towards z -- theta_(r,j), what show-polar-moment prints as the angle between two members."
+                  },
+                  "axis": {
+                    "type": "number",
+                    "description": "This member's grain from the SCHEMA's x, in degrees -- what a force-grain angle is measured against, the force's own components being in that frame. ⚠️ Not the same number as `local` since v0.74: until then the reference member's grain WAS x, so the two agreed by construction, and a detail drawn at an angle parts them."
+                  }
+                }
+              }
+            },
+            "fasteners": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "x",
+                  "z"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "z": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "center": {
+              "type": "object",
+              "required": [
+                "mode",
+                "x",
+                "z"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string"
+                },
+                "x": {
+                  "type": "number"
+                },
+                "z": {
+                  "type": "number"
+                }
+              }
+            },
+            "directions": {
+              "type": "object",
+              "required": [
+                "N",
+                "V"
+              ],
+              "properties": {
+                "N": {
+                  "type": "number"
+                },
+                "V": {
+                  "type": "number"
+                }
+              }
+            },
+            "results": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tables": {
+              "type": "array",
+              "description": "The same table shape as data/calculations.json's (docs/domain/calculation-domains.md §3.3).",
+              "items": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "columns",
+                  "rows"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "level": {
+                    "type": "number"
+                  },
+                  "place": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  },
+                  "columns": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "label",
+                        "kind"
+                      ],
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "group": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "array"
+                    }
+                  },
+                  "totals": {
+                    "type": "array",
+                    "items": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            },
+            "vars": {
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "required": [
+                    "value",
+                    "unit",
+                    "symbol",
+                    "label",
+                    "level",
+                    "source",
+                    "norm",
+                    "norm_ref"
+                  ],
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "level": {
+                      "type": "number"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "norm": {
+                      "type": "string"
+                    },
+                    "norm_ref": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "group": {
+                      "type": "string"
+                    },
+                    "group_label": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "level",
+                  "result",
+                  "uses",
+                  "norm",
+                  "norm_ref"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "level": {
+                    "type": "number"
+                  },
+                  "result": {
+                    "type": "string"
+                  },
+                  "uses": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "formula": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "norm": {
+                    "type": "string"
+                  },
+                  "norm_ref": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "checks": {
+              "type": "array"
+            },
+            "reference": {
+              "type": "number",
+              "description": "The member (1-based) whose grain is the x axis."
+            },
+            "schema": {
+              "type": "string",
+              "description": "The detail schema this connection is drawn on -- a file of details/ (docs/domain/detail-schemas.md §3.3decies). Its markers carry the fasteners and its elements are the members, so one joint is drawn once and both calculations of it read the same coordinates. Empty, or naming a schema the export does not list, is a warning and the report refuses to print the connection."
+            },
+            "calculated": {
+              "type": "boolean",
+              "description": "False where the schema it names is gone, lost a fastener or an element, or where nothing is ticked: the report refuses to print it, saying `reason`. A lost centre is not one of these -- the centroid replaces it (center.mode)."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Why the calculation cannot be printed, in English (a compile error's words); empty where it can."
+            },
+            "links": {
+              "type": "array",
+              "description": "Where each field that follows a variable came from (REQ-012): the entry (\"self\", an id, or `collection[i]`), the field, the variable, the factor and offset it was taken with, its own value and unit, and `stale` where it could not be read and the source's last value was used. Absent where none follows one.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "entry",
+                  "field",
+                  "variable",
+                  "factor",
+                  "offset",
+                  "base_value",
+                  "base_unit",
+                  "stale"
+                ],
+                "properties": {
+                  "entry": {
+                    "type": "string"
+                  },
+                  "field": {
+                    "type": "string"
+                  },
+                  "variable": {
+                    "type": "object",
+                    "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+                    "required": [
+                      "domain",
+                      "instance",
+                      "var"
+                    ],
+                    "properties": {
+                      "domain": {
+                        "type": "string"
+                      },
+                      "instance": {
+                        "type": "string"
+                      },
+                      "var": {
+                        "type": "string"
+                      },
+                      "factor": {
+                        "type": "number"
+                      },
+                      "offset": {
+                        "type": "number"
+                      },
+                      "origin": {
+                        "type": "string",
+                        "enum": [
+                          "formulas"
+                        ]
+                      }
+                    }
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "base_value": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "base_unit": {
+                    "type": "string"
+                  },
+                  "stale": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

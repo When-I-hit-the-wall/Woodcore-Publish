@@ -1,0 +1,736 @@
+{
+  "_source": "Every entry is read off the title page (or the imprint) of the edition named in its own `_source`, in ExternalFiles/000-Normes/ (docs/architecture/principles.md §2 rule 13, 11bis) -- never from memory and never from a handbook's restatement. An SIA title page prints its title in German, French, Italian and English and names its publisher in the language of the edition, so an SIA entry carries three titles and three publishers; a document whose edition exists in one language only carries one title, printed as it stands in every report (section 4bis: what no norm gives in a language is left as it is). ⚠️ Where the library does not hold the edition (the SIA documents the report templates cite and the library lacks, the VKF Brandschutznorm 1-15 and every German VKF directive), the entry's `_source` names instead the publisher's own page it was read off -- the title page of the preview PDF the SIA shop serves with the product (shop.sia.ch), or the cover of the directive on www.bsvonline.ch -- and says so with «Not in ExternalFiles/000-Normes/»; it is the same rule, read from the next most authoritative place.",
+  "_note": "The documents the engine knows how to name in full, for the report's bibliography (`#show-bibliography`, lib/bibliography.typ). It is a **catalogue and not a list to print**: an entry is set only where the report actually cites it -- by the `norm` field of a record of the export, by a `norm:` argument of `#var`, `#eq`, `#val`, `#var-unit` or `#var-line`, or by `#cite-norm`. A project's own documents -- a manufacturer's ETA, an office handbook -- belong in that project's `references.bib`, not here. ⚠️ No entry names the file it was read from anywhere the report can print: the four fields a bibliography prints are the designation, the title, the edition and the publisher, which is the engineer's own list (v0.99). `_source` is for whoever checks the transcription.",
+  "references": [
+    {
+      "key": "SIA 118",
+      "aliases": ["SIA 118:2013"],
+      "kind": "norm",
+      "designation": "SIA 118:2013",
+      "title": {
+        "de": "Allgemeine Bedingungen für Bauarbeiten",
+        "fr": "Conditions générales pour l’exécution des travaux de construction",
+        "en": "General terms and conditions for construction works"
+      },
+      "edition": "2013",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "shop.sia.ch preview PDFs (Inhaltsverzeichnis / Table des matières / Contents) of D-118, F-118 and E-118, title pages: DE «SIA 118:2013 Bauwesen 507 118 / Ersetzt die Norm SIA 118:1977/91 / Conditions générales pour l’exécution des travaux de construction / Condizioni generali per l’esecuzione dei lavori di costruzione / Allgemeine Bedingungen für Bauarbeiten», «SN 507118:2013 de», «Gültig ab: 2013-01-01», p. 2 «2013-01 1. Auflage» (https://shop.sia.ch/3131563f-07ef-4550-8639-d8f85e3039ba/D/DownloadAnhang); FR «SN 507118:2013 fr», «2013-01 1er tirage» (https://shop.sia.ch/35208f78-933d-40cc-9578-a1dcf0b76711/D/DownloadAnhang); EN edition «General terms and conditions for construction works», «SN 507118:2017 en», «Valid from: 2013-01-01», «2017-06 1st Edition», publisher «Swiss Society of Engineers and Architects» (https://shop.sia.ch/f7c2ccee-9554-43f6-b952-ab9b8e93f251/D/DownloadAnhang). Product pages https://shop.sia.ch/normenwerk/architekt/118_2013_d/D/Product and https://shop.sia.ch/normenwerk/architekt/118_2013_e/D/Product (valid from 01.01.2013, Revision 1 of 01.12.2025, SN 507118; predecessor SIA 118:1977/91). Corrigendum (Ergänzung) SIA 118-C1:2026, valid from 2026-01-01 (https://shop.sia.ch/e5477ece-ccbe-43b0-b6be-db3e7e07b011/D/DownloadAnhang): it supplements the norm for the new 60-day Rügefrist of the OR revision of 2026-01-01 and is not a new edition. Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674). Not in ExternalFiles/000-Normes/."
+    },
+    {
+      "key": "SIA 180",
+      "aliases": ["SIA 180:2014"],
+      "kind": "norm",
+      "designation": "SIA 180:2014",
+      "title": {
+        "de": "Wärmeschutz, Feuchteschutz und Raumklima in Gebäuden",
+        "fr": "Protection thermique, protection contre l’humidité et climat intérieur dans les bâtiments"
+      },
+      "edition": "2014",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA180-2014-FR.pdf, title page (p. 1): «SIA 180:2014 Bâtiment, génie civil 520 180 / Remplace la norme SIA 180:1999 / Protection thermique, protection contre l’humidité et climat intérieur dans les bâtiments», «SN 520180:2014 fr», «Valable dès: 2014-07-01», p. 2 «2014-06 1er tirage». German title read off the German edition's own title page, shop.sia.ch preview of D-180 (https://shop.sia.ch/d57eb490-1a7e-49d8-8102-9c5f8100cb63/D/DownloadAnhang): «Wärmeschutz, Feuchteschutz und Raumklima in Gebäuden», «SN 520180:2014 de», «2014-05 1. Auflage»; product page https://shop.sia.ch/normenwerk/architekt/180_2014_d/D/Product (valid from 01.07.2014, Revision 2 of 01.10.2020; Korrigenda C1:2015 and C2:2020). ⚠️ The library's French PDF prints the German title as «Wärmeschutz, Feuchteschutz und Innenraumklima in Gebäuden» in its trilingual header; the German edition itself, the shop and the SIA publication list say «Raumklima», which is what this entry prints. No English title: the cover carries German, French and Italian only and the shop lists F and I editions only. Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674)."
+    },
+    {
+      "key": "SIA 181",
+      "aliases": ["SIA 181:2020"],
+      "kind": "norm",
+      "designation": "SIA 181:2020",
+      "title": {
+        "de": "Schallschutz im Hochbau",
+        "fr": "Protection contre le bruit dans le bâtiment"
+      },
+      "edition": "2020",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "shop.sia.ch preview PDFs of D-181 and F-181, title pages: DE «SIA 181:2020 Bauwesen 520 181 / Ersetzt SIA 181:2006 / Protection contre le bruit dans le bâtiment / La protezione dal rumore nelle costruzioni edilizie / Schallschutz im Hochbau», «SN 520181:2020 de», «Gültig ab: 2020-11-01», p. 2 «2020-11 1. Auflage» (https://shop.sia.ch/36ba3617-4de3-48e6-bc57-47d1b3f50312/D/DownloadAnhang); FR «SN 520181:2020 fr», «Valable dès le: 2020-11-01», «2020-11 1er tirage» (https://shop.sia.ch/1453abb3-923f-4b89-9ede-55b2d830a363/D/DownloadAnhang). Product page https://shop.sia.ch/normenwerk/architekt/181_2020_d/D/Product (valid from 01.11.2020, SN 520181, no corrigendum; the FAQ document, 2nd edition September 2025, is a separate publication). No English title (cover D/F/I, shop F and I editions only). ⚠️ The French cover writes the publisher «Société suisse des ingénieurs et architectes» (without «des»); this entry prints the name as on the other SIA covers. Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674). Not in ExternalFiles/000-Normes/."
+    },
+    {
+      "key": "SIA 181/1",
+      "aliases": ["SIA 181/1:2026"],
+      "kind": "norm",
+      "designation": "SIA 181/1:2026",
+      "title": {
+        "de": "Raumakustik",
+        "fr": "Acoustique des salles",
+        "en": "Room acoustics"
+      },
+      "edition": "2026",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "shop.sia.ch preview PDFs of D-181/1 and F-181/1, title pages: DE «SIA 181/1:2026 Bauwesen 520 181/1 / Acoustique des salles / Acustica di sala / Room acoustics / Raumakustik», «SN 520181/1:2026 de», «Gültig ab: 2026-02-01», p. 2 «2026-02 1. Auflage» (https://shop.sia.ch/8d63eb06-25c1-486b-a245-cfd4fcc4112e/D/DownloadAnhang); FR «Raumakustik / Acustica di sala / Room acoustics / Acoustique des salles», «SN 520181/1:2026 fr», «Valable dès le: 2026-02-01», «2026-02 1er tirage» (https://shop.sia.ch/2c4178ca-3b36-46de-adb2-8fbd614e8d02/D/DownloadAnhang). Product page https://shop.sia.ch/normenwerk/architekt/181-1_2026_d/D/Product (valid from 01.02.2026, 24 pages, no predecessor; complements SIA 181:2020). ⚠️ The French title is «Acoustique des salles» (the engineer's note said «acoustique des locaux»). First listed in «Neuerscheinungen» 2026, published 30.01.2026 (https://cms.sia.ch/de/api/getMedia/673). Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674). Not in ExternalFiles/000-Normes/."
+    },
+    {
+      "key": "SIA 232/1",
+      "aliases": ["SIA 232/1:2011"],
+      "kind": "norm",
+      "designation": "SIA 232/1:2011",
+      "title": {
+        "de": "Geneigte Dächer",
+        "fr": "Toitures inclinées"
+      },
+      "edition": "2011",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA232-1-2011-FR.pdf, title page (p. 1): «SIA 232/1:2011 Bâtiment, génie civil 564 232/1 / Remplace la norme SIA 232:2000 / Geneigte Dächer / Toitures inclinées», «SN 564232/1:2011 fr», «Valable dès: 2011-08-01», p. 2 «2011-12 1er tirage». German edition: shop.sia.ch preview of D-232/1 (https://shop.sia.ch/5a5045a9-afe7-43bc-8530-405d64b99f35/D/DownloadAnhang): «SN 564232/1:2011 de», p. 2 «2011-07 1. Auflage / 2016-03 2. Auflage mit Korrekturen aus Korrigenda SIA 232/1-C1»; product page https://shop.sia.ch/normenwerk/architekt/232-1_2011_d/D/Product (valid from 01.08.2011, Revision 2 of 11.03.2016). No English title (cover D/F, shop F edition only). ⚠️ REVISION ANNOUNCED: draft prSIA 232/1:2026-09, «Vorgesehen als Ersatz für SIA 232/1:2011», consultation open until 6 November 2026 (https://cms.sia.ch/de/api/getMedia/2251); it has no validity and may not be applied. Until it is published SIA 232/1:2011 remains the current edition. Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674)."
+    },
+    {
+      "key": "SIA 260",
+      "aliases": ["SIA 260:2013"],
+      "kind": "norm",
+      "designation": "SIA 260:2013",
+      "title": {
+        "de": "Grundlagen der Projektierung von Tragwerken",
+        "fr": "Bases pour l’élaboration des projets de structures porteuses",
+        "en": "Basis of Structural Design"
+      },
+      "edition": "2013",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA260-2013-DE.pdf, -FR.pdf and -EN.pdf, title page (SN 505260:2013, valid from 2013-08-01)"
+    },
+    {
+      "key": "SIA 261",
+      "aliases": ["SIA 261:2020"],
+      "kind": "norm",
+      "designation": "SIA 261:2020",
+      "title": {
+        "de": "Einwirkungen auf Tragwerke",
+        "fr": "Actions sur les structures porteuses",
+        "en": "Actions on structures"
+      },
+      "edition": "2020",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA261-2020-DE.pdf and -FR.pdf, title page (SN 505261:2020, valid from 2020-08-01). The edition calc/norms/sia261-2020-tab08-nutzlasten.json and the glossary's French are read from."
+    },
+    {
+      "key": "SIA 261/1",
+      "aliases": ["SIA 261/1:2020"],
+      "kind": "norm",
+      "designation": "SIA 261/1:2020",
+      "title": {
+        "de": "Einwirkungen auf Tragwerke – Ergänzende Festlegungen",
+        "fr": "Actions sur les structures porteuses – Spécifications complémentaires",
+        "en": "Actions on structures – Supplementary Specifications"
+      },
+      "edition": "2020",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA261-1-2020-FR.pdf, title page, which prints all four titles (SN 505261/1:2020, valid from 2020-11-01)"
+    },
+    {
+      "key": "SIA 262",
+      "aliases": ["SIA 262:2025"],
+      "kind": "norm",
+      "designation": "SIA 262:2025",
+      "title": {
+        "de": "Betonbau",
+        "fr": "Construction en béton",
+        "en": "Concrete structures"
+      },
+      "edition": "2025",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "shop.sia.ch preview PDFs of D-262 and F-262 (2025), title pages: DE «SIA 262:2025 Bauwesen 505 262 / Ersetzt SIA 262:2013 / Construction en béton / Costruzioni di calcestruzzo / Concrete structures / Betonbau», «SN 505262:2025 de», «Gültig ab: 2025-11-01», 112 pages (https://shop.sia.ch/ab352e86-40e9-4a3c-8c1a-759ee83d8377/D/DownloadAnhang); FR «SIA 262:2025 Construction 505 262 / Remplace SIA 262:2013 … Construction en béton», «SN 505262:2025 fr», «Valable dès le : 2025-11-01», p. 2 «2025-11 1er tirage» (https://shop.sia.ch/31aaf060-a262-4657-b7f8-bb0c1e9e182c/D/DownloadAnhang). Product pages https://shop.sia.ch/normenwerk/ingenieur/262_2025_d/D/Product (valid from 01.11.2025; predecessor SIA 262:2013, valid until 31.10.2025) and https://shop.sia.ch/normenwerk/architekt/262_2025_f/D/Product. ⚠️ SIA 262:2013 (with corrigendum C1:2017) is SUPERSEDED since 2025-11-01; a citation written «SIA 262:2013» should be reviewed. ⚠️ The shop lists the French title in the plural, «Constructions en béton»; the French cover says «Construction en béton», which is what this entry prints. The partial revision also concerns SIA 269/2 (https://www.sia.ch/de/cms/node/51173). Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674). Not in ExternalFiles/000-Normes/."
+    },
+    {
+      "key": "SIA 263",
+      "aliases": ["SIA 263:2013"],
+      "kind": "norm",
+      "designation": "SIA 263:2013",
+      "title": {
+        "de": "Stahlbau",
+        "fr": "Construction en acier",
+        "en": "Steel Structures"
+      },
+      "edition": "2013",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA263-2013-DE.pdf and -FR.pdf, title page (SN 505263:2013, valid from 2013-01-01). The edition calc/norms/sia263-2013-tab01-baustaehle.json and -tab02-schrauben.json are read from."
+    },
+    {
+      "key": "SIA 264",
+      "aliases": ["SIA 264:2014"],
+      "kind": "norm",
+      "designation": "SIA 264:2014",
+      "title": {
+        "de": "Stahl-Beton-Verbundbau",
+        "fr": "Construction mixte acier-béton",
+        "en": "Composite Steel and Concrete Structures"
+      },
+      "edition": "2014",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "shop.sia.ch preview PDFs of D-264 and F-264, title pages: DE «SIA 264:2014 Bauwesen 505 264 / Ersetzt Norm SIA 264, Ausgabe 2003 / Construction mixte acier-béton / Costruzioni miste di acciaio-calcestruzzo / Composite Steel and Concrete Structures / Stahl-Beton-Verbundbau», «SN 505264:2014 de», «Gültig ab: 2014-01-01», p. 2 «2014-01 1. Auflage» (https://shop.sia.ch/2e1a6b4e-75b2-43e5-9781-51f2c678d50a/D/DownloadAnhang); FR «SN 505264:2014 fr», «Valable dès: 2014-01-01», «2014-01 1er tirage» (https://shop.sia.ch/738eb75a-fa0a-4f59-9ac6-b05eae1d1f03/D/DownloadAnhang). Product page https://shop.sia.ch/normenwerk/ingenieur/264_2014_d/D/Product (valid from 01.01.2014, SN 505264, no corrigendum for this edition; predecessor SIA 264:2003 with C1). Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674). No revision draft found. Not in ExternalFiles/000-Normes/."
+    },
+    {
+      "key": "SIA 265",
+      "aliases": ["SIA 265:2021"],
+      "kind": "norm",
+      "designation": "SIA 265:2021",
+      "title": {
+        "de": "Holzbau",
+        "fr": "Construction en bois",
+        "en": "Timber Structures"
+      },
+      "edition": "2021",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA265-2021-DE.pdf and -FR.pdf, title page (SN 505265:2021, valid from 2021-05-01). The edition every sia265-2021-*.json of calc/norms/ is read from."
+    },
+    {
+      "key": "SIA 265/1",
+      "aliases": ["SIA 265/1:2018"],
+      "kind": "norm",
+      "designation": "SIA 265/1:2018",
+      "title": {
+        "de": "Holzbau – Ergänzende Festlegungen",
+        "fr": "Constructions en bois – Spécifications complémentaires",
+        "en": "Timber Structures – Supplementary specifications"
+      },
+      "edition": "2018",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA265-1-2018-FR.pdf, title page, which prints all four titles (SN 505265/1:2018, valid from 2018-09-01)"
+    },
+    {
+      "key": "SIA 266",
+      "aliases": ["SIA 266:2015"],
+      "kind": "norm",
+      "designation": "SIA 266:2015",
+      "title": {
+        "de": "Mauerwerk",
+        "fr": "Construction en maçonnerie",
+        "en": "Masonry"
+      },
+      "edition": "2015",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "shop.sia.ch preview PDFs of D-266 and F-266, title pages: DE «SIA 266:2015 Bauwesen 505 266 / Ersetzt Norm SIA 266:2003 / Construction en maçonnerie / Costruzioni di muratura / Masonry / Mauerwerk», «SN 505266:2015 de», «Gültig ab: 2015-07-01», p. 2 «2015-07 1. Auflage» (https://shop.sia.ch/b0288fec-445b-4044-8cf2-1722d81795d2/D/DownloadAnhang); FR «SN 505266:2015 fr», «Valable dès: 2015-07-01», «2015-08 1er tirage» (https://shop.sia.ch/6bd566e4-ba16-4155-a278-49b69b7800c7/D/DownloadAnhang). Product page https://shop.sia.ch/normenwerk/ingenieur/266_2015_d/D/Product (valid from 01.07.2015, SN 505266; predecessor SIA 266:2003 with C1). Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674). No revision draft found. Not in ExternalFiles/000-Normes/."
+    },
+    {
+      "key": "SIA 267",
+      "aliases": ["SIA 267:2013"],
+      "kind": "norm",
+      "designation": "SIA 267:2013",
+      "title": {
+        "de": "Geotechnik",
+        "fr": "Géotechnique",
+        "en": "Geotechnical Design"
+      },
+      "edition": "2013",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA267-2013-DE.pdf and SIA267-2013-FR.pdf, title pages (p. 1): «SIA 267:2013 Bauwesen 505 267 / Ersetzt Norm SIA 267, Ausgabe 2003 / Géotechnique / Geotecnica / Geotechnical Design / Geotechnik», «SN 505267:2013 de», «Gültig ab: 2013-08-01», p. 2 «2013-08 1. Auflage»; FR «SN 505267:2013 fr», «Valable dès: 2013-08-01», p. 2 «2014-12 1er tirage». Confirmed against the shop: https://shop.sia.ch/normenwerk/ingenieur/sia%20267/d/2013/D/Product (valid from 01.08.2013, Revision 2 of 24.07.2018; Korrigenda C1:2016-03-02 and C2:2018-08-01, which the library's uncorrected first printing does not include) and preview https://shop.sia.ch/37b5f672-7a83-47d7-a728-9c97054065e8/D/DownloadAnhang. Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674). No revision draft found (SIA 267/1:2013 is a separate norm, corrigendum C1:2024)."
+    },
+    {
+      "key": "SIA 271",
+      "aliases": ["SIA 271:2021"],
+      "kind": "norm",
+      "designation": "SIA 271:2021",
+      "title": {
+        "de": "Abdichtungen von Hochbauten",
+        "fr": "Étanchéité des bâtiments"
+      },
+      "edition": "2021",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "shop.sia.ch preview PDFs of D-271 and F-271, title pages: DE «SIA 271:2021 Bauwesen 564 271 / Ersetzt SIA 271:2007 / Étanchéités des bâtiments / Impermeabilizzazione di edifici / Abdichtungen von Hochbauten», «SN 564271:2021 de», «Gültig ab: 2021-11-01», p. 2 «2021-11 1. Auflage / 2022-12 2. Auflage, Nachdruck mit Korrekturen aus Korrigenda SIA 271-C1» (https://shop.sia.ch/0810b80b-78c2-4446-8ad0-03234219aef9/D/DownloadAnhang); FR «Abdichtungen von Hochbauten / Impermeabilizzazione di edifici / Étanchéité des bâtiments», «SN 564271:2021 fr», «Valable dès le: 2021-11-01», «2021-11 1ère édition» (https://shop.sia.ch/032200e9-b0bb-42af-9c4e-11e611f550bc/D/DownloadAnhang). Product page https://shop.sia.ch/normenwerk/architekt/271_2021_d/D/Product (valid from 01.11.2021, Revision 2 of 27.02.2024; Korrigenda C1 and C2). ⚠️ The German cover misprints the French title in the plural, «Étanchéités des bâtiments»; the French edition and the shop say «Étanchéité des bâtiments», which is what this entry prints. No English title (D/F/I only). Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674). Related but separate norms: SIA 271/1:2025 «Abdichtungen von Innenräumen» (valid from 2025-05-01 according to https://pavidensa.ch/news/detail/jetzt-verfuegbar-die-neue-sia-271-12025, not read on shop.sia.ch) and the draft prSIA 273:2026-03 (https://cms.sia.ch/de/api/getMedia/1554). Not in ExternalFiles/000-Normes/."
+    },
+    {
+      "key": "SIA 380/1",
+      "aliases": ["SIA 380/1:2016"],
+      "kind": "norm",
+      "designation": "SIA 380/1:2016",
+      "title": {
+        "de": "Heizwärmebedarf",
+        "fr": "Besoins de chaleur pour le chauffage"
+      },
+      "edition": "2016",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA380-1-2016-FR.pdf, title page (p. 1): «SIA 380/1:2016 Construction 520 380/1 / Remplace SIA 380/1:2009 / Heizwärmebedarf / Fabbisogno termico per il riscaldamento / Besoins de chaleur pour le chauffage», «SN 520380/1:2016 fr», «Valable dès: 2016-12-01», p. 2 «2016-12 1er tirage». German edition: shop.sia.ch preview of D-380/1 (https://shop.sia.ch/119dd4fe-cdb1-43cd-be2a-fb3e74dc2e18/D/DownloadAnhang): «SN 520380/1:2016 de», «2016-12 1. Auflage»; product page https://shop.sia.ch/normenwerk/architekt/380-1_2016_d/D/Product (valid from 01.12.2016, Revision 1 of 01.03.2019, Korrigenda C1:2019). ⚠️ The French title is «Besoins» in the plural (the engineer's note said «Besoin»). No English title (D/F/I only). Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674). The list also carries SIA 380:2022 «Grundlagen für energetische Berechnungen von Gebäuden» as a separate norm. No revision draft of SIA 380/1 found."
+    },
+    {
+      "key": "SIA 414/2",
+      "aliases": ["SIA 414/2:2016"],
+      "kind": "norm",
+      "designation": "SIA 414/2:2016",
+      "title": {
+        "de": "Masstoleranzen im Hochbau",
+        "fr": "Tolérances dimensionnelles dans le bâtiment"
+      },
+      "edition": "2016",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SIA414-2-2016-DE.pdf and SIA414-2-2016-FR.pdf, title pages (p. 1): «SIA 414/2:2016 Bauwesen 501 414/2 / Ersetzt SIA V414/10:1987 / Tolérances dimensionnelles dans le bâtiment / Tolleranze dimensionali nell’edilizia / Masstoleranzen im Hochbau», «SN 501414/2:2016 de», «Gültig ab: 2016-07-01», p. 2 «2016-07 1. Auflage»; FR «SN 501414/2:2016 fr», «Valable dès le 2016-07-01», p. 2 «2016-11 1er tirage». Confirmed against https://shop.sia.ch/normenwerk/architekt/414-2_2016_d/D/Product (valid from 01.07.2016, no corrigendum) and preview https://shop.sia.ch/ef96474d-5d78-48ee-82d6-0a34aeebeb7c/D/DownloadAnhang. No English title (D/F/I only). Current in «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674). No revision draft found."
+    },
+    {
+      "key": "SIA 500",
+      "aliases": ["SIA 500:2009"],
+      "kind": "norm",
+      "designation": "SIA 500:2009",
+      "title": {
+        "de": "Hindernisfreie Bauten",
+        "fr": "Constructions sans obstacles",
+        "en": "Obstacle free buildings"
+      },
+      "edition": "2009",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "shop.sia.ch preview PDFs of D-500 and F-500, title pages: DE «SIA 500:2009 Bauwesen 521 500 / Ersetzt die Norm SN 521500, Ausgabe 1988 / Constructions sans obstacles / Edifici senza ostacoli / Obstacle free buildings / Hindernisfreie Bauten», p. 2 «2009-01 1. Auflage / 2011-06 2. Auflage, Nachdruck mit Korrekturen aus Korrigenda SIA 500-C1 und SIA 500-C2 / 2022-09 3. Auflage, Nachdruck mit Korrekturen aus Korrigenda SIA 500-C3 und SIA 500-C4» (https://shop.sia.ch/9ffe2922-345f-404f-ba13-63f917ddcc4d/D/DownloadAnhang); FR «Remplace la norme SN 521500, édition 1988», «2009-07 1er tirage» (https://shop.sia.ch/06c8d325-da87-4dc1-af51-1e25166c9684/D/DownloadAnhang). Product page https://shop.sia.ch/normenwerk/architekt/500_2009_d/D/Product (valid from 01.01.2009, SN 521500, Revision 3 of 01.10.2019, Korrigenda C1 to C4). The covers carry no «Gültig ab» line, the date is the shop's. ⚠️ REVISION ANNOUNCED: consultation draft prSIA 500:2025-07 «Hindernisfreie Bauten», «Vorgesehen als Ersatz für SIA 500:2009», consultation closed 2025-10-03 (https://cms.sia.ch/de/api/getMedia/1210); no validity, may not be applied. As of «SIA Publikationen, Stand: 30.07.2026» (https://cms.sia.ch/de/api/getMedia/674) the norm is still SIA 500:2009. Not in ExternalFiles/000-Normes/."
+    },
+    {
+      "key": "SN EN 14592",
+      "aliases": ["SN EN 14592+A1:2012", "EN 14592"],
+      "kind": "norm",
+      "designation": "SN EN 14592:2022",
+      "title": {
+        "de": "Holzbauwerke – Stiftförmige Verbindungsmittel – Anforderungen",
+        "fr": "Structures en bois – Éléments de fixation de type tige – Exigences",
+        "en": "Timber structures – Dowel-type fasteners – Requirements"
+      },
+      "edition": "2022",
+      "publisher": {
+        "de": "Schweizerischer Ingenieur- und Architektenverein",
+        "fr": "Société suisse des ingénieurs et des architectes",
+        "en": "Swiss Society of Engineers and Architects"
+      },
+      "_source": "SN EN 14592:2022 (SIA 265.177), EN-14592-2022-DE.pdf, title page: the designation and the three titles, and «Ersetzt SN EN 14592+A1:2012». calc/norms/sn-en-14592-2022-stabduebel-werkstoff.json reads its Anhang G, G.4 and Tabelle G.9 (12.10.2026, spec 2026-10-12-audit-issues-47-48-49, D-20); the 2012 edition stays an alias, as SIA 265:2021 6.2.1.1 names it."
+    },
+    {
+      "key": "SZS C5",
+      "aliases": ["SZS C5:2018", "SZS-C5"],
+      "kind": "norm",
+      "designation": "SZS C5, Revision 2018",
+      "title": {
+        "de": "Konstruktionstabellen C5",
+        "fr": "Tables de construction C5"
+      },
+      "edition": "2. Auflage, Revision 2018, Nachdruck 2021",
+      "publisher": {
+        "de": "Stahlbau Zentrum Schweiz",
+        "fr": "Centre suisse de la construction métallique"
+      },
+      "_source": "SZS-C5-2021.pdf, cover and imprint (PDF pages 3 and 4): «Konstruktionstabellen / Tables de construction», «Herausgeber/Editeur: Stahlbau Zentrum Schweiz / Centre suisse de la construction métallique», «2. Auflage … Revision 2018, Nachdruck 2021». The edition calc/norms/szs-c5-2018-edv-kurzbezeichnungen.json is read from. Its pages carry no English, so the entry has no English title and prints the German one in an English report."
+    },
+    {
+      "key": "STE Compact 02",
+      "aliases": ["STE Compact 02, Version 2022", "STE-Compact02"],
+      "kind": "literature",
+      "designation": "STE Compact 02, Version 2022",
+      "title": "Plans dans la construction en bois",
+      "edition": "Version 2022",
+      "publisher": "swiss timber engineers",
+      "_source": "STE-Compact02-FR.pdf, cover: «Compact 02   Version 2022», «Plans dans la construction en bois», «swiss timber engineers». The symbology calc/domains/plan_svg.py draws and the legend of calc/i18n/strings.json's plan block are read from it. ⚠️ Only the French edition is in the library, so the one title it prints is what a German or English report prints too."
+    },
+    {
+      "key": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
+      "aliases": ["bauforumstahl, Arbeitshilfe 02-9", "bauforumstahl"],
+      "kind": "literature",
+      "designation": "bauforumstahl, Arbeitshilfe 02-9",
+      "title": "Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
+      "edition": "2013",
+      "publisher": "bauforumstahl e.V., Düsseldorf",
+      "_source": "ExternalFiles/104-MomentPolaire/001-Artikel-ArbeitshilfePolaresFlachentragheitsmoment-…pdf. ⚠️ Its printed pages cannot be read as text -- the fonts are encoded with a scrambled mapping, which is why docs/architecture/reference-library.md §11bis counts it among the scans -- so the title is the one calc/domains/connection.py's DEFAULT_NORM cites, confirmed word by word in the garbled page («Tragwerksplanung im Stahlbau … Gelenkige Anschlüsse»), and the designation, the publisher and the year are the PDF's own metadata (/Title «Arbeitshilfe 02-9», /Author «bauforumstahl e.V., Duesseldorf», /CreationDate 2013-03-09). The year is therefore the file's and not a printed edition statement. The method `show-polar-moment` prints, and its Bild 3, are this document's."
+    },
+    {
+      "key": "VKF 1-15",
+      "aliases": ["VKF1-15", "AEAI 1-15", "AEAI1-15", "BSN 1-15", "NPI 1-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 1-15",
+      "title": {
+        "de": "Brandschutznorm",
+        "fr": "Norme de protection incendie"
+      },
+      "edition": "01.01.2015",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "Not in ExternalFiles/000-Normes/ (no VKF-AEAI-1-15 file, and no German copy of any directive); covers read off the VKF's own publication: FR «NORME DE PROTECTION INCENDIE», «01.01.2015 / 1-15fr»; DE «BRANDSCHUTZNORM», «01.01.2015 / 1-15de». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-57.pdf/content (printed title «Brandschutznorm»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-55.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The norm that directives 10-15 to 28-15 implement (BSN 1-15); unchanged on its cover since 2015 and part of the BSV 2015, still in force. A total revision (BSV 2026) is in preparation, see the note on 12-15."
+    },
+    {
+      "key": "VKF 10-15",
+      "aliases": ["VKF10-15", "AEAI 10-15", "AEAI10-15", "BSR 10-15", "DPI 10-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 10-15",
+      "title": {
+        "de": "Begriffe und Definitionen",
+        "fr": "Termes et définitions"
+      },
+      "edition": "01.01.2019 (état 22.12.2021)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-10-15-TermesEtDefinitions.pdf, cover (PDF page 1): «DIRECTIVE DE PROTECTION INCENDIE», «Termes et définitions», «01.01.2019 / 10-15fr», «État 22.12.2021». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-2768.pdf/content (printed title «Begriffe und Definitionen»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-2770.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file."
+    },
+    {
+      "key": "VKF 11-15",
+      "aliases": ["VKF11-15", "AEAI 11-15", "AEAI11-15", "BSR 11-15", "DPI 11-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 11-15",
+      "title": {
+        "de": "Qualitätssicherung im Brandschutz",
+        "fr": "Assurance qualité en protection incendie"
+      },
+      "edition": "01.01.2019 (état 01.08.2021)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-11-15-AssuranceQualiteEnProtectionIncendie.pdf, cover (PDF page 1): «Assurance qualité en protection incendie», «01.01.2019 / 11-15fr», «État 01.08.2021». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-2706.pdf/content (printed title «Qualitätssicherung im Brandschutz»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-2707.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file."
+    },
+    {
+      "key": "VKF 12-15",
+      "aliases": ["VKF12-15", "AEAI 12-15", "AEAI12-15", "BSR 12-15", "DPI 12-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 12-15",
+      "title": {
+        "de": "Brandverhütung und organisatorischer Brandschutz",
+        "fr": "Prévention des incendies et protection incendie organisationnelle"
+      },
+      "edition": "01.04.2026",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-12-15-PreventionDesIncendiesEtProtectionIncendieOrganisationnelle.pdf, cover (PDF page 1): library copy «01.01.2017 / 12-15fr», «État 01.06.2023»; current file «01.04.2026 / 12-15fr» with the note «Modifications approuvées par l’AIET le 6 mars 2026» and no «État» line. German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-1545.pdf/content (printed title «Brandverhütung und organisatorischer Brandschutz»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-68.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. ⚠️ The library copy (01.01.2017, état 01.06.2023) is SUPERSEDED: the IOTH approved amendments on 6 March 2026 (ch. 3.2 para. 10 and ch. 4.5 para. 1, the nationwide ban on igniting fireworks in publicly accessible premises), in force 2026-04-01; the old version is listed as «Gültig bis 31.03.2026» (BSPUB-…-3187 de, -3192 fr). This entry is the version valid from 01.04.2026. Sources of the change: https://www.bsvonline.ch/de/aktuell/feuerwerksverbot-20032026 and https://www.bsvonline.ch/de/aktuell/revision-bsv-sofortmassnahme-und-weiteres-vorgehen. ⚠️ TOTAL REVISION ANNOUNCED (BSV 2026): on 2026-03-06 the IOTH decided to take more time after 11 000+ responses to the technical consultation (closed 2026-01-11) and in view of the Crans-Montana fire; the new Brandschutzvorschriften are now planned to come into force in autumn 2027 and would repeal the BSV 2015 (earlier plans: 2026, then spring 2027). Until then the BSV 2015 remain valid."
+    },
+    {
+      "key": "VKF 13-15",
+      "aliases": ["VKF13-15", "AEAI 13-15", "AEAI13-15", "BSR 13-15", "DPI 13-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 13-15",
+      "title": {
+        "de": "Baustoffe und Bauteile – Klassifikation",
+        "fr": "Matériaux et éléments de construction – Classification"
+      },
+      "edition": "01.01.2017 (état 14.12.2017)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-13-15-MateriauxEtElementsDeConstruction.pdf, cover (PDF page 1): «DIRECTIVE DE PROTECTION INCENDIE», «Matériaux et éléments de construction / Classification», «01.01.2017 / 13-15fr», «État 14.12.2017». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-71.pdf/content (printed title «Baustoffe und Bauteile / Klassifikation»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-72.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file. Replaces the existing entry «VKF 13-15» of norms.json, which carries the French title only."
+    },
+    {
+      "key": "VKF 14-15",
+      "aliases": ["VKF14-15", "AEAI 14-15", "AEAI14-15", "BSR 14-15", "DPI 14-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 14-15",
+      "title": {
+        "de": "Verwendung von Baustoffen",
+        "fr": "Utilisation des matériaux de construction"
+      },
+      "edition": "01.01.2017 (état 01.06.2023)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-14-15-UtilisationDesMateriauxDeConstruction.pdf, cover (PDF page 1): «Utilisation des matériaux de construction», «01.01.2017 / 14-15fr», «État 01.06.2023». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-77.pdf/content (printed title «Verwendung von Baustoffen»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-75.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file. Replaces the existing entry «VKF 14-15», which carries the French title only."
+    },
+    {
+      "key": "VKF 15-15",
+      "aliases": ["VKF15-15", "AEAI 15-15", "AEAI15-15", "BSR 15-15", "DPI 15-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 15-15",
+      "title": {
+        "de": "Brandschutzabstände, Tragwerke und Brandabschnitte",
+        "fr": "Distances de sécurité incendie, systèmes porteurs et compartiments coupe-feu"
+      },
+      "edition": "01.01.2017 (état 18.09.2019)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-15-15-DistanceDeSecuriteIncendieSystemePorteursEtCompartimentsCoupeFeu.pdf, cover (PDF page 1): «Distances de sécurité incendie, systèmes porteurs et compartiments coupe-feu», «01.01.2017 / 15-15fr», «État 18.09.2019». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-81.pdf/content (printed title «Brandschutzabstände Tragwerke Brandabschnitte»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-79.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file. Replaces the existing entry «VKF 15-15», which carries the French title only. ⚠️ The German cover and running titles print «Brandschutzabstände Tragwerke Brandabschnitte» without separators; the comma and the «und» are added here for readability."
+    },
+    {
+      "key": "VKF 16-15",
+      "aliases": ["VKF16-15", "AEAI 16-15", "AEAI16-15", "BSR 16-15", "DPI 16-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 16-15",
+      "title": {
+        "de": "Flucht- und Rettungswege",
+        "fr": "Voies d’évacuation et de sauvetage"
+      },
+      "edition": "01.01.2017 (état 01.08.2021)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-16-15-VoiesDEvacuationEtDeSauvetage.pdf, cover (PDF page 1): «Voies d’évacuation et de sauvetage», «01.01.2017 / 16-15fr», «État 01.08.2021». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-85.pdf/content (printed title «Flucht- und Rettungswege»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-83.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file. ⚠️ The German cover reads «Stand 01.12.2022», the French one «État 01.08.2021»; the edition printed here follows the French cover, like the existing entries."
+    },
+    {
+      "key": "VKF 17-15",
+      "aliases": ["VKF17-15", "AEAI 17-15", "AEAI17-15", "BSR 17-15", "DPI 17-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 17-15",
+      "title": {
+        "de": "Kennzeichnung von Fluchtwegen, Sicherheitsbeleuchtung, Sicherheitsstromversorgung",
+        "fr": "Signalisation des voies d’évacuation, éclairage de sécurité, alimentation de sécurité"
+      },
+      "edition": "01.01.2017 (état 01.12.2022)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-17-15-SignalisationDesVoiesDEvacuationEclairageDeSecuriteAlimentationDeSecurite.pdf, cover (PDF page 1): «Signalisation des voies d’évacuation / Éclairage de sécurité / Alimentation de sécurité», «01.01.2017 / 17-15fr», «État 01.12.2022». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-89.pdf/content (printed title «Kennzeichnung von Fluchtwegen Sicherheitsbeleuchtung Sicherheitsstromversorgung»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-87.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file. ⚠️ The covers print the three parts of the title on separate lines without separators; the commas are added here."
+    },
+    {
+      "key": "VKF 18-15",
+      "aliases": ["VKF18-15", "AEAI 18-15", "AEAI18-15", "BSR 18-15", "DPI 18-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 18-15",
+      "title": {
+        "de": "Löscheinrichtungen",
+        "fr": "Dispositifs d’extinction"
+      },
+      "edition": "01.01.2017",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-18-15-DispositifsDExctinction.pdf, cover (PDF page 1): «Dispositifs d’extinction», «01.01.2017 / 18-15fr». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-91.pdf/content (printed title «Löscheinrichtungen»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-92.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file."
+    },
+    {
+      "key": "VKF 19-15",
+      "aliases": ["VKF19-15", "AEAI 19-15", "AEAI19-15", "BSR 19-15", "DPI 19-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 19-15",
+      "title": {
+        "de": "Sprinkleranlagen",
+        "fr": "Installations sprinklers"
+      },
+      "edition": "01.01.2015 (état 23.01.2019)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-19-15-InstallationsSprinklers.pdf, cover (PDF page 1): «Installations sprinklers», «01.01.2015 / 19-15fr», «État 23.01.2019». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-97.pdf/content (printed title «Sprinkleranlagen»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-95.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file."
+    },
+    {
+      "key": "VKF 20-15",
+      "aliases": ["VKF20-15", "AEAI 20-15", "AEAI20-15", "BSR 20-15", "DPI 20-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 20-15",
+      "title": {
+        "de": "Brandmeldeanlagen",
+        "fr": "Installations de détection d’incendie"
+      },
+      "edition": "01.01.2017 (état 23.01.2019)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-20-15-InstallationsDeDetectionDIncendie.pdf, cover (PDF page 1): «Installations de détection d’incendie», «01.01.2017 / 20-15fr», «État 23.01.2019». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-101.pdf/content (printed title «Brandmeldeanlagen»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-99.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file."
+    },
+    {
+      "key": "VKF 21-15",
+      "aliases": ["VKF21-15", "AEAI 21-15", "AEAI21-15", "BSR 21-15", "DPI 21-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 21-15",
+      "title": {
+        "de": "Rauch- und Wärmeabzugsanlagen",
+        "fr": "Installations d’extraction de fumée et de chaleur"
+      },
+      "edition": "01.01.2017 (état 14.12.2017)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-21-15-InstallationsDExctractionDeFumeeEtDeChaleur.pdf, cover (PDF page 1): «Installations d'extraction de fumée et de chaleur», «01.01.2017 / 21-15fr», «État 14.12.2017». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-105.pdf/content (printed title «Rauch- und Wärmeabzugsanlagen»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-103.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file. The French cover writes «d'extraction» with a straight apostrophe; typographic here."
+    },
+    {
+      "key": "VKF 22-15",
+      "aliases": ["VKF22-15", "AEAI 22-15", "AEAI22-15", "BSR 22-15", "DPI 22-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 22-15",
+      "title": {
+        "de": "Blitzschutzsysteme",
+        "fr": "Systèmes de protection contre la foudre"
+      },
+      "edition": "01.01.2017",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-22-15-SystemesDeProtectionContreLaFoudre.pdf, cover (PDF page 1): «Systèmes de protection contre la foudre», «01.01.2017 / 22-15fr». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-107.pdf/content (printed title «Blitzschutzsysteme»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-108.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file."
+    },
+    {
+      "key": "VKF 23-15",
+      "aliases": ["VKF23-15", "AEAI 23-15", "AEAI23-15", "BSR 23-15", "DPI 23-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 23-15",
+      "title": {
+        "de": "Beförderungsanlagen",
+        "fr": "Installations de transport"
+      },
+      "edition": "01.01.2017 (état 14.12.2017)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-23-15-InstallationsDeTransport.pdf, cover (PDF page 1): «Installations de transport», «01.01.2017 / 23-15fr», «État 14.12.2017». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-113.pdf/content (printed title «Beförderungsanlagen»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-111.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file."
+    },
+    {
+      "key": "VKF 24-15",
+      "aliases": ["VKF24-15", "AEAI 24-15", "AEAI24-15", "BSR 24-15", "DPI 24-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 24-15",
+      "title": {
+        "de": "Wärmetechnische Anlagen",
+        "fr": "Installations thermiques"
+      },
+      "edition": "01.01.2017 (état 17.05.2018)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-24-15-InstallationsThermiques.pdf, cover (PDF page 1): «Installations thermiques», «01.01.2017 / 24-15fr», «État 17.05.2018». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-117.pdf/content (printed title «Wärmetechnische Anlagen»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-115.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The French file was re-published on 2026-04-08 with the same cover (état 17.05.2018); its text differs from the library copy only by word-spacing artefacts of the PDF, not in content."
+    },
+    {
+      "key": "VKF 25-15",
+      "aliases": ["VKF25-15", "AEAI 25-15", "AEAI25-15", "BSR 25-15", "DPI 25-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 25-15",
+      "title": {
+        "de": "Lufttechnische Anlagen",
+        "fr": "Installations aérauliques"
+      },
+      "edition": "01.01.2017 (état 17.12.2020)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-25-15-InstallationsAerauliques.pdf, cover (PDF page 1): «Installations aérauliques», «01.01.2017 / 25-15fr», «État 17.12.2020». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-121.pdf/content (printed title «Lufttechnische Anlagen»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-119.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file."
+    },
+    {
+      "key": "VKF 26-15",
+      "aliases": ["VKF26-15", "AEAI 26-15", "AEAI26-15", "BSR 26-15", "DPI 26-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 26-15",
+      "title": {
+        "de": "Gefährliche Stoffe",
+        "fr": "Matières dangereuses"
+      },
+      "edition": "01.04.2026",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-26-15-MatieresDangereuses.pdf, cover (PDF page 1): library copy «01.01.2017 / 26-15fr», «État 01.07.2025»; current file «01.04.2026 / 26-15fr» with the note «Modifications approuvées par l’AIET le 6 mars 2026» and no «État» line. German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-125.pdf/content (printed title «Gefährliche Stoffe»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-123.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. ⚠️ The library copy (01.01.2017, état 01.07.2025) is SUPERSEDED: amendments approved by the IOTH on 6 March 2026 (ch. 11.1.3 paras 1 and 2, fireworks of categories F1 to F4), in force 2026-04-01; the old version is listed as «Gültig bis 31.03.2026» (BSPUB-…-3195 de, -3194 fr). This entry is the version valid from 01.04.2026. Source of the change: https://www.bsvonline.ch/de/aktuell/feuerwerksverbot-20032026."
+    },
+    {
+      "key": "VKF 27-15",
+      "aliases": ["VKF27-15", "AEAI 27-15", "AEAI27-15", "BSR 27-15", "DPI 27-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 27-15",
+      "title": {
+        "de": "Nachweisverfahren im Brandschutz",
+        "fr": "Méthodes de preuves en protection incendie"
+      },
+      "edition": "01.01.2015 (état 22.03.2017)",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-27-15-MethodesDepreuvesEnProtectionIncendie.pdf, cover (PDF page 1): «Méthodes de preuves en protection incendie», «01.01.2015 / 27-15fr», «État 22.03.2017». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-127.pdf/content (printed title «Nachweisverfahren im Brandschutz»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-128.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file."
+    },
+    {
+      "key": "VKF 28-15",
+      "aliases": ["VKF28-15", "AEAI 28-15", "AEAI28-15", "BSR 28-15", "DPI 28-15"],
+      "kind": "norm",
+      "designation": "VKF / AEAI 28-15",
+      "title": {
+        "de": "Anerkennungsverfahren",
+        "fr": "Procédure de reconnaissance AEAI"
+      },
+      "edition": "01.01.2015",
+      "publisher": {
+        "de": "Vereinigung Kantonaler Feuerversicherungen",
+        "fr": "Association des établissements cantonaux d’assurance incendie",
+        "en": "Vereinigung Kantonaler Feuerversicherungen"
+      },
+      "_source": "VKF-AEAI-28-15-ProcedureDeReconnaissanceAEAI.pdf, cover (PDF page 1): «Procédure de reconnaissance AEAI», «01.01.2015 / 28-15fr». German cover read off https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-133.pdf/content (printed title «Anerkennungsverfahren»); French file https://services2.vkf.ch/rest/public/georg/bs/publikation/documents/BSPUB-1394520214-131.pdf/content. Listed as «aktuell» on https://www.bsvonline.ch/de/brandschutzvorschriften/vorschriften-2015. The library copy is text-identical to the current French file. ⚠️ The German title does not contain «VKF»; the French one says «AEAI»."
+    }
+  ]
+}

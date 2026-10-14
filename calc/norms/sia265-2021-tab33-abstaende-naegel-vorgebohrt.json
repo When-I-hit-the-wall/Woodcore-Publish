@@ -1,0 +1,72 @@
+{
+  "_source": "SIA 265:2021, Tabelle 33 (clause 6.4.3.1.3) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 71, read off a render of the page; the French wording from ExternalFiles/000-Normes/SIA265-2021-FR.pdf p. 72.",
+  "edition": "SIA 265:2021",
+  "table_33": {
+    "number": "33",
+    "title": "Minimale Abstände bei Nagelung mit Vorbohrung",
+    "norm": "SIA 265",
+    "norm_ref": "6.4.3.1.3",
+    "page": 71,
+    "unit": "mm",
+    "fasteners": [
+      {
+        "fastener": "nail",
+        "clause": "6.4.3.1.3",
+        "auto": true,
+        "scope": "sia265-2021-6.4.1.1-nageldurchmesser"
+      },
+      {
+        "fastener": "screw",
+        "clause": "6.5.2.2, 6.5.2.3.3",
+        "auto": false,
+        "note": "Für Holzschrauben mit geschnittenem Gewinde nach DIN 7998 (6.5.2.2) und für Schrauben nach 6.5.1.3 mit Vorbohrung und $d_1 \\/ d > 0.75$ (6.5.2.3.3)."
+      }
+    ],
+    "head": {
+      "label": "Minimale Abstände"
+    },
+    "columns": [
+      {
+        "id": "parallel",
+        "label": "$parallel$ zur Faserrichtung"
+      },
+      {
+        "id": "perpendicular",
+        "label": "$perp$ zur Faserrichtung"
+      }
+    ],
+    "rows": [
+      {
+        "id": "fastener",
+        "label": "von Nagel zu Nagel",
+        "parallel": {
+          "factor": 7
+        },
+        "perpendicular": {
+          "factor": 4
+        }
+      },
+      {
+        "id": "loaded_edge",
+        "label": "vom beanspruchten Rand",
+        "parallel": {
+          "factor": 12
+        },
+        "perpendicular": {
+          "factor": 6
+        }
+      },
+      {
+        "id": "unloaded_edge",
+        "label": "vom unbeanspruchten Rand",
+        "parallel": {
+          "factor": 7
+        },
+        "perpendicular": {
+          "factor": 4
+        }
+      }
+    ],
+    "footnotes": {}
+  }
+}

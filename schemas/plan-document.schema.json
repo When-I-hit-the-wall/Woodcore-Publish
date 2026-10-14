@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Plan document source",
+  "description": "plans/documents/<docid>.json, schema 1.1 -- one document a position plan may be drawn on, as Woodcore imports it (v0.114, calc/domains/plan_documents.py, docs/domain/position-plans.md §3.3sexies): an architect's PDF, an image, an SVG or a CAD drawing, kept where it is in the project and never copied. Written by Woodcore only. Its pages are cut into plans, each plan naming the document and a page (`background.document`, plan-source 1.2). Since 1.1 (v0.116) it may say which tab it belongs to (`owner`).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "file",
+    "kind",
+    "sha256",
+    "pages",
+    "layers_off"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.0",
+        "1.1"
+      ],
+      "description": "-- accepted: 1.0, 1.1 (which adds `owner`)."
+    },
+    "id": {
+      "type": "string",
+      "description": "The document's id, D01, D02, ...: its file name."
+    },
+    "name": {
+      "type": "string",
+      "description": "What the engineer calls the document, free text; may be empty."
+    },
+    "group": {
+      "type": "string",
+      "description": "The folder Woodcore files this source in, \"\" or absent at the root -- a field and never a directory, as on every source."
+    },
+    "file": {
+      "type": "string",
+      "description": "Its path relative to the project folder, with forward slashes; a .pdf, .png, .jpg, .jpeg, .svg, .dxf or .dwg inside the folder."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "pdf",
+        "image",
+        "svg",
+        "cad"
+      ],
+      "description": "What the file is: a PDF, an image (PNG, JPEG), an SVG, or a CAD drawing (DXF, or a DWG converted to DXF by the ODA File Converter)."
+    },
+    "sha256": {
+      "type": "string",
+      "description": "The file's SHA-256 when it was imported or last refreshed."
+    },
+    "pages": {
+      "type": "array",
+      "description": "Every page of the document, from 1: a PDF's pages; a CAD drawing's layouts, the model space first then the paper-space layouts in their tab order; one page for an image or an SVG.",
+      "items": {
+        "type": "object",
+        "required": [
+          "page",
+          "rotation"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "rotation": {
+            "type": "integer",
+            "description": "The rotation the engineer gave the page, degrees clockwise -- 0, 90, 180 or 270 -- on top of a PDF's own /Rotate."
+          },
+          "layout": {
+            "type": "string",
+            "description": "A CAD drawing's page: the name of its layout (Model, or a paper-space layout)."
+          }
+        }
+      }
+    },
+    "layers_off": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The names of the layers switched off -- a PDF's optional-content groups, a CAD drawing's layers -- one list for the whole document: the window renders without them and the report takes them out (plan_documents.flatten_page)."
+    },
+    "owner": {
+      "type": "string",
+      "enum": [
+        "plan",
+        "fire"
+      ],
+      "description": "The tab the document belongs to, the one that imported it (v0.116): `plan` the position plans', `fire` the fire protection plans'. Each tab lists its own documents only. Absent (a document written before 1.1): the position plans', unless every plan drawn on it is a fire protection plan with a frame of its own (calc/domains/plan_pages.py, document_owner)."
+    }
+  }
+}

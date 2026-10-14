@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Annexes",
+  "description": "data/annexes.json -- the annex sources and their excerpts as the export writes them, read by lib/calc-engine.typ (show-extract, show-annexes, docs/domain/documents.md §3.3octodecies). Every excerpt resolved against its source's current version, each written as a one-page PDF cropped to its frame (data/annexes/<id>.pdf); every source's annex as the pages it carries (data/annexes/<id>-annex.pdf). Nothing is computed: an excerpt is a picture of another program's calculation, so there is deliberately no {vars, steps, checks} record here.",
+  "type": "object",
+  "required": ["schema_version", "sources", "excerpts"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0", "description": "-- pinned."},
+    "sources": {
+      "type": "object",
+      "description": "Keyed by id, in file-name order -- the order the annexes are lettered A, B, C in.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": ["name", "label", "mode", "pages", "bookmarks", "annex", "excerpts"],
+          "properties": {
+            "name": {"type": "string"},
+            "label": {"type": "string"},
+            "mode": {"type": "string", "enum": ["used", "all", "none"]},
+            "pages": {"type": "integer", "description": "The source's page count; 0 where its PDF is missing."},
+            "bookmarks": {"type": "integer", "description": "How many bookmarks it carries; 0 for a PDF printed through a PDF printer."},
+            "sha256": {"type": "string"},
+            "excerpts": {"type": "array", "items": {"type": "string"}, "description": "The ids of its excerpts, sorted."},
+            "annex": {
+              "type": ["object", "null"],
+              "description": "The pages the annexes carry, or null where they carry none.",
+              "required": ["file", "pages", "sizes"],
+              "properties": {
+                "file": {"type": "string", "description": "Relative to data/: annexes/<id>-annex.pdf, its pages in the order of `pages`."},
+                "pages": {"type": "array", "items": {"type": "integer"}, "description": "The source's page numbers, ascending."},
+                "sizes": {"type": "array", "items": {"type": "array", "items": {"type": "number"}}, "description": "Each page's width and height in points, in the order of `pages`."},
+                "inputs": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "excerpts": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": ["name", "label", "source", "resolved", "reason", "page", "title", "file", "size", "rect"],
+          "properties": {
+            "name": {"type": "string"},
+            "label": {"type": "string"},
+            "source": {"type": "string"},
+            "resolved": {"type": "boolean", "description": "false where the excerpt could not be found in its source's current version -- the report then refuses it, with `reason`."},
+            "reason": {"type": "string", "description": "Why it is not resolved, in English; \"\" where it is."},
+            "page": {"type": ["integer", "null"], "description": "The source's page it is taken from."},
+            "title": {"type": "string", "description": "The title of the bookmark it is anchored on, as the source writes it; \"\" for a page anchor."},
+            "file": {"type": "string", "description": "Relative to data/: the one-page PDF cropped to the frame; \"\" where unresolved."},
+            "size": {"type": ["array", "null"], "items": {"type": "number"}, "description": "The frame's width and height in points."},
+            "rect": {"type": ["array", "null"], "items": {"type": "number"}, "description": "The frame as [x, y, w, h] below and right of the page's top-left corner, in points -- where the annex page draws it."},
+            "page_size": {"type": "array", "items": {"type": "number"}},
+            "inputs": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}

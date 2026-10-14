@@ -1,0 +1,630 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Fire-protection plan source",
+  "description": "Woodcore-Datei/fire/<id>.json, schema 2.0 (1.0, whose background is a file only, is read as it is and upgraded on reading -- calc/domains/fire.py `upgrade`) -- one fire-protection plan: the concept of a floor drawn by hand over an architect's plan -- the surfaces of the escape routes, the walls with their fire resistance, the doors, the escape routes' lengths, exits and widths, and a legend. Written by Woodcore's «Plan de protection incendie» tab only, read by calc/domains/fire.py. It either FOLLOWS a position plan (`plan`), whose background, sheet, crop and scale it then takes afresh at every reading, or carries a frame of its own in the very four fields a position plan states (`background`, `sheet`, `crop`, `scale`) -- never both, but for the crop, which a plan that follows may state for itself. Coordinates are in the sheet's units, as a position plan's are: points for a PDF, pixels for an image, from the top left corner with y down. Every id is unique in the plan across all the collections. Every rule the walker below cannot express is checked by fire.check_source.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "label",
+    "zones"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.0",
+        "2.0",
+        "2.1"
+      ],
+      "description": "-- accepted: 1.0, 2.0 and 2.1; a 1.0 file is read as 2.0, its background being a file only, and written as 2.0 only when it is saved. 2.1 (issue #43) is 2.0 with `texts`, which Woodcore writes only where a text is placed."
+    },
+    "id": {
+      "type": "string",
+      "description": "The file name, and the string the report will address the plan by. Letters, digits and _ . + -."
+    },
+    "name": {
+      "type": "string",
+      "description": "What the engineer calls this plan, free text (Woodcore's «Nom»). Its ID is composed of it until the ID is written over (calc/tools/identity.py)."
+    },
+    "label": {
+      "type": "string",
+      "description": "Woodcore's «Description»: free text; may be empty."
+    },
+    "group": {
+      "type": "string",
+      "description": "The folder Woodcore files this source in, \"\" or absent at the root. A field and never a directory (calc/tools/grouped_list.py)."
+    },
+    "superposition": {
+      "type": "object",
+      "description": "Another plan of the same tab shown over this one in Woodcore's window (v0.116, the «Superposition» module) -- a drawing aid, never printed and never exported: what lies on the storey above or below while this one is drawn. The other plan's point q is shown at s·q + offset, s this plan's units per metre over the other's where both have a scale (else 1). Optional and additive, so schema_version does not move for it; a plan named that no longer exists is shown as nothing, never refused.",
+      "required": [
+        "plan"
+      ],
+      "properties": {
+        "plan": {
+          "type": "string",
+          "description": "The id of the plan shown over this one -- a plan of the same tab, never this one."
+        },
+        "elements": {
+          "type": "boolean",
+          "description": "Whether its drawn elements are shown with its background (default true)."
+        },
+        "opacity": {
+          "type": "number",
+          "description": "How opaque the superposed plan is, 0.05 to 1 (default 0.5)."
+        },
+        "colour": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "grey",
+            "green",
+            "blue",
+            "yellow",
+            "red",
+            "pink"
+          ],
+          "description": "Its background as it is (normal), in grey or in one of five colours (default red)."
+        },
+        "tint_elements": {
+          "type": "boolean",
+          "description": "Whether its elements take that colour too (default false: they keep their own)."
+        },
+        "offset": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[dx, dy] in this plan's sheet units: where the other plan's origin lands, set by «Aligner» (two clicks). Absent: the two crops' top left corners on each other."
+        }
+      }
+    },
+    "plan": {
+      "type": "string",
+      "description": "The id of the position plan this plan follows (Woodcore-Datei/plans/<id>.json): its background, its sheet and its scale are read from it at every reading, so changing them in «Plan de position» changes them here -- and its crop too, unless this plan states one of its own. Present, neither `background`, `sheet` nor `scale` may be."
+    },
+    "background": {
+      "type": "object",
+      "description": "The architect's plan, where this plan has a frame of its own -- a position plan's own field (schemas/plan-source.schema.json): a file of the project, or, since 2.0, a page of a document of plans/documents/ (`document`).",
+      "required": [
+        "file",
+        "page"
+      ],
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "Its path relative to the project folder, with forward slashes; a .pdf, .png, .jpg or .svg, or a .dxf or .dwg through its document only."
+        },
+        "page": {
+          "type": "number"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number"
+        },
+        "document": {
+          "type": "string",
+          "description": "The document of plans/documents/ the plan is drawn on (calc/domains/plan_documents.py): its file and page are then kept in step with it here, and its rotation and layers are the document's. Optional (2.0): absent, the plan is drawn on `file` directly, as in 1.0."
+        }
+      }
+    },
+    "sheet": {
+      "type": "object",
+      "description": "The size of the sheet, in its units; required where the plan follows no position plan.",
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        }
+      }
+    },
+    "crop": {
+      "type": "object",
+      "description": "What the report shows of the sheet. On a plan with a frame of its own, a position plan's own field. On a plan that follows a position plan, the ONE frame field it may state: its own crop, over the position plan's -- absent, the position plan's is taken.",
+      "required": [
+        "x",
+        "y",
+        "w",
+        "h"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number"
+        },
+        "h": {
+          "type": "number"
+        }
+      }
+    },
+    "scale": {
+      "type": "object",
+      "description": "How long a metre of the building is on the sheet, as a position plan states it: 'ratio' (1:n) or 'calibration'. The zones are delimited with it -- a door is closed by its width in metres -- and measured with it.",
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string"
+        },
+        "ratio": {
+          "type": "number"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "length_m": {
+          "type": "number"
+        }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "The plan's own size factors, the position plan's logic (calc/domains/figure_style.py): absent, each is 1. There is no `point`: nothing here is a symbol placed on a point.",
+      "properties": {
+        "line": {
+          "type": "number",
+          "description": "Every stroke, the walls' bands included: from 0.25 to 3."
+        },
+        "text": {
+          "type": "number",
+          "description": "Every text of the plan: from 0.25 to 3. The legend has a size of its own."
+        }
+      }
+    },
+    "zones": {
+      "type": "array",
+      "description": "The surfaces: closed outlines drawn by hand, each of one of the three kinds the VKF / AEAI sheet draws as a surface of an escape route.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "points"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique in the plan: Z1, Z2, … A number is never given twice, a deleted surface's included."
+          },
+          "kind": {
+            "type": "string",
+            "description": "What the surface is: vertical (a vertical escape route), horizontal (a horizontal one) or clear (a surface to be kept clear) -- the keys of calc/norms/vkf-2016-symbole-brandschutzplan.json's `escape`. Absent: a draft, drawn before the kinds existed -- shown in the editor, never printed and in no legend."
+          },
+          "label": {
+            "type": "string",
+            "description": "What the engineer calls the surface, free text; may be absent."
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "The outline, at least three points, not closed on itself."
+          },
+          "holes": {
+            "type": "array",
+            "description": "The islands inside the outline that are not part of the surface, each an outline of its own. No tool draws one today; a file that carries one is read.",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "The factors this entry states over the plan's own, each MULTIPLYING it (calc/domains/figure_style.py); absent, it follows the plan. A surface: `line` its outline and hatching, `text` its name.",
+            "properties": {
+              "line": {
+                "type": "number",
+                "description": "From 0.25 to 3."
+              },
+              "text": {
+                "type": "number",
+                "description": "From 0.25 to 3."
+              }
+            }
+          },
+          "opacity": {
+            "type": "number",
+            "description": "How opaque the entry is drawn, from 0.1 to 1; absent, its collection's own (fire.OPACITY: a surface is tinted at 0.65, everything else is drawn full)."
+          },
+          "label_offset": {
+            "type": "array",
+            "description": "How far its text was moved by hand from its own place, [dx, dy] in sheet units; absent, the text stands in its own place. From its own place rather than a point, so that the text follows its entry.",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "walls": {
+      "type": "array",
+      "description": "The walls with a fire resistance: each a line and one of the classes of the VKF sheet of symbols (calc/norms/vkf-2016-symbole-brandschutzplan.json), drawn as that class's coloured band. Optional and additive: a plan that has none states none.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "class",
+          "points"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique in the plan: W1, W2, …"
+          },
+          "class": {
+            "type": "string",
+            "description": "The fire resistance, by its key: EI 30, EI 60-RF1, REI 60-180, …"
+          },
+          "points": {
+            "type": "array",
+            "description": "The line, at least two points.",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "The factors this entry states over the plan's own, each MULTIPLYING it (calc/domains/figure_style.py); absent, it follows the plan. A wall: `line` the width of its band.",
+            "properties": {
+              "line": {
+                "type": "number",
+                "description": "From 0.25 to 3."
+              }
+            }
+          },
+          "opacity": {
+            "type": "number",
+            "description": "How opaque the entry is drawn, from 0.1 to 1; absent, its collection's own (fire.OPACITY: a surface is tinted at 0.65, everything else is drawn full)."
+          }
+        }
+      }
+    },
+    "doors": {
+      "type": "array",
+      "description": "The doors, each with the way it opens. Optional and additive.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "points",
+          "side"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique in the plan: T1, T2, …"
+          },
+          "kind": {
+            "type": "string",
+            "description": "swing: a leaf turning on a hinge, drawn as the sheet's quarter disc. slide: a leaf sliding along the wall, drawn as the sheet's flat arrow."
+          },
+          "class": {
+            "type": "string",
+            "description": "The door's fire resistance, EI 30 or E 30 -- the two the sheet gives a door --, which fills its symbol with that class's colour. Absent: a door without a fire resistance, drawn in outline; it is no symbol of the sheet."
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "Exactly two points. A swing door: its hinge, then the other jamb, which the closed leaf reaches. A sliding door: where the leaf stands closed, then where it slides to."
+          },
+          "side": {
+            "type": "number",
+            "description": "1 or -1: the side of the line from the first point to the second that the door opens to (a swing door) or that its arrowhead rises on (a sliding one). 1 is the side reached by turning that line a quarter towards +y."
+          },
+          "style": {
+            "type": "object",
+            "description": "The factors this entry states over the plan's own, each MULTIPLYING it (calc/domains/figure_style.py); absent, it follows the plan. A door: `line` its outline.",
+            "properties": {
+              "line": {
+                "type": "number",
+                "description": "From 0.25 to 3."
+              }
+            }
+          },
+          "opacity": {
+            "type": "number",
+            "description": "How opaque the entry is drawn, from 0.1 to 1; absent, its collection's own (fire.OPACITY: a surface is tinted at 0.65, everything else is drawn full)."
+          }
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "description": "The escape routes' lengths: each a line from where one stands to the exit, drawn as the sheet's thin green arrow, its head at the last point and its length written along it. Optional and additive.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "points"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique in the plan: F1, F2, …"
+          },
+          "points": {
+            "type": "array",
+            "description": "The line, at least two points; the arrow's head is at the last.",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "text": {
+            "type": "string",
+            "description": "What is written along the route in place of its measured length; absent or empty, the length is written, where the plan has a scale."
+          },
+          "style": {
+            "type": "object",
+            "description": "The factors this entry states over the plan's own, each MULTIPLYING it (calc/domains/figure_style.py); absent, it follows the plan. An escape route's length: `line` its arrow, `text` the length written along it.",
+            "properties": {
+              "line": {
+                "type": "number",
+                "description": "From 0.25 to 3."
+              },
+              "text": {
+                "type": "number",
+                "description": "From 0.25 to 3."
+              }
+            }
+          },
+          "opacity": {
+            "type": "number",
+            "description": "How opaque the entry is drawn, from 0.1 to 1; absent, its collection's own (fire.OPACITY: a surface is tinted at 0.65, everything else is drawn full)."
+          },
+          "label_offset": {
+            "type": "array",
+            "description": "How far its text was moved by hand from its own place, [dx, dy] in sheet units; absent, the text stands in its own place. From its own place rather than a point, so that the text follows its entry.",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "exits": {
+      "type": "array",
+      "description": "The emergency exits: each the sheet's thick green arrow, from its tail to its tip. Optional and additive.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "points"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique in the plan: N1, N2, …"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "Exactly two points, the arrow's tail and its tip: its place, its direction and its size."
+          },
+          "opacity": {
+            "type": "number",
+            "description": "How opaque the entry is drawn, from 0.1 to 1; absent, its collection's own (fire.OPACITY: a surface is tinted at 0.65, everything else is drawn full)."
+          }
+        }
+      }
+    },
+    "widths": {
+      "type": "array",
+      "description": "The escape routes' widths: each a green figure written across the passage it measures. Optional and additive.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "points"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique in the plan: B1, B2, …"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "description": "Exactly two points, one on either side of the passage: the figure is written at their middle, along the line between them."
+          },
+          "text": {
+            "type": "string",
+            "description": "What is written in place of the measured width; absent or empty, the width is written to the centimetre, where the plan has a scale."
+          },
+          "style": {
+            "type": "object",
+            "description": "The factors this entry states over the plan's own, each MULTIPLYING it (calc/domains/figure_style.py); absent, it follows the plan. A width: `text` its figure.",
+            "properties": {
+              "text": {
+                "type": "number",
+                "description": "From 0.25 to 3."
+              }
+            }
+          },
+          "label_offset": {
+            "type": "array",
+            "description": "How far its text was moved by hand from its own place, [dx, dy] in sheet units; absent, the text stands in its own place. From its own place rather than a point, so that the text follows its entry.",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "legend": {
+      "type": "object",
+      "description": "The legend drawn on the plan: a box listing every symbol the plan draws (fire.legend_rows). Absent: no legend.",
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "The box's left edge, in sheet units."
+        },
+        "y": {
+          "type": "number",
+          "description": "The box's top edge, in sheet units."
+        },
+        "scale": {
+          "type": "number",
+          "description": "The legend's own size factor, from 0.25 to 3; absent, 1."
+        }
+      }
+    },
+    "texts": {
+      "type": "array",
+      "description": "The texts placed with the Text tool (issue #43, calc/domains/figure_text.py): each with an id (X1, X2, …) and centred on its one point. Written only by a source that holds one, whose schema_version says so.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "id",
+          "points",
+          "text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "description": "Its centre on the sheet: one point, as every entry of the plan is moved and turned by its points."
+          },
+          "text": {
+            "type": "string",
+            "description": "What is printed, a line per line: `{1}` is a token, where the variable `vars[\"1\"]` is printed; a literal brace is written twice, `{{` and `}}`. A token naming no variable is a defect of the file (D-13). An underscore makes a subscript, as in every label of a figure."
+          },
+          "vars": {
+            "type": "object",
+            "description": "The variables the tokens name, by token: a link to a variable of the export, its `show` and its `last` value.",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "required": [
+                  "domain",
+                  "instance",
+                  "var"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "instance": {
+                    "type": "string"
+                  },
+                  "var": {
+                    "type": "string"
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "'formulas' for a domain of the «Formules» tab, whose id is `instance`; absent for the export."
+                  },
+                  "show": {
+                    "type": "string",
+                    "enum": [
+                      "value",
+                      "symbol"
+                    ],
+                    "description": "How it is printed (D-09): 'value', its value and unit; 'symbol', its symbol, '=', its value and unit."
+                  },
+                  "last": {
+                    "type": "object",
+                    "description": "What the variable gave when Woodcore's window last saved (D-14), printed where it can no longer be read, with a warning (D-06).",
+                    "properties": {
+                      "value": {},
+                      "unit": {
+                        "type": "string"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "The factor this text states over the drawing's: `text` only (figure_style.ENTRY_KEYS).",
+            "properties": {
+              "text": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

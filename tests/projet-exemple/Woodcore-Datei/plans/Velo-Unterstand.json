@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.1",
+  "id": "Velo-Unterstand",
+  "label": "Grundriss",
+  "floor": "0",
+  "sheet": {
+    "width": 2097.64,
+    "height": 1474.02
+  },
+  "show_lengths": false,
+  "style": {
+    "line": 1.0,
+    "point": 0.46,
+    "text": 0.4
+  },
+  "axes": [],
+  "elements": [
+    {
+      "type": "S",
+      "label": "S001",
+      "points": [
+        [
+          664.8,
+          588.23
+        ]
+      ],
+      "label_offset": [
+        -1.25,
+        27.21
+      ]
+    },
+    {
+      "type": "T",
+      "label": "T001",
+      "points": [
+        [
+          679.08,
+          467.27
+        ],
+        [
+          679.08,
+          707.47
+        ]
+      ],
+      "label_offset": [
+        0.36,
+        -31.5
+      ]
+    }
+  ],
+  "background": {
+    "file": "01_Pläne/02_Total Plane - 29-07-26.pdf",
+    "page": 22,
+    "opacity": 1.0,
+    "sha256": "4295ebad3513d4201791a8a53588838afb3f194a36986a399db85e8a40901884"
+  },
+  "crop": {
+    "x": 466.65,
+    "y": 355.41,
+    "w": 1288.71,
+    "h": 497.85
+  }
+}

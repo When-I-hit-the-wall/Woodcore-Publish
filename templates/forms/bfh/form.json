@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-form",
+  "name": {
+    "fr": "BFH – Académique",
+    "de": "BFH – Akademisch",
+    "en": "BFH – Academic"
+  },
+  "description": {
+    "fr": "La forme de la Haute école spécialisée bernoise (BSc Technique du bois) : logo et couleurs de la BFH, tout le texte en Lucida Sans, un chapitre par page, page de titre de la BFH.",
+    "de": "Die Form der Berner Fachhochschule (BSc Holztechnik): Logo und Farben der BFH, der gesamte Text in Lucida Sans, ein Kapitel pro Seite, Titelseite der BFH.",
+    "en": "The Berner Fachhochschule's form (BSc Wood Technology): the BFH's logo and colours, all the text in Lucida Sans, a chapter to a page, the BFH's title page."
+  }
+}

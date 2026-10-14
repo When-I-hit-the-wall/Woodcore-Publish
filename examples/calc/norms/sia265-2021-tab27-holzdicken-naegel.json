@@ -1,0 +1,56 @@
+{
+  "_source": "SIA 265:2021, Tabelle 27 (clause 6.4.2.1.2) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 68, read off a render of the page; the French wording from ExternalFiles/000-Normes/SIA265-2021-FR.pdf p. 69.",
+  "_note": "The footnotes are the norm's rules restated in a sentence each, under the norm's own numbering, and not its paragraphs: a norm is cited and never reproduced (docs/architecture/reference-library.md §11bis). The multiples of d, the floors in mm and the conditions are transcribed exactly.",
+  "edition": "SIA 265:2021",
+  "table_27": {
+    "number": "27",
+    "title": "Holzdicken $t$ bei Nagelung ohne Vorbohrung",
+    "norm": "SIA 265",
+    "norm_ref": "6.4.2.1.2",
+    "page": 68,
+    "unit": "mm",
+    "fasteners": [
+      {
+        "fastener": "nail",
+        "clause": "6.4.2.1.2",
+        "auto": true,
+        "scope": "sia265-2021-6.4.1.1-nageldurchmesser"
+      }
+    ],
+    "head": {
+      "label": "Baustoff",
+      "notes": [
+        "1"
+      ]
+    },
+    "columns": [
+      {
+        "id": "required",
+        "label": "erforderliche Holzdicke $t_\"erf\"$",
+        "notes": [
+          "2"
+        ]
+      },
+      {
+        "id": "minimum",
+        "label": "Mindestholzdicke $t$"
+      }
+    ],
+    "rows": [
+      {
+        "id": "timber",
+        "label": "Vollholz, keilgezinktes Vollholz, Balkenschichtholz, Brettschichtholz",
+        "required": {
+          "factor": 9
+        },
+        "minimum": {
+          "factor": 7
+        }
+      }
+    ],
+    "footnotes": {
+      "1": "Holzwerkstoffe siehe SIA 265/1.",
+      "2": "Unter $t_\"erf\"$, bis auf $7 d$, wird $R_d$ nach Tabelle 26 proportional zur Holzdicke abgemindert; die Mindestholzdicke darf nicht unterschritten werden."
+    }
+  }
+}

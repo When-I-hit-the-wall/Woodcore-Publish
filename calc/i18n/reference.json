@@ -1,0 +1,102 @@
+{
+  "_comment": "The words the documentation of the commands says about itself, in French, German and English (calc/tools/command_docs.py, docs/typst/command-docs.md §10sexies): the name of each category of build_reference.CATEGORIES and the one line that introduces it (lead), and the words the reference says beside every command. Read by the website (website/build.py) and by Woodcore's commands tab (calc/tools/commands_tab.py, v0.94), whose STRINGS carry no copy of them. The order of the categories is not here: it is build_reference.CATEGORIES', which both follow. A command's own documentation is not here either: it is the /// blocks' English and calc/i18n/commands.json's French and German. Hand-written, like the glossary beside it.",
+  "schema_version": "1.0",
+  "categories": {
+    "formula": {
+      "label": {"fr": "Calculer dans le rapport", "de": "Im Bericht rechnen", "en": "Calculating in the report"},
+      "lead": {
+        "fr": "Écrire un calcul dans le rapport lui-même : des variables, des formules évaluées avec leurs unités, des vérifications.",
+        "de": "Eine Berechnung im Bericht selbst schreiben: Variablen, Formeln, die mit ihren Einheiten ausgewertet werden, Nachweise.",
+        "en": "Write a calculation in the report itself: variables, formulas evaluated with their units, checks."
+      }
+    },
+    "display": {
+      "label": {"fr": "Afficher un calcul de l'export", "de": "Eine Berechnung des Exports anzeigen", "en": "Showing an exported calculation"},
+      "lead": {
+        "fr": "Imprimer ce que l'export a calculé : charges, positions, moyens d'assemblage, plans, modèles statiques et schémas.",
+        "de": "Drucken, was der Export berechnet hat: Lasten, Positionen, Verbindungsmittel, Pläne, statische Systeme und Schemas.",
+        "en": "Print what the export calculated: loads, positions, fasteners, plans, static models and schemas."
+      }
+    },
+    "timber": {
+      "label": {"fr": "Vérifier un élément (SIA 265)", "de": "Ein Bauteil nachweisen (SIA 265)", "en": "Checking a member (SIA 265)"},
+      "lead": {
+        "fr": "Les vérifications des éléments de la SIA 265, chapitre 4.2 : un élément décrit une fois, puis vérifié par son nom.",
+        "de": "Die Bauteilnachweise der SIA 265, Kapitel 4.2: ein Bauteil einmal beschrieben, dann mit seinem Namen nachgewiesen.",
+        "en": "The member checks of SIA 265, chapter 4.2: a member described once, then checked by its name."
+      }
+    },
+    "steel": {
+      "label": {"fr": "Vérifier l'acier (SIA 263)", "de": "Stahl nachweisen (SIA 263)", "en": "Checking steel (SIA 263)"},
+      "lead": {
+        "fr": "Les vérifications d'acier de la SIA 263 enregistrées dans les onglets « Acier » de Woodcore : calculées par l'export, imprimées ici.",
+        "de": "Die Stahlnachweise der SIA 263, in den Registern «Stahl» von Woodcore gespeichert: vom Export berechnet, hier ausgegeben.",
+        "en": "The steel checks of SIA 263 saved in Woodcore's «Acier» tabs: computed by the export, printed here."
+      }
+    },
+    "objects": {
+      "label": {"fr": "Objets des documents", "de": "Objekte der Dokumente", "en": "Document objects"},
+      "lead": {
+        "fr": "Les objets de la convention d'utilisation, de la base de projet et du rapport : tableaux, charges utiles et poids propre non-structural, champs, listes à cocher, choix, images, extraits de plan, signatures et normes citées.",
+        "de": "Die Objekte der Nutzungsvereinbarung, der Projektbasis und des Berichts: Tabellen, Nutz- und Auflasten, Felder, Listen zum Ankreuzen, Auswahlen, Bilder, Planausschnitte, Unterschriften und zitierte Normen.",
+        "en": "The objects of the service criteria agreement, the basis of design and the report: tables, live loads and non-structural self-weight, fields, lists to tick, choices, pictures, plan extracts, signatures and the norms cited."
+      }
+    },
+    "sheets": {
+      "label": {"fr": "Documents export", "de": "Exportblätter", "en": "Export sheets"},
+      "lead": {
+        "fr": "Les plans à remettre : une feuille A0 à A6 où les plans de position sont posés à l'échelle, avec la légende, une coupe schématique, des textes et le cartouche.",
+        "de": "Die Pläne zum Abgeben: ein Blatt A0 bis A6, auf dem die Positionspläne massstäblich gesetzt sind, mit der Legende, einem schematischen Schnitt, Texten und dem Plankopf.",
+        "en": "The sheets to hand over: a sheet A0 to A6 on which the position plans are set at a scale, with the legend, a schematic section, texts and the title block."
+      }
+    },
+    "data": {
+      "label": {"fr": "Lire les données", "de": "Die Daten lesen", "en": "Reading the data"},
+      "lead": {
+        "fr": "Lire les données exportées, pour calculer avec elles ou les parcourir en boucle.",
+        "de": "Die exportierten Daten lesen, um mit ihnen zu rechnen oder sie in einer Schleife zu durchlaufen.",
+        "en": "Read the exported data, to calculate with it or to loop over it."
+      }
+    },
+    "format": {
+      "label": {"fr": "Mettre en forme", "de": "Formatieren", "en": "Formatting"},
+      "lead": {
+        "fr": "Les briques de l'affichage : nombres, unités, symboles et formules.",
+        "de": "Die Bausteine der Darstellung: Zahlen, Einheiten, Symbole und Formeln.",
+        "en": "The building blocks of the display: numbers, units, symbols and formulas."
+      }
+    },
+    "document": {
+      "label": {"fr": "Le rapport et sa langue", "de": "Der Bericht und seine Sprache", "en": "The report and its language"},
+      "lead": {
+        "fr": "La langue du rapport, ses mots, et les réglages du document.",
+        "de": "Die Sprache des Berichts, seine Wörter und die Einstellungen des Dokuments.",
+        "en": "The report's language, its words, and the document's settings."
+      }
+    },
+    "internal": {
+      "label": {"fr": "Internes", "de": "Interna", "en": "Internals"}
+    }
+  },
+  "words": {
+    "commands": {"fr": "Commandes", "de": "Befehle", "en": "Commands"},
+    "command": {"fr": "Commande", "de": "Befehl", "en": "Command"},
+    "arguments": {"fr": "Arguments", "de": "Argumente", "en": "Arguments"},
+    "returns": {"fr": "Retourne", "de": "Gibt zurück", "en": "Returns"},
+    "call_minimal": {"fr": "Appel minimal — les arguments obligatoires seuls", "de": "Minimaler Aufruf — nur die erforderlichen Argumente", "en": "Minimal call — the required arguments alone"},
+    "call_complete": {"fr": "Appel complet — tous les arguments, avec leurs valeurs par défaut", "de": "Vollständiger Aufruf — alle Argumente mit ihren Vorgabewerten", "en": "Complete call — every argument, at its own default"},
+    "example": {"fr": "Exemple {n}", "de": "Beispiel {n}", "en": "Example {n}"},
+    "level": {"fr": "Niveau de détail", "de": "Detailstufe", "en": "Level of detail"},
+    "defined_in": {"fr": "Défini dans", "de": "Definiert in", "en": "Defined in"},
+    "not_rendered": {
+      "fr": "Cet exemple n'est pas compilé : aucun projet n'exporte encore de contrôle à lui montrer.",
+      "de": "Dieses Beispiel wird nicht kompiliert: noch kein Projekt exportiert einen Nachweis, an dem es sich zeigen liesse.",
+      "en": "This example is not compiled: no project exports a check for it to show yet."
+    },
+    "untranslated": {
+      "fr": "{n} passage(s) de cette commande ne sont pas encore traduits et restent en anglais.",
+      "de": "{n} Abschnitt(e) dieses Befehls sind noch nicht übersetzt und bleiben englisch.",
+      "en": "{n} passage(s) of this command are not translated yet."
+    }
+  }
+}

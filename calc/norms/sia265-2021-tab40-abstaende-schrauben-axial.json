@@ -1,0 +1,65 @@
+{
+  "_source": "SIA 265:2021, Tabelle 40 (clause 6.5.3.3) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 76, read off a render of the page; the French wording from ExternalFiles/000-Normes/SIA265-2021-FR.pdf p. 77.",
+  "_note": "The footnotes are the norm's rules restated in a sentence each, under the norm's own numbering, and not its paragraphs: a norm is cited and never reproduced (docs/architecture/reference-library.md §11bis). The multiples of d, the floors in mm and the conditions are transcribed exactly. The norm sets Tabelle 40 as one row of four columns, a_1, a_2, a_1,CG and a_2,CG; it is transposed here to one row per distance.",
+  "edition": "SIA 265:2021",
+  "table_40": {
+    "number": "40",
+    "title": "Mindestabstände für in Schaftrichtung beanspruchte Schrauben bei Holzdicken $t >= 12 d$",
+    "norm": "SIA 265",
+    "norm_ref": "6.5.3.3",
+    "page": 76,
+    "unit": "mm",
+    "fasteners": [
+      {
+        "fastener": "screw",
+        "clause": "6.5.3.3",
+        "auto": true
+      }
+    ],
+    "head": {
+      "label": "Minimale Abstände"
+    },
+    "columns": [
+      {
+        "id": "value",
+        "label": ""
+      }
+    ],
+    "rows": [
+      {
+        "id": "a_1",
+        "label": "Minimaler Schraubenabstand in einer Ebene parallel zur Faserrichtung $a_1$",
+        "value": {
+          "factor": 7
+        }
+      },
+      {
+        "id": "a_2",
+        "label": "Minimaler Schraubenabstand rechtwinklig zu einer Ebene parallel zur Faserrichtung $a_2$",
+        "value": {
+          "factor": 5,
+          "notes": [
+            "1"
+          ]
+        }
+      },
+      {
+        "id": "a_1_CG",
+        "label": "Minimaler Endabstand des Schwerpunkts des Gewindeteils im betrachteten Holz $a_(1,\"CG\")$",
+        "value": {
+          "factor": 10
+        }
+      },
+      {
+        "id": "a_2_CG",
+        "label": "Minimaler Randabstand des Schwerpunkts des Gewindeteils im betrachteten Holz $a_(2,\"CG\")$",
+        "value": {
+          "factor": 4
+        }
+      }
+    ],
+    "footnotes": {
+      "1": "Bei Vorbohrung darf $a_2$ bis auf $3 d$ verringert werden, wenn $R_(\"ax\",d)$ nach Gleichung (103) mit $k_\"red\" = (a_2 \\/ (5 d))^0.35$ abgemindert wird."
+    }
+  }
+}

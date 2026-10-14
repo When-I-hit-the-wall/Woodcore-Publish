@@ -1,0 +1,262 @@
+"""What the export guarantees about the files it writes.
+
+Three things, each of which was untrue or unchecked before v0.59:
+
+* every artifact carries the schema version the code that reads it expects, and an older one is refused rather than read as a current one -- the walker ignored `const` and `enum` until v0.59, so the version field was required to be present and never compared to anything;
+* a position deleted from Excel takes its record with it, instead of leaving a `data/positions/<id>.json` that `show-position` -- `#member` since v0.94 -- goes on printing (found in v0.59: `D001`);
+* the export is reproducible -- the same inputs give the same bytes, which is what makes a `git diff` on `data/` a diff of values rather than of noise.
+"""
+
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+
+import conftest
+from conftest import ROOT, Skip
+import validation
+
+# Every file the export writes, with the schema it is validated against.
+ARTIFACTS = (
+    ("calculations.json", "calculations"),
+    ("positions-index.json", "positions-index"),
+    ("connectors.json", "connectors"),
+    ("connections.json", "connections"),
+    ("plans.json", "plans"),
+    ("statics.json", "statics"),
+)
+
+
+def test_every_artifact_still_validates():
+    """The files in data/ pass the schema and the business rules they were written under.
+
+    Cheap, and it is the check that says whether the export on disk is the one this code produces -- a record left over from an older version fails here rather than in Typst.
+    """
+    for name, schema in ARTIFACTS:
+        data = conftest.exported(name)
+        validation.validate_structure(data, schema)
+        checker = getattr(validation, f"validate_{schema.replace('-', '_')}_business", None)
+        if checker is not None:
+            checker(data)
+
+
+def test_position_records_still_validate():
+    index = conftest.exported("positions-index.json")
+    for pid in index["positions"]:
+        record = conftest.exported(f"positions/{pid}.json")
+        validation.validate_structure(record, "position")
+        validation.validate_positions_business(record)
+
+
+def test_every_schema_pins_its_version():
+    """A schema that does not fix `schema_version` cannot catch a record written at another one.
+
+    Until v0.59 none of them did, and Typst reads the field nowhere at all -- so the versioning of section 3.0 was a field that was written and never compared.
+    """
+    for name, schema in ARTIFACTS + (("positions/", "position"),):
+        spec = json.loads((ROOT / "schemas" / f"{schema}.schema.json").read_text(encoding="utf-8"))
+        node = spec["properties"]["schema_version"]
+        assert "const" in node or "enum" in node, (
+            f"schemas/{schema}.schema.json does not pin schema_version -- a record "
+            f"written at an older version would pass as a current one"
+        )
+
+
+def test_a_record_at_the_wrong_version_is_refused():
+    """The walker enforces `const`, rather than declaring it and walking past."""
+    data = dict(conftest.exported("positions-index.json"))
+    data["schema_version"] = "0.9"
+    try:
+        validation.validate_structure(data, "positions-index")
+    except validation.ValidationError as exc:
+        assert "0.9" in str(exc), exc
+    else:
+        assert False, "a positions-index at version 0.9 was accepted as a 1.0"
+
+
+def test_the_index_and_the_position_files_agree():
+    """Every id the index names has a file, and every file is named by the index.
+
+    The second half is the one v0.59 added the sweep for: `data/positions/D001.json` outlived its row in Excel, and `show-position("D001")` went on printing an element the project does not carry.
+    """
+    index = set(conftest.exported("positions-index.json")["positions"])
+    folder = conftest.PROJECT.data_dir / "positions"
+    if not folder.is_dir():
+        raise Skip("data/positions/ is not there -- run the export first")
+    on_disk = {p.stem for p in folder.glob("*.json")}
+    assert index <= on_disk, f"the index names positions with no record: {sorted(index - on_disk)}"
+    assert on_disk <= index, (
+        f"data/positions/ holds records of positions Positions Element no longer has: "
+        f"{sorted(on_disk - index)} -- the export should have swept them "
+        f"(export_all._sweep_positions)"
+    )
+
+
+def test_the_sweep_removes_a_record_whose_row_is_gone():
+    """The sweep itself, driven directly: a file whose id is not in the index goes."""
+    import export_all
+    folder = conftest.PROJECT.data_dir / "positions"
+    if not folder.is_dir():
+        raise Skip("data/positions/ is not there -- run the export first")
+    index = conftest.exported("positions-index.json")["positions"]
+    ghost = folder / "ZZZ999-test-ghost.json"
+    ghost.write_text('{"schema_version": "1.2", "position": "ZZZ999"}', encoding="utf-8")
+    try:
+        export_all._sweep_positions(index)
+        assert not ghost.exists(), (
+            "a record of a position the index does not name survived the sweep"
+        )
+    finally:
+        if ghost.exists():
+            ghost.unlink()
+    # and the real ones are still there
+    for pid in index:
+        assert (folder / f"{pid}.json").exists(), f"the sweep removed {pid}, which the index names"
+
+
+def test_the_export_is_reproducible():
+    """Run twice, data/ comes out byte for byte the same.
+
+    Slow (it reads the workbooks), and skipped where they are not there. It is what makes a `git diff` on data/ readable: a value that changed shows as a value that changed, not inside a wall of reordered keys and redrawn figures.
+    """
+    real = conftest.real_project()   # the engineer's own: the example project carries no workbook to export from
+    import positions_store
+    # ⚠️ An export migrates a project made before v0.114 -- its Positionen.xlsx imported into positions.json and moved into _Archiv (calc/positions_store.py) -- and a test never migrates the engineer's own project: it is his to open, and Woodcore migrates it then.
+    if not positions_store.path(real).exists():
+        raise Skip("the project has no positions.json yet -- an export would migrate it, which a test does not do to the engineer's project")
+    data = real.data_dir
+    if not data.is_dir():
+        raise Skip("data/ is not there -- run the export first")
+
+    d = conftest.tmpdir("export")
+    before = d / "before"
+    shutil.copytree(data, before)
+    # The reference workbook too: openpyxl stamps the time of every save into docProps/core.xml, so it was rewritten by every export and every run of this very test left the committed file modified (periodic audit 260916, AUD-1-3).
+    reference = real.docs_dir / "typst-reference.xlsx"
+    reference_before = reference.read_bytes() if reference.exists() else None
+    out = subprocess.run(
+        [sys.executable, str(ROOT / "calc" / "export_all.py"), "--project", str(real.file)],
+        capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=str(ROOT),
+        env=dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8"),   # the child prints «Übung», «Stütze»: in the console's code page otherwise, which a UTF-8 reader fails on
+    )
+    if out.returncode != 0:
+        raise Skip(
+            "the export does not currently pass, so it cannot be run twice: "
+            + (out.stderr or out.stdout).strip().splitlines()[0]
+        )
+
+    differences = []
+    for p in sorted(data.rglob("*")):
+        if p.is_dir():
+            continue
+        twin = before / p.relative_to(data)
+        if not twin.exists():
+            differences.append(f"  {p.relative_to(data)} was not there before")
+        elif twin.read_bytes() != p.read_bytes():
+            differences.append(f"  {p.relative_to(data)} differs")
+    for p in sorted(before.rglob("*")):
+        if p.is_file() and not (data / p.relative_to(before)).exists():
+            differences.append(f"  {p.relative_to(before)} disappeared")
+    assert not differences, "a second export changed data/:\n" + "\n".join(differences)
+    if reference_before is not None:
+        assert reference.read_bytes() == reference_before, "a second export rewrote docs/typst-reference.xlsx although data/ did not change"
+
+
+# --- the strength class, its own field ------------------------------------------------
+
+def _row(**fields):
+    row = {"position": "T001", "type": "Träger", "material": "Fichte", "strength_class": "C24", "section_type": "rec",
+           "dimension": "100/200", "units": "mm", "moisture_class": 2, "description": ""}
+    row.update(fields)
+    return row
+
+
+def test_the_strength_class_is_read_from_its_own_field_and_the_material_stays_the_material():
+    """The engineer split `material` in two: what the element is made of (Fichte) and its strength class (C24), the one a connector and a schema's label read."""
+    import export_all
+    (position,), _notes = export_all._positions([_row()])
+    assert position["material"] == "Fichte" and position["strength_class"] == "C24"
+    validation.validate_structure(position, "position")
+
+
+def test_the_moisture_class_is_read_under_the_workbooks_new_header_and_its_old_one_and_a_bad_one_is_a_warning():
+    """A workbook imported (positions_store.from_sheet) reads the moisture class under `moisture class` and under `Wood moisture class`; a moisture class that is not 1, 2 or 3 is exported blank with a warning since v0.114 -- it stopped the export until then."""
+    import export_all
+    import positions_store
+    sheet = {"position": "T001", "type": "Träger", "moisture class": 2}
+    old = {"position": "T001", "type": "Träger", "Wood moisture class": 2}
+    for row in (sheet, old):
+        ((position,), _notes) = export_all._positions(positions_store.from_sheet([row])[0])
+        assert position["moisture_class"] == 2
+    (position,), notes = export_all._positions([_row(moisture_class="$")])
+    assert position["moisture_class"] is None and [n.code for n in notes] == ["position_moisture"] and "T001" in notes[0]
+
+
+def test_a_record_exported_before_the_split_still_gives_its_strength_class():
+    from domains import connector, schema
+    assert connector.strength_class_of({"material": "GL24h"}) == "GL24h", "an older record's material WAS its strength class"
+    assert connector.strength_class_of({"material": "Fichte", "strength_class": "C24"}) == "C24"
+    assert connector.strength_class_of({"material": "Fichte", "strength_class": ""}) == "", "a blank strength class is never read off the material"
+    element = {"id": "E1", "kind": "linear", "points": [[0, 0], [100, 0]], "position": "T001"}
+    positions = {"T001": {"material": "Fichte", "strength_class": "C24", "dimension": "100/200", "units": "mm"}}
+    assert schema.element_caption(element, positions) == "T001 C24 100/200"
+
+
+# --- the dimension, facultative ----------------------------------------------------------
+
+def _dimensionless_rows():
+    """Positions as the Positions tab keeps them: a timber beam, a support with no dimension and no unit, and a load from above with a unit and no dimension; and a column whose record names no dimension and no unit at all."""
+    rows = [{"position": "T001", "type": "Träger", "material": "Fichte", "strength_class": "C24", "section_type": "rec", "dimension": "100/200", "units": "mm", "moisture_class": 1},
+            {"position": "M001", "type": "Auflager"},
+            {"position": "L001", "type": "Last von oben", "units": "mm", "description": "aus dem Dach"}]
+    bare = [{"position": "S001", "type": "Stütze", "material": "Fichte", "strength_class": "GL24h", "moisture_class": 1}]
+    return rows, bare
+
+
+def test_a_position_needs_no_dimension():
+    """The engineer, v0.87: «dans le excel Positions, les dimensions d'une position ne sont pas obligatoires». A blank `dimension` cell, and a sheet with no `dimension` or `units` column at all, export as "" -- as `material` has since v0.16 -- and pass the schema and the business rules, which refused an empty dimension until then."""
+    import export_all
+    book, bare = _dimensionless_rows()
+    positions = {p["position"]: p for p in export_all._positions(book)[0]}
+    assert (positions["T001"]["dimension"], positions["T001"]["units"]) == ("100/200", "mm")
+    assert (positions["M001"]["dimension"], positions["M001"]["units"]) == ("", ""), positions["M001"]
+    assert (positions["L001"]["dimension"], positions["L001"]["units"]) == ("", "mm"), "the unit is carried through as typed; it is the summaries that leave it out"
+    (column_less,), _notes = export_all._positions(bare)
+    assert (column_less["dimension"], column_less["units"]) == ("", ""), column_less
+    for record in (*positions.values(), column_less):
+        validation.validate_structure(record, "position")
+        validation.validate_positions_business(record)
+    index = {"schema_version": "1.0", "positions": [*positions, column_less["position"]]}
+    validation.validate_structure(index, "positions-index")
+
+
+def test_a_position_without_a_dimension_is_summarised_without_a_dangling_separator():
+    """What the window prints of a position -- «T001 — Träger C24 100/200 mm» in its combos, «T001 C24 100/200» on a schema's element -- leaves out a blank dimension with its unit, and never prints a unit alone nor a trailing separator."""
+    import export_all
+    from domains import connector, schema
+    book, bare = _dimensionless_rows()
+    records = {p["position"]: p for p in export_all._positions(book)[0]}
+    records.update({p["position"]: p for p in export_all._positions(bare)[0]})
+    assert connector.position_dimension(records["T001"]) == "100/200 mm"
+    assert connector.position_dimension(records["M001"]) == ""
+    assert connector.position_dimension(records["L001"]) == "", "a unit left beside a blank dimension is not printed on its own"
+    assert connector.position_dimension({"dimension": "180", "units": ""}) == "180"
+    assert connector.position_dimension({}) == "" and connector.position_dimension(None) == ""
+    # the two combos, as the tabs build them (schema_tab.fill_positions, plan_tab's number combo)
+    assert " ".join(part for part in ("Auflager", "", "", connector.position_dimension(records["M001"])) if part) == "Auflager"
+    assert ", ".join(part for part in ("Last von oben", "", connector.position_dimension(records["L001"])) if part) == "Last von oben"
+    # a schema element's label, and the warning for a band that cannot be sized
+    element = {"id": "E1", "kind": "linear", "points": [[0, 0], [100, 0]], "view": "h", "position": "S001"}
+    assert schema.element_caption(element, records) == "S001 GL24h"
+    assert schema.element_caption({**element, "position": "M001"}, records) == "M001"
+    from domains import section
+    assert section.sides({"dimension": "", "units": "mm"}) is None and section.sides(None) is None
+    ((eid, reason),) = schema._section_reasons({"elements": [element]}, records)
+    assert eid == "E1" and "''" not in str(reason) and "—" in str(reason), str(reason)
+    # no module of the window puts a position's dimension and its unit together itself -- the form both tabs had, which printed «mm» alone for a blank dimension: connector.position_dimension is the one place that decides the unit goes with its dimension
+    for path in sorted((ROOT / "calc" / "tools").glob("*.py")):
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            assert not (re.search(r"""get\(\s*['"]dimension['"]""", line) and re.search(r"""get\(\s*['"]units['"]""", line)), (
+                f"{path.name}:{number} prints a position's dimension and unit itself -- print them through connector.position_dimension")

@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "id": "KN-01",
+  "name": "Knicken Stütze",
+  "label": "Stütze S001, beidseitig gelenkig",
+  "group": "",
+  "kind": "buckling",
+  "position": "S001",
+  "grade": null,
+  "section": null,
+  "moisture_class": null,
+  "impact": false,
+  "alpha": 0,
+  "N": {
+    "value": 40,
+    "unit": "kN"
+  },
+  "l_y": 3000,
+  "l_z": 3000,
+  "beta_y": 1,
+  "beta_z": 1
+}

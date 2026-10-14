@@ -1,0 +1,268 @@
+{
+ "_source": "SIA 261:2020, Annexe C (normative) «Coefficients de force et de pression pour le vent», Tableau 60b, p. 100 -- transcribed from the text layer of the French edition, Normen-Florian/SIA261-2020-FR.pdf, each row's values counted against the table's columns, and checked against a render of the page (11.10.2026, issue #37). Values are the norm's decimals with a point; ±x is the pair [x, -x], a/b the pair [a, b], null a cell the norm leaves empty (–), \"direct\" a cell whose force is computed directly (*).",
+ "edition": "SIA 261:2020",
+ "table": {
+  "number": "60b",
+  "title": "Coefficients pour bâtiments élevés h : b : d = 5 : 1 : 1",
+  "page": 100,
+  "ratio": "5 : 1 : 1",
+  "roof": "toit plat",
+  "columns": [
+   {
+    "key": "cpe:A1",
+    "group": "cpe",
+    "surface": "A1"
+   },
+   {
+    "key": "cpe:A2",
+    "group": "cpe",
+    "surface": "A2"
+   },
+   {
+    "key": "cpe:A3",
+    "group": "cpe",
+    "surface": "A3"
+   },
+   {
+    "key": "cpe:A4",
+    "group": "cpe",
+    "surface": "A4"
+   },
+   {
+    "key": "cpe:B1",
+    "group": "cpe",
+    "surface": "B1"
+   },
+   {
+    "key": "cpe:B2",
+    "group": "cpe",
+    "surface": "B2"
+   },
+   {
+    "key": "cpe:B3",
+    "group": "cpe",
+    "surface": "B3"
+   },
+   {
+    "key": "cpe:B4",
+    "group": "cpe",
+    "surface": "B4"
+   },
+   {
+    "key": "cpe:C1",
+    "group": "cpe",
+    "surface": "C1"
+   },
+   {
+    "key": "cpe:C2",
+    "group": "cpe",
+    "surface": "C2"
+   },
+   {
+    "key": "cpe:C3",
+    "group": "cpe",
+    "surface": "C3"
+   },
+   {
+    "key": "cpe:C4",
+    "group": "cpe",
+    "surface": "C4"
+   },
+   {
+    "key": "cpe:D1",
+    "group": "cpe",
+    "surface": "D1"
+   },
+   {
+    "key": "cpe:D2",
+    "group": "cpe",
+    "surface": "D2"
+   },
+   {
+    "key": "cpe:D3",
+    "group": "cpe",
+    "surface": "D3"
+   },
+   {
+    "key": "cpe:D4",
+    "group": "cpe",
+    "surface": "D4"
+   },
+   {
+    "key": "cpe:E",
+    "group": "cpe",
+    "surface": "E"
+   },
+   {
+    "key": "cpe:F",
+    "group": "cpe",
+    "surface": "F"
+   },
+   {
+    "key": "loc:m",
+    "group": "cpe_local",
+    "surface": "m"
+   },
+   {
+    "key": "loc:n",
+    "group": "cpe_local",
+    "surface": "n"
+   },
+   {
+    "key": "loc:o",
+    "group": "cpe_local",
+    "surface": "o"
+   },
+   {
+    "key": "cpi:rep",
+    "group": "cpi_opening",
+    "opening": "rep"
+   },
+   {
+    "key": "cpi:A",
+    "group": "cpi_opening",
+    "opening": "A"
+   },
+   {
+    "key": "cpi:B",
+    "group": "cpi_opening",
+    "opening": "B"
+   },
+   {
+    "key": "cpi:C",
+    "group": "cpi_opening",
+    "opening": "C"
+   },
+   {
+    "key": "cpi:D",
+    "group": "cpi_opening",
+    "opening": "D"
+   },
+   {
+    "key": "cf1:b·h",
+    "group": "cf",
+    "area": "b·h",
+    "index": 1
+   },
+   {
+    "key": "cf2:d·h",
+    "group": "cf",
+    "area": "d·h",
+    "index": 2
+   },
+   {
+    "key": "cf3:d·b",
+    "group": "cf",
+    "area": "d·b",
+    "index": 3
+   }
+  ],
+  "rows": [
+   {
+    "label": "0°",
+    "values": [
+     1.05,
+     0.9,
+     0.8,
+     0.6,
+     -0.5,
+     -0.4,
+     -0.4,
+     -0.35,
+     -1.2,
+     -1.1,
+     -0.8,
+     -0.6,
+     -1.2,
+     -1.1,
+     -0.8,
+     -0.6,
+     -1.3,
+     -0.5,
+     -1.55,
+     -1.55,
+     -1.2,
+     -0.5,
+     0.85,
+     -0.5,
+     -1.1,
+     -1.1,
+     1.25,
+     0.0,
+     -0.9
+    ]
+   },
+   {
+    "label": "15°",
+    "values": [
+     1.0,
+     0.85,
+     0.75,
+     0.55,
+     -0.5,
+     -0.4,
+     -0.4,
+     -0.35,
+     -1.1,
+     -1.1,
+     -0.8,
+     -0.6,
+     -1.1,
+     -1.1,
+     -1.2,
+     -0.8,
+     -1.05,
+     -0.5,
+     -1.4,
+     -1.5,
+     -0.9,
+     -0.4,
+     0.65,
+     -0.65,
+     -0.75,
+     -0.9,
+     1.2,
+     0.15,
+     -0.75
+    ]
+   },
+   {
+    "label": "45°",
+    "values": [
+     0.5,
+     0.55,
+     0.45,
+     0.3,
+     -0.6,
+     -0.7,
+     -0.7,
+     -0.6,
+     0.5,
+     0.55,
+     0.45,
+     0.3,
+     -0.6,
+     -0.7,
+     -0.7,
+     -0.6,
+     -1.5,
+     -0.75,
+     -1.9,
+     -1.1,
+     -0.7,
+     -0.15,
+     0.35,
+     -0.65,
+     0.35,
+     -0.65,
+     1.1,
+     1.1,
+     -0.84
+    ]
+   }
+  ],
+  "cpe_peak": -2.0,
+  "cfr": 0,
+  "notes": []
+ }
+}

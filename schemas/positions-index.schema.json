@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Positions index",
+  "description": "data/positions-index.json -- the ids of every position exported to data/positions/, in Positions-sheet order. Exists only because Typst cannot list a directory: report code loops over this to display every position without naming them one by one (docs/domain/positions.md §7).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "positions"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: an export written at another version is refused rather than read as this one."
+    },
+    "positions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "archived": {
+      "type": "array",
+      "description": "Additive (issue #9), written only where there is one: the positions deleted with their values kept («Copier les valeurs»), «S110-old» -- which a call may still name and no list of the project's positions shows (Woodcore-Datei/positions-archive.json).",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

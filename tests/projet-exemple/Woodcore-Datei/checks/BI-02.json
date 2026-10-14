@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "id": "BI-02",
+  "name": "Biegung mit Druck Stütze",
+  "label": "Stütze S001 unter exzentrischer Last",
+  "group": "",
+  "kind": "bending",
+  "position": "S001",
+  "grade": null,
+  "section": null,
+  "moisture_class": null,
+  "impact": false,
+  "alpha": 0,
+  "N": {
+    "value": -40,
+    "unit": "kN"
+  },
+  "M_y": {
+    "value": 3,
+    "unit": "kNm"
+  },
+  "M_z": null
+}

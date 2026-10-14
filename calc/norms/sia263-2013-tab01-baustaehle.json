@@ -1,0 +1,78 @@
+{
+  "_source": "SIA 263:2013, Tabelle 1 (clause 3.2.2.3) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA263-2013-DE.pdf p. 18. The table is a graphic and does not extract as text, so it was read off a render of that page. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
+  "_note": "The classeur Verbindung.xlsm carries the same numbers in its Daten sheet (T1:Z5) for S235, S275 and S355 -- they agree to the digit -- but it does NOT carry S460, which the norm gives. That is the whole reason a norm value is read from the norm and not from a workbook's restatement of it (section 2 rule 13). 3.2.2.3 adds that SN EN 10025, 10137, 10155, 10210 and 10219 may be used for a more accurate calculation; none of those editions is in the reference library, so nothing here reaches for them.",
+  "edition": "SIA 263:2013",
+  "table_1": {
+    "number": "1",
+    "title": "Charakteristische Werte für Streckgrenze f_y, Fliessschubspannung tau_y und Zugfestigkeit f_u",
+    "unit": "N/mm²",
+    "norm": "SIA 263",
+    "norm_ref": "3.2.2.3",
+    "bands": [
+      {
+        "id": "thin",
+        "label": "t ≤ 40 mm",
+        "max_thickness": 40
+      },
+      {
+        "id": "thick",
+        "label": "40 mm < t ≤ 100 mm",
+        "max_thickness": 100
+      }
+    ],
+    "grades": [
+      {
+        "name": "S235",
+        "thin": {
+          "f_y": 235,
+          "tau_y": 135,
+          "f_u": 360
+        },
+        "thick": {
+          "f_y": 215,
+          "tau_y": 124,
+          "f_u": 340
+        }
+      },
+      {
+        "name": "S275",
+        "thin": {
+          "f_y": 275,
+          "tau_y": 160,
+          "f_u": 430
+        },
+        "thick": {
+          "f_y": 255,
+          "tau_y": 147,
+          "f_u": 410
+        }
+      },
+      {
+        "name": "S355",
+        "thin": {
+          "f_y": 355,
+          "tau_y": 205,
+          "f_u": 510
+        },
+        "thick": {
+          "f_y": 335,
+          "tau_y": 193,
+          "f_u": 490
+        }
+      },
+      {
+        "name": "S460",
+        "thin": {
+          "f_y": 460,
+          "tau_y": 265,
+          "f_u": 550
+        },
+        "thick": {
+          "f_y": 430,
+          "tau_y": 248,
+          "f_u": 530
+        }
+      }
+    ]
+  }
+}

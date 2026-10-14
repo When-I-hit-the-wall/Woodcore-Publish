@@ -1,0 +1,294 @@
+{
+  "_source": "SIA 261:2020 (Einwirkungen auf Tragwerke), Anhang A (normativ) «Raumlasten, Flächenlasten und Schüttwinkel» -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA261-2020-DE.pdf p. 77, read off a render of the page: the PDF's text layer interleaves the table's two columns. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
+  "_note": "One row per line of the table that carries a value, in the order the norm prints them, the left column first. `group` is the heading a line is indented under (null for a line at the top level), `subgroup` a second heading under it (only «Holz in Scheitern» in Tabelle 30). `id` is the group and the name made ASCII, for a lookup by code; `name` is the norm's own wording. Decimals are written the way the report prints them (78.5), not the norm's comma.",
+  "edition": "SIA 261:2020",
+  "table_28": {
+    "number": "28",
+    "title": "Mittlere Raumlasten von Baustoffen",
+    "norm": "SIA 261",
+    "norm_ref": "Anhang A",
+    "units": {
+      "raumlast": "kN/m³"
+    },
+    "labels": {
+      "name": "Baustoff",
+      "raumlast": "Raumlast"
+    },
+    "rows": [
+      {
+        "id": "aluminium",
+        "group": null,
+        "subgroup": null,
+        "name": "Aluminium",
+        "raumlast": 27
+      },
+      {
+        "id": "baustahl",
+        "group": null,
+        "subgroup": null,
+        "name": "Baustahl",
+        "raumlast": 78.5
+      },
+      {
+        "id": "beton_unbewehrt",
+        "group": "Beton",
+        "subgroup": null,
+        "name": "unbewehrt",
+        "raumlast": 24
+      },
+      {
+        "id": "beton_bewehrt",
+        "group": "Beton",
+        "subgroup": null,
+        "name": "bewehrt",
+        "raumlast": 25
+      },
+      {
+        "id": "leichtbeton_im_einzelfall_zu_bestimmen",
+        "group": null,
+        "subgroup": null,
+        "name": "Leichtbeton (im Einzelfall zu bestimmen)",
+        "raumlast": null
+      },
+      {
+        "id": "holz_nadelhoelzer_allgemein",
+        "group": "Holz",
+        "subgroup": null,
+        "name": "Nadelhölzer, allgemein",
+        "raumlast": 5
+      },
+      {
+        "id": "holz_laubhoelzer_allgemein",
+        "group": "Holz",
+        "subgroup": null,
+        "name": "Laubhölzer, allgemein",
+        "raumlast": 7.5
+      },
+      {
+        "id": "holz_verleimte_nadelhoelzer",
+        "group": "Holz",
+        "subgroup": null,
+        "name": "verleimte Nadelhölzer",
+        "raumlast": 5
+      },
+      {
+        "id": "holz_spanplatten",
+        "group": "Holz",
+        "subgroup": null,
+        "name": "Spanplatten",
+        "raumlast": 8
+      },
+      {
+        "id": "natursteinmauerwerk_bruchstein_kalkstein",
+        "group": "Natursteinmauerwerk",
+        "subgroup": null,
+        "name": "Bruchstein (Kalkstein)",
+        "raumlast": 24
+      },
+      {
+        "id": "natursteinmauerwerk_granit",
+        "group": "Natursteinmauerwerk",
+        "subgroup": null,
+        "name": "Granit",
+        "raumlast": 27
+      },
+      {
+        "id": "natursteinmauerwerk_basalt",
+        "group": "Natursteinmauerwerk",
+        "subgroup": null,
+        "name": "Basalt",
+        "raumlast": 30
+      },
+      {
+        "id": "natursteinmauerwerk_molasse_sandstein",
+        "group": "Natursteinmauerwerk",
+        "subgroup": null,
+        "name": "Molasse-Sandstein",
+        "raumlast": 24
+      },
+      {
+        "id": "moertelueberzuege_kalkmoertel",
+        "group": "Mörtelüberzüge",
+        "subgroup": null,
+        "name": "Kalkmörtel",
+        "raumlast": 19
+      },
+      {
+        "id": "moertelueberzuege_zementmoertel",
+        "group": "Mörtelüberzüge",
+        "subgroup": null,
+        "name": "Zementmörtel",
+        "raumlast": 22
+      },
+      {
+        "id": "moertelueberzuege_gipsmoertel",
+        "group": "Mörtelüberzüge",
+        "subgroup": null,
+        "name": "Gipsmörtel",
+        "raumlast": 12
+      },
+      {
+        "id": "moertelueberzuege_wandverputz_aussen",
+        "group": "Mörtelüberzüge",
+        "subgroup": null,
+        "name": "Wandverputz aussen",
+        "raumlast": 18
+      },
+      {
+        "id": "moertelueberzuege_wandverputz_innen",
+        "group": "Mörtelüberzüge",
+        "subgroup": null,
+        "name": "Wandverputz innen",
+        "raumlast": 14
+      },
+      {
+        "id": "mauerwerk_unverputzt_backsteine_voll",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Backsteine, voll",
+        "raumlast": 18
+      },
+      {
+        "id": "mauerwerk_unverputzt_backsteine_gelocht",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Backsteine, gelocht",
+        "raumlast": 13
+      },
+      {
+        "id": "mauerwerk_unverputzt_backsteine_schalldaemmend",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Backsteine, schalldämmend",
+        "raumlast": 17
+      },
+      {
+        "id": "mauerwerk_unverputzt_sichtbacksteine_gelocht",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Sichtbacksteine, gelocht",
+        "raumlast": 15
+      },
+      {
+        "id": "mauerwerk_unverputzt_zementsteine_voll",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Zementsteine, voll",
+        "raumlast": 22
+      },
+      {
+        "id": "mauerwerk_unverputzt_zementsteine_gelocht",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Zementsteine, gelocht",
+        "raumlast": 18
+      },
+      {
+        "id": "mauerwerk_unverputzt_zementsteine_schalldaemmend",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Zementsteine, schalldämmend",
+        "raumlast": 20
+      },
+      {
+        "id": "mauerwerk_unverputzt_kalksandsteine_voll",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Kalksandsteine, voll",
+        "raumlast": 20
+      },
+      {
+        "id": "mauerwerk_unverputzt_kalksandsteine_gelocht",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Kalksandsteine, gelocht",
+        "raumlast": 18
+      },
+      {
+        "id": "mauerwerk_unverputzt_gasbetonsteine_normale_qualitaet",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Gasbetonsteine, normale Qualität",
+        "raumlast": 6
+      },
+      {
+        "id": "mauerwerk_unverputzt_gasbetonsteine_hochwertig",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Gasbetonsteine, hochwertig",
+        "raumlast": 7
+      },
+      {
+        "id": "mauerwerk_unverputzt_glasbausteine_voll",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Glasbausteine, voll",
+        "raumlast": 25
+      },
+      {
+        "id": "mauerwerk_unverputzt_glasbausteine_hohl",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Glasbausteine, hohl",
+        "raumlast": 14
+      },
+      {
+        "id": "mauerwerk_unverputzt_zelltonplatten",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Zelltonplatten",
+        "raumlast": 12
+      },
+      {
+        "id": "mauerwerk_unverputzt_gipsplatten",
+        "group": "Mauerwerk, unverputzt",
+        "subgroup": null,
+        "name": "Gipsplatten",
+        "raumlast": 12
+      },
+      {
+        "id": "bodenbelaege_keramikplatten",
+        "group": "Bodenbeläge",
+        "subgroup": null,
+        "name": "Keramikplatten",
+        "raumlast": 20
+      },
+      {
+        "id": "bodenbelaege_natursteine",
+        "group": "Bodenbeläge",
+        "subgroup": null,
+        "name": "Natursteine",
+        "raumlast": 30
+      },
+      {
+        "id": "bodenbelaege_holzparkett_geklebt",
+        "group": "Bodenbeläge",
+        "subgroup": null,
+        "name": "Holzparkett, geklebt",
+        "raumlast": 8
+      },
+      {
+        "id": "bodenbelaege_linoleum",
+        "group": "Bodenbeläge",
+        "subgroup": null,
+        "name": "Linoleum",
+        "raumlast": 15
+      },
+      {
+        "id": "bituminoese_belaege_gussasphalt",
+        "group": "Bituminöse Beläge",
+        "subgroup": null,
+        "name": "Gussasphalt",
+        "raumlast": 24
+      },
+      {
+        "id": "bituminoese_belaege_bituminoeser_belag_hmt",
+        "group": "Bituminöse Beläge",
+        "subgroup": null,
+        "name": "Bituminöser Belag (HMT)",
+        "raumlast": 24
+      }
+    ],
+    "_note_rows": "«Leichtbeton» carries no value: the norm says it is to be determined case by case (im Einzelfall zu bestimmen)."
+  }
+}

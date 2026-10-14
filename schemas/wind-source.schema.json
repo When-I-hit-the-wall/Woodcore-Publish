@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Wind load source",
+  "description": "Woodcore-Datei/loads/wind/<id>.json -- one building whose wind Woodcore computes from SIA 261:2020 chapter 6 and Annexe C (calc/domains/wind_source.py, docs/domain/loads.md §3.3quater, issue #37). Read beside the WL-* sheets of a load workbook, under the same domain wind-load; an id both carry is refused.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "q_p0",
+    "terrain",
+    "b",
+    "d",
+    "h",
+    "table",
+    "c_d"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "-- pinned. 1.1 (issue #42): 1.0 with `links`, written only where a field follows a variable.",
+      "enum": [
+        "1.0",
+        "1.1"
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "group": {
+      "type": "string"
+    },
+    "q_p0": {
+      "type": "number",
+      "description": "The reference dynamic pressure at the site, SIA 261 Annexe E, kN/m²."
+    },
+    "terrain": {
+      "type": "string",
+      "enum": [
+        "II",
+        "IIa",
+        "III",
+        "IV"
+      ],
+      "description": "The terrain category of SIA 261 Tableau 4."
+    },
+    "b": {
+      "type": "number",
+      "description": "The building's dimension across the wind direction φ = 0°, m."
+    },
+    "d": {
+      "type": "number",
+      "description": "Its dimension along it, m."
+    },
+    "h": {
+      "type": "number",
+      "description": "Its height, m (at most 200, 6.1.2)."
+    },
+    "z": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The height above ground the dynamic pressure is taken at, m; null takes h (6.2.2.3)."
+    },
+    "table": {
+      "type": "string",
+      "description": "The table of SIA 261 Annexe C whose coefficients the building takes: 31 to 56, 57a to 57d, 58, 59a, 59b, 60a, 60b, 63, 64."
+    },
+    "c_d": {
+      "type": "number",
+      "description": "The dynamic factor, 1.0 for the buildings of SIA 261 6.3.5, else SIA 261/1's."
+    },
+    "links": {
+      "type": "object",
+      "description": "The fields of this entry that follow a variable of the export, by their key (q_p0, b, d, h, z, c_d): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.1.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+          "required": [
+            "domain",
+            "instance",
+            "var"
+          ],
+          "properties": {
+            "domain": {
+              "type": "string"
+            },
+            "instance": {
+              "type": "string"
+            },
+            "var": {
+              "type": "string"
+            },
+            "factor": {
+              "type": "number"
+            },
+            "offset": {
+              "type": "number"
+            },
+            "origin": {
+              "type": "string",
+              "enum": [
+                "formulas"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

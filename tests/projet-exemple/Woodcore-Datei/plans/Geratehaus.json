@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.1",
+  "id": "Geratehaus",
+  "label": "Grundriss",
+  "floor": "0",
+  "sheet": {
+    "width": 1190.55,
+    "height": 1190.55
+  },
+  "show_lengths": false,
+  "style": {
+    "line": 1.0,
+    "point": 1.0,
+    "text": 0.77
+  },
+  "axes": [],
+  "elements": [
+    {
+      "type": "S",
+      "label": "S001",
+      "points": [
+        [
+          341.05,
+          402.19
+        ]
+      ]
+    },
+    {
+      "type": "S",
+      "label": "S001",
+      "points": [
+        [
+          340.69,
+          524.12
+        ]
+      ],
+      "label_offset": [
+        -2.99,
+        35.85
+      ]
+    },
+    {
+      "type": "T",
+      "label": "T001",
+      "points": [
+        [
+          348.79,
+          395.74
+        ],
+        [
+          348.79,
+          580.5
+        ]
+      ]
+    }
+  ],
+  "background": {
+    "file": "01_Pläne/02_Total Plane - 29-07-26.pdf",
+    "page": 4,
+    "opacity": 0.45,
+    "sha256": "4295ebad3513d4201791a8a53588838afb3f194a36986a399db85e8a40901884"
+  },
+  "crop": {
+    "x": 215.14,
+    "y": 282.17,
+    "w": 764.35,
+    "h": 382.71
+  }
+}

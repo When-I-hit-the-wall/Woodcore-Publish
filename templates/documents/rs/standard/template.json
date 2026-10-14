@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-document-template",
+  "mode": "rs",
+  "name": {
+    "fr": "Rapport de statique — standard",
+    "de": "Statischer Bericht — Standard",
+    "en": "Statical report — standard"
+  },
+  "description": {
+    "fr": "Rapport de statique de base : introduction, bases, matériaux, actions, analyse structurale, vérifications, bibliographie et historique des versions. Les boucles impriment ce que l'export contient -- plans, positions, charges et modèles statiques -- sans rien écrire à la main.",
+    "de": "Grundlegender statischer Bericht: Einleitung, Grundlagen, Baustoffe, Einwirkungen, Tragwerksanalyse, Nachweise, Literatur und Änderungsverzeichnis. Die Schleifen drucken, was der Export enthält -- Pläne, Positionen, Lasten und statische Modelle --, ohne dass etwas von Hand geschrieben wird.",
+    "en": "Basic statical report: introduction, basis, materials, actions, structural analysis, verifications, references and revision history. Its loops print what the export holds -- plans, positions, loads and static models -- with nothing written by hand."
+  },
+  "languages": [
+    "fr",
+    "de",
+    "en"
+  ]
+}

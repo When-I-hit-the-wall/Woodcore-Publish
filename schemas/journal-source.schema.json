@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Revision journal source",
+  "description": "Woodcore-Datei/journal.json, schema 1.0 -- the report's revision journal as Woodcore saves it, the source calc/journal.py exports from (docs/domain/journal.md §3.3terdecies). Written by Woodcore's «Journal» tab only. ONE file for the whole project, not one per entry: a journal is a single ordered list read as a whole, and nothing addresses one entry by an id -- so there is no folder, no `group` and no id to keep in step with a file name. An entry is written BY HAND, one per revision (the engineer's decision): nothing here is appended by an editor tab saving a drawing, which would put twenty entries in an afternoon's work. Every rule the walker below cannot express -- an index that is a whole number and not taken, a date that is a real day -- is checked by journal.check_source and by validation.validate_journal_business.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a file written at another version is refused rather than read as this one."
+    },
+    "entries": {
+      "type": "array",
+      "description": "The revisions, in the order they were written -- the export is what sorts them, newest first (journal.entries). An empty list is a project whose report has not been revised yet, and exports as an empty journal.",
+      "items": {
+        "type": "object",
+        "required": [
+          "index",
+          "date",
+          "name",
+          "initials",
+          "label"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "The revision's number, as a drawing's revision block numbers one: 1, 2, 3 ... Unique in the file. Woodcore proposes the largest plus one (journal.next_index), so a **gap is never refilled**: Rev. 2 deleted out of 1, 2, 3 leaves 2 unused and the next revision is 4. It is what the report prints as «Rev. 3» and what orders the journal."
+          },
+          "date": {
+            "type": "string",
+            "description": "The day of the revision, ISO: \"2026-09-27\". Typed by the engineer, and deliberately not taken from the clock -- a revision is dated by when it was decided, not by when it was entered -- which is also why the journal is ordered by its index and not by this field."
+          },
+          "name": {
+            "type": "string",
+            "description": "Who made the revision, in full, as the report prints it. Required: a revision nobody signs is not a revision. Woodcore prefills it from the entry before it."
+          },
+          "initials": {
+            "type": "string",
+            "description": "The short form of the office or of the person, as a revision block carries it: «FLL». Typed at every entry rather than read from a setting (the engineer's decision) -- a journal may carry entries by several offices -- and prefilled from the entry before it."
+          },
+          "label": {
+            "type": "string",
+            "description": "What the revision is, in a few words -- the one text every level of the report prints. Required: it is the whole of level 1. The engineer's own words, never translated (docs/typst/language.md §4bis)."
+          },
+          "summary": {
+            "type": "string",
+            "description": "The short description, printed from level 2. Optional and may be empty: an entry whose label says it all («Erstausgabe») has none, and level 2 then prints the label alone rather than an empty cell."
+          },
+          "description": {
+            "type": "string",
+            "description": "The long description, printed at level 3 beside the two above -- level 3 shows everything an entry carries (the engineer's decision). Optional and may be empty."
+          }
+        }
+      }
+    }
+  }
+}

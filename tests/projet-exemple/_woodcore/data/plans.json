@@ -1,0 +1,399 @@
+{
+  "schema_version": "1.3",
+  "plans": {
+    "Fluchttreppe": {
+      "label": "Grundriss",
+      "floor": "0",
+      "source": "plans/Fluchttreppe.json",
+      "sheet": {
+        "width": 1190.55,
+        "height": 1190.55
+      },
+      "crop": {
+        "x": 514.83,
+        "y": 102.51,
+        "w": 505.72,
+        "h": 644.68
+      },
+      "overlay": "plans/Fluchttreppe.svg",
+      "legend": [
+        {
+          "key": "T",
+          "text": "Träger / Wechsel / Unterzug / Überzug",
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.6\" width=\"10mm\" height=\"3.6mm\"><polyline points=\"0.6,1.8 9.4,1.8\" fill=\"none\" stroke=\"#2E5FAA\" stroke-width=\"0.288\" stroke-linejoin=\"round\"/><polygon points=\"0.6,1.8 2.16,1.26 2.16,2.34\" fill=\"#2E5FAA\"/><polygon points=\"9.4,1.8 7.84,2.34 7.84,1.26\" fill=\"#2E5FAA\"/></svg>"
+        },
+        {
+          "key": "S",
+          "text": "Stütze",
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.6\" width=\"10mm\" height=\"3.6mm\"><rect x=\"4.28\" y=\"1.08\" width=\"1.44\" height=\"1.44\" fill=\"#2E5FAA\"/></svg>"
+        }
+      ],
+      "unit": 0.758447,
+      "style": {
+        "line": 1.91,
+        "point": 0.97,
+        "text": 1.48
+      },
+      "elements": [
+        {
+          "type": "S",
+          "label": "S001",
+          "kind": "point",
+          "points": [
+            [
+              925.96,
+              675.62
+            ]
+          ],
+          "label_at": [
+            925.96,
+            656.05965
+          ]
+        },
+        {
+          "type": "T",
+          "label": "T001",
+          "kind": "line",
+          "points": [
+            [
+              925.47,
+              669.45
+            ],
+            [
+              629.81,
+              669.45
+            ]
+          ],
+          "label_at": [
+            786.85,
+            668.53
+          ]
+        },
+        {
+          "type": "S",
+          "label": "S001",
+          "kind": "point",
+          "points": [
+            [
+              742.6,
+              676.32
+            ]
+          ],
+          "label_at": [
+            741.28,
+            699.39965
+          ]
+        }
+      ],
+      "axes": [],
+      "labels": [
+        "S001",
+        "T001"
+      ],
+      "background": {
+        "file": "plans/Fluchttreppe-plan.pdf",
+        "format": "pdf",
+        "page": 1,
+        "origin": "01_Pläne/02_Total Plane - 29-07-26.pdf",
+        "origin_page": 2,
+        "sha256": "4295ebad3513d4201791a8a53588838afb3f194a36986a399db85e8a40901884",
+        "opacity": 0.45
+      },
+      "storey": "",
+      "role": "plan",
+      "unknown": []
+    },
+    "Geratehaus": {
+      "label": "Grundriss",
+      "floor": "0",
+      "source": "plans/Geratehaus.json",
+      "sheet": {
+        "width": 1190.55,
+        "height": 1190.55
+      },
+      "crop": {
+        "x": 215.14,
+        "y": 282.17,
+        "w": 764.35,
+        "h": 382.71
+      },
+      "overlay": "plans/Geratehaus.svg",
+      "legend": [
+        {
+          "key": "T",
+          "text": "Träger / Wechsel / Unterzug / Überzug",
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.6\" width=\"10mm\" height=\"3.6mm\"><polyline points=\"0.6,1.8 9.4,1.8\" fill=\"none\" stroke=\"#2E5FAA\" stroke-width=\"0.288\" stroke-linejoin=\"round\"/><polygon points=\"0.6,1.8 2.16,1.26 2.16,2.34\" fill=\"#2E5FAA\"/><polygon points=\"9.4,1.8 7.84,2.34 7.84,1.26\" fill=\"#2E5FAA\"/></svg>"
+        },
+        {
+          "key": "S",
+          "text": "Stütze",
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.6\" width=\"10mm\" height=\"3.6mm\"><rect x=\"4.28\" y=\"1.08\" width=\"1.44\" height=\"1.44\" fill=\"#2E5FAA\"/></svg>"
+        }
+      ],
+      "unit": 0.899235,
+      "style": {
+        "line": 1.0,
+        "point": 1.0,
+        "text": 0.77
+      },
+      "elements": [
+        {
+          "type": "S",
+          "label": "S001",
+          "kind": "point",
+          "points": [
+            [
+              341.05,
+              402.19
+            ]
+          ],
+          "label_at": [
+            341.05,
+            383.888314
+          ]
+        },
+        {
+          "type": "S",
+          "label": "S001",
+          "kind": "point",
+          "points": [
+            [
+              340.69,
+              524.12
+            ]
+          ],
+          "label_at": [
+            337.7,
+            541.668314
+          ]
+        },
+        {
+          "type": "T",
+          "label": "T001",
+          "kind": "line",
+          "points": [
+            [
+              348.79,
+              395.74
+            ],
+            [
+              348.79,
+              580.5
+            ]
+          ],
+          "label_at": [
+            348.79,
+            488.12
+          ]
+        }
+      ],
+      "axes": [],
+      "labels": [
+        "S001",
+        "T001"
+      ],
+      "background": {
+        "file": "plans/Geratehaus-plan.pdf",
+        "format": "pdf",
+        "page": 1,
+        "origin": "01_Pläne/02_Total Plane - 29-07-26.pdf",
+        "origin_page": 4,
+        "sha256": "4295ebad3513d4201791a8a53588838afb3f194a36986a399db85e8a40901884",
+        "opacity": 0.45
+      },
+      "storey": "",
+      "role": "plan",
+      "unknown": []
+    },
+    "Pavillon": {
+      "label": "Grundriss",
+      "floor": "0",
+      "source": "plans/Pavillon.json",
+      "sheet": {
+        "width": 1190.55,
+        "height": 1190.55
+      },
+      "crop": {
+        "x": 230.83,
+        "y": 306.21,
+        "w": 512.31,
+        "h": 473.44
+      },
+      "overlay": "plans/Pavillon.svg",
+      "legend": [
+        {
+          "key": "T",
+          "text": "Träger / Wechsel / Unterzug / Überzug",
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.6\" width=\"10mm\" height=\"3.6mm\"><polyline points=\"0.6,1.8 9.4,1.8\" fill=\"none\" stroke=\"#2E5FAA\" stroke-width=\"0.288\" stroke-linejoin=\"round\"/><polygon points=\"0.6,1.8 2.16,1.26 2.16,2.34\" fill=\"#2E5FAA\"/><polygon points=\"9.4,1.8 7.84,2.34 7.84,1.26\" fill=\"#2E5FAA\"/></svg>"
+        },
+        {
+          "key": "S",
+          "text": "Stütze",
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.6\" width=\"10mm\" height=\"3.6mm\"><rect x=\"4.28\" y=\"1.08\" width=\"1.44\" height=\"1.44\" fill=\"#2E5FAA\"/></svg>"
+        }
+      ],
+      "unit": 0.602718,
+      "style": {
+        "line": 1.0,
+        "point": 0.69,
+        "text": 1.0
+      },
+      "elements": [
+        {
+          "type": "S",
+          "label": "S001",
+          "kind": "point",
+          "points": [
+            [
+              365.5,
+              669.19
+            ]
+          ],
+          "label_at": [
+            365.5,
+            658.395327
+          ]
+        },
+        {
+          "type": "T",
+          "label": "T001",
+          "kind": "line",
+          "points": [
+            [
+              361.74,
+              665.97
+            ],
+            [
+              626.19,
+              665.97
+            ]
+          ],
+          "label_at": [
+            493.965,
+            665.97
+          ]
+        },
+        {
+          "type": "S",
+          "label": "S002",
+          "kind": "point",
+          "points": [
+            [
+              616.58,
+              657.63
+            ]
+          ],
+          "label_at": [
+            616.58,
+            646.835327
+          ]
+        }
+      ],
+      "axes": [],
+      "labels": [
+        "S001",
+        "T001",
+        "S002"
+      ],
+      "background": {
+        "file": "plans/Pavillon-plan.pdf",
+        "format": "pdf",
+        "page": 1,
+        "origin": "01_Pläne/02_Total Plane - 29-07-26.pdf",
+        "origin_page": 14,
+        "sha256": "4295ebad3513d4201791a8a53588838afb3f194a36986a399db85e8a40901884",
+        "opacity": 0.45
+      },
+      "storey": "",
+      "role": "plan",
+      "unknown": []
+    },
+    "Velo-Unterstand": {
+      "label": "Grundriss",
+      "floor": "0",
+      "source": "plans/Velo-Unterstand.json",
+      "sheet": {
+        "width": 2097.64,
+        "height": 1474.02
+      },
+      "crop": {
+        "x": 466.65,
+        "y": 355.41,
+        "w": 1288.71,
+        "h": 497.85
+      },
+      "overlay": "plans/Velo-Unterstand.svg",
+      "legend": [
+        {
+          "key": "T",
+          "text": "Träger / Wechsel / Unterzug / Überzug",
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.6\" width=\"10mm\" height=\"3.6mm\"><polyline points=\"0.6,1.8 9.4,1.8\" fill=\"none\" stroke=\"#2E5FAA\" stroke-width=\"0.288\" stroke-linejoin=\"round\"/><polygon points=\"0.6,1.8 2.16,1.26 2.16,2.34\" fill=\"#2E5FAA\"/><polygon points=\"9.4,1.8 7.84,2.34 7.84,1.26\" fill=\"#2E5FAA\"/></svg>"
+        },
+        {
+          "key": "S",
+          "text": "Stütze",
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.6\" width=\"10mm\" height=\"3.6mm\"><rect x=\"4.28\" y=\"1.08\" width=\"1.44\" height=\"1.44\" fill=\"#2E5FAA\"/></svg>"
+        }
+      ],
+      "unit": 1.516129,
+      "style": {
+        "line": 1.0,
+        "point": 0.46,
+        "text": 0.4
+      },
+      "elements": [
+        {
+          "type": "S",
+          "label": "S001",
+          "kind": "point",
+          "points": [
+            [
+              664.8,
+              588.23
+            ]
+          ],
+          "label_at": [
+            663.55,
+            600.6729
+          ]
+        },
+        {
+          "type": "T",
+          "label": "T001",
+          "kind": "line",
+          "points": [
+            [
+              679.08,
+              467.27
+            ],
+            [
+              679.08,
+              707.47
+            ]
+          ],
+          "label_at": [
+            679.44,
+            555.87
+          ]
+        }
+      ],
+      "axes": [],
+      "labels": [
+        "S001",
+        "T001"
+      ],
+      "background": {
+        "file": "plans/Velo-Unterstand-plan.pdf",
+        "format": "pdf",
+        "page": 1,
+        "origin": "01_Pläne/02_Total Plane - 29-07-26.pdf",
+        "origin_page": 22,
+        "sha256": "4295ebad3513d4201791a8a53588838afb3f194a36986a399db85e8a40901884",
+        "opacity": 1.0
+      },
+      "storey": "",
+      "role": "plan",
+      "unknown": []
+    }
+  }
+}

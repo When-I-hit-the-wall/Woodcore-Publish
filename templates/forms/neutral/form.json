@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-form",
+  "name": {
+    "fr": "Neutre",
+    "de": "Neutral",
+    "en": "Neutral"
+  },
+  "description": {
+    "fr": "La forme par défaut de Woodcore : A4, marges de 2,5 cm, texte de 11 pt justifié, titres numérotés, numéro de page centré en pied. Sobre, sans couleur ni décor.",
+    "de": "Die Standardform von Woodcore: A4, Ränder von 2,5 cm, Blocksatz in 11 pt, nummerierte Überschriften, zentrierte Seitenzahl im Fuss. Schlicht, ohne Farben und Zierrat.",
+    "en": "Woodcore's default form: A4, 2.5 cm margins, justified 11 pt text, numbered headings, the page number centred in the footer. Plain, with no colour and no decoration."
+  }
+}

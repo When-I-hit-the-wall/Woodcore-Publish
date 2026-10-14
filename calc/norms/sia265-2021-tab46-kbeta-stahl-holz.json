@@ -1,0 +1,40 @@
+{
+  "_source": "SIA 265:2021, Anhang A, Tabelle 46 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 96, read off a render of the page (the formulas are set as graphics).",
+  "_note": "base = sqrt(f_u,k / f_h,k) · d^t_exponent. Every corner is (t_1, k_1, t_2, k_2) with t_i = factor · base; a lower corner at the origin is written 0. `k_2_root` means k_2 = sqrt(value), the table's own «√2». The two conditions are printed above equations (130) and (131): wenn t_2 >= t2_over_t1 · t_1 gilt, wenn t_1 >= t1_over_t2 · t_2 gilt.",
+  "edition": "SIA 265:2021",
+  "table_46": {
+    "number": "46",
+    "title": "Holzdicken t_1,i bzw. t_2,i und zugehörige Hilfswerte k_beta1,i bzw. k_beta2,i (pro Scherfuge) bei Stahl-Holz-Verbindungen",
+    "norm": "SIA 265",
+    "norm_ref": "A.1.2",
+    "t_exponent": 0.8,
+    "mittelholz_bleche_aussen": {
+      "t_1_factor": 0,
+      "k_1": 0,
+      "t_2_factor": 1.78,
+      "k_2_root": 2,
+      "equation": "128"
+    },
+    "seitenholz_scherfuge_a": {
+      "t_1_factor": 0.89,
+      "k_1": 1.2,
+      "t_2_factor": 2.52,
+      "k_2": 2,
+      "equations": [
+        "129",
+        "130"
+      ]
+    },
+    "mittelholz_scherfuge_b": {
+      "t_1_factor": 0,
+      "k_1": 0,
+      "t_2_factor": 2.52,
+      "k_2": 2,
+      "equation": "131"
+    },
+    "conditions": {
+      "equation_130_t2_over_t1": 2,
+      "equation_131_t1_over_t2": 0.35
+    }
+  }
+}

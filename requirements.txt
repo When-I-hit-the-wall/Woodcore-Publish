@@ -1,0 +1,48 @@
+# The packages outside the standard library this pipeline needs, at the
+# versions this report was built against (docs/architecture/layout.md §11).
+#
+# The reference library versions the *edition of the norm* a value was read from
+# (section 11bis); this file versions the *tool that reads it*, which is the same
+# argument applied one level down: a report built in 2026 and checked in 2031 is
+# rebuilt with the openpyxl that read the workbook, not with whatever is current
+# then. Pinned exactly, for that reason, rather than given as a floor.
+#
+#   python -m pip install -r requirements.txt
+#
+# Typst itself is not here: it is a single binary, not a Python package. The
+# version this report was built with is in typst-version.txt, its archives'
+# SHA-256 in typst-sha256.json; python tests/bootstrap.py installs both this
+# file and that Typst (docs/conventions/testing.md §11ter).
+
+# Reads the workbooks: Positionen.xlsx's tables and every Belastungsannahmen
+# sheet (calc/io_excel.py), and writes docs/typst-reference.xlsx.
+openpyxl==3.1.5
+
+# Extracts the one page of the architect's PDF a position plan is drawn over,
+# and reads its size (calc/domains/plan.py). Imported only when a plan has a
+# PDF background.
+pypdf==6.19.0
+
+# What a script of the project computes with (calc/domains/script.py, v0.100): the
+# engineer chose numpy alone over numpy + SciPy, which would have taken the
+# installer from 63 MB to some 130 and left no room beside the site on Pages
+# (docs/conventions/build-and-release.md §12). numpy.linalg solves any linear system, which is most of
+# what a static calculation asks for; a non-linear equation is solved by Newton or
+# bisection written out, which the Python tab's own examples show.
+numpy==2.5.3
+
+# Reads an architect's CAD drawing -- a DXF, or a DWG once the ODA File
+# Converter has made it a DXF -- for a position plan, and draws its layouts
+# to SVG with the layers the engineer leaves on (calc/domains/cad.py, v0.114).
+# Imported only when a plan document is a CAD file.
+ezdxf==1.4.4
+
+# Imported by ezdxf's drawing add-on (ezdxf/addons/drawing/frontend.py) that
+# calc/domains/cad.py renders a layout with, but not declared by ezdxf itself:
+# without it a CAD plan cannot be drawn (issue #24).
+Pillow==12.3.0
+
+# Woodcore's window (calc/tools/). Nothing in the export needs it: the
+# report builds without it, which is why a missing PySide6 is reported in a
+# message box rather than failing the pipeline (docs/decisions.md §13).
+PySide6==6.11.2

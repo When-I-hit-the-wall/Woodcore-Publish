@@ -1,0 +1,19 @@
+{
+  "_source": "SIA 265:2021, clause 6.2.1.1, equation (88) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 64.",
+  "_note": "k_alpha, the factor in front of equation (88), and the diameters the equation is stated for («Stabdübel aus Stahl nach SN EN 14592+A1 mit einem Durchmesser d von 6 mm bis 30 mm»).",
+  "edition": "SIA 265:2021",
+  "clause": {
+    "value": 0.73,
+    "unit": "",
+    "symbol": "k_alpha",
+    "label": "Beiwert der Tragwiderstandsgleichung",
+    "norm": "SIA 265",
+    "norm_ref": "6.2.1.1",
+    "note": "Der Vorfaktor von Gleichung (88); die Norm schreibt ihn als «k_alpha  k_alpha = 0,73».",
+    "diameter_range": {
+      "min": 6,
+      "max": 30,
+      "unit": "mm"
+    }
+  }
+}

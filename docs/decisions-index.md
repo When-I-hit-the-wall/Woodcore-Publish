@@ -1,0 +1,522 @@
+# Decisions, by theme
+
+> An index of [`decisions.md`](decisions.md) (§13), written on 2026-10-10 (issue #31): every decision under one theme, in the file's order (newest first), with its status and the beginning of its bold sentence — grep `decisions.md` for it. `tests/test_docs_coherence.py` holds each line to one decision and each decision to one line.
+
+## 13 (index) — the decisions by theme
+
+### The retired features (RFEM, the keyword lines)
+
+- *[in force]* «One journal per document, and a convention's revision keyword is read from its own journal…»
+- *[retired in v0.117]* «An RFEM structure is a domain instance, and its extremes are read rather than enveloped, s…»
+- *[retired in v0.117]* «The design situation is part of the variable's name, settled (v0.100).»
+- *[retired in v0.117]* «A bar is one RFEM member and its index is always written, settled (v0.100).»
+- *[retired in v0.117]* «A quantity that is identically zero on a bar is left out, and said out loud, settled (v0.1…»
+- *[retired in v0.117]* «The curve is reconstructed from the export and the sign of the relation is measured, settl…»
+- *[retired in v0.117]* «An imported model stays generated and its presentation is a file beside it, settled (v0.10…»
+- *[retired in v0.117]* «The diagram is drawn for a combination and not for a design situation, settled (v0.100).»
+- *[retired in v0.117]* «A third command beside the two the engineer named, settled (v0.100).»
+- *[retired in v0.117]* «What Woodcore reads of RFEM is its table export, not its API, settled (v0.98).»
+- *[retired in v0.117]* «The metadata's sigil is `@`, one sigil for every key, settled (v0.98).»
+- *[retired in v0.117]* «A `@position` is only on a member or a surface, settled (v0.98).»
+- *[retired in v0.117]* «Nothing the RFEM reader finds refuses, settled (v0.98).»
+- *[retired in v0.117]* «An imported static model goes to `data/statics.json` and never to `Woodcore-Datei/statics/…»
+- *[retired in v0.117]* «Only a named structure is imported, settled (v0.98).»
+- *[retired in v0.117]* «The member forces are read behind a flag, settled (v0.98).»
+- *[retired in v0.117]* «XLSX stays the format, on a measurement, settled (v0.98).»
+- *[retired in v0.117]* «The sheet and column aliases are measured, never guessed, settled (v0.98).»
+- *[superseded in v0.94]* «Positionen.xlsx stays the source of positions, and a plan only locates them, settled (v0.3…»
+- *[retired in v0.117]* «A deterministic parser and no AI, settled (v0.100).»
+- *[retired in v0.117]* «The keyword grammar knows each command's arguments, settled (v0.100).»
+- *[in force]* «Retrait de RFEM et des lignes à mots-clés: the RFEM import and v0.100's «Formules» tab are…»
+
+### Building, publishing, the site and updates
+
+- *[superseded in v0.117]* «The GitLab token lives in the environment, and each publication is asked for, settled (v0.…»
+- *[in force]* «The break a release opens at a node keeps the drawing's own factors, settled (v0.99).»
+- *[in force]* «`title` is required; `edition` and `publisher` are printed where given, settled (v0.99).»
+- *[in force]* «The release is numbered after its newest version label, settled (v0.96).»
+- *[in force]* «An address the site moves keeps working, settled (v0.96).»
+- *[in force]* «The commands tab reads the website's data, settled (v0.94).»
+- *[in force]* «The website's sidebar follows the kind of page, settled (v0.94).»
+- *[in force]* «One Typst tokeniser, Qt-free, for the website and the window, settled (v0.92).»
+- *[in force]* «Woodcore is proprietary for now, © 2026 Florian Lamprecht, settled (v0.91.1).»
+- *[in force]* «Every colour of Woodcore is written once, for the site and the window, settled (v0.90).»
+- *[in force]* «The typography is the site's as a browser resolves it, settled (v0.90).»
+- *[superseded in v0.117]* «The installer is published on GitLab Pages, through the Package Registry, settled (v0.89)…»
+- *[in force]* «The site is on Cloudflare Pages and the installers in a public GitHub repository, settled…»
+- *[in force]* «A window at the start, once per version, and «Installer» installs, settled (v0.89).»
+- *[in force]* «The update check lives in the installed program only, settled (v0.89).»
+- *[in force]* «The website is generated from what Woodcore reads, settled (v0.89).»
+- *[in force]* «The norm tables are not published, settled (v0.89).»
+- *[in force]* «0.89.0, bumped for the update check, settled (v0.89).»
+- *[in force]* «The installer is rebuilt by a `post-commit` hook, from a clean worktree of the commit, in…»
+- *[in force]* «The program's version is bumped with every release, settled (v0.87).»
+- *[in force]* «A polar moment publishes its forces, and the update is emitted before the context, settled…»
+- *[in force]* «The installed program ships its sources, not a frozen archive of them, settled (v0.83).»
+- *[in force]* «The release of 0.116.0 was decided with the request, settled (v0.116).»
+
+### Tests, tools and the way of working
+
+- *[in force]* «A new project opens in the convention d'utilisation, and no console window may flash, sett…»
+- *[in force]* «Tinymist's root is stated, and a probe decided it, settled (v0.111).»
+- *[in force]* «The registry's default is written down twice and held equal by a test, settled (v0.100).»
+- *[in force]* «Typst is checked at every start, from the sources, and pinned in the same step, settled (v…»
+- *[in force]* «Every key is accepted, settled (v0.87, second half), reversing v0.79's refusal (periodic a…»
+- *[in force]* «A frozen set carries every input the test restates, settled (v0.85.1).»
+- *[in force]* «The empty folders are written to settings.json as they change, and the tests never write t…»
+- *[in force]* «The versions of the tools are pinned, and Woodcore watches them, settled (v0.59).»
+- *[in force]* «A module with no caller is deleted, not kept warm, settled (v0.59), reversing v0.11.»
+- *[in force]* «The category of a command is hand-written and held by a test in both directions, settled (…»
+- *[in force]* «The panes' sizes are kept by tab, by view and by the set of screens plugged in, AMENDING t…»
+- *[in force]* «A broad `except` raises again or says why on its line, settled (v0.117, issue #28).»
+
+### The three documents, their structure and sharing
+
+- *[in force]* «The look of a project is a form: a folder `Template/` at the Typst root, `config.typ` keep…»
+- *[in force]* «The project templates are dissolved into one form and three contents, settled (v0.114).»
+- *[in force]* «The report has content templates, and switching any document's content is a comparison, se…»
+- *[in force]* «The BFH form sets every piece of text in Lucida Sans, settled (v0.114).»
+- *[in force]* «No page-picker popup: a document is cut into plans in the centre, settled (v0.114).»
+- *[in force]* «A convention's and a base's headings are written at the level they print at, and a chapter…»
+- *[in force]* «An object taken out is not asked about, and can be put back where it stood, settled (v0.11…»
+- *[in force]* «The title page is a `title.typ` shared by the three documents, settled (v0.113).»
+- *[in force]* «The settings' templates are one page of three places, and a template is saved from a proje…»
+- *[in force]* «A document is edited in one tab, and no Typst code is ever shown in Woodcore, settled (v0.…»
+- *[in force]* «Every heading, every paragraph and every table is an object, and the report's files are ta…»
+- *[in force]* «A paragraph is a plain text box holding its markup as written, settled (v0.112).»
+- *[in force]* «The tree is chapters › sections › objects, several chosen at once, and moved by drag and d…»
+- *[in force]* «The preview is the page of what is chosen, not of the document, and not a live preview, se…»
+- *[in force]* «The right pane offers the options of what is chosen, by its kind, settled (v0.112), where…»
+- *[in force]* «What the documents share stays in step by orange, import and ignore, never by overwriting,…»
+- *[in force]* «The record of what is shared is a `sync.json` beside each document's entry file, settled (…»
+- *[in force]* «A section imported from another document is linked unless the engineer says otherwise, set…»
+- *[in force]* «A shared section keeps one id in both documents, settled (v0.112).»
+- *[in force]* «The two documents come as complete templates, with no client data, and Musterprojekt's skeletons…»
+- *[in force]* «A document template is saved from a document, in three places, and offered when a project…»
+- *[in force]* «The report is the third of three documents, and nothing is renamed, settled (v0.111).»
+- *[in force]* «The Typst root is the project's own folder, and the three documents share one `_woodcore/`…»
+- *[in force]* «`DEFAULT_LAYOUT` stays as it is, and one key says which layout a project has, settled (v0.…»
+- *[in force]* «A project is migrated by renaming, proved against a reference taken first, and undone auto…»
+- *[in force]* «A document is compiled only if its Typst changed — by a digest of its content, from Typst'…»
+- *[in force]* «The document is a drop-down that hides rows and does not rebuild the window, settled (v0.1…»
+- *[in force]* «Each document is archived apart, RFEM-Export included, settled (v0.111).»
+- *[in force]* «The three folders are the engineer's exact forms, named at creation, settled (v0.111).»
+- *[in force]* «The decisions of phases 2 to 6, taken with the engineer and recorded before they are built…»
+- *[in force]* «A file another program holds is not a report that does not compile, settled (v0.100).»
+- *[in force]* «The entry says its block, and a citation without an entry gets a third, settled (v0.99).»
+- *[in force]* «The block names are bold lines and not headings, settled (v0.99).»
+- *[in force]* «A title is the document's own, in the languages the document prints it in, settled (v0.99)…»
+- *[superseded in v0.118]* «`SN EN 14592+A1:2012` is named from its successor, and says so, settled (v0.99).»
+- *[in force]* «bauforumstahl's Arbeitshilfe is named from its own metadata, and says so, settled (v0.99).»
+- *[in force]* «The report's revision journal is one file, written by hand, settled (v0.99).»
+- *[in force]* «A journal is ordered by its index and never by its date, settled (v0.99).»
+- *[in force]* «The engineer's own words go into the table as content, settled (v0.99).»
+- *[in force]* «A narrow prose column is hyphenated, in the journal's table alone, settled (v0.99).»
+- *[in force]* «The journal's page is the last section of the template, settled (v0.99).»
+- *[in force]* «The journal's list is flat, settled (v0.99).»
+- *[in force]* «A date is checked and never inferred, settled (v0.99).»
+- *[in force]* «What files already written say is read and migrated by use, settled (v0.96).»
+- *[in force]* «A position's section is read once, settled (v0.94).»
+- *[in force]* «Templates in three places, settled (v0.94).»
+- *[in force]* «At every commit, the «Nouveautés» and the commands' documentation follow, settled (v0.94).»
+- *[in force]* «A card is a `QGroupBox` the style sheet dresses, settled (v0.93).»
+- *[in force]* «A card's labels go above their fields where they must, settled (v0.95).»
+- *[in force]* «A symbol is painted as mathematics by a delegate, and the item keeps its source, settled (…»
+- *[in force]* ««Actions» has two sections, and the display options are kept in memory, settled (v0.117).»
+- *[in force]* «Every separating dash the report prints is a long one, settled (v0.88).»
+- *[in force]* «The book's layout, and Anhang A's formulas, settled (v0.84).»
+- *[in force]* «Tabellen 45 and 46, not Tabelle 23, settled (v0.84).»
+- *[in force]* «`inline` is a property of the step, not a setting of the report, settled (v0.84).»
+- *[in force]* «The dowel layout box comes before the dowels box, settled (v0.84).»
+- *[in force]* «A table is three rules and nothing else, settled (v0.84).»
+- *[in force]* «The lock is `<name>.woodcore.lock`, and it is advice, settled (v0.83).»
+- *[in force]* «The move, and the code's history cleaned rather than restarted, settled (v0.82).»
+- *[in force]* «The title page and the PDF's metadata are the project file's, settled (v0.82).»
+- *[in force]* «The program and the project come apart: Woodcore, settled (v0.81).»
+- *[in force]* «A project is named by its `.woodcore` file, and one process works on one, settled (v0.81).»
+- *[in force]* «`Sections/004` names its cases by hand, settled (v0.79).»
+- *[in force]* «The η_w and γ_M/η_M written by hand in `Sections/005` stay, settled (v0.79).»
+- *[in force]* «The label is «position class section», on the visible middle of the piece, settled (v0.75)…»
+- *[in force]* «A source still carrying its own drawing is refused, not converted, settled (v0.74).»
+- *[in force]* «A detail is drawn once, in a module of its own, settled (v0.72).»
+- *[partly superseded in v0.118]* «`plates.thickness` is removed until the check that reads it exists, settled (v0.70).»
+- *[in force]* «The report's language is a setting of the document, settled (v0.52).»
+- *[in force]* «One glossary, and the German is its key, settled (v0.52).»
+- *[superseded in v0.54]* «The standard headings of `Sections/` come from the glossary, the prose does not, settled (…»
+- *[in force]* «What the engineer writes by hand is never translated, settled (v0.54), reversing v0.52's c…»
+- *[in force]* «The document's language and the engine's language are two settings, in two files, settled…»
+- *[in force]* «No shared section catalog, settled (v0.10).»
+- *[in force]* «A command's documentation lives in its `///` block and nowhere else, settled (v0.64).»
+- *[in force]* «An example is compiled, one per document, settled (v0.64).»
+- *[in force]* «The documentation's French and German are a file of their own, matched on the English, set…»
+- *[in force]* «The examples are frozen from the example project, settled (v0.86).»
+- *[in force]* «The report's folder is named at the project's creation, and `DEFAULT_LAYOUT` does not move…»
+- *[in force]* «`templates/projet/`'s own folder is deliberately not renamed, settled (v0.100).»
+- *[in force]* «One language choice sets both, settled (v0.100).»
+- *[in force]* «An excerpt is anchored on its title's bookmark, not on its text, settled (v0.111).»
+- *[in force]* «A title is compared without its chapter number, and told apart by the titles above it, set…»
+- *[in force]* «An excerpt that cannot be found stops the report, settled (v0.111).»
+- *[in force]* «An excerpt and its annex page are linked by where they land, settled (v0.111).»
+- *[in force]* «The annexes carry the pages of the excerpts the report shows, by default, settled (v0.111)…»
+- *[in force]* ««Annexes» sits in the Projet group, after the journal, and in the three documents, settled…»
+- *[in force]* «An excerpt has no levels, settled (v0.111).»
+- *[in force]* «`show-annexes`' examples are shown and not rendered, settled (v0.111).»
+- *[in force]* «The fire-protection plan is the position plan's tab a second time, on one shared base, set…»
+- *[in force]* «The documents are shared and a page's turn turns both kinds, settled (v0.115).»
+- *[in force]* «The tab is the base de projet's and the report's, not the convention's, settled (v0.115).»
+- *[in force]* «The drawing engines work alike wherever they can, settled (v0.116), as rule 16 of §2.»
+- *[in force]* «A document belongs to the tab that imported it, settled (v0.116).»
+- *[in force]* «A layer is switched in place and its consequences follow later, settled (v0.116).»
+- *[in force]* «The load transfer level is a collection of a section, and a storey box carries STE's own d…»
+- *[in force]* «A plan viewport has a title above it, one line, with a switch, settled (v0.116).»
+- *[in force]* «A saved bending is the section alone, its N signed, and (21)/(22) apply at an angle with t…»
+- *[in force]* «Leaving a tab, a view, a document or the window saves without a question, settled (v0.117)…»
+- *[in force]* «A notice is translated when it is shown, its technical text never, settled (v0.117).»
+- *[in force]* «A column is a square turned by an angle; the export document has an id of its own that nam…»
+- *[in force]* «The captions read «Tableau 1 — titre» and «Figure 1 — titre» in every document, settled (v…»
+- *[in force]* «A number is one object on a plan, and a position deleted takes the numbers after it down e…»
+- *[in force]* «A domain of the «Formules» tab is printed by `#include "/Formules/<id>.typ"`, its id is th…»
+- *[in force]* «An annexes' excerpt is made three ways -- a frame drawn, a range of pages, a frame found i…»
+
+### The window and its tabs
+
+- *[partly superseded in v0.118]* «The level -1 «Sélection manuelle» is four joined buttons per variable, `0 | 1 | 2 | 3`, the variables side…»
+- *[in force]* «The «Formules» tab shows a domain as one text, each command a pill where Typst prints it, an…»
+- *[in force]* «One tab «Poids propre et surcharge», settled (issue #35, 11.10.2026).»
+- *[in force]* «The «Formules» tab writes what a line is in «Calcul» and how it is printed in «Affichage»,…»
+- *[in force]* «A hidden PDF layer is stripped from the report's page, settled (v0.114).»
+- *[in force]* «The storey designation and the numbering character are two fields, settled (v0.114).»
+- *[in force]* «A choice and a checklist print the answer alone by default, settled (v0.113).»
+- *[in force]* «A long operation blocks the window behind a loading card, and hover still works, settled (…»
+- *[in force]* «A recent project whose file is gone is forgotten, and «Convertir un ancien dossier» leaves…»
+- *[in force]* «The bar says what is on screen and the banner says what went wrong, settled (v0.100).»
+- *[in force]* «The tab reads once, not on every opening, settled (v0.100), against the engineer's stated…»
+- *[in force]* «The variables tab is a browser and has no `dirty`, settled (v0.100)»
+- *[in force]* «`number_frame` applies the element's own factors itself, and is idempotent by construction…»
+- *[in force]* ««Reprendre» is one word in every tab, settled (v0.99).»
+- *[in force]* «A result is what the record calls a result, settled (v0.99).»
+- *[in force]* «A citation stays what it is and the bibliography is a second list, settled (v0.99).»
+- *[in force]* «The edition is left off the line where the designation already ends on it, settled (v0.99)…»
+- *[in force]* «The project's file is named as a path from the report's folder, settled (v0.99).»
+- *[in force]* «The two commands are «Le rapport et sa langue», settled (v0.99).»
+- *[in force]* ««Katalog» becomes «Woodcore», settled (v0.96).»
+- *[in force]* «The old file name is a shim, settled (v0.96).»
+- *[in force]* «The Positions tab re-imports after every write, settled (v0.94).»
+- *[in force]* «A column of cards is never narrower than its cards, settled (v0.93).»
+- *[in force]* «Cards read side by side reflow, settled (v0.95).»
+- *[in force]* «A pane's room is measured in the window's own fonts, settled (v0.95).»
+- *[in force]* «A light card on a soft ground, a lighter card on a darker ground, settled (v0.93).»
+- *[in force]* «The calls are coloured labels, not line edits, settled (v0.92).»
+- *[in force]* «The commands tab's reference page is its owner's, settled (v0.92).»
+- *[in force]* «The row of tabs gives way to a grouped side navigation, the QTabWidget underneath, settled…»
+- *[in force]* «The start page's actions are cards and its recent projects too, settled (v0.91).»
+- *[in force]* «Fusion, dressed by one style sheet, replaces Windows 11's own style, settled (v0.90).»
+- *[in force]* «The scheme follows Windows unless the engineer chooses, per user; the density is compact,…»
+- *[in force]* «The list of the positions keeps to the page, and a table's columns may state a width, sett…»
+- *[in force]* ««Charges» gives way to «Variables», which lists every value with its provenance, settled (…»
+- *[in force]* «After a position is saved the window is not built again; each tab is built again when it i…»
+- *[in force]* «k_h applies to glulam bending by default, settled (v0.88).»
+- *[in force]* «A table is cited «SIA 265 Tabelle 8», without §, settled (v0.88).»
+- *[in force]* «A word math does not know is quoted by asking math, settled (v0.87).»
+- *[in force]* «A negative number is printed with a minus sign, set where a number becomes text, settled (…»
+- *[in force]* «A load's colour leaves its label black, settled (v0.87).»
+- *[in force]* «A highlighted point is ringed over the pieces, settled (v0.87).»
+- *[in force]* «The name one types and the symbol the page prints are two columns, settled (v0.85).»
+- *[in force]* «R_d is computed first and R_d,Verb from it, settled (v0.84).»
+- *[in force]* «eta_w is applied to each member's K_ser, settled (v0.84).»
+- *[in force]* «A one-column `group` names that column, settled (v0.84).»
+- *[in force]* «Woodcore's own copy of a table follows the report's, settled (v0.84).»
+- *[in force]* «The start page, and a project opened in a process of its own, settled (v0.83).»
+- *[in force]* «Read-only is enforced once, on the classes, settled (v0.83).»
+- *[in force]* «A project's empty folders live in its `.woodcore`, settled (v0.83), replacing v0.75's `set…»
+- *[in force]* «The Typst-Katalog's settings and caches are Woodcore's, taken over once, settled (v0.83).»
+- *[in force]* ««Importer Excel» goes through `woodcore-cli`, settled (v0.83).»
+- *[in force]* «An old folder is converted by naming it, not by moving it, settled (v0.83).»
+- *[in force]* «One zip per archive, settled (v0.82), replacing v0.71's folder.»
+- *[in force]* «`woodcore-cli` replaces `build.ps1` and the `Makefile`, settled (v0.82).»
+- *[in force]* «`.gitattributes` marks the binary files, settled (v0.82).»
+- *[in force]* «An example of the commands tab needs no project, settled (v0.81).»
+- *[in force]* «`descr:` is `label:`, settled (v0.80).»
+- *[in force]* «A warning the window shows is a code with values, and the export's sentence stays English,…»
+- *[in force]* «A point ticked «connecteur» is a fastener to every module, settled (v0.77), reversing the…»
+- *[in force]* «Nom · Description · ID in every tab, the folder no longer a field, settled (v0.77).»
+- *[in force]* «Construction lines drawn by the canvas, not by its SVG, settled (v0.77).»
+- *[in force]* «The window watches itself for stalls, settled (v0.77).»
+- *[in force]* «The band is the side the view shows, and `width` is gone, settled (v0.75).»
+- *[in force]* «A tool bar never scrolls up and down, and the schemas' bar shares the static models', sett…»
+- *[in force]* «An empty fastener list is a draft and not a defect, settled (v0.74).»
+- *[in force]* ««Grille…» belongs to the schemas tab, settled (v0.74).»
+- *[in force]* «The import graph is acyclic by construction, settled (v0.74).»
+- *[in force]* «A modification is one step of «Annuler», and a refusal is none, settled (v0.73).»
+- *[in force]* «The selection is a focused entry and the rest, settled (v0.73).»
+- *[in force]* ««Trancher» takes its line from the selection, not from a third click, settled (v0.73).»
+- *[in force]* «The source folder is `details/`, not `schemas/`, settled (v0.72).»
+- *[in force]* «The three ways to draw a rectangle are two constructions, settled (v0.72).»
+- *[in force]* «The wheel never changes a value, and it is stopped in one place, settled (v0.69).»
+- *[in force]* «A folder is a field, not a directory, settled (v0.69).»
+- *[in force]* ««Supprimer» archives into a directory, settled (end of v0.77).»
+- *[in force]* «The export menu is a set of checks, not a list of commands, settled (v0.62).»
+- *[in force]* «Woodcore is a PySide6 window, settled (v0.30), reversing v0.28's tkinter.»
+- *[in force]* «A connection is defined in Woodcore and saved as a source file, settled (v0.31).»
+- *[in force]* «A comparison written by hand is compared by the engine, settled (v0.58).»
+- *[superseded in v0.76]* «A calculation of no listed connector is warned about at export and refused by the report,…»
+- *[in force]* «Woodcore renders the part of a plan in view first, and keeps every render, settled (v0.48)…»
+- *[in force]* «A model's influence width passes over a load it cannot apply to; a load's own is still ref…»
+- *[in force]* «A sentence in the data may carry math between dollars, settled (v0.54).»
+- *[in force]* «The preview is a PNG and the SVG route is closed, settled (v0.64), on a measurement rather…»
+- *[in force]* «The plan's tool bar wraps, and its two rows are laid out apart, settled (v0.67).»
+- *[in force]* «A short tool bar scrolls sideways rather than wrapping, settled (v0.66), reversing v0.51.»
+- *[in force]* «The pages are pre-rendered and committed, settled (v0.65).»
+- *[in force]* «The example pages are rendered in German only, settled (v0.86).»
+- *[in force]* «Only the folder is renamed, never the entry file, settled (v0.100).»
+- *[in force]* «The folder's name is checked before anything is created, settled (v0.100).»
+- *[in force]* «A `dirty` declares a tab an editor, settled (v0.100).»
+- *[in force]* «Tracking in the plan canvases dwells 350 ms, where the static models' tab dwells 220, sett…»
+- *[in force]* «The crop and the calibration are cards of the right pane, and the right pane follows the s…»
+- *[in force]* «A list of the positions is one table in three forms, settled (v0.116).»
+- *[in force]* «A bundle is a folder of the export list that makes one more PDF, settled (v0.116).»
+- *[in force]* «A sheet is of one kind, settled (v0.116).»
+- *[in force]* «The sheet editor's right pane follows the selection like the plan tabs', settled (v0.116).»
+- *[in force]* «Member checks are saved objects resolved by the export, named by ID in the report, and cal…»
+- *[in force]* «The window's results are an instant Python calculation, REVERSING «Typst alone», settled (…»
+- *[in force]* «A tab shows one task at a time, chosen in the top bar, settled (v0.117).»
+- *[in force]* «Every command of an *Affichage* has a panel written by hand, its defaults the signature's,…»
+- *[in force]* «Every error, warning and information goes through one store and is shown at the top right,…»
+- *[in force]* «The PDF views are not tiled; they render less, off the window's thread, in a better order,…»
+- *[in force]* «Every calculation written in the «Formule» tab is a domain of its own, one `.typ` file, pr…»
+- *[in force]* «The order of every list of the window is the engineer's, kept in `Woodcore-Datei/lists.jso…»
+- *[in force]* «The notices stand between the views' switch and the languages', REVERSING 07.10.2026's «le…»
+- *[in force]* «Every tab's own left pane folds by an arrow at its foot and narrows to a floor every tab s…»
+
+### Position plans, schemas, static models, fire plans
+
+- *[in force]* «CAD through ezdxf, DWG through the ODA File Converter if installed, settled (v0.114).»
+- *[in force]* «Export sheets live in `<typst_root>/Plans/`, a `.typ` the source of truth, settled (v0.114…»
+- *[in force]* «A plan is saved when left, and asks only when the save is refused, settled (v0.114).»
+- *[in force]* «The three factors are written down once, and an entry's own is a factor multiplying them,…»
+- *[in force]* «A `style` key a drawing does not know is refused, settled (v0.99), tightening v0.34.»
+- *[in force]* «A halo grows with the part it marks, settled (v0.99).»
+- *[in force]* «A text of a schema is set over its own box, translucent, settled (v0.99).»
+- *[in force]* «A line gives way to a text, and not the other way round, settled (v0.99).»
+- *[in force]* «What the schema already says is not restated in Python, settled (v0.99).»
+- *[in force]* «The static models' and the schemas' bars are icon-only and as tall as the plan's, settled…»
+- *[in force]* «A `tables` entry may be a plate of figures with no grid, settled (v0.84).»
+- *[in force]* «One installation per version, per user, and a launcher that picks, settled (v0.83).»
+- *[in force]* «A schema rename is carried into what names it, settled (v0.77).»
+- *[in force]* «A calculation names a schema and carries no geometry of its own, settled (v0.74).»
+- *[in force]* «A member carries two angles, settled (v0.74).»
+- *[in force]* «A new connector opens on the first schema there is, settled (v0.74).»
+- *[in force]* «A named point is an aid, not a fifth collection, settled (v0.72).»
+- *[in force]* «A schema is drawn at its real size, settled (v0.72).»
+- *[in force]* «One moisture class for the connection, not one per member, settled (v0.70).»
+- *[in force]* «The force arrows are drawn by the report, into the exported figure, settled (v0.32).»
+- *[in force]* «A position plan is drawn in Woodcore and saved as a source file, settled (v0.34).»
+- *[in force]* «A plan draws only the sheet's positions, settled (v0.45), tightening v0.34 in Woodcore and…»
+- *[in force]* «A plan is two layers in Typst, the architect's page and an SVG of the symbols, settled (v0…»
+- *[in force]* «The highlight is drawn by Typst, and a detail keeps the plan's scale, settled (v0.34).»
+- *[in force]* «A static model is drawn in x/z, not x/y, settled (v0.51).»
+- *[in force]* «A translational spring is a member, not an articulation, settled (v0.51).»
+- *[in force]* «A static model is a drawing and not a calculation, settled (v0.51).»
+- *[in force]* «The influence width is applied in Python, and it is the module's only arithmetic, settled…»
+- *[in force]* «A static model's figure is normalised, not drawn in metres, settled (v0.51).»
+- *[in force]* «A dimension is one collection with a `kind`, settled (v0.55).»
+- *[in force]* «A dimension's end is an anchor, and its offset is measured from the middle, settled (v0.55…»
+- *[in force]* «The third click names the sector, settled (v0.57), replacing v0.55's sign.»
+- *[in force]* «A dimension measures and does not solve, settled (v0.55).»
+- *[in force]* «A figure is drawn once per language, settled (v0.52).»
+- *[in force]* «One unit per dimension, and `#unit` sets it, settled (v0.63).»
+- *[in force]* «`dimension` is descriptive text, settled (v0.14).»
+- *[in force]* «Axes moved out of the data, settled.»
+- *[in force]* «The worked examples are frozen against a snapshot of `data/`, settled (v0.65).»
+- *[in force]* «A fire plan follows a position plan or has a frame of its own, settled (v0.115).»
+- *[in force]* «Archiving a position plan that fire plans follow detaches them, settled (v0.115).»
+- *[in force]* «Schema 2.0, and a 1.0 source is read as it is, settled (v0.115).»
+- *[in force]* «Gian's set of elements exactly, no limits checked, no automatic rooms, settled (v0.115).»
+- *[in force]* «The fire plan prints in three ways, and on a sheet its legend both on the plan and apart,…»
+- *[in force]* «Several frames on a page are several plans, the first one made by the tick, settled (v0.11…»
+- *[in force]* «A plan has a type, and a load-path plan is a plan with six more symbols, settled (v0.116).»
+- *[in force]* «Another plan shown over the open one is a display aid kept in the source, never printed, s…»
+- *[in force]* «A position plan's construction aids are the editor's alone -- saved with the plan (source…»
+
+### Connectors, polar moments and member checks
+
+- *[in force]* «A check's verdict is a key of -1, named by its utilisation, and printed only where named, settled (issue #58, 14.10.2026).»
+- *[superseded in v0.118]* «A check's result is always printed at -1, settled (issue #39, 11.10.2026).»
+- *[in force]* «Buckling and lateral torsional buckling are kinds of their own, and a lateral torsional bu…»
+- *[in force]* «The η are found by walking the registry, not by registering, settled (v0.99).»
+- *[in force]* «The data is walked, and what the report writes by hand registers at the call, settled (v0.…»
+- *[in force]* «The source of a value typed on a connector is `woodcore:`, settled (v0.96).»
+- *[partly superseded in v0.118]* «The steel families are codes and names only, settled (v0.94).»
+- *[in force]* «Round timber is computed, without lateral torsional buckling, settled (v0.94).»
+- *[in force]* «η_w stays on the stiffness, settled (v0.94).»
+- *[in force]* «The member checks are commands of the report, a member written down once, settled (v0.88).»
+- *[in force]* «A polar moment names no connector, settled (v0.76), reversing v0.33 and v0.74.»
+- *[in force]* «A polar moment's identity is Schéma · Nom · Description · ID, and its id is made from the…»
+- *[superseded in v0.76]* «A polar-moment calculation's id is composed of a name and a variant and may be written ove…»
+- *[superseded in v0.76]* «A polar moment still names its connector, settled (v0.74).»
+- *[in force]* «A connector carries its own calculation, and leaves Excel, settled (v0.68), reversing v0.3…»
+- *[in force]* «One connector is one file is one calculation, settled (v0.68).»
+- *[in force]* «k_beta from Anhang A, for every configuration, settled (v0.68).»
+- *[in force]* «A member's timber is a reference, resolved afresh at every export, settled (v0.68).»
+- *[in force]* «The forces in the fasteners are calculated in Typst, settled (v0.31).»
+- *[superseded in v0.74]* «A connection is written in the frame of a reference member, settled (v0.32), replacing v0.…»
+- *[superseded in v0.68]* «Connectors are entered in Excel, as a second sheet of positions, settled (v0.33).»
+- *[superseded in v0.76]* «A polar-moment calculation belongs to a connector and is named after it, settled (v0.33).»
+- *[in force]* «A force coefficient's c_red follows the row's wind direction, settled (issue #47, 12.10.2026).»
+- *[partly superseded in v0.118]* «The snow's 2000 m limit reads the site's altitude, and a height step and a cornice are said and not computed, settled (issue #47, 12.10.2026).»
+- *[in force]* «A snow site above 2000 m is computed and warned of in the tab only, and the report prints no drawing of the snow, settled (issue #56, 14.10.2026).»
+- *[in force]* «The three load tabs offer show-calc's level -1, settled (issues #56, #57, 14.10.2026).»
+- *[in force]* «Four aluminium entries of the Belastungsannahmen library carry the norm's value, settled (issue #47, 12.10.2026).»
+- *[in force]* «A Stabdübel's f_u,k is its steel grade's of SIA 263 Tabelle 1, S355 by default, settled (issue #48, 12.10.2026), superseding v0.77 and v0.99.»
+- *[in force]* «The steel plate's bearing is SIA 263 Tabelle 16 (76) capped by 6.2.5, a result beside R_d, settled (issue #48, 12.10.2026).»
+- *[in force]* «Lateral torsional buckling tips about the strong axis, a round section is checked with k_m = 1, and the pith halves solid timber only, settled (issue #49, 12.10.2026).»
+- *[in force]* «SZS C5's profile tables are transcribed from the book, the reference Hilfstabelle being the control, settled (issue #50, 12.10.2026).»
+- *[in force]* «Steel checks are computed once in Python and printed by Typst, settled (issue #51, 12.10.2026).»
+
+### Formulas, variables and the Typst commands
+
+- *[in force]* «`#eq` prints inline by default, as `#var` does, settled (v0.117, issue #19), reversing v0.…»
+- *[partly superseded in v0.117]* «The level of detail -1 lists what is printed: `level: -1, shown: (A: 2, W_y: 1)`, settled…»
+- *[in force]* «A table cell never carries a footnote, whatever the report's level: `doc-value`, settled w…»
+- *[in force]* «Nothing in a reading is a wall-clock value, settled (v0.100).»
+- *[in force]* «`style:` on `var`, `var-unit` and `val` wraps the whole line, not the value, settled (v0.1…»
+- *[in force]* «The PDF carries the report's own variables, settled (v0.110).»
+- *[in force]* «Python asks Typst what a state holds, by naming that state from outside, settled (v0.100).»
+- *[in force]* «The cache carries no level and no language, settled (v0.100).»
+- *[in force]* «The PDF is not in the stamp, settled (v0.100).»
+- *[in force]* «`#var` is offered for a named domain only, settled (v0.100).»
+- *[in force]* «The summaries are three commands, without a level, settled (v0.99).»
+- *[in force]* «A line written by hand enters a summary by a mark, and its unit says which, settled (v0.99…»
+- *[in force]* «The unit is read where the variable ends up, not where it is declared, settled (v0.99).»
+- *[in force]* «A group is named by a bold row of its own, settled (v0.99).»
+- *[in force]* «Two tables for the results, a `blocks:` to choose them, settled (v0.99).»
+- *[in force]* «`lib/summary.typ` imports `calc-engine.typ` and nothing else, settled (v0.99).»
+- *[in force]* «A registration is emitted before its command's context, settled (v0.99).»
+- *[in force]* «A norm follows the record, not the level, settled (v0.99).»
+- *[in force]* «The bibliography never names the library's file, settled (v0.99).»
+- *[in force]* «The levels govern the three texts and nothing else, settled (v0.99).»
+- *[in force]* «A table's head is measured to its ink, settled (v0.97), replacing v0.32's push on the firs…»
+- *[in force]* «A check is a run of `#eq` and `#verify`, not arithmetic of its own, settled (v0.88).»
+- *[in force]* «A bare number of `#verify` keeps the unit it is written with, settled (v0.88).»
+- *[in force]* «A formula too wide for its row is stacked at its `=` signs, not shrunk and not left to ove…»
+- *[in force]* «`#var` is inline, and where its extras go is an argument, settled (v0.87), reversing v0.61…»
+- *[in force]* «The PDF is written beside its `.typ`, settled (v0.87), reversing v0.23's place one level a…»
+- *[in force]* «`*` is read as a multiplication in the formula string, not by a show rule, settled (v0.87)…»
+- *[in force]* «`#distance` reads the norm's own files from Typst, settled (v0.87).»
+- *[in force]* «Level 3 says everything a value carries, and the four arguments are on all three commands,…»
+- *[in force]* «`label` and `description` are two fields, and one level scheme for `var`, `val` and `eq`,…»
+- *[in force]* «Level 0 is the one level that prints nothing, and every other level prints something, sett…»
+- *[in force]* «A command for writing a report rather than for the finished page, settled (v0.85).»
+- *[in force]* «`#var` reads a `domain:`, and a pair falls back to its instance's var-domain, settled (v0.…»
+- *[in force]* «A double rule is a scope function, not a style name, settled (v0.85).»
+- *[in force]* «The norm's formulas are written out where a table held their results, settled (v0.84).»
+- *[in force]* «A var may keep its row although a formula absorbs it (`keep`), settled (v0.84).»
+- *[in force]* «K_ser,Verb is printed at levels 1 and 2, settled (v0.84).»
+- *[in force]* «A lit result states its own ink, settled (v0.84).»
+- *[in force]* «Where a member's strength class came from is the description of its rho_k, settled (v0.84)…»
+- *[in force]* «A step's name carries no glossary entry, settled (v0.84).»
+- *[in force]* «The positions table opens level 3, and a formula shares its row with its own numbers, sett…»
+- *[in force]* «The build environment is isolated, settled (v0.83).»
+- *[in force]* «The engine's copy is guarded, settled (v0.82).»
+- *[in force]* «One command prints one value: `val` absorbed `fmt`, `inline-value` and `live-load`, settle…»
+- *[in force]* «`val`'s parts are `val`, `unit`, `val+unit` and `expression`, settled (v0.80).»
+- *[in force]* «`val` prints its extras as one footnote, and its levels only govern them, settled (v0.80).»
+- *[in force]* «A unit written over is said on the page, in orange, settled (v0.80).»
+- *[in force]* «A row of declarations is a container, not a flag on each command, settled (v0.80).»
+- *[in force]* «Figur 45 is drawn by Python, word-free, and set under the table it is read with, settled (…»
+- *[in force]* «Every norm value a Python calculation uses lives in `calc/norms/`, once, flat, named after…»
+- *[in force]* «Every export is archived by one script, called identically by all three routes, settled (v…»
+- *[in force]* «A load is a domain whose instances are Excel sheets, settled (v0.18).»
+- *[partly superseded in v0.117]* «Snow is calculated in Excel, not in Python, settled (v0.17).»
+- *[in force]* «Permanent loads are calculated in Python, settled (v0.18).»
+- *[in force]* «The local wind forces are enveloped in Python, settled (v0.29).»
+- *[in force]* «A norm table is a domain whose instances are its rows, settled (v0.49).»
+- *[in force]* «The live load is printed by a command of its own, settled (v0.49).»
+- *[in force]* «Woodcore compiles the report itself, by calling Typst directly, settled (v0.62).»
+- *[in force]* «The mark is the report's own font, settled (v0.58).»
+- *[in force]* «Tables are centred in the space they have, settled (v0.32).»
+- *[in force]* «Every file imports the whole engine through `commands.typ`, settled (v0.40).»
+- *[in force]* «Numbers do not follow the language, settled (v0.52).»
+- *[in force]* «The units are an algebra, not a decoration, settled (v0.60).»
+- *[in force]* «A variable has one name, and it lives in a registry, settled (v0.61).»
+- *[in force]* «A named domain, not a scope that unwinds, settled (v0.61).»
+- *[in force]* «`verify` and not `eval`, settled (v0.61).»
+- *[partly superseded in v0.63]* «The unit of a result need not be declared, settled (v0.61); *how* it is chosen, reversed i…»
+- *[in force]* «A command declares its named arguments one by one, settled (v0.63.1).»
+- *[in force]* «A unit table lives inside the registry's dictionary, settled (v0.63).»
+- *[in force]* «A declared unit the formula cannot reach prints in red, settled (v0.63), reversing v0.60.»
+- *[in force]* «`var-unit`, not `change-unit`, settled (v0.63).»
+- *[in force]* «A unit given to `#var` converts rather than relabels, settled (v0.63).»
+- *[in force]* «Big numbers are printed as a power of ten, and only where a hand writes them, settled (v0.…»
+- *[in force]* «Levels follow the report, settled (v0.61).»
+- *[in force]* «A second library file, settled (v0.60).»
+- *[in force]* «A check lives in the repository, settled (v0.59).»
+- *[in force]* «The calculation block is the report's unit of work, settled (v0.12).»
+- *[in force]* «The MWEs are generated from the fences and committed, settled (v0.65).»
+- *[in force]* «A script's result reaches the report as a named value, settled (v0.100).»
+- *[in force]* «numpy alone, settled (v0.100).»
+- *[in force]* «A script is read-only on the project, and that is a guard and not a sandbox, settled (v0.1…»
+- *[in force]* «Every export runs every script, settled (v0.100).»
+- *[in force]* «A script's run time is not exported, settled (v0.100).»
+- *[in force]* «A script's identity is in its own file and shown read-only, settled (v0.100).»
+- *[in force]* «Every check's verdict prints the ratio of the action to the resistance against 1 -- never…»
+- *[in force]* «A field that follows a variable keeps its number beside the link, settled (issue #42, 11.10.2026).»
+- *[in force]* «A connector and a polar moment follow no joint, and a load only another load or a «Formules» domain, settled (iss…»
+- *[in force]* «One text engine for every figure, and one text object for the four drawing engines, settled (issu…»
+
+### Data, norms and the export
+
+- *[in force]* «The materials of a build-up come from SIA 261, the Belastungsannahmen library and the proj…»
+- *[in force]* «The wind covers every building of Annexe C, settled (issue #37, 11.10.2026).»
+- *[in force]* «The curved roof is the third column of Figur 3, settled (issue #36, 11.10.2026).»
+- *[in force]* «The dead load, the snow and the wind are computed in Woodcore from SIA 261, and the load w…»
+- *[in force]* «Positions are Woodcore's own JSON, and Positionen.xlsx is imported once, settled (v0.114),…»
+- *[in force]* «Only id and type are required of a position, settled (v0.114).»
+- *[in force]* «ψ is never shown for a live load, settled (v0.112), reversing the first build's optional c…»
+- *[in force]* «The norms the library lacks are found online and cited with the page they were read from,…»
+- *[in force]* «A load's own `line` carries its arrow's length, settled (v0.99).»
+- *[in force]* «The catalogue is JSON in `calc/norms/`, and a project's own file is BibTeX, settled (v0.99…»
+- *[in force]* «The BibTeX reader understands the format or refuses, naming the line, settled (v0.99).»
+- *[in force]* «A block is sorted case-insensitively, and a norm comes before its supplement, settled (v0.…»
+- *[in force]* «`cite-norm`'s copied call is written out, settled (v0.99).»
+- *[in force]* «A gap in the numbers is never refilled, settled (v0.99).»
+- *[in force]* «The latest revision reaches the PDF through `data/project.json`, settled (v0.99).»
+- *[in force]* «`show-position` is removed with no alias, settled (v0.94).»
+- *[superseded in v0.114]* «Woodcore writes Positionen.xlsx, settled (v0.94), reversing v0.34.»
+- *[in force]* «The exact relative slenderness, with Anhang B's values, and E_0,05 times eta_w, settled (v…»
+- *[in force]* «The engine is checked when a project opens, in the very box the export asks with, settled…»
+- *[in force]* «A run of calculations is announced by a line of its own, settled (v0.84).»
+- *[in force]* «A new project carries no load workbook, settled (v0.83).»
+- *[in force]* «No load workbook is a warning while no export has read one, settled (v0.89.1).»
+- *[in force]* «The record of an export carries no date, settled (v0.82).»
+- *[in force]* «The example project is a real project anonymised, without its workbooks, settled (v0.81).»
+- *[in force]* «A calculation whose drawing is gone is exported and refused, not stopped, settled (v0.79).»
+- *[in force]* «An element's b and h follow its position and stay written over when typed, settled (v0.75)…»
+- *[in force]* «A cut piece keeps its position number, settled (v0.73).»
+- *[in force]* «A construction line is not exported unless it is asked for, settled (v0.72).»
+- *[in force]* «A value written over a reference stays written over, settled (v0.70).»
+- *[in force]* «A calculation that refuses does not stop the export, settled (v0.68).»
+- *[in force]* «One JSON file per position, settled.»
+- *[in force]* «No load-to-position link of any kind, settled (v0.10 + v0.11).»
+- *[in force]* «`show-calc` renders a whole calculation, settled (v0.18).»
+- *[in force]* «A calculation is printed in letters and then in numbers, settled (v0.20).»
+- *[partly superseded in v0.117]* «Wind is calculated in Excel, and its answer is a table, settled (v0.25).»
+- *[in force]* «The load workbooks are found by name, settled (v0.26).»
+- *[in force]* «Category E is refused by the report, settled (v0.49).»
+- *[in force]* «A load's action is declared in the data, settled (v0.28).»
+- *[in force]* «Woodcore reads the export, not the workbooks, settled (v0.28).»
+- *[in force]* «A connection is exported on its own, into its own file, settled (v0.31).»
+- *[in force]* «A load's magnitude may name a variable of the export, settled (v0.51).»
+- *[in force]* «A sentence with a hole is matched, not exported with its parts, settled (v0.52).»
+- *[in force]* «A calculation written by hand is computed by the engine, settled (v0.60).»
+- *[in force]* «A rule refuses rather than warns, even when it stops today's build, settled (v0.59).»
+- *[in force]* «Load combinations centralized, settled.»
+- *[in force]* «Neither Excel carries loads, settled (v0.18).»
+- *[in force]* «Two non-overlapping Excel workbooks, settled (v0.10).»
+- *[partly retired in v0.11]* «First MWE built, settled (2026-08-25); calculation half retired (v0.11).»
+- *[in force]* «The page is cropped by the export, and declares PDF 1.7, settled (v0.111).»
+- *[in force]* «A load symbol is not a position, settled (v0.116, the implementer's decision).»
+- *[in force]* «A position's type is stored once and shown in the language it is read in, settled (v0.116)…»
+- *[in force]* «Woodcore starts on a screen of its own before anything heavy is imported, and loads at the…»
+- *[in force]* «A member in the fire situation is checked with SIA 265 (51), R_d,fi = 1.8 · R_d, settled (issue #46, 12.10.2026).»
+- *[in force]* «A check in the fire situation is a member check of an existing kind carrying `fire`, settled (issue #46, 12.10.2026).»

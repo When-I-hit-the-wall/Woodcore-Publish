@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Quantities",
+  "description": "data/quantities.json (issue #9, calc/domains/quantities.py) -- the quantities of what the position plans draw: one row per element carrying a position (its plan, its position, its material, its section, its length in m, its area in m², its volume in m³, each null where it cannot be had), and the summary of the whole project and of each plan, by material then section with a total per material. Written by the export; show-plan-quantities and sheet-quantities print it and add up only the rows of the positions a call names. Lengths and areas from the plan's scale; a volume for timber alone (rec, cir on a line; pla, clt on a slab).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "rows",
+    "all",
+    "plans"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: an export written at another version is refused rather than read as this one."
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "plan",
+          "position",
+          "kind",
+          "material",
+          "section",
+          "length_m",
+          "area_m2",
+          "volume_m3"
+        ],
+        "properties": {
+          "plan": {"type": "string"},
+          "position": {"type": "string"},
+          "kind": {"type": "string", "enum": ["line", "poly", "point"]},
+          "material": {"type": "string"},
+          "section": {"type": "string"},
+          "section_type": {"type": "string"},
+          "length_m": {"type": ["number", "null"]},
+          "area_m2": {"type": ["number", "null"]},
+          "volume_m3": {"type": ["number", "null"]}
+        }
+      }
+    },
+    "all": {
+      "type": "object",
+      "required": ["groups", "totals"],
+      "properties": {
+        "groups": {"type": "array"},
+        "totals": {"type": "array"}
+      }
+    },
+    "plans": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": ["groups", "totals"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,86 @@
+# Woodcore's test suite at every push and every pull request (docs/conventions/build-and-release.md §12, docs/conventions/testing.md §11ter; v0.117, issue #27).
+#
+# What it runs is what a contributor runs: `python tests/bootstrap.py`, the one list of what a test machine needs -- the packages requirements.txt pins, Qt's system libraries on Linux, the Typst typst-version.txt names with its SHA-256 checked --, then `python tests/run_tests.py`, which runs every test file in a process of its own and as many at once as the runner has cores (issue #22). Nothing is installed here by name: a list written in this file would be a second one, and age without saying so.
+#
+# Red when the runner exits with 1: a test failed, or a full run skipped more than MAX_SKIPPED (tests/run_tests.py's exit_code). The tests of time (PERF = True, `--perf`) do not run here: a shared runner is no measure of a start. The time of every file (`--times`) is kept as an artifact of the job, to follow what the suite costs.
+#
+# Linux at every push and pull request; Windows -- the engineer's platform, and the installer's -- on the default branch only, its minutes costing double. Only the actions GitHub itself publishes, each pinned by the commit of the release it names (tests/test_ci_workflow.py, as tests/test_site.py for site.yml); the token may only read, and no secret is used.
+
+name: tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PYTHONUTF8: "1"
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Typst from the cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ runner.temp }}/typst-bin
+          key: typst-${{ runner.os }}-${{ hashFiles('typst-version.txt', 'typst-sha256.json') }}
+      - name: Prepare the machine
+        run: python tests/bootstrap.py --prefix "${{ runner.temp }}/typst-bin"
+      - name: Run the tests
+        shell: bash
+        run: |
+          python tests/run_tests.py --times 2>&1 | tee test-times.txt
+          exit "${PIPESTATUS[0]}"
+      - name: Keep the times
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: test-times-linux
+          path: test-times.txt
+          if-no-files-found: ignore
+
+  windows:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: windows-2025
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Typst from the cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ runner.temp }}/typst-bin
+          key: typst-${{ runner.os }}-${{ hashFiles('typst-version.txt', 'typst-sha256.json') }}
+      - name: Prepare the machine
+        run: python tests/bootstrap.py --prefix "${{ runner.temp }}/typst-bin"
+      - name: Run the tests
+        shell: bash
+        run: |
+          python tests/run_tests.py --times 2>&1 | tee test-times.txt
+          exit "${PIPESTATUS[0]}"
+      - name: Keep the times
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: test-times-windows
+          path: test-times.txt
+          if-no-files-found: ignore

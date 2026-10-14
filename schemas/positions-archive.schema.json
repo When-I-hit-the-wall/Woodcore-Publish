@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Positions archive",
+  "description": "Woodcore-Datei/positions-archive.json -- the positions deleted with «Copier les valeurs» (issue #9, calc/renumbering.py): a position still cited somewhere is deleted only so, its values kept under `<id>-old` and every citation of it rewritten to that name, and the report prints, wherever it is called, that the calculation stands on the values of an old position. Never listed with the project's positions.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "format",
+    "positions"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a file written at another version is refused rather than read as this one."
+    },
+    "format": {
+      "type": "string",
+      "const": "woodcore-positions-archive"
+    },
+    "positions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "position",
+          "was",
+          "deleted"
+        ],
+        "properties": {
+          "position": {
+            "type": "string",
+            "description": "the name the archived values are called by, «S110-old» (then -old2, -old3 where the name is taken)"
+          },
+          "was": {
+            "type": "string",
+            "description": "the id the position had when it was deleted, «S110»"
+          },
+          "deleted": {
+            "type": "string",
+            "description": "the day it was deleted, YYYY-MM-DD"
+          },
+          "type": {"type": "string"},
+          "material": {"type": "string"},
+          "strength_class": {"type": "string"},
+          "section_type": {"type": "string"},
+          "dimension": {"type": "string"},
+          "units": {"type": "string"},
+          "moisture_class": {"type": ["integer", "null"]},
+          "description": {"type": "string"}
+        }
+      }
+    }
+  }
+}

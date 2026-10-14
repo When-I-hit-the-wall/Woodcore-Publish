@@ -1,0 +1,201 @@
+{
+  "_source": "VKF / AEAI, the sheets of symbols for fire-protection plans dated 16.12.2016: «BS-Symbole.pdf» (German) and «pictogrammes PI.pdf» (French), page 1, groups 1.0 «Fluchtwege» / «Voies d'évacuation» and 2.1 «Feuerwiderstände» / «Résistances au feu». Each colour is the sheet's own «Farbcode RGB» / «code couleur RJB», read from the page's text and found again as the true colour (DXF group code 420) of the matching pictogram file in both language sets; the two entries the sheet gives no RGB column for in group 1.0 are the pictogram files' own colours. The sheets state no document number, so none is cited: the engineer's decision of 2026-10-03 is to cite what is printed. The sheets are not in the repository; the engineer keeps them beside it (folders VKF/ and AEAI/). Group 2.2 «Abschlüsse» / «Fermetures» of the same page gives the four doors: their labels are the sheets' own, their colours the «Farbcode RGB» printed beside them (the footnote mark the sheet sets after «EI 30» is left out). `shapes` are the proportions of two pictograms, measured on the files the VKF / AEAI distribute with the sheets: «Sortie de secours.jpeg» (825 x 590 px: a shaft 500 long and 200 wide, a head 325 long and 590 wide) and «Porte coulissante EI 30.jpeg» (1771 x 296 px: a bar 118 thick, a half head 354 long rising to 296). «Porte EI 30.jpeg» is a quarter disc and needs no number.",
+  "_note": "What a fire-protection plan is drawn with (calc/domains/fire.py, calc/domains/fire_svg.py): the colour a wall's fire resistance is drawn in, the colours of the escape routes, the doors with a fire resistance, and the proportions of the two pictograms drawn as shapes. `label` is the German of the sheet, word for word, and the key of the glossary (calc/i18n/strings.json), which carries the French of the AEAI sheet. Only what the drawing uses is transcribed -- the engineer's decision of 2026-10-05 keeps the plan to the symbols of the top of the AEAI's sample legend: the glazing, the roller shutters, the lift doors and the pictograms of the other groups are not.",
+  "edition": "VKF Symbole Brandschutzpläne 16.12.2016",
+  "resistances": [
+    {
+      "key": "REI 60-180",
+      "label": "Brandmauer REI 60 bis REI 180",
+      "rgb": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "key": "EI 90-RF1",
+      "label": "Feuerwiderstand EI 90-RF1",
+      "rgb": [
+        127,
+        0,
+        255
+      ]
+    },
+    {
+      "key": "EI 60-RF1",
+      "label": "Feuerwiderstand EI 60-RF1",
+      "rgb": [
+        3,
+        101,
+        221
+      ]
+    },
+    {
+      "key": "EI 30-RF1",
+      "label": "Feuerwiderstand EI 30-RF1",
+      "rgb": [
+        127,
+        191,
+        255
+      ]
+    },
+    {
+      "key": "EI 90",
+      "label": "Feuerwiderstand EI 90",
+      "rgb": [
+        125,
+        95,
+        0
+      ]
+    },
+    {
+      "key": "EI 60",
+      "label": "Feuerwiderstand EI 60",
+      "rgb": [
+        223,
+        113,
+        0
+      ]
+    },
+    {
+      "key": "EI 30",
+      "label": "Feuerwiderstand EI 30",
+      "rgb": [
+        255,
+        191,
+        0
+      ]
+    },
+    {
+      "key": "E 60",
+      "label": "Feuerwiderstand E 60",
+      "rgb": [
+        197,
+        101,
+        227
+      ]
+    },
+    {
+      "key": "E 30",
+      "label": "Feuerwiderstand E 30",
+      "rgb": [
+        250,
+        186,
+        252
+      ]
+    },
+    {
+      "key": "RF1",
+      "label": "RF1",
+      "rgb": [
+        121,
+        243,
+        243
+      ]
+    }
+  ],
+  "escape": {
+    "length": {
+      "label": "Fluchtweglänge",
+      "rgb": [
+        0,
+        153,
+        0
+      ]
+    },
+    "exit": {
+      "label": "Notausgang",
+      "rgb": [
+        0,
+        153,
+        0
+      ]
+    },
+    "width": {
+      "label": "Fluchtwegbreite",
+      "rgb": [
+        0,
+        153,
+        0
+      ]
+    },
+    "vertical": {
+      "label": "vertikaler Fluchtweg",
+      "rgb": [
+        0,
+        153,
+        0
+      ]
+    },
+    "horizontal": {
+      "label": "horizontaler Fluchtweg",
+      "rgb": [
+        202,
+        254,
+        150
+      ]
+    },
+    "clear": {
+      "label": "freizuhaltende Fläche",
+      "rgb": [
+        159,
+        255,
+        127
+      ]
+    }
+  },
+  "doors": {
+    "swing": [
+      {
+        "class": "EI 30",
+        "label": "Türe / Tor EI 30",
+        "rgb": [
+          255,
+          191,
+          0
+        ]
+      },
+      {
+        "class": "E 30",
+        "label": "Türe / Tor / Abschluss E 30",
+        "rgb": [
+          250,
+          186,
+          252
+        ]
+      }
+    ],
+    "slide": [
+      {
+        "class": "EI 30",
+        "label": "Schiebetüre / Schiebetor EI 30",
+        "rgb": [
+          255,
+          191,
+          0
+        ]
+      },
+      {
+        "class": "E 30",
+        "label": "Schiebetüre / Schiebetor E 30",
+        "rgb": [
+          250,
+          186,
+          252
+        ]
+      }
+    ]
+  },
+  "shapes": {
+    "exit": {
+      "shaft_length": 0.6061,
+      "shaft_width": 0.2424,
+      "head_width": 0.7152
+    },
+    "slide": {
+      "head_length": 0.1999,
+      "head_height": 0.1671,
+      "bar": 0.0666
+    }
+  }
+}

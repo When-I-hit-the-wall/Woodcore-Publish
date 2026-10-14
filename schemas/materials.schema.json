@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project materials",
+  "description": "Woodcore-Datei/materials.json -- the weights the engineer adds to the libraries Woodcore carries (SIA 261 Anhang A, Woodcore's materials library), for the build-ups of permanent loads (calc/domains/materials.py, issue #35, D-07).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "materials"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned."
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "value",
+          "unit"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "What a layer names, unique in the file."
+          },
+          "name": {
+            "type": "string",
+            "description": "The words the table prints."
+          },
+          "value": {
+            "type": "number",
+            "description": "The weight, above 0."
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "kg/m³",
+              "kN/m³",
+              "kg/m²",
+              "kN/m²"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "description": "Where the weight comes from: a manufacturer, a datasheet."
+          }
+        }
+      }
+    }
+  }
+}

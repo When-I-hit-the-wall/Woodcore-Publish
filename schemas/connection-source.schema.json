@@ -1,0 +1,182 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Connection source",
+  "description": "connections/<id>.json, schema 4.0 -- one polar-moment calculation as Woodcore saves it, the source calc/domains/connection.py calculates from (docs/domain/connections.md §3.3quinquies). Written by Woodcore only.\n\n⚠️ Since 4.0 (v0.76) a connection NAMES NO CONNECTOR. A polar moment distributes forces over points and has no use for what fastens them, so `connector` and `variant` are gone: the calculation has a `name`, and its id is that name made safe as a file name (connection.id_from_name), writable over. A 3.0 or 3.1 file is read as 4.0 by connection.upgrade_source(), which drops the two fields, takes the name it states or else its id, and keeps its id as it is -- nothing is written.\n\n⚠️ Since 3.0 a connection CARRIES NO GEOMETRY OF ITS OWN. It names a detail schema (details/<id>.json, section 3.3decies) and the markers of that schema its fasteners sit on; each of its members names an element of that schema. The frame is therefore the schema's: millimetres, x to the right, z down, angles in degrees from x towards z.\n\nA 1.0, 2.0 or 2.1 file carries its own drawing and is converted by calc/tools/migrate_to_schemas.py, which writes that drawing out as a schema; check_source refuses one that has not been through it.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "label",
+    "norm",
+    "norm_ref",
+    "schema",
+    "reference",
+    "members",
+    "fasteners",
+    "center",
+    "directions"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "4.0",
+        "4.1"
+      ],
+      "description": "-- pinned at 4.0. A 3.0 or 3.1 file is upgraded as it is read (connection.upgrade_source); a 1.0, 2.0 or 2.1 file carries its own geometry and is converted by calc/tools/migrate_to_schemas.py. 4.1 (issue #42): 4.0 with `links`, written only where a field follows a variable."
+    },
+    "group": {
+      "type": "string",
+      "description": "The folder Woodcore files this source in, \"\" or absent at the root. A FIELD and never a directory: the ids stay flat, so the rule that the id is the file name is untouched and no show-* call changes (calc/tools/grouped_list.py). Optional and additive -- a file written before it existed reads as the root."
+    },
+    "id": {
+      "type": "string",
+      "description": "The calculation's id: its file name, and the string the report addresses it by (show-polar-moment(\"Nordanschluss\", ...)). Made from its `name` (connection.id_from_name) and free to be written over; a file upgraded from 3.x keeps the id it had."
+    },
+    "name": {
+      "type": "string",
+      "description": "What the engineer calls the calculation, free text; the id is made from it unless written over. Empty is allowed while a draft is being named."
+    },
+    "label": {
+      "type": "string",
+      "description": "Free text, printed after the id in the report's heading and the figure's caption; may be empty."
+    },
+    "norm": {
+      "type": "string",
+      "description": "The reference the calculation follows -- a norm, or a document cited as a whole (the default: bauforumstahl's design aid on hinged connections)."
+    },
+    "norm_ref": {
+      "type": "string",
+      "description": "Its clause, or empty for a document cited as a whole."
+    },
+    "schema": {
+      "type": "string",
+      "description": "The detail schema this connection is drawn on -- a file name of details/ (section 3.3decies). Whether it exists is the export's question and not the file's, as a connector's own link is: a connection naming a schema the export does not list is a WARNING and the report refuses to print it, because stopping would stop the schemas' export with it and leave Woodcore nothing to relink to (section 13, the v0.33 rule)."
+    },
+    "reference": {
+      "type": "number",
+      "description": "The member (1-based) the report calls the Bezugselement and prints the other members' angles from. It no longer fixes the frame -- the schema does -- so a schema whose pieces are drawn at an angle is calculated in the schema's own x/z, and theta_(r,j) is still the angle from this member to member j."
+    },
+    "members": {
+      "type": "array",
+      "description": "The members meeting at the node, 2 to 6, each naming an element of the schema. Nothing but the name and that element: their sections are the schema's, and the calculation depends on the markers' coordinates alone.",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "element"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "What the report calls this member; empty falls back to the element's position, then to «Element n»."
+          },
+          "element": {
+            "type": "string",
+            "description": "The id of the schema element this member is. Its direction is the member's grain, its position (where the element names one) is what the report prints. An element the schema does not carry is a warning, not a stop."
+          }
+        }
+      }
+    },
+    "fasteners": {
+      "type": "array",
+      "description": "The ids of the schema's connector markers and construction points (aids of kind `point`) this calculation's fasteners sit on, in the order they are numbered -- a polar moment distributes forces over points, whatever sits on them. ⚠️ Ids and not coordinates: the coordinates are the schema's, read afresh at every export, so moving a marker in the schema moves it in every calculation drawn on it. A marker the schema no longer carries is dropped with a warning rather than stopping the export.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "center": {
+      "type": "object",
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "description": "'centroid' (the fasteners' centroid, calculated), 'manual' (x and z given here) or 'aid' (a centre drawn in the schema, named by `aid`) -- the third since 3.0, which is what a schema's own «Centre» tool is for."
+        },
+        "x": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        },
+        "aid": {
+          "type": "string",
+          "description": "For mode 'aid': the id of the schema's point-shaped aid (a `centre` or a `point`) the connection turns about. One the schema does not carry falls back to the centroid, with a warning."
+        }
+      }
+    },
+    "directions": {
+      "type": "object",
+      "required": [
+        "N",
+        "V"
+      ],
+      "properties": {
+        "N": {
+          "type": "number",
+          "description": "Direction a positive normal force acts in, degrees from x towards z."
+        },
+        "V": {
+          "type": "number",
+          "description": "Direction a positive shear force acts in, degrees from x towards z."
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "description": "The fields of this entry that follow a variable of the export, by their key (center.x, center.z, directions.N, directions.V, trial.N, trial.V, trial.M): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 4.1.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+          "required": [
+            "domain",
+            "instance",
+            "var"
+          ],
+          "properties": {
+            "domain": {
+              "type": "string"
+            },
+            "instance": {
+              "type": "string"
+            },
+            "var": {
+              "type": "string"
+            },
+            "factor": {
+              "type": "number"
+            },
+            "offset": {
+              "type": "number"
+            },
+            "origin": {
+              "type": "string",
+              "enum": [
+                "formulas"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "trial": {
+      "type": "object",
+      "description": "The trial forces the «Calcul» view starts from, N and V in kN, M in kNm -- data of the calculation since issue #42 (D-12), so a variable may fill them. Optional and additive.",
+      "properties": {
+        "N": {
+          "type": "number"
+        },
+        "V": {
+          "type": "number"
+        },
+        "M": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

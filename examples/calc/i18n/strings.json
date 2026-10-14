@@ -1,0 +1,3290 @@
+{
+  "_note": "Every word the report engine prints, in the three languages a report can be written in. The engineer's own data is never in here: Excel descriptions and text values, sheet names, positions, Woodcore's own interface, and the prose of Sections/*.typ. Read by Python (calc/i18n/strings.py, for the figures it draws) and by Typst (lib/i18n.typ, for everything it prints), so a word said on both sides is written once. Written by hand, like the files of calc/norms/ -- no generator touches it.",
+  "_blocks": {
+    "engine": "What Typst prints itself, and what a figure's legend says, by a key. Three languages each.",
+    "templates": "A sentence with a hole in it -- the sheet's name, a chosen value, a figure's number. It cannot be its own key, so `tl` matches the German by the literal segments around the holes and puts the captured data back into the target language. This is what lets data/calculations.json stay exactly as it is: Python composes the German it always composed, and nothing in the export had to change.",
+    "terms": "The German the export already carries, keyed by itself, the way gettext keys by its source string. `tl` translates a string only if it is in here, so an Excel description, a material name or a text value the engineer typed passes through untouched -- the glossary is the list of what counts as the engine's words."
+  },
+  "_sources": {
+    "de": "The German the engine printed before it spoke three languages: the source text, and the key of the `terms` block.",
+    "fr": "SIA 261:2020, French edition (ExternalFiles/000-Normes/SIA261-2020-FR.pdf, the reference library beside the program -- docs/architecture/reference-library.md §11bis): 1.2 for the names of the symbols, 5 and 6 for snow and wind, table 4 (p. 31) for the four terrain categories and table 8 (p. 38) word for word, annex H table 80 for the terms of chapter 1. SIA 265:2021 French edition for timber and connections -- above all its **annexe G, «Index des termes» (tableau 51, pp. 110-111)**, which is the trilingual index and therefore the norm's own French AND English for «Broche», «Résistance à la pression latérale», «Densité» and «Classe de résistance»; tableaux 45 and 46 (pp. 96-97) for the names of the four configurations, and p. 97 for «tôles latérales» (table 3 for the moisture class, 6.4 for 'prepercé'). SIA 260:2013 French edition for 'convention d'utilisation' and 'base du projet'. STE Compact 02 French for the plan legend. The member checks of SIA 265 chapter 4.2 (lib/timber.typ): SIA 265:2021 French edition, 4.2.1 to 4.2.9 (pp. 31-37) word for word for the kinds of stress («traction biaise par rapport au fil», «côté tendu», «effort tranchant», «cisaillement», «flambage», «déversement», «stabilisations latérales», «élancement géométrique» and its two guide values), table 8 (p. 25) for «en général», «avec un avant-bois», «appui d’extrémité», «rigidité», «valeurs de dimensionnement» and its note 6 for «pièces avec moelle»; SIA 260:2013 for «sécurité structurale». The fire-protection plans (calc/domains/fire.py): the AEAI sheet of symbols «pictogrammes PI.pdf», page 1, dated 16.12.2016, word for word -- the French of the VKF's «BS-Symbole.pdf», whose German is the key. Its group 2.2 «Fermetures» gives the four doors. The legend's title and the two doors without a fire resistance (engine keys fire.*) are in no sheet: they are the engine's own words, the engineer's to correct.",
+    "en": "SIA 260:2013 English edition, and SIA 261 annex H table 80, which gives the SIA's own English (Nutzlast = live load, Auflasten = non-structural self-weight); EN 1995-1-1 for the timber and connection terms those do not cover. There is no English edition of SIA 261 and no EN 1991-1-4 in the library, so the terrain categories of its table 4 are a translation, not a quotation. SIA 265:2021's annexe G (tableau 51) gives the SIA's own English for the timber and connection terms of its chapter 1 -- dowel-type fastener, embedment strength, bulk density, strength class. The names of the four connection configurations are a translation: no English edition in the library gives them. The member checks of SIA 265 chapter 4.2 (lib/timber.typ): SIA 260:2013 English edition, p. 15, for «structural safety» (Tragsicherheit); the rest is a translation in EN 1995-1-1's English vocabulary (tension/compression parallel, perpendicular or at an angle to the grain, combined bending and axial tension, lateral torsional buckling) -- the library's EN-1995-1-1-2004.pdf is the French edition, so none of it is a quotation. The fire-protection plans: the VKF / AEAI sheets of symbols exist in German and French only, so every English word of theirs is a translation, not a quotation.",
+    "_review": "Where a norm gives the word, the word is quoted. Everything else is a translation, and the wording is the engineer's to correct -- here, and nowhere else."
+  },
+  "languages": [
+    "de",
+    "fr",
+    "en"
+  ],
+  "engine": {
+    "timber.for": {
+      "de": "für",
+      "fr": "pour",
+      "en": "for"
+    },
+    "timber.fire": {
+      "de": "Bemessungssituation Brand",
+      "fr": "Situation de dimensionnement incendie",
+      "en": "Design situation fire"
+    },
+    "polar.f_max": {
+      "de": "Grösste Kraft in einem Verbindungsmittel",
+      "fr": "Force la plus grande dans un moyen d’assemblage",
+      "en": "Largest force in a fastener"
+    },
+    "moisture_class": {
+      "de": "Feuchteklasse",
+      "fr": "Classe d’humidité",
+      "en": "Moisture class"
+    },
+    "quantities.title": {
+      "de": "Ausmass",
+      "fr": "Métrés",
+      "en": "Quantities"
+    },
+    "quantities.empty": {
+      "de": "Nichts zu messen.",
+      "fr": "Rien à métrer.",
+      "en": "Nothing to measure."
+    },
+    "quantities.material": {
+      "de": "Material",
+      "fr": "Matériau",
+      "en": "Material"
+    },
+    "quantities.section": {
+      "de": "Querschnitt",
+      "fr": "Section",
+      "en": "Section"
+    },
+    "quantities.pieces": {
+      "de": "Stück",
+      "fr": "Pièces",
+      "en": "Pieces"
+    },
+    "quantities.length": {
+      "de": "Länge [m]",
+      "fr": "Longueur [m]",
+      "en": "Length [m]"
+    },
+    "quantities.volume": {
+      "de": "Volumen [m³]",
+      "fr": "Volume [m³]",
+      "en": "Volume [m³]"
+    },
+    "quantities.total": {
+      "de": "Total",
+      "fr": "Total",
+      "en": "Total"
+    },
+    "position.archived": {
+      "de": "Berechnung mit den Werten der früheren Position",
+      "fr": "Calcul sur les valeurs de l’ancienne position",
+      "en": "Calculated on the values of the former position"
+    },
+    "position.archived_on": {
+      "de": "gelöscht am",
+      "fr": "supprimée le",
+      "en": "deleted on"
+    },
+    "predrilled": {
+      "de": "vorgebohrt",
+      "fr": "prépercé",
+      "en": "predrilled"
+    },
+    "not_predrilled": {
+      "de": "nicht vorgebohrt",
+      "fr": "non prépercé",
+      "en": "not predrilled"
+    },
+    "members_joined": {
+      "de": "Bauteile",
+      "fr": "Pièces",
+      "en": "Members"
+    },
+    "plan.crop": {
+      "de": "Detail",
+      "fr": "Détail",
+      "en": "Detail"
+    },
+    "plan.scale_approx": {
+      "de": "Mst. ca. 1:",
+      "fr": "Éch. env. 1:",
+      "en": "Scale approx. 1:"
+    },
+    "sheet.object": {
+      "de": "Objekt",
+      "fr": "Objet",
+      "en": "Project"
+    },
+    "sheet.element": {
+      "de": "Bauteil",
+      "fr": "Élément de construction",
+      "en": "Building element"
+    },
+    "sheet.client": {
+      "de": "Bauherrschaft",
+      "fr": "Maître d'ouvrage",
+      "en": "Client"
+    },
+    "sheet.architect": {
+      "de": "Architektur",
+      "fr": "Architecte",
+      "en": "Architect"
+    },
+    "sheet.phase": {
+      "de": "Phase nach SIA",
+      "fr": "Phase de planification selon SIA",
+      "en": "SIA phase"
+    },
+    "sheet.project_number": {
+      "de": "Projekt-Nr.",
+      "fr": "Projet N°",
+      "en": "Project no."
+    },
+    "sheet.plan_number": {
+      "de": "Plan-Nr.",
+      "fr": "Plan N°",
+      "en": "Drawing no."
+    },
+    "sheet.index": {
+      "de": "Index",
+      "fr": "Index",
+      "en": "Rev."
+    },
+    "sheet.revision_date": {
+      "de": "Datum",
+      "fr": "Date",
+      "en": "Date"
+    },
+    "sheet.revision_author": {
+      "de": "Gezeichnet",
+      "fr": "Dessinateur",
+      "en": "Drawn"
+    },
+    "sheet.modification": {
+      "de": "Änderung",
+      "fr": "Modification",
+      "en": "Revision"
+    },
+    "sheet.drawn_by": {
+      "de": "Gezeichnet",
+      "fr": "Dessinateur",
+      "en": "Drawn by"
+    },
+    "sheet.scale": {
+      "de": "Massstab",
+      "fr": "Éch.",
+      "en": "Scale"
+    },
+    "sheet.date": {
+      "de": "Datum",
+      "fr": "Date",
+      "en": "Date"
+    },
+    "sheet.size": {
+      "de": "Planformat",
+      "fr": "Taille du plan",
+      "en": "Sheet size"
+    },
+    "sheet.legend": {
+      "de": "Legende",
+      "fr": "Légende",
+      "en": "Legend"
+    },
+    "sheet.section": {
+      "de": "Schematischer Schnitt",
+      "fr": "Coupe schématique",
+      "en": "Schematic section"
+    },
+    "sheet.scale_short": {
+      "de": "Mst. ",
+      "fr": "éch. ",
+      "en": "scale "
+    },
+    "sheet.position_plan": {
+      "de": "Positionsplan",
+      "fr": "Plan de positions",
+      "en": "Position plan"
+    },
+    "sheet.remark": {
+      "de": "Bemerkung",
+      "fr": "Remarque",
+      "en": "Note"
+    },
+    "sheet.fire_plan": {
+      "de": "Brandschutzplan",
+      "fr": "Plan de protection incendie",
+      "en": "Fire protection plan"
+    },
+    "position_list.title": {
+      "de": "Positionsliste",
+      "fr": "Liste des positions",
+      "en": "List of positions"
+    },
+    "position_list.empty": {
+      "de": "Keine Position.",
+      "fr": "Aucune position.",
+      "en": "No position."
+    },
+    "table.width_over": {
+      "de": "Die verlangten Spaltenbreiten übersteigen die Seitenbreite und wurden verkleinert.",
+      "fr": "Les largeurs de colonnes demandées dépassent la largeur de la page : elles ont été réduites.",
+      "en": "The requested column widths exceed the page width and were reduced."
+    },
+    "position_list.id": {
+      "de": "ID",
+      "fr": "ID",
+      "en": "ID"
+    },
+    "position_list.type": {
+      "de": "Typ",
+      "fr": "Type",
+      "en": "Type"
+    },
+    "position_list.material": {
+      "de": "Material",
+      "fr": "Matériau",
+      "en": "Material"
+    },
+    "position_list.strength_class": {
+      "de": "Festigkeitsklasse",
+      "fr": "Classe de résistance",
+      "en": "Strength class"
+    },
+    "position_list.section_type": {
+      "de": "Querschnittstyp",
+      "fr": "Type de section",
+      "en": "Section type"
+    },
+    "position_list.dimension": {
+      "de": "Abmessung",
+      "fr": "Dimension",
+      "en": "Dimension"
+    },
+    "position_list.units": {
+      "de": "Einheit",
+      "fr": "Unités",
+      "en": "Units"
+    },
+    "position_list.moisture_class": {
+      "de": "Feuchteklasse",
+      "fr": "Classe d’humidité",
+      "en": "Moisture class"
+    },
+    "position_list.description": {
+      "de": "Beschreibung",
+      "fr": "Description",
+      "en": "Description"
+    },
+    "position_list.section.rec": {
+      "de": "Rechteckquerschnitt",
+      "fr": "Section rectangulaire",
+      "en": "Rectangular section"
+    },
+    "position_list.section.cir": {
+      "de": "Runder Querschnitt",
+      "fr": "Section ronde",
+      "en": "Round section"
+    },
+    "position_list.section.pla": {
+      "de": "Platte",
+      "fr": "Plaque",
+      "en": "Plate"
+    },
+    "position_list.section.clt": {
+      "de": "Brettsperrholz",
+      "fr": "Bois lamellé-croisé",
+      "en": "Cross-laminated timber"
+    },
+    "with": {
+      "de": "mit",
+      "fr": "avec",
+      "en": "with"
+    },
+    "check_ok": {
+      "de": "OK",
+      "fr": "OK",
+      "en": "OK"
+    },
+    "check_failed": {
+      "de": "FAILED",
+      "fr": "ÉCHEC",
+      "en": "FAILED"
+    },
+    "nr": {
+      "de": "Nr.",
+      "fr": "N°",
+      "en": "No."
+    },
+    "fastener": {
+      "de": "Verbindungsmittel",
+      "fr": "Moyen d’assemblage",
+      "en": "Fastener"
+    },
+    "fasteners": {
+      "de": "Verbindungsmittel",
+      "fr": "Moyens d’assemblage",
+      "en": "Fasteners"
+    },
+    "governing": {
+      "de": "Massgebend",
+      "fr": "Déterminant",
+      "en": "Governing"
+    },
+    "find.none": {
+      "de": "keine",
+      "fr": "aucune",
+      "en": "none"
+    },
+    "find.vars_report": {
+      "de": "Variablen des Berichts",
+      "fr": "Variables du rapport",
+      "en": "Variables of the report"
+    },
+    "member": {
+      "de": "Element",
+      "fr": "Élément",
+      "en": "Member"
+    },
+    "internal_forces": {
+      "de": "Schnittkräfte",
+      "fr": "Efforts intérieurs",
+      "en": "Internal forces"
+    },
+    "force_grain_angle": {
+      "de": "Kraft-Faser-Winkel",
+      "fr": "Angle entre la force et le fil",
+      "en": "Force-to-grain angle"
+    },
+    "reference_member_axes": {
+      "de": "Bezugselement für x und z",
+      "fr": "Élément de référence pour x et z",
+      "en": "Reference member for x and z"
+    },
+    "angles_between_members": {
+      "de": "Winkel zwischen den Elementen",
+      "fr": "Angles entre les éléments",
+      "en": "Angles between the members"
+    },
+    "rotation_centre_fixed": {
+      "de": "Drehpunkt (festgelegt)",
+      "fr": "Centre de rotation (fixé)",
+      "en": "Rotation centre (fixed)"
+    },
+    "rotation_centre_centroid": {
+      "de": "Drehpunkt (Schwerpunkt der Verbindungsmittel)",
+      "fr": "Centre de rotation (centre de gravité des moyens d’assemblage)",
+      "en": "Rotation centre (centroid of the fasteners)"
+    },
+    "fastener_forces_title": {
+      "de": "Kräfte in den Verbindungsmitteln",
+      "fr": "Forces dans les moyens d’assemblage",
+      "en": "Forces in the fasteners"
+    },
+    "fastener_forces_worst_title": {
+      "de": "Kräfte in den Verbindungsmitteln, ungünstigste Überlagerung",
+      "fr": "Forces dans les moyens d’assemblage, superposition la plus défavorable",
+      "en": "Forces in the fasteners, most unfavourable superposition"
+    },
+    "worst_case_note": {
+      "de": "Beträge von N, V und der Kraft aus M je Komponente addiert, als wirkten alle drei gleichgerichtet. Ohne Kraft-Faser-Winkel: die Richtung ist nicht festgelegt.",
+      "fr": "Valeurs absolues de N, V et de la force due à M additionnées composante par composante, comme si les trois agissaient dans le même sens. Sans angle entre la force et le fil : la direction n’est pas définie.",
+      "en": "The magnitudes of N, V and the force from M added component by component, as if all three acted the same way. Without a force-to-grain angle: the direction is not defined."
+    },
+    "figure.normal_force_per_fastener": {
+      "de": "Normalkraft je Verbindungsmittel, positiv in Pfeilrichtung",
+      "fr": "Effort normal par moyen d’assemblage, positif dans le sens de la flèche",
+      "en": "Normal force per fastener, positive in the arrow’s direction"
+    },
+    "figure.shear_force_per_fastener": {
+      "de": "Querkraft je Verbindungsmittel, positiv in Pfeilrichtung",
+      "fr": "Effort tranchant par moyen d’assemblage, positif dans le sens de la flèche",
+      "en": "Shear force per fastener, positive in the arrow’s direction"
+    },
+    "figure.moment_force_per_fastener": {
+      "de": "Kraft je Verbindungsmittel aus dem Moment, rechtwinklig zum Hebelarm",
+      "fr": "Force par moyen d’assemblage due au moment, perpendiculaire au bras de levier",
+      "en": "Force per fastener from the moment, at right angles to the lever arm"
+    },
+    "figure.resultant_per_fastener": {
+      "de": "Resultierende je Verbindungsmittel, im gleichen Massstab",
+      "fr": "Résultante par moyen d’assemblage, à la même échelle",
+      "en": "Resultant per fastener, at the same scale"
+    },
+    "figure.moment_about_centre": {
+      "de": "Moment um den Drehpunkt, positiv im Gegenuhrzeigersinn",
+      "fr": "Moment autour du centre de rotation, positif dans le sens antihoraire",
+      "en": "Moment about the rotation centre, positive anticlockwise"
+    },
+    "figure.enlarged": {
+      "de": "Vergrössert, nicht massstäblich: ",
+      "fr": "Agrandi, pas à l’échelle : ",
+      "en": "Enlarged, not to scale: "
+    },
+    "figure.too_small": {
+      "de": "Zu klein zum Erkennen: ",
+      "fr": "Trop petit pour être lu : ",
+      "en": "Too small to make out: "
+    },
+    "figure.supplement_table": {
+      "de": "Tabelle",
+      "fr": "Tableau",
+      "en": "Table"
+    },
+    "figure.supplement_image": {
+      "de": "Abbildung",
+      "fr": "Figure",
+      "en": "Figure"
+    },
+    "figure.value_not_found": {
+      "de": "Wert nicht gefunden: ",
+      "fr": "Valeur introuvable : ",
+      "en": "Value not found: "
+    },
+    "plan.legend.quantities": {
+      "de": "Ausmass",
+      "fr": "Métrés",
+      "en": "Quantities"
+    },
+    "plan.legend.pieces": {
+      "de": "Stk.",
+      "fr": "pce",
+      "en": "pcs"
+    },
+    "plan.legend.T": {
+      "de": "Träger / Wechsel / Unterzug / Überzug",
+      "fr": "Poutre / chevêtre / sommier / poutre en surélévation",
+      "en": "Beam / trimmer / girder / upstand beam"
+    },
+    "plan.legend.S": {
+      "de": "Stütze",
+      "fr": "Poteau",
+      "en": "Column"
+    },
+    "plan.legend.A": {
+      "de": "Aussteifung, Stabilisierung Einzelstab",
+      "fr": "Contreventement, stabilisation par barre isolée",
+      "en": "Bracing, stabilisation by a single member"
+    },
+    "plan.legend.D:normal": {
+      "de": "Decke / Dach, Pfeil = Spannrichtung",
+      "fr": "Plancher / toiture, flèche = sens de portée",
+      "en": "Floor / roof, arrow = span direction"
+    },
+    "plan.legend.D:scheibe": {
+      "de": "Scheibenbildung Decke / Dach",
+      "fr": "Effet de diaphragme plancher / toiture",
+      "en": "Diaphragm action floor / roof"
+    },
+    "plan.legend.Ö": {
+      "de": "Ausschnitt / Öffnung",
+      "fr": "Trémie / ouverture",
+      "en": "Opening"
+    },
+    "plan.legend.V": {
+      "de": "Wand, vertikal tragend",
+      "fr": "Paroi porteuse verticalement",
+      "en": "Wall, vertically loadbearing"
+    },
+    "plan.legend.H": {
+      "de": "Wand, aussteifend",
+      "fr": "Paroi de contreventement",
+      "en": "Wall, bracing"
+    },
+    "plan.legend.W": {
+      "de": "Wand, vertikal tragend und aussteifend",
+      "fr": "Paroi porteuse verticalement et de contreventement",
+      "en": "Wall, vertically loadbearing and bracing"
+    },
+    "plan.legend.B:wand": {
+      "de": "Betonwand",
+      "fr": "Paroi en béton",
+      "en": "Concrete wall"
+    },
+    "plan.legend.B:decke": {
+      "de": "Betondecke",
+      "fr": "Dalle en béton",
+      "en": "Concrete slab"
+    },
+    "plan.legend.M:vert": {
+      "de": "Auflager Massivbau, vertikal",
+      "fr": "Appui sur construction massive, vertical",
+      "en": "Support on solid construction, vertical"
+    },
+    "plan.legend.M:horiz": {
+      "de": "Auflager Massivbau, horizontal",
+      "fr": "Appui sur construction massive, horizontal",
+      "en": "Support on solid construction, horizontal"
+    },
+    "plan.legend.M:vh": {
+      "de": "Auflager Massivbau, vertikal und horizontal",
+      "fr": "Appui sur construction massive, vertical et horizontal",
+      "en": "Support on solid construction, vertical and horizontal"
+    },
+    "plan.legend.L:linie": {
+      "de": "Abfangung Linienlast von oben",
+      "fr": "Reprise d’une charge linéaire venant du haut",
+      "en": "Transfer of a line load from above"
+    },
+    "plan.legend.L:punkt": {
+      "de": "Abfangung Punktlast von oben",
+      "fr": "Reprise d’une charge ponctuelle venant du haut",
+      "en": "Transfer of a point load from above"
+    },
+    "plan.legend.Achse": {
+      "de": "Achse",
+      "fr": "Axe",
+      "en": "Axis"
+    },
+    "plan.legend.PL:vert": {
+      "de": "Punktlast vertikal",
+      "fr": "Charge ponctuelle verticale",
+      "en": "Point load, vertical"
+    },
+    "plan.legend.PL:horiz": {
+      "de": "Punktlast horizontal",
+      "fr": "Charge ponctuelle horizontale",
+      "en": "Point load, horizontal"
+    },
+    "plan.legend.PL:vh": {
+      "de": "Punktlast vertikal und horizontal",
+      "fr": "Charge ponctuelle verticale + horizontale",
+      "en": "Point load, vertical and horizontal"
+    },
+    "plan.legend.LL:vert": {
+      "de": "Linienlast vertikal",
+      "fr": "Charge linéaire verticale",
+      "en": "Line load, vertical"
+    },
+    "plan.legend.LL:horiz": {
+      "de": "Linienlast horizontal",
+      "fr": "Charge linéaire horizontale",
+      "en": "Line load, horizontal"
+    },
+    "plan.legend.LL:vh": {
+      "de": "Linienlast vertikal und horizontal",
+      "fr": "Charge linéaire verticale + horizontale",
+      "en": "Line load, vertical and horizontal"
+    },
+    "plan.legend.Lastniveau": {
+      "de": "Lastübergabeniveau",
+      "fr": "Niveau de reprise des charges",
+      "en": "Load transfer level"
+    },
+    "plan.load_level": {
+      "de": "Lastübergabeniveau",
+      "fr": "Niveau de reprise des charges",
+      "en": "Load transfer level"
+    },
+    "connector.section_enlarged": {
+      "de": "Ø vergrössert, nicht massstäblich",
+      "fr": "Ø agrandi, pas à l’échelle",
+      "en": "Ø enlarged, not to scale"
+    },
+    "connector.section_reduced": {
+      "de": "Ø verkleinert, nicht massstäblich",
+      "fr": "Ø réduit, pas à l’échelle",
+      "en": "Ø reduced, not to scale"
+    },
+    "bibliography.norm": {
+      "de": "Normen",
+      "fr": "Normes",
+      "en": "Standards"
+    },
+    "bibliography.literature": {
+      "de": "Literatur",
+      "fr": "Littérature",
+      "en": "Literature"
+    },
+    "bibliography.other": {
+      "de": "Weitere Dokumente",
+      "fr": "Autres documents",
+      "en": "Other documents"
+    },
+    "journal.index": {
+      "de": "Rev.",
+      "fr": "Rév.",
+      "en": "Rev."
+    },
+    "journal.date": {
+      "de": "Datum",
+      "fr": "Date",
+      "en": "Date"
+    },
+    "journal.name": {
+      "de": "Name",
+      "fr": "Nom",
+      "en": "Name"
+    },
+    "journal.initials": {
+      "de": "Kürzel",
+      "fr": "Sigle",
+      "en": "Initials"
+    },
+    "journal.label": {
+      "de": "Bezeichnung",
+      "fr": "Désignation",
+      "en": "Designation"
+    },
+    "journal.summary": {
+      "de": "Kurzbeschreibung",
+      "fr": "Description courte",
+      "en": "Short description"
+    },
+    "journal.description": {
+      "de": "Beschreibung",
+      "fr": "Description",
+      "en": "Description"
+    },
+    "journal.empty": {
+      "de": "Noch keine Revision erfasst.",
+      "fr": "Aucune révision saisie.",
+      "en": "No revision recorded yet."
+    },
+    "summary.case": {
+      "de": "Lastfall",
+      "fr": "Cas de charge",
+      "en": "Load case"
+    },
+    "summary.report": {
+      "de": "Im Bericht berechnet",
+      "fr": "Calculé dans le rapport",
+      "en": "Calculated in the report"
+    },
+    "summary.connections": {
+      "de": "Anschlüsse",
+      "fr": "Assemblages",
+      "en": "Connections"
+    },
+    "summary.values": {
+      "de": "Hauptergebnisse",
+      "fr": "Résultats principaux",
+      "en": "Main results"
+    },
+    "summary.checks": {
+      "de": "Nachweisübersicht",
+      "fr": "Récapitulatif des vérifications",
+      "en": "Summary of the checks"
+    },
+    "summary.loads_empty": {
+      "de": "Keine Flächenlasten erfasst.",
+      "fr": "Aucune charge surfacique saisie.",
+      "en": "No area loads recorded."
+    },
+    "summary.line_loads_empty": {
+      "de": "Keine Linienlasten erfasst.",
+      "fr": "Aucune charge linéaire saisie.",
+      "en": "No line loads recorded."
+    },
+    "summary.results_empty": {
+      "de": "Keine Ergebnisse erfasst.",
+      "fr": "Aucun résultat saisi.",
+      "en": "No results recorded."
+    },
+    "summary.fire": {
+      "de": "Brandfall",
+      "fr": "incendie",
+      "en": "fire"
+    },
+    "summary.verify.tension": {
+      "de": "Zug",
+      "fr": "Traction",
+      "en": "Tension"
+    },
+    "summary.verify.compression": {
+      "de": "Druck",
+      "fr": "Compression",
+      "en": "Compression"
+    },
+    "summary.verify.compression-perp": {
+      "de": "Druck rechtwinklig zur Faserrichtung",
+      "fr": "Compression perpendiculaire au fil",
+      "en": "Compression perpendicular to the grain"
+    },
+    "summary.verify.bending": {
+      "de": "Biegung",
+      "fr": "Flexion",
+      "en": "Bending"
+    },
+    "summary.verify.bending-normal": {
+      "de": "Biegung mit Normalkraft",
+      "fr": "Flexion combinée avec un effort normal",
+      "en": "Bending with a normal force"
+    },
+    "summary.verify.shear": {
+      "de": "Schub und Torsion",
+      "fr": "Effort tranchant et torsion",
+      "en": "Shear and torsion"
+    },
+    "summary.verify.shear-off": {
+      "de": "Abscheren",
+      "fr": "Cisaillement",
+      "en": "Shear in the bearing area"
+    },
+    "summary.verify.shear-perp": {
+      "de": "Schub und Normalkraft rechtwinklig zur Faserrichtung",
+      "fr": "Effort tranchant combiné avec un effort normal, perpendiculairement au fil",
+      "en": "Shear with a normal force perpendicular to the grain"
+    },
+    "steel.kind.class": {
+      "de": "Stahl: Querschnittsklasse",
+      "fr": "Acier : classe de section",
+      "en": "Steel: cross-section class"
+    },
+    "steel.kind.tension": {
+      "de": "Stahl: Zug",
+      "fr": "Acier : traction",
+      "en": "Steel: tension"
+    },
+    "steel.kind.compression": {
+      "de": "Stahl: Druck",
+      "fr": "Acier : compression",
+      "en": "Steel: compression"
+    },
+    "steel.kind.bending": {
+      "de": "Stahl: Biegung",
+      "fr": "Acier : flexion",
+      "en": "Steel: bending"
+    },
+    "steel.kind.shear": {
+      "de": "Stahl: Querkraft",
+      "fr": "Acier : effort tranchant",
+      "en": "Steel: shear"
+    },
+    "steel.position": {
+      "de": "Position",
+      "fr": "position",
+      "en": "position"
+    },
+    "summary.verify.steel-tension": {
+      "de": "Stahl, Zug",
+      "fr": "Acier, traction",
+      "en": "Steel, tension"
+    },
+    "summary.verify.steel-compression": {
+      "de": "Stahl, Druck",
+      "fr": "Acier, compression",
+      "en": "Steel, compression"
+    },
+    "summary.verify.steel-bending": {
+      "de": "Stahl, Biegung",
+      "fr": "Acier, flexion",
+      "en": "Steel, bending"
+    },
+    "summary.verify.steel-shear": {
+      "de": "Stahl, Querkraft",
+      "fr": "Acier, effort tranchant",
+      "en": "Steel, shear"
+    },
+    "document.zone": {
+      "de": "Teilbereich",
+      "fr": "Zone",
+      "en": "Part of building"
+    },
+    "document.storey": {
+      "de": "Geschoss",
+      "fr": "Niveau",
+      "en": "Storey"
+    },
+    "document.use": {
+      "de": "Nutzung",
+      "fr": "Utilisation",
+      "en": "Use"
+    },
+    "document.category": {
+      "de": "Kategorie",
+      "fr": "Catégorie",
+      "en": "Category"
+    },
+    "document.buildup": {
+      "de": "Nutzung / Aufbau",
+      "fr": "Utilisation / composition",
+      "en": "Use / build-up"
+    },
+    "document.superimposed": {
+      "de": "Auflast",
+      "fr": "Poids propre non-structural",
+      "en": "Non-structural self-weight"
+    },
+    "document.override": {
+      "de": "In Orange: ein von Hand eingetragener Wert anstelle desjenigen der Norm.",
+      "fr": "En orange : une valeur saisie à la main à la place de celle de la norme.",
+      "en": "In orange: a value entered by hand in place of the norm's."
+    },
+    "document.other": {
+      "de": "Andere",
+      "fr": "Autre",
+      "en": "Other"
+    },
+    "document.image": {
+      "de": "[Abbildung]",
+      "fr": "[Figure]",
+      "en": "[Figure]"
+    },
+    "document.extract": {
+      "de": "[Auszug aus einem Anhang]",
+      "fr": "[Extrait d’une annexe]",
+      "en": "[Extract from an annex]"
+    },
+    "document.fire_plan": {
+      "de": "[Auszug aus dem Brandschutzplan]",
+      "fr": "[Extrait du plan de protection incendie]",
+      "en": "[Extract from the fire-protection plan]"
+    },
+    "document.plan": {
+      "de": "[Auszug aus dem Positionsplan]",
+      "fr": "[Extrait du plan de position]",
+      "en": "[Extract from the position plan]"
+    },
+    "document.role": {
+      "de": "Funktion",
+      "fr": "Fonction",
+      "en": "Role"
+    },
+    "document.name": {
+      "de": "Name",
+      "fr": "Nom",
+      "en": "Name"
+    },
+    "document.place_date": {
+      "de": "Ort, Datum",
+      "fr": "Lieu, date",
+      "en": "Place, date"
+    },
+    "document.signature": {
+      "de": "Unterschrift",
+      "fr": "Signature",
+      "en": "Signature"
+    },
+    "fire.legend": {
+      "de": "Legende",
+      "fr": "Légende",
+      "en": "Legend"
+    },
+    "fire.door.swing": {
+      "de": "Türe ohne Feuerwiderstand",
+      "fr": "Porte sans résistance au feu",
+      "en": "Door without fire resistance"
+    },
+    "fire.door.slide": {
+      "de": "Schiebetüre ohne Feuerwiderstand",
+      "fr": "Porte coulissante sans résistance au feu",
+      "en": "Sliding door without fire resistance"
+    }
+  },
+  "templates": {
+    "annex.caption": {
+      "de": "Auszug aus {source}, S. {page}",
+      "fr": "Extrait de {source}, p. {page}",
+      "en": "Excerpt from {source}, p. {page}"
+    },
+    "annex.letter": {
+      "de": "Anhang {letter}",
+      "fr": "Annexe {letter}",
+      "en": "Appendix {letter}"
+    },
+    "annex.pages": {
+      "de": "Seiten des Originals: {pages}",
+      "fr": "Pages de l’original : {pages}",
+      "en": "Pages of the original: {pages}"
+    },
+    "polar.f_i": {
+      "de": "Kraft im Verbindungsmittel {i}",
+      "fr": "Force dans le moyen d’assemblage {i}",
+      "en": "Force in fastener {i}"
+    },
+    "polar.beta_j": {
+      "de": "Kraft-Faser-Winkel zu Element {j}",
+      "fr": "Angle force-fil vers l’élément {j}",
+      "en": "Force-grain angle to member {j}"
+    },
+    "find.computed_here": {
+      "de": "Im Bericht berechnet, nicht rückverfolgbar: {names}.",
+      "fr": "Calculé dans le rapport, non traçable : {names}.",
+      "en": "Computed in the report, untraced: {names}."
+    },
+    "connection.angle_label": {
+      "de": "Winkel von Element {i} zu Element {j}",
+      "fr": "Angle de l’élément {i} à l’élément {j}",
+      "en": "Angle from member {i} to member {j}"
+    },
+    "find.vars_domain": {
+      "de": "Variablen des Bereichs {domain}",
+      "fr": "Variables du domaine {domain}",
+      "en": "Variables of the domain {domain}"
+    },
+    "find.vars_source": {
+      "de": "Variablen von {domain}, Kennung {instance}",
+      "fr": "Variables de {domain}, clé {instance}",
+      "en": "Variables of {domain}, key {instance}"
+    },
+    "connection.caption": {
+      "de": "Anschluss {id}",
+      "fr": "Assemblage {id}",
+      "en": "Connection {id}"
+    },
+    "connection.figure_caption": {
+      "de": "Verbindungsmittel und Kräfte je Verbindungsmittel",
+      "fr": "Moyens d’assemblage et forces par moyen d’assemblage",
+      "en": "The fasteners and the force in each"
+    },
+    "connection.forces_note_head": {
+      "de": "Komponenten der Kraft je Verbindungsmittel in x und z",
+      "fr": "Composantes de la force par moyen d’assemblage selon x et z",
+      "en": "The components of the force per fastener along x and z"
+    },
+    "connection.forces_note_tail": {
+      "de": "Resultierende",
+      "fr": "Résultante",
+      "en": "Resultant"
+    },
+    "connection.grain_angle_note": {
+      "de": "Winkel zwischen der Wirkungslinie von F{nr} und der Faserrichtung von Element j, auf 0° bis 90° zurückgeführt — eine Faser hat keinen Richtungssinn.",
+      "fr": "Angle entre la ligne d’action de F{nr} et la direction du fil de l’élément j, ramené entre 0° et 90° — un fil n’a pas de sens.",
+      "en": "The angle between the line of action of F{nr} and the grain direction of member j, folded into 0° to 90° — a grain has no direction sense."
+    },
+    "connection.member_fallback": {
+      "de": "Element {n}",
+      "fr": "Élément {n}",
+      "en": "Member {n}"
+    },
+    "connection.moment_note": {
+      "de": "M in kNm, mit 10³ in kN·mm umgerechnet; Δx und Δz in mm, I{p} in mm² — die Kräfte folgen in kN. M ist im Gegenuhrzeigersinn positiv, von z nach x.",
+      "fr": "M en kNm, converti en kN·mm par 10³ ; Δx et Δz en mm, I{p} en mm² — les forces suivent en kN. M est positif dans le sens antihoraire, de z vers x.",
+      "en": "M in kNm, converted to kN·mm by 10³; Δx and Δz in mm, I{p} in mm² — the forces follow in kN. M is positive anticlockwise, from z towards x."
+    },
+    "connection.to_member": {
+      "de": "zu {member}",
+      "fr": "vers {member}",
+      "en": "to {member}"
+    },
+    "connector.mixed_moisture": {
+      "de": "Die Bauteile sind verschiedenen Feuchteklassen zugeordnet ({classes}); massgebend ist die ungünstigste, Klasse {worst}.",
+      "fr": "Les pièces sont rattachées à des classes d’humidité différentes ({classes}) ; la plus défavorable est déterminante, la classe {worst}.",
+      "en": "The members are in different moisture classes ({classes}); the worst governs, class {worst}."
+    },
+    "connector.moisture_is": {
+      "de": "Feuchteklasse {n}.",
+      "fr": "Classe d’humidité {n}.",
+      "en": "Moisture class {n}."
+    },
+    "dowel.plate_e2": {
+      "de": "Lochleibung der Bleche: $e_2$ = {have} mm ist kleiner als {factor} · $d_0$ = {want} mm, ausserhalb der Voraussetzung von SIA 263 Tabelle 16, Gleichung (76).",
+      "fr": "Pression diamétrale des tôles : $e_2$ = {have} mm est inférieur à {factor} · $d_0$ = {want} mm, hors de l’hypothèse de SIA 263 tableau 16, équation (76).",
+      "en": "Bearing of the plates: $e_2$ = {have} mm is less than {factor} · $d_0$ = {want} mm, outside the premise of SIA 263 Table 16, equation (76)."
+    },
+    "dowel.plate_p2": {
+      "de": "Lochleibung der Bleche: $p_2$ = {have} mm ist kleiner als {factor} · $d_0$ = {want} mm, ausserhalb der Voraussetzung von SIA 263 Tabelle 16, Gleichung (76).",
+      "fr": "Pression diamétrale des tôles : $p_2$ = {have} mm est inférieur à {factor} · $d_0$ = {want} mm, hors de l’hypothèse de SIA 263 tableau 16, équation (76).",
+      "en": "Bearing of the plates: $p_2$ = {have} mm is less than {factor} · $d_0$ = {want} mm, outside the premise of SIA 263 Table 16, equation (76)."
+    },
+    "connector.plate_missing": {
+      "de": "Lochleibung der Stahlbleche nicht nachgewiesen (SIA 263 Tabelle 16): {fields} nicht angegeben.",
+      "fr": "Pression diamétrale des tôles non vérifiée (SIA 263 tableau 16) : {fields} non indiqué(s).",
+      "en": "Bearing of the steel plates not checked (SIA 263 Table 16): {fields} not stated."
+    },
+    "connector.n_tot_override": {
+      "de": "$n_\"tot\"$ ist mit {value} von Hand gesetzt; die Zeichnung zeigt {drawn} Verbindungsmittel.",
+      "fr": "$n_\"tot\"$ est fixé à {value} à la main ; le dessin en montre {drawn}.",
+      "en": "$n_\"tot\"$ is set to {value} by hand; the drawing shows {drawn}."
+    },
+    "connector.pattern_caption": {
+      "de": "Anordnung der Verbindungsmittel",
+      "fr": "Disposition des moyens d’assemblage",
+      "en": "Arrangement of the fasteners"
+    },
+    "connector.section_caption": {
+      "de": "Schnitt durch die Verbindung",
+      "fr": "Coupe à travers l’assemblage",
+      "en": "Section through the connection"
+    },
+    "connector.position_gone": {
+      "de": "Bauteil {n} verweist auf Position {pid}, die das Register Positionen nicht mehr führt. Wählen Sie ein Element des Schemas, dessen Position eine Festigkeitsklasse trägt, oder geben Sie die Festigkeitsklasse von Hand ein.",
+      "fr": "La pièce {n} renvoie à la position {pid}, que l'onglet Positions ne porte plus. Choisissez un élément du schéma dont la position porte une classe de résistance, ou saisissez la classe de résistance à la main.",
+      "en": "Member {n} names position {pid}, which the Positions tab no longer carries. Choose an element of the schema whose position carries a strength class, or type the strength class by hand."
+    },
+    "connector.position_no_grade": {
+      "de": "Bauteil {n} verweist auf Position {pid}, die keine Festigkeitsklasse trägt. Wählen Sie ein Element des Schemas, dessen Position eine Festigkeitsklasse trägt, oder geben Sie die Festigkeitsklasse von Hand ein.",
+      "fr": "La pièce {n} renvoie à la position {pid}, qui ne porte pas de classe de résistance. Choisissez un élément du schéma dont la position porte une classe de résistance, ou saisissez la classe de résistance à la main.",
+      "en": "Member {n} names position {pid}, which carries no strength class. Choose an element of the schema whose position carries a strength class, or type the strength class by hand."
+    },
+    "dead_load.chosen_desc": {
+      "de": "Auf der sicheren Seite gerundeter Bemessungswert der ständigen Lasten, im Blatt {sheet} gewählt.",
+      "fr": "Valeur de dimensionnement des charges permanentes, arrondie du côté de la sécurité, choisie dans la feuille {sheet}.",
+      "en": "Design value of the permanent loads, rounded on the safe side, chosen in sheet {sheet}."
+    },
+    "formula.unit_mismatch": {
+      "de": "Die verlangte Einheit {wanted} passt nicht zu den Einheiten der Operanden — das Ergebnis steht in {natural}.",
+      "fr": "L’unité demandée {wanted} ne correspond pas aux unités des opérandes — le résultat est donné en {natural}.",
+      "en": "The requested unit {wanted} does not match the operands’ units — the result is given in {natural}."
+    },
+    "formula.unit_override": {
+      "de": "Die Einheit ist für die Darstellung überschrieben: der Wert steht in {shown} statt in {have}.",
+      "fr": "L’unité est écrasée pour l’affichage : la valeur est donnée en {shown} au lieu de {have}.",
+      "en": "The unit is overridden for display: the value is given in {shown} instead of {have}."
+    },
+    "formula.unit_override_bare": {
+      "de": "Die Einheit ist für die Darstellung gesetzt: der Wert steht in {shown}, er selbst trägt keine Einheit.",
+      "fr": "L’unité est donnée pour l’affichage : la valeur est donnée en {shown}, elle-même n’a pas d’unité.",
+      "en": "The unit is set for display: the value is given in {shown}, and carries none of its own."
+    },
+    "plan.caption": {
+      "de": "Positionsplan {id}",
+      "fr": "Plan de position {id}",
+      "en": "Position plan {id}"
+    },
+    "snow.exposure_desc": {
+      "de": "Gewählte Windexposition: {exposure}.",
+      "fr": "Exposition au vent choisie : {exposure}.",
+      "en": "Chosen wind exposure: {exposure}.",
+      "translate": [
+        "exposure"
+      ]
+    },
+    "schema.caption": {
+      "de": "Schema {id}",
+      "fr": "Schéma {id}",
+      "en": "Detail schema {id}"
+    },
+    "snow.load_models_desc": {
+      "de": "Im Blatt {sheet} wählbare Lastmodelle: {models}.",
+      "fr": "Modèles de charge disponibles dans la feuille {sheet} : {models}.",
+      "en": "Load models available in sheet {sheet}: {models}."
+    },
+    "statics.caption": {
+      "de": "Statisches System {id}",
+      "fr": "Système statique {id}",
+      "en": "Static system {id}"
+    },
+    "wind.force_max_label": {
+      "de": "Maximale globale Windkraft, Bezugsfläche {area}",
+      "fr": "Force globale du vent maximale, surface de référence {area}",
+      "en": "Maximum global wind force, reference area {area}"
+    },
+    "wind.force_min_label": {
+      "de": "Minimale globale Windkraft, Bezugsfläche {area}",
+      "fr": "Force globale du vent minimale, surface de référence {area}",
+      "en": "Minimum global wind force, reference area {area}"
+    },
+    "wind.global_note": {
+      "de": "Bezugsflächen aus den Gebäudeabmessungen: b·h und d·h sind die Fassadenflächen quer bzw. längs zur Windrichtung, d·b die Dachfläche. $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über alle Windrichtungen (Blatt {sheet}, Tabelle «Globale Kraftbeiwerte»); $c_\"red\"$ ist der Reduktionsfaktor der jeweiligen Bezugsfläche. Negative Werte sind Sog.",
+      "fr": "Surfaces de référence tirées des dimensions du bâtiment : b·h et d·h sont les surfaces de façade respectivement perpendiculaire et parallèle à la direction du vent, d·b la surface de toiture. $c_f$ est le plus grand, respectivement le plus petit coefficient de force global sur toutes les directions du vent (feuille {sheet}, tableau des coefficients de force globaux) ; $c_\"red\"$ est le facteur de réduction de la surface de référence considérée. Les valeurs négatives sont des succions.",
+      "en": "Reference areas from the building’s dimensions: b·h and d·h are the facade areas across and along the wind direction, d·b the roof area. $c_f$ is the largest, respectively the smallest global force coefficient over all wind directions (sheet {sheet}, table of the global force coefficients); $c_\"red\"$ is the reduction factor of that reference area. Negative values are suction."
+    },
+    "wind.local_note": {
+      "de": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen {directions}, mit den Aussen- und Innendruckbeiwerten $c_\"pe\"$ und $c_\"pi\"$ des Blatts {sheet} (Druckbeiwerte {figure}). gleichmässig: gleichmässig verteilte Öffnungen, beide Innendruckbeiwerte des Blatts (glm. (+) und glm. (-)) berücksichtigt; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D. Negative Werte sind Sog.",
+      "fr": "Valeur la plus grande (max) et la plus petite (min) par surface sur les directions du vent {directions}, avec les coefficients de pression extérieure et intérieure $c_\"pe\"$ et $c_\"pi\"$ de la feuille {sheet} (coefficients de pression {figure}). uniforme : ouvertures uniformément réparties, les deux coefficients de pression intérieure de la feuille (uniforme (+) et uniforme (-)) pris en compte ; ouverture A–D : ouverture dominante dans la paroi A, B, C respectivement D. Les valeurs négatives sont des succions.",
+      "en": "The largest (max) and smallest (min) value per surface over the wind directions {directions}, with the external and internal pressure coefficients $c_\"pe\"$ and $c_\"pi\"$ of sheet {sheet} (pressure coefficients {figure}). uniform: uniformly distributed openings, both of the sheet’s internal pressure coefficients (uniform (+) and uniform (-)) taken into account; opening A–D: a dominant opening in wall A, B, C or D. Negative values are suction."
+    },
+    "connector.plane_row": {
+      "de": "Scherfuge {plane} ({count}×)",
+      "fr": "Section cisaillée {plane} ({count}×)",
+      "en": "Shear plane {plane} ({count}×)"
+    },
+    "connector.plane_row_single": {
+      "de": "Scherfuge ({count}×)",
+      "fr": "Section cisaillée ({count}×)",
+      "en": "Shear plane ({count}×)"
+    },
+    "connector.spacing_parallel": {
+      "de": "Mindestabstand in Faserrichtung unterschritten: {have} mm vorhanden, {want} mm verlangt (SIA 265 Tabelle 24). Gleichung (88) gilt nur bei Einhaltung der Mindestabstände (6.2.1.1).",
+      "fr": "Espacement minimal dans le sens du fil non respecté : {have} mm effectifs, {want} mm requis (SIA 265 tableau 24). L’équation (88) n’est valable que si les espacements minimaux sont respectés (6.2.1.1).",
+      "en": "Minimum spacing parallel to the grain not met: {have} mm actual, {want} mm required (SIA 265 table 24). Equation (88) holds only where the minimum spacings are kept (6.2.1.1)."
+    },
+    "connector.spacing_perpendicular": {
+      "de": "Mindestabstand rechtwinklig zur Faser unterschritten: {have} mm vorhanden, {want} mm verlangt (SIA 265 Tabelle 24). Gleichung (88) gilt nur bei Einhaltung der Mindestabstände (6.2.1.1).",
+      "fr": "Espacement minimal perpendiculairement au fil non respecté : {have} mm effectifs, {want} mm requis (SIA 265 tableau 24). L’équation (88) n’est valable que si les espacements minimaux sont respectés (6.2.1.1).",
+      "en": "Minimum spacing perpendicular to the grain not met: {have} mm actual, {want} mm required (SIA 265 table 24). Equation (88) holds only where the minimum spacings are kept (6.2.1.1)."
+    },
+    "connector.kbeta_condition_130": {
+      "de": "Tabelle 46, Gleichung (130) gilt nur wenn t_2 >= {factor} · t_1; hier ist t_2 = {t2} mm und {again} · t_1 = {bound} mm.",
+      "fr": "Tableau 46, l’équation (130) n’est valable que si t_2 >= {factor} · t_1 ; ici t_2 = {t2} mm et {again} · t_1 = {bound} mm.",
+      "en": "Table 46, equation (130) holds only if t_2 >= {factor} · t_1; here t_2 = {t2} mm and {again} · t_1 = {bound} mm."
+    },
+    "distance.alpha_default": {
+      "de": "Ohne Angabe von $alpha$ gilt der Wert für $alpha = 0°$, der grösste; für $alpha = 90°$ beträgt der Abstand {value} mm.",
+      "fr": "Sans indication de $alpha$, la valeur est celle pour $alpha = 0°$, la plus grande ; pour $alpha = 90°$, l’espacement vaut {value} mm.",
+      "en": "With no $alpha$ given, the value is the one for $alpha = 0°$, the largest; for $alpha = 90°$ the spacing is {value} mm."
+    },
+    "connector.kbeta_condition_131": {
+      "de": "Tabelle 46, Gleichung (131) gilt nur wenn t_1 >= {factor} · t_2; hier ist t_1 = {t1} mm und {again} · t_2 = {bound} mm.",
+      "fr": "Tableau 46, l’équation (131) n’est valable que si t_1 >= {factor} · t_2 ; ici t_1 = {t1} mm et {again} · t_2 = {bound} mm.",
+      "en": "Table 46, equation (131) holds only if t_1 >= {factor} · t_2; here t_1 = {t1} mm and {again} · t_2 = {bound} mm."
+    },
+    "connector.diameter_range": {
+      "de": "SIA 265 6.2.1.1 gibt Gleichung (88) für Stabdübel mit d = {min} bis {max} mm an; hier ist d = {d} mm.",
+      "fr": "SIA 265 6.2.1.1 donne l’équation (88) pour des broches de d = {min} à {max} mm ; ici d = {d} mm.",
+      "en": "SIA 265 6.2.1.1 gives equation (88) for dowels of d = {min} to {max} mm; here d = {d} mm."
+    },
+    "connector.no_element": {
+      "de": "Bauteil {n} ist keinem Element mit Position zugeordnet und trägt keine Festigkeitsklasse. Wählen Sie ein Element des Schemas oder geben Sie die Festigkeitsklasse von Hand ein.",
+      "fr": "La pièce {n} n’est rattachée à aucun élément doté d’une position et ne porte pas de classe de résistance. Choisissez un élément du schéma ou saisissez la classe de résistance à la main.",
+      "en": "Member {n} is assigned to no element with a position and carries no strength class. Choose an element of the schema or type the strength class by hand."
+    },
+    "connector.no_module": {
+      "de": "{kind}: für diese Art von Verbindungsmittel gibt es noch keine Berechnung.",
+      "fr": "{kind} : aucun calcul n’existe encore pour ce type de moyen d’assemblage.",
+      "en": "{kind}: there is no calculation yet for this kind of fastener."
+    },
+    "connector.schema_gone": {
+      "de": "Das Schema {schema} gibt es nicht mehr; die Anordnung der Verbindungsmittel und der Tragwiderstand sind damit nicht bestimmt.",
+      "fr": "Le schéma {schema} n’existe plus ; la disposition des moyens d’assemblage et la résistance ne sont donc pas déterminées.",
+      "en": "Schema {schema} no longer exists; the fastener pattern and the resistance are therefore not determined."
+    },
+    "connector.markers_lost": {
+      "de": "Das Schema {schema} trägt die Verbindungsmittel {markers} nicht mehr; die Anordnung ist unvollständig und der Tragwiderstand wird nicht berechnet.",
+      "fr": "Le schéma {schema} ne porte plus les moyens d’assemblage {markers} ; la disposition est incomplète et la résistance n’est pas calculée.",
+      "en": "Schema {schema} no longer carries the fasteners {markers}; the pattern is incomplete and the resistance is not calculated."
+    },
+    "connector.provenance_position": {
+      "de": "Bauteil {i}: {grade}, aus Position {pid}.",
+      "fr": "Pièce {i} : {grade}, reprise de la position {pid}.",
+      "en": "Member {i}: {grade}, taken from position {pid}.",
+      "translate": [
+        "grade"
+      ]
+    },
+    "connector.provenance_override": {
+      "de": "Bauteil {i}: {grade}, im Verbindungsmittel festgelegt (Position {pid}: {held}).",
+      "fr": "Pièce {i} : {grade}, fixée dans le moyen d’assemblage (position {pid} : {held}).",
+      "en": "Member {i}: {grade}, stated in the fastener (position {pid}: {held}).",
+      "translate": [
+        "held"
+      ]
+    },
+    "connector.provenance_stated": {
+      "de": "Bauteil {i}: {grade}, im Verbindungsmittel festgelegt.",
+      "fr": "Pièce {i} : {grade}, fixée dans le moyen d’assemblage.",
+      "en": "Member {i}: {grade}, stated in the fastener."
+    },
+    "connector.moisture_note": {
+      "de": "Feuchteklasse {n}.",
+      "fr": "Classe d’humidité {n}.",
+      "en": "Moisture class {n}."
+    },
+    "connector.member_role": {
+      "de": "Bauteil {i} — {role}",
+      "fr": "Pièce {i} — {role}",
+      "en": "Member {i} — {role}",
+      "translate": [
+        "role"
+      ]
+    },
+    "connector.embedment_heading": {
+      "de": "Charakteristische Lochleibungsfestigkeiten für {grade}",
+      "fr": "Valeurs caractéristiques de la résistance à la pression latérale pour {grade}",
+      "en": "Characteristic embedment strengths for {grade}"
+    },
+    "connector.slip_note": {
+      "de": "Der Schlupf beträgt rund {slip} mm (6.2.1.3).",
+      "fr": "Le glissement est d’environ {slip} mm (6.2.1.3).",
+      "en": "The slip is about {slip} mm (6.2.1.3)."
+    },
+    "timber.torsion_coefficient": {
+      "de": "Beiwert der Torsion nach Saint-Venant für das Seitenverhältnis {ratio}.",
+      "fr": "Coefficient de torsion de Saint-Venant pour le rapport des côtés {ratio}.",
+      "en": "Saint-Venant torsion coefficient for the aspect ratio {ratio}."
+    },
+    "fire.caption": {
+      "de": "Brandschutzplan {id}",
+      "fr": "Plan de protection incendie {id}",
+      "en": "Fire-protection plan {id}"
+    },
+    "dowel.steel": {
+      "de": "Stahl {steel}",
+      "fr": "Acier {steel}",
+      "en": "Steel {steel}"
+    },
+    "wind_source.global_note": {
+      "de": "SIA 261, Anhang C, Tabelle {table}: $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über die Windrichtungen; $c_\"red\"$ nach Figur 9 für b·h und d·h in den Windrichtungen 0°, 90° und 180°, der grössere der beiden in jeder anderen Windrichtung (6.3.3), 1.0 für jede andere Bezugsfläche (6.3.2). Negative Werte sind Sog.",
+      "fr": "SIA 261, annexe C, tableau {table} : $c_f$ est le plus grand, respectivement le plus petit coefficient de force global sur les directions du vent ; $c_\"red\"$ selon la figure 9 pour b·h et d·h dans les directions du vent 0°, 90° et 180°, le plus grand des deux dans toute autre direction (6.3.3), 1.0 pour toute autre surface de référence (6.3.2). Les valeurs négatives sont des succions.",
+      "en": "SIA 261, Annex C, Table {table}: $c_f$ is the largest, respectively the smallest global force coefficient over the wind directions; $c_\"red\"$ from Figure 9 for b·h and d·h in the wind directions 0°, 90° and 180°, the larger of the two in any other direction (6.3.3), 1.0 for any other reference area (6.3.2). Negative values are suction."
+    },
+    "wind_source.local_note": {
+      "de": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen der Tabelle {table}; aussen: $c_\"pe\" dot q_p$ allein; gleichmässig: gleichmässig verteilte Öffnungen; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D; netto: mit dem Innendruckbeiwert derselben Fläche. Negative Werte sind Sog.",
+      "fr": "Valeur la plus grande (max) et la plus petite (min) par surface sur les directions du vent du tableau {table} ; extérieur : $c_\"pe\" dot q_p$ seul ; réparti : ouvertures réparties uniformément ; ouverture A–D : ouverture prépondérante dans la paroi A, B, C ou D ; net : avec le coefficient de pression intérieure de la même surface. Les valeurs négatives sont des succions.",
+      "en": "The largest (max) and smallest (min) value per surface over the wind directions of Table {table}; external: $c_\"pe\" dot q_p$ alone; uniform: uniformly distributed openings; opening A–D: dominant opening in wall A, B, C or D; net: with the internal pressure coefficient of the same surface. Negative values are suction."
+    },
+    "wind_source.table_description": {
+      "de": "SIA 261, Anhang C, Tabelle {table}, h : b : d = {ratio}.",
+      "fr": "SIA 261, annexe C, tableau {table}, h : b : d = {ratio}.",
+      "en": "SIA 261, Annex C, Table {table}, h : b : d = {ratio}."
+    },
+    "wind_source.local_surface": {
+      "de": "{surface} (lokal)",
+      "fr": "{surface} (local)",
+      "en": "{surface} (local)"
+    }
+  },
+  "terms": {
+    "Höhe": {
+      "fr": "Hauteur",
+      "en": "Height"
+    },
+    "Flanschdicke": {
+      "fr": "épaisseur de l'aile",
+      "en": "flange thickness"
+    },
+    "Stegdicke": {
+      "fr": "épaisseur de l'âme",
+      "en": "web thickness"
+    },
+    "Steghöhe": {
+      "fr": "hauteur de l'âme",
+      "en": "web height"
+    },
+    "Wanddicke": {
+      "fr": "épaisseur de paroi",
+      "en": "wall thickness"
+    },
+    "Elastizitätsmodul": {
+      "fr": "module d'élasticité",
+      "en": "modulus of elasticity"
+    },
+    "Streckgrenze": {
+      "fr": "limite d'élasticité",
+      "en": "yield strength"
+    },
+    "Querschnittsfläche": {
+      "fr": "aire de la section",
+      "en": "cross-sectional area"
+    },
+    "Nettoquerschnittsfläche": {
+      "fr": "aire nette de la section",
+      "en": "net cross-sectional area"
+    },
+    "plastisches Widerstandsmoment": {
+      "fr": "module de section plastique",
+      "en": "plastic section modulus"
+    },
+    "elastisches Widerstandsmoment": {
+      "fr": "module de section élastique",
+      "en": "elastic section modulus"
+    },
+    "wirksame Schubfläche": {
+      "fr": "aire efficace de cisaillement",
+      "en": "effective shear area"
+    },
+    "Stegfläche": {
+      "fr": "aire de la section de l'âme",
+      "en": "web area"
+    },
+    "Querschnittsklasse": {
+      "fr": "classe de section",
+      "en": "cross-section class"
+    },
+    "Normalkraft": {
+      "fr": "effort normal",
+      "en": "axial force"
+    },
+    "Biegemoment": {
+      "fr": "moment de flexion",
+      "en": "bending moment"
+    },
+    "Querkraft": {
+      "fr": "effort tranchant",
+      "en": "shear force"
+    },
+    "Normalkraftwiderstand im Bruttoquerschnitt": {
+      "fr": "résistance d'une section brute",
+      "en": "resistance of the gross section"
+    },
+    "Normalkraftwiderstand im Nettoquerschnitt": {
+      "fr": "résistance d'une section nette",
+      "en": "resistance of the net section"
+    },
+    "Normalkraftwiderstand": {
+      "fr": "résistance à l'effort normal",
+      "en": "axial resistance"
+    },
+    "Ausnutzung": {
+      "fr": "taux d'utilisation",
+      "en": "utilisation"
+    },
+    "Zugfestigkeit": {
+      "fr": "résistance à la traction",
+      "en": "tensile strength"
+    },
+    "Biegewiderstand": {
+      "fr": "résistance à la flexion",
+      "en": "bending resistance"
+    },
+    "bezogene Normalkraft": {
+      "fr": "effort normal relatif",
+      "en": "relative axial force"
+    },
+    "Hilfswert": {
+      "fr": "valeur auxiliaire",
+      "en": "auxiliary value"
+    },
+    "reduzierter Biegewiderstand": {
+      "fr": "résistance à la flexion réduite",
+      "en": "reduced bending resistance"
+    },
+    "Exponent": {
+      "fr": "exposant",
+      "en": "exponent"
+    },
+    "Fliessschubspannung": {
+      "fr": "limite d'élasticité en cisaillement",
+      "en": "shear yield strength"
+    },
+    "Querkraftwiderstand": {
+      "fr": "résistance à l'effort tranchant",
+      "en": "shear resistance"
+    },
+    "Ausnutzung Querkraft": {
+      "fr": "taux d'utilisation à l'effort tranchant",
+      "en": "utilisation in shear"
+    },
+    "Ausnutzung Biegung": {
+      "fr": "taux d'utilisation à la flexion",
+      "en": "utilisation in bending"
+    },
+    "Stegschlankheit": {
+      "fr": "élancement de l'âme",
+      "en": "web slenderness"
+    },
+    "Grenzschlankheit": {
+      "fr": "élancement limite",
+      "en": "limiting slenderness"
+    },
+    "Schubbeulen nach 4.5.4 nicht nachgewiesen (5.1.4.2).": {
+      "fr": "Voilement par cisaillement selon 4.5.4 non vérifié (5.1.4.2).",
+      "en": "Shear buckling after 4.5.4 not checked (5.1.4.2)."
+    },
+    "Scheibe": {
+      "fr": "élément plan",
+      "en": "plate element"
+    },
+    "Klasse 1": {
+      "fr": "Classe 1",
+      "en": "Class 1"
+    },
+    "Klasse 2": {
+      "fr": "Classe 2",
+      "en": "Class 2"
+    },
+    "Klasse 3": {
+      "fr": "Classe 3",
+      "en": "Class 3"
+    },
+    "Massgebend ist die ungünstigste Scheibe (4.3.1.2).": {
+      "fr": "L'élément plan le plus défavorable est déterminant (4.3.1.2).",
+      "en": "The least favourable plate element governs (4.3.1.2)."
+    },
+    "Steg": {
+      "fr": "âme",
+      "en": "web"
+    },
+    "Steg links": {
+      "fr": "âme gauche",
+      "en": "web, left"
+    },
+    "Steg rechts": {
+      "fr": "âme droite",
+      "en": "web, right"
+    },
+    "Flansch oben": {
+      "fr": "aile supérieure",
+      "en": "top flange"
+    },
+    "Flansch unten": {
+      "fr": "aile inférieure",
+      "en": "bottom flange"
+    },
+    "Flansch oben links": {
+      "fr": "aile supérieure gauche",
+      "en": "top flange, left"
+    },
+    "Flansch oben rechts": {
+      "fr": "aile supérieure droite",
+      "en": "top flange, right"
+    },
+    "Flansch unten links": {
+      "fr": "aile inférieure gauche",
+      "en": "bottom flange, left"
+    },
+    "Flansch unten rechts": {
+      "fr": "aile inférieure droite",
+      "en": "bottom flange, right"
+    },
+    "Flansch oben Mitte": {
+      "fr": "aile supérieure, milieu",
+      "en": "top flange, middle"
+    },
+    "Flansch unten Mitte": {
+      "fr": "aile inférieure, milieu",
+      "en": "bottom flange, middle"
+    },
+    "Flansch links": {
+      "fr": "aile gauche",
+      "en": "flange, left"
+    },
+    "Flansch rechts": {
+      "fr": "aile droite",
+      "en": "flange, right"
+    },
+    "Flansch Mitte": {
+      "fr": "aile, milieu",
+      "en": "flange, middle"
+    },
+    "Schenkel a": {
+      "fr": "aile a",
+      "en": "leg a"
+    },
+    "Schenkel b": {
+      "fr": "aile b",
+      "en": "leg b"
+    },
+    "Rohr": {
+      "fr": "tube",
+      "en": "tube"
+    },
+    "Blech": {
+      "fr": "tôle",
+      "en": "plate"
+    },
+    "vertikal tragende Wand": {
+      "fr": "Paroi porteuse verticalement",
+      "en": "Vertically loadbearing wall"
+    },
+    "aussteifende Wand": {
+      "fr": "Paroi de contreventement",
+      "en": "Bracing wall"
+    },
+    "vertikal tragende und aussteifende Wand": {
+      "fr": "Paroi porteuse verticalement et de contreventement",
+      "en": "Vertically loadbearing and bracing wall"
+    },
+    "Träger": {
+      "fr": "Poutre",
+      "en": "Beam"
+    },
+    "Stütze": {
+      "fr": "Poteau",
+      "en": "Column"
+    },
+    "Aussteifung, Stabilisierung Einzelstab": {
+      "fr": "Contreventement, stabilisation par barre isolée",
+      "en": "Bracing, stabilisation by a single member"
+    },
+    "Scheibenbildung Decke/Dach": {
+      "fr": "Effet de diaphragme plancher/toiture",
+      "en": "Diaphragm action floor/roof"
+    },
+    "Decke/Dach": {
+      "fr": "Plancher/toiture",
+      "en": "Floor/roof"
+    },
+    "Ausschnitt/Öffnung": {
+      "fr": "Trémie/ouverture",
+      "en": "Opening"
+    },
+    "Betonwand": {
+      "fr": "Paroi en béton",
+      "en": "Concrete wall"
+    },
+    "Betondecke": {
+      "fr": "Dalle en béton",
+      "en": "Concrete slab"
+    },
+    "vertikal wirkendes Auflager": {
+      "fr": "Appui à action verticale",
+      "en": "Vertically acting support"
+    },
+    "horizontal wirkendes Auflager": {
+      "fr": "Appui à action horizontale",
+      "en": "Horizontally acting support"
+    },
+    "vertikal und horizontal wirkendes Auflager": {
+      "fr": "Appui à action verticale et horizontale",
+      "en": "Vertically and horizontally acting support"
+    },
+    "Abfangung Linienlast von oben": {
+      "fr": "Reprise d’une charge linéaire venant du haut",
+      "en": "Transfer of a line load from above"
+    },
+    "Abfangung Punktlast von oben": {
+      "fr": "Reprise d’une charge ponctuelle venant du haut",
+      "en": "Transfer of a point load from above"
+    },
+    "Grösste Kraft in einem Verbindungsmittel": {
+      "fr": "Force la plus grande dans un moyen d’assemblage",
+      "en": "Largest force in a fastener"
+    },
+    "$n_\"quer\" = n_\"tot\" \\/ n$, aufgerundet.": {
+      "fr": "$n_\"quer\" = n_\"tot\" \\/ n$, arrondi vers le haut.",
+      "en": "$n_\"quer\" = n_\"tot\" \\/ n$, rounded up."
+    },
+    "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.": {
+      "fr": "1) Surface d’application 50 × 50 mm ; la charge concentrée ne doit pas être combinée avec la charge répartie. Pour les surfaces d’entrepôts équipées d’étagères ou les surfaces accessibles aux engins de levage, elle sera fixée en fonction des spécificités du projet. 2) À fixer en fonction des spécificités du projet (SIA 261, chiffre 8.2.2), en tenant compte d’un éventuel effet dynamique, et à consigner dans la convention d’utilisation ainsi que dans la base du projet. 3) La charge concentrée et la charge répartie agissent simultanément. 4) Deux charges concentrées de moitié chacune, distantes de 1.8 m, sur des surfaces d’application de 200 × 200 mm. 5) Selon leur utilisation, les toits accessibles aux personnes et aux véhicules seront considérés comme des surfaces des catégories A à G.",
+      "en": "1) Contact surface 50 × 50 mm; the concentrated load need not be combined with the distributed load. For storage areas fitted with racking, or areas travelled by lifting equipment, it is to be fixed for the project. 2) To be fixed for the project (SIA 261, clause 8.2.2), taking any dynamic effect into account, and to be recorded in the service criteria agreement and in the basis of design. 3) The concentrated load and the distributed load act simultaneously. 4) Two concentrated loads of half each, 1.8 m apart, on contact surfaces of 200 × 200 mm. 5) Depending on their use, roofs accessible to people and to vehicles are to be treated as areas of categories A to G."
+    },
+    "Abgleiten des Schnees": {
+      "fr": "Glissement de la neige",
+      "en": "Sliding of the snow"
+    },
+    "Abstand": {
+      "fr": "Espacement",
+      "en": "Spacing"
+    },
+    "Abstand der Verbindungsmittel untereinander in Faserrichtung": {
+      "fr": "Espacement des moyens d’assemblage dans le sens du fil",
+      "en": "Spacing of the fasteners parallel to the grain"
+    },
+    "Anschlüsse der Ausfachungsstäbe mit grosser Biegesteifigkeit, bei vereinfachter Fachwerkberechnung nach 5.3.6.1.2.": {
+      "fr": "Assemblages des barres de remplissage à grande rigidité flexionnelle, pour un calcul simplifié du treillis selon 5.3.6.1.2.",
+      "en": "Connections of the infill members with a high bending stiffness, under the simplified truss calculation of 5.3.6.1.2."
+    },
+    "Anzahl der in Faserrichtung des Holzes hintereinander angeordneten Verbindungsmittel": {
+      "fr": "Nombre de moyens d’assemblage disposés l’un derrière l’autre dans le sens du fil",
+      "en": "Number of fasteners in a row parallel to the grain"
+    },
+    "Anzahl Scherfugen": {
+      "fr": "Nombre de sections cisaillées",
+      "en": "Number of shear planes"
+    },
+    "Anzahl Verbinder": {
+      "fr": "Nombre de moyens d’assemblage",
+      "en": "Number of fasteners"
+    },
+    "Anzahl Verbindungsmittel": {
+      "fr": "Nombre de moyens d’assemblage",
+      "en": "Number of fasteners"
+    },
+    "Anzahl Verbindungsmittel quer zur Faserrichtung": {
+      "fr": "Nombre de moyens d’assemblage perpendiculairement au fil",
+      "en": "Number of fasteners across the grain"
+    },
+    "Art der Nutzfläche": {
+      "fr": "Genre de surface utile",
+      "en": "Type of usable area"
+    },
+    "Auflast": {
+      "fr": "Poids propre non-structural",
+      "en": "Non-structural self-weight"
+    },
+    "Auflast (Flächenlast)": {
+      "fr": "Poids propre non-structural (charge surfacique)",
+      "en": "Non-structural self-weight (area load)"
+    },
+    "Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen.": {
+      "fr": "Surface d’application 50 × 50 mm ; la charge concentrée ne doit pas être combinée avec la charge répartie. Pour les surfaces d’entrepôts équipées d’étagères ou les surfaces accessibles aux engins de levage, elle sera fixée en fonction des spécificités du projet.",
+      "en": "Contact surface 50 × 50 mm; the concentrated load need not be combined with the distributed load. For storage areas fitted with racking, or areas travelled by lifting equipment, it is to be fixed for the project."
+    },
+    "Balkone": {
+      "fr": "Balcons",
+      "en": "Balconies"
+    },
+    "Bauteil": {
+      "fr": "Pièce",
+      "en": "Member"
+    },
+    "Bauteil / Scherfuge": {
+      "fr": "Pièce / section cisaillée",
+      "en": "Member / shear plane"
+    },
+    "Bauteil 1": {
+      "fr": "Pièce 1",
+      "en": "Member 1"
+    },
+    "Bauteil 2": {
+      "fr": "Pièce 2",
+      "en": "Member 2"
+    },
+    "Bauteil 3": {
+      "fr": "Pièce 3",
+      "en": "Member 3"
+    },
+    "Bauteil 4": {
+      "fr": "Pièce 4",
+      "en": "Member 4"
+    },
+    "Bauteil 5": {
+      "fr": "Pièce 5",
+      "en": "Member 5"
+    },
+    "Bauteil 6": {
+      "fr": "Pièce 6",
+      "en": "Member 6"
+    },
+    "Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.": {
+      "fr": "Selon leur utilisation, les toits accessibles aux personnes et aux véhicules seront considérés comme des surfaces des catégories A à G.",
+      "en": "Depending on their use, roofs accessible to people and to vehicles are to be treated as areas of categories A to G."
+    },
+    "Bei 'Ja' ist die Schneeanhäufung nach SIA 261, Figur 5 zusätzlich zu berücksichtigen.": {
+      "fr": "Avec «Ja», la congère selon SIA 261, figure 5 doit être prise en compte en plus.",
+      "en": "With ’Ja’, the snow drift to SIA 261, figure 5 must also be considered."
+    },
+    "Bei mehrschnittigen Stahl-Holz-Verbindungen wird die vorhandene Anzahl Scherfugen mit dem zugehörigen Hilfswert berücksichtigt: $p dot k_beta = p_A dot k_(beta,1) + p_B dot k_(beta,2)$.": {
+      "fr": "Dans les assemblages acier — bois à sections multiples, chaque section cisaillée est prise en compte avec son facteur auxiliaire : $p dot k_beta = p_A dot k_(beta,1) + p_B dot k_(beta,2)$.",
+      "en": "In multiple-shear steel-to-timber connections each shear plane is taken with its own auxiliary factor: $p dot k_beta = p_A dot k_(beta,1) + p_B dot k_(beta,2)$."
+    },
+    "Bei unterschiedlichen Winkeln ist $k_\"red\"$ für alle Holzteile einzeln zu bestimmen und der kleinste Wert einzusetzen.": {
+      "fr": "Si les angles diffèrent, $k_\"red\"$ est déterminé séparément pour chaque pièce en bois et la plus petite valeur est retenue.",
+      "en": "Where the angles differ, $k_\"red\"$ is determined for each timber member and the smallest value is used."
+    },
+    "Beispiel": {
+      "fr": "Exemples",
+      "en": "Examples"
+    },
+    "Beiwert der Tragwiderstandsgleichung": {
+      "fr": "Coefficient de l’équation de résistance",
+      "en": "Coefficient of the resistance equation"
+    },
+    "Bezeichnung": {
+      "fr": "Désignation",
+      "en": "Designation"
+    },
+    "Bezugsfläche": {
+      "fr": "Surface de référence",
+      "en": "Reference area"
+    },
+    "Bezugshöhe": {
+      "fr": "Altitude de référence",
+      "en": "Reference altitude"
+    },
+    "Blatt": {
+      "fr": "Assemblage à mi-bois",
+      "en": "Lap joint"
+    },
+    "Bodenrauigkeit": {
+      "fr": "Exposant de la rugosité du sol",
+      "en": "Ground roughness exponent"
+    },
+    "Bolzen": {
+      "fr": "Boulon",
+      "en": "Bolt"
+    },
+    "Breite": {
+      "fr": "Largeur",
+      "en": "Width"
+    },
+    "Büroflächen": {
+      "fr": "Bureaux",
+      "en": "Office areas"
+    },
+    "Einheit": {
+      "fr": "Unité",
+      "en": "Unit"
+    },
+    "Name": {
+      "fr": "Nom",
+      "en": "Name"
+    },
+    "Symbol": {
+      "fr": "Symbole",
+      "en": "Symbol"
+    },
+    "Wert": {
+      "fr": "Valeur",
+      "en": "Value"
+    },
+    "char. Fliessmoment des Stabdübels": {
+      "fr": "Valeur caractéristique du moment d’écoulement plastique de la broche",
+      "en": "Characteristic yield moment of the dowel"
+    },
+    "char. Zugfestigkeit des Stabdübels": {
+      "fr": "Valeur caractéristique de la résistance à la traction de la broche",
+      "en": "Characteristic tensile strength of the dowel"
+    },
+    "Charakteristische Schneelast": {
+      "fr": "Charge de neige caractéristique",
+      "en": "Characteristic snow load"
+    },
+    "Charakteristische Schneelast der Schneeanhäufung": {
+      "fr": "Charge de neige caractéristique de la congère",
+      "en": "Characteristic snow load of the drift"
+    },
+    "Charakteristische Schneelast, Lastmodell 2": {
+      "fr": "Charge de neige caractéristique, modèle de charge 2",
+      "en": "Characteristic snow load, load model 2"
+    },
+    "Charakteristischer Wert auf horizontalem Gelände": {
+      "fr": "Valeur caractéristique sur un terrain horizontal",
+      "en": "Characteristic value on horizontal ground"
+    },
+    "Charakteristischer Wert der Schneelast auf horizontalem Gelände": {
+      "fr": "Valeur caractéristique de la charge de neige sur un terrain horizontal",
+      "en": "Characteristic value of the snow load on horizontal ground"
+    },
+    "Dach E": {
+      "fr": "Toiture E",
+      "en": "Roof E"
+    },
+    "Dach F": {
+      "fr": "Toiture F",
+      "en": "Roof F"
+    },
+    "Dach G": {
+      "fr": "Toiture G",
+      "en": "Roof G"
+    },
+    "Dach H": {
+      "fr": "Toiture H",
+      "en": "Roof H"
+    },
+    "Dachform / Lastmodell": {
+      "fr": "Forme de la toiture / modèle de charge",
+      "en": "Roof shape / load model"
+    },
+    "Dachformbeiwert": {
+      "fr": "Coefficient de forme de toiture",
+      "en": "Roof shape coefficient"
+    },
+    "Dachformbeiwert 2": {
+      "fr": "Coefficient de forme de toiture 2",
+      "en": "Roof shape coefficient 2"
+    },
+    "Dachformbeiwert der Schneeanhäufung": {
+      "fr": "Coefficient de forme de toiture de la congère",
+      "en": "Roof shape coefficient of the snow drift"
+    },
+    "Dachformbeiwert für die Schneeanhäufung in der Kehle eines Sheddachs (SIA 261, Figur 2 und Figur 3).": {
+      "fr": "Coefficient de forme de toiture de la congère dans la noue d’une toiture en sheds (SIA 261, figures 2 et 3).",
+      "en": "Roof shape coefficient of the snow drift in the valley of a sawtooth roof (SIA 261, Figures 2 and 3)."
+    },
+    "Dachneigung 1": {
+      "fr": "Inclinaison de la toiture 1",
+      "en": "Roof pitch 1"
+    },
+    "Dachneigung 2": {
+      "fr": "Inclinaison de la toiture 2",
+      "en": "Roof pitch 2"
+    },
+    "Dicke": {
+      "fr": "Épaisseur",
+      "en": "Thickness"
+    },
+    "Die Geländekategorie bestimmt die Gradientenhöhe und die Bodenrauigkeit des Windprofils.": {
+      "fr": "La catégorie de terrain détermine la hauteur du gradient et l’exposant de la rugosité du sol du profil du vent.",
+      "en": "The terrain category fixes the gradient height and the ground roughness exponent of the wind profile."
+    },
+    "Die Verbindung trägt keine Feuchteklasse; eta_w nach SIA 265 Tabelle 4 ist damit nicht bestimmt. Wählen Sie eine Feuchteklasse, oder geben Sie den Bauteilen Positionen, die eine tragen.": {
+      "fr": "L’assemblage ne porte pas de classe d’humidité ; eta_w selon SIA 265 tableau 4 n’est donc pas déterminé. Choisissez une classe d’humidité, ou donnez aux pièces des positions qui en portent une.",
+      "en": "The connection carries no moisture class, so eta_w by SIA 265 table 4 is not determined. Choose a moisture class, or give the members positions that carry one."
+    },
+    "Dist.": {
+      "fr": "Dist.",
+      "en": "Dist."
+    },
+    "Drehpunkt (festgelegt)": {
+      "fr": "Centre de rotation (fixé)",
+      "en": "Rotation centre (fixed)"
+    },
+    "Drehpunkt (Schwerpunkt der Verbindungsmittel)": {
+      "fr": "Centre de rotation (centre de gravité des moyens d’assemblage)",
+      "en": "Rotation centre (centroid of the fasteners)"
+    },
+    "Drehpunkt, x": {
+      "fr": "Centre de rotation, x",
+      "en": "Rotation centre, x"
+    },
+    "Drehpunkt, z": {
+      "fr": "Centre de rotation, z",
+      "en": "Rotation centre, z"
+    },
+    "Durchmesser": {
+      "fr": "Diamètre",
+      "en": "Diameter"
+    },
+    "Dynamischer Faktor": {
+      "fr": "Facteur dynamique",
+      "en": "Dynamic factor"
+    },
+    "dynamischer Faktor": {
+      "fr": "facteur dynamique",
+      "en": "dynamic factor"
+    },
+    "Dächer mit Zugang nur für Unterhaltsarbeiten": {
+      "fr": "Toits uniquement accessibles pour des travaux d’entretien",
+      "en": "Roofs with access only for maintenance work"
+    },
+    "Dübel besonderer Bauart": {
+      "fr": "Crampons et goujons annulaires",
+      "en": "Toothed-plate and ring connector"
+    },
+    "Ebene": {
+      "fr": "Couche",
+      "en": "Layer"
+    },
+    "Eigen- und Auflasten": {
+      "fr": "Poids propres de la structure porteuse et des éléments non-structuraux",
+      "en": "Dead load and non-structural self-weight"
+    },
+    "Eigengewicht": {
+      "fr": "Poids propre",
+      "en": "Self-weight"
+    },
+    "Eigengewicht (Flächenlast)": {
+      "fr": "Poids propre (charge surfacique)",
+      "en": "Self-weight (area load)"
+    },
+    "Ein Bauteil trägt keine auswertbare Festigkeitsklasse; der Tragwiderstand kann nicht berechnet werden.": {
+      "fr": "Une pièce ne porte pas de classe de résistance exploitable ; la résistance ne peut pas être calculée.",
+      "en": "A member carries no usable strength class; the resistance cannot be calculated."
+    },
+    "eingeklebte Gewindestange": {
+      "fr": "Tige filetée collée",
+      "en": "Glued-in threaded rod"
+    },
+    "Einzellast": {
+      "fr": "Charge concentrée",
+      "en": "Concentrated load"
+    },
+    "Einzellast und Flächenlast wirken gleichzeitig.": {
+      "fr": "La charge concentrée et la charge répartie agissent simultanément.",
+      "en": "The concentrated load and the distributed load act simultaneously."
+    },
+    "Einzellast und Flächenlast wirken gleichzeitig. Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm.": {
+      "fr": "La charge concentrée et la charge répartie agissent simultanément. Deux charges concentrées de moitié chacune, distantes de 1.8 m, sur des surfaces d’application de 200 × 200 mm.",
+      "en": "The concentrated load and the distributed load act simultaneously. Two concentrated loads of half each, 1.8 m apart, on contact surfaces of 200 × 200 mm."
+    },
+    "erforderlich": {
+      "fr": "requis",
+      "en": "required"
+    },
+    "Expositionsbeiwert": {
+      "fr": "Coefficient d’exposition",
+      "en": "Exposure coefficient"
+    },
+    "Festigkeitsklasse": {
+      "fr": "Classe de résistance",
+      "en": "Strength class"
+    },
+    "Fliessmoment": {
+      "fr": "Moment d’écoulement plastique",
+      "en": "Yield moment"
+    },
+    "Flächen mit fester Bestuhlung": {
+      "fr": "Surfaces avec sièges fixes",
+      "en": "Areas with fixed seating"
+    },
+    "Flächen mit Tischen und Bestuhlung": {
+      "fr": "Surfaces avec tables et chaises",
+      "en": "Areas with tables and chairs"
+    },
+    "Flächenlast": {
+      "fr": "Charge répartie",
+      "en": "Distributed load"
+    },
+    "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen": {
+      "fr": "Surfaces librement accessibles, surfaces de sport et de jeu, surfaces pouvant accueillir des rassemblements de personnes",
+      "en": "Freely accessible areas, sports and play areas, areas where people may congregate"
+    },
+    "Gebäude Geometrie": {
+      "fr": "Géométrie du bâtiment",
+      "en": "Building geometry"
+    },
+    "Gebäudebreite": {
+      "fr": "Largeur du bâtiment",
+      "en": "Building width"
+    },
+    "Gebäudehöhe": {
+      "fr": "Hauteur du bâtiment",
+      "en": "Building height"
+    },
+    "Gebäudelänge": {
+      "fr": "Longueur du bâtiment",
+      "en": "Building length"
+    },
+    "Geländekategorie": {
+      "fr": "Catégorie de terrain",
+      "en": "Terrain category"
+    },
+    "Gewicht": {
+      "fr": "Poids",
+      "en": "Weight"
+    },
+    "gleichmässig": {
+      "fr": "uniforme",
+      "en": "uniform"
+    },
+    "Gleichung (86), jedoch $k_\"red\" <= 1.0$. Bei einem einzelnen Verbindungsmittel in Faserrichtung ist $k_\"red\" = 1.0$ (Tabelle 21).": {
+      "fr": "Équation (86), avec $k_\"red\" <= 1.0$. Pour un moyen d’assemblage seul dans le sens du fil, $k_\"red\" = 1.0$ (tableau 21).",
+      "en": "Equation (86), with $k_\"red\" <= 1.0$. For a single fastener in the grain direction, $k_\"red\" = 1.0$ (table 21)."
+    },
+    "Gleichung (88). Die Wurzel ergibt N; der Wert ist in kN angegeben. Bei Holz-Holz-Verbindungen ist die Lochleibungsfestigkeit des Seitenholzes 1 einzusetzen.": {
+      "fr": "Équation (88). La racine donne des N ; la valeur est exprimée en kN. Pour les assemblages bois — bois, c’est la résistance à la pression latérale du bois latéral 1 qui est introduite.",
+      "en": "Equation (88). The root gives N; the value is stated in kN. For timber-to-timber connections the embedment strength of side member 1 is used."
+    },
+    "Globale Windkraft": {
+      "fr": "Force globale du vent",
+      "en": "Global wind force"
+    },
+    "Globale Windkräfte": {
+      "fr": "Forces globales du vent",
+      "en": "Global wind forces"
+    },
+    "Gradientenhöhe": {
+      "fr": "Hauteur du gradient",
+      "en": "Gradient height"
+    },
+    "Grosse Höhensprünge": {
+      "fr": "Grandes différences de niveau",
+      "en": "Large level differences"
+    },
+    "Hilfswert $k_beta$": {
+      "fr": "Facteur auxiliaire $k_beta$",
+      "en": "Auxiliary factor $k_beta$"
+    },
+    "Hilfswert zur Scherfuge": {
+      "fr": "Facteur auxiliaire par section cisaillée",
+      "en": "Auxiliary factor per shear plane"
+    },
+    "Holz-Beton": {
+      "fr": "Bois — béton",
+      "en": "Timber-to-concrete"
+    },
+    "Holz-Holz einschnittig": {
+      "fr": "Bois — bois à simple section",
+      "en": "Timber-to-timber, single shear"
+    },
+    "Holz-Holz mehrschnittig": {
+      "fr": "Bois — bois à sections multiples",
+      "en": "Timber-to-timber, multiple shear"
+    },
+    "Holz-Holz zweischnittig": {
+      "fr": "Bois — bois à double section",
+      "en": "Timber-to-timber, double shear"
+    },
+    "Holzart": {
+      "fr": "Essence",
+      "en": "Species"
+    },
+    "Holzdicke": {
+      "fr": "Épaisseur de bois",
+      "en": "Timber thickness"
+    },
+    "Höhe des Standorts über Meer.": {
+      "fr": "Altitude du lieu au-dessus du niveau de la mer.",
+      "en": "Altitude of the site above sea level."
+    },
+    "Höhe ü. NN": {
+      "fr": "Altitude",
+      "en": "Altitude above sea level"
+    },
+    "Höhe über Boden": {
+      "fr": "Hauteur au-dessus du sol",
+      "en": "Height above ground"
+    },
+    "Höhe über Boden, für die der Staudruck bestimmt wird; die Norm setzt sie mindestens zu 5 m an (10 m in Geländekategorie IV).": {
+      "fr": "Hauteur au-dessus du sol pour laquelle la pression dynamique est déterminée ; la norme la fixe au minimum à 5 m (10 m en catégorie de terrain IV).",
+      "en": "The height above ground at which the dynamic pressure is determined; the norm sets it to at least 5 m (10 m in terrain category IV)."
+    },
+    "Höhenzuschlag auf die Höhe ü. NN nach SIA 261, Anhang D.": {
+      "fr": "Majoration ajoutée à l’altitude du lieu selon SIA 261, annexe D.",
+      "en": "Height increment added to the site’s altitude to SIA 261, Annex D."
+    },
+    "II Seeufer": {
+      "fr": "II rive lacustre",
+      "en": "II lake shore"
+    },
+    "IIa grosse Ebene": {
+      "fr": "IIa grande plaine",
+      "en": "IIa large plain"
+    },
+    "III Ortschaften, freies Feld": {
+      "fr": "III localité, milieu rural",
+      "en": "III built-up area, open country"
+    },
+    "in Faserrichtung": {
+      "fr": "dans le sens du fil",
+      "en": "parallel to the grain"
+    },
+    "Ist das Abgleiten behindert oder erschwert, wird der Dachformbeiwert mit mindestens 0.8 angesetzt (SIA 261, Ziffer 5.3.4).": {
+      "fr": "Si le glissement est empêché ou gêné, le coefficient de forme de toiture est pris au minimum à 0.8 (SIA 261, chiffre 5.3.4).",
+      "en": "Where sliding is hindered or impeded, the roof shape coefficient is taken as at least 0.8 (SIA 261, clause 5.3.4)."
+    },
+    "IV grossflächige Stadtgebiete": {
+      "fr": "IV zone urbaine étendue",
+      "en": "IV extended urban area"
+    },
+    "Kategorie": {
+      "fr": "Catégorie",
+      "en": "Category"
+    },
+    "Klammer": {
+      "fr": "Agrafe",
+      "en": "Staple"
+    },
+    "Korrektur Wert": {
+      "fr": "Valeur de correction",
+      "en": "Correction value"
+    },
+    "Kraftrichtungen": {
+      "fr": "Directions des efforts",
+      "en": "Force directions"
+    },
+    "Lage der Verbindungsmittel": {
+      "fr": "Position des moyens d’assemblage",
+      "en": "Position of the fasteners"
+    },
+    "Lager- und Fabrikationsflächen": {
+      "fr": "Surfaces d’entreposage et de fabrication",
+      "en": "Storage and manufacturing areas"
+    },
+    "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen": {
+      "fr": "Entrepôts, bibliothèques et leurs accès, halles de fabrication",
+      "en": "Storage areas, libraries including their access ways, manufacturing halls"
+    },
+    "Last": {
+      "fr": "Charge",
+      "en": "Load"
+    },
+    "Last je Schicht = spez. Gewicht · Dicke · Breite / (Dist. · 100); der Faktor 100 rechnet kg in kN um. Flächenbezogene Materialien (kg/m²) sind mit Dicke = Breite = Dist. = 1 erfasst.": {
+      "fr": "Charge par couche = poids spécifique · épaisseur · largeur / (dist. · 100) ; le facteur 100 convertit les kg en kN. Les matériaux surfaciques (kg/m²) sont saisis avec épaisseur = largeur = dist. = 1.",
+      "en": "Load per layer = specific weight · thickness · width / (dist. · 100); the factor 100 converts kg into kN. Area-based materials (kg/m²) are entered with thickness = width = dist. = 1."
+    },
+    "Last je Schicht = Wichte · Dicke · Breite / Abstand; eine Flächenlast ohne die Dicke. Gewichte in kg werden mit g = 10 m/s² in kN umgerechnet.": {
+      "fr": "Charge par couche = poids volumique · épaisseur · largeur / entraxe ; une charge surfacique sans l’épaisseur. Les poids en kg sont convertis en kN avec g = 10 m/s².",
+      "en": "Load per layer = unit weight · thickness · width / spacing; a load per surface without the thickness. Weights in kg are converted to kN with g = 10 m/s²."
+    },
+    "Lastmodell": {
+      "fr": "Modèle de charge",
+      "en": "Load model"
+    },
+    "Laubholz": {
+      "fr": "Feuillus",
+      "en": "Hardwood"
+    },
+    "Lochleibungsfestigkeit": {
+      "fr": "Résistance à la pression latérale",
+      "en": "Embedment strength"
+    },
+    "Lochleibungsfestigkeit Bauteil 1": {
+      "fr": "Résistance à la pression latérale, pièce 1",
+      "en": "Embedment strength, member 1"
+    },
+    "Lochleibungsfestigkeit Bauteil 2": {
+      "fr": "Résistance à la pression latérale, pièce 2",
+      "en": "Embedment strength, member 2"
+    },
+    "Lochleibungsfestigkeit Bauteil 3": {
+      "fr": "Résistance à la pression latérale, pièce 3",
+      "en": "Embedment strength, member 3"
+    },
+    "Lochleibungsfestigkeit Bauteil 4": {
+      "fr": "Résistance à la pression latérale, pièce 4",
+      "en": "Embedment strength, member 4"
+    },
+    "Lochleibungsfestigkeit Bauteil 5": {
+      "fr": "Résistance à la pression latérale, pièce 5",
+      "en": "Embedment strength, member 5"
+    },
+    "Lochleibungsfestigkeit Bauteil 6": {
+      "fr": "Résistance à la pression latérale, pièce 6",
+      "en": "Embedment strength, member 6"
+    },
+    "Lochleibungsfestigkeit parallel zur Faser": {
+      "fr": "Résistance à la pression latérale parallèle au fil",
+      "en": "Embedment strength parallel to the grain"
+    },
+    "Lochleibungsfestigkeit rechtwinklig zur Faser": {
+      "fr": "Résistance à la pression latérale perpendiculaire au fil",
+      "en": "Embedment strength perpendicular to the grain"
+    },
+    "Lokale Windkraft": {
+      "fr": "Force locale du vent",
+      "en": "Local wind force"
+    },
+    "Lokale Windkräfte": {
+      "fr": "Forces locales du vent",
+      "en": "Local wind forces"
+    },
+    "Massgebend ist der kleinste Hilfswert der beteiligten Holzteile (Tabellen 45 und 46, zwischen den Eckwerten linear interpoliert).": {
+      "fr": "Le plus petit facteur auxiliaire des pièces en bois est déterminant (tableaux 45 et 46, interpolé linéairement entre les valeurs d’angle).",
+      "en": "The smallest auxiliary factor of the timber members governs (tables 45 and 46, interpolated linearly between the corner values)."
+    },
+    "Massgebender Reduktionsbeiwert": {
+      "fr": "Coefficient de réduction déterminant",
+      "en": "Governing reduction factor"
+    },
+    "Material": {
+      "fr": "Matériau",
+      "en": "Material"
+    },
+    "maximale globale Windkraft": {
+      "fr": "force globale du vent maximale",
+      "en": "maximum global wind force"
+    },
+    "min. Länge der Verbindung": {
+      "fr": "Longueur minimale de l’assemblage",
+      "en": "Minimum length of the connection"
+    },
+    "Minimale Abstände": {
+      "fr": "Espacements minimaux",
+      "en": "Minimum spacings"
+    },
+    "Minimale Abstände für Stabdübel": {
+      "fr": "Espacements minimaux des broches",
+      "en": "Minimum spacings for dowels"
+    },
+    "Holzdicken $t$ bei Nagelung ohne Vorbohrung": {
+      "fr": "Épaisseurs du bois $t$, clouage sans préperçage",
+      "en": "Timber thicknesses $t$ for nailing without predrilling"
+    },
+    "Minimale Abstände bei Nagelung ohne Vorbohrung": {
+      "fr": "Espacements minimaux des clous sans préperçage",
+      "en": "Minimum spacings for nailing without predrilling"
+    },
+    "Holzdicken $t$ bei Nagelung mit Vorbohrung": {
+      "fr": "Épaisseurs $t$ du bois, clouage avec préperçage",
+      "en": "Timber thicknesses $t$ for nailing with predrilling"
+    },
+    "Minimale Abstände bei Nagelung mit Vorbohrung": {
+      "fr": "Espacements minimaux des clous avec préperçage",
+      "en": "Minimum spacings for nailing with predrilling"
+    },
+    "Holzdicken $t_1$ und $t_2$ bei Schraubenverbindungen ohne Vorbohrung": {
+      "fr": "Épaisseurs de bois $t_1$ et $t_2$ pour des assemblages vissés sans préperçage",
+      "en": "Timber thicknesses $t_1$ and $t_2$ for screwed connections without predrilling"
+    },
+    "Holzdicken $t_1$ bei Schraubenverbindungen mit Vorbohrung (gültig für beide Schraubentypen)": {
+      "fr": "Épaisseur de bois $t_1$ pour des assemblages vissés avec préperçage (valable pour les deux types de vis)",
+      "en": "Timber thickness $t_1$ for screwed connections with predrilling (valid for both types of screw)"
+    },
+    "Minimale Abstände bei Schraubenverbindungen ohne Vorbohrung mit $d_1 \\/ d <= 0.75$": {
+      "fr": "Espacements minimaux pour les assemblages vissés sans préperçage, avec $d_1 \\/ d <= 0.75$",
+      "en": "Minimum spacings for screwed connections without predrilling, with $d_1 \\/ d <= 0.75$"
+    },
+    "Minimale Abstände bei Schraubenverbindungen mit Vorbohrung mit $d_1 \\/ d <= 0.75$": {
+      "fr": "Espacements minimaux pour les assemblages vissés avec préperçage, avec $d_1 \\/ d <= 0.75$",
+      "en": "Minimum spacings for screwed connections with predrilling, with $d_1 \\/ d <= 0.75$"
+    },
+    "Mindestabstände für in Schaftrichtung beanspruchte Schrauben bei Holzdicken $t >= 12 d$": {
+      "fr": "Espacements minimaux de vis sollicitées dans leur axe pour des épaisseurs de bois $t >= 12 d$",
+      "en": "Minimum spacings for screws loaded along their axis, in timber thicknesses $t >= 12 d$"
+    },
+    "Minimale Ringdübelabstände": {
+      "fr": "Espacements minimaux des anneaux",
+      "en": "Minimum spacings of split rings"
+    },
+    "Baustoff": {
+      "fr": "Matériau",
+      "en": "Material"
+    },
+    "$parallel$ zur Faserrichtung": {
+      "fr": "$parallel$ au fil",
+      "en": "$parallel$ to the grain"
+    },
+    "$perp$ zur Faserrichtung": {
+      "fr": "$perp$ au fil",
+      "en": "$perp$ to the grain"
+    },
+    "$perp$ zur Faser": {
+      "fr": "$perp$ au fil",
+      "en": "$perp$ to the grain"
+    },
+    "erforderliche Holzdicke $t_\"erf\"$": {
+      "fr": "Épaisseur requise $t_\"erf\"$",
+      "en": "Required timber thickness $t_\"erf\"$"
+    },
+    "Mindestholzdicke $t$": {
+      "fr": "Épaisseur minimale $t$",
+      "en": "Minimum timber thickness $t$"
+    },
+    "erforderliche Holzdicke $t_(1,\"erf\")$": {
+      "fr": "Épaisseur requise $t_(1,\"erf\")$",
+      "en": "Required timber thickness $t_(1,\"erf\")$"
+    },
+    "Mindestholzdicken $t_1$ und $t_2$": {
+      "fr": "Épaisseurs minimales $t_1$ et $t_2$",
+      "en": "Minimum timber thicknesses $t_1$ and $t_2$"
+    },
+    "Mindestholzdicken $t_1$": {
+      "fr": "Épaisseurs minimales $t_1$",
+      "en": "Minimum timber thicknesses $t_1$"
+    },
+    "Vollholz, keilgezinktes Vollholz, Balkenschichtholz, Brettschichtholz": {
+      "fr": "Bois massif, bois massif à entures multiples, bois massif reconstitué, bois lamellé-collé",
+      "en": "Solid timber, finger-jointed solid timber, glued solid timber, glued laminated timber"
+    },
+    "von Nagel zu Nagel": {
+      "fr": "de clou à clou",
+      "en": "between nails"
+    },
+    "von Schraube zu Schraube": {
+      "fr": "de vis à vis",
+      "en": "between screws"
+    },
+    "von Dübel zu Dübel": {
+      "fr": "d’anneau à anneau",
+      "en": "between rings"
+    },
+    "Minimaler Schraubenabstand in einer Ebene parallel zur Faserrichtung $a_1$": {
+      "fr": "Espacement minimal entre vis dans un plan parallèle au fil $a_1$",
+      "en": "Minimum spacing of the screws in a plane parallel to the grain $a_1$"
+    },
+    "Minimaler Schraubenabstand rechtwinklig zu einer Ebene parallel zur Faserrichtung $a_2$": {
+      "fr": "Espacement minimal entre vis perpendiculairement à un plan parallèle au fil $a_2$",
+      "en": "Minimum spacing of the screws perpendicular to a plane parallel to the grain $a_2$"
+    },
+    "Minimaler Endabstand des Schwerpunkts des Gewindeteils im betrachteten Holz $a_(1,\"CG\")$": {
+      "fr": "Distance au bord minimale parallèle au fil du centre de gravité de la partie filetée dans la pièce considérée $a_(1,\"CG\")$",
+      "en": "Minimum end distance of the centre of gravity of the threaded part in the member considered $a_(1,\"CG\")$"
+    },
+    "Minimaler Randabstand des Schwerpunkts des Gewindeteils im betrachteten Holz $a_(2,\"CG\")$": {
+      "fr": "Distance au bord minimale perpendiculaire au fil du centre de gravité de la partie filetée dans la pièce considérée $a_(2,\"CG\")$",
+      "en": "Minimum edge distance of the centre of gravity of the threaded part in the member considered $a_(2,\"CG\")$"
+    },
+    "Holzwerkstoffe siehe SIA 265/1.": {
+      "fr": "Matériaux dérivés du bois, voir SIA 265/1.",
+      "en": "Wood-based panels, see SIA 265/1."
+    },
+    "Unter $t_\"erf\"$, bis auf $7 d$, wird $R_d$ nach Tabelle 26 proportional zur Holzdicke abgemindert; die Mindestholzdicke darf nicht unterschritten werden.": {
+      "fr": "En dessous de $t_\"erf\"$, jusqu’à $7 d$, $R_d$ selon le tableau 26 est réduit proportionnellement à l’épaisseur du bois ; il n’est pas admis de descendre en dessous de l’épaisseur minimale.",
+      "en": "Below $t_\"erf\"$, down to $7 d$, $R_d$ by table 26 is reduced in proportion to the timber thickness; the minimum thickness may not be undercut."
+    },
+    "Der Abstand vom unbeanspruchten Rand darf auf $5 d$ reduziert werden, wenn die Mindestholzdicke gleichzeitig auf $14 d$ erhöht wird.": {
+      "fr": "La distance au bord non chargé peut être réduite à $5 d$ si l’épaisseur minimale du bois est portée dans le même temps à $14 d$.",
+      "en": "The distance from the unloaded edge may be reduced to $5 d$ if the minimum timber thickness is raised to $14 d$ at the same time."
+    },
+    "Unter $t_\"erf\"$, bis auf die Mindestholzdicke, wird $R_d$ nach Tabelle 31 proportional zur Holzdicke abgemindert.": {
+      "fr": "En dessous de $t_\"erf\"$, jusqu’à l’épaisseur minimale, $R_d$ selon le tableau 31 est réduit proportionnellement à l’épaisseur du bois.",
+      "en": "Below $t_\"erf\"$, down to the minimum thickness, $R_d$ by table 31 is reduced in proportion to the timber thickness."
+    },
+    "Unter den erforderlichen Holzdicken wird $R_d$ nach Tabelle 35 proportional abgemindert; die Mindestholzdicken dürfen nicht unterschritten werden.": {
+      "fr": "En dessous des épaisseurs requises, $R_d$ selon le tableau 35 est réduit proportionnellement ; il n’est pas admis de descendre en dessous des épaisseurs minimales.",
+      "en": "Below the required thicknesses, $R_d$ by table 35 is reduced proportionally; the minimum thicknesses may not be undercut."
+    },
+    "Unter den erforderlichen Holzdicken wird $R_d$ nach den Tabellen 34 und 35 proportional abgemindert; die Mindestholzdicken dürfen nicht unterschritten werden.": {
+      "fr": "En dessous des épaisseurs requises, $R_d$ selon les tableaux 34 et 35 est réduit proportionnellement ; il n’est pas admis de descendre en dessous des épaisseurs minimales.",
+      "en": "Below the required thicknesses, $R_d$ by tables 34 and 35 is reduced proportionally; the minimum thicknesses may not be undercut."
+    },
+    "Gültig für $rho_k <= 420$ kg/m³; für $rho_k > 420$ kg/m³ ist vorzubohren.": {
+      "fr": "Valable pour $rho_k <= 420$ kg/m³ ; pour $rho_k > 420$ kg/m³, il faut prépercer.",
+      "en": "Valid for $rho_k <= 420$ kg/m³; for $rho_k > 420$ kg/m³ predrilling is required."
+    },
+    "Der Abstand vom unbeanspruchten Rand darf auf $4 d$ reduziert werden, wenn die Mindestholzdicke gleichzeitig auf $14 d$ erhöht wird.": {
+      "fr": "La distance au bord non chargé peut être réduite à $4 d$ si l’épaisseur minimale du bois est portée dans le même temps à $14 d$.",
+      "en": "The distance from the unloaded edge may be reduced to $4 d$ if the minimum timber thickness is raised to $14 d$ at the same time."
+    },
+    "Bei Vorbohrung darf $a_2$ bis auf $3 d$ verringert werden, wenn $R_(\"ax\",d)$ nach Gleichung (103) mit $k_\"red\" = (a_2 \\/ (5 d))^0.35$ abgemindert wird.": {
+      "fr": "Avec préperçage, $a_2$ peut être réduit jusqu’à $3 d$ si $R_(\"ax\",d)$ selon l’équation (103) est réduit par $k_\"red\" = (a_2 \\/ (5 d))^0.35$.",
+      "en": "With predrilling, $a_2$ may be reduced down to $3 d$ if $R_(\"ax\",d)$ by equation (103) is reduced by $k_\"red\" = (a_2 \\/ (5 d))^0.35$."
+    },
+    "Für Bolzen gilt Tabelle 24 sinngemäss; der Abstand zwischen zwei Bolzen richtet sich auch nach der Grösse der Unterlagsscheibe (6.3.1.3).": {
+      "fr": "Pour les boulons, le tableau 24 s’applique par analogie ; l’espacement entre deux boulons dépend aussi de la taille de la rondelle (6.3.1.3).",
+      "en": "For bolts, table 24 applies by analogy; the spacing between two bolts also depends on the size of the washer (6.3.1.3)."
+    },
+    "Für Schrauben nach 6.5.1.3 ohne Vorbohrung mit $d_1 \\/ d > 0.75$ (6.5.2.3.3).": {
+      "fr": "Pour les vis selon 6.5.1.3 sans préperçage, avec $d_1 \\/ d > 0.75$ (6.5.2.3.3).",
+      "en": "For screws to 6.5.1.3 without predrilling, with $d_1 \\/ d > 0.75$ (6.5.2.3.3)."
+    },
+    "Für Holzschrauben mit geschnittenem Gewinde nach DIN 7998 (6.5.2.2) und für Schrauben nach 6.5.1.3 mit Vorbohrung und $d_1 \\/ d > 0.75$ (6.5.2.3.3).": {
+      "fr": "Pour les vis à bois à filetage taillé selon DIN 7998 (6.5.2.2) et pour les vis selon 6.5.1.3 avec préperçage et $d_1 \\/ d > 0.75$ (6.5.2.3.3).",
+      "en": "For wood screws with a cut thread to DIN 7998 (6.5.2.2), and for screws to 6.5.1.3 with predrilling and $d_1 \\/ d > 0.75$ (6.5.2.3.3)."
+    },
+    "$d$ ist der Aussendurchmesser des Ringdübels (6.8.3.1).": {
+      "fr": "$d$ est le diamètre extérieur de l’anneau (6.8.3.1).",
+      "en": "$d$ is the outer diameter of the split ring (6.8.3.1)."
+    },
+    "Tabelle": {
+      "fr": "tableau",
+      "en": "table"
+    },
+    "minimale globale Windkraft": {
+      "fr": "force globale du vent minimale",
+      "en": "minimum global wind force"
+    },
+    "Nachweis": {
+      "fr": "Vérification",
+      "en": "Check"
+    },
+    "Nadelholz": {
+      "fr": "Résineux",
+      "en": "Softwood"
+    },
+    "Nagel": {
+      "fr": "Clou",
+      "en": "Nail"
+    },
+    "Nicht begehbare Dächer": {
+      "fr": "Toitures non accessibles",
+      "en": "Roofs not accessible"
+    },
+    "Nicht begehbare Dächer 5)": {
+      "fr": "Toitures non accessibles 5)",
+      "en": "Roofs not accessible 5)"
+    },
+    "nicht vorgebohrt": {
+      "fr": "non prépercé",
+      "en": "not predrilled"
+    },
+    "Nr.": {
+      "fr": "N°",
+      "en": "No."
+    },
+    "Nutzfläche": {
+      "fr": "Surface utile",
+      "en": "Usable area"
+    },
+    "Nutzlast": {
+      "fr": "Charge utile",
+      "en": "Live load"
+    },
+    "Nutzlasten": {
+      "fr": "Charges utiles",
+      "en": "Live loads"
+    },
+    "Nutzungskategorie": {
+      "fr": "Catégorie de surface utile",
+      "en": "Usable area category"
+    },
+    "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t": {
+      "fr": "Surfaces de stationnement et surfaces accessibles aux véhicules de poids < 3.5 t",
+      "en": "Parking and traffic areas for vehicles under 3.5 t"
+    },
+    "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t": {
+      "fr": "Surfaces de stationnement et surfaces accessibles aux véhicules de 3.5 t à 16 t",
+      "en": "Parking and traffic areas for vehicles from 3.5 t to 16 t"
+    },
+    "Parkhäuser, Parkflächen, Einstellhallen": {
+      "fr": "Parkings à étages, surfaces de parc, garages",
+      "en": "Multi-storey car parks, parking areas, garages"
+    },
+    "Passbolzen": {
+      "fr": "Boulon ajusté",
+      "en": "Fitted bolt"
+    },
+    "Polares Flächenträgheitsmoment": {
+      "fr": "Moment d’inertie polaire",
+      "en": "Polar moment of inertia"
+    },
+    "Polares Flächenträgheitsmoment, Anteil x": {
+      "fr": "Moment d’inertie polaire, part x",
+      "en": "Polar moment of inertia, x part"
+    },
+    "Polares Flächenträgheitsmoment, Anteil z": {
+      "fr": "Moment d’inertie polaire, part z",
+      "en": "Polar moment of inertia, z part"
+    },
+    "Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten.": {
+      "fr": "À fixer en fonction des spécificités du projet (SIA 261, chiffre 8.2.2), en tenant compte d’un éventuel effet dynamique, et à consigner dans la convention d’utilisation ainsi que dans la base du projet.",
+      "en": "To be fixed for the project (SIA 261, clause 8.2.2), taking any dynamic effect into account, and to be recorded in the service criteria agreement and in the basis of design."
+    },
+    "rechtwinklig zur Faser": {
+      "fr": "perpendiculairement au fil",
+      "en": "perpendicular to the grain"
+    },
+    "senkrecht zur Faserrichtung": {
+      "fr": "perpendiculairement au fil",
+      "en": "perpendicular to the grain"
+    },
+    "Reduktionsbeiwert": {
+      "fr": "Coefficient de réduction",
+      "en": "Reduction factor"
+    },
+    "Reduktionsbeiwert Bauteil 1": {
+      "fr": "Coefficient de réduction, pièce 1",
+      "en": "Reduction factor, member 1"
+    },
+    "Reduktionsbeiwert Bauteil 2": {
+      "fr": "Coefficient de réduction, pièce 2",
+      "en": "Reduction factor, member 2"
+    },
+    "Reduktionsbeiwert Bauteil 3": {
+      "fr": "Coefficient de réduction, pièce 3",
+      "en": "Reduction factor, member 3"
+    },
+    "Reduktionsbeiwert Bauteil 4": {
+      "fr": "Coefficient de réduction, pièce 4",
+      "en": "Reduction factor, member 4"
+    },
+    "Reduktionsbeiwert Bauteil 5": {
+      "fr": "Coefficient de réduction, pièce 5",
+      "en": "Reduction factor, member 5"
+    },
+    "Reduktionsbeiwert Bauteil 6": {
+      "fr": "Coefficient de réduction, pièce 6",
+      "en": "Reduction factor, member 6"
+    },
+    "Reduktionsbeiwert für den seltenen Wert einer veränderlichen Einwirkung": {
+      "fr": "Coefficient de réduction pour la valeur rare d’une action variable",
+      "en": "Reduction factor for the occasional value of a variable action"
+    },
+    "Reduktionsbeiwert für den häufigen Wert einer veränderlichen Einwirkung": {
+      "fr": "Coefficient de réduction pour la valeur fréquente d’une action variable",
+      "en": "Reduction factor for the frequent value of a variable action"
+    },
+    "Reduktionsbeiwert für den quasi-ständigen Wert einer veränderlichen Einwirkung": {
+      "fr": "Coefficient de réduction pour la valeur quasi permanente d’une action variable",
+      "en": "Reduction factor for the quasi-permanent value of a variable action"
+    },
+    "Reduktionsbeiwerte": {
+      "fr": "Coefficients de réduction",
+      "en": "Reduction factors"
+    },
+    "Reduktionsfaktor b": {
+      "fr": "Facteur de réduction b",
+      "en": "Reduction factor b"
+    },
+    "Reduktionsfaktor d": {
+      "fr": "Facteur de réduction d",
+      "en": "Reduction factor d"
+    },
+    "Reduktionsfaktor schräg": {
+      "fr": "Facteur de réduction oblique",
+      "en": "Reduction factor oblique"
+    },
+    "Reduktionsfaktor schräge Windrichtung": {
+      "fr": "Facteur de réduction en direction oblique du vent",
+      "en": "Reduction factor in an oblique wind direction"
+    },
+    "Reduktionsfaktor für die Bezugsfläche b·h, aus dem Verhältnis Länge (b) zu Höhe (h).": {
+      "fr": "Facteur de réduction pour la surface de référence b·h, d’après le rapport de la longueur (b) à la hauteur (h).",
+      "en": "Reduction factor for the reference area b·h, from the ratio of the length (b) to the height (h)."
+    },
+    "Reduktionsfaktor für die Bezugsfläche d·h, aus dem Verhältnis Breite (d) zu Höhe (h).": {
+      "fr": "Facteur de réduction pour la surface de référence d·h, d’après le rapport de la largeur (d) à la hauteur (h).",
+      "en": "Reduction factor for the reference area d·h, from the ratio of the width (d) to the height (h)."
+    },
+    "Für eine Windrichtung, die um 15° oder mehr von den Bezugsrichtungen abweicht, gilt der ungünstigere (grössere) der beiden Reduktionsfaktoren.": {
+      "fr": "Pour une direction du vent qui s’écarte de 15° ou plus des directions de référence, le plus défavorable (le plus grand) des deux facteurs de réduction s’applique.",
+      "en": "For a wind direction 15° or more off the reference directions, the more unfavourable (larger) of the two reduction factors applies."
+    },
+    "Referenzwert des Staudrucks": {
+      "fr": "Valeur de référence de la pression dynamique",
+      "en": "Reference value of the dynamic pressure"
+    },
+    "Referenzwert des Staudrucks am Standort nach SIA 261.": {
+      "fr": "Valeur de référence de la pression dynamique au lieu considéré selon SIA 261.",
+      "en": "Reference value of the dynamic pressure at the site to SIA 261."
+    },
+    "Richtung": {
+      "fr": "Direction",
+      "en": "Direction"
+    },
+    "Richtung der Normalkraft": {
+      "fr": "Direction de l’effort normal",
+      "en": "Direction of the normal force"
+    },
+    "Richtung der Querkraft": {
+      "fr": "Direction de l’effort tranchant",
+      "en": "Direction of the shear force"
+    },
+    "Rohdichte": {
+      "fr": "Densité",
+      "en": "Bulk density"
+    },
+    "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten": {
+      "fr": "Locaux dans les immeubles et les maisons d’habitation, services des hôpitaux, chambres d’hôtel, cuisines et toilettes",
+      "en": "Rooms in residential buildings and houses, rooms in hospital wards, hotel rooms, kitchens and toilets"
+    },
+    "Mittelholz": {
+      "fr": "bois médian",
+      "en": "central member"
+    },
+    "Scherfuge": {
+      "fr": "Section cisaillée",
+      "en": "Shear plane"
+    },
+    "Scherfuge A": {
+      "fr": "Section cisaillée A",
+      "en": "Shear plane A"
+    },
+    "Scherfuge B": {
+      "fr": "Section cisaillée B",
+      "en": "Shear plane B"
+    },
+    "Scherfugen mit ihren Hilfswerten": {
+      "fr": "Sections cisaillées avec leurs facteurs auxiliaires",
+      "en": "Shear planes with their auxiliary factors"
+    },
+    "Seitenholz": {
+      "fr": "bois latéral",
+      "en": "side member"
+    },
+    "Schichtaufbau": {
+      "fr": "Composition des couches",
+      "en": "Layer build-up"
+    },
+    "Schneelast": {
+      "fr": "Charge de neige",
+      "en": "Snow load"
+    },
+    "Schwalbenschwanz": {
+      "fr": "Queue d’aronde",
+      "en": "Dovetail"
+    },
+    "Stabdübel": {
+      "fr": "Broche",
+      "en": "Dowel"
+    },
+    "Stahl-Holz, Blech aussen, einschnittig": {
+      "fr": "Acier — bois, tôle latérale, simple section",
+      "en": "Steel-to-timber, one outer plate, single shear"
+    },
+    "Stahl-Holz, Bleche aussen": {
+      "fr": "Acier — bois, tôles latérales",
+      "en": "Steel-to-timber, outer plates"
+    },
+    "Stahl-Holz, Schlitzbleche": {
+      "fr": "Acier — bois, tôles insérées",
+      "en": "Steel-to-timber, slotted-in plates"
+    },
+    "Staudruck": {
+      "fr": "Pression dynamique",
+      "en": "Dynamic pressure"
+    },
+    "Stossartige Einwirkung (Erdbeben, Anprall).": {
+      "fr": "Action de type choc (séisme, impact).",
+      "en": "Impact action (earthquake, collision)."
+    },
+    "Ständige Lasten": {
+      "fr": "Charges permanentes",
+      "en": "Permanent loads"
+    },
+    "Ständige Lasten, gewählt": {
+      "fr": "Charges permanentes, valeur choisie",
+      "en": "Permanent loads, chosen"
+    },
+    "Summe": {
+      "fr": "Somme",
+      "en": "Sum"
+    },
+    "Summe (berechnet)": {
+      "fr": "Somme (calculée)",
+      "en": "Sum (calculated)"
+    },
+    "Tabelle 22, zwischen den beiden Faserrichtungen linear interpoliert.": {
+      "fr": "Tableau 22, interpolé linéairement entre les deux directions du fil.",
+      "en": "Table 22, interpolated linearly between the two grain directions."
+    },
+    "Tabelle 24. Gleichung (88) gilt nur bei Einhaltung dieser Abstände (6.2.1.1). Die Mindestlänge folgt aus der Anzahl Verbindungsmittel in und quer zur Faserrichtung.": {
+      "fr": "Tableau 24. L’équation (88) n’est valable que si ces distances sont respectées (6.2.1.1). La longueur minimale découle du nombre de moyens d’assemblage dans le sens du fil et perpendiculairement à celui-ci.",
+      "en": "Table 24. Equation (88) holds only where these distances are kept (6.2.1.1). The minimum length follows from the number of fasteners along the grain and across it."
+    },
+    "Tabelle 25, pro Verbindungsmittel und Scherfuge, für Feuchteklasse 1 und kurzfristige Beanspruchung; andere Feuchteklassen mit $eta_w$ der Steifigkeit (Tabelle 4). Der Schlupf beträgt rund 0.5 mm (6.2.1.3).": {
+      "fr": "Tableau 25, par moyen d’assemblage et par section cisaillée, pour la classe d’humidité 1 et une sollicitation de courte durée ; pour les autres classes, avec $eta_w$ de la rigidité (tableau 4). Le glissement est d’environ 0.5 mm (6.2.1.3).",
+      "en": "Table 25, per fastener and shear plane, for moisture class 1 and short-term loading; other classes with the stiffness $eta_w$ (table 4). The slip is about 0.5 mm (6.2.1.3)."
+    },
+    "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)": {
+      "fr": "Tableau 8 : Catégories de surfaces utiles et valeurs caractéristiques des charges utiles (SIA 261:2020)",
+      "en": "Table 8: Categories of usable areas and characteristic values of the live loads (SIA 261:2020)"
+    },
+    "Teilgewindeschraube": {
+      "fr": "Vis à filetage partiel",
+      "en": "Partially threaded screw"
+    },
+    "Thermischer Beiwert": {
+      "fr": "Coefficient thermique",
+      "en": "Thermal coefficient"
+    },
+    "Thermischer Beiwert nach SIA 261, Ziffer 5.2.": {
+      "fr": "Coefficient thermique selon SIA 261, chiffre 5.2.",
+      "en": "Thermal coefficient to SIA 261, clause 5.2."
+    },
+    "Total": {
+      "fr": "Total",
+      "en": "Total"
+    },
+    "Tragwiderstand bei vereinfachter Fachwerkberechnung": {
+      "fr": "Résistance ultime dans le cas d’un calcul simplifié de treillis",
+      "en": "Design resistance under the simplified truss calculation"
+    },
+    "Tragwiderstand der Verbindung": {
+      "fr": "Résistance ultime de l’assemblage",
+      "en": "Design resistance of the connection"
+    },
+    "Tragwiderstand pro Verbindungsmittel": {
+      "fr": "Résistance ultime par moyen d’assemblage",
+      "en": "Design resistance per fastener"
+    },
+    "Treppen": {
+      "fr": "Escaliers",
+      "en": "Stairs"
+    },
+    "Type": {
+      "fr": "Type",
+      "en": "Type"
+    },
+    "Umrechnungsfaktor Einwirkungsdauer": {
+      "fr": "Facteur de conversion, durée de l’action",
+      "en": "Conversion factor, duration of action"
+    },
+    "Umrechnungsfaktor Holzfeuchte": {
+      "fr": "Facteur de conversion, humidité du bois",
+      "en": "Conversion factor, moisture"
+    },
+    "Verbindungen": {
+      "fr": "Assemblages",
+      "en": "Connections"
+    },
+    "Charakteristische Lochleibungsfestigkeiten": {
+      "fr": "Valeurs caractéristiques de la résistance à la pression latérale",
+      "en": "Characteristic embedment strengths"
+    },
+    "Erforderliche Holzdicken und Hilfswert $k_beta$": {
+      "fr": "Épaisseurs de bois requises et facteur auxiliaire $k_beta$",
+      "en": "Required timber thicknesses and auxiliary factor $k_beta$"
+    },
+    "Bemessungswert des Tragwiderstands": {
+      "fr": "Valeur de dimensionnement de la résistance ultime",
+      "en": "Design value of the resistance"
+    },
+    "Verhältnis der Lochleibungsfestigkeiten": {
+      "fr": "Rapport des résistances à la pression latérale",
+      "en": "Ratio of the embedment strengths"
+    },
+    "Verkaufsflächen": {
+      "fr": "Surfaces de vente",
+      "en": "Retail areas"
+    },
+    "Versammlungsflächen": {
+      "fr": "Locaux de réunion",
+      "en": "Assembly areas"
+    },
+    "Versatz": {
+      "fr": "Embrèvement",
+      "en": "Step joint"
+    },
+    "Verschiebungsmodul": {
+      "fr": "Module de glissement",
+      "en": "Slip modulus"
+    },
+    "Verschiebungsmodul der Verbindung": {
+      "fr": "Module de glissement de l’assemblage",
+      "en": "Slip modulus of the connection"
+    },
+    "Vollgewindeschraube": {
+      "fr": "Vis à filetage total",
+      "en": "Fully threaded screw"
+    },
+    "vom beanspruchten Rand": {
+      "fr": "du bord chargé",
+      "en": "from the loaded edge"
+    },
+    "vom unbeanspruchten Rand": {
+      "fr": "du bord non chargé",
+      "en": "from the unloaded edge"
+    },
+    "von Stabdübel zu Stabdübel": {
+      "fr": "de broche à broche",
+      "en": "between dowels"
+    },
+    "Vorbohrung": {
+      "fr": "Préperçage",
+      "en": "Predrilling"
+    },
+    "vorgebohrt": {
+      "fr": "prépercé",
+      "en": "predrilled"
+    },
+    "vorhanden": {
+      "fr": "effectif",
+      "en": "actual"
+    },
+    "Wand A": {
+      "fr": "Paroi A",
+      "en": "Wall A"
+    },
+    "Wand B": {
+      "fr": "Paroi B",
+      "en": "Wall B"
+    },
+    "Wand C": {
+      "fr": "Paroi C",
+      "en": "Wall C"
+    },
+    "Wand D": {
+      "fr": "Paroi D",
+      "en": "Wall D"
+    },
+    "Warenhäuser, Ladengeschäfte": {
+      "fr": "Grands magasins, commerces",
+      "en": "Department stores, shops"
+    },
+    "Windlast": {
+      "fr": "Charge de vent",
+      "en": "Wind load"
+    },
+    "Windprofilbeiwert": {
+      "fr": "Coefficient pour le profil de répartition du vent",
+      "en": "Wind profile coefficient"
+    },
+    "Winkel zwischen den Elementen": {
+      "fr": "Angles entre les éléments",
+      "en": "Angles between the members"
+    },
+    "Winkel zwischen der Kraft- und Faserrichtung der Holzteile": {
+      "fr": "Angle entre la direction de l’effort et le fil des pièces en bois",
+      "en": "Angle between the force and the grain of the timber"
+    },
+    "Wohnflächen": {
+      "fr": "Surfaces d’habitation",
+      "en": "Residential areas"
+    },
+    "x, z: Koordinaten im Rahmen des Schemas, x nach rechts, z nach unten; Δx, Δz: Abstände zum Drehpunkt.": {
+      "fr": "x, z : coordonnées dans le repère du schéma, x vers la droite, z vers le bas ; Δx, Δz : distances au centre de rotation.",
+      "en": "x, z: coordinates in the schema’s frame, x to the right, z downwards; Δx, Δz: the distances to the rotation centre."
+    },
+    "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen": {
+      "fr": "Rampes d’accès, zones de livraison, zones accessibles aux véhicules du service du feu",
+      "en": "Access ramps, delivery zones, zones accessible to fire brigade vehicles"
+    },
+    "Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm.": {
+      "fr": "Deux charges concentrées de moitié chacune, distantes de 1.8 m, sur des surfaces d’application de 200 × 200 mm.",
+      "en": "Two concentrated loads of half each, 1.8 m apart, on contact surfaces of 200 × 200 mm."
+    },
+    "Zwischenwerte werden linear interpoliert (Figur 45). Die vorhandene Anzahl Scherfugen wird mit dem zugehörigen Hilfswert berücksichtigt: $p dot k_beta = p_A dot k_(beta,1) + p_B dot k_(beta,2)$ (6.2.1.1).": {
+      "fr": "Les valeurs intermédiaires sont interpolées linéairement (figure 45). Chaque section cisaillée est prise en compte avec son facteur auxiliaire : $p dot k_beta = p_A dot k_(beta,1) + p_B dot k_(beta,2)$ (6.2.1.1).",
+      "en": "Intermediate values are interpolated linearly (figure 45). Each shear plane is taken with its own auxiliary factor: $p dot k_beta = p_A dot k_(beta,1) + p_B dot k_(beta,2)$ (6.2.1.1)."
+    },
+    "Zwischenwerte werden linear interpoliert (Figur 45). Massgebend ist der kleinere Wert; $beta_f = f_(h,2,k) \\/ f_(h,1,k)$.": {
+      "fr": "Les valeurs intermédiaires sont interpolées linéairement (figure 45). La plus petite valeur est déterminante ; $beta_f = f_(h,2,k) \\/ f_(h,1,k)$.",
+      "en": "Intermediate values are interpolated linearly (figure 45). The smaller value governs; $beta_f = f_(h,2,k) \\/ f_(h,1,k)$."
+    },
+    "Öffnung A": {
+      "fr": "Ouverture A",
+      "en": "Opening A"
+    },
+    "Öffnung B": {
+      "fr": "Ouverture B",
+      "en": "Opening B"
+    },
+    "Öffnung C": {
+      "fr": "Ouverture C",
+      "en": "Opening C"
+    },
+    "Öffnung D": {
+      "fr": "Ouverture D",
+      "en": "Opening D"
+    },
+    "Σ (Δx² + Δz²) über alle Verbindungsmittel, jedes als Einheitspunkt gezählt — daher in mm² und nicht in mm⁴.": {
+      "fr": "Σ (Δx² + Δz²) sur tous les moyens d’assemblage, chacun compté comme un point unitaire — d’où des mm² et non des mm⁴.",
+      "en": "Σ (Δx² + Δz²) over all the fasteners, each counted as a unit point — hence mm² and not mm⁴."
+    },
+    "normale Windexposition": {
+      "fr": "exposition au vent normale",
+      "en": "normal wind exposure"
+    },
+    "dem Wind stark ausgesetzte Lage": {
+      "fr": "endroit fortement exposé au vent",
+      "en": "location strongly exposed to wind"
+    },
+    "vor Wind geschützte Lage": {
+      "fr": "endroit protégé du vent",
+      "en": "location sheltered from wind"
+    },
+    "Kein Verbindungsmittel des Schemas ist ausgewählt; ohne Bild der Anordnung sind weder die Mindestabstände noch n_tot bestimmt.": {
+      "fr": "Aucun moyen d’assemblage du schéma n’est sélectionné ; sans disposition dessinée, ni les espacements minimaux ni n_tot ne sont déterminés.",
+      "en": "No fastener of the schema is selected; without the drawn pattern neither the minimum spacings nor n_tot are determined."
+    },
+    "SIA 265 Tabelle 45 gibt k_beta nur für ein- und zweischnittige Holz-Holz-Verbindungen an.": {
+      "fr": "SIA 265 tableau 45 ne donne k_beta que pour les assemblages bois — bois à simple et à double section.",
+      "en": "SIA 265 table 45 gives k_beta only for single and double shear timber-to-timber joints."
+    },
+    "SIA 265 Tabelle 46 gibt k_beta nur für zwei- und mehrschnittige Stahl-Holz-Verbindungen an.": {
+      "fr": "SIA 265 tableau 46 ne donne k_beta que pour les assemblages acier — bois à double et à multiple section.",
+      "en": "SIA 265 table 46 gives k_beta only for double and multiple shear steel-to-timber joints."
+    },
+    "SIA 265 Kapitel 6 behandelt Holz-Beton-Verbindungen nicht.": {
+      "fr": "Le chapitre 6 de SIA 265 ne traite pas les assemblages bois — béton.",
+      "en": "SIA 265 chapter 6 does not treat timber-to-concrete joints."
+    },
+    "Direkt eingegebene Last": {
+      "fr": "Charge saisie directement",
+      "en": "Load entered directly"
+    },
+    "Tabelle 22; bei einem Kraftangriff schräg zur Faserrichtung werden die Werte linear interpoliert.": {
+      "fr": "Tableau 22 ; pour un effort oblique par rapport au fil, les valeurs sont interpolées linéairement.",
+      "en": "Table 22; for a force at an angle to the grain the values are interpolated linearly."
+    },
+    "ohne Festigkeitsklasse": {
+      "fr": "sans classe de résistance",
+      "en": "no strength class"
+    },
+    "Anhang": {
+      "fr": "annexe",
+      "en": "Annex"
+    },
+    "Grösstwert des Hilfswerts": {
+      "fr": "Valeur maximale du facteur auxiliaire",
+      "en": "Largest value of the auxiliary factor"
+    },
+    "Holzdicke für den unteren Eckwert": {
+      "fr": "Épaisseur de bois pour la valeur d’angle inférieure",
+      "en": "Timber thickness at the lower corner value"
+    },
+    "Hilfswert zum unteren Eckwert": {
+      "fr": "Facteur auxiliaire à la valeur d’angle inférieure",
+      "en": "Auxiliary factor at the lower corner value"
+    },
+    "Holzdicke für den oberen Eckwert": {
+      "fr": "Épaisseur de bois pour la valeur d’angle supérieure",
+      "en": "Timber thickness at the upper corner value"
+    },
+    "Hilfswert zum oberen Eckwert": {
+      "fr": "Facteur auxiliaire à la valeur d’angle supérieure",
+      "en": "Auxiliary factor at the upper corner value"
+    },
+    "Bauteildicke": {
+      "fr": "Épaisseur de la pièce",
+      "en": "Member thickness"
+    },
+    "Holzdicke Seitenholz": {
+      "fr": "Épaisseur du bois latéral",
+      "en": "Side timber thickness"
+    },
+    "Holzdicke Mittelholz": {
+      "fr": "Épaisseur du bois central",
+      "en": "Middle timber thickness"
+    },
+    "Holzdicken": {
+      "fr": "Épaisseurs de bois",
+      "en": "Timber thicknesses"
+    },
+    "Umrechnungsfaktor Holzfeuchte für die Steifigkeit": {
+      "fr": "Facteur de conversion, humidité du bois, pour la rigidité",
+      "en": "Conversion factor, moisture, for the stiffness"
+    },
+    "Massgebender Verschiebungsmodul": {
+      "fr": "Module de glissement déterminant",
+      "en": "Governing slip modulus"
+    },
+    "Tragwiderstand pro Verbindungsmittel bei vereinfachter Fachwerkberechnung": {
+      "fr": "Résistance ultime par moyen d’assemblage dans le cas d’un calcul simplifié de treillis",
+      "en": "Design resistance per fastener under the simplified truss calculation"
+    },
+    "Zwischenwerte werden linear interpoliert (Figur 45).": {
+      "fr": "Les valeurs intermédiaires sont interpolées linéairement (figure 45).",
+      "en": "Intermediate values are interpolated linearly (figure 45)."
+    },
+    "Tabelle 22, nicht vorgebohrt: die Werte parallel und rechtwinklig zur Faser sind gleich, der Winkel geht nicht ein.": {
+      "fr": "Tableau 22, non prépercé : les valeurs parallèle et perpendiculaire au fil sont égales, l’angle n’intervient pas.",
+      "en": "Table 22, not predrilled: the values parallel and perpendicular to the grain are equal, and the angle does not enter."
+    },
+    "Gleichung (88), ohne $n_\"tot\"$. Die Wurzel ergibt N; der Wert ist in kN angegeben. Bei Holz-Holz-Verbindungen ist die Lochleibungsfestigkeit des Seitenholzes 1 einzusetzen.": {
+      "fr": "Équation (88), sans $n_\"tot\"$. La racine donne des N ; la valeur est exprimée en kN. Pour les assemblages bois à bois, c’est la résistance à la pression latérale du bois latéral 1 qui est introduite.",
+      "en": "Equation (88), without $n_\"tot\"$. The root gives N; the value is stated in kN. For timber-to-timber connections the embedment strength of side member 1 is used."
+    },
+    "Tabelle 25, pro Verbindungsmittel und Scherfuge. Die Werte gelten für Feuchteklasse 1 und kurzfristige Beanspruchung; andere Feuchteklassen mit $eta_w$ der Steifigkeit (Tabelle 4). Für beliebige Winkel zwischen Kraft- und Faserrichtung darf linear interpoliert werden.": {
+      "fr": "Tableau 25, par moyen d’assemblage et par section cisaillée. Les valeurs valent pour la classe d’humidité 1 et une sollicitation de courte durée ; pour les autres classes, avec $eta_w$ de la rigidité (tableau 4). Pour des angles quelconques entre la direction de l’effort et celle du fil, une interpolation linéaire est admise.",
+      "en": "Table 25, per fastener and shear plane. The values hold for moisture class 1 and short-term loading; other classes with the stiffness $eta_w$ (table 4). For any angle between the force and the grain, linear interpolation is allowed."
+    },
+    "Tragsicherheit": {
+      "fr": "Sécurité structurale",
+      "en": "Structural safety"
+    },
+    "Stabilität": {
+      "fr": "Stabilité",
+      "en": "Stability"
+    },
+    "Kippen": {
+      "fr": "Déversement",
+      "en": "Lateral torsional buckling"
+    },
+    "Knicken um die y-Achse": {
+      "fr": "Flambage autour de l’axe y",
+      "en": "Buckling about the y-axis"
+    },
+    "Knicken um die z-Achse": {
+      "fr": "Flambage autour de l’axe z",
+      "en": "Buckling about the z-axis"
+    },
+    "Biegezugseite": {
+      "fr": "Côté tendu",
+      "en": "Tension side"
+    },
+    "Biegedruckseite": {
+      "fr": "Côté comprimé",
+      "en": "Compression side"
+    },
+    "Steifigkeit": {
+      "fr": "rigidité",
+      "en": "stiffness"
+    },
+    "Zug parallel zur Faserrichtung": {
+      "fr": "Traction parallèle au fil",
+      "en": "Tension parallel to the grain"
+    },
+    "Zug rechtwinklig zur Faserrichtung": {
+      "fr": "Traction perpendiculaire au fil",
+      "en": "Tension perpendicular to the grain"
+    },
+    "Zug unter einem Winkel zur Faserrichtung": {
+      "fr": "Traction biaise par rapport au fil",
+      "en": "Tension at an angle to the grain"
+    },
+    "Druck parallel zur Faserrichtung": {
+      "fr": "Compression parallèle au fil",
+      "en": "Compression parallel to the grain"
+    },
+    "Druck rechtwinklig zur Faserrichtung": {
+      "fr": "Compression perpendiculaire au fil",
+      "en": "Compression perpendicular to the grain"
+    },
+    "Druck unter einem Winkel zur Faserrichtung": {
+      "fr": "Compression biaise par rapport au fil",
+      "en": "Compression at an angle to the grain"
+    },
+    "Biegung": {
+      "fr": "Flexion",
+      "en": "Bending"
+    },
+    "Biegung rechtwinklig zur Faserrichtung": {
+      "fr": "Flexion perpendiculaire au fil",
+      "en": "Bending perpendicular to the grain"
+    },
+    "Biegung unter einem Winkel zur Faserrichtung": {
+      "fr": "Flexion biaise par rapport au fil",
+      "en": "Bending at an angle to the grain"
+    },
+    "Biegung mit Zug": {
+      "fr": "Flexion combinée avec traction",
+      "en": "Combined bending and axial tension"
+    },
+    "Biegung mit Druck": {
+      "fr": "Flexion combinée avec compression",
+      "en": "Combined bending and axial compression"
+    },
+    "Biegung mit Zug unter einem Winkel zur Faserrichtung": {
+      "fr": "Flexion combinée avec traction, biaise par rapport au fil",
+      "en": "Combined bending and axial tension at an angle to the grain"
+    },
+    "Biegung mit Druck unter einem Winkel zur Faserrichtung": {
+      "fr": "Flexion combinée avec compression, biaise par rapport au fil",
+      "en": "Combined bending and axial compression at an angle to the grain"
+    },
+    "SIA 265 gibt (21) und (22) nur in Faserrichtung an: unter dem Winkel $alpha$ werden $f_(t,alpha,d)$ nach (9) bzw. $f_(c,alpha,d)$ nach (13) und $k_(\"mt\",alpha)$, $k_(\"mc\",alpha)$ nach (19), (20) eingesetzt, auf der Seite, auf der sich die Normalspannung zur Biegespannung addiert; die andere Seite wird nach (17) bzw. (18) allein nachgewiesen.": {
+      "fr": "La SIA 265 ne donne (21) et (22) que parallèlement au fil : sous l’angle $alpha$, on y introduit $f_(t,alpha,d)$ selon (9) resp. $f_(c,alpha,d)$ selon (13) et $k_(\"mt\",alpha)$, $k_(\"mc\",alpha)$ selon (19), (20), du côté où la contrainte normale s’ajoute à la contrainte de flexion ; l’autre côté est vérifié par (17) resp. (18) seule.",
+      "en": "SIA 265 gives (21) and (22) along the grain only: at the angle $alpha$, $f_(t,alpha,d)$ of (9) or $f_(c,alpha,d)$ of (13) and $k_(\"mt\",alpha)$, $k_(\"mc\",alpha)$ of (19), (20) are used on the side where the normal stress adds to the bending stress; the other side is checked by (17) or (18) alone."
+    },
+    "Schub": {
+      "fr": "Effort tranchant",
+      "en": "Shear"
+    },
+    "Torsion": {
+      "fr": "Torsion",
+      "en": "Torsion"
+    },
+    "Schub und Torsion": {
+      "fr": "Effort tranchant et torsion",
+      "en": "Shear and torsion"
+    },
+    "Abscheren": {
+      "fr": "Cisaillement",
+      "en": "Shear-off"
+    },
+    "Schub und Normalkraft rechtwinklig zur Faserrichtung": {
+      "fr": "Effort tranchant combiné avec un effort normal, perpendiculairement au fil",
+      "en": "Shear combined with a normal force perpendicular to the grain"
+    },
+    "Kippen nicht nachgewiesen: kein Abstand $a$ der Kipphalterungen angegeben.": {
+      "fr": "Déversement non vérifié : aucune distance $a$ entre les stabilisations latérales n’est indiquée.",
+      "en": "Lateral torsional buckling not verified: no distance $a$ between the lateral supports is given."
+    },
+    "Die geometrische Schlankheit übersteigt den Richtwert von 4.2.8.4": {
+      "fr": "L’élancement géométrique dépasse la valeur indicative du chiffre 4.2.8.4",
+      "en": "The geometric slenderness exceeds the guide value of 4.2.8.4"
+    },
+    "für Haupttragelemente": {
+      "fr": "pour les éléments porteurs principaux",
+      "en": "for main load-bearing members"
+    },
+    "für Verbände und Sekundärelemente": {
+      "fr": "pour la stabilisation et les éléments secondaires",
+      "en": "for bracing and secondary members"
+    },
+    "vorgegeben": {
+      "fr": "valeur donnée",
+      "en": "given"
+    },
+    "Markstück": {
+      "fr": "Pièce avec moelle",
+      "en": "Piece containing the pith"
+    },
+    "Querzug": {
+      "fr": "Traction perpendiculaire au fil",
+      "en": "Tension perpendicular to the grain"
+    },
+    "Querdruck": {
+      "fr": "Compression perpendiculaire au fil",
+      "en": "Compression perpendicular to the grain"
+    },
+    "generell": {
+      "fr": "en général",
+      "en": "general"
+    },
+    "mit Vorholz": {
+      "fr": "avec un avant-bois",
+      "en": "with timber beyond the load"
+    },
+    "Endauflagerung": {
+      "fr": "appui d’extrémité",
+      "en": "end support"
+    },
+    "Querschnitt": {
+      "fr": "Section",
+      "en": "Cross-section"
+    },
+    "Bemessungswerte": {
+      "fr": "Valeurs de dimensionnement",
+      "en": "Design values"
+    },
+    "Biegung nur um die schwache Achse: ein Nachweis nach 4.2.9 entfällt.": {
+      "fr": "Flexion autour de l’axe faible seulement : une vérification selon 4.2.9 est sans objet.",
+      "en": "Bending about the weak axis only: no check to 4.2.9 is needed."
+    },
+    "Biegung nur um die schwache Achse": {
+      "fr": "Flexion autour de l’axe faible seulement",
+      "en": "Bending about the weak axis only"
+    },
+    "Kreisquerschnitt": {
+      "fr": "Section circulaire",
+      "en": "Round section"
+    },
+    "Markstück: SIA 265 halbiert $f_(v,d)$ nach Tabelle 8, Anmerkung 6, nur für Vollholz; für Brettschichtholz (Tabelle 9) wird $f_(v,d)$ nicht abgemindert.": {
+      "fr": "Moelle : SIA 265 ne réduit $f_(v,d)$ de moitié, selon le tableau 8, note 6, que pour le bois massif ; pour le bois lamellé-collé (tableau 9), $f_(v,d)$ n’est pas réduit.",
+      "en": "Pith: SIA 265 halves $f_(v,d)$ to Table 8, note 6, for solid timber only; for glued laminated timber (Table 9) $f_(v,d)$ is not reduced."
+    },
+    "Ein Kreisquerschnitt kippt nicht: ein Nachweis nach 4.2.9 entfällt.": {
+      "fr": "Une section circulaire ne se déverse pas : une vérification selon 4.2.9 est sans objet.",
+      "en": "A round section does not buckle laterally: no check to 4.2.9 is needed."
+    },
+    "Torsionswiderstand des Kreisquerschnitts, exakt nach der Mechanik.": {
+      "fr": "Module de torsion de la section circulaire, exact selon la mécanique.",
+      "en": "Torsional section modulus of the round section, exact from mechanics."
+    },
+    "Grösste Schubspannung eines Kreisquerschnitts nach der Mechanik, 4/3 · V/A, wie 1.5 · V/A für den Rechteckquerschnitt; Gleichung (23) vergleicht sie mit f_v,d.": {
+      "fr": "Contrainte de cisaillement maximale d’une section circulaire selon la mécanique, 4/3 · V/A ; le facteur 1.5 de l’équation (23) vaut pour la section rectangulaire.",
+      "en": "Largest shear stress of a round section from mechanics, 4/3 · V/A, as 1.5 · V/A for a rectangular section; equation (23) compares it with f_v,d."
+    },
+    "Brandmauer REI 60 bis REI 180": {
+      "fr": "Mur coupe-feu REI 60 à REI 180",
+      "en": "Fire wall REI 60 to REI 180"
+    },
+    "Feuerwiderstand EI 90-RF1": {
+      "fr": "Résistance au feu EI 90-RF1",
+      "en": "Fire resistance EI 90-RF1"
+    },
+    "Feuerwiderstand EI 60-RF1": {
+      "fr": "Résistance au feu EI 60-RF1",
+      "en": "Fire resistance EI 60-RF1"
+    },
+    "Feuerwiderstand EI 30-RF1": {
+      "fr": "Résistance au feu EI 30-RF1",
+      "en": "Fire resistance EI 30-RF1"
+    },
+    "Feuerwiderstand EI 90": {
+      "fr": "Résistance au feu EI 90",
+      "en": "Fire resistance EI 90"
+    },
+    "Feuerwiderstand EI 60": {
+      "fr": "Résistance au feu EI 60",
+      "en": "Fire resistance EI 60"
+    },
+    "Feuerwiderstand EI 30": {
+      "fr": "Résistance au feu EI 30",
+      "en": "Fire resistance EI 30"
+    },
+    "Feuerwiderstand E 60": {
+      "fr": "Résistance au feu E 60",
+      "en": "Fire resistance E 60"
+    },
+    "Feuerwiderstand E 30": {
+      "fr": "Résistance au feu E 30",
+      "en": "Fire resistance E 30"
+    },
+    "Fluchtweglänge": {
+      "fr": "Longueur voie d'évacuation",
+      "en": "Escape route length"
+    },
+    "Notausgang": {
+      "fr": "Sortie de secours",
+      "en": "Emergency exit"
+    },
+    "Fluchtwegbreite": {
+      "fr": "Largeur voie d'évacuation",
+      "en": "Escape route width"
+    },
+    "vertikaler Fluchtweg": {
+      "fr": "Voie d'évacuation verticale",
+      "en": "Vertical escape route"
+    },
+    "horizontaler Fluchtweg": {
+      "fr": "Voie d'évacuation horizontale",
+      "en": "Horizontal escape route"
+    },
+    "freizuhaltende Fläche": {
+      "fr": "Surface à laisser libre",
+      "en": "Area to be kept clear"
+    },
+    "Türe / Tor EI 30": {
+      "fr": "Porte / portail EI 30",
+      "en": "Door / gate EI 30"
+    },
+    "Türe / Tor / Abschluss E 30": {
+      "fr": "Porte / portail / fermeture E 30",
+      "en": "Door / gate / closure E 30"
+    },
+    "Schiebetüre / Schiebetor EI 30": {
+      "fr": "Porte coulissante / portail coulissant EI 30",
+      "en": "Sliding door / sliding gate EI 30"
+    },
+    "Schiebetüre / Schiebetor E 30": {
+      "fr": "Porte coulissante / portail coulissant E 30",
+      "en": "Sliding door / sliding gate E 30"
+    },
+    "Flachdach": {
+      "fr": "Toit plat",
+      "en": "Flat roof"
+    },
+    "Pultdach": {
+      "fr": "Toit à un pan",
+      "en": "Mono-pitch roof"
+    },
+    "Satteldach": {
+      "fr": "Toit à deux pans",
+      "en": "Duo-pitch roof"
+    },
+    "Sheddach": {
+      "fr": "Toiture en sheds",
+      "en": "Shed roof"
+    },
+    "Tonnendach": {
+      "fr": "Toiture cylindrique",
+      "en": "Curved roof"
+    },
+    "möglich": {
+      "fr": "possible",
+      "en": "possible"
+    },
+    "behindert oder erschwert": {
+      "fr": "empêché ou rendu difficile",
+      "en": "hindered or made difficult"
+    },
+    "Blechdicke": {
+      "fr": "Épaisseur de la tôle",
+      "en": "Plate thickness"
+    },
+    "Randabstand in Kraftrichtung": {
+      "fr": "Pince dans la direction de l’effort",
+      "en": "End distance in the direction of the force"
+    },
+    "Randabstand quer zur Kraftrichtung": {
+      "fr": "Pince perpendiculaire à l’effort",
+      "en": "Edge distance across the force"
+    },
+    "Lochdurchmesser": {
+      "fr": "Diamètre du trou",
+      "en": "Hole diameter"
+    },
+    "Abstand in Kraftrichtung": {
+      "fr": "Entraxe dans la direction de l’effort",
+      "en": "Spacing in the direction of the force"
+    },
+    "Abstand quer zur Kraftrichtung": {
+      "fr": "Entraxe perpendiculaire à l’effort",
+      "en": "Spacing across the force"
+    },
+    "Abstände der Stabdübel": {
+      "fr": "Entraxes des broches",
+      "en": "Spacings of the dowels"
+    },
+    "Stahlblech": {
+      "fr": "Tôle d’acier",
+      "en": "Steel plate"
+    },
+    "Zugfestigkeit des Blechs": {
+      "fr": "Résistance à la traction de la tôle",
+      "en": "Tensile strength of the plate"
+    },
+    "Streckgrenze des Blechs": {
+      "fr": "Limite d’élasticité de la tôle",
+      "en": "Yield strength of the plate"
+    },
+    "Stahl des Blechs": {
+      "fr": "Acier de la tôle",
+      "en": "Steel of the plate"
+    },
+    "Widerstandsbeiwert": {
+      "fr": "Facteur de résistance",
+      "en": "Resistance factor"
+    },
+    "Massgebender Randabstand": {
+      "fr": "Pince déterminante",
+      "en": "Governing end distance"
+    },
+    "Lochleibungswiderstand nach Gleichung (76)": {
+      "fr": "Résistance à la pression diamétrale selon l’équation (76)",
+      "en": "Bearing resistance to equation (76)"
+    },
+    "Obergrenze nach Gleichung (76)": {
+      "fr": "Limite supérieure selon l’équation (76)",
+      "en": "Upper limit to equation (76)"
+    },
+    "Begrenzung für Bolzenverbindungen": {
+      "fr": "Limitation pour les assemblages par axes",
+      "en": "Limit for pin connections"
+    },
+    "Anzahl Bleche je Stabdübel": {
+      "fr": "Nombre de tôles par broche",
+      "en": "Number of plates per dowel"
+    },
+    "Lochleibungswiderstand der Bleche pro Stabdübel": {
+      "fr": "Résistance à la pression diamétrale des tôles par broche",
+      "en": "Bearing resistance of the plates per dowel"
+    },
+    "Mit der Kraft auf einen Stabdübel nachzuweisen; nicht in R_d enthalten.": {
+      "fr": "À vérifier avec l’effort sur une broche ; non compris dans R_d.",
+      "en": "To be verified against the force on one dowel; not included in R_d."
+    },
+    "Höhensprung": {
+      "fr": "Décrochement",
+      "en": "Height step"
+    },
+    "Zusatzlast nach Figur 5": {
+      "fr": "charge supplémentaire selon la figure 5",
+      "en": "extra load to Figure 5"
+    },
+    "Bei abgestuften Dächern oder bei einem Dach, das an ein höheres Bauwerk angrenzt, ist auf der unteren Dachfläche eine dreieckförmige Zusatzlast nach Figur 5 anzusetzen (Verdoppelung von mu_1 auf der Seite des Höhensprungs, Einflusslänge l_s = 2 h). Sie ist hier nicht berechnet.": {
+      "fr": "Pour un toit étagé ou un toit proche d’un ouvrage plus élevé, une charge supplémentaire de répartition triangulaire selon la figure 5 s’applique sur la surface de toiture inférieure (doublement de mu_1 le long du décrochement, longueur d’influence l_s = 2 h). Elle n’est pas calculée ici.",
+      "en": "For a stepped roof, or a roof adjoining a taller building, a triangular extra load to Figure 5 applies on the lower roof (mu_1 doubled along the step, length of influence l_s = 2 h). It is not computed here."
+    },
+    "Schneeüberhang": {
+      "fr": "Corniche",
+      "en": "Snow cornice"
+    },
+    "zu berücksichtigen": {
+      "fr": "à prendre en considération",
+      "en": "to be considered"
+    },
+    "Für Bauwerke in dieser Höhenlage ist bei auskragenden Dachteilen ein Schneeüberhang als Linienlast am Dachrand zu berücksichtigen: Höhe und Breite gleich der halben Schneehöhe auf dem Dach (SIA 261, 5.3.7). Er ist hier nicht berechnet.": {
+      "fr": "Pour les ouvrages situés à cette altitude, une corniche doit être prise en considération pour les éléments de toiture en porte-à-faux, comme charge linéaire au bord du toit : hauteur et saillie égales à la moitié de la hauteur de neige sur la toiture (SIA 261, 5.3.7). Elle n’est pas calculée ici.",
+      "en": "For works at this altitude, a snow cornice is to be considered for overhanging roof parts, as a line load at the roof edge: height and projection half the snow depth on the roof (SIA 261, 5.3.7). It is not computed here."
+    },
+    "Windexposition normal": {
+      "fr": "exposition au vent normale",
+      "en": "normal wind exposure"
+    },
+    "stark windexponiert": {
+      "fr": "endroit fortement exposé au vent",
+      "en": "site strongly exposed to wind"
+    },
+    "windgeschützt": {
+      "fr": "endroit protégé du vent",
+      "en": "site sheltered from wind"
+    },
+    "Ist das Abgleiten behindert oder erschwert, wird der Dachformbeiwert mu_1 mit 0.8 angesetzt (SIA 261, Ziffer 5.3.4).": {
+      "fr": "Si le glissement est empêché ou rendu difficile, le coefficient de forme de toiture mu_1 est admis à 0.8 (SIA 261, chiffre 5.3.4).",
+      "en": "Where the sliding is hindered or made difficult, the roof shape coefficient mu_1 is taken as 0.8 (SIA 261, clause 5.3.4)."
+    },
+    "Tabelle der Druckbeiwerte": {
+      "fr": "Tableau des coefficients de pression",
+      "en": "Table of pressure coefficients"
+    },
+    "aussen": {
+      "fr": "extérieur",
+      "en": "external"
+    },
+    "netto": {
+      "fr": "net",
+      "en": "net"
+    }
+  }
+}

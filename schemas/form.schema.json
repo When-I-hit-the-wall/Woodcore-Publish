@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Woodcore form",
+  "description": "templates/forms/<id>/form.json -- the file that makes a folder a form, the look of a project's three documents (calc/forms.py): a `template.typ` defining `#let template(doc, lang:, region:)`, a `title.typ` defining `#let title-page(document:)` and the assets they use (a logo). A form is the layout alone -- fonts, sizes, margins, headings, the page's furniture, the title page's layout -- and holds no project data. Applying a form copies the folder into the project's `Template/` (its form.json rewritten with the form's id and place, title.typ going to the top of the project instead) and archives what was there. Three places: builtin (`templates/forms/`, read only), user and shared (`forms/` inside the engineer's or the office's folder of templates). A form the engineer or the office saved from a project usually names itself in the one language it is written in.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "format",
+    "name"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a form written at another version is refused rather than read as this one."
+    },
+    "format": {
+      "type": "string",
+      "const": "woodcore-form",
+      "description": "What this file is, so a form.json that is something else is refused by name."
+    },
+    "id": {
+      "type": "string",
+      "description": "Only in the form.json copied into a project's `Template/`: the folder name of the form it was made from (`bfh`, `Holzbau`), so the project says which form it is written in."
+    },
+    "place": {
+      "type": "string",
+      "enum": [
+        "builtin",
+        "user",
+        "shared"
+      ],
+      "description": "Only in the form.json copied into a project's `Template/`: the place the form came from."
+    },
+    "name": {
+      "type": "object",
+      "description": "The form's name as a list shows it, per language: at least one.",
+      "minProperties": 1,
+      "properties": {
+        "fr": {
+          "type": "string"
+        },
+        "de": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        }
+      }
+    },
+    "description": {
+      "type": "object",
+      "description": "What the form is for, per language. Optional.",
+      "properties": {
+        "fr": {
+          "type": "string"
+        },
+        "de": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-87.84 -528.52 1331.08 1276.66" width="199.662mm" height="191.499mm">
+<rect x="-87.84" y="-528.52" width="1331.08" height="1276.66" fill="#ffffff"/>
+<!-- highlight -->
+<line x1="0" y1="0" x2="1000" y2="0" stroke="#1f1f1f" stroke-width="24.035" stroke-linecap="round"/>
+<line x1="1000" y1="-109.2" x2="1000" y2="109.2" stroke="#1f1f1f" stroke-width="14.63" stroke-linecap="round"/>
+<line x1="1000" y1="-93.6" x2="1050.4" y2="-144" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="-62.4" x2="1050.4" y2="-112.8" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="-31.2" x2="1050.4" y2="-81.6" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="0" x2="1050.4" y2="-50.4" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="31.2" x2="1050.4" y2="-19.2" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="62.4" x2="1050.4" y2="12" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="93.6" x2="1050.4" y2="43.2" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<!-- dims -->
+<line x1="0" y1="300" x2="0" y2="425.08" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<line x1="500" y1="300" x2="500" y2="425.08" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<line x1="0" y1="400" x2="500" y2="400" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<polygon points="0,400 45.98,411.495 45.98,388.505" fill="#1f1f1f"/>
+<polygon points="500,400 454.02,388.505 454.02,411.495" fill="#1f1f1f"/>
+<line x1="500" y1="300" x2="500" y2="425.08" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<line x1="1000" y1="300" x2="1000" y2="425.08" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<line x1="500" y1="400" x2="1000" y2="400" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<polygon points="500,400 545.98,411.495 545.98,388.505" fill="#1f1f1f"/>
+<polygon points="1000,400 954.02,388.505 954.02,411.495" fill="#1f1f1f"/>
+<line x1="0" y1="450" x2="0" y2="625.08" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<line x1="1000" y1="450" x2="1000" y2="625.08" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<line x1="0" y1="600" x2="1000" y2="600" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<polygon points="0,600 45.98,611.495 45.98,588.505" fill="#1f1f1f"/>
+<polygon points="1000,600 954.02,588.505 954.02,611.495" fill="#1f1f1f"/>
+<!-- /dims -->
+<!-- loads -->
+<line x1="500" y1="-376.2" x2="500" y2="-66.88" stroke="#c0392b" stroke-width="15.675" stroke-linecap="butt"/>
+<polygon points="500,0 475.965,-66.88 524.035,-66.88" fill="#c0392b"/>
+<!-- /loads -->
+<!-- dims -->
+<rect x="158.049" y="412.54" width="183.903" height="81.36" fill="#ffffff"/>
+<text x="167.089" y="472.204" font-family="Arial" font-size="54.24" text-anchor="start" font-weight="bold" fill="#1f1f1f">0.25 m</text>
+<rect x="658.049" y="412.54" width="183.903" height="81.36" fill="#ffffff"/>
+<text x="667.089" y="472.204" font-family="Arial" font-size="54.24" text-anchor="start" font-weight="bold" fill="#1f1f1f">0.25 m</text>
+<rect x="423.133" y="612.54" width="153.734" height="81.36" fill="#ffffff"/>
+<text x="432.173" y="672.204" font-family="Arial" font-size="54.24" text-anchor="start" font-weight="bold" fill="#1f1f1f">0.5 m</text>
+<!-- /dims -->
+<!-- loads -->
+<rect x="435.196" y="-474.28" width="129.608" height="81.36" fill="#ffffff"/>
+<text x="444.236" y="-414.616" font-family="Arial" font-size="54.24" text-anchor="start" font-weight="bold" fill="#1f1f1f">1 kN</text>
+<!-- /loads -->
+</svg>

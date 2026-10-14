@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "id": "BI-01",
+  "name": "Biegung Träger",
+  "label": "Träger T001 in Feldmitte, Biegung um beide Achsen",
+  "group": "",
+  "kind": "bending",
+  "position": "T001",
+  "grade": null,
+  "section": null,
+  "moisture_class": null,
+  "impact": false,
+  "alpha": 0,
+  "N": {
+    "value": 0,
+    "unit": "kN"
+  },
+  "M_y": {
+    "value": 4.5,
+    "unit": "kNm"
+  },
+  "M_z": {
+    "value": 0.3,
+    "unit": "kNm"
+  }
+}

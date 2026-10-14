@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-document-template",
+  "mode": "cu",
+  "name": {
+    "fr": "Convention d'utilisation — standard",
+    "de": "Nutzungsvereinbarung — Standard",
+    "en": "Service criteria agreement — standard"
+  },
+  "description": {
+    "fr": "Convention d'utilisation complète selon SIA 260 : 10 chapitres et 59 sections, dont 48 imprimées par défaut, des objectifs d'utilisation aux signatures. Les charges utiles et 16 autres sections sont partagées avec la base de projet.",
+    "de": "Vollständige Nutzungsvereinbarung nach SIA 260: 10 Kapitel und 59 Abschnitte, davon 48 standardmässig gedruckt, von den Nutzungszielen bis zu den Unterschriften. Die Nutzlasten und 16 weitere Abschnitte sind mit der Projektbasis geteilt.",
+    "en": "Complete service criteria agreement in accordance with SIA 260: 10 chapters and 59 sections, 48 of them printed by default, from the use objectives to the signatures. The live loads and 16 other sections are shared with the basis of design."
+  },
+  "languages": [
+    "fr",
+    "de",
+    "en"
+  ]
+}

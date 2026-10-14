@@ -1,0 +1,46 @@
+# Woodcore's repository holds the program and nothing of any project (docs/architecture/layout.md §11, v0.82): a project lives in its own folder, synced by NextCloud, and never here.
+
+# Python's own byte-code cache: regenerated on every run, never read by anything this repository versions.
+__pycache__/
+*.pyc
+
+# The window's render cache lives in %LOCALAPPDATA% and never here, but a stray one from an older version would be pure weight (docs/ui/window.md §10quater).
+.render-cache/
+
+# Each run of tests/run_tests.py writes its probes under its own process id and removes them at the end (docs/conventions/testing.md §11ter). A crashed run leaves one behind.
+tests/.tmp/
+tests/.settings-*.json
+# Each run of the suite works on its own copy of the example project (tests/projet-exemple/), beside .tmp/ and removed at the end (v0.81).
+tests/.project-*/
+# What the last run of tests/run_tests.py measured and failed (issue #22): the order the next run starts its files in, and what --failed reruns.
+tests/.timings.json
+tests/.last-run.json
+
+# The engine Woodcore copies into a project beside its export (calc/project.py, sync_engine, v0.81): lib/, the glossary lib/i18n.typ reads, and the VERSION that names them. Generated at every export and by the tests, never edited -- the example project in tests/ carries no copy of its own.
+**/_woodcore/lib/
+**/_woodcore/calc/
+**/_woodcore/VERSION
+**/_woodcore/.preview/
+**/_woodcore/out/
+# What each document was compiled from, and its hash, beside the export (calc/stamps.py: «export only if changed», the three document modes): written by every compile, read to decide whether the next one is needed -- the machine's own, never versioned.
+**/_woodcore/stamps/
+# The example project's own archives: a migration of it, an export or a compile run on the committed example (rather than on the copy each test run makes) leaves its workspace and its zips there. The example carries its sources and its export, never an archive.
+tests/projet-exemple/_Archiv/
+
+# The frozen examples carry a copy of the engine beside their frozen data, refreshed on every run of build_examples.py so they exercise the CURRENT engine (docs/typst/command-docs.md §10sexies). The copy is generated; the snapshot, the MWEs, their config.typ and their pages are versioned.
+examples/lib/
+examples/commands.typ
+
+# What PyInstaller and the installer build (step 6 of the Woodcore split): made on demand, never versioned.
+dist/
+build/
+
+# Windows' and macOS's own thumbnail and folder caches (periodic audit 260916).
+Thumbs.db
+.DS_Store
+
+# The website, built by website/build.py (docs/conventions/build-and-release.md §12): generated locally to look at, and by the CI job that publishes it -- never versioned.
+public/
+examples/.site/
+# The desktop app's scheduler lock (a harness file, never the project's); .claude/launch.json, which serves the website to the app's browser pane, is versioned.
+.claude/scheduled_tasks.lock

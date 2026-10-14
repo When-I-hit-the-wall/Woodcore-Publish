@@ -1,0 +1,2 @@
+# A hook is a shell script, and sh reads a carriage return as part of the line: checked out with CRLF (core.autocrlf, which Git for Windows sets for every repository), `exit 0` would be `exit 0\r`. Always LF here.
+* text eol=lf

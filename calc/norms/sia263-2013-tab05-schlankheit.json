@@ -1,0 +1,36 @@
+{
+  "_source": "SIA 263:2013, Tabelle 5a «Schlankheitskriterien für beidseitig gestützte Scheiben» and Tabelle 5b «Schlankheitskriterien für einseitig gestützte Scheiben», with the Beulwerte k1, k2 and the factor epsilon, p. 26 (clause 4.3.1, Tabelle 4 p. 24) -- read off a render of ExternalFiles/000-Normes/SIA263-2013-DE.pdf p. 26 on 12.10.2026: the tables are graphics and their formulas do not extract as text (spec 2026-10-12-section-acier, REQ-005). The only copy of these values in the project.",
+  "_note": "Each limit is max b/t = coefficient · epsilon, epsilon = sqrt(235/f_y). The rows with a formula in alpha or psi write it as {kind, coefficient}: 'alpha_internal' 396 epsilon/(13 alpha − 1) (alpha >= 0.5), 'alpha_inv' 36 epsilon/alpha (alpha <= 0.5), 'alpha_inv_15' 9 epsilon/alpha^1.5, 'psi_internal' 42 epsilon/(0.67 + 0.33 psi) (psi > −1), 'psi_tension' 62 epsilon (1 − psi) sqrt(−psi) (psi <= −1), 'sqrt_k1' and 'sqrt_k2' 21 epsilon sqrt(k). alpha is the compressed part of the plate, psi the ratio of the edge stresses, compression positive. The internal plate's b is the figure's: between the root radii of a rolled section, h − 3 t of a hollow section (1.5 t at each corner); the outstand's b from the root of the fillet to the free edge. The table's own epsilon for S235/S275/S355/S460 (1.0, 0.924, 0.814, 0.715) is kept as a check of the formula, not used.",
+  "edition": "SIA 263:2013",
+  "table_5": {
+    "number": "5a, 5b",
+    "title": "Schlankheitskriterien",
+    "norm": "SIA 263",
+    "norm_ref": "Tabelle 5",
+    "page": 26,
+    "epsilon": {"f_y_ref": 235, "check": {"S235": 1.0, "S275": 0.924, "S355": 0.814, "S460": 0.715}},
+    "internal": {
+      "table": "5a",
+      "compression": [33, 38, 42],
+      "bending": [72, 83, 124],
+      "compression_bending": {
+        "class_1": [{"when": "alpha >= 0.5", "kind": "alpha_internal", "coefficient": 396, "divisor": [13, 1]}, {"when": "alpha < 0.5", "kind": "alpha_inv", "coefficient": 36}],
+        "class_2": [{"when": "alpha >= 0.5", "kind": "alpha_internal", "coefficient": 456, "divisor": [13, 1]}, {"when": "alpha < 0.5", "kind": "alpha_inv", "coefficient": 41.5}],
+        "class_3": [{"when": "psi > -1", "kind": "psi_internal", "coefficient": 42, "divisor": [0.67, 0.33]}, {"when": "psi <= -1", "kind": "psi_tension", "coefficient": 62}]
+      },
+      "round_tube": {"table": "5a, Spezialfall Rundrohre", "D_over_t": [50, 70, 90], "epsilon_power": 2}
+    },
+    "outstand": {
+      "table": "5b",
+      "compression": [9, 10, 14],
+      "free_edge_compressed": {
+        "class_1": {"kind": "alpha_inv", "coefficient": 9}, "class_2": {"kind": "alpha_inv", "coefficient": 10}, "class_3": {"kind": "sqrt_k1", "coefficient": 21}
+      },
+      "free_edge_tension": {
+        "class_1": {"kind": "alpha_inv_15", "coefficient": 9}, "class_2": {"kind": "alpha_inv_15", "coefficient": 10}, "class_3": {"kind": "sqrt_k2", "coefficient": 21}
+      },
+      "k1": {"polynomial": [0.57, -0.21, 0.07], "range": [-3, 1]},
+      "k2": [{"range": [0, 1], "form": "0.578/(0.34 + psi)", "numerator": 0.578, "offset": 0.34}, {"range": [-1, 0], "polynomial": [1.7, -5, 17.1]}]
+    }
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.1",
+  "id": "VU-Skizze",
+  "label": "",
+  "grid": {
+    "snap": "auto"
+  },
+  "elements": [
+    {
+      "id": "E1",
+      "kind": "linear",
+      "position": "T001",
+      "points": [
+        [
+          -300,
+          0
+        ],
+        [
+          300,
+          0
+        ]
+      ],
+      "view": "h",
+      "label_offset": [
+        18.34,
+        42.64
+      ]
+    },
+    {
+      "id": "E2",
+      "kind": "linear",
+      "points": [
+        [
+          0,
+          -100
+        ],
+        [
+          0,
+          400
+        ]
+      ],
+      "view": "h",
+      "position": "S001"
+    }
+  ],
+  "connectors": [],
+  "aids": [
+    {
+      "id": "A1",
+      "kind": "vertical",
+      "x": -100,
+      "z": -100,
+      "angle": 90,
+      "shown": false
+    },
+    {
+      "id": "A2",
+      "kind": "vertical",
+      "x": 100,
+      "z": -100,
+      "angle": 90,
+      "shown": false
+    },
+    {
+      "id": "A3",
+      "kind": "vertical",
+      "x": 100,
+      "z": -100,
+      "angle": 90,
+      "shown": false
+    },
+    {
+      "id": "A4",
+      "kind": "vertical",
+      "x": 0,
+      "z": -100,
+      "angle": 90,
+      "shown": false
+    },
+    {
+      "id": "A5",
+      "kind": "vertical",
+      "x": -60,
+      "z": -100,
+      "angle": 90,
+      "shown": false
+    },
+    {
+      "id": "A6",
+      "kind": "vertical",
+      "x": 60,
+      "z": -100,
+      "angle": 90,
+      "shown": false
+    },
+    {
+      "id": "A7",
+      "kind": "horizontal",
+      "x": -300,
+      "z": -100,
+      "angle": 0,
+      "shown": false
+    },
+    {
+      "id": "A8",
+      "kind": "horizontal",
+      "x": -300,
+      "z": 100,
+      "angle": 0,
+      "shown": false
+    },
+    {
+      "id": "A9",
+      "kind": "horizontal",
+      "x": -300,
+      "z": 0,
+      "angle": 0,
+      "shown": false
+    },
+    {
+      "id": "A10",
+      "kind": "horizontal",
+      "x": -300,
+      "z": -60,
+      "angle": 0,
+      "shown": false
+    },
+    {
+      "id": "A11",
+      "kind": "horizontal",
+      "x": -300,
+      "z": 60,
+      "angle": 0,
+      "shown": false
+    },
+    {
+      "id": "A12",
+      "kind": "point",
+      "x": -60,
+      "z": -60,
+      "shown": true,
+      "connector": true
+    },
+    {
+      "id": "A13",
+      "kind": "point",
+      "x": 60,
+      "z": -60,
+      "shown": true,
+      "connector": true
+    },
+    {
+      "id": "A14",
+      "kind": "point",
+      "x": 60,
+      "z": 60,
+      "shown": true,
+      "connector": true
+    },
+    {
+      "id": "A15",
+      "kind": "point",
+      "x": -60,
+      "z": 60,
+      "shown": true,
+      "connector": true
+    }
+  ],
+  "dimensions": [],
+  "group": "Velo-Unterstand-Skizze"
+}

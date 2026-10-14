@@ -1,0 +1,30 @@
+{
+  "_source": "SIA 265:2021, clause 4.2.9, equations (38) to (44) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 36, read off a render of the page (the radicals of (40), (42), (43) and (44) do not extract as text).",
+  "_note": "k_m = 1 for lambda_rel,m <= lower_bound; k_m = intercept - slope · lambda_rel,m for lower_bound < lambda_rel,m <= upper_bound; k_m = 1/lambda_rel,m^2 for upper_bound < lambda_rel,m (39). The norm prints the middle condition as \"0,75 · lambda_rel,m <= 1,4\", a misprint for \"0,75 < lambda_rel,m <= 1,4\" (Figur 11). lambda_rel,m = sqrt(f_m,k / sigma_m,crit) (40); for a rectangle b x h under a constant moment with lateral supports a apart, approximately sigma_m,crit = sigma_m_crit_factor · E_0,05 · b^2/(a · h) (41), i.e. lambda_rel,m = lambda_rel_m_factor · sqrt(a · h)/b · sqrt(f_m,k / E_0,05) (42), 1.15 being 1/sqrt(0.75) rounded. f_m,k from Tabelle 8 or 9, E_0,05 from Anhang B. simplified_factors are the Nadelholz shortcut of (43)/(44), lambda_rel,m = factor · sqrt(a · h)/b, kept for the record.",
+  "edition": "SIA 265:2021",
+  "clause": {
+    "norm": "SIA 265",
+    "norm_ref": "4.2.9",
+    "page": 36,
+    "label": "Stabilität von Biegeträgern (Kippen)",
+    "equations": {
+      "check": "38",
+      "k_m": "39",
+      "lambda_rel_m": "40",
+      "sigma_m_crit": "41",
+      "lambda_rel_m_rectangle": "42"
+    },
+    "k_m": {
+      "lower_bound": 0.75,
+      "upper_bound": 1.4,
+      "intercept": 1.56,
+      "slope": 0.75
+    },
+    "sigma_m_crit_factor": 0.75,
+    "lambda_rel_m_factor": 1.15,
+    "simplified_factors": {
+      "Vollholz": 0.07,
+      "Brettschichtholz": 0.06
+    }
+  }
+}

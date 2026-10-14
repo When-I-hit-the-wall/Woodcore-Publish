@@ -1,0 +1,136 @@
+{
+ "_source": "SIA 261:2020, Annexe C (normative) «Coefficients de force et de pression pour le vent», Tableau 57d, p. 97 -- transcribed from the text layer of the French edition, Normen-Florian/SIA261-2020-FR.pdf, each row's values counted against the table's columns, and checked against a render of the page (11.10.2026, issue #37). Values are the norm's decimals with a point; ±x is the pair [x, -x], a/b the pair [a, b], null a cell the norm leaves empty (–), \"direct\" a cell whose force is computed directly (*).",
+ "edition": "SIA 261:2020",
+ "table": {
+  "number": "57d",
+  "title": "Coefficients pour avant-toits, h1/d1 = 2,675, h1/h = 0,61 à 0,75",
+  "page": 97,
+  "ratio": "h1/d1 = 2,675, h1/h = 0,61–0,75",
+  "roof": "avant-toit",
+  "columns": [
+   {
+    "key": "cpe:I",
+    "group": "cpe",
+    "surface": "I"
+   },
+   {
+    "key": "cpe:J",
+    "group": "cpe",
+    "surface": "J"
+   },
+   {
+    "key": "cpe:K",
+    "group": "cpe",
+    "surface": "K"
+   },
+   {
+    "key": "cpe:L",
+    "group": "cpe",
+    "surface": "L"
+   },
+   {
+    "key": "loc:n",
+    "group": "cpe_local",
+    "surface": "n"
+   },
+   {
+    "key": "loc:p",
+    "group": "cpe_local",
+    "surface": "p"
+   },
+   {
+    "key": "cf1:b·d1−d1²",
+    "group": "cf",
+    "area": "b·d1−d1²",
+    "index": 1
+   },
+   {
+    "key": "cf3:d1²",
+    "group": "cf",
+    "area": "d1²",
+    "index": 3
+   }
+  ],
+  "rows": [
+   {
+    "label": "0°",
+    "values": [
+     -0.34,
+     -0.35,
+     0.61,
+     0.51,
+     -0.51,
+     -0.71,
+     -0.95,
+     -0.87
+    ]
+   },
+   {
+    "label": "15°",
+    "values": [
+     -0.34,
+     -0.33,
+     0.53,
+     0.61,
+     -0.81,
+     -0.64,
+     -0.87,
+     -0.94
+    ]
+   },
+   {
+    "label": "30°",
+    "values": [
+     -0.39,
+     -0.31,
+     0.44,
+     0.58,
+     [
+      0.6,
+      -0.6
+     ],
+     0.34,
+     -0.83,
+     -0.89
+    ]
+   },
+   {
+    "label": "45°",
+    "values": [
+     -0.39,
+     -0.3,
+     0.32,
+     0.48,
+     [
+      0.6,
+      -0.6
+     ],
+     0.37,
+     -0.72,
+     -0.78
+    ]
+   },
+   {
+    "label": "90°",
+    "values": [
+     -0.24,
+     [
+      0.67,
+      -0.67
+     ],
+     -0.36,
+     -0.8,
+     -1.12,
+     -0.74,
+     0.12,
+     1.47
+    ]
+   }
+  ],
+  "cpe_peak": null,
+  "cfr": null,
+  "notes": [
+   "avant-toit de pente −5° à +20°"
+  ]
+ }
+}

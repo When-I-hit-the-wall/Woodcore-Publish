@@ -1,0 +1,212 @@
+{
+ "_source": "SIA 261:2020, Annexe C (normative) «Coefficients de force et de pression pour le vent», Tableau 51, p. 93 -- transcribed from the text layer of the French edition, Normen-Florian/SIA261-2020-FR.pdf, each row's values counted against the table's columns, and checked against a render of the page (11.10.2026, issue #37). Values are the norm's decimals with a point; ±x is the pair [x, -x], a/b the pair [a, b], null a cell the norm leaves empty (–), \"direct\" a cell whose force is computed directly (*).",
+ "edition": "SIA 261:2020",
+ "table": {
+  "number": "51",
+  "title": "Coefficients pour marquises de quai h : b : d = 0,75 : 5 : 1, pente du toit 30°",
+  "page": 93,
+  "ratio": "0,75 : 5 : 1",
+  "roof": "30°",
+  "columns": [
+   {
+    "key": "cpe:A",
+    "group": "cpe",
+    "surface": "A"
+   },
+   {
+    "key": "cpe:B",
+    "group": "cpe",
+    "surface": "B"
+   },
+   {
+    "key": "cpe:C",
+    "group": "cpe",
+    "surface": "C"
+   },
+   {
+    "key": "cpe:D",
+    "group": "cpe",
+    "surface": "D"
+   },
+   {
+    "key": "cpe:E",
+    "group": "cpe",
+    "surface": "E"
+   },
+   {
+    "key": "cpe:G",
+    "group": "cpe",
+    "surface": "G"
+   },
+   {
+    "key": "cpe:m_e",
+    "group": "cpe",
+    "surface": "m_e"
+   },
+   {
+    "key": "cpis:m_i",
+    "group": "cpi",
+    "surface": "m_i"
+   },
+   {
+    "key": "cpis:C",
+    "group": "cpi",
+    "surface": "C"
+   },
+   {
+    "key": "cpis:D",
+    "group": "cpi",
+    "surface": "D"
+   },
+   {
+    "key": "cpis:E",
+    "group": "cpi",
+    "surface": "E"
+   },
+   {
+    "key": "cpis:G",
+    "group": "cpi",
+    "surface": "G"
+   },
+   {
+    "key": "cf1:b·h1",
+    "group": "cf",
+    "area": "b·h1",
+    "index": 1
+   },
+   {
+    "key": "cf2:d·h1",
+    "group": "cf",
+    "area": "d·h1",
+    "index": 2
+   },
+   {
+    "key": "cf3:d·b",
+    "group": "cf",
+    "area": "d·b",
+    "index": 3
+   },
+   {
+    "key": "cfs1:b·hs",
+    "group": "cf_snow",
+    "area": "b·hs",
+    "index": 1
+   },
+   {
+    "key": "cfs2:d·hs",
+    "group": "cf_snow",
+    "area": "d·hs",
+    "index": 2
+   },
+   {
+    "key": "cfs3:b·d",
+    "group": "cf_snow",
+    "area": "b·d",
+    "index": 3
+   }
+  ],
+  "rows": [
+   {
+    "label": "0°",
+    "values": [
+     0.95,
+     -0.5,
+     -0.9,
+     -0.9,
+     0.5,
+     -0.5,
+     -1.0,
+     -1.0,
+     -0.7,
+     -0.7,
+     -0.7,
+     -0.7,
+     "direct",
+     0.0,
+     0.7,
+     1.45,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "label": "15°",
+    "values": [
+     0.7,
+     -0.45,
+     -0.6,
+     -1.0,
+     0.4,
+     -0.45,
+     -1.1,
+     -1.0,
+     -0.7,
+     -0.55,
+     -0.7,
+     -0.55,
+     "direct",
+     0.55,
+     0.6,
+     1.15,
+     0.4,
+     0.0
+    ]
+   },
+   {
+    "label": "45°",
+    "values": [
+     0.2,
+     -0.6,
+     0.45,
+     -0.6,
+     [
+      0.1,
+      -0.1
+     ],
+     -0.6,
+     -1.0,
+     -0.6,
+     -0.4,
+     0.2,
+     -0.3,
+     -0.3,
+     "direct",
+     1.65,
+     -0.05,
+     0.8,
+     1.05,
+     0.0
+    ]
+   },
+   {
+    "label": "90°",
+    "values": [
+     -0.4,
+     -0.4,
+     0.6,
+     -0.3,
+     -0.3,
+     -0.3,
+     -0.8,
+     -0.6,
+     -0.4,
+     0.3,
+     -0.2,
+     -0.2,
+     "direct",
+     1.6,
+     -0.1,
+     0.0,
+     0.9,
+     0.0
+    ]
+   }
+  ],
+  "cpe_peak": -2.0,
+  "cfr": 0.05,
+  "notes": [
+   "c_fr = 0,05 ; surface de référence b·d",
+   "* calcul direct de Q1 : Q1 = {[c_pe(A) − c_pe(B)]·h_D·b + [c_pe(E) − c_pe(G) − c_pi(E) + c_pi(G)]·(h1 − h_D)·b}·q_p"
+  ]
+ }
+}

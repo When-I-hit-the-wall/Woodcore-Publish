@@ -1,0 +1,87 @@
+# Architecture principle and design rules
+
+> The pipeline Excel -> Python -> JSON -> Typst, and the 16 design rules every change must respect.
+>
+> Moved verbatim from CLAUDE.md (§2) on 2026-10-07. The § numbers are kept as stable anchors: `docs/README.md` maps every § to its file.
+
+## 2. Architecture principle
+
+```
+Excel (input data -- primary source, user entry, project parameters)
+  ├─ Positionen.xlsx                 tables: Positions Element, data_type (§7). NO loads, NO connectors (§7bis).
+  └─ *Belastungsannahmen*.xlsm|xlsx  every load, one sheet per case -- every workbook
+                                     whose name says so is read, as many as there are (§3.3):
+                                     SL-*    the snow calculation itself (§3.3bis)
+                                     EL+AL-* the layer build-up Python sums (§3.3ter)
+                                     WL-*    the wind calculation itself (§3.3quater)
+        │  all at the top of the project folder, where the engineer works (§11)
+        │
+        │  + connectors/<id>.json           one connector each, with its own shear-resistance calculation, drawn on a detail schema, written by Woodcore (§3.3nonies)
+        │  + connections/<id>.json          one polar-moment calculation each, drawn on a detail schema, written by Woodcore (§3.3quinquies)
+        │  + plans/<id>.json                one position plan each, drawn in Woodcore over the architect's plan (§3.3sexies)
+        │  + statics/<id>.json              one static model each, drawn in Woodcore (§3.3octies)
+        │  + details/<id>.json              one connection detail each, drawn in Woodcore (§3.3decies)
+        │  + checks/<id>.json              one member check each (SIA 265 4.2.1 tension and 4.2.2 compression so far), written by Woodcore's «Traction» and «Compression» tabs and computed in the report by #show-check-member (§3.3unvicies)
+        │  + Formules/<id>.typ             one calculation domain each, at the top of the Typst root, written by Woodcore's «Formules» tab and by VS Code alike -- the .typ the source of truth, its id the file's name, printed by #include "/Formules/<id>.typ" (§10quinquies, v0.117, issue #15)
+        │  + journal[-cu|-bp].json         each document's revisions, ONE file each and not a folder of them, written by hand in
+        │                                   Woodcore's «Journal» tab (§3.3terdecies)
+        │  + <document>/structure.json, Sections/<id>.typ, sync.json   a convention's and a base de projet's chapters and sections, the objects in them -- every heading, paragraph and table between tags -- and what each shares with the others, written by Woodcore's «Structure du document» tab and by VS Code alike, the .typ being the source of truth (§3.3octodecies)
+        │  + calc/norms/<norm>-<year>-<table>-<designation>.json  every norm value a Python calculation uses, one file per table or clause, transcribed once (§11) --
+        │                                   the same files Typst's #distance reads for SIA 265's minimum distances (v0.87, §10bis)
+        │  + calc/domains/figure_style.py  the three factors every figure is drawn with -- the strokes, the symbols placed on a point,
+        │                                   the texts -- and the factor one entry of a drawing may state over them (§3.3quaterdecies)
+        │  + calc/norms/norms.json          the documents the engine can name in full -- designation, title, edition, publisher --
+        │                                   for the report's bibliography, beside the project's own references.bib (§10); 43 entries since v0.112, the SIA and VKF documents the two other documents name
+        │  + calc/i18n/strings.json         every word the engine prints, in German, French and English -- read by
+        │                                   Python for the figures it draws and by Typst for the rest (§4bis)
+        ▼
+Python (validation, calculations, calculation domains, load combinations)
+        │
+        ├─ schemas/*.schema.json          documented, versioned JSON schemas (data contract)
+        ├─ data/positions/<id>.json       type/material/dimension per position (descriptive only, §7)
+        ├─ data/connectors.json           every connector: its description and its shear resistance (§3.3nonies, §7bis)
+        ├─ data/calculations.json         one entry per domain, one per sheet inside it -- or per category, for a domain read from a norm table (§3.3septies)
+        ├─ data/connections.json (+ .svg) one entry per connection: its schema, its geometry and polar moment
+        ├─ data/plans.json (+ plans/)     one entry per plan: its symbols' SVG, its legend's lines, its background's page
+        ├─ data/statics.json (+ statics/) one entry per static model -- drawn in Woodcore (until 0.117 also imported from RFEM, an import retired then: archive/rfem/)
+        ├─ data/checks.json              one entry per member check saved in Woodcore: its values resolved against the positions, whether it can be calculated and why not -- nothing computed (§3.3unvicies)
+        ├─ data/formulas.json            the index of the «Formules» tab's domains, id -> title and Formules/<id>.typ (2.0), read by the «Variables» tab and the export's checks, no longer by Typst (v0.117, issue #15)
+        └─ data/journal[-cu|-bp].json    each document's revisions, newest first (§3.3terdecies)
+        │
+        ▼  read by Typst (json())
+_woodcore/lib/calc-engine.typ  (the program's lib/, copied into the project at every export with the norm tables lib/distance.typ reads: shared display functions + get-* data-access abstraction)
+        │
+        ▼
+the three documents (v0.111), each its entry .typ + Sections/*.typ in a folder of its own: 1_… the convention d'utilisation, 2_… the base de projet,
+3_…/Statischer Rapport.typ the report (layout, text, report structure, axes passed as an argument); a project laid out as one report has the report alone (§12)
+        │
+        ▼  woodcore-cli export [--document cu|bp|rs|all] --level 1|2|3   (typst compile --root <the Typst root> --input level=1|2|3)
+one PDF per document, beside its .typ (§12, v0.87) -- compiled only if its Typst changed since its PDF (calc/stamps.py, v0.111)
+```
+
+**Excel as the primary source.** Excel remains the point of user entry and project parameterization. Python turns Excel into JSON and performs the calculations — **except where Excel already performs them**: the snow load is calculated in the `SL-*` sheets of the Belastungsannahmen workbooks, and Python only reads the result and the inputs behind it (§3.3bis), while the permanent loads on the `EL+AL-*` sheets go the other way round — Excel holds the layer build-up, Python computes the sums (§3.3ter). Which of the two computed a value is never guessed: every var carries the `source` that produced it, down to the cell (`excel:Belastungsannahmen.xlsm!SL-Dach1!H17`, `python:domains/dead_load.py`). 👉 **The JSON files in `data/` must never be edited by hand**: they are always regenerated by `export_all.py` from Excel and the Python code.
+
+**The norm is the source of truth above Excel.** Excel is where the engineer enters *this project* — its geometry, its layers, the coefficients chosen for it. What the norm fixes for every project is entered nowhere: it is transcribed once into `calc/norms/*.json`, from the edition it was read in, and that edition is a PDF in `ExternalFiles/000-Normes/`, the reference library beside the program (§11bis). ⚠️ Since v0.99 the folder also holds **`norms.json`**, which is not a value of a norm but the **name** of one: the designation, the full title, the edition and the publisher of every document the engine cites, for the report's bibliography (§10). It belongs here for the same reason every other file of the folder does — a norm's own words are transcribed once, off the edition named in its `_source`, and `calc/norms/norms.py` checks the file before an export or a report takes anything out of it — and it travels into every project with the engine (§12). What no file of this folder ever holds is the *path* to the library: the report prints the four fields and never names `ExternalFiles/`.
+
+⚠️ Since v0.87 those files are read by **Typst** as well as by Python: `#distance` prints SIA 265's minimum distances from the very JSON `calc/norms/sia265.py` reads (§10bis), one source for both, and the tables it names are copied into each project's `_woodcore/` with the engine (§12). The reference library sits beside the pipeline and outside it: it is read by the engineer and by the assistant and by nothing else — no module of `calc/` opens a file in it, no schema mentions it, and `export_all.py` does not know it is there.
+
+Design rules (kept up to date):
+
+1. **One single source of truth per variable** — no value copied by hand.
+2. **Every calculation (Python or Typst) has the same data shape** and is rendered with the same display function.
+3. **What a calculation concerns is stated in the report, never in the data**: a `calc-block` attributes calculations to positions and their plan axes at display time (§5, point 12), and a load, a connection, a connector or a schema belongs to no position (§8, §14).
+4. **The default level of detail is a compile-time parameter**, but any calculation can override it individually.
+5. **Systematic provenance** (Excel / Python / Typst direct) on every variable.
+6. **A load is a calculation domain, its cases are Excel sheets** (§3.3): addressed `(domain, instance)`, never duplicated, and never assigned to a position at the data level either (§7-§8) — positions only carry their own type/material/dimension.
+7. **Every calculation step cites its norm and norm clause** — or, where it follows a document rather than a norm (a connection's handbook, §3.3quinquies), that document, whose clause may then be left empty (v0.32). The reference itself is never optional.
+8. **Every JSON file follows a versioned schema** (`schema_version`).
+9. **Every value has an explicit unit.**
+10. **Data is validated** (structure, type, business rules) **before export.**
+11. **Typst accesses data through abstraction functions** (`get-*`).
+12. **Axes are a display concern**, not stored in the data.
+13. **A value taken from a norm is read from the norm itself**, at a named edition and a page that can be turned to (§11bis) — never from memory, never from a handbook's restatement of it, and never from one of the unverified tools beside it in `ExternalFiles/`.
+14. **Every command the report can call is documented in Woodcore's commands tab** (§10sexies). A command added to `lib/` is not finished when it compiles: it is finished when it carries a `///` block with a summary, a `- name (type):` line for each of its arguments, a `->` line, and **at least two worked examples that compile**, and when it is placed in one of the categories of `build_reference.CATEGORIES`. A binding nobody outside the engine should call is placed in *Internes* instead, which is the same decision made explicitly. `tests/test_commands.py` enforces all of it, so the obligation is a check and not an intention. Since v0.86 a command is finished when its paragraphs and arguments are translated into French and German as well, in `calc/i18n/commands.json` (§10sexies), and the same test names every one that is not.
+15. **A document's `.typ` files are the source of truth, and no Typst code is shown in Woodcore** (v0.112, §3.3octodecies, §13): an object — a heading, a paragraph, a table — is found by its tags, edited through a model and written back between them and nowhere else; what the documents share is kept in step by the engineer's import and never by an overwrite; the engineer who wants to read code opens the file in VS Code, and Woodcore follows what he writes.
+16. **The drawing engines work alike wherever they can** (v0.116, §3.3sexies, §3.3vicies, §10quater, §13). The position plan and the fire-protection plan are **one engine** — `DrawingTab`, `PlanCanvas`, the document view, the export sheets — and a feature of one is a feature of the other unless it belongs to the domain: plan types, sections and their levels, the load symbols and the list of the positions are the position plan's alone. Snapping and tracking live **once**, in `PlanCanvas` and `calc/domains/plan_tracking.py`, a second kind of plan supplying only its own points; a right pane, a left pane, a frame, a layer and a sheet are built once and asked for by hook. A future drawing tab — a plan of another trade, a fire section — is built on the same base and follows the same rule where it can; where a feature cannot be shared the reason is written down next to it, the way §3.3vicies says which of this version's changes the fire plan did not take.
+
+---

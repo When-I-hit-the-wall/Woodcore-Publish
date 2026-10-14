@@ -1,0 +1,72 @@
+{
+  "_source": "VKF / AEAI 15-15, «Distances de sécurité incendie, systèmes porteurs et compartiments coupe-feu», 01.01.2017 / 15-15fr, état 18.09.2019 -- ExternalFiles/000-Normes/VKF-AEAI-15-15-DistanceDeSecuriteIncendieSystemePorteursEtCompartimentsCoupeFeu.pdf, chiffre 3.7.1, tableaux 1 (p. 12, «Version selon décision de l'AIET du 22 septembre 2016»), 2 (p. 14) and 3 (p. 15) with their notes (pp. 12-15), transcribed by hand off a render of the pages (the tables' rows do not extract as text in order).",
+  "_note": "The column «Système porteur» only: the resistance a load-bearing structure is required to have, in minutes of R (0 is «pas d'exigence»). A row lists the uses («Affectation») it holds for, one value per concept («Construction», «Installation d'extinction»). The notes that change the load-bearing column are written as data, `effect` «none» (no requirement) or «minus_30» (reduced by 30 minutes), `when` the building or the member's condition: [1] (tables 1 and 2) a one-storey building or the top storey of a building of several; [5] (table 1, on the values it marks) a building of two storeys with at most 2400 m² above ground in all; [8] (table 3) the top storey; [9] (table 3) a one-storey building. The exemptions are 3.2.3 al. 2 c and d (p. 8): the load-bearing structure of a single-family house (its underground storeys included) and of a building of reduced size carries no requirement whatever its height -- uses of their own, in no table. The other notes ([2] [3] [4] [6] [7]) concern compartment walls, parkings with openings, fire detection and the height category itself: the engineer applies them, and the window says so. The French words are the directive's; the German directive is not in the library (issue #34), so a German label is the glossary's and marked to check. 3.7.1 al. 2: these are standard solutions, from which art. 11 of the norm allows a proven departure -- which is why a check may state its own duration.",
+  "edition": "VKF / AEAI 15-15:2017",
+  "requirement": {
+    "norm": "VKF 15-15",
+    "norm_ref": "3.7.1",
+    "column": "Système porteur",
+    "unit": "min",
+    "heights": [
+      {"id": "low", "table": "1", "page": 12, "label": "Bâtiments de faible hauteur (jusqu'à une hauteur totale de 11 m)", "max_height": 11},
+      {"id": "medium", "table": "2", "page": 14, "label": "Bâtiments de hauteur moyenne (jusqu'à une hauteur totale de 30 m)", "max_height": 30},
+      {"id": "high", "table": "3", "page": 15, "label": "Bâtiments élevés (jusqu'à une hauteur totale de 100 m)", "max_height": 100}
+    ],
+    "uses": [
+      {"id": "housing", "label": "Bâtiments d'habitation abritant plusieurs logements"},
+      {"id": "office", "label": "Bureaux"},
+      {"id": "school", "label": "Écoles"},
+      {"id": "retail", "label": "Surfaces de vente (avec surface de compartiment coupe-feu jusqu'à 1'200 m2 et recevant jusqu'à 300 personnes)"},
+      {"id": "parking", "label": "Parkings"},
+      {"id": "industry_low", "label": "Industrie et artisanat, q jusqu'à 1'000 MJ/m2"},
+      {"id": "agriculture", "label": "Agriculture"},
+      {"id": "industry_high", "label": "Industrie et artisanat, q supérieur à 1'000 MJ/m2"},
+      {"id": "lodging_a", "label": "Établissements d'hébergement [a], par exemple hôpitaux, maisons de retraite et de soins"},
+      {"id": "lodging_b", "label": "Établissements d'hébergement [b], par exemple hôtels"},
+      {"id": "lodging_c", "label": "Établissements d'hébergement isolés [c], par exemple refuges de montagne"},
+      {"id": "assembly", "label": "Locaux recevant un grand nombre de personnes"},
+      {"id": "department_store", "label": "Grands magasins"},
+      {"id": "single_family", "label": "Maisons individuelles, niveaux souterrains compris"},
+      {"id": "small_building", "label": "Bâtiments de taille réduite"}
+    ],
+    "exemptions": {
+      "single_family": {"norm_ref": "3.2.3 al. 2 d", "page": 8},
+      "small_building": {"norm_ref": "3.2.3 al. 2 c", "page": 8}
+    },
+    "concepts": [
+      {"id": "construction", "label": "Construction"},
+      {"id": "extinction", "label": "Installation d'extinction"}
+    ],
+    "storeys": [
+      {"id": "single", "label": "un niveau"},
+      {"id": "two_small", "label": "deux niveaux, surface totale hors terre de 2'400 m2 au maximum"},
+      {"id": "several", "label": "plusieurs niveaux"}
+    ],
+    "tables": {
+      "1": [
+        {"uses": ["housing", "office", "school", "retail", "parking", "industry_low", "agriculture"], "construction": {"R": 30, "notes": ["5"]}, "extinction": {"R": 0, "notes": []}},
+        {"uses": ["industry_high"], "construction": {"R": 60, "notes": ["5"]}, "extinction": {"R": 30, "notes": ["5"]}},
+        {"uses": ["lodging_a"], "construction": {"R": 60, "notes": []}, "extinction": {"R": 30, "notes": []}},
+        {"uses": ["lodging_b", "lodging_c", "assembly", "department_store"], "construction": {"R": 60, "notes": []}, "extinction": {"R": 30, "notes": []}, "use_notes": {"lodging_c": ["5"]}}
+      ],
+      "2": [
+        {"uses": ["housing", "office", "school", "retail", "parking", "industry_low", "agriculture"], "construction": {"R": 60, "notes": []}, "extinction": {"R": 30, "notes": []}},
+        {"uses": ["industry_high"], "construction": {"R": 90, "notes": []}, "extinction": {"R": 60, "notes": []}},
+        {"uses": ["lodging_a"], "construction": {"R": 60, "notes": []}, "extinction": {"R": 30, "notes": []}},
+        {"uses": ["lodging_b", "lodging_c", "assembly", "department_store"], "construction": {"R": 60, "notes": []}, "extinction": {"R": 30, "notes": []}}
+      ],
+      "3": [
+        {"uses": ["housing", "office", "school", "retail", "parking", "industry_low"], "construction": {"R": 90, "notes": []}, "extinction": {"R": 60, "notes": []}},
+        {"uses": ["industry_high"], "construction": {"R": 120, "notes": []}, "extinction": {"R": 90, "notes": []}},
+        {"uses": ["lodging_a"], "construction": {"R": 90, "notes": []}, "extinction": {"R": 60, "notes": []}},
+        {"uses": ["lodging_b", "assembly", "department_store"], "construction": {"R": 90, "notes": []}, "extinction": {"R": 60, "notes": []}}
+      ]
+    },
+    "notes": {
+      "1": {"tables": ["1", "2"], "column_wide": true, "effect": "none", "when": ["single_storey", "top_level"], "text": "Dans les bâtiments à un niveau, de même qu'au dernier niveau des bâtiments à plusieurs niveaux, les éléments de construction porteurs ne sont soumis à aucune exigence sur le plan de la résistance au feu."},
+      "5": {"tables": ["1"], "column_wide": false, "effect": "minus_30", "by": 30, "when": ["two_small"], "text": "Dans les bâtiments à deux niveaux d'une surface totale hors terre de 2'400 m2 au maximum, [...] la résistance au feu peut être réduite de 30 minutes; [...] pour les établissements d'hébergement [c], la résistance au feu peut généralement être réduite de 30 minutes."},
+      "8": {"tables": ["3"], "column_wide": true, "effect": "minus_30", "by": 30, "when": ["top_level"], "text": "La résistance au feu des éléments de construction porteurs du dernier niveau peut être réduite de 30 minutes."},
+      "9": {"tables": ["3"], "column_wide": true, "effect": "none", "when": ["single_storey"], "text": "Dans les bâtiments à un niveau (par exemple entrepôts à hauts rayonnages, halles et silos), les éléments de construction porteurs ne sont soumis à aucune exigence sur le plan de la résistance au feu."}
+    }
+  }
+}

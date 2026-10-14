@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "id": "Pavillon",
+  "label": "Grundriss",
+  "floor": "0",
+  "sheet": {
+    "width": 1190.55,
+    "height": 1190.55
+  },
+  "show_lengths": false,
+  "style": {
+    "line": 1.0,
+    "point": 0.69,
+    "text": 1.0
+  },
+  "axes": [],
+  "elements": [
+    {
+      "type": "S",
+      "label": "S001",
+      "points": [
+        [
+          365.5,
+          669.19
+        ]
+      ]
+    },
+    {
+      "type": "T",
+      "label": "T001",
+      "points": [
+        [
+          361.74,
+          665.97
+        ],
+        [
+          626.19,
+          665.97
+        ]
+      ]
+    },
+    {
+      "type": "S",
+      "label": "S002",
+      "points": [
+        [
+          616.58,
+          657.63
+        ]
+      ]
+    }
+  ],
+  "background": {
+    "file": "01_Pläne/02_Total Plane - 29-07-26.pdf",
+    "page": 14,
+    "opacity": 0.45,
+    "sha256": "4295ebad3513d4201791a8a53588838afb3f194a36986a399db85e8a40901884"
+  },
+  "crop": {
+    "x": 230.83,
+    "y": 306.21,
+    "w": 512.31,
+    "h": 473.44
+  }
+}

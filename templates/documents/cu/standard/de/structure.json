@@ -1,0 +1,469 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-structure",
+  "document": "cu",
+  "headings": "absolute",
+  "sections": [
+    {
+      "id": "introduction",
+      "title": {
+        "fr": "Explications",
+        "de": "Zweck und Abgrenzung",
+        "en": "Purpose and scope"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "purpose",
+          "file": "Sections/purpose.typ",
+          "enabled": true
+        },
+        {
+          "id": "scope-and-limits",
+          "file": "Sections/scope-and-limits.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "project-description",
+      "title": {
+        "fr": "Description générale",
+        "de": "Projektbeschrieb",
+        "en": "General description of the project"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "project-overview",
+          "file": "Sections/project-overview.typ",
+          "enabled": true
+        },
+        {
+          "id": "building-description",
+          "file": "Sections/building-description.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "transport-dimensions",
+          "file": "Sections/transport-dimensions.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "sustainability-certification",
+          "file": "Sections/sustainability-certification.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "future-extension",
+          "file": "Sections/future-extension.typ",
+          "enabled": false
+        },
+        {
+          "id": "civil-protection-shelter",
+          "file": "Sections/civil-protection-shelter.typ",
+          "enabled": false
+        },
+        {
+          "id": "ground-conditions",
+          "file": "Sections/ground-conditions.typ",
+          "enabled": false,
+          "shared_with": [
+            "bp"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "use-objectives",
+      "title": {
+        "fr": "Objectifs généraux d'utilisation",
+        "de": "Allgemeine Ziele für die Nutzung",
+        "en": "General aims for the use"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "intended-use",
+          "file": "Sections/intended-use.typ",
+          "enabled": true
+        },
+        {
+          "id": "live-loads",
+          "file": "Sections/live-loads.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "superimposed-dead-loads",
+          "file": "Sections/superimposed-dead-loads.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "service-life",
+          "file": "Sections/service-life.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "other-actions",
+          "file": "Sections/other-actions.typ",
+          "enabled": true
+        },
+        {
+          "id": "flexibility-and-alterations",
+          "file": "Sections/flexibility-and-alterations.typ",
+          "enabled": true
+        },
+        {
+          "id": "drilling-and-openings",
+          "file": "Sections/drilling-and-openings.typ",
+          "enabled": true
+        },
+        {
+          "id": "prestressing",
+          "file": "Sections/prestressing.typ",
+          "enabled": false
+        },
+        {
+          "id": "energy-and-building-physics",
+          "file": "Sections/energy-and-building-physics.typ",
+          "enabled": true
+        },
+        {
+          "id": "noise-protection-objectives",
+          "file": "Sections/noise-protection-objectives.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "environment-and-third-parties",
+      "title": {
+        "fr": "Environnement et exigences de tiers",
+        "de": "Umfeld und Drittanforderungen",
+        "en": "Ambient conditions and third-party requirements"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "third-party-requirements",
+          "file": "Sections/third-party-requirements.typ",
+          "enabled": true
+        },
+        {
+          "id": "construction-site",
+          "file": "Sections/construction-site.typ",
+          "enabled": true
+        },
+        {
+          "id": "neighbouring-buildings",
+          "file": "Sections/neighbouring-buildings.typ",
+          "enabled": true
+        },
+        {
+          "id": "utilities",
+          "file": "Sections/utilities.typ",
+          "enabled": true
+        },
+        {
+          "id": "contaminated-sites",
+          "file": "Sections/contaminated-sites.typ",
+          "enabled": true
+        },
+        {
+          "id": "occupational-safety",
+          "file": "Sections/occupational-safety.typ",
+          "enabled": true
+        },
+        {
+          "id": "emissions",
+          "file": "Sections/emissions.typ",
+          "enabled": true
+        },
+        {
+          "id": "prefabricated-elements",
+          "file": "Sections/prefabricated-elements.typ",
+          "enabled": true
+        },
+        {
+          "id": "radon",
+          "file": "Sections/radon.typ",
+          "enabled": false
+        }
+      ]
+    },
+    {
+      "id": "operation-and-maintenance",
+      "title": {
+        "fr": "Besoins de l'exploitation et de l'entretien",
+        "de": "Bedürfnisse des Betriebs und des Unterhalts",
+        "en": "Operational and maintenance requirements"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "maintenance-obligations",
+          "file": "Sections/maintenance-obligations.typ",
+          "enabled": true
+        },
+        {
+          "id": "maintenance-by-building-part",
+          "file": "Sections/maintenance-by-building-part.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "owner-requirements",
+      "title": {
+        "fr": "Exigences particulières du maître de l'ouvrage",
+        "de": "Besondere Vorgaben der Bauherrschaft",
+        "en": "Special requirements of the owner"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "building-requirements",
+          "file": "Sections/building-requirements.typ",
+          "enabled": true
+        },
+        {
+          "id": "construction-stages",
+          "file": "Sections/construction-stages.typ",
+          "enabled": true
+        },
+        {
+          "id": "structural-preferences",
+          "file": "Sections/structural-preferences.typ",
+          "enabled": true
+        },
+        {
+          "id": "material-requirements",
+          "file": "Sections/material-requirements.typ",
+          "enabled": true
+        },
+        {
+          "id": "execution-details",
+          "file": "Sections/execution-details.typ",
+          "enabled": true
+        },
+        {
+          "id": "schedule",
+          "file": "Sections/schedule.typ",
+          "enabled": true
+        },
+        {
+          "id": "inspections-and-acceptance",
+          "file": "Sections/inspections-and-acceptance.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "structure-requirements",
+      "title": {
+        "fr": "Exigences relatives à la structure porteuse",
+        "de": "Anforderungen an das Tragwerk",
+        "en": "Requirements for the structure"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "deformation-limits",
+          "file": "Sections/deformation-limits.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "settlements",
+          "file": "Sections/settlements.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "vibrations",
+          "file": "Sections/vibrations.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "durability",
+          "file": "Sections/durability.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "timber-appearance-classes",
+          "file": "Sections/timber-appearance-classes.typ",
+          "enabled": true
+        },
+        {
+          "id": "cracking-requirements",
+          "file": "Sections/cracking-requirements.typ",
+          "enabled": false
+        },
+        {
+          "id": "waterproofing-classes",
+          "file": "Sections/waterproofing-classes.typ",
+          "enabled": false
+        },
+        {
+          "id": "finishes-facades-installations",
+          "file": "Sections/finishes-facades-installations.typ",
+          "enabled": true
+        },
+        {
+          "id": "construction-tolerances",
+          "file": "Sections/construction-tolerances.typ",
+          "enabled": true
+        },
+        {
+          "id": "further-requirements",
+          "file": "Sections/further-requirements.typ",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "protection-objectives-and-risks",
+      "title": {
+        "fr": "Objectifs de protection et risques particuliers",
+        "de": "Schutzziele und besondere Risiken",
+        "en": "Objectives of protection and special risks"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "risk-evaluation",
+          "file": "Sections/risk-evaluation.typ",
+          "enabled": true
+        },
+        {
+          "id": "earthquake",
+          "file": "Sections/earthquake.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "fire-resistance",
+          "file": "Sections/fire-resistance.typ",
+          "enabled": true
+        },
+        {
+          "id": "impact",
+          "file": "Sections/impact.typ",
+          "enabled": false,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "accepted-risks",
+          "file": "Sections/accepted-risks.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bases-and-documents",
+      "title": {
+        "fr": "Bases et documents",
+        "de": "Grundlagen und Dokumente",
+        "en": "Bases and documents"
+      },
+      "enabled": true,
+      "children": [
+        {
+          "id": "project-documents",
+          "file": "Sections/project-documents.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        },
+        {
+          "id": "norms",
+          "file": "Sections/norms.typ",
+          "enabled": true,
+          "shared_with": [
+            "bp"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agreement-signatures",
+      "file": "Sections/agreement-signatures.typ",
+      "enabled": true
+    },
+    {
+      "id": "annexes",
+      "title": {
+        "fr": "Annexes",
+        "de": "Anhänge",
+        "en": "Appendices"
+      },
+      "enabled": false,
+      "children": [
+        {
+          "id": "annex-floor-load-plans",
+          "file": "Sections/annex-floor-load-plans.typ",
+          "enabled": false
+        },
+        {
+          "id": "annex-crack-types",
+          "file": "Sections/annex-crack-types.typ",
+          "enabled": false
+        },
+        {
+          "id": "annex-waterproofing-plan",
+          "file": "Sections/annex-waterproofing-plan.typ",
+          "enabled": false
+        },
+        {
+          "id": "annex-pages",
+          "file": "Sections/annex-pages.typ",
+          "enabled": false
+        }
+      ]
+    },
+    {
+      "id": "journal",
+      "file": "Sections/journal.typ",
+      "enabled": true
+    }
+  ]
+}

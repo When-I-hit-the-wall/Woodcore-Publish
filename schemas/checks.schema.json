@@ -1,0 +1,575 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Member checks",
+  "description": "data/checks.json -- every member check of the project as the export writes it, read by lib/timber.typ (#show-check-member, #check-member-ids; docs/domain/member-checks.md §3.3undecies, §3.3unvicies). One record per Woodcore-Datei/checks/<id>.json, its followed values resolved against the positions of the same export. A check that cannot be calculated is exported all the same, with `calculable: false` and its reason, and the report refuses it with that reason (the v0.33 rule).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "checks"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.0",
+        "1.1",
+        "1.2"
+      ],
+      "description": "-- 1.0, or 1.1 where a record carries `links`, or 1.2 where a record carries `fire` (issue #46): an export written at another version is refused rather than read as this one."
+    },
+    "checks": {
+      "type": "object",
+      "description": "One record per check, keyed by its id.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "label",
+            "group",
+            "kind",
+            "position",
+            "position_found",
+            "grade",
+            "grade_from",
+            "section",
+            "section_from",
+            "moisture_class",
+            "moisture_from",
+            "impact",
+            "alpha",
+            "N",
+            "calculable",
+            "reason",
+            "warnings"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "label": {
+              "type": "string"
+            },
+            "group": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "tension",
+                "compression",
+                "bending",
+                "shear",
+                "torsion",
+                "buckling",
+                "lateral-torsional",
+                "deformation",
+                "vibration"
+              ]
+            },
+            "position": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The position the source names, as it names it."
+            },
+            "position_found": {
+              "type": "boolean",
+              "description": "Whether the export carries that position: #show-check-member reads its line only then."
+            },
+            "grade": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "grade_from": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "position",
+                "stated",
+                null
+              ],
+              "description": "Where the value came from: \"position\", \"stated\", or null where neither gives one."
+            },
+            "section": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "The section the check computes with, resolved, and its text («100/200 mm», «Ø 200 mm»); null where neither the source nor the position gives one.",
+              "required": [
+                "type",
+                "text"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "rec",
+                    "cir"
+                  ]
+                },
+                "b": {
+                  "type": "number"
+                },
+                "h": {
+                  "type": "number"
+                },
+                "d": {
+                  "type": "number"
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
+            },
+            "section_from": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "position",
+                "stated",
+                null
+              ],
+              "description": "Where the value came from: \"position\", \"stated\", or null where neither gives one."
+            },
+            "moisture_class": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "moisture_from": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "position",
+                "stated",
+                null
+              ],
+              "description": "Where the value came from: \"position\", \"stated\", or null where neither gives one."
+            },
+            "impact": {
+              "type": "boolean"
+            },
+            "alpha": {
+              "type": "number"
+            },
+            "N": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "The design force: a tension's normal force, positive; a compression's magnitude, positive; a bending's normal force signed, tension positive, 0 for none. null for a shear, which reads its shear forces (issue #38).",
+              "required": [
+                "value",
+                "unit"
+              ],
+              "properties": {
+                "value": {
+                  "type": "number"
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "kN",
+                    "N",
+                    "MN"
+                  ]
+                }
+              }
+            },
+            "calculable": {
+              "type": "boolean",
+              "description": "Whether #show-check-member can print the check; false where something it needs is missing -- `reason` says what."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Why it cannot be calculated, \"\" where it can."
+            },
+            "M_y": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "A bending: the design moment about y, a moment of 0 being none (null); absent for the other kinds, whose records stay as they were.",
+              "required": [
+                "value",
+                "unit"
+              ],
+              "properties": {
+                "value": {
+                  "type": "number"
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "kNm",
+                    "Nm",
+                    "MNm"
+                  ]
+                }
+              }
+            },
+            "M_z": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "A bending: the design moment about z, null where none; absent for the other kinds.",
+              "required": [
+                "value",
+                "unit"
+              ],
+              "properties": {
+                "value": {
+                  "type": "number"
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "kNm",
+                    "Nm",
+                    "MNm"
+                  ]
+                }
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "What the export printed about this check."
+            },
+            "case": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "generell",
+                "mit_vorholz",
+                "endauflagerung",
+                null
+              ],
+              "description": "A compression at an angle: the case of Tabelle 8 or 9 read for f_c,90,d; null for a tension and a compression along the grain."
+            },
+            "larger": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "A compression at an angle: whether the bracketed f_c,90,d is read; null where no contact is checked."
+            },
+            "l": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "A compression at an angle: the contact length in mm; null otherwise."
+            },
+            "w": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "A compression at an angle: the contact width in mm, resolved -- the section's b or the one stated; null otherwise, or where a round section gives none."
+            },
+            "w_from": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "section",
+                "stated",
+                null
+              ],
+              "description": "Where w came from: \"section\" (its width b), \"stated\", or null."
+            },
+            "case_label": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The table's words for the case, «Endauflagerung (grössere Eindrückungen)»; null where no contact is checked."
+            },
+            "f_c_90_table": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "f_c,90,d as SIA 265 Tabelle 8 or 9 gives it for the case, in N/mm², before eta_w and eta_t, which the report applies -- read, not computed; null where no contact is checked or the table gives none."
+            },
+            "V_z": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "A shear: the design shear force in the plane of h (z), its sign immaterial; absent, null or 0 is none. Optional, additive (issue #38).",
+              "required": [
+                "value",
+                "unit"
+              ],
+              "properties": {
+                "value": {
+                  "type": "number"
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "kN",
+                    "N",
+                    "MN"
+                  ]
+                }
+              }
+            },
+            "V_y": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "A shear: the design shear force in the plane of b (y), likewise. Optional, additive (issue #38).",
+              "required": [
+                "value",
+                "unit"
+              ],
+              "properties": {
+                "value": {
+                  "type": "number"
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "kN",
+                    "N",
+                    "MN"
+                  ]
+                }
+              }
+            },
+            "pith": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "A shear: a member cut from the pith takes half of f_v,d (SIA 265 Tabelle 8 note 6). Optional; absent or null is false (issue #38)."
+            },
+            "l_y": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "A buckling, or a lateral torsional buckling with a compression: the system length about y, in mm, 0 or above -- the buckling length is beta_y · l_y, 0 holding the member against buckling about y. Optional, additive (issue #38)."
+            },
+            "l_z": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Likewise about z (issue #38)."
+            },
+            "beta_y": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "The buckling length coefficient about y, 0 or above: 1 pinned-pinned, 2 cantilever, 0.7, 0.5; absent or null is 1 (issue #38)."
+            },
+            "beta_z": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Likewise about z (issue #38)."
+            },
+            "a": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "A lateral torsional buckling: the distance between the lateral supports, in mm, above 0 -- sigma_m,crit by (41); or null with sigma_m_crit given (issue #38)."
+            },
+            "sigma_m_crit": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "A lateral torsional buckling: the critical bending stress of a finer calculation, in N/mm², above 0, in place of (41) -- never with a (issue #38)."
+            },
+            "fire": {
+              "type": "object",
+              "description": "A check in the design situation fire, SIA 265 4.5.2 (issue #46), resolved: present only for such a check. `section` stays the section before the fire; `b` and `h` here are the ideal residual section #member(fire:) computes, written for the summary and the window -- the report computes them again from `duration`, `sides` and `wood`, and tests/test_member_check.py holds the two equal.",
+              "required": [
+                "duration",
+                "duration_from",
+                "sides",
+                "wood",
+                "top_level"
+              ],
+              "properties": {
+                "duration": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "The fire resistance checked, in minutes: the check's own, or what VKF 15-15 requires; null where neither gives one (the check is then not calculable)."
+                },
+                "duration_from": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "stated",
+                    "vkf",
+                    null
+                  ],
+                  "description": "Where the duration came from."
+                },
+                "requirement": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "description": "What VKF 15-15 requires for the project's building and this check (calc/norms/vkf.py, required_resistance): {minutes, table, page, row, base, notes, reason, norm, norm_ref}; null where the project states no building."
+                },
+                "sides": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "bottom",
+                      "top",
+                      "left",
+                      "right"
+                    ]
+                  },
+                  "description": "The faces the fire reaches, in this order."
+                },
+                "wood": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "The wood Tabelle 13 is read for: softwood, beech, oak or cladding; null where it cannot be read."
+                },
+                "top_level": {
+                  "type": "boolean"
+                },
+                "beta_n": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "d_ef": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "b": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "h": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "links": {
+              "type": "object",
+              "description": "Where each value that follows a variable came from (REQ-012), by its key in the source: the variable, the factor and offset it was taken with, its own value and unit, and `stale` where it could not be read and the source's last value was kept. Absent where no field follows one.",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "required": [
+                    "variable",
+                    "factor",
+                    "offset",
+                    "base_value",
+                    "base_unit",
+                    "stale"
+                  ],
+                  "properties": {
+                    "variable": {
+                      "type": "object",
+                      "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+                      "required": [
+                        "domain",
+                        "instance",
+                        "var"
+                      ],
+                      "properties": {
+                        "domain": {
+                          "type": "string"
+                        },
+                        "instance": {
+                          "type": "string"
+                        },
+                        "var": {
+                          "type": "string"
+                        },
+                        "factor": {
+                          "type": "number"
+                        },
+                        "offset": {
+                          "type": "number"
+                        },
+                        "origin": {
+                          "type": "string",
+                          "enum": [
+                            "formulas"
+                          ]
+                        }
+                      }
+                    },
+                    "factor": {
+                      "type": "number"
+                    },
+                    "offset": {
+                      "type": "number"
+                    },
+                    "base_value": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "base_unit": {
+                      "type": "string"
+                    },
+                    "stale": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

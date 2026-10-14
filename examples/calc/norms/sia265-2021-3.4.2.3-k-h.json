@@ -1,0 +1,35 @@
+{
+  "_source": "SIA 265:2021, clause 3.4.2.3, equation (5), with 3.4.2.2 and 4.5.2.5 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf pp. 26, 27 and 40, read off a render of p. 27.",
+  "_note": "k_h = (reference_height / h)^exponent <= maximum, h in mm. A permission (\"dürfen\"), for f_m,d of Brettschichtholz (Tabelle 9) with h below the reference height only. Solid timber (3.3.2, 3.3.3) has no height factor. Not together with k_sys for bending about z (3.4.2.2), and not in the fire situation (4.5.2.5).",
+  "edition": "SIA 265:2021",
+  "clause": {
+    "norm": "SIA 265",
+    "norm_ref": "3.4.2.3",
+    "norm_ref_z": "3.4.2.3, 3.4.2.2",
+    "note_z": "About z the height is b. 3.4.2.2 lets the bending design values about z be raised by k_sys and forbids k_h «gleichzeitig» with it: k_h about z is allowed where k_sys is not applied, which Woodcore never does (the engineer, 12.10.2026, spec 2026-10-12-audit-issues-47-48-49, D-12).",
+    "equation": "5",
+    "page": 27,
+    "label": "Höhenbeiwert",
+    "symbol": "k_h",
+    "reference_height": 600,
+    "unit": "mm",
+    "exponent": 0.1,
+    "maximum": 1.1,
+    "applies_to": "f_m_d",
+    "families": [
+      "Brettschichtholz"
+    ],
+    "not_with": [
+      {
+        "what": "k_sys",
+        "norm_ref": "3.4.2.2",
+        "note": "Nicht gleichzeitig mit k_sys bei Biegung um die z-Achse."
+      },
+      {
+        "what": "fire",
+        "norm_ref": "4.5.2.5",
+        "note": "Im Brandfall nicht anzusetzen."
+      }
+    ]
+  }
+}

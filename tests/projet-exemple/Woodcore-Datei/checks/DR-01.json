@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "id": "DR-01",
+  "name": "Auflagerpressung Träger",
+  "label": "Endauflager des Trägers T001 auf der Schwelle",
+  "group": "",
+  "kind": "compression",
+  "position": "T001",
+  "grade": null,
+  "section": null,
+  "moisture_class": null,
+  "impact": false,
+  "alpha": 90,
+  "N": {
+    "value": 16,
+    "unit": "kN"
+  },
+  "case": "endauflagerung",
+  "larger": false,
+  "l": 120,
+  "w": null
+}

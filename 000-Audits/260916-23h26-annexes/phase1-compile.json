@@ -1,0 +1,38 @@
+{
+ "as-written": {
+  "exit": 0,
+  "seconds": 2.7,
+  "stderr": "",
+  "size": 3786487
+ },
+ "de-u3": {
+  "exit": 0,
+  "seconds": 3.1,
+  "stderr": "",
+  "size": 4085793
+ },
+ "fr-u3": {
+  "exit": 0,
+  "seconds": 2.8,
+  "stderr": "",
+  "size": 4086209
+ },
+ "en-u3": {
+  "exit": 0,
+  "seconds": 2.6,
+  "stderr": "",
+  "size": 4080823
+ },
+ "de-u1": {
+  "exit": 0,
+  "seconds": 1.8,
+  "stderr": "",
+  "size": 3588108
+ },
+ "de-u2": {
+  "exit": 0,
+  "seconds": 1.7,
+  "stderr": "",
+  "size": 3792662
+ }
+}

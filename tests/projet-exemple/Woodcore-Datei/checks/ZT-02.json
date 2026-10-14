@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "id": "ZT-02",
+  "name": "Zuglasche",
+  "label": "",
+  "group": "",
+  "kind": "tension",
+  "position": null,
+  "grade": "GL24h",
+  "section": {
+    "type": "rec",
+    "b": 120,
+    "h": 240
+  },
+  "moisture_class": 1,
+  "impact": false,
+  "alpha": 10,
+  "N": {
+    "value": 20,
+    "unit": "kN"
+  }
+}

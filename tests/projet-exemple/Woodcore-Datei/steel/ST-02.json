@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "id": "ST-02",
+  "name": "Auflager Stahl",
+  "label": "IPE 360 in S355, Querkraft mit Biegung",
+  "group": "",
+  "kind": "shear",
+  "position": null,
+  "profile": {
+    "type": "IPE",
+    "dimension": "360"
+  },
+  "grade": "S355",
+  "V_z": {
+    "value": 500,
+    "unit": "kN"
+  },
+  "V_y": null,
+  "M_y": {
+    "value": 150,
+    "unit": "kNm"
+  }
+}

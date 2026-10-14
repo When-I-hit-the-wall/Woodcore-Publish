@@ -1,0 +1,57 @@
+{
+  "_source": "SIA 265:2021, Tabelle 37 (clause 6.5.2.3.2) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 75, read off a render of the page; the French wording from ExternalFiles/000-Normes/SIA265-2021-FR.pdf p. 76.",
+  "_note": "The footnotes are the norm's rules restated in a sentence each, under the norm's own numbering, and not its paragraphs: a norm is cited and never reproduced (docs/architecture/reference-library.md §11bis). The multiples of d, the floors in mm and the conditions are transcribed exactly.",
+  "edition": "SIA 265:2021",
+  "table_37": {
+    "number": "37",
+    "title": "Holzdicken $t_1$ bei Schraubenverbindungen mit Vorbohrung (gültig für beide Schraubentypen)",
+    "norm": "SIA 265",
+    "norm_ref": "6.5.2.3.2",
+    "page": 75,
+    "unit": "mm",
+    "fasteners": [
+      {
+        "fastener": "screw",
+        "clause": "6.5.2.2, 6.5.2.3.2",
+        "auto": true,
+        "scope": "sia265-2021-6.5.2.3.1-schraubendurchmesser"
+      }
+    ],
+    "head": {
+      "label": "Baustoff",
+      "notes": [
+        "1"
+      ]
+    },
+    "columns": [
+      {
+        "id": "required",
+        "label": "erforderliche Holzdicke $t_(1,\"erf\")$",
+        "notes": [
+          "2"
+        ]
+      },
+      {
+        "id": "minimum",
+        "label": "Mindestholzdicken $t_1$"
+      }
+    ],
+    "rows": [
+      {
+        "id": "timber",
+        "label": "Vollholz, keilgezinktes Vollholz, Balkenschichtholz, Brettschichtholz",
+        "required": {
+          "factor": 9
+        },
+        "minimum": {
+          "factor": 4,
+          "min": 24
+        }
+      }
+    ],
+    "footnotes": {
+      "1": "Holzwerkstoffe siehe SIA 265/1.",
+      "2": "Unter den erforderlichen Holzdicken wird $R_d$ nach den Tabellen 34 und 35 proportional abgemindert; die Mindestholzdicken dürfen nicht unterschritten werden."
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Building data for the fire resistance",
+  "description": "Woodcore-Datei/building.json -- the building's data VKF / AEAI 15-15 (3.7.1, tables 1 to 3) reads the fire resistance of its load-bearing structure off, one file for the project, written by Woodcore's «Résistance au feu» tab and read by calc/domains/member_check.py at the export (issue #46). Each field is one of the ids calc/norms/vkf-2015-15-15-tab01-03-tragwerk.json lists, which calc/norms/vkf.py check_building holds it against. Absent, a check in the fire situation states its own duration or cannot be calculated; malformed, it stops the export naming the field.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "height",
+    "use",
+    "concept",
+    "storeys"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.0"
+      ]
+    },
+    "height": {
+      "type": "string",
+      "description": "The height category: low (up to 11 m, table 1), medium (up to 30 m, table 2), high (up to 100 m, table 3)."
+    },
+    "use": {
+      "type": "string",
+      "description": "The use («Affectation»): housing, office, school, retail, parking, industry_low, agriculture, industry_high, lodging_a, lodging_b, lodging_c, assembly, department_store."
+    },
+    "concept": {
+      "type": "string",
+      "description": "construction (the «Construction» concept) or extinction (an «Installation d'extinction»)."
+    },
+    "storeys": {
+      "type": "string",
+      "description": "single (one storey: notes [1], [9]), two_small (two storeys, at most 2400 m² above ground: note [5]), several."
+    }
+  }
+}

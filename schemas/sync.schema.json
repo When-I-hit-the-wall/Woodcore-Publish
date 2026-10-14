@@ -1,0 +1,249 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Synchronisation record of a document",
+  "description": "<document folder>/sync.json, schema 1.0 -- what one document of a project in three documents remembers of the blocks it shares with the others (calc/sync.py, docs/domain/documents.md §3.3octodecies): for every shared block, the hashes of the block as this document last synchronised it, where it stands with each other document, and what it ignores. Written by Woodcore whole (keys in a fixed order, two-space indent, LF: sync.dumps), never by hand, and read by sync.check_source alone, which validates it against this schema first and then checks what the walker cannot express: a hash is 16 lowercase hexadecimal digits, `-` or null (`-` never for a block's own text); an id has structure.ID_PATTERN's shape; an entry, a relation and a pair hold no key they do not know; `with` names another document than this one; `objects` and `with` stand only beside a `text`; `ignored_objects` names each id once. Described in v0.117 (issue #33) from the format the code wrote since 01.10.2026, unchanged.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "format",
+    "document",
+    "blocks"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a record written at another version is refused rather than read as this one (sync.SCHEMA_VERSION)."
+    },
+    "format": {
+      "type": "string",
+      "const": "woodcore-sync",
+      "description": "What this file is (sync.FORMAT), so a sync.json that is something else is refused by name."
+    },
+    "document": {
+      "type": "string",
+      "enum": [
+        "cu",
+        "bp",
+        "rs"
+      ],
+      "description": "The document this record belongs to (sync.SHARE_MODES): a record found in another document's folder is refused."
+    },
+    "blocks": {
+      "type": "object",
+      "description": "By shared id (the `<id>` of `// woodcore:shared <id>`), the record of that block. A block with nothing to remember is left out.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "description": "One shared block. `text`, with its `objects` and `with`, is the base the block was last synchronised at; absent, the base is not known. `ignored` and `ignored_objects` are the engineer's «Ignorer», kept until «Réactiver».",
+          "properties": {
+            "text": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The hash of the block's own text -- everything between the tags but its objects -- or null where it is not known."
+            },
+            "objects": {
+              "type": "object",
+              "description": "By object id (calc/typst_objects.py), the hash of that object as last synchronised; `-` where the copy did not hold it.",
+              "patternProperties": {
+                ".*": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "with": {
+              "type": "object",
+              "description": "By other document, where this one stands with it apart from the base.",
+              "properties": {
+                "cu": {
+                  "type": "object",
+                  "description": "Where this document stands with one other document, apart from the block's base: `text` the block's own text, `objects` by id. Holds `text` and `objects` and nothing else, and names another document than this one (checked by sync.check_source).",
+                  "properties": {
+                    "text": {
+                      "type": "object",
+                      "required": [
+                        "own",
+                        "seen"
+                      ],
+                      "description": "The relation with that document for this part: the hash of THIS copy (`own`) and of THAT copy (`seen`) when the two last synchronised -- each a 16-digit hash, `-` (the part was not in that copy) or null (not known). No other key (checked by sync.check_source).",
+                      "properties": {
+                        "own": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "seen": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "objects": {
+                      "type": "object",
+                      "description": "By object id, the relation for that object.",
+                      "patternProperties": {
+                        ".*": {
+                          "type": "object",
+                          "required": [
+                            "own",
+                            "seen"
+                          ],
+                          "description": "The relation with that document for this part: the hash of THIS copy (`own`) and of THAT copy (`seen`) when the two last synchronised -- each a 16-digit hash, `-` (the part was not in that copy) or null (not known). No other key (checked by sync.check_source).",
+                          "properties": {
+                            "own": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "seen": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "bp": {
+                  "type": "object",
+                  "description": "Where this document stands with one other document, apart from the block's base: `text` the block's own text, `objects` by id. Holds `text` and `objects` and nothing else, and names another document than this one (checked by sync.check_source).",
+                  "properties": {
+                    "text": {
+                      "type": "object",
+                      "required": [
+                        "own",
+                        "seen"
+                      ],
+                      "description": "The relation with that document for this part: the hash of THIS copy (`own`) and of THAT copy (`seen`) when the two last synchronised -- each a 16-digit hash, `-` (the part was not in that copy) or null (not known). No other key (checked by sync.check_source).",
+                      "properties": {
+                        "own": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "seen": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "objects": {
+                      "type": "object",
+                      "description": "By object id, the relation for that object.",
+                      "patternProperties": {
+                        ".*": {
+                          "type": "object",
+                          "required": [
+                            "own",
+                            "seen"
+                          ],
+                          "description": "The relation with that document for this part: the hash of THIS copy (`own`) and of THAT copy (`seen`) when the two last synchronised -- each a 16-digit hash, `-` (the part was not in that copy) or null (not known). No other key (checked by sync.check_source).",
+                          "properties": {
+                            "own": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "seen": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "rs": {
+                  "type": "object",
+                  "description": "Where this document stands with one other document, apart from the block's base: `text` the block's own text, `objects` by id. Holds `text` and `objects` and nothing else, and names another document than this one (checked by sync.check_source).",
+                  "properties": {
+                    "text": {
+                      "type": "object",
+                      "required": [
+                        "own",
+                        "seen"
+                      ],
+                      "description": "The relation with that document for this part: the hash of THIS copy (`own`) and of THAT copy (`seen`) when the two last synchronised -- each a 16-digit hash, `-` (the part was not in that copy) or null (not known). No other key (checked by sync.check_source).",
+                      "properties": {
+                        "own": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "seen": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "objects": {
+                      "type": "object",
+                      "description": "By object id, the relation for that object.",
+                      "patternProperties": {
+                        ".*": {
+                          "type": "object",
+                          "required": [
+                            "own",
+                            "seen"
+                          ],
+                          "description": "The relation with that document for this part: the hash of THIS copy (`own`) and of THAT copy (`seen`) when the two last synchronised -- each a 16-digit hash, `-` (the part was not in that copy) or null (not known). No other key (checked by sync.check_source).",
+                          "properties": {
+                            "own": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "seen": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "ignored": {
+              "type": "boolean",
+              "description": "The whole block ignored in this document."
+            },
+            "ignored_objects": {
+              "type": "array",
+              "description": "The objects of the block this document ignores, by id, each once.",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

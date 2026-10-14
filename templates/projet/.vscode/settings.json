@@ -1,0 +1,19 @@
+{
+  // A project is written as three documents -- the convention d'utilisation, the base de projet and the rapport de statique -- each in a folder of its own at the top of the project, and compiled from the project's own folder, where the config.typ, the commands.typ, the pictures and the export they share lie: every entry file and every section imports the engine as "/commands.typ" and a picture as "/Images/…", read from that root.
+  //
+  // "tinymist.rootPath" states that root for Tinymist, whatever file of the project is open and whichever entry is pinned: ${workspaceFolder} is the folder VS Code was opened on, which is this project's folder when VS Code opens it -- as Woodcore's «Ouvrir dans VS Code» does. Tinymist wants an absolute path there, so a relative one (".") is refused; the variable is what makes it absolute. ⚠️ VS Code reads this file only when this project's folder is the folder it opened: opened on a document's own folder, or on a folder above the project, it reads none of it, and "/commands.typ" is then looked for in the wrong place -- open the project's folder.
+  "tinymist.rootPath": "${workspaceFolder}",
+
+  // No "tinymist.outputPath": Tinymist's default, $dir/$name, exports each document's PDF next to its .typ, in the document's own folder -- whatever that folder is named (it is named when the project is created) -- which is where woodcore-cli and «Exporter PDF» in Woodcore's window write it too (the project's layout), so the two can never produce two different PDFs. Until v0.87 it was "$dir/../$name", one level above; a project whose .woodcore names another PDF sets outputPath to match it.
+
+  // Pin the entry file of the document you are writing as the main file (command palette -> "Typst: Pin the main file") -- «Statischer Rapport.typ» in the report's folder, or the entry file in the convention d'utilisation's or the base de projet's -- one at a time, or the section files each compile on their own and export a stray PDF.
+
+  // Detail level for the editor preview and the on-save export. Without it a document compiles at the level it declares itself. Uncomment for the review report while writing:
+  // "tinymist.typstExtraArgs": ["--input", "level=3"],
+
+  "files.associations": {
+    "*.typ": "typst"
+  },
+
+  "cSpell.language": "en,de",
+}

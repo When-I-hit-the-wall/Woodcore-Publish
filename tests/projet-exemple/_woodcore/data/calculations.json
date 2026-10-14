@@ -1,0 +1,4737 @@
+{
+  "schema_version": "1.4",
+  "domains": {
+    "dead-load": {
+      "label": "Eigen- und Auflasten",
+      "action": "permanent",
+      "engine": "python",
+      "sheet_prefix": "EL+AL",
+      "instances": {
+        "EL+AL-Dach mit Wasser": {
+          "workbook": "Belastungsannahmen.xlsm",
+          "sheet": "EL+AL-Dach mit Wasser",
+          "results": [
+            "gk_ak_gew"
+          ],
+          "tables": [
+            {
+              "title": "Schichtaufbau",
+              "source": "python:domains/dead_load.py",
+              "note": "Last je Schicht = spez. Gewicht · Dicke · Breite / (Dist. · 100); der Faktor 100 rechnet kg in kN um. Flächenbezogene Materialien (kg/m²) sind mit Dicke = Breite = Dist. = 1 erfasst.",
+              "columns": [
+                {
+                  "label": "Type",
+                  "kind": "math",
+                  "unit": ""
+                },
+                {
+                  "label": "Ebene",
+                  "kind": "text",
+                  "unit": ""
+                },
+                {
+                  "label": "Material",
+                  "kind": "wide",
+                  "unit": ""
+                },
+                {
+                  "label": "Dicke",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Breite",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Dist.",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Gewicht",
+                  "kind": "number",
+                  "unit": ""
+                },
+                {
+                  "label": "Last",
+                  "kind": "number",
+                  "unit": "kN/m²"
+                }
+              ],
+              "rows": [
+                [
+                  "a_k",
+                  "Beschichtung",
+                  "Dachbegrnung (Bienenweide) (voll Nass)",
+                  1.0,
+                  1.0,
+                  1.0,
+                  "160 kg/m²",
+                  1.6
+                ],
+                [
+                  "a_k",
+                  "Dämmung",
+                  "PUR / PIR Dämmung",
+                  0.04,
+                  1.0,
+                  1.0,
+                  "30 kg/m³",
+                  0.012
+                ],
+                [
+                  "g_k",
+                  "Beplankung",
+                  "Kerto-Q",
+                  0.06,
+                  1.0,
+                  1.0,
+                  "500 kg/m³",
+                  0.3
+                ],
+                [
+                  "g_k",
+                  "Konstruktion",
+                  "Fi/Ta",
+                  0.2,
+                  0.1,
+                  0.2,
+                  "500 kg/m³",
+                  0.5
+                ]
+              ],
+              "totals": [
+                [
+                  "g_k",
+                  "Total",
+                  "Eigengewicht",
+                  "",
+                  "",
+                  "",
+                  "",
+                  0.8
+                ],
+                [
+                  "a_k",
+                  "Total",
+                  "Auflast",
+                  "",
+                  "",
+                  "",
+                  "",
+                  1.612
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "gk": {
+              "value": 0.8,
+              "unit": "kN/m²",
+              "symbol": "g_k",
+              "label": "Eigengewicht (Flächenlast)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "ak": {
+              "value": 1.612,
+              "unit": "kN/m²",
+              "symbol": "a_k",
+              "label": "Auflast (Flächenlast)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "gk_ak": {
+              "value": 2.412,
+              "unit": "kN/m²",
+              "symbol": "g_k + a_k",
+              "label": "Summe (berechnet)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "gk_ak_gew": {
+              "value": 2.5,
+              "unit": "kN/m²",
+              "symbol": "(g_k + a_k)_\"gew\"",
+              "label": "Ständige Lasten, gewählt",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!EL+AL-Dach mit Wasser!J31",
+              "norm": "SIA 261",
+              "norm_ref": "2.1",
+              "description": "Auf der sicheren Seite gerundeter Bemessungswert der ständigen Lasten, im Blatt EL+AL-Dach mit Wasser gewählt."
+            }
+          },
+          "steps": [
+            {
+              "name": "Eigengewicht",
+              "level": 2,
+              "result": "gk",
+              "uses": [],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Auflast",
+              "level": 2,
+              "result": "ak",
+              "uses": [],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Summe",
+              "level": 2,
+              "result": "gk_ak",
+              "uses": [
+                "gk",
+                "ak"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Ständige Lasten",
+              "level": 1,
+              "result": "gk_ak_gew",
+              "uses": [
+                "gk_ak"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "2.1"
+            }
+          ],
+          "checks": []
+        },
+        "EL+AL-Dach ohne Wasser": {
+          "workbook": "Belastungsannahmen.xlsm",
+          "sheet": "EL+AL-Dach ohne Wasser",
+          "results": [
+            "gk_ak_gew"
+          ],
+          "tables": [
+            {
+              "title": "Schichtaufbau",
+              "source": "python:domains/dead_load.py",
+              "note": "Last je Schicht = spez. Gewicht · Dicke · Breite / (Dist. · 100); der Faktor 100 rechnet kg in kN um. Flächenbezogene Materialien (kg/m²) sind mit Dicke = Breite = Dist. = 1 erfasst.",
+              "columns": [
+                {
+                  "label": "Type",
+                  "kind": "math",
+                  "unit": ""
+                },
+                {
+                  "label": "Ebene",
+                  "kind": "text",
+                  "unit": ""
+                },
+                {
+                  "label": "Material",
+                  "kind": "wide",
+                  "unit": ""
+                },
+                {
+                  "label": "Dicke",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Breite",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Dist.",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Gewicht",
+                  "kind": "number",
+                  "unit": ""
+                },
+                {
+                  "label": "Last",
+                  "kind": "number",
+                  "unit": "kN/m²"
+                }
+              ],
+              "rows": [
+                [
+                  "a_k",
+                  "Beschichtung",
+                  "Dachbegrünung (Bienenweide) (trocken)",
+                  1.0,
+                  1.0,
+                  1.0,
+                  "100 kg/m²",
+                  1.0
+                ],
+                [
+                  "a_k",
+                  "Dämmung",
+                  "PUR / PIR Dämmung",
+                  0.04,
+                  1.0,
+                  1.0,
+                  "30 kg/m³",
+                  0.012
+                ],
+                [
+                  "g_k",
+                  "Beplankung",
+                  "Kerto-Q",
+                  0.06,
+                  1.0,
+                  1.0,
+                  "500 kg/m³",
+                  0.3
+                ],
+                [
+                  "g_k",
+                  "Konstruktion",
+                  "Fi/Ta",
+                  0.2,
+                  0.1,
+                  0.2,
+                  "500 kg/m³",
+                  0.5
+                ]
+              ],
+              "totals": [
+                [
+                  "g_k",
+                  "Total",
+                  "Eigengewicht",
+                  "",
+                  "",
+                  "",
+                  "",
+                  0.8
+                ],
+                [
+                  "a_k",
+                  "Total",
+                  "Auflast",
+                  "",
+                  "",
+                  "",
+                  "",
+                  1.012
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "gk": {
+              "value": 0.8,
+              "unit": "kN/m²",
+              "symbol": "g_k",
+              "label": "Eigengewicht (Flächenlast)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "ak": {
+              "value": 1.012,
+              "unit": "kN/m²",
+              "symbol": "a_k",
+              "label": "Auflast (Flächenlast)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "gk_ak": {
+              "value": 1.812,
+              "unit": "kN/m²",
+              "symbol": "g_k + a_k",
+              "label": "Summe (berechnet)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "gk_ak_gew": {
+              "value": 1.9,
+              "unit": "kN/m²",
+              "symbol": "(g_k + a_k)_\"gew\"",
+              "label": "Ständige Lasten, gewählt",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!EL+AL-Dach ohne Wasser!J31",
+              "norm": "SIA 261",
+              "norm_ref": "2.1",
+              "description": "Auf der sicheren Seite gerundeter Bemessungswert der ständigen Lasten, im Blatt EL+AL-Dach ohne Wasser gewählt."
+            }
+          },
+          "steps": [
+            {
+              "name": "Eigengewicht",
+              "level": 2,
+              "result": "gk",
+              "uses": [],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Auflast",
+              "level": 2,
+              "result": "ak",
+              "uses": [],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Summe",
+              "level": 2,
+              "result": "gk_ak",
+              "uses": [
+                "gk",
+                "ak"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Ständige Lasten",
+              "level": 1,
+              "result": "gk_ak_gew",
+              "uses": [
+                "gk_ak"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "2.1"
+            }
+          ],
+          "checks": []
+        },
+        "EL+AL-DachRand": {
+          "workbook": "Belastungsannahmen.xlsm",
+          "sheet": "EL+AL-DachRand",
+          "results": [
+            "gk_ak_gew"
+          ],
+          "tables": [
+            {
+              "title": "Schichtaufbau",
+              "source": "python:domains/dead_load.py",
+              "note": "Last je Schicht = spez. Gewicht · Dicke · Breite / (Dist. · 100); der Faktor 100 rechnet kg in kN um. Flächenbezogene Materialien (kg/m²) sind mit Dicke = Breite = Dist. = 1 erfasst.",
+              "columns": [
+                {
+                  "label": "Type",
+                  "kind": "math",
+                  "unit": ""
+                },
+                {
+                  "label": "Ebene",
+                  "kind": "text",
+                  "unit": ""
+                },
+                {
+                  "label": "Material",
+                  "kind": "wide",
+                  "unit": ""
+                },
+                {
+                  "label": "Dicke",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Breite",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Dist.",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Gewicht",
+                  "kind": "number",
+                  "unit": ""
+                },
+                {
+                  "label": "Last",
+                  "kind": "number",
+                  "unit": "kN/m²"
+                }
+              ],
+              "rows": [
+                [
+                  "a_k",
+                  "Schutzbahn/Dachhaut",
+                  "Blech Aluminium 2mm",
+                  1.0,
+                  1.0,
+                  1.0,
+                  "8 kg/m²",
+                  0.08
+                ],
+                [
+                  "a_k",
+                  "Bekleidung",
+                  "3-Schichtplatte",
+                  0.03,
+                  1.0,
+                  1.0,
+                  "500 kg/m³",
+                  0.15
+                ],
+                [
+                  "g_k",
+                  "Beplankung",
+                  "Kerto-Q",
+                  0.06,
+                  1.0,
+                  1.0,
+                  "500 kg/m³",
+                  0.3
+                ]
+              ],
+              "totals": [
+                [
+                  "g_k",
+                  "Total",
+                  "Eigengewicht",
+                  "",
+                  "",
+                  "",
+                  "",
+                  0.3
+                ],
+                [
+                  "a_k",
+                  "Total",
+                  "Auflast",
+                  "",
+                  "",
+                  "",
+                  "",
+                  0.22999999999999998
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "gk": {
+              "value": 0.3,
+              "unit": "kN/m²",
+              "symbol": "g_k",
+              "label": "Eigengewicht (Flächenlast)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "ak": {
+              "value": 0.22999999999999998,
+              "unit": "kN/m²",
+              "symbol": "a_k",
+              "label": "Auflast (Flächenlast)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "gk_ak": {
+              "value": 0.53,
+              "unit": "kN/m²",
+              "symbol": "g_k + a_k",
+              "label": "Summe (berechnet)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "gk_ak_gew": {
+              "value": 0.6,
+              "unit": "kN/m²",
+              "symbol": "(g_k + a_k)_\"gew\"",
+              "label": "Ständige Lasten, gewählt",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!EL+AL-DachRand!J31",
+              "norm": "SIA 261",
+              "norm_ref": "2.1",
+              "description": "Auf der sicheren Seite gerundeter Bemessungswert der ständigen Lasten, im Blatt EL+AL-DachRand gewählt."
+            }
+          },
+          "steps": [
+            {
+              "name": "Eigengewicht",
+              "level": 2,
+              "result": "gk",
+              "uses": [],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Auflast",
+              "level": 2,
+              "result": "ak",
+              "uses": [],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Summe",
+              "level": 2,
+              "result": "gk_ak",
+              "uses": [
+                "gk",
+                "ak"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Ständige Lasten",
+              "level": 1,
+              "result": "gk_ak_gew",
+              "uses": [
+                "gk_ak"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "2.1"
+            }
+          ],
+          "checks": []
+        },
+        "EL+AL-Wand": {
+          "workbook": "Belastungsannahmen.xlsm",
+          "sheet": "EL+AL-Wand",
+          "results": [
+            "gk_ak_gew"
+          ],
+          "tables": [
+            {
+              "title": "Schichtaufbau",
+              "source": "python:domains/dead_load.py",
+              "note": "Last je Schicht = spez. Gewicht · Dicke · Breite / (Dist. · 100); der Faktor 100 rechnet kg in kN um. Flächenbezogene Materialien (kg/m²) sind mit Dicke = Breite = Dist. = 1 erfasst.",
+              "columns": [
+                {
+                  "label": "Type",
+                  "kind": "math",
+                  "unit": ""
+                },
+                {
+                  "label": "Ebene",
+                  "kind": "text",
+                  "unit": ""
+                },
+                {
+                  "label": "Material",
+                  "kind": "wide",
+                  "unit": ""
+                },
+                {
+                  "label": "Dicke",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Breite",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Dist.",
+                  "kind": "number",
+                  "unit": "m"
+                },
+                {
+                  "label": "Gewicht",
+                  "kind": "number",
+                  "unit": ""
+                },
+                {
+                  "label": "Last",
+                  "kind": "number",
+                  "unit": "kN/m²"
+                }
+              ],
+              "rows": [
+                [
+                  "g_k",
+                  "Konstruktion",
+                  "Fi/Ta",
+                  0.2,
+                  0.1,
+                  0.2,
+                  "500 kg/m³",
+                  0.5
+                ]
+              ],
+              "totals": [
+                [
+                  "g_k",
+                  "Total",
+                  "Eigengewicht",
+                  "",
+                  "",
+                  "",
+                  "",
+                  0.5
+                ],
+                [
+                  "a_k",
+                  "Total",
+                  "Auflast",
+                  "",
+                  "",
+                  "",
+                  "",
+                  0
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "gk": {
+              "value": 0.5,
+              "unit": "kN/m²",
+              "symbol": "g_k",
+              "label": "Eigengewicht (Flächenlast)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "ak": {
+              "value": 0,
+              "unit": "kN/m²",
+              "symbol": "a_k",
+              "label": "Auflast (Flächenlast)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "gk_ak": {
+              "value": 0.5,
+              "unit": "kN/m²",
+              "symbol": "g_k + a_k",
+              "label": "Summe (berechnet)",
+              "level": 2,
+              "source": "python:domains/dead_load.py",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            "gk_ak_gew": {
+              "value": 0.5,
+              "unit": "kN/m²",
+              "symbol": "(g_k + a_k)_\"gew\"",
+              "label": "Ständige Lasten, gewählt",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!EL+AL-Wand!J27",
+              "norm": "SIA 261",
+              "norm_ref": "2.1",
+              "description": "Auf der sicheren Seite gerundeter Bemessungswert der ständigen Lasten, im Blatt EL+AL-Wand gewählt."
+            }
+          },
+          "steps": [
+            {
+              "name": "Eigengewicht",
+              "level": 2,
+              "result": "gk",
+              "uses": [],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Auflast",
+              "level": 2,
+              "result": "ak",
+              "uses": [],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Summe",
+              "level": 2,
+              "result": "gk_ak",
+              "uses": [
+                "gk",
+                "ak"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang A"
+            },
+            {
+              "name": "Ständige Lasten",
+              "level": 1,
+              "result": "gk_ak_gew",
+              "uses": [
+                "gk_ak"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "2.1"
+            }
+          ],
+          "checks": []
+        }
+      }
+    },
+    "snow-load": {
+      "label": "Schneelast",
+      "action": "variable",
+      "engine": "excel",
+      "sheet_prefix": "SL",
+      "instances": {
+        "SL": {
+          "workbook": "Belastungsannahmen.xlsm",
+          "sheet": "SL",
+          "results": [
+            "q_k11"
+          ],
+          "vars": {
+            "h_0": {
+              "value": 551.767944335937,
+              "unit": "m",
+              "symbol": "h_0",
+              "label": "Höhe ü. NN",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!SL!H10",
+              "norm": "SIA 261",
+              "norm_ref": "5.2.6",
+              "description": "Höhe des Standorts über Meer."
+            },
+            "korrektur": {
+              "value": "± 0",
+              "unit": "m",
+              "symbol": "Delta h",
+              "label": "Korrektur Wert",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!SL!H11",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang D",
+              "description": "Höhenzuschlag auf die Höhe ü. NN nach SIA 261, Anhang D.",
+              "choices": [
+                {
+                  "value": -200,
+                  "desc": "-200 m"
+                },
+                {
+                  "value": "± 0",
+                  "desc": "± 0 m"
+                },
+                {
+                  "value": "+200",
+                  "desc": "+200 m"
+                },
+                {
+                  "value": "+400",
+                  "desc": "+400 m"
+                },
+                {
+                  "value": "+500",
+                  "desc": "+500 m"
+                }
+              ]
+            },
+            "h_ref": {
+              "value": 551.767944335937,
+              "unit": "m",
+              "symbol": "h_\"ref\"",
+              "label": "Bezugshöhe",
+              "level": 2,
+              "source": "excel:Belastungsannahmen.xlsm!SL!H12",
+              "norm": "SIA 261",
+              "norm_ref": "5.2.6"
+            },
+            "ce": {
+              "value": 1,
+              "unit": "",
+              "symbol": "C_e",
+              "label": "Expositionsbeiwert",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!SL!H14",
+              "norm": "SIA 261",
+              "norm_ref": "5.2.2",
+              "description": "Gewählte Windexposition: normale Windexposition.",
+              "choices": [
+                {
+                  "value": 1,
+                  "desc": "normale Windexposition"
+                },
+                {
+                  "value": 0.8,
+                  "desc": "dem Wind stark ausgesetzte Lage"
+                },
+                {
+                  "value": 1.2,
+                  "desc": "vor Wind geschützte Lage"
+                }
+              ],
+              "group": "beiwerte"
+            },
+            "ct": {
+              "value": 1,
+              "unit": "",
+              "symbol": "C_T",
+              "label": "Thermischer Beiwert",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!SL!H15",
+              "norm": "SIA 261",
+              "norm_ref": "5.2.2",
+              "description": "Thermischer Beiwert nach SIA 261, Ziffer 5.2.",
+              "group": "beiwerte"
+            },
+            "L": {
+              "value": 17.5,
+              "unit": "m",
+              "symbol": "L",
+              "label": "Gebäudelänge",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!SL!H23",
+              "norm": "SIA 261",
+              "norm_ref": "5.3",
+              "group": "geometrie",
+              "group_label": "Gebäude Geometrie"
+            },
+            "B": {
+              "value": 4.25,
+              "unit": "m",
+              "symbol": "B",
+              "label": "Gebäudebreite",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!SL!H24",
+              "norm": "SIA 261",
+              "norm_ref": "5.3",
+              "group": "geometrie"
+            },
+            "hoehenspruenge": {
+              "value": "Nein",
+              "unit": "",
+              "symbol": "\"Grosse Höhensprünge\"",
+              "label": "Grosse Höhensprünge",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!SL!F19",
+              "norm": "SIA 261",
+              "norm_ref": "5.3.5",
+              "description": "Bei 'Ja' ist die Schneeanhäufung nach SIA 261, Figur 5 zusätzlich zu berücksichtigen."
+            },
+            "abgleiten": {
+              "value": "behindert oder erschwert",
+              "unit": "",
+              "symbol": "\"Abgleiten des Schnees\"",
+              "label": "Abgleiten des Schnees",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!SL!F29",
+              "norm": "SIA 261",
+              "norm_ref": "5.3.6",
+              "description": "Ist das Abgleiten behindert oder erschwert, wird der Dachformbeiwert mit mindestens 0.8 angesetzt (SIA 261, Ziffer 5.3.6)."
+            },
+            "lastmodell": {
+              "value": "Flachdach",
+              "unit": "",
+              "symbol": "\"Lastmodell\"",
+              "label": "Dachform / Lastmodell",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!SL!F21",
+              "norm": "SIA 261",
+              "norm_ref": "5.3",
+              "description": "Im Blatt SL wählbare Lastmodelle: Flachdach, GiebeldachLM1, GiebeldachLM2, SheddachLM1, SheddachLM2."
+            },
+            "mu_11": {
+              "value": 0.8,
+              "unit": "",
+              "symbol": "mu_11",
+              "label": "Dachformbeiwert",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!SL!H26",
+              "norm": "SIA 261",
+              "norm_ref": "5.3",
+              "group": "dachformbeiwerte"
+            },
+            "s_k": {
+              "value": 1.39411547558108,
+              "unit": "kN/m²",
+              "symbol": "s_k",
+              "label": "Charakteristischer Wert der Schneelast auf horizontalem Gelände",
+              "level": 2,
+              "source": "excel:Belastungsannahmen.xlsm!SL!H17",
+              "norm": "SIA 261",
+              "norm_ref": "5.2.6"
+            },
+            "q_k11": {
+              "value": 1.115292380464864,
+              "unit": "kN/m²",
+              "symbol": "q_(k,11)",
+              "label": "Charakteristische Schneelast",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!SL!I37",
+              "norm": "SIA 261",
+              "norm_ref": "5.2.2"
+            }
+          },
+          "steps": [
+            {
+              "name": "Bezugshöhe",
+              "level": 3,
+              "result": "h_ref",
+              "uses": [
+                "h_0",
+                "korrektur"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "Anhang D",
+              "formula": "h_\"ref\" = h_0 + Delta h"
+            },
+            {
+              "name": "Charakteristischer Wert auf horizontalem Gelände",
+              "level": 3,
+              "result": "s_k",
+              "uses": [
+                "h_ref"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "5.2.6",
+              "formula": "s_k = (1 + (h_\"ref\" / 350)^2) dot 0.4 >= 0.9 thin \"kN/m\"^2"
+            },
+            {
+              "name": "Charakteristische Schneelast",
+              "level": 1,
+              "result": "q_k11",
+              "uses": [
+                "mu_11",
+                "ce",
+                "ct",
+                "s_k",
+                "abgleiten"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "5.2.2",
+              "formula": "q_(k,11) = max(mu_11, 0.8) dot C_e dot C_T dot s_k"
+            }
+          ],
+          "checks": []
+        }
+      }
+    },
+    "wind-load": {
+      "label": "Windlast",
+      "action": "variable",
+      "engine": "excel",
+      "sheet_prefix": "WL",
+      "instances": {
+        "WL-Velo": {
+          "workbook": "Belastungsannahmen.xlsm",
+          "sheet": "WL-Velo",
+          "results": [
+            "qk_max_bh",
+            "qk_min_bh",
+            "qk_max_dh",
+            "qk_min_dh",
+            "qk_max_db",
+            "qk_min_db"
+          ],
+          "tables": [
+            {
+              "title": "Globale Windkräfte",
+              "level": 1,
+              "place": "below",
+              "formula": "q_k = c_\"red\" dot c_d dot c_f dot q_p",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "note": "Bezugsflächen aus den Gebäudeabmessungen: b·h und d·h sind die Fassadenflächen quer bzw. längs zur Windrichtung, d·b die Dachfläche. $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über alle Windrichtungen (Blatt WL-Velo, Tabelle «Globale Kraftbeiwerte»); $c_\"red\"$ ist der Reduktionsfaktor der jeweiligen Bezugsfläche. Negative Werte sind Sog.",
+              "columns": [
+                {
+                  "label": "Globale Windkraft",
+                  "kind": "wide",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "",
+                  "kind": "math"
+                },
+                {
+                  "label": "b·h",
+                  "kind": "value",
+                  "group": "Bezugsfläche"
+                },
+                {
+                  "label": "d·h",
+                  "kind": "value",
+                  "group": "Bezugsfläche"
+                },
+                {
+                  "label": "d·b",
+                  "kind": "value",
+                  "group": "Bezugsfläche"
+                }
+              ],
+              "rows": [
+                [
+                  "maximale globale Windkraft",
+                  "q_k =",
+                  "qk_max_bh",
+                  "qk_max_dh",
+                  "qk_max_db"
+                ],
+                [
+                  "minimale globale Windkraft",
+                  "q_k =",
+                  "qk_min_bh",
+                  "qk_min_dh",
+                  "qk_min_db"
+                ]
+              ]
+            },
+            {
+              "title": "Lokale Windkräfte",
+              "level": 2,
+              "place": "below",
+              "formula": "q_k = q_p dot (c_\"pe\" - c_\"pi\")",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "source": "python:domains/wind.py",
+              "note": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen 0°, 15°, 45°, 90°, mit den Aussen- und Innendruckbeiwerten $c_\"pe\"$ und $c_\"pi\"$ des Blatts WL-Velo (Druckbeiwerte 31). gleichmässig: gleichmässig verteilte Öffnungen, beide Innendruckbeiwerte des Blatts (glm. (+) und glm. (-)) berücksichtigt; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D. Negative Werte sind Sog.",
+              "columns": [
+                {
+                  "label": "Lokale Windkraft",
+                  "kind": "wide",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "gleichmässig"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "gleichmässig"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung A"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung A"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung B"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung B"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung C"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung C"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung D"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung D"
+                }
+              ],
+              "rows": [
+                [
+                  "Wand A",
+                  0.6051843060578718,
+                  -0.33251884948234717,
+                  0.0,
+                  0.0,
+                  0.6317858140164596,
+                  0.0,
+                  0.698289583912929,
+                  -0.698289583912929,
+                  0.698289583912929,
+                  -0.06650376989646942
+                ],
+                [
+                  "Wand B",
+                  -0.02660150795858778,
+                  -0.33251884948234717,
+                  0.0,
+                  -0.6317858140164596,
+                  0.0,
+                  0.0,
+                  0.06650376989646942,
+                  -0.698289583912929,
+                  0.06650376989646942,
+                  -0.06650376989646942
+                ],
+                [
+                  "Wand C",
+                  0.5652820441199902,
+                  -0.33251884948234717,
+                  0.698289583912929,
+                  -0.698289583912929,
+                  0.698289583912929,
+                  -0.06650376989646942,
+                  0.0,
+                  0.0,
+                  0.6317858140164596,
+                  0.0
+                ],
+                [
+                  "Wand D",
+                  -0.06650376989646943,
+                  -0.33251884948234717,
+                  0.06650376989646942,
+                  -0.698289583912929,
+                  0.06650376989646942,
+                  -0.06650376989646942,
+                  0.0,
+                  -0.6317858140164596,
+                  0.0,
+                  0.0
+                ],
+                [
+                  "Dach E",
+                  -0.19286093269976137,
+                  -0.43227450432705133,
+                  -0.09975565484470417,
+                  -0.7980452387576332,
+                  -0.03325188494823471,
+                  -0.16625942474117358,
+                  -0.09975565484470417,
+                  -0.7980452387576332,
+                  -0.03325188494823471,
+                  -0.16625942474117358
+                ],
+                [
+                  "Dach F",
+                  -0.06650376989646943,
+                  -0.46552638927528606,
+                  0.06650376989646942,
+                  -0.7980452387576332,
+                  0.06650376989646942,
+                  -0.19951130968940833,
+                  -0.09975565484470417,
+                  -0.6317858140164596,
+                  0.0,
+                  -0.13300753979293892
+                ],
+                [
+                  "Dach G",
+                  -0.02660150795858778,
+                  -0.43227450432705133,
+                  -0.09975565484470417,
+                  -0.6317858140164596,
+                  0.0,
+                  -0.09975565484470417,
+                  0.06650376989646942,
+                  -0.7980452387576332,
+                  0.06650376989646942,
+                  -0.16625942474117358
+                ],
+                [
+                  "Dach H",
+                  -0.02660150795858778,
+                  -0.29926696453411245,
+                  0.06650376989646942,
+                  -0.6317858140164596,
+                  0.09975565484470417,
+                  -0.03325188494823471,
+                  0.06650376989646942,
+                  -0.6317858140164596,
+                  0.09975565484470417,
+                  0.0
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "qp0": {
+              "value": 0.9,
+              "unit": "kN/m²",
+              "symbol": "q_(p 0)",
+              "label": "Referenzwert des Staudrucks",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J6",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang E",
+              "description": "Referenzwert des Staudrucks am Standort nach SIA 261."
+            },
+            "b": {
+              "value": 17.5,
+              "unit": "m",
+              "symbol": "b",
+              "label": "Gebäudelänge",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J7",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group": "geometrie",
+              "group_label": "Gebäude Geometrie"
+            },
+            "d": {
+              "value": 4.25,
+              "unit": "m",
+              "symbol": "d",
+              "label": "Gebäudebreite",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J8",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group": "geometrie"
+            },
+            "h": {
+              "value": 2.95,
+              "unit": "m",
+              "symbol": "h",
+              "label": "Gebäudehöhe",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J9",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group": "geometrie"
+            },
+            "gelaendekategorie": {
+              "value": "IV grossflächige Stadtgebiete",
+              "unit": "",
+              "symbol": "\"Geländekategorie\"",
+              "label": "Geländekategorie",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!I11",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "description": "Die Geländekategorie bestimmt die Gradientenhöhe und die Bodenrauigkeit des Windprofils.",
+              "choices": [
+                {
+                  "value": "II Seeufer",
+                  "desc": "$z_g$ = 300 m, $alpha_r$ = 0.16"
+                },
+                {
+                  "value": "IIa grosse Ebene",
+                  "desc": "$z_g$ = 380 m, $alpha_r$ = 0.19"
+                },
+                {
+                  "value": "III Ortschaften, freies Feld",
+                  "desc": "$z_g$ = 450 m, $alpha_r$ = 0.23"
+                },
+                {
+                  "value": "IV grossflächige Stadtgebiete",
+                  "desc": "$z_g$ = 526 m, $alpha_r$ = 0.3"
+                }
+              ]
+            },
+            "zg": {
+              "value": 526,
+              "unit": "m",
+              "symbol": "z_g",
+              "label": "Gradientenhöhe",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J12",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "group_label": "Gradientenhöhe"
+            },
+            "alpha_r": {
+              "value": 0.3,
+              "unit": "",
+              "symbol": "alpha_r",
+              "label": "Bodenrauigkeit",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J13",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "group_label": "Bodenrauigkeit"
+            },
+            "z": {
+              "value": 10,
+              "unit": "m",
+              "symbol": "z",
+              "label": "Höhe über Boden",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J14",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "description": "Höhe über Boden, für die der Staudruck bestimmt wird; die Norm setzt sie mindestens zu 5 m an (10 m in Geländekategorie IV).",
+              "group_label": "Höhe über Boden"
+            },
+            "ch": {
+              "value": 0.7389307766274381,
+              "unit": "",
+              "symbol": "c_h",
+              "label": "Windprofilbeiwert",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J15",
+              "norm": "SIA 261",
+              "norm_ref": "6.2 (11)",
+              "group_label": "Windprofilbeiwert"
+            },
+            "cred_bh": {
+              "value": 0.85,
+              "unit": "",
+              "symbol": "c_(\"red\", \"b/h\")",
+              "label": "Reduktionsfaktor b",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J19",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "description": "Reduktionsfaktor für die Bezugsfläche b·h, aus dem Verhältnis Länge (b) zu Höhe (h).",
+              "group_label": "Reduktionsfaktor b"
+            },
+            "cred_dh": {
+              "value": 0.95,
+              "unit": "",
+              "symbol": "c_(\"red\", \"d/h\")",
+              "label": "Reduktionsfaktor d",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J20",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "description": "Reduktionsfaktor für die Bezugsfläche d·h, aus dem Verhältnis Breite (d) zu Höhe (h).",
+              "group_label": "Reduktionsfaktor d"
+            },
+            "cd": {
+              "value": 1,
+              "unit": "",
+              "symbol": "c_d",
+              "label": "Dynamischer Faktor",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J60",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group_label": "dynamischer Faktor"
+            },
+            "qp": {
+              "value": 0.6650376989646943,
+              "unit": "kN/m²",
+              "symbol": "q_p",
+              "label": "Staudruck",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J17",
+              "norm": "SIA 261",
+              "norm_ref": "6.2 (12)"
+            },
+            "qk_max_bh": {
+              "value": 0.5370179419139907,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"max\",\"b·h\")",
+              "label": "Maximale globale Windkraft, Bezugsfläche b·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J69",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_min_bh": {
+              "value": 0,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"min\",\"b·h\")",
+              "label": "Minimale globale Windkraft, Bezugsfläche b·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J70",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_max_dh": {
+              "value": 0.6001965233156366,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"max\",\"d·h\")",
+              "label": "Maximale globale Windkraft, Bezugsfläche d·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!K69",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_min_dh": {
+              "value": 0,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"min\",\"d·h\")",
+              "label": "Minimale globale Windkraft, Bezugsfläche d·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!K70",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_max_db": {
+              "value": -0.25271432560658386,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"max\",\"d·b\")",
+              "label": "Maximale globale Windkraft, Bezugsfläche d·b",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!L69",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_min_db": {
+              "value": -0.2660150795858777,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"min\",\"d·b\")",
+              "label": "Minimale globale Windkraft, Bezugsfläche d·b",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!L70",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            }
+          },
+          "steps": [
+            {
+              "name": "Staudruck",
+              "level": 3,
+              "result": "qp",
+              "uses": [
+                "ch",
+                "qp0"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "6.2 (12)",
+              "formula": "q_p = c_h dot q_(p 0)",
+              "bold": true
+            }
+          ],
+          "checks": []
+        },
+        "WL-Fluchttreppe+Geräte": {
+          "workbook": "Belastungsannahmen.xlsm",
+          "sheet": "WL-Fluchttreppe+Geräte",
+          "results": [
+            "qk_max_bh",
+            "qk_min_bh",
+            "qk_max_dh",
+            "qk_min_dh",
+            "qk_max_db",
+            "qk_min_db"
+          ],
+          "tables": [
+            {
+              "title": "Globale Windkräfte",
+              "level": 1,
+              "place": "below",
+              "formula": "q_k = c_\"red\" dot c_d dot c_f dot q_p",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "note": "Bezugsflächen aus den Gebäudeabmessungen: b·h und d·h sind die Fassadenflächen quer bzw. längs zur Windrichtung, d·b die Dachfläche. $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über alle Windrichtungen (Blatt WL-Fluchttreppe+Geräte, Tabelle «Globale Kraftbeiwerte»); $c_\"red\"$ ist der Reduktionsfaktor der jeweiligen Bezugsfläche. Negative Werte sind Sog.",
+              "columns": [
+                {
+                  "label": "Globale Windkraft",
+                  "kind": "wide",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "",
+                  "kind": "math"
+                },
+                {
+                  "label": "b·h",
+                  "kind": "value",
+                  "group": "Bezugsfläche"
+                },
+                {
+                  "label": "d·h",
+                  "kind": "value",
+                  "group": "Bezugsfläche"
+                },
+                {
+                  "label": "d·b",
+                  "kind": "value",
+                  "group": "Bezugsfläche"
+                }
+              ],
+              "rows": [
+                [
+                  "maximale globale Windkraft",
+                  "q_k =",
+                  "qk_max_bh",
+                  "qk_max_dh",
+                  "qk_max_db"
+                ],
+                [
+                  "minimale globale Windkraft",
+                  "q_k =",
+                  "qk_min_bh",
+                  "qk_min_dh",
+                  "qk_min_db"
+                ]
+              ]
+            },
+            {
+              "title": "Lokale Windkräfte",
+              "level": 2,
+              "place": "below",
+              "formula": "q_k = q_p dot (c_\"pe\" - c_\"pi\")",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "source": "python:domains/wind.py",
+              "note": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen 0°, 15°, 45°, 90°, mit den Aussen- und Innendruckbeiwerten $c_\"pe\"$ und $c_\"pi\"$ des Blatts WL-Fluchttreppe+Geräte (Druckbeiwerte 59a). gleichmässig: gleichmässig verteilte Öffnungen, beide Innendruckbeiwerte des Blatts (glm. (+) und glm. (-)) berücksichtigt; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D. Negative Werte sind Sog.",
+              "columns": [
+                {
+                  "label": "Lokale Windkraft",
+                  "kind": "wide",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "gleichmässig"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "gleichmässig"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung A"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung A"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung B"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung B"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung C"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung C"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung D"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung D"
+                }
+              ],
+              "rows": [
+                [
+                  "Wand A",
+                  0.465526389275286,
+                  -0.29926696453411245,
+                  0.0,
+                  0.0,
+                  0.5985339290682249,
+                  0.0,
+                  0.6650376989646943,
+                  -0.698289583912929,
+                  0.6650376989646943,
+                  -0.06650376989646942
+                ],
+                [
+                  "Wand B",
+                  -0.13300753979293886,
+                  -0.29926696453411245,
+                  0.0,
+                  -0.5985339290682249,
+                  0.0,
+                  0.0,
+                  0.06650376989646946,
+                  -0.698289583912929,
+                  0.06650376989646946,
+                  -0.06650376989646942
+                ],
+                [
+                  "Wand C",
+                  0.5320301591717554,
+                  -0.33251884948234717,
+                  0.698289583912929,
+                  -0.6650376989646943,
+                  0.698289583912929,
+                  -0.06650376989646946,
+                  0.0,
+                  0.0,
+                  0.6317858140164596,
+                  0.0
+                ],
+                [
+                  "Wand D",
+                  -0.09975565484470415,
+                  -0.33251884948234717,
+                  0.06650376989646942,
+                  -0.6650376989646943,
+                  0.06650376989646942,
+                  -0.06650376989646946,
+                  0.0,
+                  -0.6317858140164596,
+                  0.0,
+                  0.0
+                ],
+                [
+                  "Dach E",
+                  -0.16625942474117356,
+                  -0.465526389275286,
+                  -0.03325188494823474,
+                  -0.7980452387576332,
+                  -0.03325188494823471,
+                  -0.1995113096894083,
+                  -0.13300753979293883,
+                  -0.7315414688611638,
+                  0.03325188494823474,
+                  -0.13300753979293883
+                ],
+                [
+                  "Dach F",
+                  -0.09975565484470415,
+                  -0.465526389275286,
+                  0.06650376989646942,
+                  -0.7980452387576332,
+                  0.06650376989646942,
+                  -0.1995113096894083,
+                  -0.13300753979293883,
+                  -0.6317858140164596,
+                  0.0,
+                  -0.13300753979293883
+                ],
+                [
+                  "Dach G",
+                  -0.13300753979293886,
+                  -0.3657707344305819,
+                  -0.03325188494823474,
+                  -0.5985339290682249,
+                  0.0,
+                  -0.09975565484470417,
+                  0.06650376989646946,
+                  -0.7315414688611638,
+                  0.06650376989646946,
+                  -0.09975565484470417
+                ],
+                [
+                  "Dach H",
+                  -0.09975565484470415,
+                  -0.29926696453411245,
+                  0.06650376989646942,
+                  -0.5985339290682249,
+                  0.06650376989646942,
+                  -0.03325188494823471,
+                  0.06650376989646946,
+                  -0.6317858140164596,
+                  0.06650376989646946,
+                  0.0
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "qp0": {
+              "value": 0.9,
+              "unit": "kN/m²",
+              "symbol": "q_(p 0)",
+              "label": "Referenzwert des Staudrucks",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J6",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang E",
+              "description": "Referenzwert des Staudrucks am Standort nach SIA 261."
+            },
+            "b": {
+              "value": 8.9,
+              "unit": "m",
+              "symbol": "b",
+              "label": "Gebäudelänge",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J7",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group": "geometrie",
+              "group_label": "Gebäude Geometrie"
+            },
+            "d": {
+              "value": 6.5,
+              "unit": "m",
+              "symbol": "d",
+              "label": "Gebäudebreite",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J8",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group": "geometrie"
+            },
+            "h": {
+              "value": 3,
+              "unit": "m",
+              "symbol": "h",
+              "label": "Gebäudehöhe",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J9",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group": "geometrie"
+            },
+            "gelaendekategorie": {
+              "value": "IV grossflächige Stadtgebiete",
+              "unit": "",
+              "symbol": "\"Geländekategorie\"",
+              "label": "Geländekategorie",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!I11",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "description": "Die Geländekategorie bestimmt die Gradientenhöhe und die Bodenrauigkeit des Windprofils.",
+              "choices": [
+                {
+                  "value": "II Seeufer",
+                  "desc": "$z_g$ = 300 m, $alpha_r$ = 0.16"
+                },
+                {
+                  "value": "IIa grosse Ebene",
+                  "desc": "$z_g$ = 380 m, $alpha_r$ = 0.19"
+                },
+                {
+                  "value": "III Ortschaften, freies Feld",
+                  "desc": "$z_g$ = 450 m, $alpha_r$ = 0.23"
+                },
+                {
+                  "value": "IV grossflächige Stadtgebiete",
+                  "desc": "$z_g$ = 526 m, $alpha_r$ = 0.3"
+                }
+              ]
+            },
+            "zg": {
+              "value": 526,
+              "unit": "m",
+              "symbol": "z_g",
+              "label": "Gradientenhöhe",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J12",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "group_label": "Gradientenhöhe"
+            },
+            "alpha_r": {
+              "value": 0.3,
+              "unit": "",
+              "symbol": "alpha_r",
+              "label": "Bodenrauigkeit",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J13",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "group_label": "Bodenrauigkeit"
+            },
+            "z": {
+              "value": 10,
+              "unit": "m",
+              "symbol": "z",
+              "label": "Höhe über Boden",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J14",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "description": "Höhe über Boden, für die der Staudruck bestimmt wird; die Norm setzt sie mindestens zu 5 m an (10 m in Geländekategorie IV).",
+              "group_label": "Höhe über Boden"
+            },
+            "ch": {
+              "value": 0.7389307766274381,
+              "unit": "",
+              "symbol": "c_h",
+              "label": "Windprofilbeiwert",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J15",
+              "norm": "SIA 261",
+              "norm_ref": "6.2 (11)",
+              "group_label": "Windprofilbeiwert"
+            },
+            "cred_bh": {
+              "value": 0.86,
+              "unit": "",
+              "symbol": "c_(\"red\", \"b/h\")",
+              "label": "Reduktionsfaktor b",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J19",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "description": "Reduktionsfaktor für die Bezugsfläche b·h, aus dem Verhältnis Länge (b) zu Höhe (h).",
+              "group_label": "Reduktionsfaktor b"
+            },
+            "cred_dh": {
+              "value": 0.88,
+              "unit": "",
+              "symbol": "c_(\"red\", \"d/h\")",
+              "label": "Reduktionsfaktor d",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J20",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "description": "Reduktionsfaktor für die Bezugsfläche d·h, aus dem Verhältnis Breite (d) zu Höhe (h).",
+              "group_label": "Reduktionsfaktor d"
+            },
+            "cd": {
+              "value": 1,
+              "unit": "",
+              "symbol": "c_d",
+              "label": "Dynamischer Faktor",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J60",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group_label": "dynamischer Faktor"
+            },
+            "qp": {
+              "value": 0.6650376989646943,
+              "unit": "kN/m²",
+              "symbol": "q_p",
+              "label": "Staudruck",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J17",
+              "norm": "SIA 261",
+              "norm_ref": "6.2 (12)"
+            },
+            "qk_max_bh": {
+              "value": 0.5147391789986735,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"max\",\"b·h\")",
+              "label": "Maximale globale Windkraft, Bezugsfläche b·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J69",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_min_bh": {
+              "value": 0,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"min\",\"b·h\")",
+              "label": "Minimale globale Windkraft, Bezugsfläche b·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J70",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_max_dh": {
+              "value": 0.5559715163344845,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"max\",\"d·h\")",
+              "label": "Maximale globale Windkraft, Bezugsfläche d·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!K69",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_min_dh": {
+              "value": 0,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"min\",\"d·h\")",
+              "label": "Minimale globale Windkraft, Bezugsfläche d·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!K70",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_max_db": {
+              "value": -0.21946244065834913,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"max\",\"d·b\")",
+              "label": "Maximale globale Windkraft, Bezugsfläche d·b",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!L69",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_min_db": {
+              "value": -0.30591734152375943,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"min\",\"d·b\")",
+              "label": "Minimale globale Windkraft, Bezugsfläche d·b",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!L70",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            }
+          },
+          "steps": [
+            {
+              "name": "Staudruck",
+              "level": 3,
+              "result": "qp",
+              "uses": [
+                "ch",
+                "qp0"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "6.2 (12)",
+              "formula": "q_p = c_h dot q_(p 0)",
+              "bold": true
+            }
+          ],
+          "checks": []
+        },
+        "WL-Pavillon": {
+          "workbook": "Belastungsannahmen.xlsm",
+          "sheet": "WL-Pavillon",
+          "results": [
+            "qk_max_bh",
+            "qk_min_bh",
+            "qk_max_dh",
+            "qk_min_dh",
+            "qk_max_db",
+            "qk_min_db"
+          ],
+          "tables": [
+            {
+              "title": "Globale Windkräfte",
+              "level": 1,
+              "place": "below",
+              "formula": "q_k = c_\"red\" dot c_d dot c_f dot q_p",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "note": "Bezugsflächen aus den Gebäudeabmessungen: b·h und d·h sind die Fassadenflächen quer bzw. längs zur Windrichtung, d·b die Dachfläche. $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über alle Windrichtungen (Blatt WL-Pavillon, Tabelle «Globale Kraftbeiwerte»); $c_\"red\"$ ist der Reduktionsfaktor der jeweiligen Bezugsfläche. Negative Werte sind Sog.",
+              "columns": [
+                {
+                  "label": "Globale Windkraft",
+                  "kind": "wide",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "",
+                  "kind": "math"
+                },
+                {
+                  "label": "b·h",
+                  "kind": "value",
+                  "group": "Bezugsfläche"
+                },
+                {
+                  "label": "d·h",
+                  "kind": "value",
+                  "group": "Bezugsfläche"
+                },
+                {
+                  "label": "d·b",
+                  "kind": "value",
+                  "group": "Bezugsfläche"
+                }
+              ],
+              "rows": [
+                [
+                  "maximale globale Windkraft",
+                  "q_k =",
+                  "qk_max_bh",
+                  "qk_max_dh",
+                  "qk_max_db"
+                ],
+                [
+                  "minimale globale Windkraft",
+                  "q_k =",
+                  "qk_min_bh",
+                  "qk_min_dh",
+                  "qk_min_db"
+                ]
+              ]
+            },
+            {
+              "title": "Lokale Windkräfte",
+              "level": 2,
+              "place": "below",
+              "formula": "q_k = q_p dot (c_\"pe\" - c_\"pi\")",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "source": "python:domains/wind.py",
+              "note": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen 0°, 15°, 45°, 90°, mit den Aussen- und Innendruckbeiwerten $c_\"pe\"$ und $c_\"pi\"$ des Blatts WL-Pavillon (Druckbeiwerte 31). gleichmässig: gleichmässig verteilte Öffnungen, beide Innendruckbeiwerte des Blatts (glm. (+) und glm. (-)) berücksichtigt; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D. Negative Werte sind Sog.",
+              "columns": [
+                {
+                  "label": "Lokale Windkraft",
+                  "kind": "wide",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "gleichmässig"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "gleichmässig"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung A"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung A"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung B"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung B"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung C"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung C"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "Öffnung D"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "Öffnung D"
+                }
+              ],
+              "rows": [
+                [
+                  "Wand A",
+                  0.6051843060578718,
+                  -0.33251884948234717,
+                  0.0,
+                  0.0,
+                  0.6317858140164596,
+                  0.0,
+                  0.698289583912929,
+                  -0.698289583912929,
+                  0.698289583912929,
+                  -0.06650376989646942
+                ],
+                [
+                  "Wand B",
+                  -0.02660150795858778,
+                  -0.33251884948234717,
+                  0.0,
+                  -0.6317858140164596,
+                  0.0,
+                  0.0,
+                  0.06650376989646942,
+                  -0.698289583912929,
+                  0.06650376989646942,
+                  -0.06650376989646942
+                ],
+                [
+                  "Wand C",
+                  0.5652820441199902,
+                  -0.33251884948234717,
+                  0.698289583912929,
+                  -0.698289583912929,
+                  0.698289583912929,
+                  -0.06650376989646942,
+                  0.0,
+                  0.0,
+                  0.6317858140164596,
+                  0.0
+                ],
+                [
+                  "Wand D",
+                  -0.06650376989646943,
+                  -0.33251884948234717,
+                  0.06650376989646942,
+                  -0.698289583912929,
+                  0.06650376989646942,
+                  -0.06650376989646942,
+                  0.0,
+                  -0.6317858140164596,
+                  0.0,
+                  0.0
+                ],
+                [
+                  "Dach E",
+                  -0.19286093269976137,
+                  -0.43227450432705133,
+                  -0.09975565484470417,
+                  -0.7980452387576332,
+                  -0.03325188494823471,
+                  -0.16625942474117358,
+                  -0.09975565484470417,
+                  -0.7980452387576332,
+                  -0.03325188494823471,
+                  -0.16625942474117358
+                ],
+                [
+                  "Dach F",
+                  -0.06650376989646943,
+                  -0.46552638927528606,
+                  0.06650376989646942,
+                  -0.7980452387576332,
+                  0.06650376989646942,
+                  -0.19951130968940833,
+                  -0.09975565484470417,
+                  -0.6317858140164596,
+                  0.0,
+                  -0.13300753979293892
+                ],
+                [
+                  "Dach G",
+                  -0.02660150795858778,
+                  -0.43227450432705133,
+                  -0.09975565484470417,
+                  -0.6317858140164596,
+                  0.0,
+                  -0.09975565484470417,
+                  0.06650376989646942,
+                  -0.7980452387576332,
+                  0.06650376989646942,
+                  -0.16625942474117358
+                ],
+                [
+                  "Dach H",
+                  -0.02660150795858778,
+                  -0.29926696453411245,
+                  0.06650376989646942,
+                  -0.6317858140164596,
+                  0.09975565484470417,
+                  -0.03325188494823471,
+                  0.06650376989646942,
+                  -0.6317858140164596,
+                  0.09975565484470417,
+                  0.0
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "qp0": {
+              "value": 0.9,
+              "unit": "kN/m²",
+              "symbol": "q_(p 0)",
+              "label": "Referenzwert des Staudrucks",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J6",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang E",
+              "description": "Referenzwert des Staudrucks am Standort nach SIA 261."
+            },
+            "b": {
+              "value": 17.5,
+              "unit": "m",
+              "symbol": "b",
+              "label": "Gebäudelänge",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J7",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group": "geometrie",
+              "group_label": "Gebäude Geometrie"
+            },
+            "d": {
+              "value": 4.25,
+              "unit": "m",
+              "symbol": "d",
+              "label": "Gebäudebreite",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J8",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group": "geometrie"
+            },
+            "h": {
+              "value": 2.95,
+              "unit": "m",
+              "symbol": "h",
+              "label": "Gebäudehöhe",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J9",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group": "geometrie"
+            },
+            "gelaendekategorie": {
+              "value": "IV grossflächige Stadtgebiete",
+              "unit": "",
+              "symbol": "\"Geländekategorie\"",
+              "label": "Geländekategorie",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!I11",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "description": "Die Geländekategorie bestimmt die Gradientenhöhe und die Bodenrauigkeit des Windprofils.",
+              "choices": [
+                {
+                  "value": "II Seeufer",
+                  "desc": "$z_g$ = 300 m, $alpha_r$ = 0.16"
+                },
+                {
+                  "value": "IIa grosse Ebene",
+                  "desc": "$z_g$ = 380 m, $alpha_r$ = 0.19"
+                },
+                {
+                  "value": "III Ortschaften, freies Feld",
+                  "desc": "$z_g$ = 450 m, $alpha_r$ = 0.23"
+                },
+                {
+                  "value": "IV grossflächige Stadtgebiete",
+                  "desc": "$z_g$ = 526 m, $alpha_r$ = 0.3"
+                }
+              ]
+            },
+            "zg": {
+              "value": 526,
+              "unit": "m",
+              "symbol": "z_g",
+              "label": "Gradientenhöhe",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J12",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "group_label": "Gradientenhöhe"
+            },
+            "alpha_r": {
+              "value": 0.3,
+              "unit": "",
+              "symbol": "alpha_r",
+              "label": "Bodenrauigkeit",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J13",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "group_label": "Bodenrauigkeit"
+            },
+            "z": {
+              "value": 10,
+              "unit": "m",
+              "symbol": "z",
+              "label": "Höhe über Boden",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J14",
+              "norm": "SIA 261",
+              "norm_ref": "6.2",
+              "description": "Höhe über Boden, für die der Staudruck bestimmt wird; die Norm setzt sie mindestens zu 5 m an (10 m in Geländekategorie IV).",
+              "group_label": "Höhe über Boden"
+            },
+            "ch": {
+              "value": 0.7389307766274381,
+              "unit": "",
+              "symbol": "c_h",
+              "label": "Windprofilbeiwert",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J15",
+              "norm": "SIA 261",
+              "norm_ref": "6.2 (11)",
+              "group_label": "Windprofilbeiwert"
+            },
+            "cred_bh": {
+              "value": 0.85,
+              "unit": "",
+              "symbol": "c_(\"red\", \"b/h\")",
+              "label": "Reduktionsfaktor b",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J19",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "description": "Reduktionsfaktor für die Bezugsfläche b·h, aus dem Verhältnis Länge (b) zu Höhe (h).",
+              "group_label": "Reduktionsfaktor b"
+            },
+            "cred_dh": {
+              "value": 0.95,
+              "unit": "",
+              "symbol": "c_(\"red\", \"d/h\")",
+              "label": "Reduktionsfaktor d",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J20",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "description": "Reduktionsfaktor für die Bezugsfläche d·h, aus dem Verhältnis Breite (d) zu Höhe (h).",
+              "group_label": "Reduktionsfaktor d"
+            },
+            "cd": {
+              "value": 1,
+              "unit": "",
+              "symbol": "c_d",
+              "label": "Dynamischer Faktor",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J60",
+              "norm": "SIA 261",
+              "norm_ref": "6.3",
+              "group_label": "dynamischer Faktor"
+            },
+            "qp": {
+              "value": 0.6650376989646943,
+              "unit": "kN/m²",
+              "symbol": "q_p",
+              "label": "Staudruck",
+              "level": 3,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J17",
+              "norm": "SIA 261",
+              "norm_ref": "6.2 (12)"
+            },
+            "qk_max_bh": {
+              "value": 0.5370179419139907,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"max\",\"b·h\")",
+              "label": "Maximale globale Windkraft, Bezugsfläche b·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J69",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_min_bh": {
+              "value": 0,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"min\",\"b·h\")",
+              "label": "Minimale globale Windkraft, Bezugsfläche b·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J70",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_max_dh": {
+              "value": 0.6001965233156366,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"max\",\"d·h\")",
+              "label": "Maximale globale Windkraft, Bezugsfläche d·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!K69",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_min_dh": {
+              "value": 0,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"min\",\"d·h\")",
+              "label": "Minimale globale Windkraft, Bezugsfläche d·h",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!K70",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_max_db": {
+              "value": -0.25271432560658386,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"max\",\"d·b\")",
+              "label": "Maximale globale Windkraft, Bezugsfläche d·b",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!L69",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            },
+            "qk_min_db": {
+              "value": -0.2660150795858777,
+              "unit": "kN/m²",
+              "symbol": "q_(k,\"min\",\"d·b\")",
+              "label": "Minimale globale Windkraft, Bezugsfläche d·b",
+              "level": 1,
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!L70",
+              "norm": "SIA 261",
+              "norm_ref": "6.3"
+            }
+          },
+          "steps": [
+            {
+              "name": "Staudruck",
+              "level": 3,
+              "result": "qp",
+              "uses": [
+                "ch",
+                "qp0"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "6.2 (12)",
+              "formula": "q_p = c_h dot q_(p 0)",
+              "bold": true
+            }
+          ],
+          "checks": []
+        }
+      }
+    },
+    "live-load": {
+      "label": "Nutzlasten",
+      "action": "variable",
+      "engine": "norm",
+      "sheet_prefix": "",
+      "instances": {
+        "A1": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                0
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "A1",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Wohnflächen",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 2,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 2,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "A2": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                1
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "A2",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Wohnflächen",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Balkone",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 3,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 2,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "A3": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                2
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "A3",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Wohnflächen",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Treppen",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 4,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 2,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "B": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                3
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "B",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Büroflächen",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 3,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 2,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "C1": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                4
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "C1",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Versammlungsflächen",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Flächen mit Tischen und Bestuhlung",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 3,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 4,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "C2": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                5
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "C2",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Versammlungsflächen",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Flächen mit fester Bestuhlung",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 4,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 4,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "C3": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                6
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "C3",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Versammlungsflächen",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 5,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 4,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "D": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                7
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "D",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Verkaufsflächen",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Warenhäuser, Ladengeschäfte",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 5,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 4,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "E": {
+          "results": [
+            "hinweis"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                8
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "E",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Lager- und Fabrikationsflächen",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "hinweis": {
+              "value": "Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten.",
+              "unit": "",
+              "symbol": "\"Nutzlast\"",
+              "label": "Nutzlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.2",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "F": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                9
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "F",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Parkhäuser, Parkflächen, Einstellhallen",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 2,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Einzellast und Flächenlast wirken gleichzeitig.",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 20,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Einzellast und Flächenlast wirken gleichzeitig. Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "G": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                10
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "G",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 5,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Einzellast und Flächenlast wirken gleichzeitig.",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 90,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Einzellast und Flächenlast wirken gleichzeitig. Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        },
+        "H": {
+          "results": [
+            "q_k",
+            "Q_k"
+          ],
+          "tables": [
+            {
+              "title": "Tabelle 8: Kategorien von Nutzflächen und charakteristische Werte der Nutzlasten (SIA 261:2020)",
+              "level": 3,
+              "place": "above",
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "highlight": [
+                11
+              ],
+              "note": "1) Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen. 2) Projektspezifisch festzulegen (SIA 261, Ziffer 8.2.2), unter Berücksichtigung einer allfälligen dynamischen Wirkung, und in der Nutzungsvereinbarung sowie in der Projektbasis festzuhalten. 3) Einzellast und Flächenlast wirken gleichzeitig. 4) Zwei Einzellasten von je der Hälfte im Abstand von 1.8 m, auf Aufstandsflächen von 200 × 200 mm. 5) Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "columns": [
+                {
+                  "label": "Kategorie",
+                  "kind": "text"
+                },
+                {
+                  "label": "Art der Nutzfläche",
+                  "kind": "wide"
+                },
+                {
+                  "label": "Beispiel",
+                  "kind": "wide"
+                },
+                {
+                  "label": "qk",
+                  "label_math": "q_k",
+                  "kind": "math",
+                  "unit": "kN/m²"
+                },
+                {
+                  "label": "Qk",
+                  "label_math": "Q_k",
+                  "kind": "math",
+                  "unit": "kN"
+                }
+              ],
+              "rows": [
+                [
+                  "A1",
+                  "Wohnflächen",
+                  "Räume in Wohngebäuden und Wohnhäusern, Räume in Stationen von Krankenhäusern, Hotelzimmer, Küchen und Toiletten",
+                  "2",
+                  "2^\"1)\""
+                ],
+                [
+                  "A2",
+                  "Wohnflächen",
+                  "Balkone",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "A3",
+                  "Wohnflächen",
+                  "Treppen",
+                  "4",
+                  "2^\"1)\""
+                ],
+                [
+                  "B",
+                  "Büroflächen",
+                  "",
+                  "3",
+                  "2^\"1)\""
+                ],
+                [
+                  "C1",
+                  "Versammlungsflächen",
+                  "Flächen mit Tischen und Bestuhlung",
+                  "3",
+                  "4^\"1)\""
+                ],
+                [
+                  "C2",
+                  "Versammlungsflächen",
+                  "Flächen mit fester Bestuhlung",
+                  "4",
+                  "4^\"1)\""
+                ],
+                [
+                  "C3",
+                  "Versammlungsflächen",
+                  "Frei begehbare Flächen, Sport- und Spielflächen, Flächen für mögliche Menschenansammlungen",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "D",
+                  "Verkaufsflächen",
+                  "Warenhäuser, Ladengeschäfte",
+                  "5",
+                  "4^\"1)\""
+                ],
+                [
+                  "E",
+                  "Lager- und Fabrikationsflächen",
+                  "Lagerflächen, Bibliotheken inklusive ihrer Zugänge, Fabrikationshallen",
+                  "\"\"^\"2) 3)\"",
+                  "\"\"^\"2) 3)\""
+                ],
+                [
+                  "F",
+                  "Park- und Verkehrsflächen für Fahrzeuge unter 3.5 t",
+                  "Parkhäuser, Parkflächen, Einstellhallen",
+                  "2^\"3)\"",
+                  "20^\"3) 4)\""
+                ],
+                [
+                  "G",
+                  "Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t",
+                  "Zugangsrampen, Anlieferungszonen, für Feuerwehrfahrzeuge zugängliche Zonen",
+                  "5^\"3)\"",
+                  "90^\"3) 4)\""
+                ],
+                [
+                  "H",
+                  "Nicht begehbare Dächer 5)",
+                  "Dächer mit Zugang nur für Unterhaltsarbeiten",
+                  "0.4",
+                  "1^\"1)\""
+                ]
+              ]
+            }
+          ],
+          "vars": {
+            "kategorie": {
+              "value": "H",
+              "unit": "",
+              "symbol": "\"Kategorie\"",
+              "label": "Nutzungskategorie",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "description": "Begehbare und befahrbare Dächer sind je nach Nutzung als Flächen der Kategorien A bis G zu behandeln.",
+              "group": "nutzlast"
+            },
+            "nutzflaeche": {
+              "value": "Nicht begehbare Dächer",
+              "unit": "",
+              "symbol": "\"Nutzfläche\"",
+              "label": "Art der Nutzfläche",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "beispiel": {
+              "value": "Dächer mit Zugang nur für Unterhaltsarbeiten",
+              "unit": "",
+              "symbol": "\"Beispiel\"",
+              "label": "Beispiel",
+              "level": 2,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.1.2",
+              "group": "nutzlast"
+            },
+            "q_k": {
+              "value": 0.4,
+              "unit": "kN/m²",
+              "symbol": "q_k",
+              "label": "Flächenlast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "group": "nutzlast"
+            },
+            "Q_k": {
+              "value": 1,
+              "unit": "kN",
+              "symbol": "Q_k",
+              "label": "Einzellast",
+              "level": 1,
+              "source": "norm:SIA 261:2020, Tabelle 8",
+              "norm": "SIA 261",
+              "norm_ref": "8.2.1",
+              "description": "Aufstandsfläche 50 × 50 mm; die Einzellast muss nicht mit der Flächenlast kombiniert werden. Für Flächen mit Lagergestellen oder mit Hebeeinrichtungen befahrene Flächen ist sie projektspezifisch festzulegen.",
+              "group": "nutzlast"
+            }
+          },
+          "steps": [],
+          "checks": []
+        }
+      }
+    }
+  }
+}

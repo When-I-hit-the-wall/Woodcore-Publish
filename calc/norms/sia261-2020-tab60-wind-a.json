@@ -1,0 +1,380 @@
+{
+ "_source": "SIA 261:2020, Annexe C (normative) «Coefficients de force et de pression pour le vent», Tableau 60a, p. 100 -- transcribed from the text layer of the French edition, Normen-Florian/SIA261-2020-FR.pdf, each row's values counted against the table's columns, and checked against a render of the page (11.10.2026, issue #37). Values are the norm's decimals with a point; ±x is the pair [x, -x], a/b the pair [a, b], null a cell the norm leaves empty (–), \"direct\" a cell whose force is computed directly (*).",
+ "edition": "SIA 261:2020",
+ "table": {
+  "number": "60a",
+  "title": "Coefficients pour bâtiments élevés h : b : d = 5 : 5 : 1 à 5 : 10 : 1, toit plat",
+  "page": 100,
+  "ratio": "5 : 5 : 1 – 5 : 10 : 1",
+  "roof": "toit plat",
+  "columns": [
+   {
+    "key": "cpe:A1",
+    "group": "cpe",
+    "surface": "A1"
+   },
+   {
+    "key": "cpe:A2",
+    "group": "cpe",
+    "surface": "A2"
+   },
+   {
+    "key": "cpe:A3",
+    "group": "cpe",
+    "surface": "A3"
+   },
+   {
+    "key": "cpe:A4",
+    "group": "cpe",
+    "surface": "A4"
+   },
+   {
+    "key": "cpe:A5",
+    "group": "cpe",
+    "surface": "A5"
+   },
+   {
+    "key": "cpe:A6",
+    "group": "cpe",
+    "surface": "A6"
+   },
+   {
+    "key": "cpe:A7",
+    "group": "cpe",
+    "surface": "A7"
+   },
+   {
+    "key": "cpe:A8",
+    "group": "cpe",
+    "surface": "A8"
+   },
+   {
+    "key": "cpe:B1",
+    "group": "cpe",
+    "surface": "B1"
+   },
+   {
+    "key": "cpe:B2",
+    "group": "cpe",
+    "surface": "B2"
+   },
+   {
+    "key": "cpe:B3",
+    "group": "cpe",
+    "surface": "B3"
+   },
+   {
+    "key": "cpe:B4",
+    "group": "cpe",
+    "surface": "B4"
+   },
+   {
+    "key": "cpe:B5",
+    "group": "cpe",
+    "surface": "B5"
+   },
+   {
+    "key": "cpe:B6",
+    "group": "cpe",
+    "surface": "B6"
+   },
+   {
+    "key": "cpe:B7",
+    "group": "cpe",
+    "surface": "B7"
+   },
+   {
+    "key": "cpe:B8",
+    "group": "cpe",
+    "surface": "B8"
+   },
+   {
+    "key": "cpe:C1",
+    "group": "cpe",
+    "surface": "C1"
+   },
+   {
+    "key": "cpe:C2",
+    "group": "cpe",
+    "surface": "C2"
+   },
+   {
+    "key": "cpe:C3",
+    "group": "cpe",
+    "surface": "C3"
+   },
+   {
+    "key": "cpe:C4",
+    "group": "cpe",
+    "surface": "C4"
+   },
+   {
+    "key": "cpe:D1",
+    "group": "cpe",
+    "surface": "D1"
+   },
+   {
+    "key": "cpe:D2",
+    "group": "cpe",
+    "surface": "D2"
+   },
+   {
+    "key": "cpe:D3",
+    "group": "cpe",
+    "surface": "D3"
+   },
+   {
+    "key": "cpe:D4",
+    "group": "cpe",
+    "surface": "D4"
+   },
+   {
+    "key": "cpe:E",
+    "group": "cpe",
+    "surface": "E"
+   },
+   {
+    "key": "cpe:F",
+    "group": "cpe",
+    "surface": "F"
+   },
+   {
+    "key": "loc:m",
+    "group": "cpe_local",
+    "surface": "m"
+   },
+   {
+    "key": "loc:n",
+    "group": "cpe_local",
+    "surface": "n"
+   },
+   {
+    "key": "loc:o",
+    "group": "cpe_local",
+    "surface": "o"
+   },
+   {
+    "key": "cpi:rep",
+    "group": "cpi_opening",
+    "opening": "rep"
+   },
+   {
+    "key": "cpi:A",
+    "group": "cpi_opening",
+    "opening": "A"
+   },
+   {
+    "key": "cpi:B",
+    "group": "cpi_opening",
+    "opening": "B"
+   },
+   {
+    "key": "cpi:C",
+    "group": "cpi_opening",
+    "opening": "C"
+   },
+   {
+    "key": "cpi:D",
+    "group": "cpi_opening",
+    "opening": "D"
+   },
+   {
+    "key": "cf1:b·h",
+    "group": "cf",
+    "area": "b·h",
+    "index": 1
+   },
+   {
+    "key": "cf2:d·h",
+    "group": "cf",
+    "area": "d·h",
+    "index": 2
+   },
+   {
+    "key": "cf3:d·b",
+    "group": "cf",
+    "area": "d·b",
+    "index": 3
+   }
+  ],
+  "rows": [
+   {
+    "label": "0°",
+    "values": [
+     0.8,
+     0.8,
+     0.85,
+     0.85,
+     0.7,
+     0.7,
+     0.6,
+     0.6,
+     -0.6,
+     -0.6,
+     -0.8,
+     -0.8,
+     -0.8,
+     -0.8,
+     -0.7,
+     -0.7,
+     -0.9,
+     -0.9,
+     -1.0,
+     -1.05,
+     -0.9,
+     -0.9,
+     -1.0,
+     -1.05,
+     -0.95,
+     -0.95,
+     -1.2,
+     -1.2,
+     -1.2,
+     -0.2,
+     0.75,
+     -0.75,
+     -0.95,
+     -0.95,
+     1.46,
+     0.0,
+     -0.95
+    ]
+   },
+   {
+    "label": "15°",
+    "values": [
+     0.7,
+     0.65,
+     0.8,
+     0.7,
+     0.6,
+     0.5,
+     0.6,
+     0.5,
+     -0.45,
+     -0.45,
+     -0.45,
+     -0.5,
+     -0.5,
+     -0.55,
+     -0.7,
+     -0.6,
+     -0.65,
+     -0.75,
+     -0.85,
+     -0.95,
+     -0.8,
+     -0.85,
+     -0.95,
+     -1.0,
+     -0.9,
+     -0.7,
+     -1.0,
+     -1.0,
+     -1.0,
+     [
+      0.1,
+      -0.1
+     ],
+     0.65,
+     -0.55,
+     -0.8,
+     -0.9,
+     1.16,
+     0.1,
+     -0.8
+    ]
+   },
+   {
+    "label": "45°",
+    "values": [
+     0.5,
+     0.35,
+     0.6,
+     0.35,
+     0.5,
+     0.3,
+     0.45,
+     0.3,
+     -0.65,
+     -0.45,
+     -0.6,
+     -0.45,
+     -0.55,
+     -0.45,
+     -0.6,
+     -0.55,
+     0.35,
+     0.35,
+     0.35,
+     0.3,
+     -0.6,
+     -0.55,
+     -0.6,
+     -0.65,
+     -0.75,
+     -0.6,
+     -1.5,
+     -1.3,
+     0.6,
+     [
+      0.1,
+      -0.1
+     ],
+     0.45,
+     -0.55,
+     0.35,
+     -0.6,
+     0.96,
+     0.94,
+     -0.68
+    ]
+   },
+   {
+    "label": "90°",
+    "values": [
+     -0.75,
+     -0.3,
+     -0.8,
+     -0.45,
+     -0.9,
+     -0.45,
+     -0.8,
+     -0.45,
+     -0.3,
+     -0.75,
+     -0.45,
+     -0.8,
+     -0.45,
+     -0.9,
+     -0.45,
+     -0.8,
+     0.65,
+     0.75,
+     0.7,
+     0.6,
+     -0.5,
+     -0.5,
+     -0.5,
+     -0.55,
+     -0.95,
+     -0.7,
+     -1.8,
+     -1.0,
+     0.5,
+     -0.5,
+     -0.6,
+     -0.6,
+     0.7,
+     -0.5,
+     0.0,
+     1.19,
+     -0.83
+    ]
+   }
+  ],
+  "cpe_peak": -2.0,
+  "cfr": 0,
+  "notes": []
+ }
+}

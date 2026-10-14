@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Steel checks (export)",
+  "description": "data/steel.json -- every steel check of the project, resolved and computed by calc/domains/steel_check.py (issues #50-#52, spec 2026-10-12-section-acier D-09, D-17). A calculable check carries its calculation in the shape show-calc prints (vars, steps, tables, results), its utilisation and verdict; `#show-check-steel` (lib/steel.typ) prints it and computes nothing. Forces in kN, moments in kNm.",
+  "type": "object",
+  "required": ["schema_version", "checks"],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["1.0"]},
+    "checks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "kind", "calculable", "reason", "designation", "grade", "warnings"],
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "label": {"type": "string"},
+          "group": {"type": "string"},
+          "kind": {"type": "string"},
+          "position": {"type": ["string", "null"]},
+          "position_found": {"type": "boolean"},
+          "profile": {"type": ["object", "null"]},
+          "profile_from": {"type": ["string", "null"], "enum": ["stated", "position", null]},
+          "designation": {"type": "string"},
+          "grade": {"type": ["string", "null"]},
+          "grade_from": {"type": ["string", "null"], "enum": ["stated", "position", null]},
+          "N": {"type": "number"}, "M_y": {"type": "number"}, "M_z": {"type": "number"}, "V_z": {"type": "number"}, "V_y": {"type": "number"},
+          "A_net": {"type": ["number", "null"]},
+          "section": {"type": ["object", "null"]},
+          "calculable": {"type": "boolean"},
+          "reason": {"type": "string"},
+          "class": {"type": "integer", "minimum": 1, "maximum": 4},
+          "vars": {"type": "object"},
+          "steps": {"type": "array"},
+          "tables": {"type": "array"},
+          "results": {"type": "array", "items": {"type": "string"}},
+          "eta": {"type": ["number", "null"]},
+          "ok": {"type": "boolean"},
+          "relation": {"type": ["string", "null"]},
+          "ratio": {"type": ["string", "null"]},
+          "notes": {"type": "array", "items": {"type": "string"}},
+          "warnings": {"type": "array", "items": {"type": "string"}},
+          "links": {"type": "object"}
+        }
+      }
+    }
+  }
+}

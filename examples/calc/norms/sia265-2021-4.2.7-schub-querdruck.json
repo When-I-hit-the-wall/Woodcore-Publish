@@ -1,0 +1,17 @@
+{
+  "_source": "SIA 265:2021, clause 4.2.7.1, equation (28) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 33, read off a render of the page.",
+  "_note": "((f_c,90,d + sigma_90,d)/(f_c,90,d + k_t,90 · f_t,90,d))^2 + (tau_d/f_v,d)^2 · [1 - (f_c,90,d/(f_c,90,d + k_t,90 · f_t,90,d))^2] <= 1, for -f_c,90,d <= sigma_90,d <= f_t,90,d; sigma_90,d = sigma_t,90,d with k_t,90 = querzug, sigma_90,d = -sigma_c,90,d with k_t,90 = querdruck. 4.2.7.2 (direct load transfer by transverse compression) may not be used at the same time.",
+  "edition": "SIA 265:2021",
+  "clause": {
+    "norm": "SIA 265",
+    "norm_ref": "4.2.7.1",
+    "equation": "28",
+    "page": 33,
+    "label": "Schub und Normalkraft rechtwinklig zur Faserrichtung",
+    "k_t_90": {
+      "querzug": 1.0,
+      "querdruck": 4.0
+    },
+    "exclusive_with": "4.2.7.2"
+  }
+}

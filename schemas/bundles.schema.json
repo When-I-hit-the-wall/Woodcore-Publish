@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Plans/bundles.json",
+  "description": "The PDF bundles of a project's export sheets (calc/sheets.py, v0.116; 1.1 since v0.117): each gathers sheets of one kind into one PDF, their pages in the bundle's order. Written by Woodcore only. 1.0 is read as it is; a bundle's id, description and storey are optional -- absent, they are the first plan's on its first sheet, read and never copied (sheets.bundle_fields) -- and the id, its own or the plan's, names the PDF (Plans/<id>.pdf), where 1.0 named it by the bundle's name.",
+  "type": "object",
+  "required": ["format", "schema_version", "bundles"],
+  "properties": {
+    "format": {"const": "woodcore-sheet-bundles"},
+    "schema_version": {"type": "string", "enum": ["1.0", "1.1"]},
+    "bundles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "kind", "sheets"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "minLength": 1, "description": "The bundle's name, unique, as its folder shows it in the export list -- a free label since 1.1."},
+          "kind": {"type": "string", "enum": ["position", "fire"], "description": "The kind of sheets it gathers, never both."},
+          "sheets": {"type": "array", "items": {"type": "string"}, "uniqueItems": true, "description": "Its sheets' ids, in the order its pages follow."},
+          "id": {"type": "string", "minLength": 1, "description": "What names its PDF (1.1): no sheet's id and no other bundle's; absent, the first plan's id, else its name."},
+          "description": {"type": "string", "minLength": 1, "description": "Its description (1.1); absent, the first plan's label."},
+          "storey": {"type": "string", "minLength": 1, "description": "Its storey (1.1); absent, the first plan's storey."}
+        }
+      }
+    }
+  }
+}

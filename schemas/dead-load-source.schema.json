@@ -1,0 +1,195 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dead load source",
+  "description": "Woodcore-Datei/loads/dead/<id>.json -- one build-up of layers whose permanent load Woodcore computes (calc/domains/dead_load_source.py, docs/domain/loads.md §3.3ter, issue #35). Read beside the EL+AL-* sheets of a load workbook, under the same domain dead-load; an id both carry is refused.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "layers",
+    "chosen"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "-- pinned. 1.1 (issue #42): 1.0 with `links`, written only where a field follows a variable.",
+      "enum": [
+        "1.0",
+        "1.1"
+      ]
+    },
+    "id": {
+      "type": "string",
+      "description": "The file name without .json, and the instance the report names: letters, digits and _ . + -."
+    },
+    "name": {
+      "type": "string",
+      "description": "Optional, free text."
+    },
+    "label": {
+      "type": "string",
+      "description": "Optional: the description."
+    },
+    "group": {
+      "type": "string",
+      "description": "Optional: the folder of Woodcore's list, \"\" for the root."
+    },
+    "chosen": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The permanent load designed with, kN/m², rounded up from the sum of the layers; null takes the sum."
+    },
+    "layers": {
+      "type": "array",
+      "description": "The layers, top to bottom.",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "library",
+          "material"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "gk",
+              "ak"
+            ],
+            "description": "gk: Eigenlast (poids propre); ak: Auflast (surcharge) -- the engineer's choice for each layer."
+          },
+          "library": {
+            "type": "string",
+            "enum": [
+              "sia261",
+              "belastungsannahmen",
+              "project",
+              "direct"
+            ],
+            "description": "Where the weight is read: SIA 261 Anhang A (Tabelle 28 or 29), Woodcore's materials library, the project's materials.json -- or direct, a load typed in kN/m² (`load`)."
+          },
+          "material": {
+            "type": "string",
+            "description": "The line of the library: SIA 261's id, the workbook's material name (with its `ebene`), the project's id; for `direct`, the words the table prints."
+          },
+          "ebene": {
+            "type": "string",
+            "description": "The workbook's Ebene, which keys its library with the name."
+          },
+          "thickness": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "In mm, above 0: what a weight per volume is multiplied by, and what the drawing stacks."
+          },
+          "width": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "In mm: the width of battens, rafters or joists set at `spacing`; null for a continuous layer."
+          },
+          "spacing": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "In mm: the spacing of those members, centre to centre; null for a continuous layer."
+          },
+          "beside": {
+            "type": "boolean",
+            "description": "true: the layer shares the band of the layer above it, drawn in its gaps (the insulation between the rafters)."
+          },
+          "load": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "For `direct`: the load typed, kN/m², above 0."
+          },
+          "links": {
+            "type": "object",
+            "description": "The fields of this entry that follow a variable of the export, by their key (thickness, width, spacing, load): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.1.",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+                "required": [
+                  "domain",
+                  "instance",
+                  "var"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "instance": {
+                    "type": "string"
+                  },
+                  "var": {
+                    "type": "string"
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": [
+                      "formulas"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "description": "The fields of this entry that follow a variable of the export, by their key (chosen): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.1.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+          "required": [
+            "domain",
+            "instance",
+            "var"
+          ],
+          "properties": {
+            "domain": {
+              "type": "string"
+            },
+            "instance": {
+              "type": "string"
+            },
+            "var": {
+              "type": "string"
+            },
+            "factor": {
+              "type": "number"
+            },
+            "offset": {
+              "type": "number"
+            },
+            "origin": {
+              "type": "string",
+              "enum": [
+                "formulas"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

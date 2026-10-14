@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.3",
+  "position": "T001",
+  "type": "Träger",
+  "material": "Fichte",
+  "strength_class": "C24",
+  "section_type": "rec",
+  "dimension": "100/200",
+  "units": "mm",
+  "section": {
+    "type": "rec",
+    "kind": "timber",
+    "text": "100/200 mm",
+    "b": 100,
+    "h": 200
+  },
+  "moisture_class": 2,
+  "description": "UK",
+  "domains": {}
+}

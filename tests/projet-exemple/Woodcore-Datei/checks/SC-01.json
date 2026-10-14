@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "id": "SC-01",
+  "name": "Schub Träger",
+  "label": "Träger T001 am Auflager",
+  "group": "",
+  "kind": "shear",
+  "position": "T001",
+  "grade": null,
+  "section": null,
+  "moisture_class": null,
+  "impact": false,
+  "alpha": 0,
+  "V_z": {
+    "value": 12,
+    "unit": "kN"
+  },
+  "V_y": {
+    "value": 2,
+    "unit": "kN"
+  },
+  "pith": false
+}

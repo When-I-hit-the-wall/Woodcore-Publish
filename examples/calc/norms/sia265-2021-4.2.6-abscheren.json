@@ -1,0 +1,21 @@
+{
+  "_source": "SIA 265:2021, clause 4.2.6, equations (26) and (27) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 33, read off a render of the page.",
+  "_note": "tau_a,d <= factor · f_v,d, the factor by family: Vollholz stands for Vollholz, keilgezinktes Vollholz and Balkenschichtholz (the rows of Tabelle 8), Brettschichtholz for Tabelle 9. The resistance counts only where the shear area is at least min_shear_length long in the grain direction.",
+  "edition": "SIA 265:2021",
+  "clause": {
+    "norm": "SIA 265",
+    "norm_ref": "4.2.6",
+    "page": 33,
+    "label": "Abscheren",
+    "factor": {
+      "Vollholz": 0.6,
+      "Brettschichtholz": 0.8
+    },
+    "equation": {
+      "Vollholz": "26",
+      "Brettschichtholz": "27"
+    },
+    "min_shear_length": 150,
+    "unit": "mm"
+  }
+}

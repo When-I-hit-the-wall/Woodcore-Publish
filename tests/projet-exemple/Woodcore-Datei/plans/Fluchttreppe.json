@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.1",
+  "id": "Fluchttreppe",
+  "label": "Grundriss",
+  "floor": "0",
+  "sheet": {
+    "width": 1190.55,
+    "height": 1190.55
+  },
+  "show_lengths": false,
+  "style": {
+    "line": 1.91,
+    "point": 0.97,
+    "text": 1.48
+  },
+  "axes": [],
+  "elements": [
+    {
+      "type": "S",
+      "label": "S001",
+      "points": [
+        [
+          925.96,
+          675.62
+        ]
+      ]
+    },
+    {
+      "type": "T",
+      "label": "T001",
+      "points": [
+        [
+          925.47,
+          669.45
+        ],
+        [
+          629.81,
+          669.45
+        ]
+      ],
+      "label_offset": [
+        9.21,
+        -0.92
+      ]
+    },
+    {
+      "type": "S",
+      "label": "S001",
+      "points": [
+        [
+          742.6,
+          676.32
+        ]
+      ],
+      "label_offset": [
+        -1.32,
+        42.64
+      ]
+    }
+  ],
+  "background": {
+    "file": "01_Pläne/02_Total Plane - 29-07-26.pdf",
+    "page": 2,
+    "opacity": 0.45,
+    "sha256": "4295ebad3513d4201791a8a53588838afb3f194a36986a399db85e8a40901884"
+  },
+  "crop": {
+    "x": 514.83,
+    "y": 102.51,
+    "w": 505.72,
+    "h": 644.68
+  }
+}

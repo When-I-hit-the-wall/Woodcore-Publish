@@ -1,0 +1,29 @@
+{
+  "_source": "SIA 265:2021, Tabelle 3 (clause 3.2.1.2) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 22. The only copy of the moisture classes in the project: a position's Feuchteklasse is checked against these ids, and eta_w is read by them (Tabelle 4).",
+  "_note": "Id, the mean moisture of the wood and what the class describes.",
+  "edition": "SIA 265:2021",
+  "table_3": {
+    "number": "3",
+    "title": "Feuchteklassen",
+    "norm": "SIA 265",
+    "norm_ref": "3.2.1.2",
+    "classes": [
+      {
+        "id": 1,
+        "moisture": "<= 12 %",
+        "label": "vor der Witterung geschützt"
+      },
+      {
+        "id": 2,
+        "moisture": "> 12 bis 20 %",
+        "label": "teilweise vor der Witterung geschützt oder direkt bewittert"
+      },
+      {
+        "id": 3,
+        "moisture": "> 20 %",
+        "label": "feucht oder unter Wasser"
+      }
+    ],
+    "note": "Die Werte der mittleren Holzfeuchte dürfen während einiger Wochen im Jahr überschritten werden (Tabelle 3, Fussnote 1)."
+  }
+}

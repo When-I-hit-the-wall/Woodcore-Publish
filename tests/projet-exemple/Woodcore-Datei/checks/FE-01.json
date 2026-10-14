@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.2",
+  "id": "FE-01",
+  "name": "Biegung im Brandfall",
+  "label": "Einfeldträger, dreiseitiger Abbrand («Bemessung im Brandfall Biegung»)",
+  "group": "",
+  "kind": "bending",
+  "position": null,
+  "grade": "C24",
+  "section": {
+    "type": "rec",
+    "b": 140,
+    "h": 200
+  },
+  "moisture_class": 1,
+  "impact": false,
+  "alpha": 0,
+  "N": {
+    "value": 0,
+    "unit": "kN"
+  },
+  "M_y": {
+    "value": 2,
+    "unit": "kNm"
+  },
+  "M_z": null,
+  "fire": {
+    "duration": null,
+    "sides": {
+      "bottom": true,
+      "top": false,
+      "left": true,
+      "right": true
+    },
+    "wood": null,
+    "top_level": false
+  }
+}

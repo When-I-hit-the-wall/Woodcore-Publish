@@ -1,0 +1,32 @@
+{
+  "_source": "SIA 261:2020, chapter 5 «Schnee» -- clauses 5.1.4, 5.2.2 to 5.2.6 and 5.3.1 to 5.3.7, Figuren 2, 3 and 4 (and Figur 5 named, not transcribed), and Anhang D -- transcribed by hand from the French edition, Normen-Florian/SIA261-2020-FR.pdf pp. 26-29 and 115, the figures read off a render of the pages (11.10.2026, issue #36). The text of the clauses extracts as text; the curves of Figur 2 and 4 are straight segments between the grid values written here, read off the render and checked against the clauses that state them (5.3.4: mu_1 = 0.8; 5.3.5: Figur 4 for flat roofs over 20 m).",
+  "_note": "Equation (9): q_k = mu · C_e · C_T · s_k. Equation (10): s_k = (1 + (h_0 / s_k_divisor)^2) · s_k_factor kN/m², at least s_k_min -- h_0 being the reference altitude of Anhang D, the altitude above sea level plus the correction of the map. Figur 2: each coefficient is a polyline of [alpha in degrees, mu] points, constant beyond its last point. Figur 3: the load models of the three roof forms, the curved roof's third column reading mu_3(alpha) with alpha_0 = 60°, the slope beyond which the roof carries no snow. Figur 4: mu_1 of a flat roof, by the larger of its two plan dimensions, for a roof whose length and width both exceed min_side (5.3.5) and whose slope is under max_slope.",
+  "edition": "SIA 261:2020",
+  "clause": {
+    "norm": "SIA 261",
+    "norm_ref": "5",
+    "pages": [26, 27, 28, 29, 115],
+    "label": "Schnee",
+    "max_altitude": {"value": 2000, "unit": "m", "norm_ref": "5.1.4", "note": "5.1.4: the provisions of chapter 5 do not apply to works above this altitude, the site's h_0. Woodcore computes a site above it all the same and warns in the tab only, the report saying nothing (spec 2026-10-14-neige-vent-affichage-altitude): a limit to warn of, not a refusal."},
+    "s_k": {"factor": 0.4, "divisor": 350, "exponent": 2, "min": 0.9, "unit": "kN/m²", "equation": "10", "norm_ref": "5.2.6"},
+    "exposure": {
+      "norm_ref": "5.2.4",
+      "choices": [
+        {"id": "normal", "label": "Windexposition normal", "value": 1.0},
+        {"id": "exposed", "label": "stark windexponiert", "value": 0.8},
+        {"id": "sheltered", "label": "windgeschützt", "value": 1.2}
+      ]
+    },
+    "c_t": {"default": 1.0, "norm_ref": "5.2.5"},
+    "corrections": {"norm_ref": "Anhang D", "unit": "m", "values": [-200, 0, 200, 400, 500]},
+    "mu_1": {"norm_ref": "Figur 2", "points": [[0, 0.8], [30, 0.8], [60, 0.0]]},
+    "mu_2": {"norm_ref": "Figur 2", "points": [[0, 0.8], [30, 1.6]]},
+    "mu_3": {"norm_ref": "Figur 2", "points": [[0, 0.2], [20, 2.0]]},
+    "hindered": {"mu_1": 0.8, "norm_ref": "5.3.4"},
+    "mono": {"norm_ref": "5.3.2", "note": "Un toit incliné sur un seul pan doit être traité comme la moitié d'une toiture symétrique."},
+    "curved": {"alpha_0": 60, "model_1": 0.8, "norm_ref": "Figur 3"},
+    "large_flat": {"norm_ref": "5.3.5", "min_side": 20, "max_slope": 10, "points": [[20, 0.8], [25, 1.0]]},
+    "height_step": {"norm_ref": "5.3.6", "figure": "Figur 5", "note": "Bei Gebäuden mit abgestuften Dächern oder deren Dach an Bauwerke grösserer Höhe angrenzt: dreieckförmige Zusatzlast auf der unteren Dachfläche nach Figur 5 (Verdoppelung von mu_1 auf der Seite des Höhensprungs), Einflusslänge l_s = 2·h (p. 27). Not computed: a source says only that its roof has such a step (spec 2026-10-12-audit-issues-47-48-49, D-04)."},
+    "cornice": {"norm_ref": "5.3.7", "min_altitude": 800, "unit": "m", "density": 3, "density_unit": "kN/m³", "note": "Für Bauwerke über 800 m Meereshöhe ist bei auskragenden Dachteilen ein Schneeüberhang zu berücksichtigen: Höhe und Breite gleich der halben Schneehöhe auf dem Dach (aus der Schneelast nach 5.2.2 mit 3 kN/m³), Linienlast am Dachrand (p. 27). «Meereshöhe» is the site's altitude h_0, as for 5.1.4. Not computed: the report says it applies (D-04)."}
+  }
+}

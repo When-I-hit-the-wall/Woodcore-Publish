@@ -1,0 +1,301 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Position",
+  "description": "data/positions/<id>.json -- one structural element (type/material/section) plus any calculated domains (docs/architecture/data-contracts.md §3.1). 1.3 (v0.94) adds `section_type` and `section`, the dimension read once by domains/section.py. 1.4 (v0.114): the record of a position Woodcore keeps itself in Woodcore-Datei/positions.json (calc/positions_store.py) -- only `position` and `type` are required; every other field may be absent or null, which reads as blank. A 1.3 record is still read. 1.5 (issue #50): a section may be a free steel profile (`kind` user, `type` USR, its `id`), and only such a record is written at 1.5.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "position",
+    "type",
+    "domains"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "-- pinned: an export written at another version is refused rather than read as this one. 1.4 since v0.114; 1.3, whose records carried every key, is read as well; 1.5 for a record whose section is a free profile (issue #50).",
+      "enum": [
+        "1.3",
+        "1.4",
+        "1.5"
+      ]
+    },
+    "position": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "material": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "What the element is made of, as typed in the Positions Element sheet (Fichte, Stahl, ...). Until the sheet gained a `resistance class` column this held the strength class; a record without `strength_class` is still read that way."
+    },
+    "strength_class": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The element's strength class (Festigkeitsklasse), from the Positions Element sheet's `resistance class` column: C24, GL24h, S355 ... -- what a connector's timber and a schema element's label are read off. Empty where the cell is blank."
+    },
+    "section_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The shape of the section, as typed in the Positions Element sheet's `section type` column (v0.94): rec, cir, pla, clt for timber, an SZS C5 code (IPE, HEA, ROR, RRW ...) for a steel profile, or empty. What `dimension` is read by; empty where the cell is blank or the column absent."
+    },
+    "dimension": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The dimension exactly as typed in the Positions Element sheet (\"100/200\", \"200\", \"20/30/20/30/20\", \"101.6x10\" ...), read according to `section_type` into `section` by domains/section.py and by nothing else (docs/domain/positions.md §7, v0.94). Facultative since v0.87: empty where the cell is blank or the column absent, and then left out of every summary with its unit. The key is always written, empty or not."
+    },
+    "units": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Unit the `dimension` text is given in, as typed in the Positions Element sheet (e.g. \"mm\"). Printed after the dimension, and only where there is one -- it qualifies the dimension and nothing else; facultative like it, and empty where the cell is blank or the column absent."
+    },
+    "section": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The section the row's `section_type`, `dimension` and `units` state, read once at the export (domains/section.py, v0.94) -- what the report's level-1 line prints (`text`) and what #member and a detail schema's element read, none of them parsing the dimension again. null where the type is empty and the dimension is descriptive text. Every length in mm, whatever `units` the row states.",
+      "required": [
+        "type",
+        "kind",
+        "text"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "rec, cir, pla, clt, an SZS C5 code, or USR for a free steel profile (1.5)."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "timber",
+            "steel",
+            "user"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "description": "What a summary prints: \"100/200 mm\", \"Ø 200 mm\", \"22 mm\", \"20/30/20/30/20 mm (120 mm)\", \"ROR 101.6×10\" -- in the units the row states."
+        },
+        "b": {
+          "type": "number",
+          "description": "rec: the width, in mm."
+        },
+        "h": {
+          "type": "number",
+          "description": "rec: the height, in mm."
+        },
+        "d": {
+          "type": "number",
+          "description": "cir: the diameter, in mm."
+        },
+        "t": {
+          "type": "number",
+          "description": "pla: the thickness; clt: the sum of its layers, in mm."
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "clt: the layers' thicknesses, outermost first, in mm."
+        },
+        "dims": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "steel: the designation's size as written, \"101.6x10\" giving [101.6, 10]; its values are SZS C5's table's (calc/norms/szs_c5.py, issue #50), read by the steel checks and not written here."
+        },
+        "id": {
+          "type": "string",
+          "description": "user (1.5): the id of the free profile, a file of Woodcore-Datei/profiles/ (domains/profile.py); its values are computed from its rectangles by the steel checks and not written here."
+        },
+        "deduced": {
+          "type": "boolean",
+          "description": "true where the row states no section type and its dimension reads as b/h, the case of a workbook written before the column existed: read as rec, with an export warning."
+        }
+      }
+    },
+    "moisture_class": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "The position's moisture class (Feuchteklasse), 1, 2 or 3, from the Positions Element sheet's `moisture class` column (`Wood moisture class` until it was renamed) -- the one column of the sheet a calculation reads as a number. null where the cell is left blank, a position that is not timber having none (docs/domain/positions.md §7)."
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "archived": {
+      "type": "object",
+      "description": "Additive (issue #9), written only on a position deleted with its values kept («Copier les valeurs», calc/renumbering.py): the id it had and the day it was deleted. The report prints, wherever such a position is called, that the calculation stands on the values of an old position.",
+      "required": [
+        "was",
+        "deleted"
+      ],
+      "properties": {
+        "was": {
+          "type": "string"
+        },
+        "deleted": {
+          "type": "string"
+        }
+      }
+    },
+    "domains": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": [
+            "vars",
+            "steps",
+            "checks"
+          ],
+          "properties": {
+            "vars": {
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "required": [
+                    "value",
+                    "unit",
+                    "symbol",
+                    "label",
+                    "level",
+                    "source",
+                    "norm",
+                    "norm_ref"
+                  ],
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "level": {
+                      "type": "number"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "norm": {
+                      "type": "string"
+                    },
+                    "norm_ref": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "choices": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "level",
+                  "result",
+                  "uses",
+                  "norm",
+                  "norm_ref"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "level": {
+                    "type": "number"
+                  },
+                  "result": {
+                    "type": "string"
+                  },
+                  "uses": {
+                    "type": "array"
+                  },
+                  "formula": {
+                    "type": "string"
+                  },
+                  "norm": {
+                    "type": "string"
+                  },
+                  "norm_ref": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "checks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "eta",
+                  "unit",
+                  "level",
+                  "status",
+                  "norm",
+                  "norm_ref"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "eta": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  },
+                  "level": {
+                    "type": "number"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "norm": {
+                    "type": "string"
+                  },
+                  "norm_ref": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

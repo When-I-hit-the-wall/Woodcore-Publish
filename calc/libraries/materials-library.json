@@ -1,0 +1,2131 @@
+{
+  "_source": "The material library of a load workbook of an engineering office («load workbook» template, sheet «Material (hier ergänzen)», table Tabelle2, rows 14 to 249), read out once on 11.10.2026 (issue #35, decision D-07). Not a norm, and a faithful read-out but for four entries the norm contradicts: Aluwellblech (row 152), Blech Aluminium (row 243) and Blech Aluminium 2mm (rows 85, 160) carry the value of SIA 261 Tabelle 28/29, the workbook's in their `info` (spec 2026-10-12-audit-issues-47-48-49, D-05; tests/test_dead_load_source.py holds them equal to the norm files). Otherwise not a norm: each entry keeps the workbook's own «Quellen» column, and where SIA 261 Anhang A gives the material, the norm's table (calc/norms/sia261-2020-tab28/29) is offered beside it and wins (docs/domain/loads.md §3.3ter).",
+  "_note": "Keyed by (ebene, material), as a layer of the workbook names both: a name listed under two Ebenen with two weights (Gartenplatten, Sand, Schlacke, Duripanel, PV-Anlage) is two entries. `mass` is in the unit given, kg/m³ or kg/m²; the load of a layer is mass / 100 kN per kg (g = 10 m/s², the workbook's own conversion) times its thickness, width and spacing. `row` is the workbook row the entry was read from. An entry of weight 0 (Scobalit, row 235) is listed as the workbook lists it and refused where a layer names it.",
+  "edition": "Woodcore 2026-10-11",
+  "materials": [
+    {
+      "ebene": "Fussboden",
+      "material": "Parkett Hartholz",
+      "mass": 800,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 14
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Natursteinboden",
+      "mass": 3000,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 15
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Keramikplatten",
+      "mass": 2000,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 16
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Steinholzböden",
+      "mass": 1600,
+      "unit": "kg/m³",
+      "quelle": "Repoxit AG, Winterthur",
+      "info": "",
+      "row": 17
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Anhydritestrich",
+      "mass": 2000,
+      "unit": "kg/m³",
+      "quelle": "Fixit AG, 5113 Holderbank",
+      "info": "",
+      "row": 18
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Bodenriemen Fi/Ta",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 19
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Zement UB",
+      "mass": 2200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 20
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Linoleum",
+      "mass": 1160,
+      "unit": "kg/m³",
+      "quelle": "DLW, Marmorette",
+      "info": "",
+      "row": 21
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Gussasphalt",
+      "mass": 2400,
+      "unit": "kg/m³",
+      "quelle": "Veras, Bern www.gussasphalt.ch",
+      "info": "",
+      "row": 22
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Hartbeton leichtbeansprucht",
+      "mass": 2050,
+      "unit": "kg/m³",
+      "quelle": "Repoxit AG, Winterthur",
+      "info": "",
+      "row": 23
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Hartbeton schwerbeansprucht",
+      "mass": 2100,
+      "unit": "kg/m³",
+      "quelle": "Repoxit AG, Winterthur",
+      "info": "",
+      "row": 24
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "3-Schichtplatte",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 25
+    },
+    {
+      "ebene": "Fussboden",
+      "material": "Haltopex (Walo)",
+      "mass": 1200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 26
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Steinholzböden",
+      "mass": 1600,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 27
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Zement UB",
+      "mass": 2200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 28
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Magnesit UB",
+      "mass": 1500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 29
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Spanplatten",
+      "mass": 800,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 30
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "OSB-Platten",
+      "mass": 680,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 31
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Fermacell Estrich",
+      "mass": 1200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 32
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Duripanel",
+      "mass": 1300,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 33
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Anhydritestrich",
+      "mass": 2000,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 34
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Gussasphalt",
+      "mass": 2400,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 35
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Blindboden Tanne",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 36
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Hartbeton schwerbeansprucht",
+      "mass": 2100,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 37
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Blindboden Fi/Ta",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 38
+    },
+    {
+      "ebene": "Unterlagsboden",
+      "material": "Stahlbeton (Holzbetonverbund)",
+      "mass": 2400,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 39
+    },
+    {
+      "ebene": "Trittschalldämmung",
+      "material": "Flumroc Trittschall",
+      "mass": 110,
+      "unit": "kg/m³",
+      "quelle": "Flumroc",
+      "info": "Trittschall",
+      "row": 40
+    },
+    {
+      "ebene": "Trittschalldämmung",
+      "material": "Isover Trittschall PS81",
+      "mass": 80,
+      "unit": "kg/m³",
+      "quelle": "Isover",
+      "info": "Trittschall",
+      "row": 41
+    },
+    {
+      "ebene": "Trittschalldämmung",
+      "material": "Weichfaserplatte Pavapor",
+      "mass": 135,
+      "unit": "kg/m³",
+      "quelle": "Pavatex, Cham",
+      "info": "Trittschall",
+      "row": 42
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Isover uniroll",
+      "mass": 20,
+      "unit": "kg/m³",
+      "quelle": "Isover",
+      "info": "Standardprodukt für Dach. Geeignet für Dach-/Decken-/Wandkonstruktionen ohne Brandschutzanforderungen.",
+      "row": 43
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Isover PBM 032 / 034",
+      "mass": 20,
+      "unit": "kg/m³",
+      "quelle": "Isover",
+      "info": "Hochleistungsdämmung, Ausnahmeprodukt",
+      "row": 44
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Isover Isolene P",
+      "mass": 60,
+      "unit": "kg/m³",
+      "quelle": "Isover",
+      "info": "Hochleistungsdämmung, Ausnahmeprodukt",
+      "row": 45
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Flumroc Typ 1",
+      "mass": 38,
+      "unit": "kg/m³",
+      "quelle": "Flumroc",
+      "info": "Typische Brandschutzdämmung, geeignet für Dach-/Decken-/Wandkonstruktionen mit Brandschutzanforderungen",
+      "row": 46
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Flumroc Typ 3",
+      "mass": 60,
+      "unit": "kg/m³",
+      "quelle": "Flumroc",
+      "info": "Schwere Brandschutzdämmung, Ausnahmeprodukt",
+      "row": 47
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Flumroc Solo",
+      "mass": 38,
+      "unit": "kg/m³",
+      "quelle": "Flumroc",
+      "info": "Typische Brandschutzdämmung, geeignet für Dach-/Decken-/Wandkonstruktionen mit Brandschutzanforderungen",
+      "row": 48
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Weichfaserplatte Pavatherm",
+      "mass": 115,
+      "unit": "kg/m³",
+      "quelle": "Pavatherm",
+      "info": "Typische Aufdachdämmung, druckfest",
+      "row": 49
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Weichfaserplatte Thermoflex",
+      "mass": 50,
+      "unit": "kg/m³",
+      "quelle": "GUTEX",
+      "info": "Zwischendämmung bei Dach-/Decken-/Wandkonstruktionen",
+      "row": 50
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Zellulosefaserplatte FlexCL",
+      "mass": 70,
+      "unit": "kg/m³",
+      "quelle": "Homatherm",
+      "info": "Zwischendämmung bei Dach-/Decken-/Wandkonstruktionen",
+      "row": 51
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Zellulosefasern 1",
+      "mass": 60,
+      "unit": "kg/m³",
+      "quelle": "Isofloc",
+      "info": "Dach- und Wandkonstruktionen ohne Brandschutzanforderungen",
+      "row": 52
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Zellulosefasern 2",
+      "mass": 55,
+      "unit": "kg/m³",
+      "quelle": "Isofloc",
+      "info": "Dach- und Wandkonstruktionen ohne Brandschutzanforderungen",
+      "row": 53
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Schlacke",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "Annahme",
+      "info": "",
+      "row": 54
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Kalksplittschüttung trocken",
+      "mass": 1400,
+      "unit": "kg/m³",
+      "quelle": "H&F Kalksplittschüttung",
+      "info": "",
+      "row": 55
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Flumroc Trittschall",
+      "mass": 110,
+      "unit": "kg/m³",
+      "quelle": "Flumroc",
+      "info": "Trittschall",
+      "row": 56
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Isover Trittschall PS81",
+      "mass": 80,
+      "unit": "kg/m³",
+      "quelle": "Isover",
+      "info": "Trittschall",
+      "row": 57
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Weichfaserplatte Pavapor",
+      "mass": 135,
+      "unit": "kg/m³",
+      "quelle": "Pavatex, Cham",
+      "info": "Trittschall",
+      "row": 58
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "Flumroc prima",
+      "mass": 120,
+      "unit": "kg/m³",
+      "quelle": "Flumroc",
+      "info": "typische Flachdachdämmung, begehbar, Mineralwolle RF1",
+      "row": 59
+    },
+    {
+      "ebene": "Dämmung",
+      "material": "PUR / PIR Dämmung",
+      "mass": 30,
+      "unit": "kg/m³",
+      "quelle": "Sager PIR Premium",
+      "info": "Flachdachdämmung, begehbar",
+      "row": 60
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "3-Schichtplatte",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 61
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "OSB3",
+      "mass": 680,
+      "unit": "kg/m³",
+      "quelle": "Kronospan, 6122 Menznau www.kronospan.ch",
+      "info": "",
+      "row": 62
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Kerto-T",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 63
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Kerto-S",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 64
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Kerto-Q",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 65
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Spanplatten",
+      "mass": 800,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 66
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Duripanel",
+      "mass": 1300,
+      "unit": "kg/m³",
+      "quelle": "Eternit AG, Niederurnen www.eternit.ch",
+      "info": "",
+      "row": 67
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Schalung",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 68
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Fermacell",
+      "mass": 1200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 69
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Rigips",
+      "mass": 1200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 70
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Sperrholzplatte",
+      "mass": 600,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 71
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Weichfaserplatte",
+      "mass": 200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 72
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Heraklith-BM",
+      "mass": 350,
+      "unit": "kg/m³",
+      "quelle": "ZZ Wancor, 8197 Rafz",
+      "info": "",
+      "row": 73
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Kalk, Kalkzementputz",
+      "mass": 1800,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 74
+    },
+    {
+      "ebene": "Beplankung",
+      "material": "Gipsdecke auf Lättli",
+      "mass": 1200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 75
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Substrat nass",
+      "mass": 1500,
+      "unit": "kg/m³",
+      "quelle": "Anfrage bei Ernst Gerber AG, durch Modifizierung auch weniger Gewicht möglich",
+      "info": "",
+      "row": 76
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Ziegelschrot",
+      "mass": 1100,
+      "unit": "kg/m³",
+      "quelle": "ZZ Wancor, 8197 Rafz",
+      "info": "",
+      "row": 77
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Gartenplatten",
+      "mass": 2200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 78
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Kiesauflage",
+      "mass": 2000,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 79
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Natursteinplatten",
+      "mass": 2000,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 80
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Erde",
+      "mass": 2100,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 81
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Sand",
+      "mass": 1500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 82
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Granit",
+      "mass": 2700,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 83
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Bruchstein",
+      "mass": 2400,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 84
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Blech Aluminium 2mm",
+      "mass": 5.4,
+      "unit": "kg/m²",
+      "quelle": "SIA 261 Tab 28",
+      "info": "Korrigiert: das Arbeitsblatt gibt 8 kg/m²; SIA 261 Tabelle 28, Aluminium 27 kN/m³ × 2 mm: 0.054 kN/m²",
+      "row": 85
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Blech Kupfer 2mm",
+      "mass": 16,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 86
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Blech Stahl 2mm",
+      "mass": 16,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 87
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "xps Roofmate",
+      "mass": 33,
+      "unit": "kg/m³",
+      "quelle": "Dow Europe GmbH,",
+      "info": "",
+      "row": 88
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Lärchenrost",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 89
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "Gummischrotmatte",
+      "mass": 1000,
+      "unit": "kg/m³",
+      "quelle": "Schätzung",
+      "info": "",
+      "row": 90
+    },
+    {
+      "ebene": "Beschichtung",
+      "material": "PV-Anlage",
+      "mass": 80,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 91
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "GL24h",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 92
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "C24",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 93
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Fi/Ta",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 94
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Eiche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 95
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Buche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 96
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Robinie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 97
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Kastanie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 98
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Kerto-T",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 99
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Kerto-S",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 100
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Kerto-Q",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 101
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Stahlbeton",
+      "mass": 2500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 102
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Mauerwerk BN",
+      "mass": 1300,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 103
+    },
+    {
+      "ebene": "Konstruktion",
+      "material": "Fi/Ta auf Federbügel",
+      "mass": 550,
+      "unit": "kg/m³",
+      "quelle": "Schätzung",
+      "info": "",
+      "row": 104
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Kalksplittschüttung trocken",
+      "mass": 1400,
+      "unit": "kg/m³",
+      "quelle": "H&F",
+      "info": "",
+      "row": 105
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Gartenplatten",
+      "mass": 2000,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 106
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Lehmsteine Lecca",
+      "mass": 940,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 107
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Lehmsteine Voll-Lehm",
+      "mass": 1990,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 108
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Kies",
+      "mass": 2200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 109
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Sand",
+      "mass": 2200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 110
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Liapor (Lecca)",
+      "mass": 350,
+      "unit": "kg/m³",
+      "quelle": "liapor.com",
+      "info": "",
+      "row": 111
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Fermacell Ausgleichsschüttung",
+      "mass": 400,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 112
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Fermacell Wabenschüttung",
+      "mass": 1500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 113
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Fermacell Gebundene Schüttung",
+      "mass": 350,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 114
+    },
+    {
+      "ebene": "Beschwerung",
+      "material": "Schlacke",
+      "mass": 1400,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 115
+    },
+    {
+      "ebene": "Lattung",
+      "material": "GL24h",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 116
+    },
+    {
+      "ebene": "Lattung",
+      "material": "C24",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 117
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Fi/Ta",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 118
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Eiche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 119
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Buche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 120
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Robinie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 121
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Kastanie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 122
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Kerto-T",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 123
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Kerto-S",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 124
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Kerto-Q",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 125
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Stahlbeton",
+      "mass": 2500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 126
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Mauerwerk BN",
+      "mass": 1300,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 127
+    },
+    {
+      "ebene": "Lattung",
+      "material": "Fi/Ta auf Federbügel",
+      "mass": 550,
+      "unit": "kg/m³",
+      "quelle": "Schätzung",
+      "info": "",
+      "row": 128
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "3-Schichtplatte",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 129
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "OSB3",
+      "mass": 680,
+      "unit": "kg/m³",
+      "quelle": "Kronospan, 6122 Menznau www.kronospan.ch",
+      "info": "",
+      "row": 130
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Kerto-T",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 131
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Kerto-S",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 132
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Kerto-Q",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 133
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Spanplatten",
+      "mass": 800,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 134
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Duripanel",
+      "mass": 1300,
+      "unit": "kg/m³",
+      "quelle": "Eternit AG, Niederurnen www.eternit.ch",
+      "info": "",
+      "row": 135
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Schalung",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 136
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Fermacell",
+      "mass": 1200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 137
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Rigips",
+      "mass": 1200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 138
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Sperrholzplatte",
+      "mass": 600,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 139
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Weichfaserplatte",
+      "mass": 200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 140
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Heraklith-BM",
+      "mass": 350,
+      "unit": "kg/m³",
+      "quelle": "ZZ Wancor, 8197 Rafz",
+      "info": "",
+      "row": 141
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Kalk, Kalkzementputz",
+      "mass": 1800,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 142
+    },
+    {
+      "ebene": "Bekleidung",
+      "material": "Gipsdecke auf Lättli",
+      "mass": 1200,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 143
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "Biberschw. einf.",
+      "mass": 50,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 144
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "Biberschw. Doppelt",
+      "mass": 75,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 145
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "Betonziegel",
+      "mass": 55,
+      "unit": "kg/m²",
+      "quelle": "Etenit AG,",
+      "info": "",
+      "row": 146
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "Pfannenziegel",
+      "mass": 47,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 147
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "Welleternit",
+      "mass": 18,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 148
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "Eternitschiefer",
+      "mass": 30,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 149
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "Glas",
+      "mass": 5000,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 150
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "Scobalit",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 151
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "Aluwellblech",
+      "mass": 4,
+      "unit": "kg/m²",
+      "quelle": "SIA 261 Tab 29",
+      "info": "Korrigiert: das Arbeitsblatt gibt 40 kg/m²; SIA 261 Tabelle 29, Profilblech Aluminium 80 mm × 0.8 mm: 0.04 kN/m²",
+      "row": 152
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "Profilblech",
+      "mass": 12,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 153
+    },
+    {
+      "ebene": "Dachhaut",
+      "material": "PV-Anlage",
+      "mass": 50,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 154
+    },
+    {
+      "ebene": "Schutzbahn/Dachhaut",
+      "material": "Dachpappe",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 155
+    },
+    {
+      "ebene": "Schutzbahn/Dachhaut",
+      "material": "EPDM",
+      "mass": 10,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 156
+    },
+    {
+      "ebene": "Schutzbahn/Dachhaut",
+      "material": "Sarnafil",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 157
+    },
+    {
+      "ebene": "Schutzbahn/Dachhaut",
+      "material": "Ampack",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 158
+    },
+    {
+      "ebene": "Schutzbahn/Dachhaut",
+      "material": "Polyesterflies",
+      "mass": 1,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 159
+    },
+    {
+      "ebene": "Schutzbahn/Dachhaut",
+      "material": "Blech Aluminium 2mm",
+      "mass": 5.4,
+      "unit": "kg/m²",
+      "quelle": "SIA 261 Tab 28",
+      "info": "Korrigiert: das Arbeitsblatt gibt 8 kg/m²; SIA 261 Tabelle 28, Aluminium 27 kN/m³ × 2 mm: 0.054 kN/m²",
+      "row": 160
+    },
+    {
+      "ebene": "Schutzbahn/Dachhaut",
+      "material": "Blech Kupfer 2mm",
+      "mass": 16,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 161
+    },
+    {
+      "ebene": "Schutzbahn/Dachhaut",
+      "material": "Blech Stahl 2mm",
+      "mass": 16,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 162
+    },
+    {
+      "ebene": "Abdichtung",
+      "material": "Dachpappe",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 163
+    },
+    {
+      "ebene": "Abdichtung",
+      "material": "EPDM",
+      "mass": 10,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 164
+    },
+    {
+      "ebene": "Abdichtung",
+      "material": "Sarnafil",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 165
+    },
+    {
+      "ebene": "Abdichtung",
+      "material": "Ampack",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 166
+    },
+    {
+      "ebene": "Abdichtung",
+      "material": "Polyesterflies",
+      "mass": 1,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 167
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "GL24h",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 168
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "C24",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 169
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Fi/Ta",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 170
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Eiche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 171
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Buche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 172
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Robinie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 173
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Kastanie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 174
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Kerto-T",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 175
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Kerto-S",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 176
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Kerto-Q",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 177
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Stahlbeton",
+      "mass": 2500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 178
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Mauerwerk BN",
+      "mass": 1300,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 179
+    },
+    {
+      "ebene": "Gefällslattung",
+      "material": "Fi/Ta auf Federbügel",
+      "mass": 550,
+      "unit": "kg/m³",
+      "quelle": "Schätzung",
+      "info": "",
+      "row": 180
+    },
+    {
+      "ebene": "Rostung",
+      "material": "GL24h",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 181
+    },
+    {
+      "ebene": "Rostung",
+      "material": "C24",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 182
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Fi/Ta",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 183
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Eiche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 184
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Buche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 185
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Robinie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 186
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Kastanie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 187
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Kerto-T",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 188
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Kerto-S",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 189
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Kerto-Q",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 190
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Stahlbeton",
+      "mass": 2500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 191
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Mauerwerk BN",
+      "mass": 1300,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 192
+    },
+    {
+      "ebene": "Rostung",
+      "material": "Fi/Ta auf Federbügel",
+      "mass": 550,
+      "unit": "kg/m³",
+      "quelle": "Schätzung",
+      "info": "",
+      "row": 193
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "GL24h",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 194
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "C24",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 195
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Fi/Ta",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 196
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Eiche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 197
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Buche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 198
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Robinie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 199
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Kastanie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 200
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Kerto-T",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 201
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Kerto-S",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 202
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Kerto-Q",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 203
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Stahlbeton",
+      "mass": 2500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 204
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Mauerwerk BN",
+      "mass": 1300,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 205
+    },
+    {
+      "ebene": "Dachlattung",
+      "material": "Fi/Ta auf Federbügel",
+      "mass": 550,
+      "unit": "kg/m³",
+      "quelle": "Schätzung",
+      "info": "",
+      "row": 206
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "GL24h",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 207
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "C24",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 208
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Fi/Ta",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 209
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Eiche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 210
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Buche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 211
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Robinie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 212
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Kastanie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 213
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Kerto-T",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 214
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Kerto-S",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 215
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Kerto-Q",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 216
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Stahlbeton",
+      "mass": 2500,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 217
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Mauerwerk BN",
+      "mass": 1300,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 218
+    },
+    {
+      "ebene": "Konterlattung",
+      "material": "Fi/Ta auf Federbügel",
+      "mass": 550,
+      "unit": "kg/m³",
+      "quelle": "Schätzung",
+      "info": "",
+      "row": 219
+    },
+    {
+      "ebene": "Unterdachbahn",
+      "material": "Dachpappe",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 220
+    },
+    {
+      "ebene": "Unterdachbahn",
+      "material": "EPDM",
+      "mass": 10,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 221
+    },
+    {
+      "ebene": "Unterdachbahn",
+      "material": "Sarnafil",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 222
+    },
+    {
+      "ebene": "Unterdachbahn",
+      "material": "Ampack",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 223
+    },
+    {
+      "ebene": "Unterdachbahn",
+      "material": "Polyesterflies",
+      "mass": 1,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 224
+    },
+    {
+      "ebene": "Unterdach",
+      "material": "Weichfaserplatte Isoroof",
+      "mass": 200,
+      "unit": "kg/m³",
+      "quelle": "Pavatex",
+      "info": "",
+      "row": 225
+    },
+    {
+      "ebene": "Unterdach",
+      "material": "Duripanel",
+      "mass": 1250,
+      "unit": "kg/m³",
+      "quelle": "Eternit",
+      "info": "",
+      "row": 226
+    },
+    {
+      "ebene": "Unterdach",
+      "material": "3-Schichtplatte",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 227
+    },
+    {
+      "ebene": "Unterdach",
+      "material": "Weichfaserplatte ISOLAIR",
+      "mass": 250,
+      "unit": "kg/m³",
+      "quelle": "Pavatex, Cham",
+      "info": "",
+      "row": 228
+    },
+    {
+      "ebene": "Unterdach",
+      "material": "Faserzement Swisspearl",
+      "mass": 1800,
+      "unit": "kg/m³",
+      "quelle": "Eternit",
+      "info": "",
+      "row": 229
+    },
+    {
+      "ebene": "Unterdach",
+      "material": "Schalung Fi/Ta",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 230
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Fermacell HD",
+      "mass": 1000,
+      "unit": "kg/m³",
+      "quelle": "fermacell.ch",
+      "info": "",
+      "row": 231
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Duripanel",
+      "mass": 1250,
+      "unit": "kg/m³",
+      "quelle": "eternit.ch",
+      "info": "",
+      "row": 232
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Heraklith-BM",
+      "mass": 350,
+      "unit": "kg/m³",
+      "quelle": "ZZ Wancor, 8197 Rafz",
+      "info": "",
+      "row": 233
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Glas",
+      "mass": 5000,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 234
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Scobalit",
+      "mass": 0,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 235
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Fi/Ta",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 236
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Eiche",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 237
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Robinie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 238
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Lärche",
+      "mass": 500,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 239
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Eternit",
+      "mass": 1400,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 240
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Kastanie",
+      "mass": 750,
+      "unit": "kg/m³",
+      "quelle": "SIA 261",
+      "info": "",
+      "row": 241
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Eternit",
+      "mass": 1400,
+      "unit": "kg/m³",
+      "quelle": "",
+      "info": "",
+      "row": 242
+    },
+    {
+      "ebene": "Fassade",
+      "material": "Blech Aluminium",
+      "mass": 2700,
+      "unit": "kg/m³",
+      "quelle": "SIA 261 Tab 28",
+      "info": "Korrigiert: das Arbeitsblatt gibt 3500 kg/m³; SIA 261 Tabelle 28, Aluminium: 27 kN/m³",
+      "row": 243
+    },
+    {
+      "ebene": "Abdeckbahn",
+      "material": "Stamisol FA",
+      "mass": 1,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 244
+    },
+    {
+      "ebene": "Abdeckbahn",
+      "material": "Stamisol",
+      "mass": 1,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 245
+    },
+    {
+      "ebene": "Abdeckbahn",
+      "material": "Ampack",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 246
+    },
+    {
+      "ebene": "Abdeckbahn",
+      "material": "Flammex",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 247
+    },
+    {
+      "ebene": "Abdeckbahn",
+      "material": "Sisalex",
+      "mass": 5,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 248
+    },
+    {
+      "ebene": "Abdeckbahn",
+      "material": "Fassadenbahn",
+      "mass": 1,
+      "unit": "kg/m²",
+      "quelle": "",
+      "info": "",
+      "row": 249
+    }
+  ]
+}

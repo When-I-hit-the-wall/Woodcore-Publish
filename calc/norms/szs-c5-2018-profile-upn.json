@@ -1,0 +1,55 @@
+{
+ "_source": "SZS C5 Konstruktionstabellen, revision 2018, reprinted 2021: ExternalFiles/000-Normes/SZS-C5-2021.pdf (the engineer's copy is 301-Normes/SZS-C5-2018.pdf). The PDF is a scan: every number was read off a render of its page (220 and 330 dpi) and held three ways -- against the page's OCR text, against the section's own mechanics (i = sqrt(I/A), W_el = I/(h/2), A from h, b, t_w, t_f, r), and against the «Hilfstabelle Stahl-Profile» of the steel check templates (tests/fixtures/steel-reference-profiles.json); wherever they disagreed the page was read again at 330-400 dpi and the page wins. Values are as printed, each column's factor under its head (×10⁶, ×10³) stated in `columns`; the reader converts them into plain mm units. This file: U-Stahl mit geneigten Flanschen / Profilés U avec ailes inclinées, printed pp. 36-37 (PDF 40-41), «Statische Werte / Valeurs statiques» and «Profilmasse / Dimensions de la section».",
+ "_note": "t_f equals r (the page's head) and the flanges slope 8 %; r_1 is the flange tip's radius. A_v and W_pl,y apply to profiles held against twisting only (footnote 1).",
+ "edition": "SZS C5:2018",
+ "title": "U-Stahl mit geneigten Flanschen / Profilés U avec ailes inclinées",
+ "norm_ref": "pp. 36-37",
+ "columns": {
+  "m": {"unit": "kg/m"},
+  "A": {"unit": "mm2"},
+  "A_v": {"unit": "mm2"},
+  "A_w": {"unit": "mm2"},
+  "I_y": {"unit": "mm4", "factor": 1000000},
+  "W_el_y": {"unit": "mm3", "factor": 1000},
+  "W_y_bar": {"unit": "mm3", "factor": 1000},
+  "W_pl_y": {"unit": "mm3", "factor": 1000},
+  "i_y": {"unit": "mm"},
+  "I_z": {"unit": "mm4", "factor": 1000000},
+  "W_el_z": {"unit": "mm3", "factor": 1000},
+  "W_pl_z": {"unit": "mm3", "factor": 1000},
+  "i_z": {"unit": "mm"},
+  "K": {"unit": "mm4", "factor": 1000000},
+  "h": {"unit": "mm"},
+  "b": {"unit": "mm"},
+  "t_w": {"unit": "mm"},
+  "t_f": {"unit": "mm"},
+  "r_1": {"unit": "mm"},
+  "h_1": {"unit": "mm"},
+  "e": {"unit": "mm"},
+  "a_c": {"unit": "mm"}
+ },
+ "families": {
+  "UPN": {
+   "columns": ["m", "A", "A_v", "A_w", "I_y", "W_el_y", "W_y_bar", "W_pl_y", "i_y", "I_z", "W_el_z", "W_pl_z", "i_z", "K", "h", "b", "t_w", "t_f", "r_1", "h_1", "e", "a_c"],
+   "rows": {
+    "65": [7.09, 903, 369, 316, 0.58, 17.7, 20, 23.4, 25.2, 0.141, 5.07, 9.46, 12.5, 0.0157, 65, 42, 5.5, 7.5, 4, 33, 14.2, 26],
+    "80": [8.64, 1100, 490, 432, 1.06, 26.5, 29.4, 31.8, 31, 0.194, 6.36, 12.1, 13.3, 0.0216, 80, 45, 6, 8, 4, 46, 14.5, 26.7],
+    "100": [10.6, 1350, 646, 549, 2.06, 41.2, 45, 49, 39.1, 0.293, 8.49, 16.2, 14.7, 0.0282, 100, 50, 6, 8.5, 4.5, 64, 15.5, 29.3],
+    "120": [13.4, 1700, 880, 777, 3.64, 60.7, 65.6, 72.6, 46.2, 0.432, 11.1, 21.2, 15.9, 0.0415, 120, 55, 7, 9, 4.5, 82, 16, 30.3],
+    "140": [16, 2040, 1040, 910, 6.05, 86.4, 93.1, 102.8, 54.5, 0.627, 14.8, 28.3, 17.5, 0.0572, 140, 60, 7, 10, 5, 98, 17.5, 33.7],
+    "160": [18.8, 2400, 1260, 1120, 9.25, 116, 124, 137.6, 62.1, 0.853, 18.3, 35.2, 18.9, 0.0744, 160, 65, 7.5, 10.5, 5.5, 114, 18.4, 35.6],
+    "180": [22, 2800, 1510, 1350, 13.5, 150, 160, 179.2, 69.5, 1.14, 22.4, 42.9, 20.2, 0.0952, 180, 70, 8, 11, 5.5, 132, 19.2, 37.5],
+    "200": [25.3, 3220, 1770, 1600, 19.1, 191, 203, 228, 77, 1.48, 27, 51.8, 21.4, 0.12, 200, 75, 8.5, 11.5, 6, 150, 20.1, 39.4],
+    "220": [29.4, 3740, 2060, 1870, 26.9, 245, 259, 292, 84.8, 1.97, 33.6, 64.1, 23, 0.162, 220, 80, 9, 12.5, 6.5, 166, 21.4, 42],
+    "240": [33.2, 4230, 2370, 2160, 36, 300, 317, 358, 92.2, 2.48, 39.6, 75.7, 24.2, 0.198, 240, 85, 9.5, 13, 6.5, 184, 22.3, 43.9],
+    "260": [37.9, 4830, 2710, 2460, 48.2, 371, 392, 442, 99.9, 3.17, 47.7, 91.6, 25.6, 0.258, 260, 90, 10, 14, 7, 200, 23.6, 46.6],
+    "280": [41.8, 5330, 2930, 2650, 62.8, 448, 474, 532, 109, 3.99, 57.2, 109, 27.4, 0.314, 280, 95, 10, 15, 7.5, 216, 25.3, 50.2],
+    "300": [46.2, 5880, 3180, 2840, 80.3, 535, 565, 632, 117, 4.95, 67.8, 130, 29, 0.38, 300, 100, 10, 16, 8, 232, 27, 54.1],
+    "320": [59.5, 7580, 4710, 4240, 108.7, 679, 719, 826, 121, 5.97, 80.6, 152, 28.1, 0.681, 320, 100, 14, 17.5, 8.8, 246, 26, 48.2],
+    "350": [60.6, 7730, 5080, 4680, 128.4, 734, 769, 918, 129, 5.7, 75, 143, 27.2, 0.62, 350, 100, 14, 16, 8, 282, 24, 44.5],
+    "380": [63.1, 8040, 5320, 4850, 157.6, 829, 866, 1014, 140, 6.15, 78.7, 148, 27.7, 0.617, 380, 102, 13.5, 16, 8, 312, 23.8, 45.8],
+    "400": [71.8, 9150, 5860, 5350, 203.5, 1020, 1065, 1240, 149, 8.46, 102, 190, 30.4, 0.83, 400, 110, 14, 18, 9, 324, 26.5, 51.1]
+   }
+  }
+ }
+}

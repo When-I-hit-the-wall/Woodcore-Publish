@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "id": "CO1-My",
+  "name": "Moments CO1",
+  "label": "",
+  "source": "Rapport-EF",
+  "anchor": {
+    "kind": "bookmark",
+    "path": [
+      "2 Résultats",
+      "2.2 CO1: Efforts internes M_y"
+    ],
+    "occurrence": 1
+  },
+  "frame": {
+    "x": 50,
+    "y": -4,
+    "w": 495,
+    "h": 258
+  }
+}

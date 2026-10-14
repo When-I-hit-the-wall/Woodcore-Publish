@@ -1,0 +1,454 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Calculations",
+  "description": "data/calculations.json -- every calculation domain and its instances (docs/domain/calculation-domains.md §3.3). A domain groups calculations of one kind (snow-load, dead-load, wind-load, live-load); an instance is one sheet of one of the project's Belastungsannahmen workbooks (every .xlsm/.xlsx whose name contains 'Belastungsannahmen'), discovered by the domain's sheet_prefix -- or, for a domain read from a norm table (engine 'norm'), one row of that table: live-load's instances are the categories of SIA 261's Tabelle 8 (section 3.3septies). Domains attached to a position live in data/positions/<id>.json instead.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "domains"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "1.5 since issues #35-#37 (additive: an instance may be computed from a source of the project -- `engine`, `source_file`, `figures`); 1.4 still read. Pinned to these two: an export written at another version is refused rather than read as this one. 1.6 (issue #42): 1.5 with an instance's `links`, written only where a load source follows a variable.",
+      "enum": [
+        "1.4",
+        "1.5",
+        "1.6"
+      ]
+    },
+    "domains": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": [
+            "label",
+            "action",
+            "engine",
+            "sheet_prefix",
+            "instances"
+          ],
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "action": {
+              "type": "string",
+              "description": "The kind of action this load is, in SIA 260's terms: 'permanent' (G: self-weight, superimposed dead load) or 'variable' (Q: snow, wind). Declared by the domain module, so the classification the catalog window groups loads by, and a load combination will read, lives where the load is calculated (docs/domain/calculation-domains.md §3.3)."
+            },
+            "engine": {
+              "type": "string",
+              "description": "Which side produced the numbers: 'excel' (the sheet calculated them, Python only read the cells), 'python' (Python calculated them from the sheet's raw entries) or 'norm' (nobody calculated them -- they are read from a norm table, as live-load reads SIA 261's Tabelle 8). Recorded per domain the same way every var records its own `source`."
+            },
+            "sheet_prefix": {
+              "type": "string",
+              "description": "The prefix of the sheets carrying this domain's instances ('SL', 'WL', 'EL+AL'). Empty for a domain whose engine is 'norm', which is read from no workbook."
+            },
+            "instances": {
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "required": [
+                    "results",
+                    "vars",
+                    "steps",
+                    "checks"
+                  ],
+                  "properties": {
+                    "workbook": {
+                      "type": "string",
+                      "description": "File name of the load workbook this sheet was read from (02_Belastungsannahmen.xlsm). Carried per instance, not per domain: one domain's sheets may come from several workbooks. Required of every instance read from a workbook (validation.py), and absent from one read from a norm table, which has no file to name."
+                    },
+                    "sheet": {
+                      "type": "string",
+                      "description": "The sheet this instance was read from, which is also its id. Absent for an instance read from a norm table, whose id is the table's own row key (a category of Tabelle 8)."
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "Names of the vars that are this instance's final results -- what show-calc prints at level 1. A list, not a single value, because one sheet may legitimately produce several (SL-Dach2's q_k11 and q_k12).",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "tables": {
+                      "type": "array",
+                      "description": "Optional tabular detail, as many tables as the calculation needs, each with its own level and place: dead-load's layer build-up; wind-load's global forces (level 1) and local forces (level 3). Printed in list order on their side of the values. Values are rendered by Typst, never pre-formatted here.",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "title",
+                          "columns",
+                          "rows"
+                        ],
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "type": "number",
+                            "description": "From which report level the table is printed, 3 when absent. A table that is the working behind a value waits for the checking report; one that carries the calculation's own results (wind-load's global wind forces) is shown from level 1 -- which of the two it is, is a property of the calculation."
+                          },
+                          "place": {
+                            "type": "string",
+                            "description": "'above' (the default) prints the table before the values, as the working they come from; 'below' prints it after them, where it is the answer they lead to."
+                          },
+                          "formula": {
+                            "type": "string",
+                            "description": "Optional formula, as Typst math source, that the table evaluates -- printed in letters above it with `norm`/`norm_ref` beside it. For a calculation whose answer is a table of cases rather than one number, this is the step's formula line and the table is its numbers."
+                          },
+                          "norm": {
+                            "type": "string"
+                          },
+                          "norm_ref": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string",
+                            "description": "Where the table's own numbers come from, in a var's `source` format ('python:domains/wind.py'). For a table whose cells are numbers rather than vars -- a `value` cell's var carries its own -- and the one record that a table was computed in Python on a domain whose engine is Excel (wind-load's local forces)."
+                          },
+                          "note": {
+                            "type": [
+                              "string",
+                              "array"
+                            ],
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Optional prose under the table -- what its columns are multiplied into, the way a step's `description` explains a formula. A list is a run of sentences, each translated on its own and joined into one paragraph."
+                          },
+                          "highlight": {
+                            "type": "array",
+                            "description": "Optional body-row indices (from 0) the table sets apart, drawn on a tinted ground and in bold: the one row of a norm table this calculation reads -- its category in SIA 261's Tabelle 8 (docs/domain/loads.md §3.3septies). An index the table does not have stops the export.",
+                            "items": {
+                              "type": "integer"
+                            }
+                          },
+                          "columns": {
+                            "type": "array",
+                            "description": "One entry per column: its header, plus what the column holds. `kind` is 'math' (cells are Typst math source, evaluated like a var's `symbol`), 'value' (cells name a var of this instance, printed as its value -- and set bold where that var is one of the instance's `results`), 'wide' (the column that should take the leftover width), 'text', or 'number'. The display layer turns the kind into a width and a rendering -- the data says what a column holds, never how wide it is.",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "label",
+                                "kind"
+                              ],
+                              "properties": {
+                                "label": {
+                                  "type": "string"
+                                },
+                                "kind": {
+                                  "type": "string"
+                                },
+                                "label_math": {
+                                  "type": "string",
+                                  "description": "Optional header written as Typst math source, used instead of `label` where the column is headed by a symbol (q_k, Q_k in SIA 261's Tabelle 8) -- `label` then carries the same name in plain text, for the catalog window and anything else reading this file as text."
+                                },
+                                "unit": {
+                                  "type": "string",
+                                  "description": "The column's unit, carried as its own field and never typed into the label -- the header sets it on a second line ('Dicke' over '[m]'), and the brackets are display. Empty where the column has no unit of its own."
+                                },
+                                "group": {
+                                  "type": "string",
+                                  "description": "Names a heading spanning this column and the consecutive ones sharing it ('Bezugsfläche' over b·h, d·h and d·b; 'Öffnung A' over max and min), set on a header line of its own. The same idea as a var's `group`: what the source states together is printed together."
+                                }
+                              }
+                            }
+                          },
+                          "rows": {
+                            "type": "array",
+                            "items": {
+                              "type": "array"
+                            }
+                          },
+                          "totals": {
+                            "type": "array",
+                            "description": "Optional summary rows, same shape as `rows`, rendered under a rule and set bold: the sums the table's own rows add up to (dead-load's g_k and a_k).",
+                            "items": {
+                              "type": "array"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "vars": {
+                      "type": "object",
+                      "patternProperties": {
+                        ".*": {
+                          "type": "object",
+                          "description": "One traced input/result. `value` is a number for a calculated quantity, or a string for a text entry the source workbook offers as a dropdown -- a load model name, a Ja/Nein answer (docs/domain/loads.md §3.3bis).",
+                          "required": [
+                            "value",
+                            "unit",
+                            "symbol",
+                            "label",
+                            "level",
+                            "source",
+                            "norm",
+                            "norm_ref"
+                          ],
+                          "properties": {
+                            "value": {
+                              "type": [
+                                "number",
+                                "string"
+                              ]
+                            },
+                            "unit": {
+                              "type": "string"
+                            },
+                            "symbol": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "level": {
+                              "type": "number"
+                            },
+                            "source": {
+                              "type": "string"
+                            },
+                            "norm": {
+                              "type": "string"
+                            },
+                            "norm_ref": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "choices": {
+                              "type": "array"
+                            },
+                            "group": {
+                              "type": "string",
+                              "description": "Display grouping only: consecutive input vars sharing a group are printed on one row, semicolon-separated (C_e and C_T, L and B). Affects no value (docs/typst/api-conventions.md §10bis)."
+                            },
+                            "group_label": {
+                              "type": "string",
+                              "description": "Names the row a `group` opens (\"Gebäude Geometrie: L = 20.18 m; B = 7.8 m\"), read off the var that starts the run. A var that joins a run already open and carries one names itself inside that row (\"Bauteil 1: ...; Bauteil 2: ...\"). Display only; a group without one is printed bare (docs/typst/api-conventions.md §10bis)."
+                            },
+                            "keep": {
+                              "type": "boolean",
+                              "description": "This var states an input of the calculation and keeps its own row even where an intermediate step's substituted formula already shows its number -- a dowel's diameter, a member's density and its thickness. Without it the default rule applies: an operand of an intermediate step is not set out twice. Display only (docs/typst/api-conventions.md §10bis)."
+                            },
+                            "heading": {
+                              "type": "string",
+                              "description": "Announces the run of calculations this var opens, on a line of its own above it (\"Charakteristische Lochleibungsfestigkeiten für C24\"); the report writes its colon. Printed where this var's own first row is printed, so a var this level hides, or one absorbed into an intermediate formula, announces nothing. Display only (docs/domain/calculation-domains.md §3.3, docs/typst/api-conventions.md §10bis)."
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "steps": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "name",
+                          "level",
+                          "result",
+                          "uses",
+                          "norm",
+                          "norm_ref"
+                        ],
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "type": "number"
+                          },
+                          "result": {
+                            "type": "string"
+                          },
+                          "uses": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "formula": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "inline": {
+                            "type": "boolean",
+                            "description": "Sets the formula, its numbers and the answer on ONE row -- `M_(u,k) = 0.3 dot f_(u,k) dot d^2.6 = 0.3 dot 510 dot 10^2.6 = 60910.397 Nmm` -- instead of the two rows the display gives by default. A property of the formula, not of the report: a step short enough to be read across one line says so. Never applied to a bounded formula, which has no numbers line to join. Display only (docs/typst/api-conventions.md §10bis)."
+                          },
+                          "bold": {
+                            "type": "boolean",
+                            "description": "Sets this step's numbers line bold even though its result is not one of the instance's `results` -- an answer of its own (wind-load's Staudruck q_p). Read exactly like `results` membership: the line is bold, and the step's operands keep their own rows instead of being absorbed into its substituted formula. Display only (docs/typst/api-conventions.md §10bis)."
+                          },
+                          "norm": {
+                            "type": "string"
+                          },
+                          "norm_ref": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "checks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "name",
+                          "eta",
+                          "unit",
+                          "level",
+                          "status",
+                          "norm",
+                          "norm_ref"
+                        ],
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "eta": {
+                            "type": "number"
+                          },
+                          "unit": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "type": "number"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "norm": {
+                            "type": "string"
+                          },
+                          "norm_ref": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "engine": {
+                      "type": "string",
+                      "description": "Which side produced this instance's numbers, where it is not its domain's: 'python' for a case entered in Woodcore and computed from its source (1.5, D-04). Absent: the domain's own engine."
+                    },
+                    "source_file": {
+                      "type": "string",
+                      "description": "The source this instance was computed from, under Woodcore-Datei (loads/dead/D1.json): an instance entered in Woodcore names it, and no workbook and no sheet (1.5)."
+                    },
+                    "figures": {
+                      "type": "array",
+                      "description": "The drawings an instance carries, printed by show-calc above its tables (1.5): the build-up of a dead load, the disposition of a snow load, the building of a wind load.",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "file",
+                          "title"
+                        ],
+                        "properties": {
+                          "file": {
+                            "type": "string",
+                            "description": "The SVG under data/, calculations/<domain>-<id>.svg."
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "type": "number",
+                            "description": "From which report level it is printed, 2 when absent."
+                          },
+                          "width": {
+                            "type": "number",
+                            "description": "Its width on the page, in mm."
+                          }
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "description": "Where each field that follows a variable came from (REQ-012): the entry (\"self\", an id, or `collection[i]`), the field, the variable, the factor and offset it was taken with, its own value and unit, and `stale` where it could not be read and the source's last value was used. Absent where none follows one.",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "entry",
+                          "field",
+                          "variable",
+                          "factor",
+                          "offset",
+                          "base_value",
+                          "base_unit",
+                          "stale"
+                        ],
+                        "properties": {
+                          "entry": {
+                            "type": "string"
+                          },
+                          "field": {
+                            "type": "string"
+                          },
+                          "variable": {
+                            "type": "object",
+                            "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17).",
+                            "required": [
+                              "domain",
+                              "instance",
+                              "var"
+                            ],
+                            "properties": {
+                              "domain": {
+                                "type": "string"
+                              },
+                              "instance": {
+                                "type": "string"
+                              },
+                              "var": {
+                                "type": "string"
+                              },
+                              "factor": {
+                                "type": "number"
+                              },
+                              "offset": {
+                                "type": "number"
+                              },
+                              "origin": {
+                                "type": "string",
+                                "enum": [
+                                  "formulas"
+                                ]
+                              }
+                            }
+                          },
+                          "factor": {
+                            "type": "number"
+                          },
+                          "offset": {
+                            "type": "number"
+                          },
+                          "base_value": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "base_unit": {
+                            "type": "string"
+                          },
+                          "stale": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

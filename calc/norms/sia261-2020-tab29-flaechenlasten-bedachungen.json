@@ -1,0 +1,153 @@
+{
+  "_source": "SIA 261:2020 (Einwirkungen auf Tragwerke), Anhang A (normativ) «Raumlasten, Flächenlasten und Schüttwinkel» -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA261-2020-DE.pdf p. 78, read off a render of the page: the PDF's text layer interleaves the table's two columns. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
+  "_note": "One row per line of the table that carries a value, in the order the norm prints them, the left column first. `group` is the heading a line is indented under (null for a line at the top level), `subgroup` a second heading under it (only «Holz in Scheitern» in Tabelle 30). `id` is the group and the name made ASCII, for a lookup by code; `name` is the norm's own wording. Decimals are written the way the report prints them (78.5), not the norm's comma.",
+  "edition": "SIA 261:2020",
+  "table_29": {
+    "number": "29",
+    "title": "Mittlere Flächenlasten von Bedachungen und Verkleidungen",
+    "norm": "SIA 261",
+    "norm_ref": "Anhang A",
+    "units": {
+      "flaechenlast": "kN/m²"
+    },
+    "labels": {
+      "name": "Bedachungstyp, Verkleidungsart",
+      "flaechenlast": "Flächenlast"
+    },
+    "rows": [
+      {
+        "id": "faserzement",
+        "group": null,
+        "subgroup": null,
+        "name": "Faserzement",
+        "flaechenlast": 0.18
+      },
+      {
+        "id": "profilbleche_hoehe_80_mm_dicke_0_8_mm_stahlblech",
+        "group": "Profilbleche, Höhe 80 mm, Dicke 0,8 mm",
+        "subgroup": null,
+        "name": "Stahlblech",
+        "flaechenlast": 0.12
+      },
+      {
+        "id": "profilbleche_hoehe_80_mm_dicke_0_8_mm_aluminiumblech",
+        "group": "Profilbleche, Höhe 80 mm, Dicke 0,8 mm",
+        "subgroup": null,
+        "name": "Aluminiumblech",
+        "flaechenlast": 0.04
+      },
+      {
+        "id": "faserzementschieferdach_einfachdeckung",
+        "group": "Faserzementschieferdach",
+        "subgroup": null,
+        "name": "Einfachdeckung",
+        "flaechenlast": 0.23
+      },
+      {
+        "id": "faserzementschieferdach_doppeldeckung",
+        "group": "Faserzementschieferdach",
+        "subgroup": null,
+        "name": "Doppeldeckung",
+        "flaechenlast": 0.3
+      },
+      {
+        "id": "tonziegeldach_inkl_lattung_biberschwanz_doppeldeckung",
+        "group": "Tonziegeldach inkl. Lattung",
+        "subgroup": null,
+        "name": "Biberschwanz, Doppeldeckung",
+        "flaechenlast": 0.75
+      },
+      {
+        "id": "tonziegeldach_inkl_lattung_pfannenziegel",
+        "group": "Tonziegeldach inkl. Lattung",
+        "subgroup": null,
+        "name": "Pfannenziegel",
+        "flaechenlast": 0.47
+      },
+      {
+        "id": "betonziegeldach_inkl_lattung_flachziegel",
+        "group": "Betonziegeldach inkl. Lattung",
+        "subgroup": null,
+        "name": "Flachziegel",
+        "flaechenlast": 0.55
+      },
+      {
+        "id": "betonziegeldach_inkl_lattung_pfannenziegel",
+        "group": "Betonziegeldach inkl. Lattung",
+        "subgroup": null,
+        "name": "Pfannenziegel",
+        "flaechenlast": 0.48
+      },
+      {
+        "id": "unterdaecher_schindelunterzug",
+        "group": "Unterdächer",
+        "subgroup": null,
+        "name": "Schindelunterzug",
+        "flaechenlast": 0.1
+      },
+      {
+        "id": "unterdaecher_hartfaserplatten",
+        "group": "Unterdächer",
+        "subgroup": null,
+        "name": "Hartfaserplatten",
+        "flaechenlast": 0.05
+      },
+      {
+        "id": "unterdaecher_faserzementplatten",
+        "group": "Unterdächer",
+        "subgroup": null,
+        "name": "Faserzementplatten",
+        "flaechenlast": 0.12
+      },
+      {
+        "id": "unterdaecher_holzschalung_24_mm_inkl_eine_lage_bitumenpappe_oder_kunststofffolie",
+        "group": "Unterdächer",
+        "subgroup": null,
+        "name": "Holzschalung, 24 mm, inkl. eine Lage Bitumenpappe oder Kunststofffolie",
+        "flaechenlast": 0.14
+      },
+      {
+        "id": "verglasung_inkl_rahmenkonstruktion_normalglas_5_mm",
+        "group": "Verglasung inkl. Rahmenkonstruktion",
+        "subgroup": null,
+        "name": "Normalglas, 5 mm",
+        "flaechenlast": 0.25
+      },
+      {
+        "id": "verglasung_inkl_rahmenkonstruktion_armiertes_glas_6_mm",
+        "group": "Verglasung inkl. Rahmenkonstruktion",
+        "subgroup": null,
+        "name": "Armiertes Glas, 6 mm",
+        "flaechenlast": 0.35
+      },
+      {
+        "id": "feinkiesauflage_pro_10_mm_dicke",
+        "group": null,
+        "subgroup": null,
+        "name": "Feinkiesauflage, pro 10 mm Dicke",
+        "flaechenlast": 0.2
+      },
+      {
+        "id": "bitumenpappe_pro_lage",
+        "group": null,
+        "subgroup": null,
+        "name": "Bitumenpappe, pro Lage",
+        "flaechenlast": 0.02
+      },
+      {
+        "id": "kunststofffolie",
+        "group": null,
+        "subgroup": null,
+        "name": "Kunststofffolie",
+        "flaechenlast": 0.02
+      },
+      {
+        "id": "moertelueberzuege",
+        "group": null,
+        "subgroup": null,
+        "name": "Mörtelüberzüge",
+        "flaechenlast": 0.02
+      }
+    ]
+  }
+}

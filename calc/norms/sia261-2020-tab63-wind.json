@@ -1,0 +1,229 @@
+{
+ "_source": "SIA 261:2020, Annexe C (normative) «Coefficients de force et de pression pour le vent», Tableau 63, p. 104 -- transcribed from the text layer of the French edition, Normen-Florian/SIA261-2020-FR.pdf, each row's values counted against the table's columns, and checked against a render of the page (11.10.2026, issue #37). Values are the norm's decimals with a point; ±x is the pair [x, -x], a/b the pair [a, b], null a cell the norm leaves empty (–), \"direct\" a cell whose force is computed directly (*).",
+ "edition": "SIA 261:2020",
+ "table": {
+  "number": "63",
+  "title": "Coefficients pour hémisphères",
+  "page": 104,
+  "ratio": "d",
+  "roof": "hémisphère",
+  "columns": [
+   {
+    "key": "cpe:5°",
+    "group": "cpe",
+    "surface": "5°"
+   },
+   {
+    "key": "cpe:15°",
+    "group": "cpe",
+    "surface": "15°"
+   },
+   {
+    "key": "cpe:30°",
+    "group": "cpe",
+    "surface": "30°"
+   },
+   {
+    "key": "cpe:45°",
+    "group": "cpe",
+    "surface": "45°"
+   },
+   {
+    "key": "cpe:60°",
+    "group": "cpe",
+    "surface": "60°"
+   },
+   {
+    "key": "cpe:75°",
+    "group": "cpe",
+    "surface": "75°"
+   },
+   {
+    "key": "cpe:90°",
+    "group": "cpe",
+    "surface": "90°"
+   },
+   {
+    "key": "cpe:105°",
+    "group": "cpe",
+    "surface": "105°"
+   },
+   {
+    "key": "cpe:120°",
+    "group": "cpe",
+    "surface": "120°"
+   },
+   {
+    "key": "cpe:135°",
+    "group": "cpe",
+    "surface": "135°"
+   },
+   {
+    "key": "cpe:150°",
+    "group": "cpe",
+    "surface": "150°"
+   },
+   {
+    "key": "cpe:165°",
+    "group": "cpe",
+    "surface": "165°"
+   },
+   {
+    "key": "cpe:180°",
+    "group": "cpe",
+    "surface": "180°"
+   },
+   {
+    "key": "cf1:π·d²/8",
+    "group": "cf",
+    "area": "π·d²/8",
+    "index": 1
+   },
+   {
+    "key": "cf2:π·d²/8",
+    "group": "cf",
+    "area": "π·d²/8",
+    "index": 2
+   },
+   {
+    "key": "cf3:π·d²/4",
+    "group": "cf",
+    "area": "π·d²/4",
+    "index": 3
+   }
+  ],
+  "rows": [
+   {
+    "label": "90°",
+    "values": [
+     -0.45,
+     -0.65,
+     -0.75,
+     -0.85,
+     -0.9,
+     -0.95,
+     -1.0,
+     -0.95,
+     -0.9,
+     -0.85,
+     -0.75,
+     -0.65,
+     -0.45,
+     0.21,
+     0.0,
+     -0.43
+    ]
+   },
+   {
+    "label": "60°",
+    "values": [
+     -0.3,
+     -0.3,
+     -0.4,
+     -0.55,
+     -0.7,
+     -0.85,
+     -1.0,
+     -0.85,
+     -0.65,
+     -0.5,
+     -0.3,
+     -0.2,
+     -0.2,
+     0.21,
+     0.0,
+     -0.43
+    ]
+   },
+   {
+    "label": "30°",
+    "values": [
+     0.15,
+     0.15,
+     0.1,
+     -0.1,
+     -0.55,
+     -0.8,
+     -1.0,
+     -0.8,
+     -0.45,
+     0.0,
+     -0.2,
+     -0.2,
+     -0.2,
+     0.21,
+     0.0,
+     -0.43
+    ]
+   },
+   {
+    "label": "0°",
+    "values": [
+     0.6,
+     0.4,
+     0.4,
+     0.1,
+     -0.4,
+     -0.75,
+     -1.0,
+     -0.75,
+     -0.2,
+     -0.2,
+     -0.2,
+     -0.2,
+     -0.2,
+     0.21,
+     0.0,
+     -0.43
+    ]
+   },
+   {
+    "label": "−30°",
+    "values": [
+     0.15,
+     0.15,
+     0.1,
+     -0.1,
+     -0.55,
+     -0.8,
+     -1.0,
+     -0.8,
+     -0.45,
+     0.0,
+     -0.2,
+     -0.2,
+     -0.2,
+     0.21,
+     0.0,
+     -0.43
+    ]
+   },
+   {
+    "label": "−60°",
+    "values": [
+     -0.3,
+     -0.3,
+     -0.4,
+     -0.55,
+     -0.7,
+     -0.85,
+     -1.0,
+     -0.85,
+     -0.65,
+     -0.5,
+     -0.3,
+     -0.2,
+     -0.2,
+     0.21,
+     0.0,
+     -0.43
+    ]
+   }
+  ],
+  "cpe_peak": null,
+  "cfr": null,
+  "notes": [
+   "les surfaces sont les angles α des points de mesure ; les lignes, la direction φ du vent"
+  ]
+ }
+}

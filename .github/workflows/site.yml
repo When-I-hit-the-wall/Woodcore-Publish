@@ -1,0 +1,70 @@
+# Woodcore's website on Cloudflare Pages (docs/conventions/build-and-release.md §12, v0.117): https://woodcore.pages.dev/
+#
+# On every push to the default branch -- and by hand, from the Actions tab -- website/build.py builds the site into public/: the reference from the /// blocks of lib/, the tutorial and the download page from website/content/, the examples compiled to SVG with Typst, and -- where website/releases.json records an installer kept on GitHub (packaging/publish.py) -- that installer downloaded from its public Release and checked against its SHA-256, beside the version.json every installed Woodcore reads at its start (calc/tools/updates.py). The installer itself is not in the site: Cloudflare Pages takes no file over 25 MiB.
+#
+# The build exits with 1 where something must not go out -- an installer that is not the one releases.json records, a file Cloudflare would refuse -- and the deploy step then does not run: a deployment replaces the one that is live, so a failed check leaves the site as it is.
+#
+# The site is published from the public repository alone, When-I-hit-the-wall/Woodcore-Publish (14.10.2026): the code is developed in When-I-hit-the-wall/Woodcore and published there as one commit holding the tree, so this file is in both and the job runs in the public one only -- two repositories deploying the same Pages project would each replace the other's site.
+#
+# What the engineer sets up once, none of it in the repository, in Woodcore-Publish:
+#   - Settings › Secrets and variables › Actions: CLOUDFLARE_API_TOKEN (a token with the single permission «Cloudflare Pages: Edit») and CLOUDFLARE_ACCOUNT_ID.
+#   - ⚠️ wrangler compares --branch with the project's *production branch*, and any other value publishes a Preview at <branch>.woodcore.pages.dev, leaving woodcore.pages.dev as it was -- a green run proves nothing about it (the first one, with `master`, was a Preview: a direct-upload project's production branch is `main` unless it was changed). So the deploy step asks Cloudflare which branch is the project's and passes that one; check a deployment with `curl -I https://woodcore.pages.dev/version.json`.
+#
+# Only the actions GitHub itself publishes, each pinned by the commit of the release it names (a tag can be moved); wrangler is run by npx at the exact version below, no third-party action touches the Cloudflare token. Triggers are `push` and `workflow_dispatch` alone -- never `pull_request` or `pull_request_target`, which would hand the secrets to a branch nobody reviewed. The Typst the site is compiled with is the one typst-version.txt names and the installed program carries, installed by tests/bootstrap.py -- the one recipe that installs Typst, which refuses an archive whose SHA-256 is not the one typst-sha256.json records (v0.117).
+
+name: site
+
+on:
+  push:
+    branches: [master]
+    # what the site does not read: a push that changes only these does not rebuild it (a build is minutes of a private repository's free allowance)
+    paths-ignore:
+      - "docs/**"
+      - "tests/**"
+      - "packaging/**"
+      - ".claude/**"
+      - "archive/**"
+      - "CHANGELOG.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site
+  cancel-in-progress: true
+
+env:
+  WRANGLER_VERSION: "4.148.0"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  WRANGLER_SEND_METRICS: "false"
+
+jobs:
+  site:
+    # the public repository alone deploys the site (see above); GitHub compares the two strings without regard to case
+    if: github.repository == 'When-I-hit-the-wall/Woodcore-Publish'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Typst
+        run: |
+          python tests/bootstrap.py --typst-only --prefix "$RUNNER_TEMP/typst-bin"
+          "$RUNNER_TEMP/typst-bin/typst" --version
+      # build_reference reads the /// blocks and writes nothing here, but imports openpyxl: the pinned one, and nothing else of requirements.txt
+      - name: openpyxl
+        run: pip install -q "$(grep -i '^openpyxl==' requirements.txt)"
+      - name: Build the site
+        run: python website/build.py --out public --fetch-installer
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          PAGES_BRANCH="$(curl -fsS -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/woodcore" | python -c 'import json, sys; print(json.load(sys.stdin)["result"]["production_branch"])')"
+          test -n "${PAGES_BRANCH}"
+          echo "the production branch of the Pages project woodcore is ${PAGES_BRANCH}"
+          npx --yes "wrangler@${WRANGLER_VERSION}" pages deploy public --project-name=woodcore --branch="${PAGES_BRANCH}" --commit-hash="${GITHUB_SHA}" --commit-message="${GITHUB_SHA}"

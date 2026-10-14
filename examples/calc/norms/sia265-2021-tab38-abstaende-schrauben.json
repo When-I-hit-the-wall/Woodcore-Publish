@@ -1,0 +1,95 @@
+{
+  "_source": "SIA 265:2021, Tabelle 38 (clause 6.5.2.3.3) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 75, read off a render of the page; the French wording from ExternalFiles/000-Normes/SIA265-2021-FR.pdf p. 76.",
+  "_note": "The footnotes are the norm's rules restated in a sentence each, under the norm's own numbering, and not its paragraphs: a norm is cited and never reproduced (docs/architecture/reference-library.md §11bis). The multiples of d, the floors in mm and the conditions are transcribed exactly. The first diameter column is headed «d = 4 mm» in both the German (p. 75) and the French (p. 76) edition, where Tabelle 28 heads the same column «d ≤ 4 mm»; it is read here as d ≤ 4 mm, which is what makes the two columns cover every diameter, and `printed` keeps what the page says. The loaded edge's 13 d spans both columns.",
+  "edition": "SIA 265:2021",
+  "table_38": {
+    "number": "38",
+    "title": "Minimale Abstände bei Schraubenverbindungen ohne Vorbohrung mit $d_1 \\/ d <= 0.75$",
+    "norm": "SIA 265",
+    "norm_ref": "6.5.2.3.3",
+    "page": 75,
+    "unit": "mm",
+    "fasteners": [
+      {
+        "fastener": "screw",
+        "clause": "6.5.2.3.3",
+        "auto": true
+      }
+    ],
+    "head": {
+      "label": "Minimale Abstände",
+      "notes": [
+        "1"
+      ]
+    },
+    "columns": [
+      {
+        "id": "parallel",
+        "label": "$parallel$ zur Faserrichtung"
+      },
+      {
+        "id": "perpendicular",
+        "label": "$perp$ zur Faserrichtung"
+      }
+    ],
+    "rows": [
+      {
+        "id": "fastener",
+        "label": "von Schraube zu Schraube",
+        "parallel": {
+          "cases": [
+            {
+              "d_max": 4,
+              "printed": "d = 4 mm",
+              "factor": 8
+            },
+            {
+              "d_above": 4,
+              "factor": 10
+            }
+          ]
+        },
+        "perpendicular": {
+          "factor": 5
+        }
+      },
+      {
+        "id": "loaded_edge",
+        "label": "vom beanspruchten Rand",
+        "parallel": {
+          "factor": 13
+        },
+        "perpendicular": {
+          "factor": 8
+        }
+      },
+      {
+        "id": "unloaded_edge",
+        "label": "vom unbeanspruchten Rand",
+        "parallel": {
+          "cases": [
+            {
+              "d_max": 4,
+              "printed": "d = 4 mm",
+              "factor": 6
+            },
+            {
+              "d_above": 4,
+              "factor": 7.5
+            }
+          ]
+        },
+        "perpendicular": {
+          "factor": 8,
+          "notes": [
+            "2"
+          ]
+        }
+      }
+    ],
+    "footnotes": {
+      "1": "Gültig für $rho_k <= 420$ kg/m³; für $rho_k > 420$ kg/m³ ist vorzubohren.",
+      "2": "Der Abstand vom unbeanspruchten Rand darf auf $4 d$ reduziert werden, wenn die Mindestholzdicke gleichzeitig auf $14 d$ erhöht wird."
+    }
+  }
+}

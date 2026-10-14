@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Woodcore document template",
+  "description": "templates/documents/<mode>/<folder>/template.json -- the file that makes a folder a template a new CU, BP or RS document is made from (calc/doc_templates.py) -- a content template, its sections and their text. Beside it, one folder per language (`fr`, `de`, `en`), each **exactly the document's folder**: the entry `.typ` (the only `.typ` at its top), `structure.json` and `Sections/<id>.typ`. Instantiating a template copies the folder of the project's language into the document's folder, renames the entry file to the document's name and rewrites the structure block of the entry from structure.json. A builtin template carries its name and description in all three languages; one the engineer or the office saved from a document (calc/doc_templates.py `save_from_document`, into `documents/<mode>/<folder>/` of the user's or the shared folder of templates) usually in the one language it is written in, which is then the only one it is offered for -- saving the same folder again in another language adds that language. Which languages it has is `languages`, and each has a folder.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "format",
+    "mode",
+    "name",
+    "languages"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a template written at another version is refused rather than read as this one."
+    },
+    "format": {
+      "type": "string",
+      "const": "woodcore-document-template",
+      "description": "What this file is, so a template.json that is something else is refused by name."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "cu",
+        "bp",
+        "rs"
+      ],
+      "description": "The document this template makes: cu, the Convention d'utilisation, bp, the Base de projet, or rs, the Rapport de statique. A new project's report is made from its project template (calc/templates.py); a report template is what a report's content is switched to (calc/content_switch.py) or saved as -- its language folders hold the report's entry and its numbered `Sections/NNN-<name>.typ`, and no structure.json."
+    },
+    "name": {
+      "type": "object",
+      "description": "The template's name as a list shows it, per language: a key for every language in `languages`.",
+      "properties": {
+        "fr": {
+          "type": "string"
+        },
+        "de": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        }
+      }
+    },
+    "description": {
+      "type": "object",
+      "description": "What the template is for, per language: a key for every language in `languages`. Optional.",
+      "properties": {
+        "fr": {
+          "type": "string"
+        },
+        "de": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        }
+      }
+    },
+    "languages": {
+      "type": "array",
+      "description": "The languages the template exists in, each a folder beside this file (`fr/`, `de/`, `en/`). At least one.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "fr",
+          "de",
+          "en"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,526 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Detail schema source",
+  "description": "000-Python/details/<id>.json, schema 1.1 -- one connection detail (schéma), drawn in Woodcore's «Schémas» tab and read by calc/domains/schema.py alone (docs/domain/connections.md §3.3quinquies, docs/domain/connectors.md §3.3nonies, docs/decisions.md §13, plan 3 of je-souhaite-commencer-generic-valley.md). It is the one place a detail is drawn: *Connecteurs* and *Moments polaires* name a schema instead of carrying their own geometry, and check off which of its connector markers belong to their own calculation. The folder is `details/`, not `schemas/`: that one already holds every *.schema.json contract, this file included, and a source living there too would be glob-matched as one (schema.py's own module docstring).\n\nThe frame is the connections' (section 3.3quinquies): millimetres, x to the right, z DOWN, angles in degrees from +x turning towards +z (clockwise as the figure is read) -- so that a connector or a moment-polaire calculation can take a copy of a schema's geometry with no conversion.\n\nFour collections, and nothing else: `elements` are the pieces (a beam, a plate, seen in elevation or in section), `connectors` are fastener markers, `aids` are construction lines and points that help the drawing and do not themselves appear in the report by default, `dimensions` measure the detail. An id is unique across the whole schema -- across every collection at once -- so that `show-schema(..., highlight:)` never has to ask which collection it meant.\n\n**A named point is an aid of kind 'centre' or 'point'.** There is deliberately no fifth, flat `points` collection: a point worth naming is drawn as an aid (so it is visible, or not, exactly like any other aid) and a dimension's `{\"point\": id}` anchor, like a connector's own `x`/`z`, may name one. What validation._validate_node cannot express, schema.check_source does instead -- most of it the same shape of rule connection-source.schema.json and statics-source.schema.json already state for their own collections.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "label",
+    "elements",
+    "connectors",
+    "aids",
+    "dimensions"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.1",
+        "1.2"
+      ],
+      "description": "-- 1.1, or 1.2 where the schema holds `texts` (issue #43), which Woodcore writes only where a text is placed: a source written at another version is refused rather than read as this one. A 1.0 file is still read: schema.upgrade_source turns its elements' `width` into the side their view shows, which is the whole of what 1.1 changed."
+    },
+    "group": {
+      "type": "string",
+      "description": "The folder Woodcore files this source in, \"\" or absent at the root. A FIELD and never a directory: the ids stay flat, so the rule that the id is the file name is untouched and no show-* call changes (calc/tools/grouped_list.py). Optional and additive, so no schema_version bump was needed for it."
+    },
+    "name": {
+      "type": "string",
+      "description": "What the engineer calls this object, free text (Woodcore's «Nom»). Its ID is composed of it until the ID is written over (calc/tools/identity.py). Optional and additive: a source without one is named by its ID alone."
+    },
+    "id": {
+      "type": "string",
+      "description": "The schema's id: its file name, and the string the report addresses it by (show-schema(\"VU-Skizze\"))."
+    },
+    "label": {
+      "type": "string",
+      "description": "Woodcore's «Description»: free text, printed in the figure's caption; may be empty."
+    },
+    "grid": {
+      "type": "object",
+      "description": "The editor's own grid preference, in millimetres, saved so that reopening the schema keeps it. Nothing of it reaches the export or the report.",
+      "properties": {
+        "snap": {
+          "type": [
+            "string",
+            "number"
+          ],
+          "description": "'auto' -- the step follows the zoom -- or one of the steps in mm: 1000, 100, 10, 1."
+        }
+      }
+    },
+    "crop": {
+      "type": "object",
+      "description": "«Cadrage» (v0.75): the part of the detail the report shows, {x, z, w, h} in mm -- its top-left corner and its size. Absent, the report shows the whole detail with the frame the drawing computes. Woodcore's canvas shows the whole detail and marks the crop over it.",
+      "required": [
+        "x",
+        "z",
+        "w",
+        "h"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number",
+          "description": "mm, greater than 0."
+        },
+        "h": {
+          "type": "number",
+          "description": "mm, greater than 0."
+        }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "The three sliders, absent or a key of them absent meaning 1: factors on the strokes (`line`), on the symbols placed on a point (`point`) -- a fastener marker, a centre's or a named point's cross -- and on the texts (`text`), from 0.25 to 3. The plans' and the static models' own three, with the same names, the same range and the same meaning: a slider means one thing in every tab (calc/domains/figure_style.py). ⚠️ Additive (v0.99): a source that carries none is read exactly as it was, so `schema_version` did not move -- the v0.69 rule for a field whose absence has a meaning.",
+      "properties": {
+        "line": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 3.0
+        },
+        "point": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 3.0
+        },
+        "text": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 3.0
+        }
+      }
+    },
+    "elements": {
+      "type": "array",
+      "description": "The pieces of the detail: a beam or a plate, drawn linear (its points a polyline, its width the piece seen edge-on) or area (its points a polygon, a plate or a gusset seen face-on).",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "points"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A letter, then letters, digits and _ (E1, E2)."
+          },
+          "kind": {
+            "type": "string",
+            "description": "'linear' (a beam or a plate seen edge-on -- a polyline of at least two points, its width the piece's b or h) or 'area' (a plate or a gusset seen face-on -- a polygon of at least three points)."
+          },
+          "position": {
+            "type": "string",
+            "description": "The id of a Positions Element row this piece is a detail of -- optional, since a schema may show a piece Positionen.xlsx has no row for yet (a gusset plate, a packer). Where it names one, the strength class and the moisture class a connector calculation needs are read off that position, resolved afresh at every export (docs/domain/connectors.md §3.3nonies's reference pattern)."
+          },
+          "points": {
+            "type": "array",
+            "description": "[x, z] pairs in mm, at least two for a linear element and at least three for an area one.",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "view": {
+            "type": "string",
+            "description": "A linear element only: 'h' (the default -- its height is the visible width) or 'b' (its breadth is). Its band is drawn at that side of its section (v0.75); the other side is still the piece's."
+          },
+          "b": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Its breadth in mm (v0.75). ABSENT, it FOLLOWS the element's position -- read afresh at every export off the position's `section` («100/200» gives b = 100, h = 200, a round section's d both, a plate's t both, a steel profile none: domains/section.py, the one reader of a position's dimension, docs/domain/positions.md §7, v0.94). PRESENT, it is written over and stays written over when Positionen.xlsx changes -- the connectors' own reference pattern (section 3.3nonies). Replaces schema 1.0's `width`, which was one number for the band alone."
+          },
+          "h": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Its height in mm (v0.75). ABSENT, it FOLLOWS the element's position -- read afresh at every export off the position's `section` («100/200» gives b = 100, h = 200, a round section's d both, a plate's t both, a steel profile none: domains/section.py, the one reader of a position's dimension, docs/domain/positions.md §7, v0.94). PRESENT, it is written over and stays written over when Positionen.xlsx changes -- the connectors' own reference pattern (section 3.3nonies). Replaces schema 1.0's `width`, which was one number for the band alone."
+          },
+          "label": {
+            "type": "string",
+            "description": "What is printed on the piece where it states something; empty or absent, the piece carries its position, the position's strength class and its section -- «T001 C24 100/200» (schema.element_caption, v0.75)."
+          },
+          "label_offset": {
+            "type": "array",
+            "description": "[dx, dz] in mm, how far the label was moved by hand from its own place (docs/domain/position-plans.md §3.3sexies's v0.42 rule, applied here); absent where it was not.",
+            "items": {
+              "type": "number"
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "A factor multiplying the drawing's own (v0.99), never a size: a schema is a detail at its real size in millimetres, so a length stated on one entry would mean something else in a static model's scale-free sketch and nothing at all once the drawing is redrawn at another extent. Absent -- the usual case -- the entry follows the drawing, which is what makes the field additive. A band or an outline is stroked (`line`) and carries a label (`text`); it draws no symbol on a point, so `point` on an element is refused, naming what it may state.",
+            "properties": {
+              "line": {
+                "type": "number",
+                "minimum": 0.25,
+                "maximum": 3.0
+              },
+              "text": {
+                "type": "number",
+                "minimum": 0.25,
+                "maximum": 3.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "connectors": {
+      "type": "array",
+      "description": "Fastener markers: where a connector sits on the detail. Placed here so the drawing can be seen while the fasteners are laid out; a *Connecteurs* or *Moments polaires* calculation later checks off which of these belong to it (\"fasteners\": [id, id, ...]) rather than carrying its own coordinates.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "x",
+          "z"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "The kind of fastener, one of connector.TYPES (Stabdübel, Nagel, Vollgewindeschraube, Passbolzen, Bolzen, ...) -- the same list the *Connecteurs* tab's tool bar offers, so a marker drawn here already says roughly what it will be calculated as."
+          },
+          "x": {
+            "type": "number",
+            "description": "mm, to the right."
+          },
+          "z": {
+            "type": "number",
+            "description": "mm, down."
+          },
+          "diameter": {
+            "type": "object",
+            "description": "d, {value, unit} in mm -- normally absent: the diameter is decided in the connector calculation that picks this marker up, not in the drawing. Present only where the engineer wants the drawing itself to say it (a preview, or a marker no calculation names yet).",
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          },
+          "label_offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "A factor multiplying the drawing's own (v0.99), never a size: a schema is a detail at its real size in millimetres, so a length stated on one entry would mean something else in a static model's scale-free sketch and nothing at all once the drawing is redrawn at another extent. Absent -- the usual case -- the entry follows the drawing, which is what makes the field additive. A marker is a dot at its own radius (`point`) with its id beside it (`text`). A diameter it states is a length in millimetres and is never scaled -- a Ø 8 dowel is 8 mm across whatever the sliders say; `point` moves the radius of a marker that states none, and the floor under a very small one. `line` is refused: the dot's white hairline parts it from what lies under it and is not a line the engineer drew.",
+            "properties": {
+              "point": {
+                "type": "number",
+                "minimum": 0.25,
+                "maximum": 3.0
+              },
+              "text": {
+                "type": "number",
+                "minimum": 0.25,
+                "maximum": 3.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "aids": {
+      "type": "array",
+      "description": "Construction lines and points: what helps the drawing without being, itself, part of the detail. Not exported by default -- only a 'centre' or a 'point' is, since a dimension or a connector may name one (`shown` says whether the OTHER kinds, the lines, are drawn -- a shown line is drawn differently inside the module, more prominent, so it reads as deliberate rather than as clutter left behind).",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "'centre' or 'point' (a single named point -- exported by default, `shown` true unless stated otherwise); 'vertical', 'horizontal', 'point-angle', 'perpendicular' or 'parallel' (a construction line through one point, resolved to a plain angle when it is drawn -- which of the five it was only changes how the tool computed that angle and which icon it drew with); 'two-points' (a construction line through two points)."
+          },
+          "x": {
+            "type": "number",
+            "description": "mm. Required for every kind but 'two-points'."
+          },
+          "z": {
+            "type": "number",
+            "description": "mm. Required for every kind but 'two-points'."
+          },
+          "angle": {
+            "type": "number",
+            "description": "Degrees, from +x turning towards +z. Required for the five line kinds that are not 'two-points': 0 for 'horizontal', 90 for 'vertical', whatever the engineer typed or the reference gave for 'point-angle', 'perpendicular' and 'parallel'."
+          },
+          "x1": {
+            "type": "number",
+            "description": "'two-points' only: the first point, mm."
+          },
+          "z1": {
+            "type": "number"
+          },
+          "x2": {
+            "type": "number",
+            "description": "'two-points' only: the second point, mm, distinct from the first."
+          },
+          "z2": {
+            "type": "number"
+          },
+          "shown": {
+            "type": "boolean",
+            "description": "Whether this aid is exported at all. A point or a centre defaults to true; a line defaults to false, and a shown line is drawn differently inside the module (a heavier stroke) so it reads as deliberate."
+          },
+          "connector": {
+            "type": "boolean",
+            "description": "A point (kind `point`) only, v0.77: ticked «connecteur» in the «Schémas» tab's own «Points» list, it is a fastener «Moments polaires» may take (connection.fastener_places). Absent or false, the point is one to draw by and is not offered. Additive: no schema_version bump, an older file simply has no point ticked."
+          },
+          "label": {
+            "type": "string"
+          },
+          "label_offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "A factor multiplying the drawing's own (v0.99), never a size: a schema is a detail at its real size in millimetres, so a length stated on one entry would mean something else in a static model's scale-free sketch and nothing at all once the drawing is redrawn at another extent. Absent -- the usual case -- the entry follows the drawing, which is what makes the field additive. An aid is a construction line (`line`), or a centre's or a named point's cross -- a symbol placed on a point (`point`), its ink a line -- and it may carry a name (`text`).",
+            "properties": {
+              "line": {
+                "type": "number",
+                "minimum": 0.25,
+                "maximum": 3.0
+              },
+              "point": {
+                "type": "number",
+                "minimum": 0.25,
+                "maximum": 3.0
+              },
+              "text": {
+                "type": "number",
+                "minimum": 0.25,
+                "maximum": 3.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "dimensions": {
+      "type": "array",
+      "description": "What statics-source.schema.json already states for a static model's dimensions (docs/domain/static-models.md §3.3octies), taken as-is: a length between two ends, or the angle between two directions. It measures the detail and changes nothing in it.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "from",
+          "to"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "'horizontal' (the distance along x), 'vertical' (along z), 'parallel' (the true distance between the two ends) or 'angle' (between two directions, in degrees)."
+          },
+          "from": {
+            "type": "object",
+            "description": "One end of a dimension. For the three linear kinds: `point` names an aid of kind 'centre' or 'point', so the dimension follows it as it is moved, or `x`/`z` put the end at a place of its own. For `angle`: `element` names a linear element (its direction is its first point towards its last) or `aid` names a line-shaped aid.",
+            "properties": {
+              "point": {
+                "type": "string"
+              },
+              "element": {
+                "type": "string"
+              },
+              "aid": {
+                "type": "string"
+              },
+              "x": {
+                "type": "number"
+              },
+              "z": {
+                "type": "number"
+              }
+            }
+          },
+          "to": {
+            "type": "object",
+            "description": "As `from`.",
+            "properties": {
+              "point": {
+                "type": "string"
+              },
+              "element": {
+                "type": "string"
+              },
+              "aid": {
+                "type": "string"
+              },
+              "x": {
+                "type": "number"
+              },
+              "z": {
+                "type": "number"
+              }
+            }
+          },
+          "offset": {
+            "type": "number",
+            "description": "Where the dimension is drawn, in mm, signed: for a length, the distance of its line from the middle of the two ends, at right angles to that line; for an angle, the radius of the arc, a negative one drawing that sector's reflex."
+          },
+          "bearing": {
+            "type": "number",
+            "description": "An angle dimension only: the direction of the third click from the corner, in degrees, which of the four sectors the two directions cut the plane into is the one being measured (docs/domain/static-models.md §3.3octies's v0.57 rule, applied here)."
+          },
+          "label": {
+            "type": "string",
+            "description": "The dimension's name, which the figure writes where `show` asks for it. Empty -- the usual case -- names nothing."
+          },
+          "show": {
+            "type": "string",
+            "description": "What the figure writes beside it, statics-source.schema.json's own four: 'none', 'name' (its label), 'value' (what it measured) or 'name+value' ('label = value'). Absent -- a dimension saved before it could be chosen -- reads as 'name' where it carries a label and as 'value' where it does not (schema.dimension_show). Optional and additive, so schema_version is not bumped for it."
+          },
+          "label_offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "A factor multiplying the drawing's own (v0.99), never a size: a schema is a detail at its real size in millimetres, so a length stated on one entry would mean something else in a static model's scale-free sketch and nothing at all once the drawing is redrawn at another extent. Absent -- the usual case -- the entry follows the drawing, which is what makes the field additive. Witness lines, a dimension line and two heads (`line`), and the value written over it (`text`). `point` is refused: a dimension puts no symbol on a point.",
+            "properties": {
+              "line": {
+                "type": "number",
+                "minimum": 0.25,
+                "maximum": 3.0
+              },
+              "text": {
+                "type": "number",
+                "minimum": 0.25,
+                "maximum": 3.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "texts": {
+      "type": "array",
+      "description": "The texts placed with the Text tool (issue #43, calc/domains/figure_text.py): each centred on its x and z, in mm. Written only by a source that holds one, whose schema_version says so.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "x",
+          "z",
+          "text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number",
+            "description": "Its centre, in mm, in the schema's frame."
+          },
+          "z": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string",
+            "description": "What is printed, a line per line: `{1}` is a token, where the variable `vars[\"1\"]` is printed; a literal brace is written twice, `{{` and `}}`. A token naming no variable is a defect of the file (D-13). An underscore makes a subscript, as in every label of a figure."
+          },
+          "vars": {
+            "type": "object",
+            "description": "The variables the tokens name, by token: a link to a variable of the export, its `show` and its `last` value.",
+            "patternProperties": {
+              ".*": {
+                "type": "object",
+                "required": [
+                  "domain",
+                  "instance",
+                  "var"
+                ],
+                "properties": {
+                  "domain": {
+                    "type": "string"
+                  },
+                  "instance": {
+                    "type": "string"
+                  },
+                  "var": {
+                    "type": "string"
+                  },
+                  "factor": {
+                    "type": "number"
+                  },
+                  "offset": {
+                    "type": "number"
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "'formulas' for a domain of the «Formules» tab, whose id is `instance`; absent for the export."
+                  },
+                  "show": {
+                    "type": "string",
+                    "enum": [
+                      "value",
+                      "symbol"
+                    ],
+                    "description": "How it is printed (D-09): 'value', its value and unit; 'symbol', its symbol, '=', its value and unit."
+                  },
+                  "last": {
+                    "type": "object",
+                    "description": "What the variable gave when Woodcore's window last saved (D-14), printed where it can no longer be read, with a warning (D-06).",
+                    "properties": {
+                      "value": {},
+                      "unit": {
+                        "type": "string"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "style": {
+            "type": "object",
+            "description": "The factor this text states over the drawing's: `text` only (figure_style.ENTRY_KEYS).",
+            "properties": {
+              "text": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

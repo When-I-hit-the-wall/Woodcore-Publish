@@ -1,0 +1,40 @@
+﻿WOODCORE — LIZENZBEDINGUNGEN
+
+© 2026 Florian Lamprecht — woodcore@pineo.ch
+Alle Rechte vorbehalten.
+
+Woodcore (das Programm, sein Fenster, seine Befehlszeile, seine Typst-Engine, seine Dokumentation und seine Website) ist durch das Bundesgesetz über das Urheberrecht (URG) geschützt. Es ist keine freie Software. Wer Woodcore installiert oder verwendet, akzeptiert die folgenden Bedingungen.
+
+1. Nutzungsrecht
+   Der Rechteinhaber räumt Ihnen unentgeltlich ein nicht ausschliessliches und nicht übertragbares Recht ein, Woodcore zu nutzen, wenn Sie es vom Rechteinhaber erhalten oder von seiner Website (https://woodcore.pages.dev/) heruntergeladen haben. Sie dürfen es auf Ihren eigenen Computern installieren und damit Ihre statischen Berechnungen erstellen, auch in Ihrer beruflichen Tätigkeit. Sie dürfen die nötigen Sicherungskopien anfertigen.
+
+2. Was ohne schriftliche Zustimmung des Rechteinhabers nicht erlaubt ist
+   - Woodcore ganz oder teilweise weiterzugeben, zu veröffentlichen, zu verkaufen, zu vermieten oder Dritten zur Verfügung zu stellen, zum Beispiel auf einem Netzlaufwerk oder einer Website;
+   - das Programm zu verändern oder davon ein abgeleitetes Werk zu schaffen, ausser in den Grenzen, die das Gesetz zwingend erlaubt (insbesondere Art. 21 URG);
+   - Urheberrechts- und Lizenzvermerke zu entfernen oder zu verändern.
+
+3. Ihre Projekte und Ihre Berichte
+   Die Projekte, Daten, Berechnungen und Berichte, die Sie mit Woodcore erstellen, gehören Ihnen; der Rechteinhaber beansprucht keine Rechte daran. Die Kopie der Engine, die Woodcore in den Ordner eines Projekts legt (_woodcore/), darf dieses Projekt begleiten und mit ihm weitergegeben werden — an eine Bauherrschaft, einen Prüfingenieur, einen Kollegen — einzig um dieses Projekt zu kompilieren oder zu prüfen.
+
+4. Vorabversion
+   Woodcore wird aktiv weiterentwickelt. Funktionen können sich von einer Version zur nächsten ändern oder wegfallen, und eine Version kann Fehler enthalten. Der Rechteinhaber ist nicht verpflichtet, Updates, Support oder Korrekturen zu liefern.
+
+5. Verantwortung des Benutzers
+   Woodcore ist ein Hilfsmittel für Berechnung und Berichterstellung. Es ersetzt weder das Urteil noch die Verantwortung des Ingenieurs. Sie allein sind dafür verantwortlich, die eingegebenen Daten, die Annahmen, die Ergebnisse und die erstellten Berichte zu prüfen, ebenso ihre Übereinstimmung mit den anwendbaren Normen. Woodcore enthält weder die SIA-Normen noch andere Normen: Sie müssen selbst über die Ausgaben verfügen, die Sie anwenden.
+
+6. Ausschluss der Gewährleistung und Haftungsbeschränkung
+   Woodcore wird unentgeltlich und «wie besehen» zur Verfügung gestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere für Richtigkeit, Fehlerfreiheit, Eignung für einen bestimmten Zweck oder Normkonformität. Soweit gesetzlich zulässig, schliesst der Rechteinhaber jede Haftung für direkte oder indirekte Schäden aus, die aus der Nutzung von Woodcore oder der Unmöglichkeit seiner Nutzung entstehen, einschliesslich Berechnungsfehlern, Datenverlusten und Folgeschäden. Vorbehalten bleibt die Haftung für absichtlich oder grobfahrlässig verursachte Schäden (Art. 100 OR).
+
+7. Komponenten Dritter
+   Woodcore enthält Software Dritter (namentlich Python, Qt/PySide6, Typst, openpyxl und pypdf), die ihren eigenen Lizenzen unterliegt. Diese sind in der Datei THIRD-PARTY-NOTICES.txt wiedergegeben, die mit dem Programm geliefert und auf der Website veröffentlicht wird. Nichts in diesen Bedingungen schränkt die Rechte ein, die Ihnen jene Lizenzen gewähren.
+
+8. Prüfung auf Updates
+   Beim Start liest eine installierte Version von Woodcore die Datei version.json auf der Website von Woodcore, um festzustellen, ob eine neue Version besteht. Es werden keine Daten Ihrer Projekte übermittelt. Wie bei jeder Internetanfrage erhält der Server, der die Website beherbergt (Cloudflare), die IP-Adresse Ihres Computers und kann sie in seinen Protokollen speichern; dasselbe gilt für GitHub, das das Installationsprogramm ausliefert, wenn Sie es herunterladen. Die Prüfung lässt sich abschalten, indem Sie "updates": {"enabled": false} in die Datei %APPDATA%\Woodcore\settings.json eintragen.
+
+9. Ende des Nutzungsrechts
+   Das Nutzungsrecht endet automatisch, wenn Sie diese Bedingungen nicht einhalten. Der Rechteinhaber kann die Bedingungen für künftige Versionen ändern; jede Version bleibt den Bedingungen unterstellt, die mit ihr geliefert wurden.
+
+10. Anwendbares Recht
+   Diese Bedingungen unterstehen schweizerischem Recht. Sie liegen auf Französisch, Deutsch und Englisch vor; bei Abweichungen ist die französische Fassung massgebend.
+
+Kontakt: Florian Lamprecht — woodcore@pineo.ch

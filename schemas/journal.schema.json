@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Revision journal",
+  "description": "data/journal.json -- the report's revision journal as the export writes it, read by lib/calc-engine.typ (journal-entries, show-journal, docs/domain/journal.md §3.3terdecies). The entries are the source's, **sorted newest first** by their index, and nothing else: a journal is a list of what the engineer wrote, not a calculation, so there is deliberately no {vars, steps, checks} record here and nothing addresses one with show-calc. The report therefore never sorts: entries.first() is the latest revision, which is also the one the PDF's keywords name (data/project.json's `revision`).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a record written at another version is refused rather than read as this one."
+    },
+    "entries": {
+      "type": "array",
+      "description": "The revisions, newest first (the largest index first). Every field is a string but the index, so the display layer never has to ask what it was given; `summary` and `description` are \"\" where the entry carries none.",
+      "items": {
+        "type": "object",
+        "required": [
+          "index",
+          "date",
+          "name",
+          "initials",
+          "label",
+          "summary",
+          "description"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "The revision's number, what the report prints as «Rev. 3» and what this list is ordered by."
+          },
+          "date": {
+            "type": "string",
+            "description": "The day of the revision, ISO (\"2026-09-27\"): what the report formats for its own language."
+          },
+          "name": {
+            "type": "string"
+          },
+          "initials": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "description": "The engineer's own words: printed at every level, and never translated."
+          },
+          "summary": {
+            "type": "string",
+            "description": "\"\" where the entry carries none, so level 2 prints the label alone."
+          },
+          "description": {
+            "type": "string",
+            "description": "\"\" where the entry carries none."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.1",
+  "id": "Bankli-Fall2",
+  "label": "1 kN Mitte Träger (pro Träger)",
+  "style": {
+    "line": 2.09,
+    "point": 2.1,
+    "text": 2.26
+  },
+  "grid": {
+    "snap": "auto"
+  },
+  "points": [
+    {
+      "id": "P1",
+      "x": 0,
+      "z": 0
+    },
+    {
+      "id": "P3",
+      "x": 0.5,
+      "z": 0
+    }
+  ],
+  "members": [
+    {
+      "id": "B1",
+      "kind": "bar",
+      "p1": "P1",
+      "p2": "P3"
+    }
+  ],
+  "supports": [
+    {
+      "id": "A1",
+      "point": "P3",
+      "type": "fixed",
+      "angle": -90
+    }
+  ],
+  "releases": [],
+  "point_loads": [
+    {
+      "id": "F1",
+      "point": "P1",
+      "direction": "vertical",
+      "magnitude": {
+        "value": 1.0,
+        "unit": "kN"
+      },
+      "label": "",
+      "show": "value",
+      "along": "0.5l",
+      "reference": "B1"
+    }
+  ],
+  "line_loads": [],
+  "dimensions": [
+    {
+      "id": "D1",
+      "kind": "horizontal",
+      "from": {
+        "point": "P1"
+      },
+      "to": {
+        "x": 0.25,
+        "z": 0
+      },
+      "offset": 0.2
+    },
+    {
+      "id": "D2",
+      "kind": "horizontal",
+      "from": {
+        "x": 0.25,
+        "z": 0
+      },
+      "to": {
+        "point": "P3"
+      },
+      "offset": 0.2
+    },
+    {
+      "id": "D3",
+      "kind": "horizontal",
+      "from": {
+        "point": "P1"
+      },
+      "to": {
+        "point": "P3"
+      },
+      "offset": 0.3
+    }
+  ]
+}

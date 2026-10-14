@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-positions",
+  "positions": [
+    {
+      "position": "T001",
+      "type": "Träger",
+      "material": "Fichte",
+      "strength_class": "C24",
+      "section_type": "rec",
+      "dimension": "100/200",
+      "units": "mm",
+      "moisture_class": 2,
+      "description": "UK"
+    },
+    {
+      "position": "S001",
+      "type": "Stütze",
+      "material": "Fichte",
+      "strength_class": "C24",
+      "section_type": "rec",
+      "dimension": "100/200",
+      "units": "mm",
+      "moisture_class": 2,
+      "description": "UK"
+    },
+    {
+      "position": "S002",
+      "type": "Stütze",
+      "material": "Stahl",
+      "strength_class": "S355",
+      "section_type": "ROR",
+      "dimension": "101.6x10",
+      "units": "mm",
+      "moisture_class": 2,
+      "description": "Pavillon - Stahlstütze"
+    }
+  ]
+}

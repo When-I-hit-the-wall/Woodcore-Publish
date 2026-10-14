@@ -1,0 +1,406 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Member check source",
+  "description": "Woodcore-Datei/checks/<id>.json -- one member check (vérification d'élément), written by Woodcore and read by calc/domains/member_check.py alone (docs/domain/connectors.md §3.3nonies, docs/domain/member-checks.md §3.3undecies). Nothing is computed from it in Python: the export resolves what it follows (the position's strength class, section and moisture class) and lib/timber.typ's #show-check-member computes the check. The kinds `tension` (SIA 265 4.2.1), `compression` (4.2.2), `bending` (4.2.3, 4.2.4, the section alone), `shear` (4.2.5), `buckling` (4.2.8) and `lateral-torsional` (4.2.9) are implemented; a compression at an angle to the grain also states its contact -- `case`, `larger`, `l`, `w` -- which the other kinds ignore, and a bending its moments `M_y`, `M_z`, which the other kinds ignore.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "kind",
+    "position",
+    "grade",
+    "section",
+    "moisture_class",
+    "impact",
+    "alpha"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.0",
+        "1.1",
+        "1.2"
+      ],
+      "description": "-- accepted: 1.0; 1.1, the same with `links`, which Woodcore writes only where a field follows a variable; 1.2, the same with `fire` (and `links` or not), which Woodcore writes only for a check in the fire situation (issue #46)."
+    },
+    "id": {
+      "type": "string",
+      "description": "The file name without .json, and the string the report addresses the check by: letters, digits and _ . + -."
+    },
+    "name": {
+      "type": "string",
+      "description": "Optional, free text."
+    },
+    "label": {
+      "type": "string",
+      "description": "Optional: the description."
+    },
+    "group": {
+      "type": "string",
+      "description": "Optional: the folder of Woodcore's list, \"\" for the root (additive, docs/decisions.md §13 v0.69)."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "tension",
+        "compression",
+        "bending",
+        "shear",
+        "torsion",
+        "buckling",
+        "lateral-torsional",
+        "deformation",
+        "vibration"
+      ],
+      "description": "The kind of check; tension, compression, bending, shear, buckling and lateral-torsional are implemented, any other is refused as not implemented yet."
+    },
+    "position": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The position the member is, whose values the nulls below follow; null for a member that is no position."
+    },
+    "grade": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "A strength class of SIA 265 Tabelle 8 or 9; null follows the position's."
+    },
+    "section": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The section, in mm: {\"type\": \"rec\", \"b\": 100, \"h\": 200} or {\"type\": \"cir\", \"d\": 200}; null follows the position's.",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "rec",
+            "cir"
+          ]
+        },
+        "b": {
+          "type": "number"
+        },
+        "h": {
+          "type": "number"
+        },
+        "d": {
+          "type": "number"
+        }
+      }
+    },
+    "moisture_class": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "1, 2 or 3 (SIA 265 Tabelle 3); null follows the position's."
+    },
+    "impact": {
+      "type": "boolean",
+      "description": "true takes eta_t = 1.4 (SIA 265 2.2.6)."
+    },
+    "alpha": {
+      "type": "number",
+      "description": "The angle between the force and the grain, in degrees, 0 to 90. A compression at 0 is the section alone (4.2.2.1, no buckling); above 0 a contact, (11) at 90 and (12), (13) between. A bending at 0 is (14), (21) or (22); above 0 it reads M_y alone, (15)/(16) at 90 and (17) to (20) between, with a normal force (21) or (22) at that angle. A shear, a buckling and a lateral torsional buckling are along the grain, alpha 0 (issue #38)."
+    },
+    "N": {
+      "type": "object",
+      "description": "The design force: a tension's normal force, positive; a compression's magnitude, positive -- along the grain the normal force over the whole section, at an angle the force F on the contact area; a bending's normal force SIGNED, tension positive, compression negative, 0 for none. Every kind but a shear states it; a buckling's is its magnitude, positive, a lateral torsional buckling's signed (issue #38).",
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "kN",
+            "N",
+            "MN"
+          ]
+        }
+      }
+    },
+    "case": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "generell",
+        "mit_vorholz",
+        "endauflagerung",
+        null
+      ],
+      "description": "A compression at an angle: which f_c,90,d of SIA 265 Tabelle 8 or 9 is read -- \"generell\", \"mit_vorholz\" (at least 100 mm of timber beyond the load on both sides) or \"endauflagerung\". Optional; absent or null is generell."
+    },
+    "larger": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "A compression at an angle: true reads the bracketed f_c,90,d (Tabelle 8 note 4, Tabelle 9 note 3), the larger indentations provably without influence on the load-bearing member -- with mit_vorholz or endauflagerung only. Optional; absent or null is false."
+    },
+    "l": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "A compression at an angle: the contact length along the grain, in mm, above 0 -- required there; ignored otherwise."
+    },
+    "w": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "A compression at an angle: the contact width, in mm, above 0; null follows the section's width b (a round section has none to follow)."
+    },
+    "M_y": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "A bending: the design moment about y (in the plane of h), its sign immaterial; absent, null or 0 is none. Optional, additive (v0.117).",
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "kNm",
+            "Nm",
+            "MNm"
+          ]
+        }
+      }
+    },
+    "M_z": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "A bending: the design moment about z, along the grain only (alpha 0); absent, null or 0 is none. Optional, additive (v0.117).",
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "kNm",
+            "Nm",
+            "MNm"
+          ]
+        }
+      }
+    },
+    "V_z": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "A shear: the design shear force in the plane of h (z), its sign immaterial; absent, null or 0 is none. Optional, additive (issue #38).",
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "kN",
+            "N",
+            "MN"
+          ]
+        }
+      }
+    },
+    "V_y": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "A shear: the design shear force in the plane of b (y), likewise. Optional, additive (issue #38).",
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "kN",
+            "N",
+            "MN"
+          ]
+        }
+      }
+    },
+    "pith": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "A shear: a member cut from the pith takes half of f_v,d (SIA 265 Tabelle 8 note 6). Optional; absent or null is false (issue #38)."
+    },
+    "l_y": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "A buckling, or a lateral torsional buckling with a compression: the system length about y, in mm, 0 or above -- the buckling length is beta_y · l_y, 0 holding the member against buckling about y. Optional, additive (issue #38)."
+    },
+    "l_z": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Likewise about z (issue #38)."
+    },
+    "beta_y": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The buckling length coefficient about y, 0 or above: 1 pinned-pinned, 2 cantilever, 0.7, 0.5; absent or null is 1 (issue #38)."
+    },
+    "beta_z": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "Likewise about z (issue #38)."
+    },
+    "a": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "A lateral torsional buckling: the distance between the lateral supports, in mm, above 0 -- sigma_m,crit by (41); or null with sigma_m_crit given (issue #38)."
+    },
+    "sigma_m_crit": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "A lateral torsional buckling: the critical bending stress of a finer calculation, in N/mm², above 0, in place of (41) -- never with a (issue #38)."
+    },
+    "fire": {
+      "type": "object",
+      "description": "The design situation fire, SIA 265 4.5.2 (issue #46): present, the check is one of the fire-resistance tab and is computed on the ideal residual section with R_d,fi = 1.8 · R_d, its forces being E_d,fi. Only for tension, compression, bending, shear and buckling, along the grain. Additive, at schema_version 1.2; absent for a check at normal temperature.",
+      "required": [
+        "duration",
+        "sides"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "duration": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "The fire resistance checked, in minutes, written over; null follows what VKF / AEAI 15-15 requires for the project's building (Woodcore-Datei/building.json) and the check's `top_level`."
+        },
+        "sides": {
+          "type": "object",
+          "description": "The faces of the rectangle the fire reaches, each true or false: left and right reduce b, bottom and top h (SIA 265 Figur 13).",
+          "required": [
+            "bottom",
+            "top",
+            "left",
+            "right"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "bottom": {"type": "boolean"},
+            "top": {"type": "boolean"},
+            "left": {"type": "boolean"},
+            "right": {"type": "boolean"}
+          }
+        },
+        "wood": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            null,
+            "beech",
+            "oak",
+            "cladding"
+          ],
+          "description": "The row of SIA 265 Tabelle 13: null for a softwood grade, beech or oak for a hardwood one (D30), cladding for solid timber cladding."
+        },
+        "top_level": {
+          "type": "boolean",
+          "description": "The member is on the top storey: VKF 15-15 notes [1] and [8]. Optional, false."
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "description": "The fields that follow a variable of the export, by their key in this file (N, V_z, V_y, M_y, M_z, alpha, section.b, section.h, section.d, l, w, l_y, l_z, a, beta_y, beta_z, sigma_m_crit): the number the field holds beside it is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where no field follows one; present at schema_version 1.1 and 1.2.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "description": "A variable of the export this field follows (calc/domains/links.py, spec 2026-10-11-variables-liees-champs-et-textes D-17): the pair a call names its calculation by and its key -- a domain of the «Formule» tab carries origin \"formulas\" and its id as instance --, with an optional factor and offset (factor × variable + offset).",
+          "required": [
+            "domain",
+            "instance",
+            "var"
+          ],
+          "properties": {
+            "domain": {
+              "type": "string"
+            },
+            "instance": {
+              "type": "string"
+            },
+            "var": {
+              "type": "string"
+            },
+            "factor": {
+              "type": "number"
+            },
+            "offset": {
+              "type": "number"
+            },
+            "origin": {
+              "type": "string",
+              "enum": [
+                "formulas"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

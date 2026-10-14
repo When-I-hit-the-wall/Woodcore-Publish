@@ -1,0 +1,54 @@
+{
+  "about": "The units #var, #eq, #verify, #val and #unit read, written once for the report's engine (lib/formula.typ reads this file with json(\"units.json\")) and for the «Formule» tab's instant calculation (calc/units.py) -- docs/typst/formulas.md §10quinquies, spec 2026-10-08-onglet-formule-domaines ARCH-005. A unit is read as the longest prefix-and-base match at each place, the first one listed where two are as long, so the order of `bases` and `prefixes` is part of the rule. Every factor is written as a float, which Typst then reads as one.",
+  "prefixes": {
+    "G": 1000000000.0,
+    "M": 1000000.0,
+    "k": 1000.0,
+    "d": 0.1,
+    "c": 0.01,
+    "m": 0.001,
+    "µ": 0.000001,
+    "μ": 0.000001,
+    "n": 0.000000001
+  },
+  "bases": {
+    "N": {"factor": 1.0, "dims": {"N": 1}},
+    "m": {"factor": 1.0, "dims": {"m": 1}},
+    "g": {"factor": 1.0, "dims": {"g": 1}},
+    "s": {"factor": 1.0, "dims": {"s": 1}},
+    "min": {"factor": 60.0, "dims": {"s": 1}},
+    "K": {"factor": 1.0, "dims": {"K": 1}},
+    "Pa": {"factor": 1.0, "dims": {"N": 1, "m": -2}},
+    "J": {"factor": 1.0, "dims": {"N": 1, "m": 1}},
+    "W": {"factor": 1.0, "dims": {"N": 1, "m": 1, "s": -1}},
+    "t": {"factor": 1000000.0, "dims": {"g": 1}},
+    "l": {"factor": 0.001, "dims": {"m": 3}},
+    "rad": {"factor": 1.0, "dims": {}},
+    "°": {"factor": 1.0, "dims": {"deg": 1}},
+    "%": {"factor": 0.01, "dims": {}}
+  },
+  "exponents": {"⁰": 0, "¹": 1, "²": 2, "³": 3, "⁴": 4, "⁵": 5, "⁶": 6, "⁷": 7, "⁸": 8, "⁹": 9},
+  "superscripts": {"0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹", "-": "⁻", "−": "⁻"},
+  "default_units": {
+    "m": "mm", "m²": "mm²", "m³": "mm³", "m⁴": "mm⁴",
+    "s": "s", "N": "kN", "N·m": "kNm",
+    "N/m²": "N/mm²", "N/m": "kN/m",
+    "g": "kg", "deg": "°"
+  },
+  "offered": {
+    "N": ["kN", "N", "MN"],
+    "N·m": ["kNm", "Nm", "Nmm"],
+    "N/m": ["kN/m", "N/m", "N/mm"],
+    "N/m²": ["N/mm²", "kN/m²", "N/m²", "MPa", "kPa"],
+    "N/m³": ["kN/m³", "N/m³", "N/mm³"],
+    "m": ["mm", "cm", "m"],
+    "m²": ["mm²", "cm²", "m²"],
+    "m³": ["mm³", "cm³", "m³"],
+    "m⁴": ["mm⁴", "cm⁴", "m⁴"],
+    "s": ["s", "min"],
+    "g": ["kg", "t", "g"],
+    "g/m³": ["kg/m³", "t/m³"],
+    "deg": ["°"],
+    "1": ["", "%"]
+  }
+}

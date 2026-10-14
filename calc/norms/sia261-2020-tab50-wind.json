@@ -1,0 +1,149 @@
+{
+ "_source": "SIA 261:2020, Annexe C (normative) «Coefficients de force et de pression pour le vent», Tableau 50, p. 92 -- transcribed from the text layer of the French edition, Normen-Florian/SIA261-2020-FR.pdf, each row's values counted against the table's columns, and checked against a render of the page (11.10.2026, issue #37). Values are the norm's decimals with a point; ±x is the pair [x, -x], a/b the pair [a, b], null a cell the norm leaves empty (–), \"direct\" a cell whose force is computed directly (*).",
+ "edition": "SIA 261:2020",
+ "table": {
+  "number": "50",
+  "title": "Coefficients pour tribune ouverte sur trois côtés",
+  "page": 92,
+  "ratio": "h = 0,8·d, b = 2,2·d",
+  "roof": "–5°",
+  "columns": [
+   {
+    "key": "cpe:A",
+    "group": "cpe",
+    "surface": "A"
+   },
+   {
+    "key": "cpe:C",
+    "group": "cpe",
+    "surface": "C"
+   },
+   {
+    "key": "cpe:E",
+    "group": "cpe",
+    "surface": "E"
+   },
+   {
+    "key": "cpe:G",
+    "group": "cpe",
+    "surface": "G"
+   },
+   {
+    "key": "cpis:B",
+    "group": "cpi",
+    "surface": "B"
+   },
+   {
+    "key": "cpis:D",
+    "group": "cpi",
+    "surface": "D"
+   },
+   {
+    "key": "cpis:F",
+    "group": "cpi",
+    "surface": "F"
+   },
+   {
+    "key": "cpis:H",
+    "group": "cpi",
+    "surface": "H"
+   },
+   {
+    "key": "cpe:K",
+    "group": "cpe",
+    "surface": "K"
+   },
+   {
+    "key": "cpe:M",
+    "group": "cpe",
+    "surface": "M"
+   },
+   {
+    "key": "cpis:J",
+    "group": "cpi",
+    "surface": "J"
+   },
+   {
+    "key": "cpis:L",
+    "group": "cpi",
+    "surface": "L"
+   }
+  ],
+  "rows": [
+   {
+    "label": "0°",
+    "values": [
+     -1.1,
+     -1.1,
+     -0.6,
+     -0.6,
+     0.5,
+     0.5,
+     0.6,
+     0.6,
+     -0.4,
+     -0.4,
+     0.4,
+     0.4
+    ]
+   },
+   {
+    "label": "45°",
+    "values": [
+     -1.1,
+     -1.0,
+     -0.6,
+     -0.6,
+     0.5,
+     0.4,
+     0.3,
+     0.3,
+     -0.4,
+     -0.4,
+     0.2,
+     0.2
+    ]
+   },
+   {
+    "label": "135°",
+    "values": [
+     -0.35,
+     -0.35,
+     -0.6,
+     -0.6,
+     -1.0,
+     -1.0,
+     -1.0,
+     -1.0,
+     0.6,
+     0.6,
+     -1.0,
+     -1.0
+    ]
+   },
+   {
+    "label": "180°",
+    "values": [
+     -0.6,
+     -0.6,
+     -0.5,
+     -0.5,
+     -0.3,
+     -0.3,
+     -0.2,
+     -0.2,
+     0.7,
+     0.7,
+     -0.3,
+     -0.3
+    ]
+   }
+  ],
+  "cpe_peak": null,
+  "cfr": null,
+  "notes": [
+   "φ = 45°, surface localisée m du toit : c_p,haut = −2,0 ; c_p,bas = 1,0",
+   "φ = 60°, surface localisée o de la paroi : c_pK = −1,0 ; c_pJ = 1,0"
+  ]
+ }
+}

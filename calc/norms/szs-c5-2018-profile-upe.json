@@ -1,0 +1,52 @@
+{
+ "_source": "SZS C5 Konstruktionstabellen, revision 2018, reprinted 2021: ExternalFiles/000-Normes/SZS-C5-2021.pdf (the engineer's copy is 301-Normes/SZS-C5-2018.pdf). The PDF is a scan: every number was read off a render of its page (220 and 330 dpi) and held three ways -- against the page's OCR text, against the section's own mechanics (i = sqrt(I/A), W_el = I/(h/2), A from h, b, t_w, t_f, r), and against the «Hilfstabelle Stahl-Profile» of the steel check templates (tests/fixtures/steel-reference-profiles.json); wherever they disagreed the page was read again at 330-400 dpi and the page wins. Values are as printed, each column's factor under its head (×10⁶, ×10³) stated in `columns`; the reader converts them into plain mm units. This file: U-Stahl mit parallelen Flanschen / Profilés U avec ailes parallèles, printed pp. 34-35 (PDF 38-39), «Statische Werte / Valeurs statiques» and «Profilmasse / Dimensions de la section».",
+ "_note": "e is the centroid's distance from the web's back, a_c the shear centre's (p. 35). A_v and W_pl,y apply to profiles held against twisting only (the page's footnote 1).",
+ "edition": "SZS C5:2018",
+ "title": "U-Stahl mit parallelen Flanschen / Profilés U avec ailes parallèles",
+ "norm_ref": "pp. 34-35",
+ "columns": {
+  "m": {"unit": "kg/m"},
+  "A": {"unit": "mm2"},
+  "A_v": {"unit": "mm2"},
+  "A_w": {"unit": "mm2"},
+  "I_y": {"unit": "mm4", "factor": 1000000},
+  "W_el_y": {"unit": "mm3", "factor": 1000},
+  "W_y_bar": {"unit": "mm3", "factor": 1000},
+  "W_pl_y": {"unit": "mm3", "factor": 1000},
+  "i_y": {"unit": "mm"},
+  "I_z": {"unit": "mm4", "factor": 1000000},
+  "W_el_z": {"unit": "mm3", "factor": 1000},
+  "W_pl_z": {"unit": "mm3", "factor": 1000},
+  "i_z": {"unit": "mm"},
+  "K": {"unit": "mm4", "factor": 1000000},
+  "h": {"unit": "mm"},
+  "b": {"unit": "mm"},
+  "t_w": {"unit": "mm"},
+  "t_f": {"unit": "mm"},
+  "r": {"unit": "mm"},
+  "h_1": {"unit": "mm"},
+  "e": {"unit": "mm"},
+  "a_c": {"unit": "mm"}
+ },
+ "families": {
+  "UPE": {
+   "columns": ["m", "A", "A_v", "A_w", "I_y", "W_el_y", "W_y_bar", "W_pl_y", "i_y", "I_z", "W_el_z", "W_pl_z", "i_z", "K", "h", "b", "t_w", "t_f", "r", "h_1", "e", "a_c"],
+   "rows": {
+    "80": [7.9, 1010, 405, 292, 1.07, 26.8, 29.3, 31.2, 32.6, 0.254, 7.98, 14.1, 15.9, 0.0147, 80, 50, 4, 7, 10, 46, 18.2, 37.1],
+    "100": [9.82, 1250, 534, 416, 2.07, 41.4, 44.8, 48, 40.7, 0.382, 10.6, 18.9, 17.5, 0.0201, 100, 55, 4.5, 7.5, 10, 65, 19.1, 39.3],
+    "120": [12.1, 1540, 718, 560, 3.64, 60.6, 65, 70.3, 48.6, 0.554, 13.8, 24.8, 19, 0.029, 120, 60, 5, 8, 12, 80, 19.8, 41.2],
+    "140": [14.5, 1840, 825, 655, 5.99, 85.6, 91.5, 98.8, 57.1, 0.787, 18.2, 32.6, 20.7, 0.0405, 140, 65, 5, 9, 12, 98, 21.7, 45.4],
+    "160": [17, 2170, 1000, 828, 9.11, 114, 121, 132, 64.8, 1.07, 22.6, 40.7, 22.2, 0.052, 160, 70, 5.5, 9.5, 12, 117, 22.7, 47.6],
+    "180": [19.7, 2510, 1120, 934, 13.5, 150, 160, 173, 73.4, 1.44, 28.6, 51.3, 23.9, 0.0699, 180, 75, 5.5, 10.5, 12, 135, 24.7, 51.9],
+    "200": [22.8, 2900, 1350, 1130, 19.1, 191, 202, 220, 81.1, 1.87, 34.4, 62.2, 25.4, 0.0889, 200, 80, 6, 11, 13, 152, 25.6, 54.1],
+    "220": [26.6, 3390, 1580, 1350, 26.8, 244, 258, 281, 89, 2.46, 42.5, 76.9, 27, 0.121, 220, 85, 6.5, 12, 13, 170, 27, 57],
+    "240": [30.2, 3850, 1880, 1590, 36, 300, 316, 347, 96.7, 3.11, 50.1, 90.8, 28.4, 0.151, 240, 90, 7, 12.5, 15, 185, 27.9, 59.1],
+    "270": [35.2, 4480, 2220, 1930, 52.6, 389, 410, 451, 108, 4.01, 60.7, 110, 29.9, 0.199, 270, 95, 7.5, 13.5, 15, 213, 28.9, 61.4],
+    "300": [44.4, 5660, 3030, 2710, 78.2, 522, 549, 613, 118, 5.38, 75.6, 137, 30.8, 0.315, 300, 100, 9.5, 15, 15, 240, 28.9, 60.3],
+    "330": [53.2, 6780, 3880, 3450, 110, 667, 701, 792, 127, 6.81, 89.7, 162, 31.7, 0.452, 330, 105, 11, 16, 18, 262, 29, 60],
+    "360": [61.2, 7790, 4560, 4120, 148, 824, 865, 982, 138, 8.44, 105, 189, 32.9, 0.585, 360, 110, 12, 17, 18, 290, 29.7, 61.2],
+    "400": [72.2, 9190, 5620, 5160, 210, 1050, 1100, 1260, 151, 10.5, 123, 221, 33.7, 0.791, 400, 115, 13.5, 18, 18, 328, 29.8, 60.6]
+   }
+  }
+ }
+}

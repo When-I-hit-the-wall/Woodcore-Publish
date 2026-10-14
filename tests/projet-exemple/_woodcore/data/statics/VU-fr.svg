@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="886 -1090.857 1247.055 446" width="187.058mm" height="66.9mm">
+<rect x="886" y="-1090.857" width="1247.055" height="446" fill="#ffffff"/>
+<!-- highlight -->
+<line x1="1000" y1="-842.857" x2="2000" y2="-842.857" stroke="#1f1f1f" stroke-width="11.5" stroke-linecap="round"/>
+<polygon points="1000,-842.857 1035,-782.857 965,-782.857" fill="#ffffff" stroke="#1f1f1f" stroke-width="7" stroke-linejoin="round"/>
+<line x1="1046" y1="-782.857" x2="954" y2="-782.857" stroke="#1f1f1f" stroke-width="7" stroke-linecap="round"/>
+<line x1="1039.429" y1="-782.857" x2="1063.429" y2="-758.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="1026.286" y1="-782.857" x2="1050.286" y2="-758.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="1013.143" y1="-782.857" x2="1037.143" y2="-758.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="1000" y1="-782.857" x2="1024" y2="-758.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="986.857" y1="-782.857" x2="1010.857" y2="-758.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="973.714" y1="-782.857" x2="997.714" y2="-758.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="960.571" y1="-782.857" x2="984.571" y2="-758.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<circle cx="1000" cy="-842.857" r="17" fill="#ffffff" stroke="#1f1f1f" stroke-width="6"/>
+<polygon points="2000,-842.857 2035,-782.857 1965,-782.857" fill="#ffffff" stroke="#1f1f1f" stroke-width="7" stroke-linejoin="round"/>
+<circle cx="2019.25" cy="-772.857" r="10" fill="#ffffff" stroke="#1f1f1f" stroke-width="5.5"/>
+<circle cx="1980.75" cy="-772.857" r="10" fill="#ffffff" stroke="#1f1f1f" stroke-width="5.5"/>
+<line x1="2046" y1="-762.857" x2="1954" y2="-762.857" stroke="#1f1f1f" stroke-width="7" stroke-linecap="round"/>
+<line x1="2039.429" y1="-762.857" x2="2063.429" y2="-738.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="2026.286" y1="-762.857" x2="2050.286" y2="-738.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="2013.143" y1="-762.857" x2="2037.143" y2="-738.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="2000" y1="-762.857" x2="2024" y2="-738.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="1986.857" y1="-762.857" x2="2010.857" y2="-738.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="1973.714" y1="-762.857" x2="1997.714" y2="-738.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="1960.571" y1="-762.857" x2="1984.571" y2="-738.857" stroke="#1f1f1f" stroke-width="4.5" stroke-linecap="round"/>
+<circle cx="2000" cy="-842.857" r="17" fill="#ffffff" stroke="#1f1f1f" stroke-width="6"/>
+<polyline points="1980,-842.857 1979.877,-844.176 1979.841,-845.511 1979.894,-846.856 1980.038,-848.206 1980.272,-849.554 1980.599,-850.893 1981.016,-852.219 1981.525,-853.524 1982.123,-854.802 1982.811,-856.047 1983.585,-857.253 1984.444,-858.413 1985.385,-859.523 1986.404,-860.575 1987.5,-861.565 1988.667,-862.487 1989.901,-863.336 1991.198,-864.106 1992.553,-864.794 1993.961,-865.395 1995.415,-865.906 1996.911,-866.321 1998.441,-866.639 2000,-866.857 2001.581,-866.972 2003.176,-866.982 2004.78,-866.886 2006.384,-866.683 2007.982,-866.373 2009.567,-865.954 2011.131,-865.428 2012.667,-864.796 2014.167,-864.06 2015.625,-863.22 2017.033,-862.28 2018.385,-861.242 2019.673,-860.11 2020.892,-858.888 2022.034,-857.58 2023.094,-856.19 2024.066,-854.725 2024.945,-853.19 2025.725,-851.59 2026.402,-849.932 2026.972,-848.222 2027.43,-846.468 2027.774,-844.678 2028,-842.857 2028.106,-841.015 2028.091,-839.159 2027.952,-837.297 2027.69,-835.438 2027.303,-833.589 2026.793,-831.759 2026.159,-829.957 2025.403,-828.19 2024.528,-826.468 2023.536,-824.797 2022.43,-823.187 2021.213,-821.644 2019.89,-820.177 2018.466,-818.792 2016.945,-817.497 2015.333,-816.299 2013.637,-815.204 2011.863,-814.217 2010.018,-813.344 2008.11,-812.591 2006.145,-811.962 2004.133,-811.461 2002.082,-811.092 2000,-810.857 1997.896,-810.759 1995.78,-810.8 1993.66,-810.982 1991.545,-811.304 1989.446,-811.766 1987.371,-812.369 1985.331,-813.111 1983.333,-813.99 1981.388,-815.003 1979.505,-816.148 1977.692,-817.42 1975.958,-818.816 1974.312,-820.329 1972.762,-821.956 1971.314,-823.69 1969.978,-825.524 1968.759,-827.451 1967.664,-829.463 1966.7,-831.553 1965.871,-833.712 1965.182,-835.931 1964.638,-838.202 1964.243,-840.514 1964,-842.857 1963.911,-845.223 1963.978,-847.6 1964.201,-849.978 1964.583,-852.347 1965.121,-854.697 1965.816,-857.016 1966.666,-859.296 1967.668,-861.524 1968.82,-863.691 1970.117,-865.787 1971.555,-867.802 1973.13,-869.727 1974.835,-871.552 1976.664,-873.269 1978.611,-874.869 1980.667,-876.343 1982.824,-877.686 1985.075,-878.888 1987.41,-879.945 1989.82,-880.85 1992.294,-881.598 1994.822,-882.184 1997.395,-882.605 2000,-882.857" fill="none" stroke="#1f1f1f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="2000" cy="-842.857" r="17" fill="#ffffff" stroke="#1f1f1f" stroke-width="6"/>
+<!-- dims -->
+<!-- /dims -->
+<!-- loads -->
+<line x1="2000" y1="-1022.857" x2="2000" y2="-874.857" stroke="#c0392b" stroke-width="7.5" stroke-linecap="butt"/>
+<polygon points="2000,-842.857 1988.5,-874.857 2011.5,-874.857" fill="#c0392b"/>
+<line x1="1000" y1="-952.857" x2="2000" y2="-952.857" stroke="#c0392b" stroke-width="7" stroke-linecap="round"/>
+<line x1="1000" y1="-952.857" x2="1000" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1000,-842.857 990.8,-868.457 1009.2,-868.457" fill="#c0392b"/>
+<line x1="1076.923" y1="-952.857" x2="1076.923" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1076.923,-842.857 1067.723,-868.457 1086.123,-868.457" fill="#c0392b"/>
+<line x1="1153.846" y1="-952.857" x2="1153.846" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1153.846,-842.857 1144.646,-868.457 1163.046,-868.457" fill="#c0392b"/>
+<line x1="1230.769" y1="-952.857" x2="1230.769" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1230.769,-842.857 1221.569,-868.457 1239.969,-868.457" fill="#c0392b"/>
+<line x1="1307.692" y1="-952.857" x2="1307.692" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1307.692,-842.857 1298.492,-868.457 1316.892,-868.457" fill="#c0392b"/>
+<line x1="1384.615" y1="-952.857" x2="1384.615" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1384.615,-842.857 1375.415,-868.457 1393.815,-868.457" fill="#c0392b"/>
+<line x1="1461.538" y1="-952.857" x2="1461.538" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1461.538,-842.857 1452.338,-868.457 1470.738,-868.457" fill="#c0392b"/>
+<line x1="1538.462" y1="-952.857" x2="1538.462" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1538.462,-842.857 1529.262,-868.457 1547.662,-868.457" fill="#c0392b"/>
+<line x1="1615.385" y1="-952.857" x2="1615.385" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1615.385,-842.857 1606.185,-868.457 1624.585,-868.457" fill="#c0392b"/>
+<line x1="1692.308" y1="-952.857" x2="1692.308" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1692.308,-842.857 1683.108,-868.457 1701.508,-868.457" fill="#c0392b"/>
+<line x1="1769.231" y1="-952.857" x2="1769.231" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1769.231,-842.857 1760.031,-868.457 1778.431,-868.457" fill="#c0392b"/>
+<line x1="1846.154" y1="-952.857" x2="1846.154" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1846.154,-842.857 1836.954,-868.457 1855.354,-868.457" fill="#c0392b"/>
+<line x1="1923.077" y1="-952.857" x2="1923.077" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="1923.077,-842.857 1913.877,-868.457 1932.277,-868.457" fill="#c0392b"/>
+<line x1="2000" y1="-952.857" x2="2000" y2="-868.457" stroke="#c0392b" stroke-width="6" stroke-linecap="butt"/>
+<polygon points="2000,-842.857 1990.8,-868.457 2009.2,-868.457" fill="#c0392b"/>
+<!-- /loads -->
+<rect x="1468.647" y="-826.857" width="62.706" height="36" fill="#ffffff"/>
+<text x="1472.647" y="-800.457" font-family="Arial" font-size="24" text-anchor="start" font-weight="bold" fill="#1f1f1f">T001</text>
+<rect x="1890.945" y="-919.857" width="218.11" height="36" fill="#ffffff"/>
+<text x="1894.945" y="-893.457" font-family="Arial" font-size="24" text-anchor="start" font-weight="bold" fill="#1f1f1f">k = 21.672 kNm/rad</text>
+<!-- dims -->
+<!-- /dims -->
+<!-- loads -->
+<rect x="1910.286" y="-1066.857" width="179.427" height="36" fill="#ffffff"/>
+<text x="1914.286" y="-1040.457" font-family="Arial" font-size="24" text-anchor="start" font-weight="bold" fill="#1f1f1f">CC1 = 11.19 kN</text>
+<rect x="1433.643" y="-930.857" width="132.714" height="66" fill="#ffffff"/>
+<text x="1437.643" y="-904.457" font-family="Arial" font-size="24" text-anchor="start" font-weight="bold" fill="#1f1f1f">CC1 = 5 kN</text>
+<text x="1454.841" y="-874.457" font-family="Arial" font-size="24" text-anchor="start" fill="#1f1f1f">b</text>
+<text x="1468.19" y="-869.177" font-family="Arial" font-size="17.28" text-anchor="start" fill="#1f1f1f">e</text>
+<text x="1484.468" y="-874.457" font-family="Arial" font-size="24" text-anchor="start" fill="#1f1f1f">= 2 m</text>
+<text x="910" y="-685.857" font-family="Arial" font-size="20" text-anchor="start" fill="#6b6b6b">b</text>
+<text x="921.124" y="-681.457" font-family="Arial" font-size="14.4" text-anchor="start" fill="#6b6b6b">e</text>
+<text x="934.689" y="-685.857" font-family="Arial" font-size="20" text-anchor="start" fill="#6b6b6b">= 2 m — depuis l'avant-toit</text>
+<text x="910" y="-655.857" font-family="Arial" font-size="20" text-anchor="start" fill="#6b6b6b">CC1 = 2.5 kN/m × b</text>
+<text x="1086.74" y="-651.457" font-family="Arial" font-size="14.4" text-anchor="start" fill="#6b6b6b">e</text>
+<text x="1100.305" y="-655.857" font-family="Arial" font-size="20" text-anchor="start" fill="#6b6b6b">= 2 m</text>
+<!-- /loads -->
+</svg>

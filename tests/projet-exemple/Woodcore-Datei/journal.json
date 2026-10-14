@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "entries": [
+    {
+      "index": 1,
+      "date": "2026-09-14",
+      "name": "Max Muster",
+      "initials": "MMB",
+      "label": "Erstausgabe",
+      "summary": "Erste Ausgabe des statischen Berichts.",
+      "description": "Positionen, Lastannahmen, statische Systeme und die Verbindungsmittel des Velo-Unterstands."
+    },
+    {
+      "index": 2,
+      "date": "2026-09-21",
+      "name": "Max Muster",
+      "initials": "MMB",
+      "label": "Schneelast nachgerechnet",
+      "summary": "Bezugshöhe des Standorts korrigiert.",
+      "description": "Die Bezugshöhe war 200 m zu tief angesetzt; die charakteristische Schneelast steigt dadurch von 1.55 auf 1.729 kN/m². Die Nachweise der Dachträger wurden damit neu gerechnet."
+    },
+    {
+      "index": 3,
+      "date": "2026-09-25",
+      "name": "Petra Prüfer",
+      "initials": "PPA",
+      "label": "Prüfung",
+      "summary": "Bemerkungen der Prüfung eingearbeitet.",
+      "description": ""
+    }
+  ]
+}

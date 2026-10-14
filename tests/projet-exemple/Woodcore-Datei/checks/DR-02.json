@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "id": "DR-02",
+  "name": "Druckstütze Querschnitt",
+  "label": "Querschnitt einer Stütze GL24h 140/140, ohne Knicken",
+  "group": "",
+  "kind": "compression",
+  "position": null,
+  "grade": "GL24h",
+  "section": {
+    "type": "rec",
+    "b": 140,
+    "h": 140
+  },
+  "moisture_class": 1,
+  "impact": false,
+  "alpha": 0,
+  "N": {
+    "value": 60,
+    "unit": "kN"
+  },
+  "case": null,
+  "larger": null,
+  "l": null,
+  "w": null
+}

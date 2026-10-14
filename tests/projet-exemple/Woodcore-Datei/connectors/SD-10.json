@@ -1,0 +1,86 @@
+{
+  "schema_version": "2.0",
+  "id": "SD-10",
+  "group": "",
+  "name": "Velo Unterstand",
+  "variant": "8mm",
+  "type": "Stabdübel",
+  "assembly": "Holz-Holz zweischnittig",
+  "label": "",
+  "description": "Stabdübel 4x 10mm Durchmesser",
+  "diameter": {
+    "value": 10.0,
+    "unit": "mm"
+  },
+  "length": {
+    "value": 100.0,
+    "unit": "mm"
+  },
+  "dimension": "8/200",
+  "steel": "",
+  "elements": [],
+  "moisture_class": 2,
+  "conditions": {
+    "seismic": false,
+    "truss": false
+  },
+  "n_tot": {
+    "value": 4,
+    "override": false
+  },
+  "schema": "VU-Skizze",
+  "members": [
+    {
+      "name": "",
+      "element": "",
+      "role": "timber",
+      "predrilled": true,
+      "alpha": 0.0,
+      "t": {
+        "value": 50.0,
+        "unit": "mm"
+      },
+      "n": 2,
+      "a_1": {
+        "value": 120.0,
+        "unit": "mm"
+      },
+      "plates": null,
+      "material": {
+        "grade": "C24"
+      }
+    },
+    {
+      "name": "",
+      "element": "",
+      "role": "timber",
+      "predrilled": true,
+      "alpha": 0.0,
+      "t": {
+        "value": 100.0,
+        "unit": "mm"
+      },
+      "n": 2,
+      "a_1": {
+        "value": 120.0,
+        "unit": "mm"
+      },
+      "plates": null,
+      "material": {
+        "grade": "C24"
+      }
+    }
+  ],
+  "fasteners": [
+    "A12",
+    "A13",
+    "A14",
+    "A15"
+  ],
+  "dowel": {
+    "f_u_k": {
+      "value": 510.0,
+      "unit": "N/mm²"
+    }
+  }
+}

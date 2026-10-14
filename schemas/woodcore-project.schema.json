@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Woodcore project",
+  "description": "<name>.woodcore -- the file that makes a folder a Woodcore project and says where each of its parts is (docs/architecture/layout.md §11). The project's folder is the folder this file sits in; every path in `layout` is relative to it, written with forward slashes, and must stay inside it. Written by hand or by Woodcore, read by calc/project.py alone. A key of `layout` left out takes its default, the layout a new project was created with until the three documents -- `report`, `pdf`, `sources`, `generated` and `archives` each have one; the six keys of a project laid out in three documents (`typst_root`, `images`, `report_cu`, `pdf_cu`, `report_bp`, `pdf_bp`) have none, and are stated all together or not at all. A key Woodcore no longer reads -- `layout.rfem_export` and `gui.rfem_models`, since the RFEM import was retired in 0.117 -- is still valid here, ignored, and said at every export (calc/project.py RETIRED_KEYS).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "format",
+    "name"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a project file written at another version is refused rather than read as this one."
+    },
+    "format": {
+      "type": "string",
+      "const": "woodcore-project",
+      "description": "What this file is, so a .woodcore that is something else is refused by name rather than half-read."
+    },
+    "name": {
+      "type": "string",
+      "description": "The project's name, as the window and the start page show it."
+    },
+    "number": {
+      "type": "string",
+      "description": "The project's number, as the office files it. Printed on the report's title page and in the PDF's metadata, through data/project.json (v0.82). Optional."
+    },
+    "client": {
+      "type": "string",
+      "description": "The client (Bauherrschaft). Printed on the report's title page and in the PDF's metadata, through data/project.json (v0.82). Optional."
+    },
+    "address": {
+      "type": "string",
+      "description": "Where the structure stands. Printed on the report's title page and in the PDF's metadata, through data/project.json (v0.82). Optional."
+    },
+    "company": {
+      "type": "string",
+      "description": "The office the report is written by. Printed on the report's title page and in the PDF's metadata, through data/project.json (v0.82). Optional."
+    },
+    "author": {
+      "type": "string",
+      "description": "Who wrote the report. Printed on the report's title page and in the PDF's metadata, through data/project.json (v0.82). Optional."
+    },
+    "checker": {
+      "type": "string",
+      "description": "Who checks it. Printed on the report's title page and in the PDF's metadata, through data/project.json (v0.82). Optional."
+    },
+    "woodcore_version": {
+      "type": "string",
+      "description": "The Woodcore version this project asks to be opened with, as a prefix -- `0.83` opens it with the newest 0.83.x installed. Read by the launcher a double-click on this file starts (packaging/launcher.py, v0.83). Optional: absent, the newest version installed opens it."
+    },
+    "gui": {
+      "type": "object",
+      "description": "What the window keeps with the project rather than with the user (v0.83; named `katalog` until v0.96). Written by Woodcore.",
+      "properties": {
+        "empty_folders": {
+          "type": "object",
+          "description": "Per editor tab (tab_plan, tab_statics, tab_schema, tab_connections, tab_polar), the folders of its list that hold nothing -- a folder being a field of the sources it holds, an empty one has nowhere else to be written (docs/ui/window.md §10quater)."
+        },
+        "rfem_models": {
+          "type": "array",
+          "description": "Retired in 0.117 with the RFEM import (archive/rfem/): the RFEM table exports a project read. Still valid in a file written before, never written by Woodcore since, ignored, and said at every export (calc/project.py RETIRED_KEYS)."
+        }
+      }
+    },
+    "katalog": {
+      "type": "object",
+      "description": "`gui`'s name in a project file written before v0.96, when the window was the Katalog: still read where `gui` is absent, and taken out, its content carried into `gui`, the first time the window writes its empty folders. Never written.",
+      "properties": {
+        "empty_folders": {
+          "type": "object",
+          "description": "As `gui.empty_folders`."
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "description": "Where each part of the project is, relative to the project's folder. A project is laid out as a report alone -- the report's folder is the Typst root, and its config.typ, its pictures and the export lie inside it -- unless `typst_root` is stated: it is then laid out in three documents, the convention d'utilisation, the base de projet and the report (the rapport de statique), each in a folder of its own, compiled from the project's own folder, which holds what the three share (calc/project.py, calc/documents.py). Woodcore writes such a layout in full, every key below stated.",
+      "properties": {
+        "typst_root": {
+          "type": "string",
+          "description": "The folder the documents are compiled from, and read nothing outside of: \".\", the project's own folder, and nothing else. Stated, the project is laid out in three documents, and every one of `images`, `report_cu`, `pdf_cu`, `report_bp` and `pdf_bp` is stated with it. Absent, the Typst root is the report's folder, as it has always been."
+        },
+        "report": {
+          "type": "string",
+          "description": "The report's entry file, `Statischer Rapport.typ`. Its folder is the Typst root, unless `typst_root` is stated; in three documents it is the rapport de statique's, `3_Statischer Bericht/Statischer Rapport.typ`, and keeps the name it has always had."
+        },
+        "pdf": {
+          "type": "string",
+          "description": "Where the compiled report is written -- the deliverable."
+        },
+        "sources": {
+          "type": "string",
+          "description": "The folder holding what is drawn in Woodcore's window: connectors/, connections/, plans/, statics/, details/."
+        },
+        "generated": {
+          "type": "string",
+          "description": "The folder the export writes into: data/ (and docs/). Inside the Typst root, since the report reads data/ through the engine -- the report's folder for a report alone, `_woodcore` at the top of the project for three documents, which share it."
+        },
+        "archives": {
+          "type": "string",
+          "description": "Where every successful export is archived."
+        },
+        "images": {
+          "type": "string",
+          "description": "The pictures the documents' sections set, shared by the three: `Images`, at the top of the project, read as `/Images/...`. Stated with `typst_root`; a report alone keeps its pictures in `Images/` inside its own folder."
+        },
+        "rfem_export": {
+          "type": "string",
+          "description": "Retired in 0.117 with the RFEM import (archive/rfem/): where a project kept its RFEM table exports, `RFEM-Export`. Still valid in a file written before, never written by Woodcore since, ignored, and said at every export (calc/project.py RETIRED_KEYS)."
+        },
+        "report_cu": {
+          "type": "string",
+          "description": "The convention d'utilisation's entry file (Nutzungsvereinbarung, SIA 260's service criteria agreement), in a folder of its own beside its structure.json and its Sections/: `1_Nutzungsvereinbarung/Nutzungsvereinbarung.typ`. Stated with `typst_root`."
+        },
+        "pdf_cu": {
+          "type": "string",
+          "description": "Where the convention d'utilisation is compiled to, beside its entry file. Stated with `typst_root`."
+        },
+        "report_bp": {
+          "type": "string",
+          "description": "The base de projet's entry file (Projektbasis, SIA 260's basis of design), in a folder of its own beside its structure.json and its Sections/: `2_Projektbasis/Projektbasis.typ`. Stated with `typst_root`."
+        },
+        "pdf_bp": {
+          "type": "string",
+          "description": "Where the base de projet is compiled to, beside its entry file. Stated with `typst_root`."
+        }
+      }
+    }
+  }
+}

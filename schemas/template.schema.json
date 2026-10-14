@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Woodcore project template",
+  "description": "template.json -- the file that makes a folder a template a new project is made from (calc/templates.py, docs/conventions/build-and-release.md §12, v0.94). The folder beside it is the project's skeleton, copied into every project made from it without this file. Written by Woodcore's *Paramètres* or by hand, read by calc/templates.py alone. Every key but the first three is optional: a template that states no language takes the settings' default report language, one that states no layout key the default layout, one that states no person the settings' defaults.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "format",
+    "name"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a template written at another version is refused rather than read as this one."
+    },
+    "format": {
+      "type": "string",
+      "const": "woodcore-template",
+      "description": "What this file is, so a template.json that is something else is refused by name."
+    },
+    "name": {
+      "type": "string",
+      "description": "The template's name, as *Nouveau projet* and *Paramètres* list it. Its folder, and not this, is what the settings name it by (`<place>:<folder>`), so it may be edited."
+    },
+    "description": {
+      "type": ["string", "object"],
+      "description": "What the template is for, in the engineer's words -- or, for a builtin template, one text per language (`fr`, `de`, `en`)."
+    },
+    "document_language": {
+      "type": "string",
+      "enum": ["de", "fr", "en"],
+      "description": "The language Typst itself works in, written into config.typ's `#let doc-lang` (docs/typst/language.md §4bis). Absent, the report language."
+    },
+    "report_language": {
+      "type": "string",
+      "enum": ["de", "fr", "en"],
+      "description": "The language the engine prints in, written into the entry file's `#set-report-language(sys.inputs.at(\"lang\", default: …))` (docs/typst/language.md §4bis). Absent, the settings' default report language, else German."
+    },
+    "layout": {
+      "type": "object",
+      "description": "Where the parts of the template's skeleton lie, relative to its folder -- the `layout` of schemas/woodcore-project.schema.json. A **report-shaped** template -- Standard, and one saved from a project laid out as a report alone -- states no `typst_root`: each key it leaves out takes the default, the skeleton's entry file lies where `report` says, and `generated` and `pdf` follow the report's folder where they are left out. A **documents-shaped** template -- saved from a project laid out in three documents -- states `typst_root` and with it every key, as that project's .woodcore did. A project made from either is laid out in three documents (calc/project_template.py), its folders named when it is made.",
+      "properties": {
+        "typst_root": {"type": "string", "description": "\".\" -- stated by a documents-shaped template alone, with every key below."},
+        "report": {"type": "string"},
+        "pdf": {"type": "string"},
+        "report_cu": {"type": "string", "description": "The convention d'utilisation's entry file, in a folder of its own (a documents-shaped template)."},
+        "pdf_cu": {"type": "string"},
+        "report_bp": {"type": "string", "description": "The base de projet's entry file, in a folder of its own (a documents-shaped template)."},
+        "pdf_bp": {"type": "string"},
+        "sources": {"type": "string"},
+        "generated": {"type": "string"},
+        "images": {"type": "string", "description": "The pictures the three documents share, at the top (a documents-shaped template)."},
+        "rfem_export": {"type": "string", "description": "Retired in 0.117 with the RFEM import: still valid in a template written before, and not carried into a project made from it."},
+        "archives": {"type": "string"}
+      }
+    },
+    "company": {
+      "type": "string",
+      "description": "The office a new project's report is written by, unless the engineer types another."
+    },
+    "author": {
+      "type": "string",
+      "description": "Who writes a new project's report, unless the engineer types another."
+    },
+    "checker": {
+      "type": "string",
+      "description": "Who checks it, unless the engineer types another."
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "id": "KI-02",
+  "name": "Kippen und Knicken Träger",
+  "label": "Träger T001 mit Druckkraft, (37)",
+  "group": "",
+  "kind": "lateral-torsional",
+  "position": "T001",
+  "grade": null,
+  "section": null,
+  "moisture_class": null,
+  "impact": false,
+  "alpha": 0,
+  "N": {
+    "value": -12,
+    "unit": "kN"
+  },
+  "M_y": {
+    "value": 3,
+    "unit": "kNm"
+  },
+  "M_z": null,
+  "a": 2500,
+  "sigma_m_crit": null,
+  "l_y": 4000,
+  "l_z": 2500,
+  "beta_y": 1,
+  "beta_z": 1
+}

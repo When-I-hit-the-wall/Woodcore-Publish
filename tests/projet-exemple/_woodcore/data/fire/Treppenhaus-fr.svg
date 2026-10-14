@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 640 420" width="640" height="420">
+<path d="M60 110 L180 110 L180 300 L60 300 Z" fill="#009900" fill-opacity="0.65" fill-rule="evenodd" stroke="#009900" stroke-width="0.602" stroke-linejoin="round"/>
+<path d="M180 180 L470 180 L470 230 L180 230 Z" fill="#cafe96" fill-opacity="0.65" fill-rule="evenodd" stroke="#009900" stroke-width="0.602" stroke-linejoin="round"/>
+<path d="M300 180 L370 180 L370 230 L300 230 Z" fill="none" stroke="#9fff7f" stroke-width="0.602" stroke-linejoin="round"/>
+<line x1="368.565" y1="180" x2="370" y2="181.435" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="363.241" y1="180" x2="370" y2="186.759" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="357.917" y1="180" x2="370" y2="192.083" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="352.593" y1="180" x2="370" y2="197.407" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="347.269" y1="180" x2="370" y2="202.731" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="341.945" y1="180" x2="370" y2="208.055" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="336.62" y1="180" x2="370" y2="213.38" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="331.296" y1="180" x2="370" y2="218.704" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="325.972" y1="180" x2="370" y2="224.028" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="320.648" y1="180" x2="370" y2="229.352" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="315.324" y1="180" x2="365.324" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="310" y1="180" x2="360" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="304.676" y1="180" x2="354.676" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="300" y1="180.648" x2="349.352" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="300" y1="185.972" x2="344.028" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="300" y1="191.296" x2="338.704" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="300" y1="196.62" x2="333.38" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="300" y1="201.945" x2="328.055" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="300" y1="207.269" x2="322.731" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="300" y1="212.593" x2="317.407" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="300" y1="217.917" x2="312.083" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="300" y1="223.241" x2="306.759" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<line x1="300" y1="228.565" x2="301.435" y2="230" stroke="#9fff7f" stroke-width="0.678"/>
+<polyline points="180,107 57,107 57,303 180,303" fill="none" stroke="#0365dd" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+<polyline points="183,107 183,178" fill="none" stroke="#0365dd" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+<polyline points="183,232 183,303" fill="none" stroke="#0365dd" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+<polyline points="186,177 470,177" fill="none" stroke="#ffbf00" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+<polyline points="186,233 470,233" fill="none" stroke="#ffbf00" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+<polyline points="473,177 473,233" fill="none" stroke="#fabafc" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
+<polygon points="183,184 183,226 178.883,225.798 174.806,225.193 170.808,224.191 166.927,222.803 163.201,221.041 159.666,218.922 156.355,216.466 153.302,213.698 150.534,210.645 148.078,207.334 145.959,203.799 144.197,200.073 142.809,196.192 141.807,192.194 141.202,188.117 141,184" fill="#ffbf00" stroke="#000000" stroke-width="0.376" stroke-linejoin="round"/>
+<polygon points="440,177 430.005,168.645 430.005,173.67 390,173.67 390,177" fill="#fabafc" stroke="#000000" stroke-width="0.376" stroke-linejoin="round"/>
+<polyline points="230,233 230,265 233.137,264.846 236.243,264.385 239.289,263.622 242.246,262.564 245.085,261.221 247.778,259.607 250.301,257.736 252.627,255.627 254.736,253.301 256.607,250.778 258.221,248.085 259.564,245.246 260.622,242.289 261.385,239.243 261.846,236.137 262,233" fill="none" stroke="#000000" stroke-width="0.753" stroke-linejoin="round"/>
+<polyline points="455,205 200,205 125.906,246.678" fill="none" stroke="#009900" stroke-width="0.979" stroke-linejoin="round"/>
+<polygon points="120,250 124.725,244.578 127.087,248.778" fill="#009900"/>
+<polygon points="110.91,270 110.91,315.457 93.18,315.457 120,345 146.82,315.457 129.09,315.457 129.09,270" fill="#009900" stroke="#000000" stroke-width="0.301" stroke-linejoin="miter"/>
+<rect x="-11.703" y="-3.968" width="23.406" height="7.936" fill="#ffffff" fill-opacity="0.85" transform="translate(327.5,198.92) rotate(0)"/>
+<text x="0" y="2.24" font-family="Arial" font-size="6.4" fill="#009900" text-anchor="middle" transform="translate(327.5,198.92) rotate(0)">17.3 m</text>
+<line x1="420" y1="205" x2="442" y2="205" stroke="#009900" stroke-width="0.376"/>
+<rect x="-11.703" y="-3.968" width="23.406" height="7.936" fill="#ffffff" fill-opacity="0.85" transform="translate(442,205) rotate(-90)"/>
+<text x="0" y="2.24" font-family="Arial" font-size="6.4" fill="#009900" text-anchor="middle" transform="translate(442,205) rotate(-90)">2.50 m</text>
+<rect x="-22.34" y="-4.608" width="44.68" height="9.216" fill="#ffffff" fill-opacity="0.85" transform="translate(120,205) rotate(0)"/>
+<text x="0" y="2.372" font-family="Arial" font-size="6.776" fill="#000000" text-anchor="middle" transform="translate(120,205) rotate(0)">Treppenhaus</text>
+<!-- legend -->
+<rect x="490" y="20" width="118.934" height="117.037" fill="#ffffff" stroke="#000000" stroke-width="0.361"/>
+<text x="493.614" y="29.246" font-family="Arial" font-size="6.626" fill="#000000">Légende</text>
+<rect x="493.614" y="33.734" width="14.456" height="5.421" fill="#0365dd"/>
+<text x="511.685" y="38.236" font-family="Arial" font-size="5.12" fill="#000000">Résistance au feu EI 60-RF1</text>
+<rect x="493.614" y="42.167" width="14.456" height="5.421" fill="#ffbf00"/>
+<text x="511.685" y="46.669" font-family="Arial" font-size="5.12" fill="#000000">Résistance au feu EI 30</text>
+<rect x="493.614" y="50.6" width="14.456" height="5.421" fill="#fabafc"/>
+<text x="511.685" y="55.102" font-family="Arial" font-size="5.12" fill="#000000">Résistance au feu E 30</text>
+<path d="M493.614 59.032 L508.071 59.032 L508.071 64.454 L493.614 64.454 Z" fill="#009900" fill-opacity="0.65" fill-rule="evenodd" stroke="#009900" stroke-width="0.482" stroke-linejoin="round"/>
+<text x="511.685" y="63.535" font-family="Arial" font-size="5.12" fill="#000000">Voie d'évacuation verticale</text>
+<path d="M493.614 67.465 L508.071 67.465 L508.071 72.887 L493.614 72.887 Z" fill="#cafe96" fill-opacity="0.65" fill-rule="evenodd" stroke="#009900" stroke-width="0.482" stroke-linejoin="round"/>
+<text x="511.685" y="71.968" font-family="Arial" font-size="5.12" fill="#000000">Voie d'évacuation horizontale</text>
+<path d="M493.614 75.898 L508.071 75.898 L508.071 81.32 L493.614 81.32 Z" fill="none" stroke="#9fff7f" stroke-width="0.482" stroke-linejoin="round"/>
+<line x1="506.65" y1="75.898" x2="508.071" y2="77.319" stroke="#9fff7f" stroke-width="0.542"/>
+<line x1="502.391" y1="75.898" x2="507.812" y2="81.32" stroke="#9fff7f" stroke-width="0.542"/>
+<line x1="498.132" y1="75.898" x2="503.553" y2="81.32" stroke="#9fff7f" stroke-width="0.542"/>
+<line x1="493.872" y1="75.898" x2="499.294" y2="81.32" stroke="#9fff7f" stroke-width="0.542"/>
+<line x1="493.614" y1="79.899" x2="495.034" y2="81.32" stroke="#9fff7f" stroke-width="0.542"/>
+<text x="511.685" y="80.401" font-family="Arial" font-size="5.12" fill="#000000">Surface à laisser libre</text>
+<polygon points="497.052,87.961 501.647,87.961 501.647,89.752 504.632,87.042 501.647,84.331 501.647,86.123 497.052,86.123" fill="#009900" stroke="#000000" stroke-width="0.241"/>
+<text x="511.685" y="88.834" font-family="Arial" font-size="5.12" fill="#000000">Sortie de secours</text>
+<polyline points="508.071,97.21 497.68,97.21" fill="none" stroke="#009900" stroke-width="0.587" stroke-linejoin="round"/>
+<polygon points="493.614,97.21 497.68,95.764 497.68,98.655" fill="#009900"/>
+<text x="502.288" y="95.854" font-family="Arial" font-size="4.096" fill="#009900" text-anchor="middle">... m</text>
+<text x="511.685" y="97.267" font-family="Arial" font-size="5.12" fill="#000000">Longueur voie d'évacuation</text>
+<text x="500.842" y="105.7" font-family="Arial" font-size="5.12" fill="#009900" text-anchor="middle">1.20 m</text>
+<text x="511.685" y="105.7" font-family="Arial" font-size="5.12" fill="#000000">Largeur voie d'évacuation</text>
+<polygon points="498.132,115.051 503.553,115.051 503.527,114.52 503.449,113.994 503.32,113.478 503.14,112.977 502.913,112.496 502.639,112.039 502.322,111.612 501.965,111.218 501.571,110.861 501.144,110.544 500.687,110.27 500.206,110.043 499.705,109.864 499.189,109.734 498.663,109.656 498.132,109.63" fill="#ffbf00" stroke="#000000" stroke-width="0.301" stroke-linejoin="round"/>
+<text x="511.685" y="114.133" font-family="Arial" font-size="5.12" fill="#000000">Porte / portail EI 30</text>
+<polygon points="493.614,123.484 496.504,121.069 496.504,122.521 508.071,122.521 508.071,123.484" fill="#fabafc" stroke="#000000" stroke-width="0.301" stroke-linejoin="round"/>
+<text x="511.685" y="122.566" font-family="Arial" font-size="5.12" fill="#000000">Porte coulissante / portail coulissant E 30</text>
+<polyline points="498.132,131.917 498.132,126.496 498.663,126.522 499.189,126.6 499.705,126.729 500.206,126.909 500.687,127.136 501.144,127.41 501.571,127.727 501.965,128.084 502.322,128.478 502.639,128.905 502.913,129.362 503.14,129.843 503.32,130.343 503.449,130.86 503.527,131.386 503.553,131.917" fill="none" stroke="#000000" stroke-width="0.602" stroke-linejoin="round"/>
+<text x="511.685" y="130.999" font-family="Arial" font-size="5.12" fill="#000000">Porte sans résistance au feu</text>
+<!-- /legend -->
+</svg>

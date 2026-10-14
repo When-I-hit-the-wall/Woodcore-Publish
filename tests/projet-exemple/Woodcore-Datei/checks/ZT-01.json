@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "id": "ZT-01",
+  "name": "Zugstab Träger",
+  "label": "Zug im Träger T001 aus der Abspannung",
+  "group": "",
+  "kind": "tension",
+  "position": "T001",
+  "grade": null,
+  "section": null,
+  "moisture_class": null,
+  "impact": false,
+  "alpha": 0,
+  "N": {
+    "value": 25,
+    "unit": "kN"
+  }
+}

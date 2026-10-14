@@ -1,0 +1,55 @@
+{
+  "_source": "SIA 265:2021, Anhang B (normativ), B.1, Tabelle 47 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 98, read off a render of the page.",
+  "_note": "Characteristic values, not design values: what lambda_rel of 4.2.8.4 (equations (32) to (34)) and lambda_rel,m of 4.2.9.3 (equation (42)) read. Anhang B derives them from f_m,k and E_m,mean of Tabelle 8; they are the norm's own figures and govern over footnote 5 of Tabelle 8 (2/3 of E_0,mean for Nadelholz, 5/6 for Laubholz), which gives slightly different numbers (C24: 7333 against 7400). Decimals with a point, the norm's apostrophe thousands separator dropped. Every grade of Tabelle 8 has a row, and no other.",
+  "edition": "SIA 265:2021",
+  "table_47": {
+    "number": "47",
+    "title": "Charakteristische Werte der Druckfestigkeit und 5 %-Fraktilwerte des Elastizitätsmoduls parallel zur Faserrichtung für Vollholz sowie für keilgezinktes Vollholz und Balkenschichtholz aus Nadelholz",
+    "norm": "SIA 265",
+    "norm_ref": "Anhang B",
+    "clause": "B.1",
+    "page": 98,
+    "grades_from": "sia265-2021-tab08-vollholz",
+    "family": "Vollholz",
+    "units": {
+      "f_c_0_k": "N/mm²",
+      "E_0_05": "N/mm²"
+    },
+    "labels": {
+      "f_c_0_k": "Druckfestigkeit parallel zur Faserrichtung",
+      "E_0_05": "E-Modul parallel zur Faserrichtung (5 %-Fraktile)"
+    },
+    "grades": [
+      {
+        "id": "C16",
+        "family": "Vollholz",
+        "f_c_0_k": 17,
+        "E_0_05": 5400
+      },
+      {
+        "id": "C24",
+        "family": "Vollholz",
+        "f_c_0_k": 21,
+        "E_0_05": 7400
+      },
+      {
+        "id": "C30",
+        "family": "Vollholz",
+        "f_c_0_k": 24,
+        "E_0_05": 8000
+      },
+      {
+        "id": "D30",
+        "family": "Vollholz",
+        "f_c_0_k": 24,
+        "E_0_05": 9200
+      }
+    ],
+    "notes": {
+      "1": "Die Werte beziehen sich auf eine Holzfeuchte von 12 %."
+    },
+    "table_notes": [
+      "1"
+    ]
+  }
+}

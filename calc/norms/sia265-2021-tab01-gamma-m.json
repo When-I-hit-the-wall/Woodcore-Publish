@@ -1,0 +1,35 @@
+{
+  "_source": "SIA 265:2021, Tabelle 1 (clause 2.2.5) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 19. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
+  "_note": "gamma_M and eta_M are not given separately: 2.2.5 says so and tabulates their ratio, which is what a design value is divided by. The values for Holzwerkstoffe are SIA 265/1's and are deliberately absent here rather than guessed.",
+  "edition": "SIA 265:2021",
+  "table_1": {
+    "number": "1",
+    "title": "Verhältniswerte gamma_M / eta_M",
+    "norm": "SIA 265",
+    "norm_ref": "2.2.5",
+    "entries": [
+      {
+        "id": "solid",
+        "label": "Bauteile aus Rund- und Vollholz, keilgezinktem Vollholz, Balkenschichtholz",
+        "value": 1.7
+      },
+      {
+        "id": "glulam",
+        "label": "Bauteile aus Brettschichtholz",
+        "value": 1.5
+      },
+      {
+        "id": "connection",
+        "label": "Verbindungen mit Holz, generell",
+        "value": 1.7
+      },
+      {
+        "id": "connection_ductile",
+        "label": "Verbindungen mit Holz, falls Duktilitätsmass Ds >= 3",
+        "value": 1.5,
+        "note": "Duktilitätsmass nach SIA 265 6.1.2.3, Tabelle 20."
+      }
+    ],
+    "elsewhere": "Bauteile und Verbindungen aus Holzwerkstoffen: siehe SIA 265/1."
+  }
+}

@@ -1,0 +1,21 @@
+#!/bin/sh
+# After every commit: a commit that changed VERSION in calc/project.py starts the build of its installer, in the background (packaging/auto_build.py, docs/conventions/build-and-release.md §12).
+# Active once core.hooksPath names this folder: python packaging/auto_build.py install
+# It never fails the commit -- the commit is made before this runs, and every way out of here exits 0 -- and never waits for the build, which is a process of its own.
+
+[ -n "$WOODCORE_NO_AUTOBUILD" ] && exit 0
+[ -f packaging/auto_build.py ] || exit 0
+
+# Cheap first, with no Python started: a commit whose calc/project.py is its first parent's changed no VERSION. A first commit has no parent and goes on.
+if git rev-parse -q --verify "HEAD^" >/dev/null 2>&1; then
+    git diff --quiet "HEAD^" HEAD -- calc/project.py >/dev/null 2>&1 && exit 0
+fi
+
+for py in python python3 py; do
+    if command -v "$py" >/dev/null 2>&1; then
+        "$py" packaging/auto_build.py hook || true
+        exit 0
+    fi
+done
+echo "auto-build: no python on the PATH -- the installer of this version is not built" >&2
+exit 0

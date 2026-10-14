@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-template",
+  "name": "Standard",
+  "description": {
+    "fr": "Le rapport de Woodcore : sept sections qui bouclent sur ce que l'export contient, la page de titre tirée du fichier du projet. Les langues suivent celle du rapport par défaut des paramètres.",
+    "de": "Der Bericht von Woodcore: sieben Abschnitte, die über den Inhalt des Exports laufen, das Titelblatt aus der Projektdatei. Die Sprachen folgen der Standard-Berichtssprache der Einstellungen.",
+    "en": "Woodcore's report: seven sections looping over what the export holds, the title page from the project file. The languages follow the settings' default report language."
+  }
+}

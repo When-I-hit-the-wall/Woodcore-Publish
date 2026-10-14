@@ -1,0 +1,74 @@
+{
+  "schema": "profile-source",
+  "schema_version": "1.0",
+  "id": "PR-01",
+  "unit": "mm",
+  "template": {
+    "kind": "I",
+    "params": {
+      "b": 120.0,
+      "h": 240.0,
+      "t_f": 10.0,
+      "t_w": 6.0
+    }
+  },
+  "parts": [
+    {
+      "name": "Flansch unten links",
+      "y": 0,
+      "z": 0,
+      "b": 57.0,
+      "h": 10.0,
+      "role": "outstand"
+    },
+    {
+      "name": "Flansch unten Mitte",
+      "y": 57.0,
+      "z": 0,
+      "b": 6.0,
+      "h": 10.0,
+      "role": "none"
+    },
+    {
+      "name": "Flansch unten rechts",
+      "y": 63.0,
+      "z": 0,
+      "b": 57.0,
+      "h": 10.0,
+      "role": "outstand"
+    },
+    {
+      "name": "Steg",
+      "y": 57.0,
+      "z": 10.0,
+      "b": 6.0,
+      "h": 220.0,
+      "role": "internal"
+    },
+    {
+      "name": "Flansch oben links",
+      "y": 0,
+      "z": 230.0,
+      "b": 57.0,
+      "h": 10.0,
+      "role": "outstand"
+    },
+    {
+      "name": "Flansch oben Mitte",
+      "y": 57.0,
+      "z": 230.0,
+      "b": 6.0,
+      "h": 10.0,
+      "role": "none"
+    },
+    {
+      "name": "Flansch oben rechts",
+      "y": 63.0,
+      "z": 230.0,
+      "b": 57.0,
+      "h": 10.0,
+      "role": "outstand"
+    }
+  ],
+  "name": "Geschweisster Träger"
+}

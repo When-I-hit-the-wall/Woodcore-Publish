@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-156.746 -528.52 1399.986 1136.66" width="209.998mm" height="170.499mm">
+<rect x="-156.746" y="-528.52" width="1399.986" height="1136.66" fill="#ffffff"/>
+<!-- highlight -->
+<line x1="0" y1="0" x2="1000" y2="0" stroke="#1f1f1f" stroke-width="24.035" stroke-linecap="round"/>
+<line x1="1000" y1="-109.2" x2="1000" y2="109.2" stroke="#1f1f1f" stroke-width="14.63" stroke-linecap="round"/>
+<line x1="1000" y1="-93.6" x2="1050.4" y2="-144" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="-62.4" x2="1050.4" y2="-112.8" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="-31.2" x2="1050.4" y2="-81.6" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="0" x2="1050.4" y2="-50.4" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="31.2" x2="1050.4" y2="-19.2" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="62.4" x2="1050.4" y2="12" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<line x1="1000" y1="93.6" x2="1050.4" y2="43.2" stroke="#1f1f1f" stroke-width="9.405" stroke-linecap="round"/>
+<!-- dims -->
+<line x1="0" y1="345" x2="0" y2="485.08" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<line x1="1000" y1="345" x2="1000" y2="485.08" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<line x1="0" y1="460" x2="1000" y2="460" stroke="#1f1f1f" stroke-width="7.315" stroke-linecap="butt"/>
+<polygon points="0,460 45.98,471.495 45.98,448.505" fill="#1f1f1f"/>
+<polygon points="1000,460 954.02,448.505 954.02,471.495" fill="#1f1f1f"/>
+<!-- /dims -->
+<!-- loads -->
+<line x1="0" y1="-376.2" x2="0" y2="-66.88" stroke="#c0392b" stroke-width="15.675" stroke-linecap="butt"/>
+<polygon points="0,0 -24.035,-66.88 24.035,-66.88" fill="#c0392b"/>
+<!-- /loads -->
+<!-- dims -->
+<rect x="423.133" y="472.54" width="153.734" height="81.36" fill="#ffffff"/>
+<text x="432.173" y="532.204" font-family="Arial" font-size="54.24" text-anchor="start" font-weight="bold" fill="#1f1f1f">0.5 m</text>
+<!-- /dims -->
+<!-- loads -->
+<rect x="-102.506" y="-474.28" width="205.013" height="81.36" fill="#ffffff"/>
+<text x="-93.466" y="-414.616" font-family="Arial" font-size="54.24" text-anchor="start" font-weight="bold" fill="#1f1f1f">0.55 kN</text>
+<!-- /loads -->
+</svg>

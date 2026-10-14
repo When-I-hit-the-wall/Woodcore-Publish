@@ -1,0 +1,327 @@
+{
+  "_source": "SIA 261:2020 (Einwirkungen auf Tragwerke), Anhang A (normativ) «Raumlasten, Flächenlasten und Schüttwinkel» -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA261-2020-DE.pdf p. 78, read off a render of the page: the PDF's text layer interleaves the table's two columns. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
+  "_note": "One row per line of the table that carries a value, in the order the norm prints them, the left column first. `group` is the heading a line is indented under (null for a line at the top level), `subgroup` a second heading under it (only «Holz in Scheitern» in Tabelle 30). `id` is the group and the name made ASCII, for a lookup by code; `name` is the norm's own wording. Decimals are written the way the report prints them (78.5), not the norm's comma.",
+  "edition": "SIA 261:2020",
+  "table_30": {
+    "number": "30",
+    "title": "Raumlasten und Schüttwinkel von Erdauflasten, Gleisschotter und Lagergütern",
+    "norm": "SIA 261",
+    "norm_ref": "Anhang A",
+    "units": {
+      "raumlast": "kN/m³",
+      "schuettwinkel": "°"
+    },
+    "labels": {
+      "name": "Stoff",
+      "raumlast": "Raumlast",
+      "schuettwinkel": "Schüttwinkel"
+    },
+    "rows": [
+      {
+        "id": "erdauflasten_und_gleisschotter_sand",
+        "group": "Erdauflasten und Gleisschotter",
+        "subgroup": null,
+        "name": "Sand",
+        "raumlast": 15,
+        "schuettwinkel": 35
+      },
+      {
+        "id": "erdauflasten_und_gleisschotter_kiessand_gemischt",
+        "group": "Erdauflasten und Gleisschotter",
+        "subgroup": null,
+        "name": "Kiessand, gemischt",
+        "raumlast": 20,
+        "schuettwinkel": 27
+      },
+      {
+        "id": "erdauflasten_und_gleisschotter_schotter_gebrochen",
+        "group": "Erdauflasten und Gleisschotter",
+        "subgroup": null,
+        "name": "Schotter, gebrochen",
+        "raumlast": 18,
+        "schuettwinkel": 35
+      },
+      {
+        "id": "erdauflasten_und_gleisschotter_erde_trocken",
+        "group": "Erdauflasten und Gleisschotter",
+        "subgroup": null,
+        "name": "Erde, trocken",
+        "raumlast": 16,
+        "schuettwinkel": [
+          40,
+          45
+        ]
+      },
+      {
+        "id": "erdauflasten_und_gleisschotter_erde_nass",
+        "group": "Erdauflasten und Gleisschotter",
+        "subgroup": null,
+        "name": "Erde, nass",
+        "raumlast": 21,
+        "schuettwinkel": [
+          20,
+          25
+        ]
+      },
+      {
+        "id": "erdauflasten_und_gleisschotter_bauschutt_im_mittel",
+        "group": "Erdauflasten und Gleisschotter",
+        "subgroup": null,
+        "name": "Bauschutt (im Mittel)",
+        "raumlast": 14,
+        "schuettwinkel": [
+          30,
+          35
+        ]
+      },
+      {
+        "id": "brennstoffe_steinkohle",
+        "group": "Brennstoffe",
+        "subgroup": null,
+        "name": "Steinkohle",
+        "raumlast": 9,
+        "schuettwinkel": 35
+      },
+      {
+        "id": "brennstoffe_briketts_geschuettet",
+        "group": "Brennstoffe",
+        "subgroup": null,
+        "name": "Briketts, geschüttet",
+        "raumlast": 9,
+        "schuettwinkel": 30
+      },
+      {
+        "id": "brennstoffe_briketts_gestapelt",
+        "group": "Brennstoffe",
+        "subgroup": null,
+        "name": "Briketts, gestapelt",
+        "raumlast": 13.5,
+        "schuettwinkel": null
+      },
+      {
+        "id": "brennstoffe_koks_geschuettet",
+        "group": "Brennstoffe",
+        "subgroup": null,
+        "name": "Koks, geschüttet",
+        "raumlast": 5,
+        "schuettwinkel": null
+      },
+      {
+        "id": "brennstoffe_holz_in_scheitern_nadelholz_trocken",
+        "group": "Brennstoffe",
+        "subgroup": "Holz in Scheitern",
+        "name": "Nadelholz, trocken",
+        "raumlast": 4.4,
+        "schuettwinkel": 45
+      },
+      {
+        "id": "brennstoffe_holz_in_scheitern_nadelholz_nass",
+        "group": "Brennstoffe",
+        "subgroup": "Holz in Scheitern",
+        "name": "Nadelholz, nass",
+        "raumlast": 6.5,
+        "schuettwinkel": 45
+      },
+      {
+        "id": "brennstoffe_holz_in_scheitern_laubholz_trocken",
+        "group": "Brennstoffe",
+        "subgroup": "Holz in Scheitern",
+        "name": "Laubholz, trocken",
+        "raumlast": 7,
+        "schuettwinkel": 45
+      },
+      {
+        "id": "brennstoffe_holz_in_scheitern_laubholz_nass",
+        "group": "Brennstoffe",
+        "subgroup": "Holz in Scheitern",
+        "name": "Laubholz, nass",
+        "raumlast": 10,
+        "schuettwinkel": 45
+      },
+      {
+        "id": "brennstoffe_holzspaene_geschuettet",
+        "group": "Brennstoffe",
+        "subgroup": null,
+        "name": "Holzspäne, geschüttet",
+        "raumlast": 1.5,
+        "schuettwinkel": 25
+      },
+      {
+        "id": "brennstoffe_holzspaene_gut_gepresst",
+        "group": "Brennstoffe",
+        "subgroup": null,
+        "name": "Holzspäne, gut gepresst",
+        "raumlast": 2.5,
+        "schuettwinkel": 45
+      },
+      {
+        "id": "bindemittel_hydraulischer_kalk",
+        "group": "Bindemittel",
+        "subgroup": null,
+        "name": "Hydraulischer Kalk",
+        "raumlast": 12,
+        "schuettwinkel": 25
+      },
+      {
+        "id": "bindemittel_zement_im_silo",
+        "group": "Bindemittel",
+        "subgroup": null,
+        "name": "Zement im Silo",
+        "raumlast": 16,
+        "schuettwinkel": 30
+      },
+      {
+        "id": "bindemittel_zement_in_saecken",
+        "group": "Bindemittel",
+        "subgroup": null,
+        "name": "Zement in Säcken",
+        "raumlast": 12,
+        "schuettwinkel": null
+      },
+      {
+        "id": "bindemittel_zementklinker_geschuettet",
+        "group": "Bindemittel",
+        "subgroup": null,
+        "name": "Zementklinker, geschüttet",
+        "raumlast": 17,
+        "schuettwinkel": 30
+      },
+      {
+        "id": "fluessige_stoffe_benzin",
+        "group": "Flüssige Stoffe",
+        "subgroup": null,
+        "name": "Benzin",
+        "raumlast": 7.3,
+        "schuettwinkel": null
+      },
+      {
+        "id": "fluessige_stoffe_petrol_diesel_und_heizoel",
+        "group": "Flüssige Stoffe",
+        "subgroup": null,
+        "name": "Petrol-, Diesel- und Heizöl",
+        "raumlast": 8.5,
+        "schuettwinkel": null
+      },
+      {
+        "id": "fluessige_stoffe_steinkohleteer_bitumen",
+        "group": "Flüssige Stoffe",
+        "subgroup": null,
+        "name": "Steinkohleteer, Bitumen",
+        "raumlast": 12,
+        "schuettwinkel": null
+      },
+      {
+        "id": "fluessige_stoffe_mineralschmieroel",
+        "group": "Flüssige Stoffe",
+        "subgroup": null,
+        "name": "Mineralschmieröl",
+        "raumlast": 9.2,
+        "schuettwinkel": null
+      },
+      {
+        "id": "fluessige_stoffe_pflanzenoel",
+        "group": "Flüssige Stoffe",
+        "subgroup": null,
+        "name": "Pflanzenöl",
+        "raumlast": 9.5,
+        "schuettwinkel": null
+      },
+      {
+        "id": "papier_buecher_auf_gestellen",
+        "group": "Papier",
+        "subgroup": null,
+        "name": "Bücher auf Gestellen",
+        "raumlast": 6,
+        "schuettwinkel": null
+      },
+      {
+        "id": "papier_papier_geschichtet",
+        "group": "Papier",
+        "subgroup": null,
+        "name": "Papier, geschichtet",
+        "raumlast": 11,
+        "schuettwinkel": null
+      },
+      {
+        "id": "papier_papier_in_rollen",
+        "group": "Papier",
+        "subgroup": null,
+        "name": "Papier, in Rollen",
+        "raumlast": 15,
+        "schuettwinkel": null
+      },
+      {
+        "id": "futtermittel_getreide_geschuettet",
+        "group": "Futtermittel",
+        "subgroup": null,
+        "name": "Getreide, geschüttet",
+        "raumlast": 7.5,
+        "schuettwinkel": 30
+      },
+      {
+        "id": "futtermittel_kartoffeln_zuckerrueben",
+        "group": "Futtermittel",
+        "subgroup": null,
+        "name": "Kartoffeln, Zuckerrüben",
+        "raumlast": 7,
+        "schuettwinkel": 30
+      },
+      {
+        "id": "futtermittel_heu_und_stroh_geschuettet",
+        "group": "Futtermittel",
+        "subgroup": null,
+        "name": "Heu und Stroh, geschüttet",
+        "raumlast": 1.5,
+        "schuettwinkel": null
+      },
+      {
+        "id": "futtermittel_gruenfutter_geschuettet",
+        "group": "Futtermittel",
+        "subgroup": null,
+        "name": "Grünfutter, geschüttet",
+        "raumlast": 3.5,
+        "schuettwinkel": null
+      },
+      {
+        "id": "stallmist_verrottet",
+        "group": null,
+        "subgroup": null,
+        "name": "Stallmist, verrottet",
+        "raumlast": 9.5,
+        "schuettwinkel": null
+      },
+      {
+        "id": "nahrungsmittel_mehl_geschuettet",
+        "group": "Nahrungsmittel",
+        "subgroup": null,
+        "name": "Mehl, geschüttet",
+        "raumlast": 6,
+        "schuettwinkel": 35
+      },
+      {
+        "id": "nahrungsmittel_zucker_geschuettet",
+        "group": "Nahrungsmittel",
+        "subgroup": null,
+        "name": "Zucker, geschüttet",
+        "raumlast": 9.5,
+        "schuettwinkel": 35
+      },
+      {
+        "id": "nahrungsmittel_salz_geschuettet",
+        "group": "Nahrungsmittel",
+        "subgroup": null,
+        "name": "Salz, geschüttet",
+        "raumlast": 12,
+        "schuettwinkel": 40
+      },
+      {
+        "id": "nahrungsmittel_salz_in_saecken",
+        "group": "Nahrungsmittel",
+        "subgroup": null,
+        "name": "Salz, in Säcken",
+        "raumlast": 10,
+        "schuettwinkel": null
+      }
+    ]
+  }
+}

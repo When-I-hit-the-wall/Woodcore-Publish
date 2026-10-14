@@ -1,0 +1,90 @@
+%PDF-1.7
+%‚„œ”
+1 0 obj
+<<
+/Producer (pypdf)
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Count 1
+/Kids [ 4 0 R ]
+>>
+endobj
+3 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+4 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 5 0 R
+>>
+>>
+/MediaBox [ 50 147.89 545 405.89 ]
+/Contents 6 0 R
+/CropBox [ 50 147.89 545 405.89 ]
+/Parent 2 0 R
+>>
+endobj
+5 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+>>
+endobj
+6 0 obj
+<<
+/Length 1375
+>>
+stream
+BT /F1 12 Tf 60 767.89 Td (2 RÈsultats) Tj ET
+BT /F1 12 Tf 60 727.89 Td (2.1 CO1: Efforts internes N) Tj ET
+0.2 0.4 0.8 RG 1 w 60 491.89 470 220 re S
+BT /F1 9 Tf 70 691.89 Td (diagram of CO1: Efforts internes N) Tj ET
+0.85 0.45 0.1 RG 2 w 110 631.89 m 480 631.89 l S
+0.1 0.6 0.2 rg 102 617.89 m 118 617.89 l 110 631.89 l f
+0.1 0.6 0.2 rg 287 617.89 m 303 617.89 l 295 631.89 l f
+0.1 0.6 0.2 rg 472 617.89 m 488 617.89 l 480 631.89 l f
+0.9 0.4 0.4 rg 0.6 0.2 0.2 RG 0.8 w 110 631.89 m 150 541.89 255 541.89 295 631.89 c 335 541.89 440 541.89 480 631.89 c h B
+0.4 0.55 0.8 rg 270 631.89 m 295 676.89 l 320 631.89 l h f
+0 0 0 rg BT /F1 8 Tf 185 556.89 Td (708.32) Tj ET
+BT /F1 8 Tf 282 681.89 Td (-979.26) Tj ET
+BT /F1 12 Tf 60 387.89 Td (2.2 CO1: Efforts internes M_y) Tj ET
+0.2 0.4 0.8 RG 1 w 60 151.89 470 220 re S
+BT /F1 9 Tf 70 351.89 Td (diagram of CO1: Efforts internes M_y) Tj ET
+0.85 0.45 0.1 RG 2 w 110 291.89 m 480 291.89 l S
+0.1 0.6 0.2 rg 102 277.89 m 118 277.89 l 110 291.89 l f
+0.1 0.6 0.2 rg 287 277.89 m 303 277.89 l 295 291.89 l f
+0.1 0.6 0.2 rg 472 277.89 m 488 277.89 l 480 291.89 l f
+0.9 0.4 0.4 rg 0.6 0.2 0.2 RG 0.8 w 110 291.89 m 150 201.89 255 201.89 295 291.89 c 335 201.89 440 201.89 480 291.89 c h B
+0.4 0.55 0.8 rg 270 291.89 m 295 336.89 l 320 291.89 l h f
+0 0 0 rg BT /F1 8 Tf 185 216.89 Td (708.32) Tj ET
+BT /F1 8 Tf 282 341.89 Td (-979.26) Tj ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000015 00000 n 
+0000000054 00000 n 
+0000000113 00000 n 
+0000000162 00000 n 
+0000000333 00000 n 
+0000000430 00000 n 
+trailer
+<<
+/Size 7
+/Root 3 0 R
+/Info 1 0 R
+>>
+startxref
+1857
+%%EOF

@@ -1,0 +1,12 @@
+# Every text file is checked out in LF, as the repository holds it, whatever the machine's core.autocrlf (issue #24). Git for Windows sets autocrlf for every repository, so a clone on Windows came out in CRLF: the templates a new project is made from, the example project the tests work on and the installer built from that checkout were CRLF, and some forty tests that hold a file LF failed on that machine alone.
+* text=auto eol=lf
+# Files git must never touch the line endings of (v0.82). A PDF written by pypdf holds no NUL byte, so git would take it for text: converted, its cross-reference offsets would no longer point at its objects.
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.xlsx  binary
+*.xlsm  binary
+*.zip   binary
+# cmd.exe reads a batch file line by line and wants CRLF.
+*.bat   text eol=crlf

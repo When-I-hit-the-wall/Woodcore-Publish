@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Steel check (source)",
+  "description": "Woodcore-Datei/steel/<id>.json -- one steel check of Woodcore's «Acier» tabs (issues #50-#52, spec 2026-10-12-section-acier D-12; docs/domain/steel.md). Read and checked by calc/domains/steel_check.py (`check_source`), resolved against the positions and the free profiles at the export, computed there, and written into data/steel.json. 1.1 adds `links` (a field following a variable of the export).",
+  "type": "object",
+  "required": ["schema_version", "id", "kind"],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["1.0", "1.1"]},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.+-]*$", "description": "The file's name."},
+    "name": {"type": "string"},
+    "label": {"type": "string"},
+    "group": {"type": "string", "description": "The folder of the tab's left pane."},
+    "kind": {
+      "type": "string",
+      "enum": ["class", "tension", "compression", "bending", "shear", "buckling", "lateral-torsional", "interaction", "bolts", "welds", "splice"],
+      "description": "The check: class, tension, compression, bending and shear are built (lot 1); the others are refused as not implemented yet."
+    },
+    "position": {"type": ["string", "null"], "description": "The position the check follows, or null."},
+    "profile": {
+      "type": ["object", "null"],
+      "description": "null follows the position's section; else the profile stated: an SZS C5 code and its size («IPE», «360») or USR and a free profile's id.",
+      "required": ["type", "dimension"],
+      "properties": {"type": {"type": "string"}, "dimension": {"type": "string"}}
+    },
+    "grade": {"type": ["string", "null"], "description": "null follows the position's strength class; else a grade of SIA 263 Tabelle 1."},
+    "N": {"$ref": "#/definitions/force", "description": "The normal force, tension positive."},
+    "V_z": {"$ref": "#/definitions/force"},
+    "V_y": {"$ref": "#/definitions/force"},
+    "M_y": {"$ref": "#/definitions/moment"},
+    "M_z": {"$ref": "#/definitions/moment"},
+    "A_net": {"type": ["number", "null"], "exclusiveMinimum": 0, "description": "A tension's net area in mm², SIA 263 (39); null: the gross section only."},
+    "links": {"type": "object", "description": "1.1: the fields that follow a variable (docs/domain/variable-links.md)."}
+  },
+  "definitions": {
+    "force": {
+      "type": ["object", "null"],
+      "required": ["value", "unit"],
+      "properties": {"value": {"type": "number"}, "unit": {"enum": ["kN", "N", "MN"]}}
+    },
+    "moment": {
+      "type": ["object", "null"],
+      "required": ["value", "unit"],
+      "properties": {"value": {"type": "number"}, "unit": {"enum": ["kNm", "Nm", "MNm"]}}
+    }
+  }
+}

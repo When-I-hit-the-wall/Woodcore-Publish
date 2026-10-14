@@ -1,0 +1,6 @@
+# What builds Woodcore's installed program, and nothing the report itself needs (packaging/build.py, docs/conventions/build-and-release.md §12, v0.83).
+#
+# Installed by build.py into an environment of its own, %LOCALAPPDATA%\Woodcore\build\venv, beside requirements.txt and nothing else -- so PyInstaller never lands in the report's own interpreter, and what is frozen is exactly what the two files pin. Pinned exactly, as requirements.txt is: a build made again later is made the same way.
+#
+# Inno Setup 6, which writes the installer, is a program and not a package: winget install --id JRSoftware.InnoSetup -e --scope user
+pyinstaller==6.22.3

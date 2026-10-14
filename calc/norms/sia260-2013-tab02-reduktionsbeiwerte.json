@@ -1,0 +1,47 @@
+{
+  "_source": "SIA 260:2013 (Grundlagen der Projektierung von Tragwerken), Anhang A (normativ) «Gebäude», Tabelle 2 «Reduktionsbeiwerte für Gebäude», printed p. 33 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA260-2013-DE.pdf, read as text and checked against a render of the page; the French (Tableau 2 «Coefficients de réduction pour les bâtiments») and English (Table 2 «Reduction factors for buildings») editions, SIA260-2013-FR.pdf and -EN.pdf p. 33, print the same thirty-nine cells (thirty-six numbers and the three snow formulas). The meaning of ψ0, ψ1 and ψ2 is the norm's own: 1.2.4 (p. 18) for the symbols and 3.2.3.2 to 3.2.3.4 (p. 23) for the values they scale. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json): every module that needs them reads this file, none restates them.",
+  "_note": "Decimals are written the way the report prints them (0.7, not the norm's comma); a 0 the norm prints as a bare 0 is a 0, and category E's 1.0 is the norm's own «1,0». The table carries no footnote. ⚠️ **Snow is a formula and not a number**: the norm prints «1 – 60/h0», «1 – 250/h0» and «1 – 1000/h0», so the three cells are transcribed as printed (`printed`), as the same formula in Typst-neutral text (`formula`) and as the one constant that differs between them (`c`) -- and nothing here evaluates them. h0 is «Bezugshöhe gemäss der Norm SIA 261» (SIA 260 1.2.2, p. 17), in m (SIA 261 5.2.6, Anhang D): the `h_ref` of the snow-load calculation (docs/domain/loads.md §3.3bis). The norm gives no lower bound for h0, and the cells turn negative well inside Switzerland: ψ0 below 60 m, ψ1 below 250 m, ψ2 below 1000 m (h0 = 500 m gives ψ2 = −1.0). The cells stay as the norm prints them; the reading retained for the load combinations to come is max(0, 1 − c/h0) -- the Belastungsannahmen workbook's (its Dropdowns!C82:E82), not a rule of SIA 260 -- and whatever evaluates them clamps there and says so (spec 2026-10-12-audit-issues-47-48-49, REQ-005). ⚠️ **Which category is which**: SIA 260 names the categories A to H, SIA 261 Tabelle 8 subdivides A (A1 to A3) and C (C1 to C3); a subcategory takes its category's factors (`sia260.live_load_row`), which is the engineer's reading and the practice, the norm stating no other. `group` is the heading the table sets a row under (null for a row of its own); `defined_in` names the clauses that define a symbol.",
+  "edition": "SIA 260:2013",
+  "table_2": {
+    "number": "2",
+    "title": "Reduktionsbeiwerte für Gebäude",
+    "norm": "SIA 260",
+    "norm_ref": "Tabelle 2",
+    "annex": "Anhang A",
+    "symbols": {
+      "psi_0": {
+        "label": "Reduktionsbeiwert für den seltenen Wert einer veränderlichen Einwirkung",
+        "defined_in": ["1.2.4", "3.2.3.2"]
+      },
+      "psi_1": {
+        "label": "Reduktionsbeiwert für den häufigen Wert einer veränderlichen Einwirkung",
+        "defined_in": ["1.2.4", "3.2.3.3"]
+      },
+      "psi_2": {
+        "label": "Reduktionsbeiwert für den quasi-ständigen Wert einer veränderlichen Einwirkung",
+        "defined_in": ["1.2.4", "3.2.3.4"]
+      }
+    },
+    "rows": [
+      {"id": "A", "group": "Nutzlasten in Gebäuden", "name": "Wohnflächen", "psi_0": 0.7, "psi_1": 0.5, "psi_2": 0.3},
+      {"id": "B", "group": "Nutzlasten in Gebäuden", "name": "Büroflächen", "psi_0": 0.7, "psi_1": 0.5, "psi_2": 0.3},
+      {"id": "C", "group": "Nutzlasten in Gebäuden", "name": "Versammlungsräume", "psi_0": 0.7, "psi_1": 0.7, "psi_2": 0.6},
+      {"id": "D", "group": "Nutzlasten in Gebäuden", "name": "Verkaufsflächen", "psi_0": 0.7, "psi_1": 0.7, "psi_2": 0.6},
+      {"id": "E", "group": "Nutzlasten in Gebäuden", "name": "Lagerflächen", "psi_0": 1.0, "psi_1": 0.9, "psi_2": 0.8},
+      {"id": "F", "group": "Verkehrslasten in Gebäuden", "name": "Fahrzeuge unter 3.5 t", "psi_0": 0.7, "psi_1": 0.7, "psi_2": 0.6},
+      {"id": "G", "group": "Verkehrslasten in Gebäuden", "name": "Fahrzeuge von 3.5 bis 16 t", "psi_0": 0.7, "psi_1": 0.5, "psi_2": 0.3},
+      {"id": "H", "group": "Verkehrslasten in Gebäuden", "name": "Dächer", "psi_0": 0, "psi_1": 0, "psi_2": 0},
+      {
+        "id": "snow", "group": null, "name": "Schneelasten",
+        "variable": {"symbol": "h_0", "name": "Bezugshöhe gemäss der Norm SIA 261", "unit": "m", "norm": "SIA 261", "norm_ref": "Anhang D"},
+        "psi_0": {"printed": "1 – 60/h0", "formula": "1 - 60 / h_0", "c": 60},
+        "psi_1": {"printed": "1 – 250/h0", "formula": "1 - 250 / h_0", "c": 250},
+        "psi_2": {"printed": "1 – 1000/h0", "formula": "1 - 1000 / h_0", "c": 1000}
+      },
+      {"id": "wind", "group": null, "name": "Windkräfte", "psi_0": 0.6, "psi_1": 0.5, "psi_2": 0},
+      {"id": "temperature", "group": null, "name": "Temperatureinwirkungen", "psi_0": 0.6, "psi_1": 0.5, "psi_2": 0},
+      {"id": "earth-pressure", "group": "Einwirkungen aus dem Baugrund", "name": "Erddruck", "psi_0": 0.7, "psi_1": 0.7, "psi_2": 0.7},
+      {"id": "water-pressure", "group": "Einwirkungen aus dem Baugrund", "name": "Wasserdruck", "psi_0": 0.7, "psi_1": 0.7, "psi_2": 0.7}
+    ]
+  }
+}

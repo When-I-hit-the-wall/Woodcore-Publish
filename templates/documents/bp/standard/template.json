@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-document-template",
+  "mode": "bp",
+  "name": {
+    "fr": "Base de projet — standard",
+    "de": "Projektbasis — Standard",
+    "en": "Basis of design — standard"
+  },
+  "description": {
+    "fr": "Base de projet complète selon SIA 260 : 18 chapitres et 72 sections, dont 66 imprimées par défaut, du concept structural à la protection contre le bruit. Les charges utiles et 16 autres sections sont partagées avec la convention d'utilisation.",
+    "de": "Vollständige Projektbasis nach SIA 260: 18 Kapitel und 72 Abschnitte, davon 66 standardmässig gedruckt, vom Tragwerkskonzept bis zum Schallschutz. Die Nutzlasten und 16 weitere Abschnitte sind mit der Nutzungsvereinbarung geteilt.",
+    "en": "Complete basis of design in accordance with SIA 260: 18 chapters and 72 sections, 66 of them printed by default, from the structural concept to noise protection. The live loads and 16 other sections are shared with the service criteria agreement."
+  },
+  "languages": [
+    "fr",
+    "de",
+    "en"
+  ]
+}

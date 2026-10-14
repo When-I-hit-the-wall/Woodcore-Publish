@@ -1,0 +1,168 @@
+# Woodcore reference documentation — index
+
+This folder is the project's reference. It was CLAUDE.md until 2026-10-07 (v0.117), when that file reached 1.5 MB and was split by domain: every section was moved **verbatim**, and keeps its § number as a stable anchor. Code comments cite a section as `docs/<file>.md §<n>`; older texts (CHANGELOG.md, 000-Audits/) cite `CLAUDE.md §<n>` — the table at the bottom resolves either.
+
+**Read only what the task needs.** Start from the file whose purpose matches, and `grep` the large ones (decisions, status notes) rather than reading them whole; `tests/test_docs_coherence.py` holds every file here under 100 KB but `decisions.md`, every `docs/<file>.md §<n>` to a section that exists and every file to a row of this index. Every file opens with one line saying what it covers.
+
+Specifications of work in progress are in [`requirements/`](requirements/README.md).
+
+## Project and conventions
+
+| File | Sections | Covers | Size |
+|---|---|---|---|
+| [`project/purpose.md`](project/purpose.md) | §1, §1bis | What Woodcore is for, and why Typst + Python + JSON + Excel rather than a web app. | 2 KB |
+| [`conventions/writing.md`](conventions/writing.md) | §1ter | Prose is not hard-wrapped: one paragraph is one line, in every file. | 1 KB |
+| [`conventions/testing.md`](conventions/testing.md) | §11ter | tests/, how to prepare a machine and run them, pinned versions of Python, Typst and packages. | 18 KB |
+| [`conventions/testing-catalogue.md`](conventions/testing-catalogue.md) | §11ter | What each test file guards: the engine, the norms, the documents, the build. | 84 KB |
+| [`conventions/testing-catalogue-window.md`](conventions/testing-catalogue-window.md) | §11ter | What each test file of the window guards, built off-screen. | 41 KB |
+| [`conventions/build-and-release.md`](conventions/build-and-release.md) | §12 | woodcore-cli, the engine copy, archives, new projects, migration, installer, publishing, website. | 53 KB |
+| [`conventions/changelog-and-commits.md`](conventions/changelog-and-commits.md) | §15 | Where the journal lives and what every commit must carry. | 2 KB |
+
+## Architecture
+
+| File | Sections | Covers | Size |
+|---|---|---|---|
+| [`architecture/principles.md`](architecture/principles.md) | §2 | The pipeline Excel -> Python -> JSON -> Typst, and the 16 design rules every change must respect. | 12 KB |
+| [`architecture/data-contracts.md`](architecture/data-contracts.md) | §3, §3.0, §3.1, §3.2, §3.4, §3.6, §3.7 | JSON schemas, the position record, validation levels, the three detail levels. | 9 KB |
+| [`architecture/layout.md`](architecture/layout.md) | §11 | The folders of the program, of a project, and of calc/. | 48 KB |
+| [`architecture/reference-library.md`](architecture/reference-library.md) | §11bis | Norms and literature beside the program; values are read from the norm itself. | 8 KB |
+| [`architecture/figure-style.md`](architecture/figure-style.md) | §3.3quaterdecies | The three factors a figure is drawn with, and an entry's own over them. | 5 KB |
+| [`architecture/performance.md`](architecture/performance.md) | — | What the start, the window's build, `rebuild()` and the export cost, measured before and after each change (`tests/perf_startup.py`), and the causes found. | 6 KB |
+
+## Domain (what Woodcore calculates and draws)
+
+| File | Sections | Covers | Size |
+|---|---|---|---|
+| [`domain/calculation-domains.md`](domain/calculation-domains.md) | §3.3 | How a load is a domain whose instances are Excel sheets; tables, results, groups, headings. | 23 KB |
+| [`domain/loads.md`](domain/loads.md) | §3.3bis, §3.3ter, §3.3quater, §3.3septies, §3.5, §8 | The four load domains, load combinations and why no load is linked to a position. | 28 KB |
+| [`domain/positions.md`](domain/positions.md) | §7 | Positions are Woodcore's own data: type, material, section, moisture class. | 12 KB |
+| [`domain/connectors.md`](domain/connectors.md) | §3.3nonies, §7bis | A connector file and its SIA 265 6.2.1 shear resistance; the descriptive keys. | 29 KB |
+| [`domain/connections.md`](domain/connections.md) | §3.3quinquies | A connection drawn on a schema; geometry in Python, forces distributed in Typst. | 24 KB |
+| [`domain/detail-schemas.md`](domain/detail-schemas.md) | §3.3decies | The one drawing of a connection detail, modified and consumed by connectors and polar moments. | 25 KB |
+| [`domain/member-checks.md`](domain/member-checks.md) | §3.3undecies, §3.3septdecies, §3.3unvicies | #member and the verify-* commands, and checks saved in Woodcore (the keyword lines of §3.3septdecies were retired in 0.117: archive/formules-dsl/). | 25 KB |
+| [`domain/position-plans.md`](domain/position-plans.md) | §3.3sexies | Plans drawn over the architect's plan: source, export, Typst, types, load symbols, superposition, sheets. | 22 KB |
+| [`domain/fire-plans.md`](domain/fire-plans.md) | §3.3vicies | A second kind of plan on the same documents and engine. | 9 KB |
+| [`domain/static-models.md`](domain/static-models.md) | §3.3octies | Static systems drawn in Woodcore and exported as figures; nothing solved. | 23 KB |
+| [`domain/documents.md`](domain/documents.md) | §3.3octodecies | Structure, tags and objects, sharing and sync, imports, previews, content and layout templates. | 46 KB |
+| [`domain/annexes.md`](domain/annexes.md) | §3.3undevicies | External PDFs, excerpts anchored on bookmarks, and the annexes that close a document. | 10 KB |
+| [`domain/journal.md`](domain/journal.md) | §3.3terdecies | One journal per document, written by hand in Woodcore, printed by show-journal. | 12 KB |
+| [`domain/scripts.md`](domain/scripts.md) | §3.3sexdecies | Python the engineer writes, run by Woodcore, whose named results the report reads. | 6 KB |
+| [`domain/fire-resistance.md`](domain/fire-resistance.md) | §3.3tervicies | Member checks in the design situation fire (SIA 265 4.5.2), the fire resistance VKF 15-15 requires, and the comparison with the reference workbooks and the AEAI directives. | 10 KB |
+| [`domain/steel.md`](domain/steel.md) | §3.3quatervicies | Steel profiles (SZS C5 tables, free profiles), the section class and the member checks of SIA 263:2013, computed once in Python. | 7 KB |
+| [`domain/variable-links.md`](domain/variable-links.md) | §3.3duovicies, §3.3duovicies-bis | A field of the window that follows a variable of the export: its shape, units, resolution, versions and what it may name; a text placed on a drawing and the variables it prints. | 14 KB |
+
+## Typst report engine
+
+| File | Sections | Covers | Size |
+|---|---|---|---|
+| [`typst/report-engine.md`](typst/report-engine.md) | §4, §5, §6, §6bis, §9 | Global level with local override, the calc-block, the get-* abstraction, input descriptions. | 10 KB |
+| [`typst/formulas.md`](typst/formulas.md) | §10quinquies | The registry, var-domain, val, var-line, units, verify, levels, stacked formulas. | 45 KB |
+| [`typst/language.md`](typst/language.md) | §4bis | Document language vs engine language, the glossary, figures per language. | 18 KB |
+| [`typst/citations.md`](typst/citations.md) | §10 | Systematic norm citations, registration and show-bibliography. | 6 KB |
+| [`typst/api-conventions.md`](typst/api-conventions.md) | §10bis | /// doc comments, call shapes, one import, and the reference table of every command. | 77 KB |
+| [`typst/command-docs.md`](typst/command-docs.md) | §10sexies | Every command documented and exemplified; examples frozen and pre-rendered. | 22 KB |
+| [`typst/reference-workbook.md`](typst/reference-workbook.md) | §10ter | docs/typst-reference.xlsx and the call_* functions that spell every Typst call. | 8 KB |
+
+## User interface
+
+| File | Sections | Covers | Size |
+|---|---|---|---|
+| [`ui/window.md`](ui/window.md) | §10quater | The frame: the start page, the theme, the navigation, folders, panes, saving, the settings — and the index of the tabs below. | 73 KB |
+| [`ui/tab-polar-moments.md`](ui/tab-polar-moments.md) | §10quater | The polar moments tab. | 7 KB |
+| [`ui/tab-plans.md`](ui/tab-plans.md) | §10quater | The plan tabs: the position plan, and what it shares with the fire-protection plan. | 27 KB |
+| [`ui/tab-fire-plan.md`](ui/tab-fire-plan.md) | §10quater | The fire-protection plan tab. | 4 KB |
+| [`ui/tab-static-models.md`](ui/tab-static-models.md) | §10quater | The static models tab. | 18 KB |
+| [`ui/tab-schemas.md`](ui/tab-schemas.md) | §10quater | The schemas tab. | 14 KB |
+| [`ui/tab-structure.md`](ui/tab-structure.md) | §10quater | The «Structure du document» tab. | 14 KB |
+| [`ui/tab-commands.md`](ui/tab-commands.md) | §10quater | The commands tab. | 1 KB |
+| [`ui/tab-connectors.md`](ui/tab-connectors.md) | §10quater | The connectors tab. | 16 KB |
+| [`ui/tab-positions.md`](ui/tab-positions.md) | §10quater | The positions tab, and the list of the positions. | 9 KB |
+| [`ui/tab-journal.md`](ui/tab-journal.md) | §10quater | The journal tab. | 2 KB |
+| [`ui/tab-annexes.md`](ui/tab-annexes.md) | §10quater | The annexes tab. | 3 KB |
+| [`ui/tab-member-checks.md`](ui/tab-member-checks.md) | §10quater | The member checks tabs. | 8 KB |
+| [`ui/tab-fire-resistance.md`](ui/tab-fire-resistance.md) | §10quater | The «Résistance au feu» tab. | 4 KB |
+| [`ui/tab-steel.md`](ui/tab-steel.md) | §10quater | The «Acier» tabs: profiles, section class, tension, compression, bending, shear. | 4 KB |
+| [`ui/tab-python.md`](ui/tab-python.md) | §10quater | The Python tab. | 2 KB |
+| [`ui/tab-formulas.md`](ui/tab-formulas.md) | §10quater | The «Formules» tab. | 6 KB |
+| [`ui/tab-variables.md`](ui/tab-variables.md) | §10quater | The variables tab. | 14 KB |
+
+## Decisions and open questions
+
+| File | Sections | Covers | Size |
+|---|---|---|---|
+| [`decisions.md`](decisions.md) | §13 | Every settled decision with its reason and accepted price, each with its status. Large: grep it, do not read it whole. | 394 KB |
+| [`decisions-index.md`](decisions-index.md) | §13 | The decisions by theme, each by its status and the beginning of its bold sentence: the way into `decisions.md`. | 44 KB |
+| [`open-questions.md`](open-questions.md) | §14 | What is not done or not decided yet, each point dated by its version. Grep it for the topic at hand. | 84 KB |
+
+## History
+
+| File | Sections | Covers | Size |
+|---|---|---|---|
+| [`history/status-notes.md`](history/status-notes.md) | status line | The per-version status paragraphs that headed CLAUDE.md until v0.117, newest first. The journal of every version is CHANGELOG.md. | 179 KB |
+| [`history/changelog-v0.1-to-v0.100.md`](history/changelog-v0.1-to-v0.100.md) | — | The versions of `CHANGELOG.md` before v0.110, moved verbatim on 2026-10-10. | 484 KB |
+| [`test-report-2026-10-10.md`](test-report-2026-10-10.md) | — | The test suite's report of 10.10.2026 (issue #24): a dated snapshot, not kept up to date. | 17 KB |
+| [`history/open-questions-closed.md`](history/open-questions-closed.md) | §14 | The open points that were closed or settled, moved verbatim from `open-questions.md`. | 3 KB |
+
+## Section → file
+
+| § | File |
+|---|---|
+| §1 | [`project/purpose.md`](project/purpose.md) |
+| §1bis | [`project/purpose.md`](project/purpose.md) |
+| §1ter | [`conventions/writing.md`](conventions/writing.md) |
+| §2 | [`architecture/principles.md`](architecture/principles.md) |
+| §3 | [`architecture/data-contracts.md`](architecture/data-contracts.md) |
+| §3.0 | [`architecture/data-contracts.md`](architecture/data-contracts.md) |
+| §3.1 | [`architecture/data-contracts.md`](architecture/data-contracts.md) |
+| §3.2 | [`architecture/data-contracts.md`](architecture/data-contracts.md) |
+| §3.4 | [`architecture/data-contracts.md`](architecture/data-contracts.md) |
+| §3.6 | [`architecture/data-contracts.md`](architecture/data-contracts.md) |
+| §3.7 | [`architecture/data-contracts.md`](architecture/data-contracts.md) |
+| §3.3 | [`domain/calculation-domains.md`](domain/calculation-domains.md) |
+| §3.3bis | [`domain/loads.md`](domain/loads.md) |
+| §3.3ter | [`domain/loads.md`](domain/loads.md) |
+| §3.3quater | [`domain/loads.md`](domain/loads.md) |
+| §3.3septies | [`domain/loads.md`](domain/loads.md) |
+| §3.5 | [`domain/loads.md`](domain/loads.md) |
+| §8 | [`domain/loads.md`](domain/loads.md) |
+| §3.3quinquies | [`domain/connections.md`](domain/connections.md) |
+| §3.3sexies | [`domain/position-plans.md`](domain/position-plans.md) |
+| §3.3octies | [`domain/static-models.md`](domain/static-models.md) |
+| §3.3nonies | [`domain/connectors.md`](domain/connectors.md) |
+| §7bis | [`domain/connectors.md`](domain/connectors.md) |
+| §3.3decies | [`domain/detail-schemas.md`](domain/detail-schemas.md) |
+| §3.3undecies | [`domain/member-checks.md`](domain/member-checks.md) |
+| §3.3septdecies | [`domain/member-checks.md`](domain/member-checks.md) |
+| §3.3unvicies | [`domain/member-checks.md`](domain/member-checks.md) |
+| §3.3duodecies | retired in 0.117: [`archive/rfem/docs/domain/rfem.md`](../archive/rfem/docs/domain/rfem.md) |
+| §3.3quindecies | retired in 0.117: [`archive/rfem/docs/domain/rfem.md`](../archive/rfem/docs/domain/rfem.md) |
+| §3.3terdecies | [`domain/journal.md`](domain/journal.md) |
+| §3.3quaterdecies | [`architecture/figure-style.md`](architecture/figure-style.md) |
+| §3.3sexdecies | [`domain/scripts.md`](domain/scripts.md) |
+| §3.3octodecies | [`domain/documents.md`](domain/documents.md) |
+| §3.3undevicies | [`domain/annexes.md`](domain/annexes.md) |
+| §3.3vicies | [`domain/fire-plans.md`](domain/fire-plans.md) |
+| §3.3duovicies | [`domain/variable-links.md`](domain/variable-links.md) |
+| §3.3duovicies-bis | [`domain/variable-links.md`](domain/variable-links.md) |
+| §3.3tervicies | [`domain/fire-resistance.md`](domain/fire-resistance.md) |
+| §3.3quatervicies | [`domain/steel.md`](domain/steel.md) |
+| §4 | [`typst/report-engine.md`](typst/report-engine.md) |
+| §5 | [`typst/report-engine.md`](typst/report-engine.md) |
+| §6 | [`typst/report-engine.md`](typst/report-engine.md) |
+| §6bis | [`typst/report-engine.md`](typst/report-engine.md) |
+| §9 | [`typst/report-engine.md`](typst/report-engine.md) |
+| §4bis | [`typst/language.md`](typst/language.md) |
+| §7 | [`domain/positions.md`](domain/positions.md) |
+| §10 | [`typst/citations.md`](typst/citations.md) |
+| §10bis | [`typst/api-conventions.md`](typst/api-conventions.md) |
+| §10ter | [`typst/reference-workbook.md`](typst/reference-workbook.md) |
+| §10quater | [`ui/window.md`](ui/window.md) |
+| §10quinquies | [`typst/formulas.md`](typst/formulas.md) |
+| §10sexies | [`typst/command-docs.md`](typst/command-docs.md) |
+| §11 | [`architecture/layout.md`](architecture/layout.md) |
+| §11bis | [`architecture/reference-library.md`](architecture/reference-library.md) |
+| §11ter | [`conventions/testing.md`](conventions/testing.md) |
+| §12 | [`conventions/build-and-release.md`](conventions/build-and-release.md) |
+| §13 | [`decisions.md`](decisions.md) |
+| §14 | [`open-questions.md`](open-questions.md) |
+| §15 | [`conventions/changelog-and-commits.md`](conventions/changelog-and-commits.md) |

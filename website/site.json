@@ -1,0 +1,31 @@
+{
+  "_comment": "The website's settings (website/build.py, docs/conventions/build-and-release.md §12). base_url is where Cloudflare Pages serves the site (project `woodcore`, deployed by .github/workflows/site.yml; the site was on GitLab Pages until v0.117) and what calc/tools/updates.py's FEED_URL points into -- tests/test_site.py holds every copy of it equal to this one. releases_repo is the public GitHub repository whose Releases carry the installers (packaging/publish.py uploads them, the program accepts an installer only from there: calc/tools/updates.py INSTALLER_PREFIX), the installer being too large for a Cloudflare Pages file (25 MiB). masked: the example pages the public site does not show, because they set a norm table in full (the engineer's choice, v0.89): SIA 261 Tabelle 8 (show-live-load at level 3) and SIA 265 Tabellen 24 to 41 (#distance, and the minimum distances show-connector-resistance prints). Their code and their calls stay; their picture is replaced by a note. Globs on the example's stem. hero_example, levels_example and gallery name worked examples by their stem (show-calc-1 is show-calc's first): the code the home page shows beside a picture is that example's own fence, and the command an example belongs to is read off it, so neither is written here a second time. moved: the addresses the site no longer has a page at, each with the address of the page that replaced it, both read from a language's root: the build writes at the old one, in every language, a small page that sends the reader on (v0.96: the tutorial's step on the window, tutorial/katalog/ while the window was the Katalog).",
+  "base_url": "https://woodcore.pages.dev/",
+  "releases_repo": "When-I-hit-the-wall/woodcore-releases",
+  "default_language": "fr",
+  "masked": [
+    "distance-*",
+    "show-live-load-*-L3",
+    "show-live-load-2",
+    "show-connector-resistance-*"
+  ],
+  "moved": {
+    "tutorial/katalog/": "tutorial/window/"
+  },
+  "hero_example": "verify-compression-1",
+  "levels_example": "show-calc-1",
+  "gallery": [
+    "show-calc-1",
+    "show-calc-3",
+    "show-polar-moment-1",
+    "show-static-model-1",
+    "show-schema-1",
+    "show-plan-1",
+    "var-line-1",
+    "eq-2",
+    "verify-1",
+    "member-1",
+    "verify-compression-1",
+    "verify-bending-1"
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Scripts",
+  "description": "data/scripts.json -- the scripts of the project as the export writes them, read by lib/calc-engine.typ (find-calculation's `script` branch, so #val(\"x\", domain: (\"script\", \"<id>\")) and #show-calc(\"script\", \"<id>\") both reach one; docs/domain/scripts.md §3.3sexdecies, v0.100). One entry per Woodcore-Datei/scripts/<id>.py, carrying the {vars, steps, checks, results} shape every calculation of this engine has (section 2 rule 2) -- `steps` and `checks` are always empty, a script declaring values and not a working. A script that failed is exported all the same, with `calculated: false` and its reason, so the report refuses to print what it names rather than the export stopping (the v0.33 rule).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "scripts"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a record written at another version is refused rather than read as this one."
+    },
+    "scripts": {
+      "type": "object",
+      "description": "One entry per script, keyed by its id, which is its file name without the .py.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "label",
+            "group",
+            "calculated",
+            "reason",
+            "vars",
+            "steps",
+            "checks",
+            "results"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The file's name without its suffix, and the string the report addresses it by."
+            },
+            "name": {
+              "type": "string",
+              "description": "Its @name, the id where it carries none."
+            },
+            "label": {
+              "type": "string",
+              "description": "Its @label: the description, \"\" where it carries none."
+            },
+            "group": {
+              "type": "string",
+              "description": "Its @group: the folder of the tab's left pane, \"\" for the root."
+            },
+            "calculated": {
+              "type": "boolean",
+              "description": "Whether the run produced results. false where it failed, timed out or declared none -- `reason` says which."
+            },
+            "reason": {
+              "type": "string",
+              "description": "Why nothing was produced, \"\" where it ran through. How long the run took is not recorded: a wall-clock duration would differ at every export, where data/ must stay unchanged to the byte when nothing else changed (docs/conventions/build-and-release.md §12)."
+            },
+            "vars": {
+              "type": "object",
+              "description": "The results the script declared, one var each, in the shape section 3.1 defines. `norm` and `norm_ref` are \"\" where the script cites nothing: what a script computes is the engineer's own arithmetic, so `source` names the file that produced it (`python:scripts/<id>.py`, section 2 rule 5) and there is no normative citation to invent. A report that wants one states it at the call -- #val(..., norm: \"SIA 265\") -- which is what val's own override is for.",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "required": [
+                    "value",
+                    "unit",
+                    "symbol",
+                    "label",
+                    "level",
+                    "source",
+                    "norm",
+                    "norm_ref"
+                  ],
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string",
+                      "description": "Typst math source (section 6bis): the name itself where the script states none."
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "level": {
+                      "type": "integer"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "norm": {
+                      "type": "string"
+                    },
+                    "norm_ref": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "steps": {
+              "type": "array",
+              "description": "Always empty: a script declares values, not a working."
+            },
+            "checks": {
+              "type": "array",
+              "description": "Always empty: a verification is written in the report with #verify."
+            },
+            "results": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "The names of the vars, in the order the script declared them: what show-calc prints at level 1."
+            }
+          }
+        }
+      }
+    }
+  }
+}

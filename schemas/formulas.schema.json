@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Calculation domains",
+  "description": "data/formulas.json -- the index of the calculation domains written in Woodcore's «Formules» tab, one file each, <Typst root>/Formules/<id>.typ (calc/domains/formula_domain.py, docs/typst/formulas.md §10quinquies). A report prints a domain with #include \"/Formules/<id>.typ\" and reads none of this file (2.0, issue #15); it lists the domains for the «Variables» tab and for the export's own checks. Written at every save of the tab and at every export, sorted by id, with no date, so an unchanged project writes the same bytes. A domain's file is its own source of truth and is never copied here.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "domains"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "2.0",
+      "description": "-- pinned. 2.0 (issue #15): keyed by the id, with the title; 1.0 was keyed by the name #show-formula read."
+    },
+    "domains": {
+      "type": "object",
+      "description": "One entry per domain, keyed by its id -- the name of its file and what #var-domain and #val(domain:) are given.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": [
+            "title",
+            "file"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "The domain's name -- the title: of its #var-domain, which the report prints as a heading; \"\" where it has none."
+            },
+            "file": {
+              "type": "string",
+              "description": "The file, relative to the Typst root and written with forward slashes: Formules/<id>.typ."
+            }
+          }
+        }
+      }
+    }
+  }
+}

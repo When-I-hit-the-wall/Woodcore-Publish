@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.3",
+  "position": "S002",
+  "type": "Stütze",
+  "material": "Stahl",
+  "strength_class": "S355",
+  "section_type": "ROR",
+  "dimension": "101.6x10",
+  "units": "mm",
+  "section": {
+    "type": "ROR",
+    "kind": "steel",
+    "text": "ROR 101.6×10",
+    "dims": [
+      101.6,
+      10
+    ]
+  },
+  "moisture_class": 2,
+  "description": "Pavillon - Stahlstütze",
+  "domains": {}
+}

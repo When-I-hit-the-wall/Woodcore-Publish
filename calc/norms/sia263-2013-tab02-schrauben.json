@@ -1,0 +1,64 @@
+{
+  "_source": "SIA 263:2013, Tabelle 2 (clause 3.4.2) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA263-2013-DE.pdf p. 19, read off a render of the page, the table being a graphic. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
+  "_note": "The Festigkeitsklassen of SN EN 20898-2. They belong here because a Bolzen or a Passbolzen IS a Schraube: a timber connection made with one takes its f_u from this table. A Stabdübel is not -- it is a plain round bar, whose grade is Tabelle 1's, or a fastener to SN EN 14592 carrying its own declared value, which is why f_u,k stays a field the engineer can type into whatever is chosen here.\n\nThe footnote marks the qualities SIA 263 says are not used in Switzerland (too little elongation at rupture): they are transcribed, and carried as `common: false` so that the interface can say so rather than hiding them.\n\n⚠️ SIA 263 Tabelle 3 (Kopfbolzendübel, Gewindebolzen und Stifte, same page) is deliberately NOT transcribed. Its «Stifte» are the pins of fastenings and supports -- «Stifte für Befestigungen und Halterungen», its own Anwendungsbereich column -- and not the Stabdübel of a timber connection; offering its two rows as fastener grades would put a value in front of an engineer that does not belong to what is being calculated.",
+  "edition": "SIA 263:2013",
+  "table_2": {
+    "number": "2",
+    "title": "Streckgrenze f_yb, Zugfestigkeit f_ub und minimale Bruchdehnung eps_u für Schrauben",
+    "unit": "N/mm²",
+    "norm": "SIA 263",
+    "norm_ref": "3.4.2",
+    "footnote": "In der Schweiz nicht gebräuchliche Schraubenqualitäten (zu geringe Bruchdehnung).",
+    "classes": [
+      {
+        "name": "4.6",
+        "f_yb": 240,
+        "f_ub": 400,
+        "eps_u": 22,
+        "common": true
+      },
+      {
+        "name": "4.8",
+        "f_yb": 320,
+        "f_ub": 400,
+        "eps_u": 14,
+        "common": false
+      },
+      {
+        "name": "5.6",
+        "f_yb": 300,
+        "f_ub": 500,
+        "eps_u": 20,
+        "common": true
+      },
+      {
+        "name": "5.8",
+        "f_yb": 400,
+        "f_ub": 500,
+        "eps_u": 10,
+        "common": false
+      },
+      {
+        "name": "6.8",
+        "f_yb": 480,
+        "f_ub": 600,
+        "eps_u": 8,
+        "common": false
+      },
+      {
+        "name": "8.8",
+        "f_yb": 640,
+        "f_ub": 800,
+        "eps_u": 12,
+        "common": true
+      },
+      {
+        "name": "10.9",
+        "f_yb": 900,
+        "f_ub": 1000,
+        "eps_u": 9,
+        "common": true
+      }
+    ]
+  }
+}

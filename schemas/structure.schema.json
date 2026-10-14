@@ -1,0 +1,267 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Document structure",
+  "description": "<document folder>/structure.json, schema 1.0 -- the sections of a Convention d'utilisation (CU) or a Base de projet (BP): which there are, in which order, how deep, and whether each is printed (calc/structure.py). Written by Woodcore whole, in one shape (fixed key order, two-space indent), and read by calc/structure.py alone; the document's entry .typ has a block of `#heading` and `#include` lines generated from it between the tags `// woodcore:structure` and `// woodcore:/structure` (structure.sync_entry). The report (RS) has no such file: its order and enabled state stay in its own #include lines. A node is a GROUP (`title` in three languages and `children`, no file) or a LEAF (`file` `Sections/<id>.typ`, no title and no children): one lowest-level section is one file. The tree goes four levels deep, which this schema states by nesting the same shape four times -- the walker has no $ref. Every rule it cannot express -- the id's shape, an id unique in its document, a leaf's file named after its id, a group or a leaf and never both, no key it does not know -- is checked by structure.check_source.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "format",
+    "document",
+    "sections"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a file written at another version is refused rather than read as this one."
+    },
+    "format": {
+      "type": "string",
+      "const": "woodcore-structure",
+      "description": "What this file is, so a structure.json that is something else is refused by name."
+    },
+    "document": {
+      "type": "string",
+      "enum": [
+        "cu",
+        "bp"
+      ],
+      "description": "Which document this structure belongs to. The report (rs) has none."
+    },
+    "headings": {
+      "type": "string",
+      "enum": [
+        "absolute"
+      ],
+      "description": "`absolute` where the document writes its headings at the level they are printed at and gives each chapter a file of its own, `Sections/<chapter id>.typ` (the engineer's request of 06.10.2026); absent, the document is laid out with offsets, as until then. Optional and additive, so schema_version stays 1.0."
+    },
+    "sections": {
+      "type": "array",
+      "description": "The document's top-level sections, in print order. An empty list is a document with nothing in it yet.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The section's id: English, lower case, letters and digits parted by single hyphens, starting with a letter -- `^[a-z][a-z0-9]*(-[a-z0-9]+)*$` (checked by structure.check_source, which the walker below cannot express). Unique in the document, and **never changed by a rename**: it names the section's file (`Sections/<id>.typ`) and everything that refers to the section."
+          },
+          "title": {
+            "type": "object",
+            "description": "A GROUP's title, in the three languages -- it is printed as a heading in the document's own language. A leaf states none: its title is the first heading of its file, and a second place for it would drift.",
+            "required": [
+              "fr",
+              "de",
+              "en"
+            ],
+            "properties": {
+              "fr": {
+                "type": "string"
+              },
+              "de": {
+                "type": "string"
+              },
+              "en": {
+                "type": "string"
+              }
+            }
+          },
+          "file": {
+            "type": "string",
+            "description": "A LEAF's file, `Sections/<id>.typ`, relative to the document's folder: one lowest-level section is one file, named after its id, with no number prefix. A leaf has no children."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the section is printed. Default true. A disabled section keeps its file and is written into the entry as `// disabled: <id> (<file>)`; a disabled group takes its whole subtree out with it."
+          },
+          "shared_with": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "cu",
+                "bp",
+                "rs"
+              ]
+            },
+            "description": "A LEAF's: the other documents its file is shared with. The file is the unit of sharing; what stays synchronised is only what lies between the `woodcore:shared` tags inside it. Maintained by Woodcore's share and stop-sharing, and reconciled against the tags of the copies when the structure is read."
+          },
+          "children": {
+            "type": "array",
+            "description": "A GROUP's sections, in print order. A group has children and no file; it prints its title as a heading of its own depth, and its leaves are included one level down.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The section's id, as above."
+                },
+                "title": {
+                  "type": "object",
+                  "description": "A group's title, as above.",
+                  "required": [
+                    "fr",
+                    "de",
+                    "en"
+                  ],
+                  "properties": {
+                    "fr": {
+                      "type": "string"
+                    },
+                    "de": {
+                      "type": "string"
+                    },
+                    "en": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "file": {
+                  "type": "string",
+                  "description": "A leaf's file, as above."
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Whether the section is printed, as above."
+                },
+                "shared_with": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "cu",
+                      "bp",
+                      "rs"
+                    ]
+                  },
+                  "description": "A leaf's: the other documents it is shared with, as above."
+                },
+                "children": {
+                  "type": "array",
+                  "description": "A group's sections, as above.",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The section's id, as above."
+                      },
+                      "title": {
+                        "type": "object",
+                        "description": "A group's title, as above.",
+                        "required": [
+                          "fr",
+                          "de",
+                          "en"
+                        ],
+                        "properties": {
+                          "fr": {
+                            "type": "string"
+                          },
+                          "de": {
+                            "type": "string"
+                          },
+                          "en": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "file": {
+                        "type": "string",
+                        "description": "A leaf's file, as above."
+                      },
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Whether the section is printed, as above."
+                      },
+                      "shared_with": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "cu",
+                            "bp",
+                            "rs"
+                          ]
+                        },
+                        "description": "A leaf's: the other documents it is shared with, as above."
+                      },
+                      "children": {
+                        "type": "array",
+                        "description": "A group's sections, as above.",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "The section's id, as above."
+                            },
+                            "title": {
+                              "type": "object",
+                              "description": "A group's title, as above.",
+                              "required": [
+                                "fr",
+                                "de",
+                                "en"
+                              ],
+                              "properties": {
+                                "fr": {
+                                  "type": "string"
+                                },
+                                "de": {
+                                  "type": "string"
+                                },
+                                "en": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "file": {
+                              "type": "string",
+                              "description": "A leaf's file, as above."
+                            },
+                            "enabled": {
+                              "type": "boolean",
+                              "description": "Whether the section is printed, as above."
+                            },
+                            "shared_with": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "enum": [
+                                  "cu",
+                                  "bp",
+                                  "rs"
+                                ]
+                              },
+                              "description": "A leaf's: the other documents it is shared with, as above."
+                            },
+                            "children": {
+                              "type": "array",
+                              "description": "A group at the deepest level holds nothing: the structure goes down four levels and no further (structure.check_source refuses a fifth)."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

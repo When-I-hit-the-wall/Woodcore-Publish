@@ -1,0 +1,166 @@
+{
+  "_source": "SIA 265:2021, Tabelle 8 (clause 3.3.2.1) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 25. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
+  "_note": "Design values, already divided by gamma_M/eta_M (clause 2.2.2), and valid for Feuchteklasse 1 with eta_w = 1.0 and eta_t = 1.0 -- another moisture class multiplies them (Tabelle 4). `species` is the norm's own column heading, Nadelholz or Laubholz, and is what SIA 265 Tabelle 22 picks a Lochleibungsfestigkeit branch by; it is a property of the grade, so nothing asks for it a second time. `groessere_eindrueckungen` is the parenthesised value of footnote 4, null where the norm gives none. Decimals are written the way the report prints them (0.1), not the norm's comma.",
+  "edition": "SIA 265:2021",
+  "table_8": {
+    "number": "8",
+    "title": "Kennzeichnende Eigenschaften und Bemessungswerte für Vollholz sowie für keilgezinktes Vollholz und Balkenschichtholz aus Nadelholz",
+    "norm": "SIA 265",
+    "norm_ref": "3.3.2.1",
+    "units": {
+      "f_m_k": "N/mm²",
+      "E_m_mean": "N/mm²",
+      "rho_k": "kg/m³",
+      "f_m_d": "N/mm²",
+      "f_t_0_d": "N/mm²",
+      "f_c_0_d": "N/mm²",
+      "f_t_90_d": "N/mm²",
+      "f_c_90_d": "N/mm²",
+      "f_v_d": "N/mm²",
+      "E_0_mean": "N/mm²",
+      "E_90_mean": "N/mm²",
+      "G_mean": "N/mm²"
+    },
+    "labels": {
+      "f_m_k": "Biegefestigkeit",
+      "E_m_mean": "mittlerer Biege-Elastizitätsmodul",
+      "rho_k": "Rohdichte",
+      "f_m_d": "Biegung",
+      "f_t_0_d": "Zug parallel zur Faserrichtung",
+      "f_c_0_d": "Druck parallel zur Faserrichtung",
+      "f_t_90_d": "Zug rechtwinklig zur Faserrichtung",
+      "f_c_90_d": "Druck rechtwinklig zur Faserrichtung",
+      "f_v_d": "Schub",
+      "E_0_mean": "E_0,mean in Faserrichtung",
+      "E_90_mean": "E_90,mean rechtwinklig zur Faserrichtung",
+      "G_mean": "Schubmodul"
+    },
+    "grades": [
+      {
+        "id": "C16",
+        "family": "Vollholz",
+        "species": "Nadelholz",
+        "f_m_k": 16,
+        "E_m_mean": 8000,
+        "rho_k": 310,
+        "f_m_d": 9.4,
+        "f_t_0_d": 5.0,
+        "f_c_0_d": 10.0,
+        "f_t_90_d": 0.1,
+        "f_c_90_d": {
+          "generell": 1.5,
+          "mit_vorholz": {
+            "value": 2.0,
+            "groessere_eindrueckungen": 2.6
+          },
+          "endauflagerung": {
+            "value": 1.5,
+            "groessere_eindrueckungen": 2.6
+          }
+        },
+        "f_v_d": 1.5,
+        "E_0_mean": 8000,
+        "E_90_mean": 270,
+        "G_mean": 500,
+        "notes": {
+          "f_t_0_d": [
+            "2"
+          ]
+        }
+      },
+      {
+        "id": "C24",
+        "family": "Vollholz",
+        "species": "Nadelholz",
+        "f_m_k": 24,
+        "E_m_mean": 11000,
+        "rho_k": 350,
+        "f_m_d": 14.1,
+        "f_t_0_d": 8.5,
+        "f_c_0_d": 12.4,
+        "f_t_90_d": 0.1,
+        "f_c_90_d": {
+          "generell": 1.8,
+          "mit_vorholz": {
+            "value": 2.3,
+            "groessere_eindrueckungen": 2.9
+          },
+          "endauflagerung": {
+            "value": 1.8,
+            "groessere_eindrueckungen": 2.9
+          }
+        },
+        "f_v_d": 1.5,
+        "E_0_mean": 11000,
+        "E_90_mean": 370,
+        "G_mean": 690,
+        "notes": {}
+      },
+      {
+        "id": "C30",
+        "family": "Vollholz",
+        "species": "Nadelholz",
+        "f_m_k": 30,
+        "E_m_mean": 12000,
+        "rho_k": 380,
+        "f_m_d": 17.6,
+        "f_t_0_d": 11.2,
+        "f_c_0_d": 14.1,
+        "f_t_90_d": 0.1,
+        "f_c_90_d": {
+          "generell": 2.0,
+          "mit_vorholz": {
+            "value": 2.7,
+            "groessere_eindrueckungen": 3.3
+          },
+          "endauflagerung": {
+            "value": 2.0,
+            "groessere_eindrueckungen": 3.3
+          }
+        },
+        "f_v_d": 1.5,
+        "E_0_mean": 12000,
+        "E_90_mean": 400,
+        "G_mean": 750,
+        "notes": {}
+      },
+      {
+        "id": "D30",
+        "family": "Vollholz",
+        "species": "Laubholz",
+        "f_m_k": 30,
+        "E_m_mean": 11000,
+        "rho_k": 530,
+        "f_m_d": 17.6,
+        "f_t_0_d": 10.6,
+        "f_c_0_d": 14.1,
+        "f_t_90_d": 0.2,
+        "f_c_90_d": {
+          "generell": 5.3,
+          "mit_vorholz": {
+            "value": 7.0,
+            "groessere_eindrueckungen": null
+          },
+          "endauflagerung": {
+            "value": 5.3,
+            "groessere_eindrueckungen": null
+          }
+        },
+        "f_v_d": 1.8,
+        "E_0_mean": 11000,
+        "E_90_mean": 730,
+        "G_mean": 690,
+        "notes": {}
+      }
+    ],
+    "notes": {
+      "1": "Eigenschaften und Bemessungswerte beziehen sich auf eine Holzfeuchte von 12 %.",
+      "2": "Für Zugglieder nicht zulässig.",
+      "3": "Das Vorholz muss beidseitig mindestens 100 mm betragen. Andernfalls ist mit dem generellen Wert zu rechnen.",
+      "4": "Der höhere (Klammer-) Wert ist nur dort zulässig, wo die auftretenden grösseren Eindrückungen nachweisbar ohne Einfluss auf den Bestand des tragenden Bauteils sind.",
+      "5": "5 %-Fraktilwerte sind für Nadelholz auf das 2/3-Fache und für Laubholz auf das 5/6-Fache der Mittelwerte festgelegt.",
+      "6": "Für Markstücke sind die Bemessungswerte bei Schub- oder Scherbeanspruchung auf die Hälfte zu reduzieren."
+    },
+    "elsewhere": "Andere Festigkeitsklassen: Rohdichte, E- und Schubmodul gemäss SN EN 338; Bemessungswerte der Festigkeit gemäss 2.2.2, mit f_v,d = 1,5 N/mm2 (Nadelholz) bzw. 1,8 N/mm2 (Laubholz) und f_t,90,d = 0,1 N/mm2 (Nadelholz) bzw. 0,2 N/mm2 (Laubholz), SIA 265 3.3.2.2."
+  }
+}

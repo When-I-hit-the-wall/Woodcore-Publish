@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "format": "woodcore-form",
+  "name": {
+    "fr": "Compacte",
+    "de": "Kompakt",
+    "en": "Compact"
+  },
+  "description": {
+    "fr": "La forme neutre, en plus serré : marges de 2 cm, texte de 10 pt, pour qu'un calcul tienne sur moins de pages.",
+    "de": "Die neutrale Form, enger gesetzt: Ränder von 2 cm, Text in 10 pt, damit eine Berechnung weniger Seiten braucht.",
+    "en": "The neutral form, set tighter: 2 cm margins and 10 pt text, so a calculation takes fewer pages."
+  }
+}

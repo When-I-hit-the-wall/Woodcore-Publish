@@ -1,0 +1,16 @@
+{
+  "_source": "SIA 265:2021, clause 6.4.1.1 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 67.",
+  "_note": "The nails the clauses of 6.4 -- and so Tabellen 27, 28, 32 and 33 -- are stated for: a diameter d from 1.9 mm to 8.0 mm, to 8.5 mm for smooth-shank nails. `lib/distance.typ` reads the range to decide which tables apply to a nail's d; the wider bound is the range, and the grooved and screw nails' own 8.0 mm is kept beside it.",
+  "edition": "SIA 265:2021",
+  "clause": {
+    "label": "Nageldurchmesser",
+    "norm": "SIA 265",
+    "norm_ref": "6.4.1.1",
+    "diameter_range": {
+      "min": 1.9,
+      "max": 8.5,
+      "unit": "mm"
+    },
+    "grooved_max": 8.0
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "The order of the window's lists",
+  "description": "Woodcore-Datei/lists.json -- the order the engineer gives the lists of the window's tabs by drag and drop, and the folders of the «Formules» tab (calc/list_order.py, issue #15, docs/ui/window.md §10quater). Written by Woodcore at each drop, beside the sources the engineer draws; the window's alone -- the report prints by id and the export never reads it. A tab keeps `groups` only where its sources have no `group` field of their own (list_order.GROUPED_TABS, today tab_formula).",
+  "type": "object",
+  "required": [
+    "format",
+    "schema_version",
+    "tabs"
+  ],
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "woodcore-lists",
+      "description": "What the file is."
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned."
+    },
+    "tabs": {
+      "type": "object",
+      "description": "One entry per tab, keyed by the tab's key (tab_schema, tab_formula…).",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": [
+            "order"
+          ],
+          "properties": {
+            "order": {
+              "type": "array",
+              "description": "The ids of the tab's list in the order the engineer gave them; an id not named comes after, by id.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "groups": {
+              "type": "object",
+              "description": "The folder of each id, for a tab whose sources cannot carry one (tab_formula): id -> folder name; an id not named is at the root.",
+              "patternProperties": {
+                ".*": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

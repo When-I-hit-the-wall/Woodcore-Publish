@@ -1,0 +1,61 @@
+{
+ "_source": "SZS C5 Konstruktionstabellen, revision 2018, reprinted 2021: ExternalFiles/000-Normes/SZS-C5-2021.pdf (the engineer's copy is 301-Normes/SZS-C5-2018.pdf). The PDF is a scan: every number was read off a render of its page (220 and 330 dpi) and held three ways -- against the page's OCR text, against the section's own mechanics (i = sqrt(I/A), W_el = I/(h/2), A from h, b, t_w, t_f, r), and against the «Hilfstabelle Stahl-Profile» of the steel check templates (tests/fixtures/steel-reference-profiles.json); wherever they disagreed the page was read again at 330-400 dpi and the page wins. Values are as printed, each column's factor under its head (×10⁶, ×10³) stated in `columns`; the reader converts them into plain mm units. This file: Vierkantstäbe / Carrés, printed p. 55 (PDF 59), «Statische Werte / Valeurs statiques» and «Profilmasse / Dimensions de la section».",
+ "_note": "The last row is 500 in the table's left column and 480 in its right one; A = 250 000 mm² = 500², so 500 is kept.",
+ "edition": "SZS C5:2018",
+ "title": "Vierkantstäbe / Carrés",
+ "norm_ref": "p. 55",
+ "columns": {
+  "m": {"unit": "kg/m"},
+  "A": {"unit": "mm2"},
+  "I": {"unit": "mm4", "factor": 1000000},
+  "W_el": {"unit": "mm3", "factor": 1000},
+  "W_pl": {"unit": "mm3", "factor": 1000},
+  "i": {"unit": "mm"}
+ },
+ "families": {
+  "VKT": {
+   "columns": ["m", "A", "I", "W_el", "W_pl", "i"],
+   "rows": {
+    "10": [0.785, 100, 0.00083, 0.167, 0.25, 2.88],
+    "12": [1.13, 144, 0.00173, 0.288, 0.432, 3.47],
+    "14": [1.54, 196, 0.0032, 0.457, 0.686, 4.04],
+    "15": [1.77, 225, 0.00422, 0.563, 0.844, 4.33],
+    "16": [2.01, 256, 0.00546, 0.683, 1.023, 4.62],
+    "18": [2.54, 324, 0.00875, 0.972, 1.46, 5.2],
+    "20": [3.14, 400, 0.0133, 1.33, 2, 5.77],
+    "25": [4.91, 625, 0.0326, 2.6, 3.91, 7.22],
+    "30": [7.07, 900, 0.0675, 4.5, 6.75, 8.66],
+    "35": [9.62, 1230, 0.125, 7.15, 10.7, 10.1],
+    "40": [12.6, 1600, 0.213, 10.7, 16, 11.5],
+    "45": [15.9, 2030, 0.342, 15.2, 22.8, 13],
+    "50": [19.6, 2500, 0.521, 20.8, 31.3, 14.4],
+    "60": [28.3, 3600, 1.08, 36, 54, 17.3],
+    "70": [38.5, 4900, 2, 57.2, 85.8, 20.2],
+    "80": [50.2, 6400, 3.41, 85.3, 128, 23.1],
+    "90": [63.6, 8100, 5.47, 122, 182, 26],
+    "100": [78.5, 10000, 8.33, 167, 250, 28.9],
+    "110": [95, 12100, 12.2, 222, 332, 31.8],
+    "120": [113, 14400, 17.3, 288, 432, 34.6],
+    "130": [133, 16900, 23.8, 366, 549, 37.5],
+    "140": [154, 19600, 32, 457, 686, 40.4],
+    "150": [177, 22500, 42.2, 563, 844, 43.3],
+    "160": [201, 25600, 54.6, 683, 1024, 46.2],
+    "180": [254, 32400, 87.5, 972, 1458, 52],
+    "200": [314, 40000, 133, 1330, 2000, 57.6],
+    "220": [380, 48400, 195, 1770, 2662, 63.5],
+    "240": [452, 57600, 276, 2300, 3456, 69.2],
+    "250": [491, 62500, 326, 2600, 3906, 72.2],
+    "260": [531, 67600, 381, 2930, 4394, 75.1],
+    "280": [615, 78400, 512, 3660, 5488, 80.8],
+    "300": [707, 90000, 675, 4500, 6750, 86.6],
+    "320": [804, 102000, 873, 5460, 8190, 92.4],
+    "350": [962, 123000, 1250, 7150, 10700, 101],
+    "380": [1130, 144000, 1740, 9150, 13700, 110],
+    "400": [1260, 160000, 2130, 10700, 16000, 115],
+    "420": [1380, 176000, 2590, 12300, 18500, 121],
+    "450": [1590, 203000, 3420, 15200, 22800, 130],
+    "500": [1960, 250000, 5210, 20800, 31300, 144]
+   }
+  }
+ }
+}
