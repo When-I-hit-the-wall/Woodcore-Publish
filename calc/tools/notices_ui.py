@@ -60,6 +60,10 @@ STRINGS = {
         "notice_severity_success": "Succès",
         "notice_schema_unreadable_title": "Schéma ignoré",
         "notice_schema_unreadable": "Le schéma {file} est laissé de côté : il ne se lit pas — {error}",
+        "notice_command_removed_title": "Commande retirée",
+        "notice_command_removed": "{file}, ligne {line} : {name} n'existe plus — {hint}",
+        "notice_unit_scope_title": "Portée de #unit",
+        "notice_unit_scope": "{file}, ligne {line} : #unit sans scope: ne vaut plus que pour la réponse suivante de sa dimension — écrire scope: \"document\" pour l'ancienne portée",
         "notice_exception_title": "Erreur inattendue",
         "notice_exception": "Une erreur inattendue s'est produite : {error}. L'opération en cours n'a peut-être pas abouti.",
         "notice_typst_error_title": "Compilation Typst impossible",
@@ -102,6 +106,10 @@ STRINGS = {
         "notice_severity_success": "Erfolg",
         "notice_schema_unreadable_title": "Schema übergangen",
         "notice_schema_unreadable": "Das Schema {file} wird übergangen: Es lässt sich nicht lesen — {error}",
+        "notice_command_removed_title": "Befehl entfernt",
+        "notice_command_removed": "{file}, Zeile {line}: {name} gibt es nicht mehr — {hint}",
+        "notice_unit_scope_title": "Reichweite von #unit",
+        "notice_unit_scope": "{file}, Zeile {line}: #unit ohne scope: gilt nur noch für das nächste Ergebnis seiner Dimension — scope: \"document\" schreiben für die frühere Reichweite",
         "notice_exception_title": "Unerwarteter Fehler",
         "notice_exception": "Ein unerwarteter Fehler ist aufgetreten: {error}. Der laufende Vorgang ist möglicherweise nicht abgeschlossen.",
         "notice_typst_error_title": "Typst-Kompilierung unmöglich",
@@ -144,6 +152,10 @@ STRINGS = {
         "notice_severity_success": "Success",
         "notice_schema_unreadable_title": "Schema left out",
         "notice_schema_unreadable": "The schema {file} is left out: it does not read — {error}",
+        "notice_command_removed_title": "Command removed",
+        "notice_command_removed": "{file}, line {line}: {name} no longer exists — {hint}",
+        "notice_unit_scope_title": "Reach of #unit",
+        "notice_unit_scope": "{file}, line {line}: #unit without scope: now reaches only the next answer of its dimension — write scope: \"document\" for its former reach",
         "notice_exception_title": "Unexpected error",
         "notice_exception": "An unexpected error occurred: {error}. The operation under way may not have been completed.",
         "notice_typst_error_title": "Typst compilation failed",
@@ -825,6 +837,23 @@ def tell_unreadable_schemas(problems):
     for path, exc in problems:
         tell(f"The schema {Path(path).name} is left out: it does not read -- {exc}", notifications.WARNING, exc=exc, code="schema_unreadable",
              key="notice_schema_unreadable", args={"file": Path(path).name, "error": str(exc)}, source="schemas", file=str(path))
+
+
+def tell_removed_commands(removals, here):
+    """A warning for each call of a command or an argument taken away that a project's sections still write (commands_migrate.removals: [(path, line, name, hint)]), naming the file and the line and offering to open it: the project is carried over by hand, never rewritten (spec 2026-10-21-commandes-typst-refonte, REQ-020, CON-004); the export refuses the first."""
+    for path, line, name, hint in removals:
+        rel = here.rel(path)
+        tell(f"{rel}, line {line}: {name} no longer exists -- {hint}", notifications.WARNING, code="command_removed",
+             key="notice_command_removed", args={"file": rel, "line": line, "name": name, "hint": hint}, title_key="notice_command_removed_title",
+             source="commands", file=str(path), line=line)
+
+
+def tell_unscoped_units(found, here):
+    """A warning for each `#unit` without `scope:` a project's sections write (commands_migrate.unit_scope_notes: [(path, line)]): it reached the rest of the document until the spec 2026-10-21-commandes-typst-refonte and now reaches the next answer (CON-007) -- said, never rewritten."""
+    for path, line in found:
+        rel = here.rel(path)
+        tell(f"{rel}, line {line}: #unit without scope: now reaches only the next answer of its dimension -- write scope: \"document\" for its former reach", notifications.WARNING, code="unit_scope",
+             key="notice_unit_scope", args={"file": rel, "line": line}, title_key="notice_unit_scope_title", source="commands", file=str(path), line=line)
 
 
 def tell(text, severity=notifications.CRITICAL, *, exc=None, code=None, key="", args=None, title_key="", source="", file="", line=None, column=None):

@@ -969,10 +969,6 @@ class DocumentView(QWidget):
         drawn = {item.get("plan") for items in self.area.crops.values() for item in items if not item.get("other")}
         self.area.set_frames([p for p in plans if p in drawn], emit=emit)
 
-    def select_pages(self, pages):
-        self.area.selected = [p for p in pages if p in self.area.rects]
-        self.area.viewport().update()
-        self.update_buttons()
 
     def rotate_selected(self, delta):
         for page in self.area.selected:
@@ -1026,9 +1022,6 @@ class DocumentView(QWidget):
 
     # -- where things are, for the caller and the tests --
 
-    def page_rect(self, page):
-        """The rectangle of `page` in the page area's viewport."""
-        return self.area.rects[page].translated(-self.area.scroll())
 
     def viewport_point(self, page, x, y):
         """The point of the page area's viewport over the sheet point (x, y) of `page`."""

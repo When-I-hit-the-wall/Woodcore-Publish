@@ -9,4 +9,4 @@
 #number-digits.update(3)
 
 #report-level.update(3)
-#show-calc("snow-load", "SL")
+#var("s_k", domain: ("snow-load", "SL"))

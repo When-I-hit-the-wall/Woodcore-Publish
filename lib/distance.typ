@@ -5,7 +5,7 @@
 // Nothing here is a norm value. The multiples, the floors in mm, the diameter ranges and which fastener a table is stated for are read from calc/norms/ (docs/architecture/principles.md §2 rule 13, 11), one JSON per table, through the relative path `../calc/norms/` -- which resolves in the program and in a project's _woodcore/ alike, lib/ sitting beside calc/ in both. calc/norms/sia265.py checks the same files before an export reads anything, and tests/test_distance.py holds this file's list of them equal to its own.
 //
 // It imports from calc-engine.typ and never from formula.typ: formula.typ imports `distance` from here, which is how commands.typ, re-exporting formula.typ at the wildcard, gives every section the command -- and the helpers below stay out of the sections' scope.
-#import "calc-engine.typ": colon-str, fmt-decimals, note-column, note-gutter, number-digits, render-prose, render-table, t-str, tl-str, value-type, var-lookup, var-registry
+#import "calc-engine.typ": print-level, cite-text, colon-str, display-number, display-quantity, fmt-decimals, note-column, note-gutter, norm-text, render-prose, render-table, t-str, tl-str, value-type, var-lookup, var-registry
 // The bibliography (lib/bibliography.typ, v0.99): `bib-note` registers SIA 265 so that the tables printed here are listed at the end of the report. bibliography.typ imports calc-engine.typ and nothing else, so the chain calc-engine -> bibliography -> distance -> formula stays acyclic.
 #import "bibliography.typ": bib-note
 
@@ -151,18 +151,13 @@
   if notes.len() == 0 { words } else { [#words#super(notes.map(n => n + ")").join(" "))] }
 }
 
-// The citation: «SIA 265 Tabelle 28» -- a table takes no §, and «Tabelle» is a word, printed in the report's language; a clause is cited with its §, as norm-text cites one.
-#let distance-cite(norm, ref) = {
-  if ref == "" { [#norm] }
-  else if ref.starts-with("Tabelle ") { [#norm #tl-str("Tabelle") #ref.slice("Tabelle ".len())] }
-  else if ref.starts-with("Anhang ") { [#norm #tl-str("Anhang") #ref.slice("Anhang ".len())] }
-  else { [#norm §#ref] }
-}
+// The citation: «SIA 265 Tabelle 28», «Tabelle» printed in the report's language -- norm-text's own, the one writer of a citation (spec 2026-10-21-commandes-typst-refonte, UI-001: until then this file wrote its own, with the § norm-text then also set).
+#let distance-cite(norm, ref) = norm-text((norm: norm, norm_ref: ref))
 
-// One line with the citation beside it in the right-hand column, as annotated-rows sets one -- written here because a table is cited by its number, which norm-text would print after a §.
+// One line with the citation beside it in the right-hand column, as annotated-rows sets one, in the citation grey.
 #let distance-line(body, cite) = {
   if cite == none { return block(width: 100%, body) }
-  grid(columns: (1fr, note-column), column-gutter: note-gutter, body, align(right + horizon, text(size: 8pt, cite)))
+  grid(columns: (1fr, note-column), column-gutter: note-gutter, body, align(right + horizon, cite-text(cite)))
 }
 
 // Whether a fastener's entry of a table holds for a diameter d: the range its clause states, or every d where it states none.
@@ -179,7 +174,7 @@
   let turned = tbl.rows.len() == 1 and tbl.columns.len() > 1
   let named = not turned and (tbl.columns.len() > 1 or tbl.columns.first().label != "")
   let head = if turned { distance-label((label: "Holzdicke")) } else { distance-label(tbl.head) }
-  let columns = ((label: head, kind: "wide", group: "$d$ = " + fmt-decimals(d, number-digits.get()) + " mm"),)
+  let columns = ((label: head, kind: "wide", group: "$d$ = " + display-quantity(d, "mm")),)
   let groups = if turned { (none,) } else { tbl.columns }
   for column in groups {
     let over = if named { (group: distance-label(column)) } else { (:) }
@@ -216,7 +211,7 @@
         notes.push([#render-prose(tl-str(row.label)), #render-prose(tl-str(column.label))#colon-str() #render-prose(distance-alpha-math(cell.alpha)).])
         if alpha == none {
           let at90 = distance-cell(cell, d, 90).at(0)
-          notes.push(render-prose(t-str("distance.alpha_default", value: fmt-decimals(at90, number-digits.get()))))
+          notes.push(render-prose(t-str("distance.alpha_default", value: display-number(at90))))
         }
       }
     }
@@ -228,14 +223,14 @@
 /// Prints the minimum distances and timber thicknesses SIA 265:2021 gives for a kind of fastener, each multiple of d computed in mm for the diameter `d` -- Tabellen 24, 27, 28, 32, 33 and 36 to 41, read from `calc/norms/`.
 ///
 /// ```typ
-/// #distance(3.1, "nail", tab: 28)
+/// #distance(3.1, "nail", table: 28)
 /// ```
 ///
 /// ```typ
-/// #distance(8, "screw", tab: 38, label: "Anschluss Sparren – Pfette", descr: "Vollgewindeschrauben, nicht vorgebohrt.")
+/// #distance(8, "screw", table: 38, label: "Anschluss Sparren – Pfette", descr: "Vollgewindeschrauben, nicht vorgebohrt.")
 /// ```
 ///
-/// Every table SIA 265 gives for the kind and that holds for that d, one under the other, when no `tab:` is given:
+/// Every table SIA 265 gives for the kind and that holds for that d, one under the other, when no `table:` is given:
 ///
 /// ```typ
 /// #distance(12, "Stabdübel")
@@ -251,21 +246,27 @@
 ///
 /// ```typ
 /// #var("d", 1.6, "cm")
-/// #distance("d", "dowel", title: none)
+/// #distance("d", "dowel", label: none)
 /// ```
 ///
-/// Which tables a kind is shown: dowel -- Tabelle 24 (d from 6 to 30 mm, 6.2.1.1); bolt -- Tabelle 24 (6.3.1.3); nail -- 27, 28, 32 and 33 (d from 1.9 to 8.5 mm, 6.4.1.1); screw -- 36 and 37 (d from 6 to 12 mm, 6.5.2.3.1), 38, 39 and 40, and 28 or 33 when asked for by `tab:` (a screw with d₁/d > 0.75, or one after DIN 7998); ring -- 41. The ranges and the assignments are the norm files', not this list's.
+/// Which tables a kind is shown: dowel -- Tabelle 24 (d from 6 to 30 mm, 6.2.1.1); bolt -- Tabelle 24 (6.3.1.3); nail -- 27, 28, 32 and 33 (d from 1.9 to 8.5 mm, 6.4.1.1); screw -- 36 and 37 (d from 6 to 12 mm, 6.5.2.3.1), 38, 39 and 40, and 28 or 33 when asked for by `table:` (a screw with d₁/d > 0.75, or one after DIN 7998); ring -- 41. The ranges and the assignments are the norm files', not this list's.
 /// - d (int, float, str, dictionary): the fastener's diameter in mm; or a var object, or the name of a variable declared with `#var`, in mm, cm or m. For a ring, its outer diameter (6.8.3.1).
 /// - connector (str): the kind of fastener -- "dowel", "bolt", "nail", "screw", "ring" -- or its German name as Woodcore's connectors carry it: "Stabdübel", "Passbolzen", "Bolzen", "Vollgewindeschraube", "Teilgewindeschraube", "Nagel", "Dübel besonderer Bauart". "staple" ("Klammer") and "threaded-rod" ("eingeklebte Gewindestange") are refused, SIA 265 giving them no table.
-/// - tab (auto, int, str): auto prints every table the kind is shown by itself and that holds for d; a number prints that table alone -- refused, naming the ones that do, where it does not concern the kind or that d.
-/// - title (auto, none, str): auto sets each table's own title from the norm, in the report's language; none sets none; a string replaces it, for one table.
-/// - label (str, none): what the tables are for, on a line above them -- «Anschluss Sparren – Pfette».
-/// - descr (str, none): a footnote on that line, or on the first title where there is no label.
+/// - table (auto, int, str, array): auto prints every table the kind is shown by itself and that holds for d; a number prints that table alone, a list those tables in its order -- each refused, naming the ones that do, where it does not concern the kind or that d.
+/// - label (auto, none, str): the title of each table: auto the norm's own, in the report's language; none none; a string replaces it -- «Anschluss Sparren – Pfette» --, for one table (`title:` until the spec 2026-10-21-commandes-typst-refonte, REQ-016).
+/// - descr (str, none): a footnote on the first table's title.
 /// - norm (auto, none, str): the citation in the right-hand column: auto is the norm's own, "SIA 265"; none prints none.
-/// - norm-ref (auto, str): auto cites the table by its number, «Tabelle 28»; a string replaces it, for one table -- a clause is printed after a §.
+/// - norm-section (auto, str): auto cites the table by its number, «Tabelle 28»; a string replaces it, for one table.
 /// - alpha (none, int, float): the angle between force and grain in degrees, 0 to 90, for the one value that depends on it, Tabelle 41's spacing between rings along the grain; refused where no table shown depends on it.
+/// - level (auto, int): 1 the tables alone, without their titles and their citation where `label` and `norm` are auto; 2 with them (what a document prints by default); 3 the same as 2, the citation of the norm's table being printed from 2. auto follows the report.
+/// - id (str, none): the name Woodcore finds this call by in a domain it wrote, as every line's `id:` (REQ-012).
 /// -> content
-#let distance(d, connector, tab: auto, title: auto, label: none, descr: none, norm: auto, norm-ref: auto, alpha: none) = bib-note(distance-norm()) + context {
+#let distance(d, connector, table: auto, label: auto, descr: none, norm: auto, norm-section: auto, alpha: none, id: none, level: auto) = bib-note(distance-norm()) + context {
+  // the uniform names (spec 2026-10-21-commandes-typst-refonte, REQ-016): `table` was `tab`, `label` was `title`, `norm-section` was `norm-ref` -- the old names said by the export with what to write (calc/renamed-commands.json)
+  let norm-ref = norm-section
+  let title = label
+  // the level (spec 2026-10-20-indices-et-niveaux, UI-003): the tables' titles and their citation, where the call leaves them auto, from level 2
+  let (title, norm) = if print-level("distance", level) >= 2 { (title, norm) } else { (if title == auto { none } else { title }, if norm == auto { none } else { norm }) }
   // ⚠️ `bib-note(distance-norm()) + context { … }` above: the document these tables come out of is registered for the bibliography **outside** this context, which is where a state written is read back by the folded chain an update function reads (docs/domain/connections.md §3.3quinquies, v0.99). It is registered whatever `norm:` asks to be printed beside them -- `norm: none` prints no citation and the tables are still SIA 265's.
   let kind = distance-kind(connector)
   if kind in distance-none {
@@ -283,9 +284,7 @@
     let entry = tbl.fasteners.find(f => f.fastener == kind)
     if entry != none { stated.push((number: number, tbl: tbl, entry: entry, fits: distance-in-scope(entry, dd))) }
   }
-  let shown = if tab == auto {
-    stated.filter(s => s.entry.auto and s.fits)
-  } else {
+  let pick-one(tab) = {
     let number = str(tab)
     if not (number in distance-files) {
       panic("distance: SIA 265 has no table of distances " + repr(tab) + " -- the tables are " + distance-files.keys().join(", "))
@@ -293,36 +292,35 @@
     let pick = stated.find(s => s.number == number)
     let fitting = stated.filter(s => s.fits).map(s => s.number)
     if pick == none {
-      panic("distance: Tabelle " + number + " is not stated for a " + kind + " -- for a " + kind + " of d = " + fmt-decimals(dd, 3) + " mm, tab: takes " + fitting.join(", "))
+      panic("distance: Tabelle " + number + " is not stated for a " + kind + " -- for a " + kind + " of d = " + fmt-decimals(dd, 3) + " mm, table: takes " + fitting.join(", "))
     }
     if not pick.fits {
       let span = json(distance-dir + pick.entry.scope + ".json").clause
       panic("distance: Tabelle " + number + " holds for a " + kind + " of d from " + fmt-decimals(span.diameter_range.min, 3) + " to " + fmt-decimals(span.diameter_range.max, 3)
-        + " mm (SIA 265 " + span.norm_ref + ") -- d = " + fmt-decimals(dd, 3) + " mm" + (if fitting.len() == 0 { "" } else { "; tab: takes " + fitting.join(", ") }))
+        + " mm (SIA 265 " + span.norm_ref + ") -- d = " + fmt-decimals(dd, 3) + " mm" + (if fitting.len() == 0 { "" } else { "; table: takes " + fitting.join(", ") }))
     }
-    (pick,)
+    pick
   }
+  // auto every table the kind is shown by itself that holds for d; a number that table; a list those tables, in its order (REQ-016)
+  let shown = if table == auto { stated.filter(s => s.entry.auto and s.fits) } else if type(table) == array { table.map(pick-one) } else { (pick-one(table),) }
   if shown.len() == 0 {
     let spans = stated.filter(s => "scope" in s.entry).map(s => json(distance-dir + s.entry.scope + ".json").clause).dedup()
     panic("distance: no table of SIA 265 holds for a " + kind + " of d = " + fmt-decimals(dd, 3) + " mm -- "
       + spans.map(c => "SIA 265 " + c.norm_ref + " states d from " + fmt-decimals(c.diameter_range.min, 3) + " to " + fmt-decimals(c.diameter_range.max, 3) + " mm").join("; "))
   }
   if shown.len() > 1 {
-    if value-type(title) == str { panic("distance: title: a string names one table, and " + str(shown.len()) + " are shown -- pick one with tab: (" + shown.map(s => s.number).join(", ") + "), or leave title: auto") }
-    if value-type(norm-ref) == str { panic("distance: norm-ref: a string cites one table, and " + str(shown.len()) + " are shown -- pick one with tab: (" + shown.map(s => s.number).join(", ") + "), or leave norm-ref: auto") }
+    if value-type(title) == str { panic("distance: label: a string names one table, and " + str(shown.len()) + " are shown -- pick one with table: (" + shown.map(s => s.number).join(", ") + "), or leave label: auto") }
+    if value-type(norm-ref) == str { panic("distance: norm-section: a string cites one table, and " + str(shown.len()) + " are shown -- pick one with table: (" + shown.map(s => s.number).join(", ") + "), or leave norm-section: auto") }
   }
   if alpha != none and not shown.any(s => s.tbl.rows.any(r => s.tbl.columns.any(c => "alpha" in r.at(c.id)))) {
     panic("distance: alpha: no table shown depends on the angle between force and grain -- only Tabelle 41's spacing between rings does")
   }
 
   let note = if descr == none { none } else { footnote(render-prose(tl-str(descr))) }
-  if label != none {
-    block(above: 1em, below: 0.5em, sticky: true, [#render-prose(tl-str(label))#note])
-  }
   for (i, s) in shown.enumerate() {
     // The table's title is its numbered caption, «Tabelle 3: …», set by render-table as every table's is (table-figure); the citation stays in the right-hand column of a line of its own above it.
     let head = if title == auto { render-prose(tl-str(s.tbl.title)) } else if title == none { [] } else { render-prose(tl-str(title)) }
-    if i == 0 and label == none and note != none { head = [#head#note] }
+    if i == 0 and note != none { head = [#head#note] }
     let cite = if norm == none { none } else {
       let ref = if norm-ref == auto { "Tabelle " + s.number } else { norm-ref }
       distance-cite(if norm == auto { s.tbl.norm } else { norm }, ref)

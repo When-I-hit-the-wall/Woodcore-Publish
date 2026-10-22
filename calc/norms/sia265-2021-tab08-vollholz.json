@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, Tabelle 8 (clause 3.3.2.1) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 25. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
+  "_source": "SIA 265:2021, Tabelle 8 (clause 3.3.2.1) -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 25. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
   "_note": "Design values, already divided by gamma_M/eta_M (clause 2.2.2), and valid for Feuchteklasse 1 with eta_w = 1.0 and eta_t = 1.0 -- another moisture class multiplies them (Tabelle 4). `species` is the norm's own column heading, Nadelholz or Laubholz, and is what SIA 265 Tabelle 22 picks a Lochleibungsfestigkeit branch by; it is a property of the grade, so nothing asks for it a second time. `groessere_eindrueckungen` is the parenthesised value of footnote 4, null where the norm gives none. Decimals are written the way the report prints them (0.1), not the norm's comma.",
   "edition": "SIA 265:2021",
   "table_8": {

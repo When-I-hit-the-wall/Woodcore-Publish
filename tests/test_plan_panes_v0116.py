@@ -147,7 +147,9 @@ def test_with_nothing_selected_the_plan_s_modules_show_the_crop_above_the_scale(
     with project.using(here), _dialogs():
         _open_plan(tab, _plan_source())
         assert not tab.has_selection()
-        expected = [tab.t("plan_group_plan"), tab.t("plan_group_background"), tab.t("plan_group_crop"), tab.t("plan_group_scale"), tab.t("plan_group_snap"), tab.t("plan_group_style"),
+        expected = [tab.t("plan_group_plan"), tab.t("plan_group_background"), tab.t("plan_group_crop"), tab.t("plan_group_scale"), tab.t("plan_group_snap"),
+                    tab.t("plan_group_centres"),   # the stiffness centre and the mass centre, a module of the plan (issue #54)
+                    tab.t("plan_group_style"),
                     tab.superposition.card.title()]   # «Superposition» after the sizes (WP-F)
         assert _titles(tab) == expected, _titles(tab)
         assert tab.selection_group.isHidden()

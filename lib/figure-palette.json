@@ -1,0 +1,32 @@
+{
+  "about": "The colours and the font every figure of Woodcore is drawn with -- the position plans, the fire plans, the schemas, the static models, the connections, the connectors, the dead loads and the snow -- written once for the drawing engines of calc/domains/ (svg_draw.colour) and for the report's own drawings (lib/calc-engine-drawings.typ reads this file with json(\"figure-palette.json\")), spec 2026-10-19-base-saine-nettoyage D5. Until v0.120 each engine wrote its own: some sixty values, five blacks among them (#000000, #111111, #1f1f1f, #222222, #2b2b2b); they were merged here into one per role (Q-015), the plan's STE colours kept where a hue had several. A colour is named by its hue or its role, never by the engine that draws it. `lists` holds the rotations a figure takes one after the other, each colour distinct on purpose. The window's own colours are not here: they are calc/tools/theme.json's.",
+  "font-family": "Arial",
+  "colours": {
+    "ground": "#ffffff",
+    "ink": "#1f1f1f",
+    "axis": "#333333",
+    "ink-soft": "#5b646c",
+    "muted": "#8a8a8a",
+    "aid": "#9aa4ac",
+    "concrete-deck": "#e2e5e8",
+    "concrete": "#edeff1",
+    "orange": "#e8841a",
+    "red": "#d32f2f",
+    "blue": "#2e5faa",
+    "light-blue": "#3fa9d6",
+    "green": "#2e8b40",
+    "yellow": "#f4d03f",
+    "ochre": "#d9a400",
+    "ochre-dark": "#6b5200",
+    "violet": "#7c3aa0",
+    "pink": "#e754a6",
+    "brown": "#8a5a2b",
+    "snow": "#cfe3f3",
+    "snow-edge": "#5a86a8",
+    "insulation": "#f4e7a1"
+  },
+  "lists": {
+    "wood": ["#ecd9b4", "#d9bf8c", "#e4cf9f", "#cdb17c", "#efdfbf", "#d2b889"],
+    "layers": ["#d7dde2", "#c4ccd3", "#e9e4d8"]
+  }
+}

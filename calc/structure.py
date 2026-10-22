@@ -261,7 +261,6 @@ def sync_entry(entry_file, structure, language):
 
 # --- the tree ------------------------------------------------------------------------------
 
-NODE_KINDS = ("group", "file", "heading", "object")
 
 
 # --- switching a section on and off, and naming it -----------------------------------------
@@ -550,19 +549,6 @@ def fit_text(text, level):
     return text if first is None else shift_headings(text, level - first.level)
 
 
-def fit_file(path, depth):
-    """The file at `path` written so that its first heading -- outside its shared blocks -- is of level `depth` (`fit_text`). Returns whether it was written."""
-    try:
-        text = typst_paths.read_text(path)
-    except (OSError, UnicodeDecodeError):
-        return False
-    new_text = fit_text(text, depth)
-    if new_text == text:
-        return False
-    typst_paths.write_text(path, new_text)
-    return True
-
-
 # --- the catalogue: adding, removing, moving and renaming sections -------------------------------------------
 
 ARCHIVES_DIR = "archives"
@@ -715,7 +701,7 @@ def _run(steps):
         for do, undo in steps:
             do()
             done.append(undo)
-    except Exception as exc:
+    except Exception as exc:  # broad: whatever stopped a step, the steps done are undone first, then raised again
         for undo in reversed(done):
             try:
                 undo()

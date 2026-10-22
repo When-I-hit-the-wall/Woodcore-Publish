@@ -10,10 +10,12 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "description": "-- pinned: an export written at another version is refused rather than read as this one. 4.1 adds `calculated` and `reason`: a connection its schema no longer draws whole is exported and refused by the report, where it stopped the export or was printed on what remained (periodic audit 260916). 4.0 drops `connector`: a polar moment names a schema and no connector (v0.76). 3.0 was the move to a detail schema: `schema` replaced `orientation`, and a member names an element and carries two angles -- `local` from the reference member, `axis` from the schema's x (v0.74). 4.2 (issue #42): a record may carry `links`.",
+      "description": "-- pinned: an export written at another version is refused rather than read as this one. 4.1 adds `calculated` and `reason`: a connection its schema no longer draws whole is exported and refused by the report, where it stopped the export or was printed on what remained (periodic audit 260916). 4.0 drops `connector`: a polar moment names a schema and no connector (v0.76). 3.0 was the move to a detail schema: `schema` replaced `orientation`, and a member names an element and carries two angles -- `local` from the reference member, `axis` from the schema's x (v0.74). 4.2 (issue #42): a record may carry `links`. 4.3 (issue #64): 4.2 with the figures named from the Typst root (`/Connections/Exports/Figures/V01-fr.svg`), written by a project laid out by folders. 4.4 (v0.120, UI-002): a line carries no level, lib/line-levels.json says it; it holds what 4.2 and 4.3 hold.",
       "enum": [
         "4.1",
-        "4.2"
+        "4.2",
+        "4.3",
+        "4.4"
       ]
     },
     "connections": {
@@ -275,7 +277,6 @@
                     "unit",
                     "symbol",
                     "label",
-                    "level",
                     "source",
                     "norm",
                     "norm_ref"
@@ -324,7 +325,6 @@
                 "type": "object",
                 "required": [
                   "name",
-                  "level",
                   "result",
                   "uses",
                   "norm",

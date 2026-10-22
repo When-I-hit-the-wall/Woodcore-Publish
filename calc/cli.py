@@ -5,6 +5,8 @@
     python calc/cli.py run-script  <script.py> --report <file> [--project P]
     python calc/cli.py sync-engine [--project F] [--update]
     python calc/cli.py sync        status|share|import|move [--document cu|bp|rs] ...   the sections the documents share (calc/cli_sync.py, v0.117)
+    python calc/cli.py unfold      status|import|reinsert|take-back|regenerate [--check <id>] ...   the member checks printed unfolded in Formules/ (calc/cli_unfold.py)
+    python calc/cli.py loads       migrate [--project F] [--dry-run]   the project's files taken to the names the snow and wind sheets give since v0.120 (calc/domains/loads_migrate.py)
     python calc/cli.py new         <folder> --name N [--template T] [--style S] [--language de|fr|en] [--folders CU BP RS] [--report-folder F] [--number ...] [--client ...] [--address ...] [--company ...] [--author ...] [--checker ...]
     python calc/cli.py migrate     [--project F] [--language de|fr|en] [--names CU BP RS] [--dry-run] [--skip-data] [--update-engine] [--lock-owner PID]
     python calc/cli.py migrate     --rollback <archives>/migration-<timestamp>
@@ -69,8 +71,10 @@ ALL_DOCUMENTS = "all"
 def requested_documents(here, which=None):
     """The documents `--document` names, in the project's order (project.MODES): every one of the project's for `all` or None, else the one named -- a ProjectError where the project has no such document, a report alone having none but the report (Project.document_typ says so, naming the migration)."""
     if which in (None, ALL_DOCUMENTS):
-        return tuple(here.modes)
+        return tuple(here.created_modes)
     here.document_typ(which)
+    if not here.is_created(which):   # a document of the layout not made yet (issue #90): made from the «Projet» tab
+        raise project.ProjectError(f"{here.rel(here.document_typ(which))} is not made yet -- choose its content template in Woodcore's «Projet» tab")
     return (which,)
 
 
@@ -231,7 +235,8 @@ def run_script(args):
     It is the child `calc/domains/script.py` spawns, and it is a command of its own rather than a private entry point because that is what lets an installed Woodcore -- which has no `python.exe` -- relaunch itself to run a script (project.cli_command). Run by hand it is also the way to see a script fail with its traceback on the terminal.
     """
     from domains import script_runner
-    return script_runner.main([args.source, "--report", args.report, *(["--results-only"] if args.results_only else [])])
+    return script_runner.main([args.source, "--report", args.report, *(["--results-only"] if args.results_only else []),
+                               *(["--calculations", args.calculations] if args.calculations else [])])
 
 
 def parser():
@@ -257,8 +262,16 @@ def parser():
     r.add_argument("source", help="the script: Woodcore-Datei/scripts/<id>.py")
     r.add_argument("--report", required=True, help="the JSON file the run's results, variables and reason are written to")
     r.add_argument("--results-only", action="store_true", help="leave the variables out: what the export asks for, having no use for a local")
+    r.add_argument("--calculations", help="the calculations a script's value() reads -- the export's own, in memory, written to a file of its own; data/calculations.json if left out")
+    lo = sub.add_parser("loads", help="the snow and wind values of the project's files: migrate -- what Woodcore does when the project is opened")
+    lo_actions = lo.add_subparsers(dest="action", required=True)
+    lm = lo_actions.add_parser("migrate", help="the sections, scripts and sources taken to the names the snow and wind sheets give since v0.120, each file saved first into the archives")
+    lm.add_argument("--dry-run", action="store_true", help="say what would change, writing nothing")
+    lm.add_argument("--project", help="the project's .woodcore file; else WOODCORE_PROJECT's, else the one beside the checkout")
     import cli_sync
     cli_sync.add_parser(sub)
+    import cli_unfold
+    cli_unfold.add_parser(sub)
     s = sub.add_parser("sync-engine", help="copy the program's engine into the project")
     s.add_argument("--update", action="store_true", help="replace a copy another version wrote, or one edited by hand")
     for p in (e, sub.choices["check"], s, r):
@@ -282,6 +295,22 @@ def parser():
     c.add_argument("folder", help="the old folder: 000-TypstRapport/ and 000-Python/, or an archive of one")
     c.add_argument("--name", help="the project's name; the folder's name if left out")
     return ap
+
+
+def loads(args):
+    """`loads migrate`: the project's sections, scripts and sources taken to the names the snow and wind sheets give since v0.120 (spec 2026-10-21-restes-issue-69, CON-002) -- what the window does when the project is opened, each file saved first into the archives. `--dry-run` says what would change and what cannot be rewritten, writing nothing."""
+    from domains import loads_migrate
+    here = project.current()
+    changes, unresolved = loads_migrate.plan(here)
+    for change in changes:
+        print(f"{here.rel(change.path)}: " + "; ".join(change.notes))
+    for path, where, name, why in unresolved:
+        print(f"{here.rel(path)} ({where}): {name!r} cannot be rewritten -- {why}", file=sys.stderr)
+    if not args.dry_run:
+        loads_migrate.commit(here, changes)
+    if not changes and not unresolved:
+        print("woodcore-cli: nothing names a load value by its old name")
+    return 1 if unresolved else 0
 
 
 def main(argv=None):
@@ -308,6 +337,11 @@ def main(argv=None):
     if args.command == "sync":
         import cli_sync
         return cli_sync.run(args)
+    if args.command == "unfold":
+        import cli_unfold
+        return cli_unfold.run(args)
+    if args.command == "loads":
+        return loads(args)
     return {"export": export, "check": check,
             "sync-engine": sync_engine, "run-script": run_script}[args.command](args)
 

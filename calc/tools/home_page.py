@@ -8,8 +8,6 @@ One process works on one project (calc/project.py): this page opens a project in
 Nothing here writes into a project but *Nouveau projet* and *Propriétés du projet*, each through calc/project_template.py or project.update, and the lock (calc/project_lock.py).
 """
 
-import json
-import inspect
 import os
 from datetime import datetime
 from pathlib import Path
@@ -21,8 +19,6 @@ from PySide6.QtWidgets import (
     QLineEdit, QMainWindow, QMenu, QMessageBox, QPushButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
-import doc_templates  # the content templates, «templates de fond», each document is made from (calc/doc_templates.py)
-import documents  # what each of the three documents is called (calc/documents.py)
 import project
 import busy
 import project_template
@@ -64,7 +60,6 @@ STRINGS = {
         "home_failed": "Ce projet n'a pas pu être ouvert :\n\n{error}",
         "home_language": "Langue :",
         "proj_new_title": "Nouveau projet",
-        "proj_props_title": "Propriétés du projet",
         "proj_location": "Emplacement",
         "proj_choose": "Choisir…",
         "proj_folder": "Dossier du projet",
@@ -75,28 +70,14 @@ STRINGS = {
         "proj_company": "Bureau",
         "proj_author": "Auteur",
         "proj_checker": "Vérificateur",
-        "proj_form": "Template de forme",
         "proj_form_hint": "La mise en page des trois documents : polices, tailles, marges, titres, page de titre — aucune donnée.",
-        "proj_form_old": "(config.typ d'une version précédente)",
-        "proj_form_switch_hint": "Un autre template de forme remplace le dossier Template/ et le title.typ du projet ; les anciens sont archivés dans _Archiv. Vos réglages dans config.typ sont gardés.",
         "proj_form_ask": "Le projet s'imprimera avec le template de forme « {form} » : son dossier Template/ et son title.typ seront remplacés, les anciens archivés dans _Archiv. Vos réglages dans config.typ sont gardés.\n\nChanger de template de forme ?",
         "proj_form_ask_old": "Le projet s'imprimera avec le template de forme « {form} » : son config.typ, d'une version précédente, sera remplacé par un config.typ qui ne garde que la langue et vos réglages à venir, et archivé dans _Archiv avec son title.typ. Ce qui a été modifié à la main dans l'ancien config.typ ne passe pas dans le nouveau.\n\nChanger de template de forme ?",
         "proj_form_failed": "Le template de forme n'a pas pu être appliqué :\n\n{error}",
-        "proj_content_cu": "Template de fond — convention d'utilisation",
-        "proj_content_bp": "Template de fond — base de projet",
-        "proj_content_rs": "Template de fond — rapport de statique",
-        "proj_content_hint": "Le template de fond de ce document : ses sections, objets et textes. Seuls les templates de fond qui existent dans la langue choisie sont proposés.",
-        "proj_content_none": "(aucun template de fond dans cette langue)",
         "proj_language": "Langue du rapport",
         "proj_language_hint": "Règle d'un coup la langue du document (config.typ : la césure, «Abbildung»/«Fig.», le titre du sommaire) et celle du moteur (#set-report-language : les libellés des calculs, les titres des tableaux, les légendes des figures).",
-        "proj_doc_folder": "Dossier : {document}",
-        "proj_doc_folders_hint": "Le dossier de chacun des trois documents, dans le dossier du projet. Par défaut les noms de la langue choisie ; le fichier .typ et le PDF du rapport gardent le leur.",
-        "proj_doc_folder_needed": "Le dossier de « {document} » a besoin d'un nom.",
-        "proj_doc_folders_same": "« {first} » et « {second} » ont le même dossier : chaque document a le sien.",
-        "proj_version": "Version de Woodcore",
         "proj_version_latest": "La plus récente installée",
-        "proj_hint_new": "Crée le dossier du projet : ses trois documents — la convention d'utilisation, la base de projet et le rapport de statique — et leurs sections, et les dossiers de Woodcore-Datei, où l'onglet Positions enregistre les positions. Copiez-y ensuite le classeur Belastungsannahmen du bureau avant le premier export.",
-        "proj_hint_props": "Le nom, le numéro et les personnes sont imprimés sur la page de titre et dans les métadonnées du PDF au prochain export.",
+        "proj_hint_new": "Crée le dossier du projet dans la langue choisie, qui ne se change plus. La page de titre, le template de forme et le template de fond de chaque document se choisissent ensuite dans l'onglet Projet, où Woodcore s'ouvre.",
         "proj_name_needed": "Le projet a besoin d'un nom.",
         "proj_failed": "Le projet n'a pas pu être écrit :\n\n{error}",
         "busy_creating": "Création du projet…",
@@ -121,6 +102,11 @@ STRINGS = {
         "file_open_vscode": "Ouvrir dans &VS Code",
         "file_dev": "Ouvrir les fichiers .woodcore avec ces sources (développement)",
         "file_dev_tip": "Un double-clic sur un fichier .woodcore lancera Woodcore depuis ces sources plutôt que la version installée.",
+        "view_menu": "&Affichage",
+        "zoom_in": "Zoom &avant",
+        "zoom_out": "Zoom a&rrière",
+        "zoom_reset": "&Taille réelle",
+        "zoom_status": "Zoom {percent} %",
         "file_appearance": "&Apparence",
         "file_appearance_system": "Comme &Windows",
         "file_appearance_light": "&Clair",
@@ -155,7 +141,6 @@ STRINGS = {
         "home_failed": "Dieses Projekt konnte nicht geöffnet werden:\n\n{error}",
         "home_language": "Sprache:",
         "proj_new_title": "Neues Projekt",
-        "proj_props_title": "Projekteigenschaften",
         "proj_location": "Speicherort",
         "proj_choose": "Wählen…",
         "proj_folder": "Projektordner",
@@ -166,28 +151,14 @@ STRINGS = {
         "proj_company": "Büro",
         "proj_author": "Verfasser",
         "proj_checker": "Prüfer",
-        "proj_form": "Formvorlage",
         "proj_form_hint": "Das Layout der drei Dokumente: Schriften, Grössen, Ränder, Titel, Titelseite — keine Daten.",
-        "proj_form_old": "(config.typ einer früheren Version)",
-        "proj_form_switch_hint": "Eine andere Formvorlage ersetzt den Ordner Template/ und die title.typ des Projekts; die alten werden in _Archiv archiviert. Die eigenen Einstellungen in config.typ bleiben.",
         "proj_form_ask": "Das Projekt wird mit der Formvorlage «{form}» gedruckt: sein Ordner Template/ und seine title.typ werden ersetzt, die alten in _Archiv archiviert. Die eigenen Einstellungen in config.typ bleiben.\n\nDie Formvorlage wechseln?",
         "proj_form_ask_old": "Das Projekt wird mit der Formvorlage «{form}» gedruckt: seine config.typ einer früheren Version wird durch eine config.typ ersetzt, die nur die Sprache und künftige eigene Einstellungen behält, und mit seiner title.typ in _Archiv archiviert. Was in der alten config.typ von Hand geändert wurde, geht nicht in die neue über.\n\nDie Formvorlage wechseln?",
         "proj_form_failed": "Die Formvorlage konnte nicht angewendet werden:\n\n{error}",
-        "proj_content_cu": "Inhaltsvorlage — Nutzungsvereinbarung",
-        "proj_content_bp": "Inhaltsvorlage — Projektbasis",
-        "proj_content_rs": "Inhaltsvorlage — statischer Bericht",
-        "proj_content_hint": "Die Inhaltsvorlage dieses Dokuments: seine Abschnitte, Objekte und Texte. Angeboten werden nur Inhaltsvorlagen, die es in der gewählten Sprache gibt.",
-        "proj_content_none": "(keine Inhaltsvorlage in dieser Sprache)",
         "proj_language": "Sprache des Berichts",
         "proj_language_hint": "Setzt zugleich die Sprache des Dokuments (config.typ: die Silbentrennung, «Abbildung»/«Fig.», der Titel des Inhaltsverzeichnisses) und die der Engine (#set-report-language: die Bezeichnungen der Berechnungen, die Titel der Tabellen, die Legenden der Abbildungen).",
-        "proj_doc_folder": "Ordner: {document}",
-        "proj_doc_folders_hint": "Der Ordner jedes der drei Dokumente, im Projektordner. Standard sind die Namen der gewählten Sprache; die .typ-Datei und das PDF des Berichts behalten ihren Namen.",
-        "proj_doc_folder_needed": "Der Ordner von «{document}» braucht einen Namen.",
-        "proj_doc_folders_same": "«{first}» und «{second}» haben denselben Ordner: jedes Dokument hat seinen eigenen.",
-        "proj_version": "Woodcore-Version",
         "proj_version_latest": "Die neueste installierte",
-        "proj_hint_new": "Legt den Projektordner an: seine drei Dokumente — Nutzungsvereinbarung, Projektbasis und statischen Bericht — mit ihren Abschnitten, und die Ordner von Woodcore-Datei, in die das Register Positionen die Positionen speichert. Vor dem ersten Export die Belastungsannahmen-Arbeitsmappe des Büros hineinkopieren.",
-        "proj_hint_props": "Name, Nummer und Personen stehen ab dem nächsten Export auf dem Titelblatt und in den Metadaten des PDF.",
+        "proj_hint_new": "Erstellt den Projektordner in der gewählten Sprache, die sich nicht mehr ändern lässt. Titelseite, Formvorlage und die Inhaltsvorlage jedes Dokuments werden danach im Register Projekt gewählt, in dem Woodcore sich öffnet.",
         "proj_name_needed": "Das Projekt braucht einen Namen.",
         "proj_failed": "Das Projekt konnte nicht geschrieben werden:\n\n{error}",
         "busy_creating": "Projekt wird erstellt…",
@@ -212,6 +183,11 @@ STRINGS = {
         "file_open_vscode": "In &VS Code öffnen",
         "file_dev": ".woodcore-Dateien mit diesen Quellen öffnen (Entwicklung)",
         "file_dev_tip": "Ein Doppelklick auf eine .woodcore-Datei startet Woodcore aus diesen Quellen statt der installierten Version.",
+        "view_menu": "&Ansicht",
+        "zoom_in": "Ver&grössern",
+        "zoom_out": "Ver&kleinern",
+        "zoom_reset": "&Originalgrösse",
+        "zoom_status": "Zoom {percent} %",
         "file_appearance": "&Darstellung",
         "file_appearance_system": "Wie &Windows",
         "file_appearance_light": "&Hell",
@@ -246,7 +222,6 @@ STRINGS = {
         "home_failed": "This project could not be opened:\n\n{error}",
         "home_language": "Language:",
         "proj_new_title": "New project",
-        "proj_props_title": "Project properties",
         "proj_location": "Location",
         "proj_choose": "Choose…",
         "proj_folder": "Project folder",
@@ -257,28 +232,14 @@ STRINGS = {
         "proj_company": "Office",
         "proj_author": "Author",
         "proj_checker": "Checker",
-        "proj_form": "Layout template",
         "proj_form_hint": "How the three documents look: fonts, sizes, margins, headings, title page — no data.",
-        "proj_form_old": "(config.typ of an earlier version)",
-        "proj_form_switch_hint": "Another layout template replaces the project's Template/ folder and title.typ; the old ones are archived in _Archiv. Your adjustments in config.typ are kept.",
         "proj_form_ask": "The project will be printed with the layout template «{form}»: its Template/ folder and its title.typ will be replaced, the old ones archived in _Archiv. Your adjustments in config.typ are kept.\n\nSwitch the layout template?",
         "proj_form_ask_old": "The project will be printed with the layout template «{form}»: its config.typ, of an earlier version, will be replaced by a config.typ that keeps only the language and your adjustments to come, and archived in _Archiv with its title.typ. What was edited by hand in the old config.typ does not pass into the new one.\n\nSwitch the layout template?",
         "proj_form_failed": "The layout template could not be applied:\n\n{error}",
-        "proj_content_cu": "Content template — service criteria agreement",
-        "proj_content_bp": "Content template — basis of design",
-        "proj_content_rs": "Content template — statical report",
-        "proj_content_hint": "The content template of this document: its sections, objects and texts. Only the content templates that exist in the chosen language are offered.",
-        "proj_content_none": "(no content template in this language)",
         "proj_language": "Report language",
         "proj_language_hint": "Sets at once the document's language (config.typ: the hyphenation, «Abbildung»/«Fig.», the outline's title) and the engine's (#set-report-language: the calculations' labels, the tables' titles, the figures' legends).",
-        "proj_doc_folder": "Folder: {document}",
-        "proj_doc_folders_hint": "The folder of each of the three documents, inside the project's folder. The names of the chosen language by default; the report's .typ file and PDF keep their own.",
-        "proj_doc_folder_needed": "The folder of “{document}” needs a name.",
-        "proj_doc_folders_same": "“{first}” and “{second}” are given the same folder: each document has one of its own.",
-        "proj_version": "Woodcore version",
         "proj_version_latest": "The newest installed",
-        "proj_hint_new": "Creates the project's folder: its three documents — the service criteria agreement, the basis of design and the statical report — and their sections, and the folders of Woodcore-Datei, where the Positions tab saves the positions. Copy the office's Belastungsannahmen workbook into it before the first export.",
-        "proj_hint_props": "The name, the number and the people are printed on the title page and in the PDF's metadata from the next export on.",
+        "proj_hint_new": "Creates the project's folder in the language chosen, which no longer changes. The title page, the layout template and each document's content template are chosen afterwards in the Project tab, where Woodcore opens.",
         "proj_name_needed": "The project needs a name.",
         "proj_failed": "The project could not be written:\n\n{error}",
         "busy_creating": "Creating the project…",
@@ -303,6 +264,11 @@ STRINGS = {
         "file_open_vscode": "Open in &VS Code",
         "file_dev": "Open .woodcore files with these sources (development)",
         "file_dev_tip": "A double-click on a .woodcore file will start Woodcore from these sources rather than the installed version.",
+        "view_menu": "&View",
+        "zoom_in": "Zoom &in",
+        "zoom_out": "Zoom &out",
+        "zoom_reset": "&Actual size",
+        "zoom_status": "Zoom {percent}%",
         "file_appearance": "&Appearance",
         "file_appearance_system": "Like &Windows",
         "file_appearance_light": "&Light",
@@ -343,14 +309,8 @@ def summary(file):
         row["error"] = str(exc)
         return row
     row["name"], row["number"] = here.name, here.detail("number")
-    stamp = here.data_dir / "project.json"
-    if stamp.is_file():
-        row["exported"] = datetime.fromtimestamp(stamp.stat().st_mtime)
-    version = here.generated_dir / project.ENGINE_STAMP
-    try:
-        row["engine"] = str(json.loads(version.read_text(encoding="utf-8")).get("version", ""))
-    except (OSError, ValueError, AttributeError):
-        pass
+    # the time of the last export, not of data/project.json, which the «Projet» tab rewrites as a title page's field is saved (project.last_export, issue #87)
+    row["exported"], row["engine"] = project.last_export(here)
     return row
 
 
@@ -374,128 +334,49 @@ def ask_lock(parent, lang, here, holder):
 
 
 class ProjectDialog(QDialog):
-    """«Nouveau projet» -- where, in which language, with which layout template and which content templates, and what the title page says -- and «Propriétés du projet» -- what the title page says, the layout template, and the version the project asks for. The fields are project.DETAILS and nothing else, so the file cannot carry a field this dialog does not know.
+    """«Nouveau projet»: the project's name -- which names its folder too --, where that folder goes, and the project's language, nothing else (issue #90, the engineer, 21.10.2026: «La fenêtre qui s'ouvre pour créer le nouveau projet doit uniquement demander le nom du projet, qui sera le nom du dossier créé, ainsi que l'endroit où ce dossier doit être créé»; and 22.10.2026: «le choix de la langue se fait lors de la création du projet»). The folder is shown before it is made. Everything else -- the title page, the form, each document's content template, the version pinned -- is the «Projet» tab's (project_tab.py), where the window opens on the new project.
 
-    **The two kinds of template are told apart** (the engineer's decision of 06.10.2026): a **layout template** («template de forme», calc/forms.py) is the look of the three documents -- fonts, sizes, margins, headings, title page, no data --, one combo, the settings' default first (`forms.default`, else builtin neutral), its description under it and as its tooltip; a **content template** («template de fond», calc/doc_templates.py) is the sections, objects and texts of one document, one combo for each of the three -- the convention d'utilisation, the base de projet and the report --, listing the templates that exist in the language chosen, the builtin standard one first and chosen at first, then the engineer's own and the office's, listed again whenever the language changes, the choice kept where the new language still offers it. The project templates of v0.94 are gone: the company, the author and the checker are the settings' defaults, and the language the settings' report language.
+    The language is the project's for good: the document's and the engine's both (docs/typst/language.md §4bis), the settings' report language at first."""
 
-    In a project's properties the layout template's combo shows the one the project is written in (forms.current) -- or «(config.typ d'une version précédente)» for a project whose look is still one config.typ --, and choosing another switches it once the engineer agrees (`edit_properties`)."""
-
-    def __init__(self, parent, lang, mode, data=None, location=None, versions=()):
+    def __init__(self, parent, lang, location=None):
         super().__init__(parent)
         self.t = STRINGS[lang]
         self.lang = lang
-        self.mode = mode
-        data = data or {}
-        self.setWindowTitle(self.t["proj_new_title" if mode == "new" else "proj_props_title"])
-        self.setMinimumWidth(560)
+        self.setWindowTitle(self.t["proj_new_title"])
+        self.setMinimumWidth(520)
         layout = QVBoxLayout(self)
-        hint = QLabel(self.t["proj_hint_new" if mode == "new" else "proj_hint_props"])
+        hint = QLabel(self.t["proj_hint_new"])
         hint.setWordWrap(True)
         layout.addWidget(hint)
         form = QFormLayout()
-        self.fields = {}
         self.settings = usersettings.read()
-        # the layout templates there are, sound ones only (calc/forms.py)
-        self.forms = [found for found in forms.list_forms(self.settings) if not found.error]
-        if mode == "new":
-            row = QHBoxLayout()
-            self.location = QLineEdit(str(location or Path.home()))
-            choose = QPushButton(self.t["proj_choose"])
-            choose.clicked.connect(self.choose_location)
-            row.addWidget(self.location, 1)
-            row.addWidget(choose)
-            form.addRow(self.t["proj_location"], row)
-            # One language for the whole report -- the document's and the engine's both, which is the engineer's answer C9 (v0.100): two settings in the files (docs/typst/language.md §4bis), one choice here -- the settings' report language at first.
-            self.language = QComboBox()
-            for code in templates.LANGUAGES:
-                self.language.addItem(settings_dialog.LANGUAGE_NAMES[code], code)
-            own = templates.defaults(self.settings)
-            self.language.setCurrentIndex(max(0, self.language.findData(own["report_language"] or templates.DEFAULT_LANGUAGE)))
-            self.language.setToolTip(self.t["proj_language_hint"])
-            form.addRow(self.t["proj_language"], self.language)
-            # the layout template: the look of the three documents, the settings' default chosen at first
-            self.form_combo = QComboBox()
-            for found in self.forms:
-                self.form_combo.addItem(self.form_label(found), found.ref)
-                self.form_combo.setItemData(self.form_combo.count() - 1, found.description(self.lang), Qt.ItemDataRole.ToolTipRole)
-            self.form_combo.setCurrentIndex(max(0, self.form_combo.findData(settings_dialog.default_form_ref(self.settings))))
-            self.form_combo.currentIndexChanged.connect(self.on_form)
-            form.addRow(self.t["proj_form"], self.form_combo)
-            self.form_note = QLabel()   # what the layout template is, under its combo: a label wrapping inside a form row is given no height of its own, so it is a row of its own
-            self.form_note.setObjectName("meta")
-            self.form_note.setWordWrap(True)
-            form.addRow("", self.form_note)
-            # the three documents' content templates: one combo each, filled by `update_doc_templates` -- now, and again whenever the language changes
-            self.doc_template_combos = {}
-            self.doc_templates_found = {}
-            for doc in project.MODES:
-                combo = QComboBox()
-                combo.currentIndexChanged.connect(lambda _index, combo=combo: self.on_doc_template(combo))
-                self.doc_template_combos[doc] = combo
-                form.addRow(self.t["proj_content_" + doc], combo)
-            self.language.currentIndexChanged.connect(self.update_doc_templates)
-            self.update_doc_templates()
-            self.on_form()
-            self.prefilled = {}
-            for key in templates.PEOPLE:
-                data.setdefault(key, own[key])
-        self.fields["name"] = QLineEdit(data.get("name", ""))
-        form.addRow(self.t["proj_name"], self.fields["name"])
-        for key in project.DETAILS:
-            self.fields[key] = QLineEdit(data.get(key, ""))
-            form.addRow(self.t["proj_" + key], self.fields[key])
-        if mode == "new":
-            # The three documents' folders, named once and here (the engineer's decision of 30.09.2026): each prefilled with calc/documents.py's names for the language chosen -- «1_Convention d'utilisation», «2_Base de projet», «3_Rapport de statique» in French -- and following them while the engineer has not typed into it. The project's `.woodcore` states where each lies from then on, so `project.DEFAULT_LAYOUT` does not move.
-            self.doc_folders = {}
-            for doc in project.MODES:
-                field = QLineEdit()
-                field.setToolTip(self.t["proj_doc_folders_hint"])
-                form.addRow(self.t["proj_doc_folder"].format(document=documents.mode_name(doc, self.lang)), field)
-                self.doc_folders[doc] = field
-            self.language.currentIndexChanged.connect(self.update_doc_folders)
-            self.update_doc_folders()
-            self.folder = QLabel()
-            self.folder.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-            form.addRow(self.t["proj_folder"], self.folder)
-            self.fields["name"].textChanged.connect(self.update_folder)
-            self.location.textChanged.connect(self.update_folder)
-            self.update_folder()
-        else:
-            # The layout template the project is written in (forms.current, given by `edit_properties` as `form`), chosen at first, so that leaving it alone changes nothing; a project whose look is still one config.typ of an earlier version is listed as what it is. Choosing another switches it, after a confirmation (`edit_properties`).
-            self.current_form = data.get("form", "")
-            self.form_combo = QComboBox()
-            if not self.current_form:
-                self.form_combo.addItem(self.t["proj_form_old"], "")
-            for found in self.forms:
-                self.form_combo.addItem(self.form_label(found), found.ref)
-                self.form_combo.setItemData(self.form_combo.count() - 1, found.description(self.lang), Qt.ItemDataRole.ToolTipRole)
-            if self.current_form and self.form_combo.findData(self.current_form) < 0:
-                self.form_combo.addItem(data.get("form_name") or self.current_form, self.current_form)   # a form no place holds any more: still the project's own
-            self.form_combo.setCurrentIndex(max(0, self.form_combo.findData(self.current_form)))
-            self.form_combo.currentIndexChanged.connect(self.on_form)
-            form.addRow(self.t["proj_form"], self.form_combo)
-            self.form_note = QLabel()
-            self.form_note.setObjectName("meta")
-            self.form_note.setWordWrap(True)
-            form.addRow("", self.form_note)
-            self.on_form()
-            self.version = QComboBox()
-            self.version.addItem(self.t["proj_version_latest"], "")
-            pinned = data.get(project.PIN_KEY, "")
-            for version in dict.fromkeys([*versions, *([pinned] if pinned else [])]):
-                self.version.addItem(version, version)
-            self.version.setCurrentIndex(max(0, self.version.findData(pinned)))
-            form.addRow(self.t["proj_version"], self.version)
+        self.name = QLineEdit()
+        form.addRow(self.t["proj_name"], self.name)
+        row = QHBoxLayout()
+        self.location = QLineEdit(str(location or Path.home()))
+        choose = QPushButton(self.t["proj_choose"])
+        choose.clicked.connect(self.choose_location)
+        row.addWidget(self.location, 1)
+        row.addWidget(choose)
+        form.addRow(self.t["proj_location"], row)
+        self.language = QComboBox()
+        for code in templates.LANGUAGES:
+            self.language.addItem(settings_dialog.LANGUAGE_NAMES[code], code)
+        own = templates.defaults(self.settings)
+        self.language.setCurrentIndex(max(0, self.language.findData(own["report_language"] or templates.DEFAULT_LANGUAGE)))
+        self.language.setToolTip(self.t["proj_language_hint"])
+        form.addRow(self.t["proj_language"], self.language)
+        self.folder = QLabel()
+        self.folder.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        form.addRow(self.t["proj_folder"], self.folder)
+        self.name.textChanged.connect(self.update_folder)
+        self.location.textChanged.connect(self.update_folder)
+        self.update_folder()
         layout.addLayout(form)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
-
-    def form_label(self, found):
-        """A layout template as a combo names it: its name in the window's language, its place after it where it is not a builtin one."""
-        name = found.name(self.lang)
-        return name if found.place == "builtin" else f"{name} — {settings_dialog.place_label(self.lang, found.place)}"
 
     def choose_location(self):
         folder = QFileDialog.getExistingDirectory(self, self.t["proj_location"], self.location.text())
@@ -504,149 +385,35 @@ class ProjectDialog(QDialog):
 
     def target(self):
         """The new project's folder: the location and, inside it, a folder named after the project."""
-        name = self.fields["name"].text().strip()
+        name = self.name.text().strip()
         return Path(self.location.text().strip()) / Path(project_template.file_name(name or "Projekt")).stem
 
     def update_folder(self):
         self.folder.setText(str(self.target()))
 
-    def chosen_form(self):
-        """The layout template chosen, a calc/forms.py Form -- None where the combo shows a project's old config.typ."""
-        ref = self.form_combo.currentData()
-        return next((found for found in self.forms if found.ref == ref), None)
-
-    def on_form(self, _index=None):
-        """Another layout template chosen: what a layout template is and what this one is, under the combo and as its tooltip -- and, in a project's properties, that choosing one replaces its Template/ and title.typ."""
-        chosen = self.chosen_form()
-        text = chosen.description(self.lang) if chosen is not None else ""
-        tip = self.t["proj_form_hint"] + (("\n\n" + text) if text else "")
-        if self.mode != "new":
-            tip += "\n\n" + self.t["proj_form_switch_hint"]
-        self.form_combo.setToolTip(tip)
-        self.form_note.setText(text or self.t["proj_form_hint"])
-
-    def update_doc_folders(self, _index=None):
-        """The three folders calc/documents.py names for the language chosen, each in its field while it still holds what the last offer put there -- a folder the engineer typed stays his."""
-        offered = documents.folders_for(self.language.currentData())
-        for doc, field in self.doc_folders.items():
-            key = "folder_" + doc
-            if field.text().strip() == self.prefilled.get(key, "").strip():
-                field.setText(offered[doc])
-            self.prefilled[key] = offered[doc]
-
-    def update_doc_templates(self, _index=None):
-        """The three combos filled with the content templates of the language chosen (doc_templates.list_templates): the builtin standard one first -- chosen at first -- then the engineer's own and the office's, each named in the window's language, the description of the one chosen as the combo's tooltip. What was chosen stays chosen where the new language still offers it. Closed -- one placeholder, the reason in its tooltip -- where no content template exists in the language."""
-        language = self.language.currentData()
-        for doc, combo in self.doc_template_combos.items():
-            kept = combo.currentData()
-            try:
-                found = doc_templates.list_templates(doc, language=language, settings=self.settings)
-            except doc_templates.DocTemplateError:
-                found = []
-            self.doc_templates_found[doc] = {template.ref: template for template in found}
-            combo.blockSignals(True)
-            combo.clear()
-            for template in found:
-                name = template.name(self.lang)
-                if template.place != "builtin":
-                    name = f"{name} — {settings_dialog.place_label(self.lang, template.place)}"
-                combo.addItem(name, template.ref)
-                combo.setItemData(combo.count() - 1, template.description(self.lang), Qt.ItemDataRole.ToolTipRole)
-            if not found:
-                combo.addItem(self.t["proj_content_none"], "")
-            refs = [template.ref for template in found]
-            wanted = kept if kept in refs else doc_templates.default_ref(doc)
-            combo.setCurrentIndex(max(0, combo.findData(wanted)))
-            combo.blockSignals(False)
-            combo.setEnabled(bool(found))
-            self.on_doc_template(combo)
-
-    def on_doc_template(self, combo):
-        """The content template chosen in a combo: what a content template is and this one's description, as the combo's tooltip."""
-        doc = next(mode for mode, other in self.doc_template_combos.items() if other is combo)
-        chosen = self.doc_templates_found.get(doc, {}).get(combo.currentData())
-        text = chosen.description(self.lang) if chosen is not None else ""
-        combo.setToolTip(self.t["proj_content_hint"] + (("\n\n" + text) if text else ""))
-
-    def chosen_document_templates(self):
-        """The content templates chosen, {mode: doc_templates.DocTemplate} -- the objects themselves, so that an office's template, whose place lies in a folder the settings name, is found again by project_template.create without a settings file. A mode left out where no template exists in the language: create then makes it from the builtin standard one, or says why it cannot."""
-        out = {}
-        for doc, combo in self.doc_template_combos.items():
-            template = self.doc_templates_found.get(doc, {}).get(combo.currentData())
-            if template is not None:
-                out[doc] = template
-        return out
-
     def values(self):
-        """What the dialog says: name, the DETAILS, the language, the layout template's reference, the three documents' folders ({mode: folder}) and the references of the three content templates ({mode: reference}) for a new project; for the properties the layout template chosen ("" for an old config.typ left as it stands) and the version pinned ("" for none)."""
-        out = {key: field.text().strip() for key, field in self.fields.items()}
-        if self.mode == "new":
-            out["language"] = self.language.currentData()
-            out["form"] = self.form_combo.currentData() or settings_dialog.default_form_ref(self.settings)
-            out["folders"] = {doc: field.text().strip() for doc, field in self.doc_folders.items()}
-            out["document_templates"] = {doc: template.ref for doc, template in self.chosen_document_templates().items()}
-        else:
-            out["form"] = self.form_combo.currentData() or ""
-            out[project.PIN_KEY] = self.version.currentData() or ""
-        return out
-
-    def folders_problem(self):
-        """Why the three folders cannot be made as they are typed, in the dialog's language -- or None. Each is one folder and not a path, which Windows takes as it is (templates.check_report_folder), and the three differ as Windows compares names: refused here, at the one moment they are typed, and not after the skeleton has been copied."""
-        seen = {}
-        for doc, field in self.doc_folders.items():
-            name = documents.mode_name(doc, self.lang)
-            if not field.text().strip():
-                return self.t["proj_doc_folder_needed"].format(document=name)
-            try:
-                cleaned = templates.check_report_folder(field.text())
-            except templates.TemplateError as exc:
-                return f"{name}: {exc}"
-            other = seen.get(cleaned.casefold())
-            if other is not None:
-                return self.t["proj_doc_folders_same"].format(first=other, second=name)
-            seen[cleaned.casefold()] = name
-        return None
+        """What the dialog says: the name and the language."""
+        return {"name": self.name.text().strip(), "language": self.language.currentData()}
 
     def accept(self):
-        if not self.fields["name"].text().strip():
+        if not self.name.text().strip():
             notices_ui.inline_error(self, self.t["proj_name_needed"])
             return
-        if self.mode == "new":
-            problem = self.folders_problem()
-            if problem:
-                notices_ui.inline_error(self, problem)
-                return
         super().accept()
 
 
-def _make(target, name, form, **kwargs):
-    """project_template.create with the layout template `form` -- handed over as `form=` where create takes one, else applied once the project is made (forms.apply), which is what create does with it."""
-    if "form" in inspect.signature(project_template.create).parameters:
-        return project_template.create(target, name, form=form, **kwargs)
-    here = project_template.create(target, name, **kwargs)
-    if form is not None:
-        forms.apply(here, form)
-    return here
-
-
 def create_project(parent, lang, location=None):
-    """«Nouveau projet»: asks, creates, and returns the new project's file -- None where the engineer cancelled or it failed (and was told)."""
-    dialog = ProjectDialog(parent, lang, "new", location=location)
+    """«Nouveau projet»: asks the name, the place and the language, makes the project -- Standard laid out in three documents, in that language, with the settings' default form and its title page's people from the settings' defaults, and **no document yet** (project_template.create_skeleton, issue #90) -- and returns its file; None where the engineer cancelled or it failed (and was told). Each document is made later from the «Projet» tab."""
+    dialog = ProjectDialog(parent, lang, location=location)
     if dialog.exec() != QDialog.DialogCode.Accepted:
         return None
     values = dialog.values()
-    name = values.pop("name")
-    language = values.pop("language")
-    values.pop("form")
-    folders = {doc: folder for doc, folder in values.pop("folders").items() if folder}
-    values.pop("document_templates")
-    form = dialog.chosen_form()
-    chosen = dialog.chosen_document_templates() or None
+    settings = usersettings.read()
+    people = {key: value for key, value in templates.defaults(settings).items() if key in templates.PEOPLE and value}
     try:
-        # Copying the skeleton and making the three documents from their content templates touches no widget: it runs in a thread of its own, the page held with the card over it meanwhile (busy.py, v0.113)
-        here = busy.run_in_thread(parent, STRINGS[lang]["busy_creating"], lambda: _make(
-            dialog.target(), name, form, document_language=language, report_language=language,
-            folders=folders or None, document_templates=chosen, **values))
+        # Copying the skeleton touches no widget: it runs in a thread of its own, the page held with the card over it meanwhile (busy.py, v0.113)
+        here = busy.run_in_thread(parent, STRINGS[lang]["busy_creating"], lambda: project_template.create_skeleton(
+            dialog.target(), values["name"], values["language"], form=forms.default_ref(settings), **people))
     except forms.FormError as exc:
         notices_ui.tell(STRINGS[lang]["proj_failed"].format(error=settings_dialog.form_error_text(lang, exc)), notifications.CRITICAL, exc=exc, source="home_page")
         return None
@@ -656,40 +423,22 @@ def create_project(parent, lang, location=None):
     return here.file
 
 
-def edit_properties(parent, lang, here):
-    """«Propriétés du projet»: the project file's details and pinned version, rewritten through project.update -- and, where another layout template was chosen and the engineer confirms it, the project switched to it (forms.apply: its `Template/` and title.typ replaced, the old ones archived in _Archiv, the engineer's adjustments in a config.typ of the new format kept -- an old monolithic config.typ replaced and archived), so the next compile of each document prints with it. Returns the Project as it now stands, or None."""
-    data = {key: here.detail(key) for key in project.DETAILS}
-    data["name"] = here.name
-    data[project.PIN_KEY] = str(here.data.get(project.PIN_KEY, ""))
-    current = forms.current(here)
-    data["form"] = current.ref if current is not None else ""
-    data["form_name"] = current.name(lang) if current is not None else ""
-    dialog = ProjectDialog(parent, lang, "properties", data=data, versions=installed_versions())
-    if dialog.exec() != QDialog.DialogCode.Accepted:
-        return None
-    values = dialog.values()
-    ref = values.pop("form", "")
-    switch = None
-    if ref and ref != data["form"]:
-        switch = dialog.chosen_form()
-        if switch is not None:
-            question = STRINGS[lang]["proj_form_ask" if current is not None else "proj_form_ask_old"].format(form=switch.name(lang))
-            asked = QMessageBox.question(parent, dialog.windowTitle(), question, QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
-            if asked != QMessageBox.StandardButton.Yes:
-                switch = None      # the other properties are still written: only the look is left as it was
+def apply_form(parent, lang, here, form, current=None):
+    """Project `here` switched to layout template `form` (a forms.Form) once the engineer agrees -- its `Template/` and title.typ replaced, the old ones archived in _Archiv, the engineer's adjustments in a config.typ of the new format kept, an old monolithic config.typ replaced and archived (forms.apply) -- so the next compile of each of the three documents prints with it. `current` is the form in use, None for an old config.typ. What the «Projet» tab's «Appliquer au projet…» does (issue #88). Returns whether it was applied; a refusal is said in the window's words."""
+    question = STRINGS[lang]["proj_form_ask" if current is not None else "proj_form_ask_old"].format(form=form.name(lang))
+    asked = QMessageBox.question(parent, form.name(lang), question,
+                                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
+    if asked != QMessageBox.StandardButton.Yes:
+        return False
     try:
-        updated = project.update(here.file, **values)
-    except (project.ProjectError, OSError) as exc:
-        notices_ui.tell(STRINGS[lang]["proj_failed"].format(error=exc), notifications.CRITICAL, exc=exc, source="home_page")
-        return None
-    if switch is not None:
-        try:
-            forms.apply(updated, switch)
-        except forms.FormError as exc:
-            notices_ui.tell(STRINGS[lang]["proj_form_failed"].format(error=settings_dialog.form_error_text(lang, exc)), notifications.CRITICAL, exc=exc, source="home_page")
-        except OSError as exc:
-            notices_ui.tell(STRINGS[lang]["proj_form_failed"].format(error=exc), notifications.CRITICAL, exc=exc, source="home_page")
-    return updated
+        forms.apply(here, form)
+    except forms.FormError as exc:
+        notices_ui.tell(STRINGS[lang]["proj_form_failed"].format(error=settings_dialog.form_error_text(lang, exc)), notifications.CRITICAL, exc=exc, source="home_page")
+        return False
+    except OSError as exc:
+        notices_ui.tell(STRINGS[lang]["proj_form_failed"].format(error=exc), notifications.CRITICAL, exc=exc, source="home_page")
+        return False
+    return True
 
 
 def choose_project_file(parent, lang, start=None):
@@ -768,6 +517,7 @@ class HomeWindow(QMainWindow):
             top.addWidget(mark)
         brand = QLabel("Woodcore")
         brand.setObjectName("brand")
+        brand.setFont(theme.brand_font())   # following the zoom (issue #85)
         top.addWidget(brand)
         version = QLabel(self.t("home_version", version=project.VERSION))
         version.setObjectName("meta")
@@ -786,6 +536,8 @@ class HomeWindow(QMainWindow):
         self.settings_button.clicked.connect(self.open_settings)
         top.addWidget(self.settings_button)
         QShortcut(QKeySequence(settings_dialog.SHORTCUT), main, activated=self.open_settings)
+        for action in chrome.zoom_actions(main, self.t):   # Ctrl+ / Ctrl− / Ctrl+0, as in the window's «Affichage» menu (issue #85)
+            main.addAction(action)
         layout.addLayout(top)
 
         columns = QHBoxLayout()

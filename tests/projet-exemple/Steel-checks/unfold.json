@@ -1,0 +1,226 @@
+{
+  "domains": {
+    "ST-01": {
+      "check": "ST-01",
+      "gen": {
+        "form": "bending fe8b9f",
+        "kind": "steel-bending",
+        "version": 2
+      },
+      "lines": {
+        "eq:M_y_N_Rd": [
+          "6c9b23238e8112a5",
+          "6c9b23238e8112a5"
+        ],
+        "eq:M_y_Rd": [
+          "6517c93a549d7bdf",
+          "6517c93a549d7bdf"
+        ],
+        "eq:M_z_N_Rd": [
+          "44c2a5f051c454bc",
+          "44c2a5f051c454bc"
+        ],
+        "eq:M_z_Rd": [
+          "da1f6cffa2046985",
+          "da1f6cffa2046985"
+        ],
+        "eq:N_Rd": [
+          "69a8408eaf8df941",
+          "69a8408eaf8df941"
+        ],
+        "eq:a": [
+          "9bc40aee8d20a845",
+          "9bc40aee8d20a845"
+        ],
+        "eq:beta_N": [
+          "b4776863ba738130",
+          "b4776863ba738130"
+        ],
+        "eq:eta": [
+          "40fd88fa8fe7969a",
+          "40fd88fa8fe7969a"
+        ],
+        "eq:n": [
+          "e0b35da4b0e6dbbd",
+          "e0b35da4b0e6dbbd"
+        ],
+        "eq:xi": [
+          "428ab81da14a25da",
+          "428ab81da14a25da"
+        ],
+        "label:ST-01-member": [
+          "c343099c7748df2f",
+          "c343099c7748df2f"
+        ],
+        "label:ST-01-presets": [
+          "be00cb17adc43631",
+          "be00cb17adc43631"
+        ],
+        "var:A": [
+          "dfc49af7100205ae",
+          "dfc49af7100205ae"
+        ],
+        "var:M_y_Ed": [
+          "8f7c8bec4728e07e",
+          "8f7c8bec4728e07e"
+        ],
+        "var:M_z_Ed": [
+          "7d3e9048d2e341e8",
+          "7d3e9048d2e341e8"
+        ],
+        "var:N_Ed": [
+          "15f362c423c26352",
+          "15f362c423c26352"
+        ],
+        "var:QK": [
+          "33d4353b5ca8a6a1",
+          "33d4353b5ca8a6a1"
+        ],
+        "var:W_pl_y": [
+          "ab8420f8c7616bb2",
+          "ab8420f8c7616bb2"
+        ],
+        "var:W_pl_z": [
+          "55ef16c71f8feeac",
+          "55ef16c71f8feeac"
+        ],
+        "var:alpha_N": [
+          "591d420bfa098774",
+          "591d420bfa098774"
+        ],
+        "var:b": [
+          "34af3b3d0abdfdc0",
+          "34af3b3d0abdfdc0"
+        ],
+        "var:f_y": [
+          "634a9d089556edaa",
+          "634a9d089556edaa"
+        ],
+        "var:gamma_M1": [
+          "4cc9f019c653154a",
+          "4cc9f019c653154a"
+        ],
+        "var:t_f": [
+          "147d0c251d4c8a66",
+          "147d0c251d4c8a66"
+        ],
+        "verify:v-steel-bending": [
+          "13afdf43a081de61",
+          "13afdf43a081de61"
+        ]
+      }
+    },
+    "ST-02": {
+      "check": "ST-02",
+      "gen": {
+        "form": "shear 5a8144",
+        "kind": "steel-shear",
+        "version": 2
+      },
+      "lines": {
+        "eq:M_V_Rd": [
+          "0d915c815753b4de",
+          "0d915c815753b4de"
+        ],
+        "eq:M_y_Rd": [
+          "6517c93a549d7bdf",
+          "6517c93a549d7bdf"
+        ],
+        "eq:V_z_Rd": [
+          "de1598597577ca74",
+          "de1598597577ca74"
+        ],
+        "eq:eta": [
+          "4b970ed6a9de0eaa",
+          "4b970ed6a9de0eaa"
+        ],
+        "eq:eta_M": [
+          "da9306df066f9373",
+          "da9306df066f9373"
+        ],
+        "eq:eta_V": [
+          "da1a53d50c388429",
+          "da1a53d50c388429"
+        ],
+        "eq:web_limit": [
+          "73a0b0ad1344d80e",
+          "73a0b0ad1344d80e"
+        ],
+        "label:ST-02-member": [
+          "c2ba2f2ca0c09fec",
+          "c2ba2f2ca0c09fec"
+        ],
+        "label:ST-02-presets": [
+          "a43a39602f9c64bc",
+          "a43a39602f9c64bc"
+        ],
+        "var:A_v_z": [
+          "eeb46caa896edda2",
+          "eeb46caa896edda2"
+        ],
+        "var:E": [
+          "e52a9c9200ea5b58",
+          "e52a9c9200ea5b58"
+        ],
+        "var:M_y_Ed": [
+          "614024cd9a113e71",
+          "614024cd9a113e71"
+        ],
+        "var:QK": [
+          "36a2962b6f8fb64c",
+          "36a2962b6f8fb64c"
+        ],
+        "var:V_z_Ed": [
+          "83d045545cc302f7",
+          "83d045545cc302f7"
+        ],
+        "var:W_pl_y": [
+          "97c17a439628faae",
+          "97c17a439628faae"
+        ],
+        "var:b": [
+          "f908f2f7a1d227c2",
+          "f908f2f7a1d227c2"
+        ],
+        "var:f_y": [
+          "e9f42e29aa382347",
+          "e9f42e29aa382347"
+        ],
+        "var:gamma_M1": [
+          "c476fc437d6fff42",
+          "c476fc437d6fff42"
+        ],
+        "var:h": [
+          "203f3015937da5b8",
+          "203f3015937da5b8"
+        ],
+        "var:h_w": [
+          "6c5803d3e65d889a",
+          "6c5803d3e65d889a"
+        ],
+        "var:t_1": [
+          "1dfb041c842bdebf",
+          "1dfb041c842bdebf"
+        ],
+        "var:t_2": [
+          "d1301d360b0dcdcb",
+          "d1301d360b0dcdcb"
+        ],
+        "var:tau_y": [
+          "4ba13bb9ef642077",
+          "4ba13bb9ef642077"
+        ],
+        "var:web_slenderness": [
+          "a14475a795d69a34",
+          "a14475a795d69a34"
+        ],
+        "verify:v-steel-shear": [
+          "900b8c8635b9a809",
+          "900b8c8635b9a809"
+        ]
+      }
+    }
+  },
+  "format": "woodcore-unfold",
+  "schema_version": "1.0"
+}

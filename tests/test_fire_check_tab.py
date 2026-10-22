@@ -5,6 +5,8 @@ What is held: the tab last of «Sécurité structurale», in the report alone, w
 ⚠️ Built off-screen on a copy of the example project (conftest.project_copy), message boxes stubbed and nothing compiled -- the helpers are test_member_check_tab's.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 
 import conftest
@@ -93,7 +95,10 @@ def test_a_check_of_each_kind_is_made_saved_and_read_back():
             # saved: the kind is closed
             assert not tab.kind_box.isEnabled()
         exported = json.loads((here.data_dir / "checks.json").read_text(encoding="utf-8"))
-        assert exported["schema_version"] == "1.2"
+        # 1.6 where a check is printed unfolded -- the example's are (spec 2026-10-15, ARCH-007; spec 2026-10-21-commandes-typst-refonte, ARCH-011) --, else 1.5 where a duration VKF 15-15 requires is cited by it (spec 2026-10-20-indices-et-niveaux, REQ-001), 1.2 otherwise
+        checks = exported["checks"].values()
+        from domains import member_check
+        assert exported["schema_version"] == ("1.6" if any(member_check.is_unfolded(r) for r in checks) else "1.5" if any((r.get("fire") or {}).get("required") for r in checks) else "1.2")
         for cid in made:
             record = exported["checks"][cid]
             assert record["calculable"], (cid, record["reason"])

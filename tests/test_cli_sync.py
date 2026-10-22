@@ -26,7 +26,7 @@ def _copy(name):
     folder = conftest.tmpdir(name) / "projet"
     if folder.exists():
         shutil.rmtree(folder)
-    shutil.copytree(SAMPLE.parent, folder, ignore=shutil.ignore_patterns("lib", "VERSION", "stamps", "_Archiv", "out"))
+    shutil.copytree(SAMPLE.parent, folder, ignore=shutil.ignore_patterns("lib", "calc", "VERSION", "stamps", "_Archiv", "archives", "out"))
     file = folder / SAMPLE.name
     with project.using(file) as here:
         for mode in sync.SHARE_MODES:
@@ -46,7 +46,7 @@ def _files(file):
     root = file.parent
     out = {}
     for path in sorted(root.rglob("*")):
-        if path.is_file() and (path.name in ("sync.json", "structure.json") or path.suffix == ".typ") and "_woodcore" not in path.parts:
+        if path.is_file() and (path.name in ("sync.json", "structure.json") or path.suffix == ".typ") and not ({"_woodcore", "000-Woodcore"} & set(path.parts)):
             out[path.relative_to(root).as_posix()] = path.read_bytes()
     return out
 
@@ -115,7 +115,8 @@ def test_check_stops_on_a_record_that_does_not_read_naming_it_and_writes_nothing
     before = _files(file)
     code, out, err = _cli(file, "check")
     assert code in (0, 1)   # what the dry export says of the example project is not this test's; what follows is
-    record = file.parent / "2_Projektbasis" / "sync.json"
+    record = project.Project.load(file).document_dir("bp") / "sync.json"
+    rel = record.relative_to(file.parent).as_posix()
     data = json.loads(record.read_text(encoding="utf-8"))
     first = next(iter(data["blocks"]))
     data["blocks"][first]["text"] = 12
@@ -124,8 +125,8 @@ def test_check_stops_on_a_record_that_does_not_read_naming_it_and_writes_nothing
         import cli_sync
         said = []
         assert cli_sync.check(here, lang="en", out=said.append, err=said.append) == 1
-    assert any("2_Projektbasis/sync.json" in s and f"blocks.{first}.text" in s for s in said), said
-    assert _files(file) == {**before, "2_Projektbasis/sync.json": record.read_bytes()}, "check wrote something"
+    assert any(rel in s and f"blocks.{first}.text" in s for s in said), said
+    assert _files(file) == {**before, rel: record.read_bytes()}, "check wrote something"
 
 
 def test_check_names_the_blocks_a_document_is_out_of_step_on():
@@ -176,7 +177,7 @@ def test_import_writes_what_the_window_s_import_writes():
     assert code == 0, err
     _domain(b, lambda here: sync.import_changes(here, "cu"))
     assert not _differences(a, b), _differences(a, b)
-    assert "Eine Zeile aus der Projektbasis." in (a.parent / "1_Nutzungsvereinbarung" / "Sections" / "accepted-risks.typ").read_text(encoding="utf-8")
+    assert "Eine Zeile aus der Projektbasis." in (project.Project.load(a).document_dir("cu") / "Sections" / "accepted-risks.typ").read_text(encoding="utf-8")
 
 
 def test_a_conflict_is_refused_without_a_choice_writing_nothing_and_taken_with_one():

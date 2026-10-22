@@ -155,9 +155,9 @@ def test_every_masked_pattern_masks_something_and_the_norm_tables_are_masked():
     stems = [e["stem"] for e in _built().examples.values()]
     for pattern in SITE.CONFIG["masked"]:
         assert any(SITE.fnmatch.fnmatch(s, pattern) for s in stems), f"{pattern} masks nothing"
-    for stem in ("distance-1", "show-live-load-2", "show-live-load-1-L3", "show-connector-resistance-1"):
+    for stem in ("distance-1", "distance-2-L3"):
         assert SITE.Site.masked(stem), stem
-    for stem in ("show-live-load-1", "show-calc-1", "verify-compression-1"):
+    for stem in ("domain-1", "eq-2", "position-2"):
         assert not SITE.Site.masked(stem), stem
     out = _built().out
     for stem in stems:
@@ -175,8 +175,8 @@ def test_every_command_has_its_page_in_every_language():
         for name in public:
             page = site.out / lang / "docs" / name / "index.html"
             assert page.is_file(), page
-        text = (site.out / lang / "docs" / "show-calc" / "index.html").read_text(encoding="utf-8")
-        assert 'lang="' + lang + '"' in text and "#show-calc(domain, instance" in re.sub(r"<[^>]+>", "", text)
+        text = (site.out / lang / "docs" / "distance" / "index.html").read_text(encoding="utf-8")
+        assert 'lang="' + lang + '"' in text and "#distance(d, connector" in re.sub(r"<[^>]+>", "", text)
         index = json.loads((site.out / "search" / f"{lang}.json").read_text(encoding="utf-8"))
         assert {e["t"] for e in index if e["k"] == "cmd"} == set(public)
 
@@ -262,7 +262,7 @@ def test_the_home_page_and_the_tutorial_in_every_language():
     out = site.out
     for lang in SITE.LANGS:
         home = (out / lang / "index.html").read_text(encoding="utf-8")
-        assert SITE.STRINGS[lang]["hero_title"].split()[0] in home and "#verify-compression" in home
+        assert SITE.STRINGS[lang]["hero_title"].split()[0] in home and "#domain" in home
         # the code beside each picture is its example's own fence, not a copy of it in site.json
         for stem in (SITE.CONFIG["hero_example"], SITE.CONFIG["levels_example"]):
             assert SITE.highlight(site.examples[stem]["code"]) in home, f"{lang}: the home page does not show the fence of {stem}"
@@ -622,12 +622,12 @@ def test_every_example_is_compiled_in_the_page_s_language_and_a_page_alike_is_st
         raise conftest.Skip("typst is not on PATH")
     out = conftest.tmpdir("website_langs")
     site = SITE.Site(out, images="svg")
-    site.examples = {stem: site.examples[stem] for stem in ("verify-compression-1", "eq-2")}
+    site.examples = {stem: site.examples[stem] for stem in ("position-2", "eq-2")}
     site.render_examples()
     assert not site.failures, site.failures
     for stem in site.examples:
         assert all(site.image_exists(stem, lang) for lang in SITE.LANGS), stem
-    worded = {site.image_path("verify-compression-1", lang) for lang in SITE.LANGS}
+    worded = {site.image_path("position-2", lang) for lang in SITE.LANGS}
     assert len(worded) == 3, "a page with the engine's words is one page per language"
     assert len({site.image_path("eq-2", lang) for lang in SITE.LANGS}) == 1, "a formula the three languages print alike is one file"
     assert len(list((out / "img").glob("*.svg"))) == 4

@@ -5,6 +5,8 @@ These hold what the engineer's three answers settled: a result reaches the repor
 ⚠️ The write guard is checked here as what it is: a guard against an accident, not a sandbox. A script that reaches for `os.open` gets round it, which the module says out loud; what is held is that the common accident -- a stray `open(..., "w")` -- is refused and **names the file**.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 
 import conftest
@@ -176,20 +178,49 @@ def test_the_export_carries_the_shape_every_calculation_has():
         _write('# @name Portique\n# @label La resolution\nresult("H_d", 2.2, "kN", symbol=\'H_"d"\', label="Reaction", descr="Pourquoi")\n')
         out, _notes = model.export()
         data = json.loads(out.read_text(encoding="utf-8"))
-        assert data["schema_version"] == model.SCHEMA_VERSION
+        assert data["schema_version"] == model.EXPORT_SCHEMA_VERSION
         entry = data["scripts"]["essai"]
         assert entry["results"] == ["H_d"] and entry["steps"] == [] and entry["checks"] == []
         held = entry["vars"]["H_d"]
         assert held["value"] == 2.2 and held["unit"] == "kN" and held["symbol"] == 'H_"d"'
         assert held["label"] == "Reaction" and held["description"] == "Pourquoi"
         assert held["source"] == "python:scripts/essai.py"
-        # the citation is always written, "" where the script names none: get-norm(v) is a field access in Typst
+        # the citation is always written, "" where the script names none: get(v, "norm") is a field access in Typst
         assert held["norm"] == "" and held["norm_ref"] == ""
         # ⚠️ How long the run took is not exported: a wall-clock duration differs at every export, and data/ must stay
         # unchanged to the byte when nothing else changed (section 12) -- which exporting it broke.
         assert "seconds" not in entry, entry
         validation.validate_structure(data, "scripts")
         validation.validate_scripts_business(data)
+    finally:
+        _clear()
+
+
+def test_a_result_naming_no_norm_is_cited_by_the_line_of_its_call():
+    """REQ-002 (spec 2026-10-20-indices-et-niveaux, Q-005, base saine Q-018): a result without `norm=` exports the line of its result() call -- from a function of the script too -- and the report cites it in its right-hand column, «script essai.py, l. 3» at level 3; a result naming its norm cites the norm and carries no line."""
+    import subprocess
+    try:
+        _write('# @name Cite\ndef place(v):\n    result("A_d", v, "kN")\nplace(1.5)\nresult("B_d", 2.5, "kN", norm="SIA 265", norm_ref="4.2.1")\nresult("C_d", 3.5, "kN")\n')
+        out, _notes = model.export()
+        data = json.loads(out.read_text(encoding="utf-8"))
+        held = data["scripts"]["essai"]["vars"]
+        assert held["A_d"]["line"] == 3 and held["C_d"]["line"] == 6, held
+        assert "line" not in held["B_d"] and held["B_d"]["norm"] == "SIA 265", held["B_d"]
+        validation.validate_structure(data, "scripts")
+        if not conftest.have_typst():
+            raise conftest.Skip("typst is not on the path")
+        d = conftest.probe_dir("script_line")
+        probe = d / "probe.typ"
+        import project
+        from domains import unfold
+        with project.using(conftest.PROJECT):
+            written = unfold.generate(unfold._module("script").records(data)["essai"], "fr", "script")   # its domain as Woodcore writes it out (spec 2026-10-21-commandes-typst-refonte, REQ-017)
+        probe.write_text('#import "/000-Typst-Config/commands.typ": *\n#set-report-language("fr")\n#calc-defaults(level: 3, scope: "document")\n' + written.split("\n", 1)[1], encoding="utf-8")
+        run = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(probe), str(d / "probe.pdf")], capture_output=True, text=True, encoding="utf-8")
+        assert run.returncode == 0, run.stderr
+        from pypdf import PdfReader
+        text = "\n".join(page.extract_text() for page in PdfReader(str(d / "probe.pdf")).pages)
+        assert "script essai.py, l. 3" in text and "script essai.py, l. 6" in text and "SIA 265" in text, (text, written)
     finally:
         _clear()
 

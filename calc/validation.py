@@ -241,8 +241,14 @@ def validate_checks_business(data):
         # a bending's and a lateral torsional buckling's N is signed, tension positive and 0 for none (v0.117); a tension's, a compression's and a buckling's is positive; a shear reads none (issue #38)
         if entry["kind"] in ("tension", "compression", "buckling") and entry["N"]["value"] <= 0:
             raise ValidationError(f"{where}: calculable with N = {entry['N']['value']!r} -- the force is positive, a tension's and a compression's magnitude alike")
-        if entry["kind"] == "shear" and not entry.get("V_z") and not entry.get("V_y"):
+        # a shear reads its forces by its variant (spec 2026-10-21-commandes-typst-refonte, REQ-021): V_z or V_y, a shear-off F and l, a shear across the grain V_z and sigma_90
+        variant = entry.get("variant") or "shear"
+        if entry["kind"] == "shear" and variant == "shear" and not entry.get("V_z") and not entry.get("V_y"):
             raise ValidationError(f"{where}: a calculable shear with no shear force")
+        if entry["kind"] == "shear" and variant == "shear-off" and (not entry.get("F") or not entry.get("l")):
+            raise ValidationError(f"{where}: a calculable shear-off with no force F or no sheared length l")
+        if entry["kind"] == "shear" and variant == "shear-perp" and (not entry.get("V_z") or entry.get("sigma_90") is None):
+            raise ValidationError(f"{where}: a calculable shear across the grain with no V_z or no sigma_90")
         if entry["kind"] == "buckling" or (entry["kind"] == "lateral-torsional" and entry["N"]["value"] < 0):
             if entry.get("l_y") is None or entry.get("l_z") is None:
                 raise ValidationError(f"{where}: a calculable {entry['kind']} with no system length about both axes")
@@ -383,8 +389,8 @@ def validate_calculations_business(data):
                     if instance.get(field):
                         raise ValidationError(f"{path}: computed from {instance['source_file']} and names a {field} ({instance[field]!r}) as well")
                 for figure in instance.get("figures") or ():
-                    if not str(figure.get("file", "")).startswith("calculations/"):
-                        raise ValidationError(f"{path}: a figure's file {figure.get('file')!r} is not under data/calculations/")
+                    if not _starts_figure(str(figure.get("file", "")), "dead-load", ""):
+                        raise ValidationError(f"{path}: a figure's file {figure.get('file')!r} is not under data/calculations/ nor {figure_names('dead-load', '')[1]}")
             elif instance.get("engine") not in (None, domain["engine"]):
                 raise ValidationError(f"{path}: engine {instance['engine']!r} and no source_file -- an instance of another engine than its domain's names the source it was computed from")
             for field in (() if instance.get("source_file") else ("workbook", "sheet")):
@@ -648,10 +654,10 @@ def validate_connections_business(data):
             raise ValidationError(f"{path}: the reference member's local angle is {record['members'][record['reference'] - 1]['local']}, not 0")
         # One figure per language, each named after the connection and the language it is drawn in: its legend is five sentences, and the frame is sized from them (docs/typst/language.md §4bis).
         for lang in strings.LANGUAGES:
-            want = f"connections/{cid}-{lang}.svg"
-            if record["figure"]["files"].get(lang) != want:
+            want = figure_names("connection", f"{cid}-{lang}.svg")
+            if record["figure"]["files"].get(lang) not in want:
                 raise ValidationError(
-                    f"{path}: the {lang} figure is {record['figure']['files'].get(lang)!r} -- expected {want!r}"
+                    f"{path}: the {lang} figure is {record['figure']['files'].get(lang)!r} -- expected {' or '.join(map(repr, want))}"
                 )
         # a document is cited whole, so the clause may be empty; the reference may not
         if not record["norm"].strip():
@@ -692,7 +698,7 @@ def validate_fire_business(data):
         if set(record["figures"]) != set(strings.LANGUAGES):
             raise ValidationError(f"{path}: it carries the figures {sorted(record['figures'])} -- expected {list(strings.LANGUAGES)}")
         for lang, name in record["figures"].items():
-            if name != f"fire/{fid}-{lang}.svg":
+            if not _is_figure(name, "fire", f"{fid}-{lang}.svg"):
                 raise ValidationError(f"{path}: the {lang} figure is {name!r} -- expected 'fire/{fid}-{lang}.svg'")
         keys = [line["key"] for line in record.get("legend_lines", [])]
         if len(keys) != len(set(keys)):
@@ -702,8 +708,8 @@ def validate_fire_business(data):
                 raise ValidationError(f"{path}: legend line {line['key']!r} has a swatch that is no SVG document")
         background = record.get("background")
         if background is not None:
-            own = background["file"].startswith(f"fire/{fid}-plan.")
-            followed = "plan" in record and background["file"].startswith(f"plans/{record['plan']}-plan.")
+            own = _starts_figure(background["file"], "fire", f"{fid}-plan.")
+            followed = "plan" in record and _starts_figure(background["file"], "plan", f"{record['plan']}-plan.")
             if not (own or followed):
                 raise ValidationError(f"{path}: background is {background['file']!r} -- expected fire/{fid}-plan.<format>, or the background of the position plan it follows")
             if not 0 <= background["opacity"] <= 1:
@@ -728,6 +734,20 @@ def validate_fire_business(data):
                 raise ValidationError(f"{path}: doors[{i}] ({door['id']}) has kind {door['kind']!r} -- expected one of {', '.join(FIRE_DOOR_KINDS)}")
 
 
+def figure_names(kind, file):
+    """The two names an export may give the figure `file` of `kind` (project.FIGURE_KINDS): under data/, `plans/P01.svg`, as every export did until 0.119 and a project laid out before still does; and from the Typst root in its tab's Exports/Figures/, `/Plans/Position-plan/Exports/Figures/P01.svg`, in a project laid out by folders (issue #64, D-10). lib/calc-engine.typ `figure-path` reads both."""
+    import project  # project reads this module at its own import
+    return (f"{project.FIGURE_KINDS[kind]}/{file}", f"/{project.figures_folder(kind)}/{file}")
+
+
+def _is_figure(name, kind, file):
+    return name in figure_names(kind, file)
+
+
+def _starts_figure(name, kind, stem):
+    return any(name.startswith(prefix) for prefix in figure_names(kind, stem))
+
+
 def validate_plans_business(data):
     """data/plans.json: every plan shows a frame of its sheet, draws its elements with the points their shape needs, refers to files under plans/ named after it, and lists as unknown only labels it shows. show-plan reads all of it without checking again."""
     for pid, record in data["plans"].items():
@@ -737,13 +757,13 @@ def validate_plans_business(data):
         crop = record["crop"]
         if crop["w"] <= 0 or crop["h"] <= 0:
             raise ValidationError(f"{path}: its frame is empty")
-        if record["overlay"] != f"plans/{pid}.svg":
+        if not _is_figure(record["overlay"], "plan", f"{pid}.svg"):
             raise ValidationError(f"{path}: overlay is {record['overlay']!r} -- expected 'plans/{pid}.svg'")
         # a section with a load transfer level is drawn once per language (v0.116): one figure for each, named after the plan
         if record.get("figures") and set(record["figures"]) != {"de", "fr", "en"}:
             raise ValidationError(f"{path}: drawn in {', '.join(sorted(record['figures']))} -- a figure for each of de, fr and en")
         for lang, file in (record.get("figures") or {}).items():
-            if file != f"plans/{pid}-{lang}.svg":
+            if not _is_figure(file, "plan", f"{pid}-{lang}.svg"):
                 raise ValidationError(f"{path}: its {lang} figure is {file!r} -- expected 'plans/{pid}-{lang}.svg'")
         if record.get("plan_type", "section" if record["role"] == "section" else "floor") not in ("floor", "section", "loadpath"):
             raise ValidationError(f"{path}: plan_type is {record.get('plan_type')!r}")
@@ -751,7 +771,7 @@ def validate_plans_business(data):
             if not line["swatch"].startswith("<svg"):
                 raise ValidationError(f"{path}: legend line {i} ({line['key']}) has no SVG swatch")
         background = record.get("background")
-        if background is not None and not background["file"].startswith(f"plans/{pid}-plan."):
+        if background is not None and not _starts_figure(background["file"], "plan", f"{pid}-plan."):
             raise ValidationError(f"{path}: background is {background['file']!r} -- expected plans/{pid}-plan.<format>")
         if record["unit"] <= 0:
             raise ValidationError(f"{path}: unit must be greater than 0")
@@ -803,10 +823,10 @@ def validate_statics_business(data):
                 f"{path}: it carries the figures {sorted(record['figures'])} -- expected {list(strings.LANGUAGES)}"
             )
         for lang, figure in record["figures"].items():
-            want = f"statics/{sid}-{lang}.svg"
-            if figure["file"] != want:
+            want = figure_names("statics", f"{sid}-{lang}.svg")
+            if figure["file"] not in want:
                 raise ValidationError(
-                    f"{path}: the {lang} figure is {figure['file']!r} -- expected {want!r}"
+                    f"{path}: the {lang} figure is {figure['file']!r} -- expected {' or '.join(map(repr, want))}"
                 )
             if figure["view"]["w"] <= 0 or figure["view"]["h"] <= 0:
                 raise ValidationError(f"{path}: its {lang} frame is empty")
@@ -899,6 +919,8 @@ def validate_schemas_business(data):
     """
     for sid, record in data["schemas"].items():
         path = f"schemas.{sid}"
+        if data["schema_version"] == "1.4" and "size" not in record:
+            raise ValidationError(f"{path}: it has no size -- an export at 1.4 carries each schema's (D7)")
         if not CONNECTION_ID.fullmatch(sid):
             raise ValidationError(
                 f"{path}: id {sid!r} -- use letters, digits and _ . + - only, "
@@ -909,10 +931,10 @@ def validate_schemas_business(data):
                 f"{path}: it carries the figures {sorted(record['figures'])} -- expected {list(strings.LANGUAGES)}"
             )
         for lang, figure in record["figures"].items():
-            want = f"schemas/{sid}-{lang}.svg"
-            if figure["file"] != want:
+            want = figure_names("details", f"{sid}-{lang}.svg")
+            if figure["file"] not in want:
                 raise ValidationError(
-                    f"{path}: the {lang} figure is {figure['file']!r} -- expected {want!r}"
+                    f"{path}: the {lang} figure is {figure['file']!r} -- expected {' or '.join(map(repr, want))}"
                 )
             if figure["view"]["w"] <= 0 or figure["view"]["h"] <= 0:
                 raise ValidationError(f"{path}: its {lang} frame is empty")

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Position plan source",
-  "description": "plans/<id>.json, schema 1.3 (1.0, without label_offset, 1.1, without the document, the storey and the section of v0.114, and 1.2, without the plan type, the load symbols and the load transfer levels of v0.116, are read as they are) -- one position plan as Woodcore saves it, the source calc/domains/plan.py exports from (docs/domain/position-plans.md §3.3sexies). Written by Woodcore only. Coordinates are in the units of the sheet the plan is drawn on -- points for a PDF, pixels for an image, viewBox units for an SVG -- from its top left corner, y down; angles in degrees, clockwise on the drawing from its right. Since v0.99 an element and an axis may carry a `style` of their own, a factor over the plan's three: optional and additive -- absent means «follows the plan» -- so schema_version is deliberately NOT bumped for it and no file needs migrating.",
+  "description": "plans/<id>.json, schema 1.8 (1.0 to 1.7 are read as they are, every field one of them lacks being optional: `schema_version` below says what each version added) -- one position plan as Woodcore saves it, the source calc/domains/plan.py exports from (docs/domain/position-plans.md §3.3sexies). Written by Woodcore only. Coordinates are in the units of the sheet the plan is drawn on -- points for a PDF, pixels for an image, viewBox units for an SVG -- from its top left corner, y down; angles in degrees, clockwise on the drawing from its right. Since v0.99 an element and an axis may carry a `style` of their own, a factor over the plan's three: optional and additive -- absent means «follows the plan» -- so schema_version is deliberately NOT bumped for it and no file needs migrating.",
   "type": "object",
   "required": [
     "schema_version",
@@ -25,9 +25,10 @@
         "1.4",
         "1.5",
         "1.6",
-        "1.7"
+        "1.7",
+        "1.8"
       ],
-      "description": "-- accepted: 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7; an older one is read as it is, every field it lacks being optional. 1.4 (v0.117): a column (S) or a point Auflager (M) may carry its `angle`, and an element its own `show_length`. 1.5 (issue #9): a plan carries its `dimensions`. 1.6 (issue #18): a plan carries its construction aids, `aids`. 1.7 (issue #43): a plan carries its `texts`, which Woodcore writes only where a text is placed."
+      "description": "-- accepted: 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8; an older one is read as it is, every field it lacks being optional. 1.4 (v0.117): a column (S) or a point Auflager (M) may carry its `angle`, and an element its own `show_length`. 1.5 (issue #9): a plan carries its `dimensions`. 1.6 (issue #18): a plan carries its construction aids, `aids`. 1.7 (issue #43): a plan carries its `texts`, which Woodcore writes only where a text is placed. 1.8 (issue #54): a bracing wall carries its `construction` mode and a plan its `outlines`, `clt_power` and `print_centres`, what the stiffness centre and the mass centre are computed from -- written only by a plan that carries one of them, and containing 1.7: a 1.8 plan may hold texts."
     },
     "plan_type": {
       "type": "string",
@@ -307,6 +308,15 @@
           "angle": {
             "type": "number",
             "description": "In degrees, clockwise on the drawing from its right; absent: 0. A point load's horizontal direction (1.3); a column's (S) or a point Auflager's (M) turn about its centre, its square drawn turned (1.4). Refused on any other element."
+          },
+          "construction": {
+            "type": "string",
+            "enum": [
+              "timber_frame",
+              "clt",
+              "concrete"
+            ],
+            "description": "How a bracing wall is built (1.8, issue #54), on an H or a W only and refused on any other element: timber frame, CLT or concrete. The stiffness centre takes the wall's length to a power this fixes -- 1, 1.5 or 2 (the plan's `clt_power`), 3 -- and is computed only where every bracing wall of the plan states the same one. Absent: not stated, and the stiffness centre is then not computed -- there is no default (calc/domains/plan_centres.py)."
           },
           "show_length": {
             "type": "boolean",
@@ -629,6 +639,41 @@
           }
         }
       }
+    },
+    "outlines": {
+      "type": "array",
+      "maxItems": 1,
+      "description": "The building's outline (1.8, issue #54): one polygon at most, of three points at least in sheet units, drawn with Woodcore's «Contour du bâtiment» tool on a floor plan or a load-path plan and refused on an elevation section. The mass centre M is its area centroid, computed and never stored. A list of one, so that it is selected, moved and deleted as every other entry of a plan is; it states no `style` of its own.",
+      "items": {
+        "type": "object",
+        "required": [
+          "points"
+        ],
+        "properties": {
+          "points": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "clt_power": {
+      "type": "number",
+      "enum": [
+        1.5,
+        2
+      ],
+      "description": "The power a CLT wall's length is raised to for its stiffness (1.8, issue #54): 1.5 or 2, the engineer's choice for this plan. Absent: not chosen, and a plan whose bracing walls are CLT has no stiffness centre until it is."
+    },
+    "print_centres": {
+      "type": "boolean",
+      "description": "Whether the stiffness centre S, the mass centre M and the building's outline are drawn on the exported plan (1.8, issue #54) -- Woodcore's window draws them whatever this says. Absent: false, and the plan is exported byte for byte as one that has none."
     }
   }
 }

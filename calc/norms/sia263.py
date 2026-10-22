@@ -1,6 +1,6 @@
 """The values of SIA 263:2013 this project calculates with, out of the JSON files beside this module in `calc/norms/` (docs/architecture/layout.md §11).
 
-The steel counterpart of `sia265.py`, and built on exactly its pattern: `calc/norms/` is the one source of every value taken from a norm for a calculation made in Python, one file per table named `<norm>-<year>-<table>-<designation>.json`, every number transcribed by hand from `ExternalFiles/000-Normes/SIA263-2013-DE.pdf` at a page that can be turned to, each file's `_source` naming it, and the whole checked here before anything is built from it (section 2 rule 13, section 3.6).
+The steel counterpart of `sia265.py`, and built on exactly its pattern: `calc/norms/` is the one source of every value taken from a norm for a calculation made in Python, one file per table named `<norm>-<year>-<table>-<designation>.json`, every number transcribed by hand from `SIA263-2013-DE.pdf` at a page that can be turned to, each file's `_source` naming it, and the whole checked here before anything is built from it (section 2 rule 13, section 3.6).
 
     sia263-2013-tab01-baustaehle.json   Tabelle 1, the structural steels: S235, S275, S355, S460 (3.2.2.3)
     sia263-2013-tab02-schrauben.json    Tabelle 2, the bolt classes: 4.6 .. 10.9 (3.4.2)
@@ -16,10 +16,10 @@ The steel counterpart of `sia265.py`, and built on exactly its pattern: `calc/no
 ⚠️ **The Lochleibungswiderstand of the plate is not here either** (SIA 263 6.1.4, p. 66). It is the one piece of the connectors' agreed scope still unbuilt (section 14); when it is written it adds a file beside this module rather than a number to a domain module.
 """
 
-import json
 from pathlib import Path
 
 import validation
+from norms import _loader  # how every reader of calc/norms/ opens its files (G3)
 
 HERE = Path(__file__).resolve().parent
 
@@ -55,13 +55,7 @@ def _fail(message):
 
 def _load(stem):
     if stem not in _cache:
-        path = HERE / ("%s.json" % stem)
-        if not path.is_file():
-            _fail("%s.json is missing" % stem)
-        try:
-            _cache[stem] = json.loads(path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            _fail("%s.json is not valid JSON: %s" % (stem, exc))
+        _cache[stem] = _loader.load(HERE / ("%s.json" % stem))
     return _cache[stem]
 
 

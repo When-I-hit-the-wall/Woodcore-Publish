@@ -8,6 +8,8 @@
 
 `ExternalFiles/`, beside `Woodcore/` and the projects, holds the documents the projects are calculated against: the norms, the literature behind them, the course documents of the topics the report covers, and a set of third-party tools. It is **read by the engineer and by the assistant, and by nothing else** — no module of `calc/` opens a file in it, no schema mentions it, `export_all.py` does not know it is there, and the report does not read it either. It is documentation, and the one place the engine meets it is where a norm's numbers are transcribed by hand into `calc/norms/*.json` (§11).
 
+**No path of a machine is written in the repository** (19.10.2026, spec 2026-10-19-base-saine-nettoyage, REQ-004; the engineer: «retire ce chemin du poste»). The library was named `ExternalFiles/000-Normes/` in every `_source` of `calc/norms/*.json`, in docstrings and in messages -- a folder that is not where the PDFs lie on the engineer's machine. Since then a `_source` names the **edition and its file** (`SIA265-2021-DE.pdf`, p. 25) and never its folder; an edition the library lacks says «Not in the reference library» and gives the publisher's address. A test that turns a page of the PDF finds the folder in the environment variable **`WOODCORE_NORMS_LIBRARY`** (`tests/conftest.norms_library`) and skips, naming it, on a machine that has none.
+
 ### What is in it
 
 | Folder | What it holds |
@@ -43,7 +45,7 @@ The documents the engine already quotes, and where they now are:
 
 ```python
 from pypdf import PdfReader
-p = "ExternalFiles/000-Normes/SIA261-2020-FR.pdf"
+p = "SIA261-2020-FR.pdf"
 print(PdfReader(p).pages[37].extract_text())        # p. 38: Tableau 8
 ```
 

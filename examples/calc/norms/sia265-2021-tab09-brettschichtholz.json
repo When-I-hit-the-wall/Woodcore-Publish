@@ -1,6 +1,6 @@
 {
-  "_source": "SIA 265:2021, Tabelle 9 (clause 3.4.2.2) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 27.",
-  "_note": "Brettschichtholz aus Nadelholz, for the strength classes commonly used in Switzerland. Same conventions as sia265-2021-tab08-vollholz.json. GL40h, GL48h, GL52h and the CLT classes are deliberately absent: SIA 265 does not give them, they belong to SN EN 14080 resp. SIA 265/1, and neither edition is in ExternalFiles/000-Normes/ (docs/architecture/principles.md §2 rule 13).",
+  "_source": "SIA 265:2021, Tabelle 9 (clause 3.4.2.2) -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 27.",
+  "_note": "Brettschichtholz aus Nadelholz, for the strength classes commonly used in Switzerland. Same conventions as sia265-2021-tab08-vollholz.json. GL40h, GL48h, GL52h and the CLT classes are deliberately absent: SIA 265 does not give them, they belong to SN EN 14080 resp. SIA 265/1, and neither edition is in the reference library (docs/architecture/principles.md §2 rule 13).",
   "edition": "SIA 265:2021",
   "table_9": {
     "number": "9",

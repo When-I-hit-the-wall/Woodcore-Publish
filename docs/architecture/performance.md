@@ -139,3 +139,11 @@ Earlier the same day, with a lighter machine, the longest gap was 0.46–0.53 s 
 | `stallwatch`, `typst_gui`/`update_gui`/`woodcore_gui` checks | the watchdog; the network checks of Typst, of an update, of PyPI | a watchdog must not be in the pool it watches; the checks answer through Qt signals already |
 
 ARCH-002's cancellation is not in `TaskRunner`: no caller needed it (`pdf_pane` kills its own process); a stale result is dropped instead.
+
+## One rule for every subscript (2026-10-20)
+
+`math-eval` (lib/subscript.typ; spec 2026-10-20-indices-et-niveaux, UI-001, ARCH-001) rewrites the subscripts of every symbol and formula before Typst evaluates it -- one `str.replace` with a regex, a source without `_` returned at once. Measured on the engineer's machine (8 cores, Windows 11, Typst 0.15.1), the example project's report compiled at `--input uniform=3`, four runs each, the engine before and after in two copies of the project: **4.66 s before, 4.77 s after, +2 %**, under the 5 % the spec allowed. The level of each line read from lib/line-levels.json (`line-level`) costs nothing measurable beside it.
+
+## The metadata every command emits (2026-10-15)
+
+Every `#var`, `#eq`, `#verify` and `#var-domain` emits a `metadata` labelled `<woodcore-var>` from its context (`wc-meta`, lib/formula.typ; spec 2026-10-15-calculs-deplies-balises-figures-natives, REQ-004), which `calc/domains/unfold.py` reads by `typst eval`. Measured on the example project's report, three compiles each on a cloud session, `wc-meta` emitting and then stubbed to `none`: 2.27 s (minimum) and 2.32 s (mean) with it, 2.21 s and 2.40 s without -- the difference is within the spread of one run, and no change was needed.

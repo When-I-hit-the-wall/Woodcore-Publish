@@ -2,8 +2,7 @@
 """
 
 from PySide6.QtCore import QByteArray, QEvent, Qt, QTimer
-from PySide6.QtGui import QCursor, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtGui import QCursor, QIcon, QKeySequence, QShortcut
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
     QAbstractItemView, QAbstractSpinBox, QApplication, QCheckBox, QComboBox, QDoubleSpinBox, QFormLayout, QGroupBox,
@@ -12,6 +11,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QWidget,
 )
 import identity
+import traceback
 import project  # where the project this tab works on is (calc/project.py)
 import theme  # the colours this tab states itself: the orange of a value written over, a lit result (theme.py, v0.90)
 import cards  # the form and what is read off it in cards, after the website (cards.py)
@@ -20,6 +20,7 @@ from shiboken6 import isValid
 from domains import connector, connector_svg, dowel, links
 from i18n import strings
 from norms import sia263, sia265, sn_en_14592
+import svg_icons
 
 
 ICON_PX = 30
@@ -61,21 +62,12 @@ TOOL_TYPES = (
 
 
 def svg_icon(kind, size=ICON_PX, ink=None, ground=None):
-    """One kind's swatch as an icon, in the palette's ink so that it reads on a dark theme too -- statics_tab.svg_icon's own arrangement, through a sentinel so an ink written as white is not painted away by the fill."""
+    """One kind's swatch as an icon, in the palette's ink so that it reads on a dark theme too (svg_icons.recolour)."""
     try:
         svg = connector_svg.swatch(kind)
     except KeyError:
         return QIcon()
-    if ink is not None or ground is not None:
-        svg = svg.replace(connector_svg.SWATCH_INK, "#000001").replace(connector_svg.SWATCH_FILL, "#000002")
-        svg = svg.replace("#000001", ink or connector_svg.SWATCH_INK).replace("#000002", ground or connector_svg.SWATCH_FILL)
-    renderer = QSvgRenderer(QByteArray(svg.encode("utf-8")))
-    pixmap = QPixmap(size, size)
-    pixmap.fill(Qt.GlobalColor.transparent)
-    painter = QPainter(pixmap)
-    renderer.render(painter)
-    painter.end()
-    return QIcon(pixmap)
+    return svg_icons.svg_icon(svg_icons.recolour(svg, connector_svg.SWATCH_INK, connector_svg.SWATCH_FILL, ink, ground), size)
 
 
 def _n(value):
@@ -357,8 +349,8 @@ class ConnectorsFormMixin:
                 self.draft(), self.detail(), lang=self.app.lang, highlight=self.marked(),
                 positions=connector.known_positions(project.current().data_dir)).encode("utf-8")))
             self.pattern_svg.renderer().setAspectRatioMode(Qt.AspectRatioMode.KeepAspectRatio)
-        except Exception:  # broad: a drawing that fails must not empty the form
-            pass
+        except Exception:  # broad: a drawing that fails must not empty the form -- but it is said, never silent (spec 2026-10-19-base-saine-nettoyage, G5)
+            traceback.print_exc()
         self.refresh_section()
 
     def refresh_section(self):
@@ -368,8 +360,8 @@ class ConnectorsFormMixin:
                 self.draft(), note=self.section_note(),
                 highlight=getattr(self, "hover_member", None)).encode("utf-8")))
             self.section_svg.renderer().setAspectRatioMode(Qt.AspectRatioMode.KeepAspectRatio)
-        except Exception:  # broad: a drawing that fails must not empty the form
-            pass
+        except Exception:  # broad: a drawing that fails must not empty the form -- but it is said, never silent (spec 2026-10-19-base-saine-nettoyage, G5)
+            traceback.print_exc()
 
     def section_note(self):
         """What the section says where the diameter could not be drawn to scale, in the window's language."""

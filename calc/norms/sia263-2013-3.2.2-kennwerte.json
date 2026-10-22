@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 263:2013, 3.2.2.3 «Charakteristische Werte», the physical properties of structural steels at normal service temperatures, p. 17 -- read in ExternalFiles/000-Normes/SIA263-2013-DE.pdf as text on 12.10.2026 (spec 2026-10-12-section-acier, REQ-002). The only copy of these values in the project (docs/architecture/layout.md §11).",
+  "_source": "SIA 263:2013, 3.2.2.3 «Charakteristische Werte», the physical properties of structural steels at normal service temperatures, p. 17 -- read in the reference librarySIA263-2013-DE.pdf as text on 12.10.2026 (spec 2026-10-12-section-acier, REQ-002). The only copy of these values in the project (docs/architecture/layout.md §11).",
   "_note": "«Dichte rho_a = 7850 kg/m3, Elastizitätsmodul E = 210 kN/mm2, Schubmodul G = 81 kN/mm2, Querdehnungszahl nu = 0,3». Written here in N/mm² (210 kN/mm² = 210 000 N/mm²). The temperature expansion coefficient of the same clause is not used by any check and is not transcribed.",
   "edition": "SIA 263:2013",
   "properties": {

@@ -4,13 +4,13 @@ One entry per norm or document the engine already cites somewhere -- SIA 260, 26
 
 It is a **catalogue, not a list to print**: an entry is set on the page only where the report actually cites it. A norm a report never cites is never printed, and a norm a report cites without an entry is printed as it was cited, under «Weitere Dokumente» -- so a project's own documents (a manufacturer's ETA, an office handbook) need nothing here: they belong in that project's `references.bib`.
 
-⚠️ Every title, edition and publisher is read off the edition's own title page in `ExternalFiles/000-Normes/` (section 2 rule 13) and the entry says which, in its `_source` -- or, for an edition the library does not hold, off the publisher's own page (the SIA shop's preview PDF, the cover of a VKF directive on www.bsvonline.ch), which the `_source` then names by its address and marks «Not in ExternalFiles/000-Normes/». Nothing checks the `_source`'s words, only that it is there: a web address is as good a page to turn to as a file name. ⚠️ No `_source` is ever printed: naming the library's file in the report is what the engineer refused.
+⚠️ Every title, edition and publisher is read off the edition's own title page in the reference library (section 2 rule 13) and the entry says which, in its `_source` -- or, for an edition the library does not hold, off the publisher's own page (the SIA shop's preview PDF, the cover of a VKF directive on www.bsvonline.ch), which the `_source` then names by its address and marks «Not in the reference library». Nothing checks the `_source`'s words, only that it is there: a web address is as good a page to turn to as a file name. ⚠️ No `_source` is ever printed: naming the library's file in the report is what the engineer refused.
 """
 
-import json
 from pathlib import Path
 
 import validation
+from norms import _loader  # how every reader of calc/norms/ opens its files (G3)
 
 NAME = "norms"
 PATH = Path(__file__).resolve().parent / (NAME + ".json")
@@ -52,13 +52,7 @@ def _text(entry, field, where):
 def _read():
     if "data" in _cache:
         return _cache["data"]
-    try:
-        with PATH.open(encoding="utf-8") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        _fail("not found at %s -- the documents the engine names live in calc/norms/" % PATH)
-    except json.JSONDecodeError as exc:
-        _fail("is not valid JSON: %s" % exc)
+    data = _loader.load(PATH)
     entries = data.get("references")
     if not isinstance(entries, list) or not entries:
         _fail("no 'references' list")
@@ -80,7 +74,7 @@ def _read():
         texts = {field: _text(entry, field, where) for field in TEXT_FIELDS}
         # ⚠️ Required, and the rule with teeth: an entry states the edition its four fields were read off, so that a title can be checked against the page it came from (docs/architecture/principles.md §2 rule 13). It is never printed.
         if not isinstance(entry.get("_source"), str) or not entry["_source"].strip():
-            _fail("%s: no '_source' -- name the edition its title was read off, in ExternalFiles/000-Normes/, or the publisher's page it was read off where the library lacks it" % where)
+            _fail("%s: no '_source' -- name the edition its title was read off, in the reference library, or the publisher's page it was read off where the library lacks it" % where)
         aliases = entry.get("aliases", [])
         if not isinstance(aliases, list) or any(not isinstance(a, str) or not a.strip() for a in aliases):
             _fail("%s: 'aliases' is %r -- expected a list of the other strings a citation may write" % (where, aliases))

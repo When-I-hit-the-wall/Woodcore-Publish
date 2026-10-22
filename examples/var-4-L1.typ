@@ -8,4 +8,4 @@
 #report-level.update(1)
 #number-digits.update(3)
 
-#var("s_k", var-of("snow-load", "SL", "s_k"))
+#var("s_k", domain: ("snow-load", "SL"))

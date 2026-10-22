@@ -4,18 +4,16 @@
 == Lüftung und sommerlicher Wärmeschutz
 // woodcore:/object title
 
-// woodcore:object doc-table ventilation-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Element]),
-    (id: "text", title: [Beschreibung], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Lüftung], text: [[Art der Lüftung, Klimatisierung.]]),
-    (item: [Sommerlicher Wärmeschutz], text: [[Sonnenschutz, thermische Masse, Nachtlüftung …]]),
+// woodcore:object table ventilation-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Lüftung], [[Art der Lüftung, Klimatisierung.]],
+    [Sommerlicher Wärmeschutz], [[Sonnenschutz, thermische Masse, Nachtlüftung …]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Lüftung und sommerlicher Wärmeschutz],
-  header: false,
 )
 // woodcore:/object ventilation-table

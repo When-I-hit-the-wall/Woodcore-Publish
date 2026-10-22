@@ -4,21 +4,19 @@
 == Requirements by building part
 // woodcore:/object title
 
-// woodcore:object doc-table maintenance-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Item]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Roof], text: [[Waterproofing, accessible drainage, roof accessible for maintenance and snow clearance. Snow depth taken into account in the design; beyond it, snow clearance at the owner's expense.]]),
-    (item: [Upper floors], text: [[…]]),
-    (item: [Ground floor], text: [[…]]),
-    (item: [Basements], text: [[…]]),
-    (item: [Facade], text: [[Replaceable independently of the load-bearing elements; preferred material (e.g. timber cladding).]]),
+// woodcore:object table maintenance-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Roof], [[Waterproofing, accessible drainage, roof accessible for maintenance and snow clearance. Snow depth taken into account in the design; beyond it, snow clearance at the owner's expense.]],
+    [Upper floors], [[…]],
+    [Ground floor], [[…]],
+    [Basements], [[…]],
+    [Facade], [[Replaceable independently of the load-bearing elements; preferred material (e.g. timber cladding).]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Operational and maintenance requirements],
-  header: false,
 )
 // woodcore:/object maintenance-table

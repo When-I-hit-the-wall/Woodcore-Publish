@@ -8,4 +8,4 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#fmt-value(var-of("snow-load", "SL", "ce"))
+#fmt-value((value: 0.8, unit: ""))

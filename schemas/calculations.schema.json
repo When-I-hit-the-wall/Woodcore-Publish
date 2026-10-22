@@ -10,11 +10,13 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "description": "1.5 since issues #35-#37 (additive: an instance may be computed from a source of the project -- `engine`, `source_file`, `figures`); 1.4 still read. Pinned to these two: an export written at another version is refused rather than read as this one. 1.6 (issue #42): 1.5 with an instance's `links`, written only where a load source follows a variable.",
+      "description": "1.5 since issues #35-#37 (additive: an instance may be computed from a source of the project -- `engine`, `source_file`, `figures`); 1.4 still read. Pinned to these two: an export written at another version is refused rather than read as this one. 1.6 (issue #42): 1.5 with an instance's `links`, written only where a load source follows a variable. 1.7 (issue #64): 1.6 with an instance's drawings named from the Typst root (`/Permanent-loads/Exports/Figures/dead-load-A1.svg`), written where a project laid out by folders draws one. 1.8 (v0.120, spec 2026-10-20-indices-et-niveaux, UI-002): a var, a step or a check carries no level -- lib/line-levels.json says the level each line is printed from, read by Typst when it prints; 1.8 holds what 1.6 and 1.7 hold, and a line's own level, where an older export writes one, is read where the table names it not.",
       "enum": [
         "1.4",
         "1.5",
-        "1.6"
+        "1.6",
+        "1.7",
+        "1.8"
       ]
     },
     "domains": {
@@ -183,7 +185,6 @@
                             "unit",
                             "symbol",
                             "label",
-                            "level",
                             "source",
                             "norm",
                             "norm_ref"
@@ -248,7 +249,6 @@
                         "type": "object",
                         "required": [
                           "name",
-                          "level",
                           "result",
                           "uses",
                           "norm",
@@ -301,7 +301,6 @@
                           "name",
                           "eta",
                           "unit",
-                          "level",
                           "status",
                           "norm",
                           "norm_ref"

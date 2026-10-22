@@ -24,6 +24,7 @@ import sys
 import unicodedata
 
 import conftest
+import engine
 from conftest import ROOT, Skip
 import project
 import validation
@@ -187,8 +188,8 @@ def test_every_load_symbol_is_drawn_and_listed_in_the_legend_in_three_languages(
     for index in range(6):
         group = svg.split(f'<g id="el-{index + 1}">')[1].split("</g>")[0]
         assert group.strip(), f"element {index + 1} drew nothing"
-    for label, colour in (("P001", plan_svg.ORANGE), ("P002", plan_svg.VIOLET), ("P003", "#111111"),
-                          ("L001", plan_svg.ORANGE), ("L002", plan_svg.VIOLET), ("L003", "#111111")):
+    for label, colour in (("P001", plan_svg.ORANGE), ("P002", plan_svg.VIOLET), ("P003", plan_svg.INK),
+                          ("L001", plan_svg.ORANGE), ("L002", plan_svg.VIOLET), ("L003", plan_svg.INK)):
         assert re.search(rf'fill="{colour}">{label}</text>', svg), label
     # a point load's number has its dotted line back to it, always
     assert svg.count('stroke-linecap="round"') >= 3
@@ -245,10 +246,11 @@ def test_a_section_with_a_load_level_is_exported_once_per_language():
     validation.validate_structure(data, "plans")
     validation.validate_plans_business(data)
     record = data["plans"]["S99"]
-    assert record["figures"] == {lang: f"plans/S99-{lang}.svg" for lang in ("de", "fr", "en")} and record["plan_type"] == "section"
+    place = engine.Figures(here.data_dir, "plan", here)   # from the Typst root laid out by folders (issue #64)
+    assert record["figures"] == {lang: place.name(f"S99-{lang}.svg") for lang in ("de", "fr", "en")} and record["plan_type"] == "section"
     assert record["load_levels"][0]["designation"] == "x0xx" and record["load_levels"][0]["storey"] == "EG"
-    assert "Niveau de reprise des charges (x0xx)" in (here.data_dir / "plans" / "S99-fr.svg").read_text(encoding="utf-8")
-    assert (here.data_dir / "plans" / "S99.svg").read_text(encoding="utf-8") == (here.data_dir / "plans" / "S99-de.svg").read_text(encoding="utf-8")
+    assert "Niveau de reprise des charges (x0xx)" in place.path(place.name("S99-fr.svg")).read_text(encoding="utf-8")
+    assert place.path(place.name("S99.svg")).read_text(encoding="utf-8") == place.path(place.name("S99-de.svg")).read_text(encoding="utf-8")
     assert "figures" not in data["plans"]["LP99"] and data["plans"]["LP99"]["labels"] == ["T001"]
     # a figures entry of another shape is refused
     broken = copy.deepcopy(data)
@@ -272,7 +274,7 @@ def _run(here, body, name, lang):
     d = here.typst_root / ".probe" / name
     d.mkdir(parents=True, exist_ok=True)
     probe = d / "probe.typ"
-    probe.write_text('#import "/config.typ": conf\n#import "/commands.typ": *\n#show: conf\n'
+    probe.write_text('#import "/000-Typst-Config/config.typ": conf\n#import "/000-Typst-Config/commands.typ": *\n#report-level.update(2)\n#show: conf\n'
                      f'#set-report-language("{lang}")\n' + body + "\n", encoding="utf-8")
     out = d / "probe.pdf"
     run = subprocess.run([project.typst_executable(), "compile", "--root", str(here.typst_root), str(probe), str(out)],
@@ -283,9 +285,9 @@ def _run(here, body, name, lang):
 
 def test_the_report_sets_the_level_in_its_language_and_the_loads_in_the_legend():
     here = _exported("plan_types_report")
-    french = _run(here, '#show-plan("S99", caption: none)\n#show-plan-legend("LP99")', "fr", "fr")
+    french = _run(here, '#image-positions-plan("S99")\n#image-positions-plan("LP99")', "fr", "fr")
     assert "Niveau de reprise des charges" in french and "Charge ponctuelle verticale" in french and "Charge linéaire horizontale" in french, french
-    german = _run(here, '#show-plan("S99", caption: none)\n#show-plan-legend("LP99")', "de", "de")
+    german = _run(here, '#image-positions-plan("S99")\n#image-positions-plan("LP99")', "de", "de")
     assert "Lastübergabeniveau" in german and "Punktlast vertikal" in german, german
 
 

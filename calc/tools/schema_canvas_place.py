@@ -4,6 +4,8 @@
 import math
 import theme  # the ground of a distance that cannot be read (theme.py, v0.90)
 from domains import schema as model
+from canvas_items import saved_at  # a coordinate rounded as it is saved, written once (D2)
+_round = saved_at(2)   # to a hundredth of a millimetre, far below what a click can place
 
 
 # An aid line the pointer turns settles on multiples of this, as a static model's support does; the panel takes any angle, to a tenth.
@@ -47,12 +49,6 @@ TOOLS = {
 
 for _kind in CONNECTOR_TOOLS:
     TOOLS[f"connector:{_kind}"] = {"geo": "connector", "kind": _kind}
-
-
-def _round(value, digits=2):
-    """A coordinate as it is saved: to a hundredth of a millimetre, far below what a click can place."""
-    value = round(float(value), digits) + 0.0
-    return int(value) if value.is_integer() else value
 
 
 class SchemaCanvasPlaceMixin:
@@ -289,25 +285,6 @@ class SchemaCanvasPlaceMixin:
         aid = model.hit_aid_point(self.source, p, self.tolerance())
         return {"point": aid} if aid is not None else {"x": _round(p[0]), "z": _round(p[1])}
 
-    def linear_entry(self, a, b, c=None):
-        """The length dimension the clicks so far would make, or None where there is nothing to measure."""
-        entry = {
-            "id": model.next_id(self.source, "dimensions"),
-            "kind": TOOLS[self.tool]["kind"],
-            "from": self.dimension_anchor(a),
-            "to": self.dimension_anchor(b),
-            "offset": 0.0,
-        }
-        ends = model.dimension_ends(self.source, entry)
-        frame = model.dimension_direction(self.source, entry)
-        if ends is None or frame is None or math.dist(ends[0], ends[1]) <= model.SAME_POINT:
-            return None
-        if c is not None:
-            _u, n = frame
-            middle = ((ends[0][0] + ends[1][0]) / 2.0, (ends[0][1] + ends[1][1]) / 2.0)
-            entry["offset"] = _round((c[0] - middle[0]) * n[0] + (c[1] - middle[1]) * n[1])
-        return entry
-
     def add_dimension(self, a, b, c):
         entry = self.linear_entry(a, b, c)
         if entry is None:
@@ -365,21 +342,8 @@ class SchemaCanvasPlaceMixin:
         self._drawing_cache = None
         self.redraw_timer.start()
 
-    def finish_turning(self):
-        if self.turning is not None:
-            self.turning = None
-            self.end_change()
-            self.selection_changed.emit()
-
     def anchor(self):
         return self.drawing[-1] if self.drawing else self.acquired
-
-    def acquire(self):
-        if self._hover is None or self.drawing:
-            return
-        self.acquired = self._hover
-        self.rays = model.tracking_rays(self.source, self.acquired)
-        self.update_helpers()
 
     def track(self, raw, shift=False):
         anchor = self.anchor()

@@ -22,7 +22,7 @@ import bundle_view  # an export document's pages and its fields, its folder chos
 
 
 # The row that stands for the plan nobody has saved yet. Not an id anything can be filed under: a plan's own id is letters, digits and `_ . + -`, so no angle bracket can reach it.
-NEW_ROW = "<new>"
+from source_editor import NEW_ROW  # the list's row of the draft, the one constant (spec 2026-10-20-indices-et-niveaux, ARCH-005)
 
 
 # What the left pane may have chosen: a plan, a document, an export sheet, the command builder -- and so what the centre and the right pane show (their stacks' pages, in this order).
@@ -122,7 +122,7 @@ class DrawingPanesMixin:
         section, v = self.list_section()
         self.add_left_box("plans", section)
         self.list = grouped_list.GroupedList(self.list_strings(), lang=self.app.lang)
-        self.archive = source_archive.Actions(self, lambda: self.sources_dir(), lambda text: self.export("", text), lambda select: self.reload_list(select), self.load_first,
+        self.archive = source_archive.Actions(self, lambda: self.sources_dir(), self.export_listed, lambda select: self.reload_list(select), self.load_first,
                                               archive_note=lambda ids: self.followers_note(ids), before_archive=lambda ids: self.detach_followers(ids))
         self.archive.connect()
         v.addWidget(grouped_list.title_row(self.heading(self.w("plan_list")), self.list))
@@ -130,7 +130,7 @@ class DrawingPanesMixin:
         self.list.currentIdChanged.connect(self.on_list_change)
         self.list.moved.connect(self.on_moved)
         self.list.foldersChanged.connect(self.on_folders_changed)
-        self.list.attach_order(self.VIEW_KEY, self.app.list_store)   # the order the engineer gives the list by drag and drop, kept in Woodcore-Datei/lists.json (calc/list_order.py, issue #15)
+        self.list.attach_order(self.KEY, self.app.list_store)   # the order the engineer gives the list by drag and drop, kept in Woodcore-Datei/lists.json (calc/list_order.py, issue #15)
         self.list.reordered.connect(lambda: self.reload_list(select=self.current_id))
         v.addWidget(self.list, 2)
         self.empty_hint = self.note(self.w("plan_empty"))
@@ -179,7 +179,8 @@ class DrawingPanesMixin:
         ov = QVBoxLayout(self.object_box)
         ov.setContentsMargins(0, 4, 6, 0)
         ov.setSpacing(2)
-        ov.addWidget(self.heading(self.w("plan_object")))
+        self.object_heading = self.heading(self.w("plan_object"))
+        ov.addWidget(self.object_heading)
         self.object_duplicate_button, self.object_delete_button = self.button_row(ov, (("plan_object_duplicate", self.duplicate_object), ("plan_object_delete", self.delete_object)))
         iv.addWidget(self.object_box)
         # the pane: the column, and under it the arrow that folds it away, at the bottom left as the navigation's (the engineer's request of 07.10.2026) -- the one every tab's left pane has since issue #10 (chrome.FoldablePane)
@@ -203,9 +204,13 @@ class DrawingPanesMixin:
         self.update_object_buttons()
 
     def update_object_buttons(self):
-        """The two buttons of «Objet sélectionné» open with something selected, closed with nothing."""
+        """The two buttons of «Objet sélectionné» open with something selected, closed with nothing; the heading says how many objects when there are several (issue #61, UI-003)."""
         canvas = getattr(self, "canvas", None)
         on = bool(canvas is not None and canvas.has_selection())
+        heading = getattr(self, "object_heading", None)
+        if heading is not None:
+            count = canvas.selection_count() if on else 0
+            heading.setText(self.w("plan_objects", n=count) if count > 1 else self.w("plan_object"))
         for button in (getattr(self, "object_duplicate_button", None), getattr(self, "object_delete_button", None)):
             if button is not None:
                 button.setEnabled(on)
@@ -251,7 +256,7 @@ class DrawingPanesMixin:
         return button
 
     def doc_view_t(self, key, **values):
-        """The document view's words, through WORDS: a subclass may say «Dans les plans de protection incendie» where the position plans say «Dans les plans»."""
+        """The document view's words, through WORD_MAP: a subclass may say «Dans les plans de protection incendie» where the position plans say «Dans les plans»."""
         return self.w(key, **values)
 
     def build_center(self):
@@ -278,7 +283,7 @@ class DrawingPanesMixin:
         self.builder.options.plan.hide()
         self.builder.options.plan_label.hide()
         self.center.addWidget(self.builder.preview)
-        self.bundle_pages = bundle_view.BundlePages(self.t)
+        self.bundle_pages = bundle_view.BundlePages(self.t, lang=self.app.lang)
         self.center.addWidget(self.bundle_pages)
         return self.center
 
@@ -563,6 +568,8 @@ class DrawingPanesMixin:
 
     def on_shown(self):
         """The tab brought to the front: the documents and the sheets read again -- VS Code may have written a sheet --, and the plan open read again where its file changed while the tab was hidden and it holds nothing unsaved: the other tab of plans may have turned its page (plan_pages.rotate_page turns both kinds) or detached it."""
+        if not getattr(self.app, "read_only", False):
+            self.write_refresh_documents()   # a document written over in Imported Plans/ read again (issue #64, D-09)
         self.reload_documents(select=self.doc_id if self.view_kind == "document" else None)
         self.reload_sheets(select=self.sheet_id if self.view_kind == "sheet" else None)
         if self.current_id is not None and not self.dirty and self.file_changed():

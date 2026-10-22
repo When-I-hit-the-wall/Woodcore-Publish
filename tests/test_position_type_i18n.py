@@ -147,12 +147,12 @@ def test_a_free_type_stays_as_typed_and_a_german_project_shows_the_german():
         _language(here, "de")
 
 
-def test_member_prints_the_type_in_the_language_of_the_report():
+def test_position_prints_the_type_in_the_language_of_the_report():
     if not conftest.have_typst():
         raise Skip("typst is not on the path")
     import test_report
     for lang, word in (("de", "Träger"), ("fr", "Poutre"), ("en", "Beam")):
-        code, err, text = test_report._probe("probe_type_" + lang, f'#set-report-language("{lang}")\n#member("T001", level: 1)')
+        code, err, text = test_report._probe("probe_type_" + lang, f'#set-report-language("{lang}")\n#position("T001")')
         assert code == 0, err
         assert re.search(r"T001\s*:\s*" + word, text), (lang, text)
         if lang != "de":

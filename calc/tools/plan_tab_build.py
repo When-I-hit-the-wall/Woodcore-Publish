@@ -21,6 +21,8 @@ from plan_canvas_editing import TEXT_TOOL
 from flowbar import FlowLayout, FlowWidget
 from plan_canvas import PlanCanvas
 import plan_canvas_edit  # «Déplacer», «Copier» and «Ligne d'aide» (issue #18)
+import plan_canvas_outline  # the building's outline, whose area centroid is the mass centre (issue #54)
+import plan_centres_card  # the card of the stiffness centre and the mass centre (issue #54)
 import drawing_tab  # what every tab of plans drawn on imported documents shares (v0.115)
 from drawing_tab import (  # noqa: F401 -- names the tab's own code uses, and names other modules and the tests read here
     Blank, CurrentStack, DrawingTab, HISTORY, KINDS, NEW_ROW, document_text, next_free_id, number_text, plain_label, plan_text, svg_icon,
@@ -83,7 +85,8 @@ class PlanBuildMixin:
         axis_icon = svg_icon(plan_svg.swatch("Achse"))
         for tool in TOOLS:
             text = self.t(f"plan_tool_{tool.replace('-', '_')}")
-            button = self.tool_button(text, icon=axis_icon if tool.startswith("axis") else None)
+            tip = self.t("plan_hint_select") if tool == "select" else None   # «Sélection» says what it does -- Ctrl+click, Ctrl+A, Ctrl+C, Ctrl+V among it (issue #61), as the fire plan's does
+            button = self.tool_button(text, tip, icon=axis_icon if tool.startswith("axis") else None)
             button.clicked.connect(lambda _checked=False, tool=tool: self.choose_tool(tool))
             self.tool_group.addButton(button)
             self.tool_buttons[tool] = button
@@ -101,6 +104,12 @@ class PlanBuildMixin:
         button.clicked.connect(lambda _checked=False: self.choose_tool(TEXT_TOOL))
         self.tool_group.addButton(button)
         self.tool_buttons[TEXT_TOOL] = button
+        top.addWidget(button)
+        # the building's outline (issue #54): one polygon a plan, drawn as an area is -- a floor plan's and a load-path plan's, hidden on a section (apply_plan_type)
+        button = self.tool_button(self.t("plan_tool_outline"), self.t("plan_tip_outline"), svg_icon(plan_svg.swatch("Umriss")))
+        button.clicked.connect(lambda _checked=False: self.choose_tool(plan_canvas_outline.TOOL))
+        self.tool_group.addButton(button)
+        self.tool_buttons[plan_canvas_outline.TOOL] = button
         top.addWidget(button)
         # the STE tools, then the load-path plan's two load tools (v0.116), shown on a load-path plan alone (apply_plan_type)
         for type_ in model.TYPE_ORDER + model.LOAD_TYPES:
@@ -331,6 +340,9 @@ class PlanBuildMixin:
         gv.addWidget(self.dimensions_box)
         self.scale_group = self.add_module(v, group)
         self.add_snap_module(v)   # «Magnétisme», in the right pane since v0.117 (drawing_tab.add_snap_module)
+        # the stiffness centre and the mass centre (issue #54): whether the plan prints them, the power of a CLT wall's length, and what each stands on or why it is not there
+        self.centres_card = plan_centres_card.CentresCard(self)
+        self.centres_group = self.add_module(v, self.centres_card.card)
 
         group = cards.card(self.t("plan_group_style"))
         form = cards.form(group)
@@ -408,6 +420,7 @@ class PlanBuildMixin:
         self.apply_plan_type()
         self.update_scale_widgets()
         self.update_crop_text()
+        self.centres_card.refresh()
 
     def update_scale_widgets(self):
         background = self.source.get("background")
@@ -472,7 +485,7 @@ class PlanBuildMixin:
         self.on_changed()
 
     def on_plan_type(self, _index):
-        """«Type de plan» (v0.116): the plan's type and its role with it -- a section's role is section --, and what the new type does not carry taken out in the same step of «Annuler»: a section's storey lines, storey boxes and load levels on any other plan, the load symbols on any plan but a load-path plan. The status line says how many went."""
+        """«Type de plan» (v0.116): the plan's type and its role with it -- a section's role is section --, and what the new type does not carry taken out in the same step of «Annuler»: a section's storey lines, storey boxes and load levels on any other plan, the load symbols on any plan but a load-path plan, the building's outline on a section (issue #54). The status line says how many went."""
         if self.loading:
             return
         kind = self.plan_type_combo.currentData()
@@ -484,6 +497,8 @@ class PlanBuildMixin:
             if kind != "section":
                 for key in ("storey_lines", "storey_boxes", "load_levels"):
                     dropped.extend(self.source.pop(key, None) or [])
+            else:
+                dropped.extend(self.source.pop("outlines", None) or [])   # an elevation has no outline in plan, and no mass centre
             if kind != "loadpath":
                 loads = [e for e in self.source.get("elements", []) if model.is_load(e.get("type"))]
                 if loads:
@@ -500,6 +515,8 @@ class PlanBuildMixin:
         kind = model.plan_type(self.source)
         if tool in SECTION_TOOLS:
             return kind == "section"
+        if tool == plan_canvas_outline.TOOL:
+            return kind != "section"
         if tool in model.TYPES:
             if model.is_load(tool):
                 return kind == "loadpath"
@@ -512,7 +529,7 @@ class PlanBuildMixin:
         section = kind == "section"
         self.section_row.setVisible(section)
         for tool, button in self.tool_buttons.items():
-            if tool in model.TYPES:
+            if tool in model.TYPES or tool == plan_canvas_outline.TOOL:
                 button.setVisible(self.tool_shown(tool))
         self.section_button.setEnabled(not section)
         for widget in (self.storey_combo, self.floor_edit, self.section_row_widget):

@@ -19,6 +19,8 @@ import plan_canvas
 import theme  # the paper of a handle (theme.py, issue #29)
 import plan_canvas_tools  # the ruler, the position plan's own (issue #9, D-012)
 import plan_canvas_edit  # «Déplacer» and «Copier», the position plan's own (issue #18, D-015: its construction aids are not this plan's)
+import plan_clipboard  # the one clip of the process, Ctrl+C's and Ctrl+V's (issue #61)
+from domains import plan_clip
 from domains import fire, fire_svg, plan, plan_svg
 from domains import plan_tracking as tracking
 
@@ -35,8 +37,6 @@ LINE_TOOLS = ("wall", "route")
 FIXED_TOOLS = {"door": "doors", "exit": "exits", "width": "widths"}
 FIXED_POINTS = 2
 
-# The tools whose clicks are drawn onto a point the plan already carries when one lies within the pick tolerance: a wall has to start exactly on the corner of a surface or the end of the wall it joins, or the gap between them is a hole in the fire resistance that nobody can see on the drawing; a door's jambs, an exit's tail and a width's ends sit on the same corners.
-SNAP_TOOLS = LINE_TOOLS + tuple(FIXED_TOOLS)
 
 
 class FireCanvas(plan_canvas.PlanCanvas):
@@ -84,12 +84,6 @@ class FireCanvas(plan_canvas.PlanCanvas):
         self.frame = frame
         self.set_source(source, project_root, here)
 
-    def set_frame(self, frame):
-        """The frame of the position plan this plan follows has changed (or the plan was made to follow another): the background is loaded again and the view fitted to it."""
-        self.frame = frame
-        self.load_background()
-        self.invalidate()
-        self.fit()
 
     def redraw(self):
         """The overlay rendered by fire_svg over the frame, the crop marked, and the scene laid out as the position plan's is (apply_view_mode, v0.114): the crop shown alone, or the whole page under a veil where «Afficher toute la page» asks for it."""
@@ -168,18 +162,44 @@ class FireCanvas(plan_canvas.PlanCanvas):
         path = QPainterPath()
         for eid in self.selected:
             found = fire.entry_of(self.source, eid)
-            if found is None:
+            if found is not None:
+                path.addPath(self.entry_outline(found[0], self.source[found[0]][found[1]], dx, dy))
+        return path
+
+    def entry_outline(self, collection, entry, dx=0.0, dy=0.0):
+        """One entry drawn where (dx, dy) would put it: its outline or its line (`outline_of`)."""
+        path = QPainterPath()
+        rings, closed = self.outline_of(collection, entry)
+        for ring in rings:
+            if not ring:
                 continue
-            collection, index = found
-            rings, closed = self.outline_of(collection, self.source[collection][index])
-            for ring in rings:
-                if not ring:
-                    continue
-                path.moveTo(QPointF(ring[0][0] + dx, ring[0][1] + dy))
-                for x, y in ring[1:]:
-                    path.lineTo(QPointF(x + dx, y + dy))
-                if closed:
-                    path.closeSubpath()
+            path.moveTo(QPointF(ring[0][0] + dx, ring[0][1] + dy))
+            for x, y in ring[1:]:
+                path.lineTo(QPointF(x + dx, y + dy))
+            if closed:
+                path.closeSubpath()
+        return path
+
+    def selected_entries(self):
+        """The position plan's question (plan_canvas_editing), answered for a canvas that selects ids: none of the position plan's kind."""
+        return []
+
+    def selection_count(self):
+        """How many entries are selected."""
+        return len(self.selected)
+
+    def select_all(self):
+        """Ctrl+A (issue #61): every entry of the plan -- a fire-protection plan has no building outline to leave out."""
+        self.select_ids([entry["id"] for collection in fire.ENTRY_COLLECTIONS for entry in self.source.get(collection) or []])
+
+    def clip_outline(self, point):
+        """The clip held drawn as Ctrl+V would put it down at `point` (plan_clip.placed)."""
+        path = QPainterPath()
+        clip = plan_clipboard.current()
+        if clip is None or clip.kind != plan_clip.FIRE:
+            return path
+        for collection, entry in plan_clip.placed(clip, point, self.per_m()):
+            path.addPath(self.entry_outline(collection, entry))
         return path
 
     def delete_selection(self):
@@ -247,19 +267,6 @@ class FireCanvas(plan_canvas.PlanCanvas):
         if self.tool == "polygon" or self.tool in LINE_TOOLS or self.tool in FIXED_TOOLS:
             self.add_point(raw, shift)
 
-    def snap_to_existing(self, raw):
-        """The nearest point of anything the plan carries -- the outline or the islands of a surface, the points of a wall, a door, an escape route, an exit, a width -- within the pick tolerance of `raw`, or None."""
-        tol = self.tolerance()
-        best = None
-        for collection in fire.COLLECTIONS:
-            for entry in self.source.get(collection, []):
-                rings = [entry["points"]] + (list(entry.get("holes", [])) if collection == "zones" else [])
-                for ring in rings:
-                    for q in ring:
-                        d = math.dist(raw, q)
-                        if d <= tol and (best is None or d < best[0]):
-                            best = (d, (q[0], q[1]))
-        return None if best is None else best[1]
 
     # -- drawing --
 

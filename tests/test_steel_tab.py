@@ -5,6 +5,8 @@ What is held: the group «Acier» before «Référence» with its sub-titles, in
 ⚠️ Built off-screen on a copy of the example project (conftest.project_copy), message boxes stubbed; nothing here compiles Typst.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import sys
 
@@ -123,8 +125,9 @@ def test_a_check_follows_its_position_and_is_saved_and_exported():
         assert written["kind"] == "bending" and written["position"] == "S900"
         exported = json.loads((here.data_dir / "steel.json").read_text(encoding="utf-8"))
         assert exported["checks"][cid]["calculable"] and abs(exported["checks"][cid]["eta"] - 40 / (355 * 429e3 / 1.05e6)) < 1e-6
-        assert tab.command_text() == '#show-check-steel("%s")' % cid
-        assert tab.preview_source() is not None and "show-check-steel" in tab.preview_source()
+        # its file written out by the export, included where a section prints it (spec 2026-10-21-commandes-typst-refonte, REQ-017, UI-002)
+        assert tab.command_text() == '#include domain-file("steel", "%s")' % cid
+        assert tab.preview_source() is not None and tab.command_text() in tab.preview_source()
 
 
 def test_a_profile_written_over_is_orange_and_reprendre_takes_it_back():

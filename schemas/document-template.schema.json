@@ -28,7 +28,7 @@
         "bp",
         "rs"
       ],
-      "description": "The document this template makes: cu, the Convention d'utilisation, bp, the Base de projet, or rs, the Rapport de statique. A new project's report is made from its project template (calc/templates.py); a report template is what a report's content is switched to (calc/content_switch.py) or saved as -- its language folders hold the report's entry and its numbered `Sections/NNN-<name>.typ`, and no structure.json."
+      "description": "The document this template makes: cu, the Convention d'utilisation, bp, the Base de projet, or rs, the Rapport de statique. A new project's report is made from its project template (calc/templates.py); a report template is what a report is made from (calc/project_template.py) or saved as -- its language folders hold the report's entry and its numbered `Sections/NNN-<name>.typ`, and no structure.json."
     },
     "name": {
       "type": "object",

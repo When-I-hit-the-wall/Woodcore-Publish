@@ -21,14 +21,20 @@ from domains import quantities   # the plans' quantities by material and section
 import validation
 import variable_sources                            # the values a linked field follows, built from this export in memory (spec 2026-10-11-variables-liees-champs-et-textes)
 from domains import annex, connection, connector, fire, plan, schema, section, statics
+from domains import plan_documents                 # the documents the plans are drawn on, read again where replaced (issue #64)
 from domains import member_check                   # the member checks: resolved here, calculated in the report (#show-check-member)
 from domains import steel_check                    # the steel checks of the «Acier» tabs: resolved and computed here, printed by #show-check-steel (issues #50-#52)
+from domains import unfold                         # the member checks printed unfolded as domains of the «Formules» tab (spec 2026-10-15-calculs-deplies-balises-figures-natives)
+from domains import commands_migrate              # a section that still calls a command renamed or taken away stops the export, naming its replacement (spec 2026-10-19-base-saine-nettoyage, REQ-002)
+from domains import loads_migrate                 # a file that still names a snow or wind value by its name before v0.120 stops the export, naming it (spec 2026-10-21-restes-issue-69, CON-002)
+from domains import dependency_graph              # which object reads which, data/dependencies.json, and what a change touches (spec 2026-10-21-graphe-dependances, issue #71)
+from domains import domain_file                    # one .typ per domain of a specialised tab, in a project laid out by folders (issue #64)
 from domains import formula_domain                 # the calculation domains of the «Formules» tab: their index, data/formulas.json, which the «Variables» tab reads (v0.117, 2.0 by id since issue #15)
 from domains import script as script_domain        # the `script` domain: one instance per script of the project
 from i18n import strings
 import registry
 from registry import build_calculations, open_workbooks
-from tools.build_reference import build_reference_workbook
+from build_reference import build_reference_workbook
 
 # Every path this pipeline reads or writes is the project's, named by its .woodcore file (calc/project.py, v0.81): the workbooks in the project's folder, beside the finished report, where the engineer works; the sources Woodcore's window writes -- connectors/, connections/, plans/, statics/ and details/ (not `schemas/`, the contracts' own folder, docs/domain/detail-schemas.md §3.3decies) -- in its `sources`; and the export, data/, in its `generated`. The load workbooks are not named here: registry.py finds every one whose name says it is one. Until v0.80 all of it was derived from this file's own location, which tied one copy of the code to one project.
 
@@ -152,6 +158,14 @@ def run(update_engine=False, dry=False):
         raise project.EngineDecision(state, project.engine_message(state, detail))
     # The glossary first, whatever the project holds: it was checked only when a figure asked it for a word, so a project with no figure exported a broken one without a word (docs/typst/language.md §4bis; periodic audit 260916).
     strings.check()
+    # A section that still calls a report command renamed in v0.120 (`position-ids()`, `get-value(v)`, …) or taken away stops here, naming the file and what to write: the window rewrites them when the project is opened (commands_migrate.migrate), never the export, which writes data/ and nothing of the engineer's own (spec 2026-10-19-base-saine-nettoyage, ARCH-RISK-406).
+    refused = commands_migrate.refusal(here)
+    if refused:
+        raise validation.ValidationError(refused)
+    # So does a section, a script or a source that still names a value of a snow or wind sheet by its name before v0.120 (`q_k11` of a flat roof, `qk_max_bh`…): the window rewrites them when the project is opened (loads_migrate.migrate), and what cannot be rewritten safely is named here (spec 2026-10-21-restes-issue-69, CON-002, ARCH-RISK-805).
+    refused = loads_migrate.refusal(here)
+    if refused:
+        raise validation.ValidationError(refused)
     # The positions are Woodcore's own since v0.114 (calc/positions_store.py): a project made before is given its positions.json here, its Positionen.xlsx imported and moved into its archives, so its first export is its migration too. A project with no position is exported with none -- never an error.
     # `woodcore-cli check` writes nothing, so it reads the workbook a migration would read, and moves nothing.
     if dry and not positions_store.path(here).exists() and positions_store.workbook(here).is_file():
@@ -214,20 +228,26 @@ def run(update_engine=False, dry=False):
     # the number in the report the number the current data gives (docs/architecture/principles.md §2 rule 1, 3.3sexdecies). One that
     # fails, is given up on or declares nothing is a warning and never a stop, and its record carries the reason.
     # Run before the connectors, the polar moments, the member checks and the static models since v0.117 (issue #42): a field of theirs may follow a script's variable (spec 2026-10-11-variables-liees-champs-et-textes, ARCH-005).
-    script_records, script_warnings = script_domain.prepare()
+    script_reads = {}   # what each script read, for the graph of dependencies (spec 2026-10-21-graphe-dependances)
+    script_records, script_warnings = script_domain.prepare(calculations=calculations, reads=script_reads)   # a script reads the calculations of this export, not the last one's (ARCH-RISK-804)
     # The calculation domains written in the «Formule» tab, one .typ each in the Typst root's Formules/ (calc/domains/formula_domain.py, v0.117): only their index is exported -- each file is its own source, and a section prints it with #include "/Formules/<id>.typ" where it lies (issue #15). One that cannot be read stops the export naming it; one written by hand in another form is a warning.
     formula_index, formula_warnings = formula_domain.prepare(here)
+    # A value kept in step with `#sync` and written as a literal that no longer says what the export holds: said at its file and line, never overwritten -- the refresh is the engineer's (spec 2026-10-21-commandes-typst-refonte, ARCH-010, calc/typst_sync.py)
+    import typst_sync
+    formula_warnings += [engine.Note("sync_stale", f"{here.rel(path)}, line {line}: #sync({ident!r}) writes {content!r}, and the export holds {value!r} -- refresh the value, or take #sync away to keep it as it is",
+                                     file=here.rel(path), line=line, id=ident, written=content, held=value)
+                         for path, line, ident, content, value in typst_sync.check(here, calculations)]
     # What a connector and a polar moment may follow: the loads, the scripts and the «Formule» domains computed against these loads -- never a joint, a joint giving variables of its own (ARCH-005) --, from this export in memory and never from the last one on the disk (ARCH-RISK-003). A field whose variable is gone keeps its last value with a warning, never a stop (D-06).
     script_document = script_domain.document(script_records)
     joint_values = variable_sources.export_values(here, calculations, scripts=script_document, formulas=formula_index)
     # A connector's timber is a reference to a position -- its member's element names one -- resolved afresh here, so «Import données» is all it takes for a strength class changed in the workbook to reach the resistance (docs/domain/connectors.md §3.3nonies). One that no longer resolves is a warning: stopping would stop the positions' own export with it.
-    connector_data, connector_figures, warnings = connector.prepare(here.connectors_dir, position_records, details, joint_values)
+    connector_data, connector_figures, warnings = connector.prepare(here.connectors_dir, position_records, details, joint_values, place=engine.figures(data_dir, "connector"))
     # A polar moment names a schema and no connector since v0.76, so the connectors are not handed over.
-    connections, figures, link_warnings = connection.prepare(here.connections_dir, details, position_records, joint_values)
+    connections, figures, link_warnings = connection.prepare(here.connections_dir, details, position_records, joint_values, place=engine.figures(data_dir, "connection"))
     # Every variable a member check or a static model may follow: the joints' too, now that they are built.
     values = variable_sources.export_values(here, calculations, connections, connector_data, script_document, formula_index)
     # The schemas' records and figures, once every variable is built: a text placed on one prints a variable of the export (issue #43). Their sources were read above, before the joints that are drawn on them.
-    schemas, schema_files, schema_warnings = schema.prepare(here.details_dir, position_records, values)
+    schemas, schema_files, schema_warnings = schema.prepare(here.details_dir, position_records, values, place=engine.figures(data_dir, "details"))
     # A member check names a position and follows its strength class, section and moisture class unless it states them, resolved here against the positions just built -- the connector's reference pattern (domains/member_check.py). Nothing is computed: #show-check-member computes the check in the report. One the project cannot give a value for is exported `calculable: false` with its reason, never a stop.
     check_data = member_check.prepare(here, position_records, values)
     check_warnings = member_check.warnings_of(check_data)
@@ -235,7 +255,15 @@ def run(update_engine=False, dry=False):
     steel_data = steel_check.prepare(here, position_records, values)
     check_warnings = check_warnings + steel_check.warnings_of(steel_data)
     # A plan's labels are checked against the positions exported with it: one the Positions tab does not have is a warning, never a reason to stop the report (docs/domain/position-plans.md §3.3sexies).
-    plans, plan_files, plan_warnings = plan.prepare(here.plans_dir, here.root, data_dir, index["positions"], values)
+    # A document still lying where the engineer keeps it is copied into its tab's Imported Plans/, and an annex's PDF into Appendix/ -- a project migrated before Woodcore copied them (issue #64, D-09, D-11); then a document written over in Imported Plans/ by a file of the same name is read again before the plans drawn on it are: its pages, its layers and its SHA-256 brought up to date. Not by `woodcore-cli check`, which writes nothing; nothing in a project laid out before
+    if not dry:
+        for record, made in plan_documents.adopt(here) + annex.adopt(here):
+            print(f"export_all: {here.rel(record)} names {here.rel(made)} now" if made else f"export_all: {here.rel(record)} names its copy now")
+    refreshed, refresh_notes = plan_documents.refresh_all(here) if not dry else ([], [])
+    for docid in refreshed:
+        print(f"export_all: the document {docid} was read again from its file")
+    plans, plan_files, plan_warnings = plan.prepare(here.plans_dir, here.root, data_dir, index["positions"], values, positions_store.section_types(rows))
+    plan_warnings = refresh_notes + plan_warnings
     # The quantities of what the position plans draw, by material and section (issue #9): measured here, with the plans' own lengths and the positions' sections, and printed by show-plan-quantities and sheet-quantities, which compute nothing again. A section is no plan of positions.
     plan_sources = plan.position_plan_sources(here.plans_dir)
     quantity_data, quantity_notes = quantities.document(plan_sources, rows)
@@ -243,7 +271,7 @@ def run(update_engine=False, dry=False):
     # The fire-protection plans, after the position plans they may follow: one that follows a position plan is set over that plan's own exported background, so it is handed the plans just built rather than reading the last export's off the disk (docs/domain/position-plans.md §3.3sexies; domains/fire.py). The documents a plan is drawn on live under the position plans' folder.
     fire_plans, fire_files, fire_warnings = fire.prepare(here.fire_dir, here.plans_dir, here.root, data_dir, plans["plans"], values)
     # A load drawn on a static model may name a var of the calculations instead of stating a number, so the figure follows the workbook by itself. It is resolved against the record just built above -- nothing is read back off disk -- and a name that is no longer there is a warning, never a stop (docs/domain/static-models.md §3.3octies).
-    models, model_files, model_warnings = statics.prepare(here.statics_dir, values)
+    models, model_files, model_warnings = statics.prepare(here.statics_dir, values, place=engine.figures(data_dir, "statics"))
     # The report's revision journal, one file rather than a folder of them (calc/journal.py, docs/domain/journal.md §3.3terdecies): a project that has never been revised carries none, which is an empty journal and never an error. A project laid out in three documents has one per document, each printing its own (Project.journal_file_for), and each is exported beside the report's -- data/journal-cu.json and data/journal-bp.json, which their entry files read at every compile.
     journals, journal_warnings = {}, []
     for mode in here.modes:
@@ -251,9 +279,18 @@ def run(update_engine=False, dry=False):
         journal_warnings += notes
     journal_data = journals["rs"]
     # The documents the report draws on from outside and the excerpts it shows of them (docs/domain/annexes.md §3.3undevicies, v0.115): every excerpt found again in its source's current version -- by the bookmark it is anchored on -- and cropped to its frame here, since Typst cannot crop such a page itself. One that cannot be found is a warning here and a refusal in the report, which is where the engineer asked for it to stop.
+    # an annex's PDF written over in Appendix/ by a file of the same name is read again first (issue #64, D-11) -- not by `woodcore-cli check`, which writes nothing
+    _refreshed, annex_refresh_notes = annex.refresh_sources(here) if not dry else ([], [])
     annex_data, annex_files, annex_warnings = annex.prepare(here, annex.previous_export(data_dir))
+    annex_warnings = annex_refresh_notes + annex_warnings
+    # The graph of dependencies (spec 2026-10-21-graphe-dependances, issue #71): which object reads which, built from what was just built -- nothing computed again --, compared with the last export's, and what changed since said with what depends on it downstream, and a circle through objects of different kinds. Built before anything is written, and by `woodcore-cli check` too.
+    previous_graph = dependency_graph.read(data_dir / dependency_graph.EXPORT_FILE)
+    graph = dependency_graph.build(here, calculations, position_records, script_records, script_reads, formula_domain.list_domains(here),
+                                   check_data, steel_data, connector_data, connections, schemas, plans, fire_plans, models, annex_data)
+    validation.validate_structure(graph, dependency_graph.EXPORT_SCHEMA)
+    graph_warnings = dependency_graph.notes(previous_graph, graph)
     # A key of the project file that names a feature Woodcore no longer has is read, ignored and said -- at every export, until the engineer takes it out (project.RETIRED_KEYS); the file is his and is not rewritten.
-    for message in here.retired_keys() + load_link_warnings + position_warnings + quantity_notes + warnings + check_warnings + link_warnings + plan_warnings + fire_warnings + model_warnings + schema_warnings + journal_warnings + script_warnings + annex_warnings + formula_warnings:
+    for message in here.retired_keys() + load_link_warnings + position_warnings + quantity_notes + warnings + check_warnings + link_warnings + plan_warnings + fire_warnings + model_warnings + schema_warnings + journal_warnings + script_warnings + annex_warnings + formula_warnings + (graph_warnings if dry else []):
         _warn(message)
 
     # What produced this export, beside it: the project as its file describes it, the program's version and revision, Typst's, and the workbooks' hashes (data/project.json, v0.82) -- what the one git repository proved until the code and the project came apart. Since v0.99 also the report's own latest revision, which the PDF's keywords name.
@@ -263,8 +300,17 @@ def run(update_engine=False, dry=False):
     if dry:
         return  # `woodcore-cli check`: everything read, built and validated, nothing written
 
+    # The file of a domain that is gone archived where it is an untouched stub of an earlier Woodcore, said where it is the engineer's (domains/domain_file.py, issue #64) -- every domain's own file is written out below (calc/domains/unfold.py); nothing in a project laid out before
+    _archived, domain_notes = domain_file.sync(here)
+    for message in domain_notes:
+        _warn(message)
+    # the workbook beside positions.json, never read (issue #64, D-24): written at every change of the positions, and here where it is missing -- a project unpacked, a workbook deleted
+    if here.has_folders and not positions_store.workbook_path(here).is_file():
+        positions_store.write_workbook(here)
+
+    previous_calculations = engine.previous_json(data_dir / "calculations.json")
     engine.write_json(data_dir / "calculations.json", calculations)
-    registry.write_files(calculation_files, data_dir)
+    registry.write_files(calculation_files, data_dir, previous_calculations)
     _sweep_retired(data_dir)
     # The scripts beside them, keyed by their file name (docs/domain/scripts.md §3.3sexdecies).
     script_domain.write(script_records)
@@ -275,8 +321,30 @@ def run(update_engine=False, dry=False):
     connector.write(connector_data, connector_figures, data_dir)
     member_check.write(check_data, data_dir)
     steel_check.write(steel_data, data_dir)
-    # Before the reference workbook, which catalogues the connections' calls along with everything else.
+    # Before the domains are written out, which read each record back from data/; and before the reference workbook, which catalogues the connections' calls along with everything else.
     connection.write(connections, figures, data_dir)
+    # A check printed unfolded gets its domain the first time it is exported, its file written from its record -- Timber-checks/<Kind>/<id>.typ laid out by folders, over its stub where the stub is Woodcore's own (issue #64, D-16), Formules/<id>.typ before (REQ-002) --, and the index of the domains is built again so that it lists it; a steel check too, into Steel-checks/<Kind>/<id>.typ (spec 2026-10-21-commandes-typst-refonte, REQ-017)
+    unfold_notes = []
+    for kind, data in [("check", check_data), ("steel", steel_data)] + [(kind, calculations) for kind in unfold.LOAD_KINDS] + [("connector", connector_data), ("connection", connections), ("script", script_domain.document(script_records))]:
+        for rid in unfold.unfold_domains(here, kind, data, notes=unfold_notes):
+            print(f"export_all: the {kind} {rid} written out into {here.rel(unfold.domain_path(here, rid, kind=kind))}")
+    for message in unfold_notes:
+        _warn(message)
+    # what #show-check-member includes for a check printed unfolded: its file, where it holds the domain written out -- none where it is still a stub, or one the engineer wrote in, which is then printed folded (lib/timber.typ)
+    if member_check.mark_unfolded_files(check_data, unfold.unfolded_files(here, check_data)):
+        member_check.write(check_data, data_dir)
+    # where each domain Woodcore wrote stands against its data, and its file (spec 2026-10-21-commandes-typst-refonte, REQ-012, ARCH-007, ARCH-008): what `#domain` prints in red at its head and what `domain-file(kind, id)` reads -- computed here, never by Typst
+    for name, payload, contract in ((unfold.STATE_FILE, unfold.domain_state(here, check_data, steel=steel_data, calculations=calculations, connectors=connector_data, connections=connections, scripts=script_domain.document(script_records)), unfold.STATE_SCHEMA),
+                                    (unfold.FILES_FILE, unfold.domain_files(here, check_data, steel_data, calculations, connector_data, connections, script_domain.document(script_records)), unfold.FILES_SCHEMA)):
+        validation.validate_structure(payload, contract, where=f"data/{name}")
+        engine.write_json(data_dir / name, payload)
+    formula_index, _notes = formula_domain.prepare(here)
+    # the graph built again now that the domains Woodcore writes out are on the disk (spec 2026-10-21-commandes-typst-refonte, REQ-017): built before, an export that writes one would draw another graph at the next export and say a change nobody made
+    graph = dependency_graph.build(here, calculations, position_records, script_records, script_reads, formula_domain.list_domains(here),
+                                   check_data, steel_data, connector_data, connections, schemas, plans, fire_plans, models, annex_data)
+    validation.validate_structure(graph, dependency_graph.EXPORT_SCHEMA)
+    for message in dependency_graph.notes(previous_graph, graph):
+        _warn(message)
     plan.write(plans, plan_files, data_dir)
     engine.write_json(data_dir / "quantities.json", quantity_data)
     fire.write(fire_plans, fire_files, data_dir)
@@ -284,9 +352,10 @@ def run(update_engine=False, dry=False):
     schema.write(schemas, schema_files, data_dir)
     annex.write(annex_data, annex_files, data_dir)
     formula_domain.write(formula_index, data_dir)
+    dependency_graph.write(graph, data_dir)
     for mode, data in journals.items():
         journal.write(data, data_dir, mode)
-    engine.write_json(data_dir / "project.json", info)
+    write_project_info(here, info)
     # the engine beside the export, as one: after the data, so a failed export leaves the old pair together
     for name in project.sync_engine(here, update=update_engine):
         print(f"export_all: engine {name} written to {here.rel(here.generated_dir)}/")
@@ -311,6 +380,31 @@ def run(update_engine=False, dry=False):
         print(f"export_all: wrote {ref_path.relative_to(here.generated_dir)}")
 
 
+# --- data/project.json --------------------------------------------------------------------
+
+def write_project_info(here, info):
+    """data/project.json written: `info` (project.record) checked against its contract first, then written -- the one writer of the file, the export's and the «Projet» tab's (issue #87)."""
+    validation.validate_structure(info, "project")
+    engine.write_json(here.data_dir / "project.json", info)
+
+
+def refresh_project_info(here):
+    """The title page's fields of data/project.json brought into step with the project file at once, without an export (issue #87, the engineer: «une donnée modifiée est reportée tout de suite pour le prochain PDF»).
+
+    Only the name and DETAILS are taken from the project file: what produced the last export -- Woodcore's and Typst's versions, the workbooks' digests, the journal's revision -- is kept as that export wrote it, since nothing was exported now. No stamp is touched: data/project.json is an input of every document, so the next compile and the next export see a document changed, as they should. A file that is missing or does not hold to its contract is written as a new project's (project.record). Returns whether the file was written."""
+    path = here.data_dir / "project.json"
+    try:
+        info = json.loads(path.read_text(encoding="utf-8"))
+        validation.validate_structure(info, "project")
+    except (OSError, ValueError, validation.ValidationError):
+        info = None
+    fresh = project.record(here) if info is None else {**info, "name": here.name, **project.details_of(here)}
+    if info == fresh:
+        return False
+    write_project_info(here, fresh)
+    return True
+
+
 # --- the export a project starts with --------------------------------------------------
 
 def seed(here=None):
@@ -324,6 +418,8 @@ def seed(here=None):
     empty = {
         "project.json": ("project", lambda: project.record(here)),
         "calculations.json": ("calculations", lambda: build_calculations([])),
+        "domain-state.json": ("domain-state", lambda: unfold.empty_state()),   # spec 2026-10-21-commandes-typst-refonte, ARCH-007: what #domain reads
+        "domain-files.json": ("domain-files", lambda: unfold.empty_files()),   # ARCH-008: what domain-file(kind, id) reads
         "positions-index.json": ("positions-index", lambda: {"schema_version": "1.0", "positions": []}),
         "quantities.json": ("quantities", lambda: {"schema_version": "1.0", "rows": [], "all": {"groups": [], "totals": []}, "plans": {}}),
         connector.EXPORT_FILE: ("connectors", lambda: {"schema_version": connector.EXPORT_SCHEMA_VERSION, "connectors": {}}),
@@ -346,6 +442,8 @@ def seed(here=None):
         steel_check.EXPORT_FILE: ("steel", steel_check.empty),
         # The calculation domains of the «Formules» tab, none: a project with none must still let the «Variables» tab read an index rather than stop on a missing file (v0.117).
         formula_domain.EXPORT_FILE: ("formulas", formula_domain.empty),
+        # The graph of dependencies, empty: what the «Dépendances» tab reads before a first export (spec 2026-10-21-graphe-dependances, D-07) -- Typst never reads it.
+        dependency_graph.EXPORT_FILE: ("dependencies", dependency_graph.empty),
     }
     # A project laid out in three documents: the journals of the convention d'utilisation and of the base de projet too, empty -- each document prints its own, Typst cannot ask whether a file is there, and so a document's compile stops on a missing one (lib/calc-engine.typ, `journal-files`). A project laid out as a report alone has neither document, and is seeded exactly as it always was.
     if here.has_modes:
@@ -359,6 +457,12 @@ def seed(here=None):
             missing[name] = data
     for name, data in missing.items():   # every one built and checked before the first is written
         engine.write_json(data_dir / name, data)
+    # each document's journal, written once in raw Typst beside its entry file where it has none (spec 2026-10-21-commandes-typst-refonte, Q-008): what its journal section includes, `#include domain-file("journal", document)` -- listed in data/domain-files.json here, an export lists it again --, so the document compiles from the moment the project exists -- the templates carry none, the file being the project's (domains/list_files.py)
+    from domains import list_files
+    for mode in here.created_modes:   # a document not made yet has no journal: it is written as the document is made (project_template.create_document, issue #90)
+        if not list_files.path(here, "journal", mode).is_file():
+            list_files.write(here, "journal", mode)
+    list_files.list_journals(here)
     return list(missing)
 
 

@@ -21,21 +21,25 @@ import validation
 
 TITLES = {"fr": "Sondes", "de": "Sonden", "en": "Probes"}
 PROBE = "sync-probe"
-# The section's body after its heading: words, two parametric objects and words again -- the text of the block around its objects, and two objects compared by id.
+# The section's body after its heading: words, two parametric objects -- lists of norms with free lines, the one parametric command left (spec 2026-10-21-commandes-typst-refonte, REQ-019) -- and words again -- the text of the block around its objects, and two objects compared by id.
 BODY = (
     "Einleitung im gemeinsamen Block.\n"
     "\n"
-    "// woodcore:object doc-field probe-use\n"
-    "#doc-field(\n"
-    "  label: [Nutzung],\n"
-    "  value: [Büro],\n"
+    "// woodcore:object show-norm-list probe-use\n"
+    "#show-norm-list(\n"
+    "  keys: (\n"
+    "    [Nutzung],\n"
+    "    [Büro],\n"
+    "  ),\n"
     ")\n"
     "// woodcore:/object probe-use\n"
     "\n"
-    "// woodcore:object doc-field probe-area\n"
-    "#doc-field(\n"
-    "  label: [Fläche],\n"
-    "  value: [120],\n"
+    "// woodcore:object show-norm-list probe-area\n"
+    "#show-norm-list(\n"
+    "  keys: (\n"
+    "    [Fläche],\n"
+    "    [120],\n"
+    "  ),\n"
     ")\n"
     "// woodcore:/object probe-area\n"
     "\n"
@@ -127,7 +131,7 @@ def _outside(here, mode, name=PROBE, shared_id=PROBE):
 def _object_lines(text, object_id):
     """(lines before the object's start tag, the object's lines, lines after its end tag) of a file's text, line endings kept."""
     lines = sync._lines(text)
-    start = next(i for i, line in enumerate(lines) if line.rstrip("\r\n") == f"// woodcore:object doc-field {object_id}")
+    start = next(i for i, line in enumerate(lines) if line.rstrip("\r\n") == f"// woodcore:object show-norm-list {object_id}")
     end = next(i for i, line in enumerate(lines) if line.rstrip("\r\n") == f"// woodcore:/object {object_id}")
     return "".join(lines[:start]), "".join(lines[start:end + 1]), "".join(lines[end + 1:])
 
@@ -153,7 +157,7 @@ def test_share_records_both_sides_in_step_and_the_record_is_canonical():
         block = _status(here, mode)
         assert (block.state, block.text_state, [o.state for o in block.objects]) == ("in_sync", "in_sync", ["in_sync", "in_sync"])
         assert block.modes == ("cu", "bp") and block.file == _file(here, mode) and block.rel == f"Sections/{PROBE}.typ"
-        assert [o.id for o in block.objects] == [USE, AREA] and all(o.type == "doc-field" and o.present for o in block.objects)
+        assert [o.id for o in block.objects] == [USE, AREA] and all(o.type == "show-norm-list" and o.present for o in block.objects)
         path = sync.state_file(here, mode)
         assert path == here.document_dir(mode) / "sync.json" and path.is_file(), "share writes the record of both sides"
         raw = path.read_bytes()
@@ -247,7 +251,7 @@ def test_both_copies_edited_is_a_conflict_refused_without_a_choice_and_taken_wit
 def test_an_ignored_object_is_never_imported_survives_a_new_reading_and_comes_back_on_reactivate():
     here = _project("sync_ignore")
     key = f"{PROBE}/{USE}"
-    _edit(here, "cu", "value: [Büro],", "value: [Wohnen],")
+    _edit(here, "cu", "[Büro],", "[Wohnen],")
     assert (_status(here, "bp", key).state, _status(here, "bp").state) == ("incoming", "incoming")
     result = sync.ignore(here, "bp", [key])
     assert result.changed == (key,)
@@ -259,10 +263,10 @@ def test_an_ignored_object_is_never_imported_survives_a_new_reading_and_comes_ba
     _code("ignored", sync.import_changes, here, "bp", [key])
     assert json.loads(sync.state_file(here, "bp").read_bytes())["blocks"][PROBE]["ignored_objects"] == [USE], "remembered in the document's record"
     # a later change of the other object is still on offer
-    _edit(here, "cu", "value: [120],", "value: [140],")
+    _edit(here, "cu", "[120],", "[140],")
     assert _status(here, "bp", f"{PROBE}/{AREA}").state == "incoming" and _status(here, "bp").state == "incoming"
     sync.import_changes(here, "bp")
-    assert "value: [140]" in _text(_file(here, "bp")) and "value: [Büro]" in _text(_file(here, "bp"))
+    assert "[140]" in _text(_file(here, "bp")) and "[Büro]" in _text(_file(here, "bp"))
     assert _status(here, "bp", key).state == "ignored", "a new reading, the flag still there"
     assert sync.ignore(here, "bp", [key]).changed == (), "ignoring twice changes nothing"
     back = sync.reactivate(here, "bp", [key])
@@ -287,7 +291,7 @@ def test_an_ignored_object_is_never_imported_survives_a_new_reading_and_comes_ba
 
 def test_an_object_changed_inside_a_block_is_that_object_alone_and_its_import_touches_it_alone():
     here = _project("sync_object")
-    _edit(here, "cu", "value: [120],", "value: [140],")
+    _edit(here, "cu", "[120],", "[140],")
     # the base de projet writes its own words around the objects meanwhile: its text is local
     _edit(here, "bp", "Einleitung im gemeinsamen Block.", "Einleitung der Projektbasis.")
     block = _status(here, "bp")
@@ -300,7 +304,7 @@ def test_an_object_changed_inside_a_block_is_that_object_alone_and_its_import_to
     assert result.imported == {f"{PROBE}/{AREA}": "cu"}
     new_head, new_object, new_tail = _object_lines(_text(path), AREA)
     assert (new_head, new_tail) == (head, tail), "not one byte outside the object's two tags and what lies between"
-    assert "value: [140]," in new_object
+    assert "[140]," in new_object
     block = _status(here, "bp")
     assert (block.state, block.text_state, block.object(AREA).state) == ("local", "local", "in_sync"), "the words around stay this document's own"
     assert _status(here, "cu").text_state == "incoming"
@@ -310,9 +314,11 @@ def test_an_object_added_or_taken_out_elsewhere_is_imported_where_it_stands():
     here = _project("sync_object_added")
     new_object = (
         "\n"
-        "// woodcore:object doc-field probe-height\n"
-        "#doc-field(\n"
-        "  label: [Höhe],\n"
+        "// woodcore:object show-norm-list probe-height\n"
+        "#show-norm-list(\n"
+        "  keys: (\n"
+        "    [Höhe],\n"
+        "  ),\n"
         ")\n"
         "// woodcore:/object probe-height\n"
     )
@@ -341,13 +347,13 @@ def test_an_object_added_or_taken_out_elsewhere_is_imported_where_it_stands():
 
 def test_a_whole_block_import_keeps_this_documents_own_changes_to_other_objects():
     here = _project("sync_merge")
-    _edit(here, "cu", "value: [120],", "value: [140],")            # the convention changes the area
-    _edit(here, "bp", "value: [Büro],", "value: [Labor],")          # the base de projet the use
+    _edit(here, "cu", "[120],", "[140],")            # the convention changes the area
+    _edit(here, "bp", "[Büro],", "[Labor],")          # the base de projet the use
     block = _status(here, "bp")
     assert [(o.id, o.state) for o in block.objects] == [(USE, "local"), (AREA, "incoming")] and block.text_state == "in_sync"
     sync.import_changes(here, "bp", [PROBE])
     text = _text(_file(here, "bp"))
-    assert "value: [140]," in text and "value: [Labor]," in text, "what is incoming taken, what is this document's own kept"
+    assert "[140]," in text and "[Labor]," in text, "what is incoming taken, what is this document's own kept"
     assert _status(here, "bp").state == "local" and _status(here, "cu", f"{PROBE}/{USE}").state == "incoming"
 
 
@@ -373,11 +379,11 @@ def test_crlf_and_lf_copies_keep_their_line_endings():
     bp.write_bytes(bp.read_bytes().replace(b"\n", b"\r\n"))
     assert _states(here) == ("in_sync", "in_sync"), "line endings are no difference"
     _edit(here, "cu", "Einleitung im gemeinsamen Block.", "LF-Einleitung.")
-    _edit(here, "cu", "value: [120],", "value: [99],")
+    _edit(here, "cu", "[120],", "[99],")
     outside = _outside(here, "bp")
     sync.import_changes(here, "bp", [f"{PROBE}/{AREA}"])
     raw = bp.read_bytes()
-    assert raw.count(b"\n") == raw.count(b"\r\n") and b"value: [99]," in raw, "an object written into a CRLF file is CRLF"
+    assert raw.count(b"\n") == raw.count(b"\r\n") and b"[99]," in raw, "an object written into a CRLF file is CRLF"
     sync.import_changes(here, "bp")
     raw = bp.read_bytes()
     assert raw.count(b"\n") == raw.count(b"\r\n") and b"LF-Einleitung." in raw, "a block written into a CRLF file is CRLF"
@@ -448,19 +454,19 @@ def test_a_woodcore_edit_is_local_here_and_incoming_there_even_on_a_project_neve
     _code("changed_meanwhile", sync.write_local, here, "cu", PROBE, new, loaded)
     _code("bad_block", sync.write_local, here, "cu", PROBE, "// woodcore:shared inner\nx\n// woodcore:/shared inner\n", new)
     _code("no_such_item", sync.write_local, here, "rs", PROBE, new, new)
-    _code("bad_block", sync.write_local, here, "cu", PROBE, "// woodcore:object doc-field open\n#doc-field()\n", new)
+    _code("bad_block", sync.write_local, here, "cu", PROBE, "// woodcore:object show-norm-list open\n#show-norm-list()\n", new)
     # an object id the copy uses outside the block, brought into it: the file's tags would no longer read
     cu = _file(here, "cu")
-    _write(cu, _text(cu) + "\n// woodcore:object doc-field outside\n#doc-field()\n// woodcore:/object outside\n")
+    _write(cu, _text(cu) + "\n// woodcore:object show-norm-list outside\n#show-norm-list()\n// woodcore:/object outside\n")
     snap = _snapshot(here)
-    exc = _code("bad_block", sync.write_local, here, "cu", PROBE, new + "// woodcore:object doc-field outside\n#doc-field()\n// woodcore:/object outside\n", new)
+    exc = _code("bad_block", sync.write_local, here, "cu", PROBE, new + "// woodcore:object show-norm-list outside\n#show-norm-list()\n// woodcore:/object outside\n", new)
     assert exc.values["file"] == str(cu) and _snapshot(here) == snap
     # a file written by the caller itself, then recorded
     _forget(here)
     sync.import_changes(here, "bp", choices={PROBE: "theirs"})
     _forget(here)
     loaded = _block(here, "bp").block_text
-    _edit(here, "bp", "value: [Büro],", "value: [Archiv],")
+    _edit(here, "bp", "[Büro],", "[Archiv],")
     sync.record_local_edit(here, "bp", PROBE, before=loaded)
     assert _states(here) == ("incoming", "local")
     assert _status(here, "cu", f"{PROBE}/{USE}").state == "incoming" and _status(here, "cu").text_state == "in_sync"

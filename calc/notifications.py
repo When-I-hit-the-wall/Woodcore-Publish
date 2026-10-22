@@ -160,7 +160,7 @@ def configure(translate=None, log=None):
             log.parent.mkdir(parents=True, exist_ok=True)
             if log.exists() and log.stat().st_size > LOG_LIMIT:
                 log.unlink()
-            with open(log, "a", encoding="utf-8") as handle:
+            with open(log, "a", encoding="utf-8", newline="\n") as handle:
                 handle.write(f"\n--- Woodcore started {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
             _config["log"] = log
         except OSError:
@@ -181,7 +181,7 @@ def _log(notice):
     if notice.count > 1:
         line += f" (x{notice.count})"
     try:
-        with _log_lock, open(log, "a", encoding="utf-8") as handle:
+        with _log_lock, open(log, "a", encoding="utf-8", newline="\n") as handle:
             handle.write(line + "\n")
     except OSError:
         pass

@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, Tabelle 1 (clause 2.2.5) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 19. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
+  "_source": "SIA 265:2021, Tabelle 1 (clause 2.2.5) -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 19. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
   "_note": "gamma_M and eta_M are not given separately: 2.2.5 says so and tabulates their ratio, which is what a design value is divided by. The values for Holzwerkstoffe are SIA 265/1's and are deliberately absent here rather than guessed.",
   "edition": "SIA 265:2021",
   "table_1": {

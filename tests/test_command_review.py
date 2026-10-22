@@ -5,6 +5,8 @@ Three probes went through the 64 public commands of lib/, argument by argument a
 Each test compiles against the example project the suite works on (conftest), through the report's own `commands.typ`.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import re
 import subprocess
@@ -21,7 +23,7 @@ def _compile(body, name):
         raise Skip("typst is not on the path")
     d = conftest.probe_dir(name)
     probe = d / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n' + body + "\n", encoding="utf-8")
     out = subprocess.run(["typst", "compile", "--root", str(TYPST_ROOT), str(probe), str(d / "probe.pdf")],
                          capture_output=True, text=True, encoding="utf-8", errors="replace")
     if out.returncode != 0:
@@ -49,7 +51,7 @@ def _query(body, name):
         raise Skip("typst is not on the path")
     d = conftest.probe_dir(name)
     probe = d / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n' + body + "\n", encoding="utf-8")
     out = subprocess.run(["typst", "query", "--root", str(TYPST_ROOT), str(probe), "<out>", "--field", "value", "--one"],
                          capture_output=True, text=True, encoding="utf-8", errors="replace")
     assert out.returncode == 0, out.stderr
@@ -118,7 +120,7 @@ def test_the_inverse_functions_evaluate_and_print_under_both_spellings():
 def test_norm_ref_alone_overrides_the_clause():
     """`norm-ref:` was read only beside a `norm:`, so the export's own clause was printed whatever was asked."""
     text = _printed('#var("ce", domain: ("snow-load", "SL"), norm-ref: "9.9.9", level: 3)\n'
-                    'Satz #val("ce", domain: ("snow-load", "SL"), norm-ref: "8.8.8", level: 3).', "review_norm_ref")
+                    'Satz #var("ce", domain: ("snow-load", "SL"), norm-ref: "8.8.8", level: 3).', "review_norm_ref")
     assert "9.9.9" in text and "8.8.8" in text, text
 
 
@@ -128,54 +130,21 @@ def test_var_keeps_the_choices_its_value_carries():
     assert choices and len(choices) >= 2, choices
 
 
-def test_val_prints_a_ratio_in_percent():
-    """A dimensionless value was refused in `%` by val, which var-unit carries there."""
-    text = _printed('#var("eta", 0.5, level: 0)\nA #val("eta", unit: "%", level: 1) B', "review_val_percent")
-    assert re.search(r"A 50 ?% ?1? B", text), text
-    assert "statt in ." not in text and "trägt keine Einheit" in text, text  # the orange note names no unit that is not there
-
-
-def test_val_reads_what_a_polar_moment_published():
-    """`var` and `find` read F_max under the connection's pair, falling back to the var-domain show-polar-moment writes; `val` refused it."""
-    text = _printed('#show-polar-moment("VU-MP-1", N: 7.5, V: 25, M: 6.6, level: 1)\n'
-                    'Max #val("F_max", domain: ("connection", "VU-MP-1"), level: 1) end', "review_val_published")
-    assert re.search(r"Max \d+(\.\d+)? kN end", text), text
-
-
-def test_the_published_largest_force_is_named_in_the_reports_language():
-    """F_max was labelled with an engine key's German, which the glossary's terms do not carry, so an English report read «Grösste Kraft in einem Verbindungsmittel» beside «Force in fastener 1»."""
-    text = _printed('#set-report-language("en")\n#show-polar-moment("VU-MP-1", N: 7.5, V: 25, M: 6.6, level: 1)\n'
-                    '#find(object: "variable", domain: ("connection", "VU-MP-1"))', "review_fmax_label")
-    assert "Largest force in a fastener" in text and "Grösste" not in text, text
-
-
 # --- the display commands -----------------------------------------------------------
 
 def test_a_symbol_that_is_a_word_prints_outside_context():
-    """render-symbol read the report's language for a symbol that is a word («Lastmodell») and failed in plain markup, where var-of's own example calls it."""
-    ok, err, _ = _compile('#render-symbol(var-of("snow-load", "SL", "lastmodell"))', "review_render_symbol")
+    """render-symbol read the report's language for a symbol that is a word («Dachform») and failed in plain markup."""
+    ok, err, _ = _compile('#render-symbol((symbol: "\\"Dachform\\""))', "review_render_symbol")
     assert ok, err
 
 
 def test_a_report_level_outside_one_to_three_is_refused():
     """`report-level.update(0)` hid every #var while show-calc went on printing, and `update(4)` printed level 3 without a word."""
     for bad in ("0", "4"):
-        err = _refused(f'#report-level.update({bad})\n#show-input("snow-load", "SL", "ce")', "review_report_level")
+        err = _refused(f'#report-level.update({bad})\n#var("ce", domain: ("snow-load", "SL"))', "review_report_level")
         assert "report level is " + bad in err, err
-    ok, err, _ = _compile('#report-level.update(3)\n#var("x", 1, level: 0)\n#show-input("snow-load", "SL", "ce")', "review_report_level_ok")
+    ok, err, _ = _compile('#report-level.update(3)\n#var("x", 1, level: 0)\n#var("ce", domain: ("snow-load", "SL"))', "review_report_level_ok")
     assert ok, err
-
-
-def test_a_pure_shear_prints_no_division_by_zero():
-    """cos(90°) left 6·10⁻¹⁶ in F_x, which the guard compared with zero, so level 3 printed «arctan(2.5/0)»."""
-    text = _printed('#show-polar-moment("VU-MP-1", V: 10, level: 3, title: none)', "review_polar_shear")
-    assert "/0)" not in text.replace(" ", ""), text
-
-
-def test_a_connectors_colon_is_spaced_in_french():
-    """show-connector wrote its colon by hand, «SD-10: Broche», where show-position sets French's narrow space."""
-    text = _printed('#set-report-language("fr")\n#show-connector("SD-10")', "review_connector_colon")
-    assert "SD-10 :" in text, text
 
 
 def test_a_number_and_its_unit_do_not_part():

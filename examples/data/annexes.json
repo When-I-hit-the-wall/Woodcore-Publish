@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "sources": {
     "Rapport-EF": {
       "name": "Rapport d'impression EF",
@@ -8,7 +8,7 @@
       "pages": 3,
       "bookmarks": 9,
       "annex": {
-        "file": "annexes/Rapport-EF-annex.pdf",
+        "file": "/Appendix/Exports/Rapport-EF-annex.pdf",
         "pages": [
           3
         ],
@@ -36,7 +36,7 @@
       "reason": "",
       "page": 3,
       "title": "2.2 CO1: Efforts internes M_y",
-      "file": "annexes/CO1-My.pdf",
+      "file": "/Appendix/Exports/CO1-My.pdf",
       "size": [
         495,
         258
@@ -61,7 +61,7 @@
       "reason": "",
       "page": 3,
       "title": "2.1 CO1: Efforts internes N",
-      "file": "annexes/CO1-N.pdf",
+      "file": "/Appendix/Exports/CO1-N.pdf",
       "size": [
         495,
         258

@@ -26,7 +26,7 @@ import shiboken6
 from PySide6.QtCore import QBuffer, QByteArray, QIODevice, QModelIndex, QPointF, QProcess, QThread, QTimer, Qt, Signal
 from PySide6.QtPdf import QPdfBookmarkModel, QPdfDocument
 from PySide6.QtPdfWidgets import QPdfView
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QProgressBar, QStackedLayout, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QProgressBar, QPushButton, QStackedLayout, QVBoxLayout, QWidget
 
 import documents
 import proc
@@ -46,6 +46,11 @@ PREVIEW_CACHE = "preview"
 # How many lines of Typst's message the failure banner shows: its first, where Typst says what is wrong and where.
 MESSAGE_LINES = 20
 
+# Ctrl+wheel on a page (issue #89): each notch multiplies the scale by this, the point under the pointer kept where it is; the scale stays between these two, 1 being the page's own size. One step for every Typst page of the window; the export sheets' editor zooms a drawing by its own 1.25 (sheet_editor_canvas.ZOOM_STEP), a sheet edited object by object and not a page read.
+ZOOM_STEP = 1.1
+ZOOM_MIN = 0.1
+ZOOM_MAX = 8.0
+
 # One entry of a PDF's outline: the heading's level as Typst counts it (1 for a top-level heading), its title, the page it is on (0 for the first) and how far down that page it stands, in points from the page's top edge -- what `jump` takes.
 Bookmark = namedtuple("Bookmark", "level title page y")
 
@@ -57,6 +62,7 @@ STRINGS = {
         "pp_more": "… et {n} lignes de plus",
         "pp_timeout": "Arrêtée après {minutes} min sans réponse de Typst.",
         "pp_empty": "Pas encore d'aperçu",
+        "pp_fit": "Ajuster à la largeur",
     },
     "de": {
         "pp_stale": "Nicht kompilierte Änderungen",
@@ -65,6 +71,7 @@ STRINGS = {
         "pp_more": "… und {n} weitere Zeilen",
         "pp_timeout": "Nach {minutes} min ohne Antwort von Typst abgebrochen.",
         "pp_empty": "Noch keine Vorschau",
+        "pp_fit": "An Breite anpassen",
     },
     "en": {
         "pp_stale": "Uncompiled changes",
@@ -73,6 +80,7 @@ STRINGS = {
         "pp_more": "… and {n} more lines",
         "pp_timeout": "Stopped after {minutes} min without an answer from Typst.",
         "pp_empty": "No preview yet",
+        "pp_fit": "Fit to width",
     },
 }
 
@@ -160,6 +168,107 @@ def _same(a, b):
     return Path(a[0].file) == Path(b[0].file) and a[1] == b[1]
 
 
+class ZoomablePdfView(QPdfView):
+    """Every Typst page of the window, one under the other, fitted to the width of its pane as the pane is resized -- and zoomed by Ctrl+wheel, as in VS Code (issue #89, the engineer, 21.10.2026: «lorsque je diminue de moitié la largeur du volet, eh bien en fait, la page A4 diminue également de moitié en largeur»).
+
+    The wheel alone scrolls (the window's rule since v0.69); with Ctrl it multiplies the scale by `ZOOM_STEP` a notch, the point under the pointer kept in place, and the view leaves its fit to the width. The zoom holds through a new PDF -- a recompilation -- and goes back to the width only when asked: the button «Ajuster à la largeur», shown over the page while it is zoomed, or the tab left (`fit()`, MainWindow.reset_view). `ZOOMS_ITSELF` tells the window's Ctrl+wheel, which zooms the interface, to leave a page its own (nowheel.py).
+
+    One class for the Structure tab's pane, the «Affichage» views, the plans' command builder and the export sheets' bundles (bundle_view.BundlePages), so that every page of the window behaves alike.
+    """
+
+    ZOOMS_ITSELF = True
+    zoomedChanged = Signal(bool)
+
+    def __init__(self, parent=None, lang="en"):
+        super().__init__(parent)
+        self.setPageMode(QPdfView.PageMode.MultiPage)
+        self.setZoomMode(QPdfView.ZoomMode.FitToWidth)
+        # the vertical bar is always there: fitted to the width, a page just taller than the pane brings the bar, which narrows the view, which shrinks the page to fit again, which takes the bar away -- and the page, rendered at each width in turn, showed blank
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self._notches = 0   # a touchpad's wheel comes in fractions of a notch: summed until one is whole
+        self.fit_button = QPushButton(self)
+        self.fit_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.fit_button.clicked.connect(self.fit)
+        self.fit_button.hide()
+        self.set_language(lang)
+
+    def set_language(self, lang):
+        self.fit_button.setText(text("pp_fit", lang))
+        self.fit_button.adjustSize()
+        self._place_button()
+
+    def zoomed(self):
+        """Whether the page has left its fit to the width."""
+        return self.zoomMode() != QPdfView.ZoomMode.FitToWidth
+
+    def scale(self):
+        """The scale the page is drawn at now, 1 being its own size: the one set where it is zoomed, the one its fit to the width gives otherwise -- which QPdfView computes and does not say."""
+        if self.zoomed():
+            return self.zoomFactor()
+        document = self.document()
+        if document is None or document.pageCount() == 0:
+            return 1.0
+        widest = max(document.pagePointSize(page).width() for page in range(document.pageCount()))
+        margins = self.documentMargins()
+        room = self.viewport().width() - margins.left() - margins.right()
+        dots = self.logicalDpiX() / 72.0
+        return max(room, 1) / max(widest * dots, 1e-9)
+
+    def zoom_by(self, factor, at=None):
+        """The page drawn `factor` times larger, the point `at` (in the viewport) kept where it is -- the viewport's centre where none is given."""
+        if self.document() is None or self.document().pageCount() == 0:
+            return
+        old = self.scale()
+        new = min(ZOOM_MAX, max(ZOOM_MIN, old * factor))
+        if abs(new - old) < 1e-9 and self.zoomed():
+            return
+        if at is None:
+            at = QPointF(self.viewport().width() / 2, self.viewport().height() / 2)
+        bars = (self.horizontalScrollBar(), self.verticalScrollBar())
+        offsets = (at.x(), at.y())
+        anchor = [(bar.value() + offset) / old for bar, offset in zip(bars, offsets)]
+        was = self.zoomed()
+        self.setZoomMode(QPdfView.ZoomMode.Custom)
+        self.setZoomFactor(new)
+        for bar, point, offset in zip(bars, anchor, offsets):
+            bar.setValue(round(point * new - offset))
+        if not was:
+            self.zoomedChanged.emit(True)
+        self._place_button()
+
+    def fit(self):
+        """The page back to the width of its pane."""
+        if not self.zoomed():
+            return
+        self.setZoomMode(QPdfView.ZoomMode.FitToWidth)
+        self.zoomedChanged.emit(False)
+        self._place_button()
+
+    def wheelEvent(self, event):
+        if not event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            super().wheelEvent(event)
+            return
+        self._notches += event.angleDelta().y()
+        steps = int(self._notches / 120)
+        if steps:
+            self._notches -= steps * 120
+            self.zoom_by(ZOOM_STEP ** steps, event.position())
+        event.accept()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._place_button()
+
+    def _place_button(self):
+        """The button over the page's top right corner, left of the bar, while the page is zoomed."""
+        button = self.fit_button
+        button.setVisible(self.zoomed())
+        if not button.isHidden():
+            bar = self.verticalScrollBar().width()
+            button.move(max(0, self.width() - bar - button.width() - 8), 8)
+            button.raise_()
+
+
 class PdfPane(QWidget):
     """One document's compiled PDF, every page one under the other fitted to the pane's width, compiled again in the background on request.
 
@@ -202,11 +311,7 @@ class PdfPane(QWidget):
         self._buffer = None
 
         self.document = QPdfDocument(self)
-        self.view = QPdfView(self)
-        self.view.setPageMode(QPdfView.PageMode.MultiPage)
-        self.view.setZoomMode(QPdfView.ZoomMode.FitToWidth)
-        # the vertical bar is always there: fitted to the width, a page just taller than the pane brings the bar, which narrows the view, which shrinks the page to fit again, which takes the bar away -- and the page, rendered at each width in turn, showed blank
-        self.view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.view = ZoomablePdfView(self, lang=lang)   # fitted to the width, zoomed by Ctrl+wheel (issue #89)
         self.view.setDocument(self.document)
 
         self.timer = QTimer(self)
@@ -280,6 +385,7 @@ class PdfPane(QWidget):
         self.stale_banner.setText(self.t("pp_stale"))
         self.busy_label.setText(self.t("pp_compiling"))
         self.placeholder.setText(self.t("pp_empty"))
+        self.view.set_language(lang)
         self._show_error()
 
     # --- what is shown -------------------------------------------------------------------

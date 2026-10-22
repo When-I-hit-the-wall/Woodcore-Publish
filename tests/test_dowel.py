@@ -14,6 +14,8 @@ Three kinds of check, and the project has real oracles for all three.
 - `'Stabdübel (Holz-Holz)'!C33/D33` does not special-case n = 1, where equation (86) alone gives 0.915 at a_1 = 7d and Tabelle 21 gives 1.0. `'Stabdübel (Stahl-Holz)'!C31` does special-case it. `test_k_red_against_tabelle_21` holds it.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import math
 
 from domains import dowel

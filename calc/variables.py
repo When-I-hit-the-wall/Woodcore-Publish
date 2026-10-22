@@ -180,15 +180,11 @@ class Variable:
 
     @property
     def citation(self):
-        """The norm as the report's own right-hand column sets it: «SIA 265 §4.2.1», and without the § where the clause is a table or an annex (`norm-text`, §10)."""
+        """The norm as the report's own right-hand column sets it: «SIA 265 4.2.1» -- no §, the engineer's rule of 20.10.2026 (spec 2026-10-21-commandes-typst-refonte, UI-001) -- and a table or an annex as it is written (`norm-text`, §10)."""
         if not self.norm:
             return ""
         ref = self.norm_ref
-        if not ref:
-            return self.norm
-        if ref.split(" ")[0] in ("Tabelle", "Tabelle:", "Anhang", "Annex", "annexe", "tableau", "Tableau"):
-            return f"{self.norm} {ref}"
-        return f"{self.norm} §{ref}"
+        return f"{self.norm} {ref}" if ref else self.norm
 
 
 @dataclass
@@ -475,7 +471,7 @@ def save(found, here=None, mode="rs"):
             },
         }
         temporary = path.with_name(path.name + ".new")
-        temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
+        temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
         os.replace(temporary, path)
     except OSError:
         pass

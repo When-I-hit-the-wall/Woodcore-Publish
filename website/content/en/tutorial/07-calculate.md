@@ -8,7 +8,7 @@ Not everything comes from the export: a value from a manufacturer's sheet, a che
 
 {{example eq-2}}
 
-A variable keeps its name for the rest of the document: the next line can name it in turn. Several declarations fit on one line with `#var-line`, and `level: 0` declares a value without printing it.
+A variable keeps its name for the rest of the document: the next line can name it in turn. Several `#var` written in a sentence are printed in that sentence, and `level: 0` declares a value without printing it.
 
 ## A check
 
@@ -18,11 +18,13 @@ A variable keeps its name for the rest of the document: the next line can name i
 
 ## Check a timber member
 
-The checks of SIA 265, chapter 4.2, take two steps: `#member` describes the member once — section, strength class and moisture class, read from its position —, then a `verify-…` command checks it for each action.
+The checks of SIA 265, chapter 4.2, are made in the window's tabs — Tension, Compression, Bending, Shear, Buckling, Lateral torsional buckling: Woodcore writes each out whole in a file of its own, every value checked against the export, and the section includes it:
 
-{{example verify-compression-1}}
+```typ
+#include domain-file("check", "ZT-01")
+```
 
-`verify-tension`, `verify-compression`, `verify-bending`, `verify-bending-normal`, `verify-shear` and the others take the same form; the normal force is signed, tension positive.
+What you change in that file with VS Code is taken back by Woodcore line by line; a value the export no longer gives turns red.
 
 > [!note]
 > What is calculated in the report is not traced in the export: the text around it must say where values typed by hand come from.

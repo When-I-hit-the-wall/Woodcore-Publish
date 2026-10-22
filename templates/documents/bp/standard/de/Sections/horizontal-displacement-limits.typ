@@ -8,19 +8,19 @@
 Die horizontalen Auslenkungen infolge der veränderlichen Einwirkungen werden auf die Richtwerte der Norm SIA 260, Anhang A, Tabelle 4 begrenzt; h bezeichnet die Stockwerkshöhe, H die Gebäudehöhe. Für die Bemessungssituation Erdbeben sind die horizontalen Auslenkungen pro Stockwerk bei Einbauten mit sprödem bzw. duktilem Verhalten auf 1/500 bzw. 1/200 der Stockwerkshöhe zu begrenzen (Ziffer 4.4.4.5).
 // woodcore:/object p1
 
-// woodcore:object doc-table horizontal-limits-table
-#doc-table(
-  columns: (
-    (id: "criterion", title: [Kriterium]),
-    (id: "limit", title: [Grenzwert], kind: "math"),
-    (id: "load_case", title: [Lastfall (SIA 260, Tab. 4)]),
-  ),
-  hidden: (),
-  rows: (
-    (criterion: [Einbauten mit sprödem Verhalten], limit: [$u <= h \/ 500$], load_case: [selten (20)]),
-    (criterion: [Einbauten mit duktilem Verhalten], limit: [$u <= h \/ 200$], load_case: [häufig (21)]),
-    (criterion: [Nutzung und Betrieb], limit: [$u <= H \/ 300$], load_case: [häufig (21)]),
-    (criterion: [Aussehen], limit: [$u <= h \/ 250$], load_case: [quasi-ständig (22)]),
+// woodcore:object table horizontal-limits-table
+#figure(
+  table(
+    columns: (auto, auto, auto),
+    align: (left, center, left),
+    table.hline(stroke: 1pt),
+    table.header([*Kriterium*], [*Grenzwert*], [*Lastfall (SIA 260, Tab. 4)*]),
+    table.hline(stroke: 0.5pt),
+    [Einbauten mit sprödem Verhalten], [$u <= h \/ 500$], [selten (20)],
+    [Einbauten mit duktilem Verhalten], [$u <= h \/ 200$], [häufig (21)],
+    [Nutzung und Betrieb], [$u <= H \/ 300$], [häufig (21)],
+    [Aussehen], [$u <= h \/ 250$], [quasi-ständig (22)],
+    table.hline(stroke: 1pt),
   ),
   caption: [Zulässige horizontale Auslenkungen],
 )

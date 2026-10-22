@@ -329,32 +329,32 @@ def instance_from_layers(layers, chosen, chosen_source, chosen_description, sour
     ak = sum(l["load"] for l in layers if l["kind"] == KIND_IMPOSED)
     calc = engine.Calculation()
 
-    def add(name, value, symbol, label, level, source, description=None):
+    def add(name, value, symbol, label, source, description=None):
         calc.add_var(
             name=name, value=value, unit="kN/m²", symbol=symbol, label=label,
-            level=level, source=source, norm=NORM, norm_ref=NORM_REF,
+            source=source, norm=NORM, norm_ref=NORM_REF,
             description=description,
         )
 
     # The level split, decided here rather than in the display code (docs/typst/api-conventions.md §10bis): every level from 2 up prints g_k, a_k, g_k + a_k and the gewählt value as four plain lines -- the four numbers an engineer reads off an Aufbau -- and level 3 adds the Schichtaufbau table above them.
     #
     # Neither sum carries a formula. A Sigma over the layers would state in letters exactly what the table below it lists row by row, and the table now carries the two sums itself as its `totals` rows, where each stands directly under the column it adds up. The steps stay, formula or not: they are what records that these vars are calculated (their norm, their source) rather than entered.
-    add("gk", gk, "g_k", "Eigengewicht (Flächenlast)", 2, source)
+    add("gk", gk, "g_k", "Eigengewicht (Flächenlast)", source)
     calc.add_step(
-        name="Eigengewicht", level=2, result="gk", uses=[],
+        name="Eigengewicht", result="gk", uses=[],
         norm=NORM, norm_ref=NORM_REF,
     )
 
-    add("ak", ak, "a_k", "Auflast (Flächenlast)", 2, source)
+    add("ak", ak, "a_k", "Auflast (Flächenlast)", source)
     calc.add_step(
-        name="Auflast", level=2, result="ak", uses=[],
+        name="Auflast", result="ak", uses=[],
         norm=NORM, norm_ref=NORM_REF,
     )
 
     # No formula: the sum of two symbols that are printed right above it would only restate them as `g_k + a_k = g_k + a_k`.
-    add("gk_ak", gk + ak, "g_k + a_k", "Summe (berechnet)", 2, source)
+    add("gk_ak", gk + ak, "g_k + a_k", "Summe (berechnet)", source)
     calc.add_step(
-        name="Summe", level=2, result="gk_ak", uses=["gk", "ak"],
+        name="Summe", result="gk_ak", uses=["gk", "ak"],
         norm=NORM, norm_ref=NORM_REF,
     )
 
@@ -363,12 +363,12 @@ def instance_from_layers(layers, chosen, chosen_source, chosen_description, sour
         calc.add_var(
             name="gk_ak_gew", value=chosen, unit="kN/m²",
             symbol='(g_k + a_k)_"gew"', label="Ständige Lasten, gewählt",
-            level=1, source=chosen_source,
+            source=chosen_source,
             norm=NORM, norm_ref="2.1",
             description=chosen_description,
         )
         calc.add_step(
-            name="Ständige Lasten", level=1, result="gk_ak_gew", uses=["gk_ak"],
+            name="Ständige Lasten", result="gk_ak_gew", uses=["gk_ak"],
             norm=NORM, norm_ref="2.1",
         )
     table = _layer_table(layers, gk, ak)
@@ -382,7 +382,7 @@ def instance_from_layers(layers, chosen, chosen_source, chosen_description, sour
     }
 
 
-def read_instances(cells, sheets):
+def read_instances(cells, sheets, notes=None):   # `notes`: what is worth saying, registry's one signature for the three (C4)
     """Every EL+AL-* sheet of one workbook, in tab order, keyed by sheet name. The material library is read once and shared -- it is one table for the whole workbook, not per build-up, and registry.py calls this once per workbook, so each workbook's build-ups use that workbook's own library.
     """
     materials = read_materials(cells)

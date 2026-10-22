@@ -38,6 +38,7 @@ from pathlib import Path
 import sharing
 import structure
 import typst_objects
+import typst_sync
 import validation
 
 FILE = "sync.json"
@@ -126,6 +127,14 @@ def _block(text):
 def digest(text):
     """The hash a part is recorded by: the first 16 hexadecimal digits of the SHA-256 of `text` with its line endings made LF."""
     return hashlib.sha256(_lf(text).encode("utf-8")).hexdigest()[:16]
+
+
+def three_way(mine_now, theirs_now, own, seen):
+    """Where one part stands between this copy and another, by the rule this module is built on: the same text in both is in step; else `mine` is this copy not being what it held when the two last synchronised (`own`), `theirs` the other not being what this one then saw of it (`seen`) -- both a conflict, `theirs` alone incoming, `mine` alone local, neither in step (this copy saw the other's version and kept its own). A base nobody states (UNKNOWN) differs from every text: a difference with no record is a conflict, never guessed. Pure; shared by an unfolded check's lines and its writing (calc/domains/unfold.py, spec 2026-10-15 REQ-007)."""
+    if theirs_now == mine_now:
+        return "in_sync"
+    mine, theirs = mine_now != own, theirs_now != seen
+    return "conflict" if (mine and theirs) else "incoming" if theirs else "local" if mine else "in_sync"
 
 
 def _blank(line):
@@ -220,13 +229,14 @@ def _decompose(block_text, flat=False):
         spans[obj.id] = (obj.start, obj.end)
         types[obj.id] = obj.type
         texts[obj.id] = span
-        values[obj.id] = digest(span)
+        # the values Woodcore keeps in step (`#sync`, calc/typst_sync.py) are left out of what two copies are compared by: a number refreshed is no edit (spec 2026-10-21-commandes-typst-refonte, ARCH-009, ARCH-RISK-303); the text kept, and written, is the whole of it
+        values[obj.id] = digest(typst_sync.blanked(span))
         order.append(obj.id)
         skeleton.append(("object", obj.id))
         out.append(_PLACEHOLDER.format(obj.id))
         index = obj.end + 1
     texts[TEXT] = "".join(out)
-    values[TEXT] = digest(texts[TEXT])
+    values[TEXT] = digest(typst_sync.blanked(texts[TEXT]))
     return _Parts(lines, values, texts, spans, types, tuple(order), tuple(skeleton))
 
 
@@ -421,7 +431,7 @@ def _read_doc(here, mode):
 
 
 def _modes(here):
-    return [m for m in SHARE_MODES if m in here.modes]
+    return [m for m in SHARE_MODES if m in here.created_modes]
 
 
 def _check_mode(here, mode):
@@ -623,13 +633,8 @@ class _World:
             if other == mode or other not in holders:
                 continue
             theirs_now = holders[other].value(part)
-            if theirs_now == mine_now:
-                state = "in_sync"
-            else:
-                own, seen = entry.pair(other, part)
-                mine, theirs = mine_now != own, theirs_now != seen
-                state = "conflict" if (mine and theirs) else "incoming" if theirs else "local" if mine else "in_sync"
-            pairwise[other] = state
+            own, seen = entry.pair(other, part)
+            pairwise[other] = three_way(mine_now, theirs_now, own, seen)
         state = max(pairwise.values(), key=_RANK.get, default="in_sync")
         return state, pairwise
 
@@ -1341,4 +1346,3 @@ def stop_writes(here, removed):
 
 # The names these two had while they were private, which calc/doc_import.py calls: kept, the same functions.
 _share_writes = share_writes
-_stop_writes = stop_writes

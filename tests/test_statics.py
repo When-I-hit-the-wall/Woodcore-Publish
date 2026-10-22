@@ -63,10 +63,10 @@ def _texts(svg):
 
 
 def test_a_load_is_drawn_in_the_colour_it_states_and_red_is_what_it_always_was():
-    from domains import statics, statics_svg
+    from domains import statics, statics_svg, svg_draw
     assert list(statics.LOAD_COLOURS) == ["red", "green", "orange", "blue", "violet"], statics.LOAD_COLOURS
     # the red every load was drawn in before the colour could be chosen, so a model saved then draws exactly as it did
-    assert statics.LOAD_COLOURS[statics.DEFAULT_LOAD_COLOUR] == "#c0392b"
+    assert statics.LOAD_COLOURS[statics.DEFAULT_LOAD_COLOUR] == svg_draw.colour("red")
     plain = _figure(_loaded())
     assert plain == _figure(_loaded(color="red")), "a load stating red is drawn otherwise than one stating nothing"
     for name, ink in statics.LOAD_COLOURS.items():
@@ -75,7 +75,7 @@ def test_a_load_is_drawn_in_the_colour_it_states_and_red_is_what_it_always_was()
         others = [other for other in statics.LOAD_COLOURS.values() if other != ink]
         assert not any(other in svg for other in others), f"{name}: another load colour is in the figure"
         # the label stays in the drawing's own ink, on its white box, whatever colour the arrows are
-        assert f'fill="{statics_svg.LABEL}">F' in svg, f"{name}: the label left the drawing's own ink"
+        assert f'fill="{statics_svg.LABEL_COLOUR}">F' in svg, f"{name}: the label left the drawing's own ink"
         record = statics.build_record(_loaded(color=name), {})
         assert record["loads"][0]["color"] == name, record["loads"][0]
     assert statics.build_record(_loaded(), {})["loads"][0]["color"] == "red"
@@ -346,10 +346,11 @@ def _sink():
 # The figure `_sink()` drew the day before the per-entry factors were written, one hash per language. A source that
 # states no factor of its own must draw byte for byte as it did: an entry's own factor is an addition, and an
 # addition that moved every figure already exported would be a change to every report.
+# ⚠️ Taken again at v0.120 for one reason: the palette merged (lib/figure-palette.json, D5) -- with the old colours mapped onto the new, the figure before is this one byte for byte, checked first.
 FROZEN_SINK = {
-    "de": "89e3e2f9f478ec34e3c2bf1d33586b3340cdf3f0b1706e058d349359b42d4258",
-    "fr": "ffb8ca46ca27ac9b306bd71852f1c87cb230a9027547809f2bc0884448214288",
-    "en": "e8b3b0c3027970a74a592d487110885280d1a2de2acd9188cd26b383026ef14d",
+    "de": "21eea2a2cfc61170eabc86587bf9c362fc25c47b703d0d246c5164cb33592321",
+    "fr": "23bf19aa2dfbb7b7183c16f1917dcb50f8faafd455eefeb412a3091d3c2d24f4",
+    "en": "dedec58ed13d9cac7141ab77b250e9165c6e3781fd914b7ae96a4476b5bdc799",
 }
 
 

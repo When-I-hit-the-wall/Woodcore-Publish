@@ -1,5 +1,5 @@
 {
-  "schema_version": "3.0",
+  "schema_version": "3.3",
   "connectors": {
     "SD-10": {
       "position": "SD-10",
@@ -114,13 +114,13 @@
           "rows": [],
           "figures": [
             {
-              "file": "connectors/SD-10-kbeta-1.svg",
+              "file": "/Connectors/Exports/Figures/SD-10-kbeta-1.svg",
               "index": 1,
               "label": "Bauteil 1",
               "role": "Seitenholz"
             },
             {
-              "file": "connectors/SD-10-kbeta-2.svg",
+              "file": "/Connectors/Exports/Figures/SD-10-kbeta-2.svg",
               "index": 2,
               "label": "Bauteil 2",
               "role": "Mittelholz"
@@ -206,7 +206,6 @@
           "unit": "mm",
           "symbol": "d",
           "label": "Durchmesser",
-          "level": 2,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.1",
@@ -218,7 +217,6 @@
           "unit": "",
           "symbol": "n_\"tot\"",
           "label": "Anzahl Verbinder",
-          "level": 2,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.1",
@@ -230,7 +228,6 @@
           "unit": "N/mm²",
           "symbol": "f_(u,k)",
           "label": "char. Zugfestigkeit des Stabdübels",
-          "level": 3,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.4",
@@ -242,7 +239,6 @@
           "unit": "kg/m³",
           "symbol": "rho_(k,1)",
           "label": "Rohdichte",
-          "level": 3,
           "source": "norm:SIA 265:2021, Tabelle 8",
           "norm": "SIA 265",
           "norm_ref": "3.3.2.1",
@@ -257,7 +253,6 @@
           "unit": "°",
           "symbol": "alpha_1",
           "label": "Winkel zwischen der Kraft- und Faserrichtung der Holzteile",
-          "level": 3,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2",
@@ -268,7 +263,6 @@
           "unit": "kg/m³",
           "symbol": "rho_(k,2)",
           "label": "Rohdichte",
-          "level": 3,
           "source": "norm:SIA 265:2021, Tabelle 8",
           "norm": "SIA 265",
           "norm_ref": "3.3.2.1",
@@ -282,7 +276,6 @@
           "unit": "°",
           "symbol": "alpha_2",
           "label": "Winkel zwischen der Kraft- und Faserrichtung der Holzteile",
-          "level": 3,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2",
@@ -293,7 +286,6 @@
           "unit": "N/mm²",
           "symbol": "f_(h,0,1)",
           "label": "Lochleibungsfestigkeit parallel zur Faser",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.3"
@@ -303,7 +295,6 @@
           "unit": "N/mm²",
           "symbol": "f_(h,90,1)",
           "label": "Lochleibungsfestigkeit rechtwinklig zur Faser",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.3"
@@ -313,7 +304,6 @@
           "unit": "N/mm²",
           "symbol": "f_(h,1,k)",
           "label": "Lochleibungsfestigkeit",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.3"
@@ -323,7 +313,6 @@
           "unit": "N/mm²",
           "symbol": "f_(h,0,2)",
           "label": "Lochleibungsfestigkeit parallel zur Faser",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.3"
@@ -333,7 +322,6 @@
           "unit": "N/mm²",
           "symbol": "f_(h,90,2)",
           "label": "Lochleibungsfestigkeit rechtwinklig zur Faser",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.3"
@@ -343,7 +331,6 @@
           "unit": "N/mm²",
           "symbol": "f_(h,2,k)",
           "label": "Lochleibungsfestigkeit",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.3"
@@ -353,7 +340,6 @@
           "unit": "",
           "symbol": "beta_f",
           "label": "Verhältnis der Lochleibungsfestigkeiten",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1",
@@ -364,7 +350,6 @@
           "unit": "mm",
           "symbol": "t_1",
           "label": "Holzdicke",
-          "level": 3,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "A.1.2",
@@ -378,7 +363,6 @@
           "unit": "mm",
           "symbol": "t_2",
           "label": "Holzdicke",
-          "level": 3,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "A.1.2",
@@ -391,7 +375,6 @@
           "unit": "",
           "symbol": "k_(beta,\"max\")",
           "label": "Grösstwert des Hilfswerts",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1",
@@ -402,7 +385,6 @@
           "unit": "mm",
           "symbol": "t_(1,1)",
           "label": "Holzdicke für den unteren Eckwert",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1",
@@ -413,7 +395,6 @@
           "unit": "",
           "symbol": "k_(beta,1,1)",
           "label": "Hilfswert zum unteren Eckwert",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1"
@@ -423,7 +404,6 @@
           "unit": "mm",
           "symbol": "t_(1,2)",
           "label": "Holzdicke für den oberen Eckwert",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1"
@@ -433,7 +413,6 @@
           "unit": "",
           "symbol": "k_(beta,1,2)",
           "label": "Hilfswert zum oberen Eckwert",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1"
@@ -443,7 +422,6 @@
           "unit": "",
           "symbol": "k_(beta,1)",
           "label": "Hilfswert zur Scherfuge",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1"
@@ -453,7 +431,6 @@
           "unit": "mm",
           "symbol": "t_(2,2)",
           "label": "Holzdicke für den oberen Eckwert",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1",
@@ -464,7 +441,6 @@
           "unit": "",
           "symbol": "k_(beta,2,2)",
           "label": "Hilfswert zum oberen Eckwert",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1"
@@ -474,7 +450,6 @@
           "unit": "",
           "symbol": "k_(beta,2)",
           "label": "Hilfswert zur Scherfuge",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1"
@@ -484,7 +459,6 @@
           "unit": "",
           "symbol": "n_1",
           "label": "Anzahl der in Faserrichtung des Holzes hintereinander angeordneten Verbindungsmittel",
-          "level": 3,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2"
@@ -494,7 +468,6 @@
           "unit": "mm",
           "symbol": "a_(1,1)",
           "label": "Abstand der Verbindungsmittel untereinander in Faserrichtung",
-          "level": 3,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2"
@@ -504,7 +477,6 @@
           "unit": "",
           "symbol": "k_(\"red\",1)",
           "label": "Reduktionsbeiwert",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2",
@@ -515,7 +487,6 @@
           "unit": "",
           "symbol": "n_2",
           "label": "Anzahl der in Faserrichtung des Holzes hintereinander angeordneten Verbindungsmittel",
-          "level": 3,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2"
@@ -525,7 +496,6 @@
           "unit": "mm",
           "symbol": "a_(1,2)",
           "label": "Abstand der Verbindungsmittel untereinander in Faserrichtung",
-          "level": 3,
           "source": "woodcore:connectors/SD-10.json",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2"
@@ -535,7 +505,6 @@
           "unit": "",
           "symbol": "k_(\"red\",2)",
           "label": "Reduktionsbeiwert",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2"
@@ -545,7 +514,6 @@
           "unit": "Nmm",
           "symbol": "M_(u,k)",
           "label": "char. Fliessmoment des Stabdübels",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.4",
@@ -556,7 +524,6 @@
           "unit": "",
           "symbol": "k_beta",
           "label": "Hilfswert zur Scherfuge",
-          "level": 2,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "A.1.1",
@@ -570,7 +537,6 @@
           "unit": "",
           "symbol": "p",
           "label": "Anzahl Scherfugen",
-          "level": 2,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.1",
@@ -582,7 +548,6 @@
           "unit": "",
           "symbol": "(p dot k_beta)",
           "label": "Scherfugen mit ihren Hilfswerten",
-          "level": 2,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.1",
@@ -594,7 +559,6 @@
           "unit": "",
           "symbol": "k_\"red\"",
           "label": "Massgebender Reduktionsbeiwert",
-          "level": 2,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2",
@@ -607,7 +571,6 @@
           "unit": "",
           "symbol": "n_(\"quer\",1)",
           "label": "Anzahl Verbindungsmittel quer zur Faserrichtung",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2",
@@ -620,7 +583,6 @@
           "unit": "",
           "symbol": "n_(\"quer\",2)",
           "label": "Anzahl Verbindungsmittel quer zur Faserrichtung",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.1.4.2",
@@ -632,7 +594,6 @@
           "unit": "",
           "symbol": "k_alpha",
           "label": "Beiwert der Tragwiderstandsgleichung",
-          "level": 3,
           "source": "norm:SIA 265:2021, Ziffer 6.2.1.1",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.1",
@@ -644,7 +605,6 @@
           "unit": "",
           "symbol": "eta_w",
           "label": "Umrechnungsfaktor Holzfeuchte",
-          "level": 2,
           "source": "norm:SIA 265:2021, Tabelle 4",
           "norm": "SIA 265",
           "norm_ref": "3.2.1.3",
@@ -657,7 +617,6 @@
           "unit": "",
           "symbol": "eta_t",
           "label": "Umrechnungsfaktor Einwirkungsdauer",
-          "level": 2,
           "source": "norm:SIA 265:2021, Ziffer 2.2.6",
           "norm": "SIA 265",
           "norm_ref": "2.2.6",
@@ -669,7 +628,6 @@
           "unit": "kN",
           "symbol": "R_d",
           "label": "Tragwiderstand pro Verbindungsmittel",
-          "level": 1,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.1"
@@ -679,7 +637,6 @@
           "unit": "kN",
           "symbol": "R_(d,\"Verb\")",
           "label": "Tragwiderstand der Verbindung",
-          "level": 1,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.1"
@@ -689,7 +646,6 @@
           "unit": "",
           "symbol": "eta_(w,\"Steif\")",
           "label": "Umrechnungsfaktor Holzfeuchte für die Steifigkeit",
-          "level": 3,
           "source": "norm:SIA 265:2021, Tabelle 4",
           "norm": "SIA 265",
           "norm_ref": "3.2.1.3"
@@ -699,7 +655,6 @@
           "unit": "N/mm",
           "symbol": "K_(\"ser\",1)",
           "label": "Verschiebungsmodul",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.4",
@@ -710,7 +665,6 @@
           "unit": "N/mm",
           "symbol": "K_(\"ser\",2)",
           "label": "Verschiebungsmodul",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.4"
@@ -720,7 +674,6 @@
           "unit": "N/mm",
           "symbol": "K_\"ser\"",
           "label": "Massgebender Verschiebungsmodul",
-          "level": 3,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.4"
@@ -730,7 +683,6 @@
           "unit": "N/mm",
           "symbol": "K_(\"ser\",\"Verb\")",
           "label": "Verschiebungsmodul der Verbindung",
-          "level": 1,
           "source": "python:domains/dowel.py",
           "norm": "SIA 265",
           "norm_ref": "6.2.1.4",
@@ -740,7 +692,6 @@
       "steps": [
         {
           "name": "Lochleibungsfestigkeit parallel zur Faser Bauteil 1",
-          "level": 3,
           "result": "f_h_0_1",
           "uses": [
             "d",
@@ -753,7 +704,6 @@
         },
         {
           "name": "Lochleibungsfestigkeit rechtwinklig zur Faser Bauteil 1",
-          "level": 3,
           "result": "f_h_90_1",
           "uses": [
             "f_h_0_1",
@@ -766,7 +716,6 @@
         },
         {
           "name": "Lochleibungsfestigkeit Bauteil 1",
-          "level": 3,
           "result": "f_h_1",
           "uses": [
             "f_h_90_1",
@@ -781,7 +730,6 @@
         },
         {
           "name": "Lochleibungsfestigkeit parallel zur Faser Bauteil 2",
-          "level": 3,
           "result": "f_h_0_2",
           "uses": [
             "d",
@@ -794,7 +742,6 @@
         },
         {
           "name": "Lochleibungsfestigkeit rechtwinklig zur Faser Bauteil 2",
-          "level": 3,
           "result": "f_h_90_2",
           "uses": [
             "f_h_0_2",
@@ -807,7 +754,6 @@
         },
         {
           "name": "Lochleibungsfestigkeit Bauteil 2",
-          "level": 3,
           "result": "f_h_2",
           "uses": [
             "f_h_90_2",
@@ -822,7 +768,6 @@
         },
         {
           "name": "Verhältnis der Lochleibungsfestigkeiten",
-          "level": 3,
           "result": "beta_f",
           "uses": [
             "f_h_2",
@@ -835,7 +780,6 @@
         },
         {
           "name": "Grösstwert des Hilfswerts",
-          "level": 3,
           "result": "k_beta_max",
           "uses": [
             "beta_f"
@@ -847,7 +791,6 @@
         },
         {
           "name": "Holzdicke Bauteil 1, unterer Eckwert",
-          "level": 3,
           "result": "t_c_1_1",
           "uses": [
             "beta_f",
@@ -862,7 +805,6 @@
         },
         {
           "name": "Hilfswert Bauteil 1, unterer Eckwert",
-          "level": 3,
           "result": "k_beta_1_1",
           "uses": [
             "k_beta_max"
@@ -874,7 +816,6 @@
         },
         {
           "name": "Holzdicke Bauteil 1, oberer Eckwert",
-          "level": 3,
           "result": "t_c_1_2",
           "uses": [
             "beta_f",
@@ -889,7 +830,6 @@
         },
         {
           "name": "Hilfswert Bauteil 1, oberer Eckwert",
-          "level": 3,
           "result": "k_beta_1_2",
           "uses": [
             "k_beta_max"
@@ -901,7 +841,6 @@
         },
         {
           "name": "Hilfswert Bauteil 1",
-          "level": 3,
           "result": "k_beta_1",
           "uses": [
             "k_beta_1_1",
@@ -918,7 +857,6 @@
         },
         {
           "name": "Holzdicke Bauteil 2, oberer Eckwert",
-          "level": 3,
           "result": "t_c_2_2",
           "uses": [
             "beta_f",
@@ -933,7 +871,6 @@
         },
         {
           "name": "Hilfswert Bauteil 2, oberer Eckwert",
-          "level": 3,
           "result": "k_beta_2_2",
           "uses": [
             "k_beta_max"
@@ -945,7 +882,6 @@
         },
         {
           "name": "Hilfswert Bauteil 2",
-          "level": 3,
           "result": "k_beta_2",
           "uses": [
             "k_beta_2_2"
@@ -957,7 +893,6 @@
         },
         {
           "name": "Reduktionsbeiwert Bauteil 1",
-          "level": 3,
           "result": "k_red_1",
           "uses": [
             "n_1",
@@ -973,7 +908,6 @@
         },
         {
           "name": "Reduktionsbeiwert Bauteil 2",
-          "level": 3,
           "result": "k_red_2",
           "uses": [
             "n_2",
@@ -988,7 +922,6 @@
         },
         {
           "name": "Fliessmoment",
-          "level": 3,
           "result": "M_u_k",
           "uses": [
             "f_u_k",
@@ -1001,7 +934,6 @@
         },
         {
           "name": "Tragwiderstand pro Verbindungsmittel",
-          "level": 1,
           "result": "R_d",
           "uses": [
             "k_alpha",
@@ -1020,7 +952,6 @@
         },
         {
           "name": "Tragwiderstand der Verbindung",
-          "level": 1,
           "result": "R_d_Verb",
           "uses": [
             "n_tot",
@@ -1033,7 +964,6 @@
         },
         {
           "name": "Verschiebungsmodul Bauteil 1",
-          "level": 3,
           "result": "K_ser_1",
           "uses": [
             "alpha_1",
@@ -1049,7 +979,6 @@
         },
         {
           "name": "Verschiebungsmodul Bauteil 2",
-          "level": 3,
           "result": "K_ser_2",
           "uses": [
             "alpha_2",
@@ -1064,7 +993,6 @@
         },
         {
           "name": "Massgebender Verschiebungsmodul",
-          "level": 3,
           "result": "K_ser",
           "uses": [
             "K_ser_1",
@@ -1077,7 +1005,6 @@
         },
         {
           "name": "Verschiebungsmodul der Verbindung",
-          "level": 1,
           "result": "K_ser_Verb",
           "uses": [
             "n_tot",
@@ -1095,14 +1022,14 @@
       "section_scaled": "",
       "figures": {
         "section": {
-          "de": "connectors/SD-10-section.svg",
-          "fr": "connectors/SD-10-section.svg",
-          "en": "connectors/SD-10-section.svg"
+          "de": "/Connectors/Exports/Figures/SD-10-section.svg",
+          "fr": "/Connectors/Exports/Figures/SD-10-section.svg",
+          "en": "/Connectors/Exports/Figures/SD-10-section.svg"
         },
         "pattern": {
-          "de": "connectors/SD-10-pattern-de.svg",
-          "fr": "connectors/SD-10-pattern-fr.svg",
-          "en": "connectors/SD-10-pattern-en.svg"
+          "de": "/Connectors/Exports/Figures/SD-10-pattern-de.svg",
+          "fr": "/Connectors/Exports/Figures/SD-10-pattern-fr.svg",
+          "en": "/Connectors/Exports/Figures/SD-10-pattern-en.svg"
         }
       }
     }

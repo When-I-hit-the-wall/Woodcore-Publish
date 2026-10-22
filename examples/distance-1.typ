@@ -8,4 +8,4 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#distance(3.1, "nail", tab: 28)
+#distance(3.1, "nail", table: 28)

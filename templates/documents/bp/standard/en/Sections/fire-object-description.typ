@@ -4,34 +4,27 @@
 == Description of the object
 // woodcore:/object title
 
-// woodcore:object doc-table fire-object-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Item]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Use], text: [[…]]),
-    (item: [Number of places or beds], text: [[…]]),
-    (item: [Number of storeys and total height], text: [[…]]),
-    (item: [Neighbouring buildings], text: [[…]]),
-    (item: [Availability of extinguishing water], text: [[…]]),
-    (item: [Concept chosen (constructional / technical)], text: [[…]]),
+// woodcore:object table fire-object-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Use], [[…]],
+    [Number of places or beds], [[…]],
+    [Number of storeys and total height], [[…]],
+    [Neighbouring buildings], [[…]],
+    [Availability of extinguishing water], [[…]],
+    [Concept chosen (constructional / technical)], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Description of the object for fire protection],
-  header: false,
 )
 // woodcore:/object fire-object-table
 
-// woodcore:object doc-choice fire-building-height
-#doc-choice(
-  label: [Building height category (VKF)],
-  options: (
-    (id: "low", label: [Low-rise building (up to 11 m)]),
-    (id: "medium", label: [Medium-rise building (up to 30 m)]),
-    (id: "high", label: [High-rise building (over 30 m)]),
-  ),
-  selected: none,
-)
+// woodcore:object text fire-building-height
+*Building height category (VKF)*:
+- Low-rise building (up to 11 m)
+- Medium-rise building (up to 30 m)
+- High-rise building (over 30 m)
 // woodcore:/object fire-building-height

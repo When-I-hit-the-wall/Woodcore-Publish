@@ -4,14 +4,21 @@
 = Signatures
 // woodcore:/object title
 
-// woodcore:object doc-signatures agreement-signatures-block
-#doc-signatures(
-  rows: (
-    (group: [Maître de l'ouvrage], role: [Maître de l'ouvrage]),
-    (group: [Maître de l'ouvrage], role: [Représentant·e]),
-    (group: [Auteur du projet], role: [Architecte]),
-    (group: [Auteur du projet], role: [Ingénieur·e]),
+// woodcore:object table agreement-signatures-block
+#figure(
+  table(
+    columns: (auto, auto, auto, 1fr),
+    align: (left, left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Fonction*], [*Nom*], [*Lieu, date*], [*Signature*]),
+    table.hline(stroke: 0.5pt),
+    [*Maître de l'ouvrage*], [], [], [],
+    [Maître de l'ouvrage], [], [], [#v(1cm)#line(length: 100%, stroke: 0.5pt)],
+    [Représentant·e], [], [], [#v(1cm)#line(length: 100%, stroke: 0.5pt)],
+    [*Auteur du projet*], [], [], [],
+    [Architecte], [], [], [#v(1cm)#line(length: 100%, stroke: 0.5pt)],
+    [Ingénieur·e], [], [], [#v(1cm)#line(length: 100%, stroke: 0.5pt)],
+    table.hline(stroke: 1pt),
   ),
-  place-date: true,
 )
 // woodcore:/object agreement-signatures-block

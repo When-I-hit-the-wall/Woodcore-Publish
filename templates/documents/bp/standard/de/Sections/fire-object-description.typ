@@ -4,34 +4,27 @@
 == Objektbeschrieb
 // woodcore:/object title
 
-// woodcore:object doc-table fire-object-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Element]),
-    (id: "text", title: [Beschreibung], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Nutzung], text: [[…]]),
-    (item: [Anzahl Plätze oder Betten], text: [[…]]),
-    (item: [Anzahl Geschosse und Gesamthöhe], text: [[…]]),
-    (item: [Nachbargebäude], text: [[…]]),
-    (item: [Verfügbarkeit von Löschwasser], text: [[…]]),
-    (item: [Gewähltes Konzept (baulich / technisch)], text: [[…]]),
+// woodcore:object table fire-object-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Nutzung], [[…]],
+    [Anzahl Plätze oder Betten], [[…]],
+    [Anzahl Geschosse und Gesamthöhe], [[…]],
+    [Nachbargebäude], [[…]],
+    [Verfügbarkeit von Löschwasser], [[…]],
+    [Gewähltes Konzept (baulich / technisch)], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Objektbeschrieb für den Brandschutz],
-  header: false,
 )
 // woodcore:/object fire-object-table
 
-// woodcore:object doc-choice fire-building-height
-#doc-choice(
-  label: [Gebäudehöhenkategorie (VKF)],
-  options: (
-    (id: "low", label: [Gebäude geringer Höhe (bis 11 m)]),
-    (id: "medium", label: [Gebäude mittlerer Höhe (bis 30 m)]),
-    (id: "high", label: [Hochhaus (über 30 m)]),
-  ),
-  selected: none,
-)
+// woodcore:object text fire-building-height
+*Gebäudehöhenkategorie (VKF)*:
+- Gebäude geringer Höhe (bis 11 m)
+- Gebäude mittlerer Höhe (bis 30 m)
+- Hochhaus (über 30 m)
 // woodcore:/object fire-building-height

@@ -4,41 +4,38 @@
 == Baustahl und Verbindungsmittel
 // woodcore:/object title
 
-// woodcore:object doc-table structural-steel-table
-#doc-table(
-  columns: (
-    (id: "grade", title: [Stahlsorte]),
-    (id: "band", title: [Dicke]),
-    (id: "fy", title: [Streckgrenze $f_y$], unit: "N/mm²", kind: "number"),
-    (id: "fu", title: [Zugfestigkeit $f_u$], unit: "N/mm²", kind: "number"),
-    (id: "Ea", title: [Elastizitätsmodul $E_a$], unit: "N/mm²", kind: "number"),
-    (id: "gamma", title: [Raumlast $gamma$], unit: "kN/m³", kind: "number"),
-  ),
-  hidden: ("Ea", "gamma"),
-  rows: (
-    (grade: [S235], band: [t ≤ 40 mm], fy: 235, fu: 360, Ea: 210000, gamma: 78.5),
-    (grade: [S355], band: [t ≤ 40 mm], fy: 355, fu: 510, Ea: 210000, gamma: 78.5),
+// woodcore:object table structural-steel-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, right, right),
+    table.hline(stroke: 1pt),
+    table.header([*Stahlsorte*], [*Dicke*], [*Streckgrenze $f_y$*], [*Zugfestigkeit $f_u$*]),  // woodcore:hidden 5=[Elastizitätsmodul $E_a$] 6=[Raumlast $gamma$]
+    table.hline(stroke: 0.5pt),
+    [S235], [t ≤ 40 mm], [235], [360],  // woodcore:hidden 5=[210000] 6=[78.5]
+    [S355], [t ≤ 40 mm], [355], [510],  // woodcore:hidden 5=[210000] 6=[78.5]
+    table.hline(stroke: 1pt),
   ),
   caption: [Baustahl (SIA 263)],
 )
 // woodcore:/object structural-steel-table
 
-// woodcore:object doc-table bolts-table
-#doc-table(
-  columns: (
-    (id: "class", title: [Festigkeitsklasse]),
-    (id: "fyb", title: [Streckgrenze $f_"yb"$], unit: "N/mm²", kind: "number"),
-    (id: "fub", title: [Zugfestigkeit $f_"ub"$], unit: "N/mm²", kind: "number"),
-    (id: "use", title: [Verwendung]),
-  ),
-  hidden: (),
-  rows: (
-    (class: [4.6], fyb: 240, fub: 400, use: [Bolzen, Schlüsselschrauben]),
-    (class: [8.8], fyb: 640, fub: 800, use: [Holzschrauben (Mindestklasse)]),
+// woodcore:object table bolts-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, right, right, left),
+    table.hline(stroke: 1pt),
+    table.header([*Festigkeitsklasse*], [*Streckgrenze $f_"yb"$*], [*Zugfestigkeit $f_"ub"$*], [*Verwendung*]),
+    table.hline(stroke: 0.5pt),
+    [4.6], [240], [400], [Bolzen, Schlüsselschrauben],
+    [8.8], [640], [800], [Holzschrauben (Mindestklasse)],
+    table.hline(stroke: 1pt),
   ),
   caption: [Schrauben und Holzschrauben (SIA 263)],
-  notes: (
-    [Stabdübel aus Stahl S355 werden mit $f_(u,k)$ = 510 N/mm² berechnet (SN EN 14592).],
-  ),
 )
 // woodcore:/object bolts-table
+
+// woodcore:object text bolts-table-notes
+Stabdübel aus Stahl S355 werden mit $f_(u,k)$ = 510 N/mm² berechnet (SN EN 14592).
+// woodcore:/object bolts-table-notes

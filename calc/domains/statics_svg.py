@@ -1,6 +1,6 @@
 """The drawing of a static model, as SVG text: the members, where they are held, where they are hinged, and what acts on them, with the figure's frame computed from what it actually draws (docs/domain/static-models.md §3.3octies).
 
-One drawing serves both places it is seen. Woodcore's window shows it while a model is edited, and the export writes it to data/statics/<id>.svg, which lib/calc-engine.typ's show-static-model sets in the report -- so the system the engineer drew is the system the checker reads. That is why it is built as plain text here, with no Qt: export_all.py draws it too, without a window.
+One drawing serves both places it is seen. Woodcore's window shows it while a model is edited, and the export writes it to data/statics/<id>.svg (Statics/Exports/Figures/ in a project laid out by folders, issue #64), which lib/calc-engine.typ's show-static-model sets in the report -- so the system the engineer drew is the system the checker reads. That is why it is built as plain text here, with no Qt: export_all.py draws it too, without a window.
 
 It is kept to what both renderers read alike. QtSvg implements SVG Tiny 1.2, which has no <marker>, no clipPath, no <pattern>, no CSS, no paint-order and no arc command: an arrowhead is a polygon, a member interrupted by a hinge is drawn as the stretches that clear it, a moment spring's spiral is a polyline, a subscript is a second <text> set smaller and lower, and a label's white halo is a rectangle, its own box turned with its text (v0.77). A `transform="rotate(...)"` is read by both and is what draws a support upright once and turns it.
 
@@ -15,6 +15,7 @@ import math
 import re
 from xml.sax.saxutils import escape
 
+from domains import svg_draw  # the one writer of an SVG number and text (D6)
 from domains import figure_style
 from domains import figure_text  # a text placed with the Text tool (issue #43)
 from domains import svg_text  # the one text engine of every figure (D-19)
@@ -86,20 +87,21 @@ from domains.statics_svg_layout import (  # split out of this module (issue #30)
 )
 
 # The colours. A bar is the drawing's own black; a cable and a spring are set apart, being members that carry along their axis only; the supports and the hinges are the structure's, the loads the action's.
-BAR = "#1f1f1f"
-CABLE = "#1f6fb2"
-SPRING = "#1f6fb2"
-SUPPORT = "#1f1f1f"
-RELEASE = "#1f1f1f"
+BAR = svg_draw.colour("ink")
+CABLE = svg_draw.colour("blue")
+SPRING = svg_draw.colour("blue")
+SUPPORT = svg_draw.colour("ink")
+RELEASE = svg_draw.colour("ink")
 # a dimension measures the drawing and is not part of it, so it is written in the drawing's own ink and set apart by its thinner line rather than by a colour of its own
-DIMENSION = "#1f1f1f"
+DIMENSION = svg_draw.colour("ink")
 # A load's ink is its own (statics.LOAD_COLOURS): the colour it states, red where it states none -- the colour every load was drawn in before the engineer could choose, so a model saved before then draws exactly as it did. Its arrows, its band and its cap take it; its label stays in the drawing's own ink, being text set on a white box and read the same whatever colour the arrows are.
-NODE = "#1f1f1f"
-LABEL = "#1f1f1f"
-NOTE_COLOUR = "#6b6b6b"
-HIGHLIGHT_COLOUR = "#ffd34d"
+NODE = svg_draw.colour("ink")
+LABEL_COLOUR = svg_draw.colour("ink")
+NOTE_COLOUR = svg_draw.colour("ink-soft")
+HIGHLIGHT_COLOUR = svg_draw.colour("yellow")
+GROUND = svg_draw.colour("ground")
 # One family, not a list: QtSvg takes the whole font-family string as a single name, so "Arial, Helvetica, sans-serif" matches nothing and it falls back to a face whose advances are not Arial's -- which put every subscript, placed where ARIAL_WIDTHS says the run before it ends, beside its letter instead of under it. resvg reads a bare family too, and a machine without Arial substitutes Liberation Sans, which has the same advances.
-FONT = "Arial"
+FONT = svg_draw.FONT
 
 # Where the report puts what only the call knows: a halo under the parts it highlights, and the loads, which `loads: false` removes so a bare system can be shown first. The loads' arrows and their labels are two separate stretches, and one regex takes both.
 HIGHLIGHT_MARK = "<!-- highlight -->"
@@ -135,19 +137,11 @@ DIM_WITNESS_MIN = 1.0
 SUB_DROP = svg_text.SUB_DROP   # svg_text's, named here as it always was
 
 
-def _f(value):
-    """A coordinate as short SVG text: three decimals at most, trailing zeros dropped."""
-    text = f"{value:.3f}".rstrip("0").rstrip(".")
-    return "0" if text in ("-0", "") else text
+_f = svg_draw.number_at(3)   # a coordinate at 3 decimals (svg_draw.py, D6)
 
 
 def _pts(points):
     return " ".join(f"{_f(x)},{_f(y)}" for x, y in points)
-
-
-def _to_model(p, k):
-    """The way back, for a pointer over Woodcore's canvas."""
-    return (p[0] / k, p[1] / k)
 
 
 def _own(placed, sz):
@@ -249,13 +243,13 @@ def _support(out, support, sz):
         return
     apex = support["origin"]
     base_a, base_b = _add(_add(apex, g, height), t, -half), _add(_add(apex, g, height), t, half)
-    _polygon(out, [apex, base_a, base_b], "#ffffff", SUPPORT, sz.line(0.7))
+    _polygon(out, [apex, base_a, base_b], GROUND, SUPPORT, sz.line(0.7))
     if support["type"] == "pinned":
         _hatch(out, _add(apex, g, height), g, t, sz)
     else:
         r = sz.point(1.0)
         for side in (-1, 1):
-            _circle(out, _add(_add(apex, g, height + r), t, side * half * 0.55), r, "#ffffff", SUPPORT, sz.line(0.55))
+            _circle(out, _add(_add(apex, g, height + r), t, side * half * 0.55), r, GROUND, SUPPORT, sz.line(0.55))
         _hatch(out, _add(apex, g, height + 2 * r), g, t, sz)
     # the pin last, over the triangle's apex and over whatever member runs past it: a Festlager and a Loslager are hinges, and this is the circle a moment release is drawn as
     if support["hinge_at"] is not None:
@@ -264,7 +258,7 @@ def _support(out, support, sz):
 
 def _hinge(out, at, sz):
     """A hinge: the white circle a moment release is drawn as, and the pin of a Festlager or a Loslager."""
-    _circle(out, at, sz.point(HINGE_RADIUS), "#ffffff", RELEASE, sz.line(HINGE_WIDTH))
+    _circle(out, at, sz.point(HINGE_RADIUS), GROUND, RELEASE, sz.line(HINGE_WIDTH))
 
 
 def _spring_inner(sz):
@@ -414,7 +408,7 @@ def _label(out, frame, sz, colour=None):
     """A label, its lines stacked over a white rectangle, over whatever it lies on. A load whose value could not be read is written in the grey its arrow is drawn in, so the figure says as much as the warning does.
 
     The halo is the label's own box -- the one a click and a leader read (`hw`, `hh`) -- turned with its text. Until v0.77 it was each line drawn a second time with a wide white stroke, which over Woodcore's grid or a member left a «bubble» around every letter; the engineer asked for a rectangle."""
-    colour = colour or (UNRESOLVED if frame.get("unresolved") else LABEL)
+    colour = colour or (UNRESOLVED if frame.get("unresolved") else LABEL_COLOUR)
     size = sz.text(LABEL_TEXT)
     lines = frame["lines"]
     angle = frame["angle"] or None
@@ -422,7 +416,7 @@ def _label(out, frame, sz, colour=None):
         (x, y), hw, hh = frame["at"], frame["hw"], frame["hh"]
         turn = f' transform="translate({_f(x)},{_f(y)}) rotate({_f(frame["angle"])})"' if angle else ""
         ox, oy = (0.0, 0.0) if angle else (x, y)
-        out.append(f'<rect x="{_f(ox - hw)}" y="{_f(oy - hh)}" width="{_f(2 * hw)}" height="{_f(2 * hh)}" fill="#ffffff"{turn}/>')
+        out.append(f'<rect x="{_f(ox - hw)}" y="{_f(oy - hh)}" width="{_f(2 * hw)}" height="{_f(2 * hh)}" fill="{GROUND}"{turn}/>')
     top = -((len(lines) - 1) / 2.0) * LINE_SPACING * size
     for i, line in enumerate(lines):
         dy = top + i * LINE_SPACING * size
@@ -434,7 +428,7 @@ def _label(out, frame, sz, colour=None):
         _text(out, at, line, size, colour, bold=(i == 0), rotate=angle)
 
 
-def _leader(out, frame, sz, colour=LABEL):
+def _leader(out, frame, sz, colour=LABEL_COLOUR):
     """A thin line from a label the engineer moved clear of what it names back to its own place, so it still says what it belongs to. plan_svg's rule: drawn only once the label has left its symbol."""
     if not frame["moved"]:
         return
@@ -566,7 +560,7 @@ def render(drawing, highlight=None, background=True, nodes=False):
     if background:
         out.append(
             f'<rect x="{_f(view["x"])}" y="{_f(view["y"])}" width="{_f(view["w"])}" '
-            f'height="{_f(view["h"])}" fill="#ffffff"/>'
+            f'height="{_f(view["h"])}" fill="{GROUND}"/>'
         )
     out.append(HIGHLIGHT_MARK)
     if highlight:
@@ -610,7 +604,7 @@ def render(drawing, highlight=None, background=True, nodes=False):
     # the texts placed with the Text tool (issue #43), over the structure and under the dimensions and the loads: figure_text sets them, with no box and no bold line -- a note on the drawing, not the name of a part of it
     for frame in texts:
         size = _own(frame, sz).text(LABEL_TEXT)
-        figure_text.draw(out, frame["at"], frame["lines"], size, LABEL, halo=TEXT_HALO * size)
+        figure_text.draw(out, frame["at"], frame["lines"], size, LABEL_COLOUR, halo=TEXT_HALO * size)
 
     # a dimension's value goes with its own lines, inside the region they are cut at, and over them: the halo it carries is what breaks the dimension line behind it
     out.append(DIMS_OPEN)

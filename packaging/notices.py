@@ -16,7 +16,7 @@ ROOT = HERE.parent
 LEGAL = ROOT / "legal"
 LICENSES = LEGAL / "licenses"
 TARGET = LEGAL / "THIRD-PARTY-NOTICES.txt"
-PYTHON = "3.13"   # the runtime the build freezes: packaging/build.py refuses another minor version
+PYTHON = "3.14"   # the runtime the build freezes: packaging/build.py refuses another minor version
 ET_XMLFILE = "2.0.0"   # openpyxl's one dependency, not pinned in requirements.txt: what the build environment installs with openpyxl 3.1.5
 EZDXF_DEPENDENCIES = {"pyparsing": "3.2.5", "fonttools": "4.61.0", "typing_extensions": "4.16.0"}   # ezdxf's dependencies beside numpy, not pinned in requirements.txt: what the build environment installs with ezdxf 1.4.4
 

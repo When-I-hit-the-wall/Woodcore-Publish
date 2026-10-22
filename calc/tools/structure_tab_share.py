@@ -1,4 +1,4 @@
-"""StructureTab's tagging, importing and sharing, the document's content template switched or saved, the sections and objects dropped, and what is shared kept in step -- a mixin of methods moved verbatim out of calc/tools/structure_tab.py (issue #30). StructureTab names it among its bases.
+"""StructureTab's tagging, importing and sharing, the document saved as a content template, the sections and objects dropped, and what is shared kept in step -- a mixin of methods moved verbatim out of calc/tools/structure_tab.py (issue #30). StructureTab names it among its bases.
 """
 
 import functools
@@ -135,45 +135,6 @@ class StructureTabShareMixin:
         self.reload(select=node_id)
         self.tree.reveal(node_id)
         return True
-
-    def switchable(self):
-        """Whether the document shown can switch its content template: a document of a project laid out in three documents (calc/content_switch.py refuses a report written alone)."""
-        try:
-            here = project.current()
-        except project.ProjectError:
-            return False
-        return bool(getattr(here, "has_modes", False)) and self.mode() in here.modes
-
-    def on_switch_template(self):
-        """«Changer de template de fond…»: what a pane holds pending written first, then the comparison asked in its dialog (`ask_switch`); where it wrote something, the tree read again and the page asked for again. Refused, and said, to a project held read-only and to a report written alone."""
-        if not self.writable():
-            return False
-        if not self.switchable():
-            self.say(self.t("st_off_switch_single"))
-            return False
-        self.host.flush()
-        result = self.ask_switch()
-        if result is None:
-            return False
-        self.failure = None
-        if getattr(result, "changed", False):
-            self.say(self.t("st_switch_done", written=len(result.written), archived=len(result.archived)))
-        else:
-            self.say(self.t("st_switch_nothing"))
-        self.reload()
-        self.refresh_sync()
-        if self.pane_loaded:
-            self.request_preview(force=True)
-        return True
-
-    def ask_switch(self):
-        """The content-switch dialog run on the document shown: its Result where it wrote, None where the engineer cancelled. A method of its own, so that a test answers it without a modal."""
-        import content_switch_dialog
-        lang = getattr(self.app, "lang", documents.DEFAULT_LANGUAGE)
-        dialog = content_switch_dialog.ContentSwitchDialog(self, lang, project.current(), self.mode(), read_only=self.read_only(), convert=self.on_make_absolute)
-        if dialog.exec() != QDialog.DialogCode.Accepted:
-            return None
-        return dialog.result_
 
     def on_save_template(self):
         """«Enregistrer comme template de fond…»: the name, the description and the place asked, then the document saved -- the convention, the base or the report alike (doc_templates.ALL_MODES). What a pane holds pending is written first, so that the template is what the engineer sees."""

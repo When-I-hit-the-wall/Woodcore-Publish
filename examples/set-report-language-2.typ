@@ -9,4 +9,4 @@
 #number-digits.update(3)
 
 #set-report-language("en")
-#show-live-load("A1")
+#include domain-file("live-load", "A1")

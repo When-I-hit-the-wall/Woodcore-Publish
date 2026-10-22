@@ -29,11 +29,17 @@ from pathlib import Path
 
 import engine
 import validation
+from domains._common import fail as _fail  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 
 # Of a source record, of an excerpt and of the export (data/annexes.json).
 SOURCE_SCHEMA_VERSION = "1.0"
+# 1.1 is 1.0 with `file`, the name of its PDF in the project's Appendix/ -- the name it was added under, the engineer's (issue #64, D-11): written by a project laid out by folders, where the PDF lies there and no more beside its record; a 1.0 record is read as it is, its PDF `<id>.pdf` beside it
+APPENDIX_SCHEMA_VERSION = "1.1"
+SOURCE_SCHEMA_VERSIONS = (SOURCE_SCHEMA_VERSION, APPENDIX_SCHEMA_VERSION)
 EXCERPT_SCHEMA_VERSION = "1.0"
 EXPORT_SCHEMA_VERSION = "1.0"
+# 1.1 is 1.0 with the excerpts' and the annexes' PDFs named from the Typst root (`/Appendix/Exports/E01.pdf`): written by a project laid out by folders, where they lie in Appendix/Exports/ (D-19)
+ROOTED_EXPORT_VERSION = "1.1"
 
 # The folder of the project's sources this module owns (project.SOURCE_FOLDERS), and its two sub-folders -- the two «dossiers» the engineer asked for inside «Annexes».
 FOLDER = "annexes"
@@ -64,10 +70,6 @@ EDGE = 0.5
 MIN_FRAME = 5.0
 
 
-def _fail(where, message):
-    raise validation.ValidationError(f"{where}: {message}")
-
-
 def _note(code, text, **args):
     return engine.Note(code, text, **args)
 
@@ -87,8 +89,105 @@ def excerpts_dir(here):
     return folder(here) / EXCERPTS
 
 
-def pdf_path(here, sid):
+def appendix_dir(here):
+    """The project's Appendix/, where the annexes' PDFs lie under their own names in a project laid out by folders (issue #64, D-11); None in one laid out before."""
+    import project
+    return here.typst_root / project.APPENDIX_FOLDER if getattr(here, "has_folders", False) else None
+
+
+def pdf_path(here, sid, source=None):
+    """The PDF of source `sid`: `Appendix/<file>` where its record names one (`source`, else read from its file) in a project laid out by folders, `<id>.pdf` beside its record otherwise -- where a record written before 1.1 still finds it."""
+    folder = appendix_dir(here)
+    if folder is not None:
+        if source is None:
+            record = sources_dir(here) / f"{sid}.json"
+            try:
+                source = json.loads(record.read_text(encoding="utf-8")) if record.is_file() else {}
+            except (OSError, ValueError):
+                source = {}
+        name = source.get("file") if isinstance(source, dict) else None
+        if name:
+            return folder / name
     return sources_dir(here) / f"{sid}.pdf"
+
+
+def appendix_name(here, sid, original, sources=None):
+    """The name a source's new PDF is given in Appendix/: the file's own (`original`), unless another source's PDF has it or a file of that name lies there already -- the engineer's, which is never written over --, then `<sid>.pdf`."""
+    sources = list_sources(here) if sources is None else sources
+    taken = {str(s.get("file", "")).casefold() for other, s in sources.items() if other != sid}
+    name = Path(original).name
+    if name.casefold() in taken or (appendix_dir(here) / name).exists() or not name.lower().endswith(".pdf"):
+        name = f"{sid}.pdf"
+    return name
+
+
+def copy_pdf(here, source, path):
+    """`source` given the PDF at `path`: copied where its record says its PDF lies -- a source new in a project laid out by folders gets its name in Appendix/ first (`appendix_name`), a source replaced keeps its own --, written whole and moved into place, its SHA-256 and the name it came from brought up to date. Returns the source, changed; its record is not written (`write_source`)."""
+    source = dict(source)
+    folder = appendix_dir(here)
+    if folder is not None and not source.get("file"):
+        source["file"] = appendix_name(here, source["id"], Path(path).name)
+    target = pdf_path(here, source["id"], source)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    partial = target.with_name(target.name + ".part")
+    partial.write_bytes(Path(path).read_bytes())
+    partial.replace(target)
+    source.update(sha256=file_hash(target), original=Path(path).name)
+    return source
+
+
+def adoptable(here):
+    """The source records `adopt` may rewrite, whose paths a migration backs up before it moves them."""
+    return _paths(sources_dir(here))
+
+
+def adopt(here):
+    """In a project laid out by folders, every source whose PDF still lies beside its record as `<id>.pdf` -- one added before the layout by folders -- given a copy in Appendix/ under the name it was added under (`original`, `appendix_name`), and its record written at 1.1 to name it (issue #64, D-11): what the migration does, and every export after it. The copy beside the record is left where it is, read by nothing any more; copying twice copies nothing. A source whose PDF is missing is left as it is: the export says it. Returns [(the record rewritten, the copy made or None)]."""
+    folder = appendix_dir(here)
+    if folder is None:
+        return []
+    sources = list_sources(here)
+    done = []
+    for sid, source in sources.items():
+        legacy = sources_dir(here) / f"{sid}.pdf"
+        if source.get("file") or not legacy.is_file():
+            continue
+        payload = legacy.read_bytes()
+        name = source.get("original") or legacy.name
+        same = folder / Path(name).name
+        if same.is_file() and same.read_bytes() == payload and same.name.casefold() not in {str(s.get("file", "")).casefold() for s in sources.values()}:
+            target, made = same, None
+        else:
+            target = folder / appendix_name(here, sid, name, sources)
+            if target.exists():
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            partial = target.with_name(target.name + ".part")
+            partial.write_bytes(payload)
+            partial.replace(target)
+            made = target
+        source = dict(source, file=target.name)
+        sources[sid] = source
+        write_source(here, source)
+        done.append((sources_dir(here) / f"{sid}.json", made))
+    return done
+
+
+def refresh_sources(here):
+    """(the ids of the sources read again, the notes): in a project laid out by folders, every source whose PDF in Appendix/ was written over since the window last wrote its record -- by a file of the same name, from outside Woodcore (D-11) -- has its SHA-256 brought up to date, and is said; the export looks for every excerpt in it again as it always does. Nothing in a project laid out before, nor for a PDF that is missing, which the export says."""
+    if appendix_dir(here) is None:
+        return [], []
+    changed, notes = [], []
+    for sid, source in list_sources(here).items():
+        path = pdf_path(here, sid, source)
+        if not path.is_file():
+            continue
+        digest = file_hash(path)
+        if digest != source.get("sha256"):
+            write_source(here, dict(source, sha256=digest))
+            changed.append(sid)
+            notes.append(_note("annex_pdf_replaced", f"annex source {sid}: its PDF {path.name} has changed since it was added -- every excerpt is looked for in it again", source=sid, file=path.name))
+    return changed, notes
 
 
 def file_hash(path):
@@ -124,6 +223,8 @@ def check_source(source, where):
     if not isinstance(source, dict):
         _fail(where, "is not a JSON object")
     validation.validate_structure(source, "annex-source")
+    if "file" in source and (not source["file"] or Path(source["file"]).name != source["file"]):
+        _fail(where, f"file is {source['file']!r} -- the name of a PDF in Appendix/, without a folder")
     if not ID_PATTERN.match(source["id"]):
         _fail(where, f"id {source['id']!r} -- letters, digits and _ . + -, starting with a letter or a digit")
     if source["mode"] not in MODES:
@@ -206,6 +307,9 @@ def list_excerpts(here):
 
 
 def write_source(here, source):
+    """The source's record, written: at 1.1 where it names its PDF in Appendix/ (`file`), at the version it was read as otherwise."""
+    if "file" in source:
+        source = dict(source, schema_version=APPENDIX_SCHEMA_VERSION)
     check_source(source, f"{source.get('id')}.json")
     engine.write_json(sources_dir(here) / f"{source['id']}.json", source)
 
@@ -604,8 +708,7 @@ def pages_of(pdf, numbers):
 
 # --- the export -----------------------------------------------------------------------------
 
-def _digest(*parts):
-    return hashlib.sha256(json.dumps(parts, sort_keys=True).encode("utf-8")).hexdigest()
+_digest = engine.digest   # the one fingerprint (the same bytes as this module's own until v0.120: a list and a tuple are one JSON array)
 
 
 def prepare(here, previous=None):
@@ -615,12 +718,13 @@ def prepare(here, previous=None):
     """
     previous = previous or {}
     data_dir = Path(here.data_dir)
+    place = engine.Figures(data_dir, "annex", here)   # Appendix/Exports/ in a project laid out by folders, data/annexes/ otherwise (D-19)
     sources, excerpts = list_sources(here), list_excerpts(here)
     notes, files = [], {}
     records = {"sources": {}, "excerpts": {}}
     opened = {}
     for sid, source in sources.items():
-        path = pdf_path(here, sid)
+        path = pdf_path(here, sid, source)
         if not path.is_file():
             notes.append(_note("annex_pdf_missing", f"annex source {sid}: its PDF {path.name} is missing from {path.parent.name}/ -- add it again in Woodcore's Annexes tab", source=sid))
             opened[sid] = None
@@ -643,11 +747,11 @@ def prepare(here, previous=None):
             note = where["note"]
             record["page"] = where["page"]
             if note is None:
-                name = f"{EXPORT_FOLDER}/{eid}.pdf"
+                name = place.name(f"{eid}.pdf")
                 inputs = _digest(sha, where["page"], where["rect"])
                 kept = previous.get("excerpts", {}).get(eid, {})
-                if kept.get("inputs") == inputs and kept.get("file") == name and (data_dir / name).is_file():
-                    files[name] = (data_dir / name).read_bytes()
+                if kept.get("inputs") == inputs and kept.get("file") == name and place.path(name).is_file():
+                    files[name] = place.path(name).read_bytes()
                 else:
                     files[name] = crop(pdf, where["page"], where["rect"])
                 record.update(resolved=True, title=where["title"], file=name, rect=where["rect"],
@@ -669,11 +773,11 @@ def prepare(here, previous=None):
             else:
                 numbers = []
             if numbers:
-                name = f"{EXPORT_FOLDER}/{sid}-annex.pdf"
+                name = place.name(f"{sid}-annex.pdf")
                 inputs = _digest(sha, numbers)
                 kept = previous.get("sources", {}).get(sid, {}).get("annex") or {}
-                if kept.get("inputs") == inputs and kept.get("file") == name and (data_dir / name).is_file():
-                    files[name] = (data_dir / name).read_bytes()
+                if kept.get("inputs") == inputs and kept.get("file") == name and place.path(name).is_file():
+                    files[name] = place.path(name).read_bytes()
                 else:
                     files[name] = pages_of(pdf, numbers)
                 sizes = []
@@ -682,27 +786,17 @@ def prepare(here, previous=None):
                     sizes.append([round(right - left, 3), round(top_edge - bottom, 3)])
                 record["annex"] = {"file": name, "pages": numbers, "sizes": sizes, "inputs": inputs}
         records["sources"][sid] = record
-    data = {"schema_version": EXPORT_SCHEMA_VERSION, **records}
+    data = {"schema_version": ROOTED_EXPORT_VERSION if place.here is not None else EXPORT_SCHEMA_VERSION, **records}
     validation.validate_structure(data, "annexes")
     validation.validate_annexes_business(data)
     return data, files, notes
 
 
 def write(data, files, data_dir):
-    """The only writer: data/annexes.json and data/annexes/, whatever it no longer needs swept out. A PDF whose bytes have not changed is left alone."""
+    """The only writer: data/annexes.json and the PDFs of the excerpts and the annexes -- Appendix/Exports/ in a project laid out by folders, data/annexes/ otherwise (engine.Figures) --, those it no longer needs removed: only what the last export wrote, never a file of the engineer's. A PDF whose bytes have not changed is left alone."""
     data_dir = Path(data_dir)
+    engine.figures(data_dir, "annex").write(files, previous_export(data_dir))
     engine.write_json(data_dir / EXPORT_FILE, data)
-    target_dir = data_dir / EXPORT_FOLDER
-    target_dir.mkdir(parents=True, exist_ok=True)
-    for name, payload in files.items():
-        target = data_dir / name
-        if target.is_file() and target.read_bytes() == payload:
-            continue
-        target.write_bytes(payload)
-    wanted = {Path(name).name for name in files}
-    for stale in target_dir.iterdir():
-        if stale.is_file() and stale.name not in wanted:
-            stale.unlink()
 
 
 def previous_export(data_dir):

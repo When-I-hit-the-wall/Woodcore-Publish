@@ -3,6 +3,8 @@
 The engineer, 07.10.2026: «pouvoir activer et désactiver le magnétisme dans le volet de droite lorsque rien n'est sélectionné» · «la "Position" possède encore les noms en allemand (e.g. T001 - Träger, Fichte». The window is built once, off-screen, on a copy of the example project (conftest.project_copy); every dialog is stubbed -- a modal off-screen never comes back.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import contextlib
 import os
 import sys

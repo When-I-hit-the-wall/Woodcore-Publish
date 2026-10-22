@@ -9,20 +9,19 @@
 Les flèches sont limitées aux valeurs indicatives de la norme SIA 260, annexe A, tableau 3 ; elles sont déterminées selon les normes SIA 262 à 266. Des valeurs différentes peuvent être convenues en accord avec les exigences d'utilisation, notamment pour les éléments secondaires ; elles sont alors consignées dans la base de projet. [Le maître de l'ouvrage n'émet pas d'exigences plus sévères que celles de la norme : oui / non.]
 // woodcore:/object p1
 
-// woodcore:object doc-table deformation-table
-#doc-table(
-  columns: (
-    (id: "element", title: [Élément]),
-    (id: "criterion", title: [Critère]),
-    (id: "limit", title: [Valeur limite], kind: "math"),
-    (id: "load_case", title: [Cas de charge (SIA 260, tab. 3)]),
-  ),
-  hidden: (),
-  rows: (
-    (element: [Planchers et poutres], criterion: [Éléments incorporés à caractère fragile], limit: [$w <= l \/ 500$], load_case: [rare (20)]),
-    (element: [Planchers et poutres], criterion: [Éléments incorporés à caractère ductile], limit: [$w <= l \/ 350$], load_case: [fréquent (21)]),
-    (element: [Planchers et poutres], criterion: [Utilisation, exploitation et confort (flèche due aux actions variables)], limit: [$w <= l \/ 350$], load_case: [fréquent (21)]),
-    (element: [Planchers et poutres], criterion: [Aspect (après déduction d'une éventuelle contreflèche)], limit: [$w <= l \/ 300$], load_case: [quasi permanent (22)]),
+// woodcore:object table deformation-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, center, left),
+    table.hline(stroke: 1pt),
+    table.header([*Élément*], [*Critère*], [*Valeur limite*], [*Cas de charge (SIA 260, tab. 3)*]),
+    table.hline(stroke: 0.5pt),
+    [Planchers et poutres], [Éléments incorporés à caractère fragile], [$w <= l \/ 500$], [rare (20)],
+    [Planchers et poutres], [Éléments incorporés à caractère ductile], [$w <= l \/ 350$], [fréquent (21)],
+    [Planchers et poutres], [Utilisation, exploitation et confort (flèche due aux actions variables)], [$w <= l \/ 350$], [fréquent (21)],
+    [Planchers et poutres], [Aspect (après déduction d'une éventuelle contreflèche)], [$w <= l \/ 300$], [quasi permanent (22)],
+    table.hline(stroke: 1pt),
   ),
   caption: [Flèches limites],
 )

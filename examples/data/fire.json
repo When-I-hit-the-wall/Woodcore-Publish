@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.0",
+  "schema_version": "2.2",
   "plans": {
     "Pavillon-EG": {
       "name": "Pavillon EG",
@@ -21,9 +21,9 @@
         "text": 1.0
       },
       "figures": {
-        "de": "fire/Pavillon-EG-de.svg",
-        "fr": "fire/Pavillon-EG-fr.svg",
-        "en": "fire/Pavillon-EG-en.svg"
+        "de": "/Plans/Fire-plan/Exports/Figures/Pavillon-EG-de.svg",
+        "fr": "/Plans/Fire-plan/Exports/Figures/Pavillon-EG-fr.svg",
+        "en": "/Plans/Fire-plan/Exports/Figures/Pavillon-EG-en.svg"
       },
       "legend": true,
       "legend_lines": [
@@ -61,7 +61,7 @@
           "key": "exit",
           "text": "Notausgang",
           "term": "Notausgang",
-          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polygon points=\"2.378,2.51 5.556,2.51 5.556,3.75 7.622,1.875 5.556,0 5.556,1.24 2.378,1.24\" fill=\"#009900\" stroke=\"#000000\" stroke-width=\"0.167\"/></svg>"
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polygon points=\"2.378,2.51 5.556,2.51 5.556,3.75 7.622,1.875 5.556,0 5.556,1.24 2.378,1.24\" fill=\"#009900\" stroke=\"#1f1f1f\" stroke-width=\"0.167\"/></svg>"
         },
         {
           "key": "length",
@@ -79,13 +79,13 @@
           "key": "door:swing:EI 30",
           "text": "Türe / Tor EI 30",
           "term": "Türe / Tor EI 30",
-          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polygon points=\"3.125,3.75 6.875,3.75 6.857,3.382 6.803,3.018 6.714,2.661 6.59,2.315 6.432,1.982 6.243,1.667 6.024,1.371 5.777,1.098 5.504,0.851 5.208,0.632 4.893,0.443 4.56,0.285 4.214,0.161 3.857,0.072 3.493,0.018 3.125,0\" fill=\"#ffbf00\" stroke=\"#000000\" stroke-width=\"0.208\" stroke-linejoin=\"round\"/></svg>"
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polygon points=\"3.125,3.75 6.875,3.75 6.857,3.382 6.803,3.018 6.714,2.661 6.59,2.315 6.432,1.982 6.243,1.667 6.024,1.371 5.777,1.098 5.504,0.851 5.208,0.632 4.893,0.443 4.56,0.285 4.214,0.161 3.857,0.072 3.493,0.018 3.125,0\" fill=\"#ffbf00\" stroke=\"#1f1f1f\" stroke-width=\"0.208\" stroke-linejoin=\"round\"/></svg>"
         },
         {
           "key": "door:swing",
           "text": "Türe ohne Feuerwiderstand",
           "engine": "fire.door.swing",
-          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polyline points=\"3.125,3.75 3.125,0 3.493,0.018 3.857,0.072 4.214,0.161 4.56,0.285 4.893,0.443 5.208,0.632 5.504,0.851 5.777,1.098 6.024,1.371 6.243,1.667 6.432,1.982 6.59,2.315 6.714,2.661 6.803,3.018 6.857,3.382 6.875,3.75\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.417\" stroke-linejoin=\"round\"/></svg>"
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polyline points=\"3.125,3.75 3.125,0 3.493,0.018 3.857,0.072 4.214,0.161 4.56,0.285 4.893,0.443 5.208,0.632 5.504,0.851 5.777,1.098 6.024,1.371 6.243,1.667 6.432,1.982 6.59,2.315 6.714,2.661 6.803,3.018 6.857,3.382 6.875,3.75\" fill=\"none\" stroke=\"#1f1f1f\" stroke-width=\"0.417\" stroke-linejoin=\"round\"/></svg>"
         }
       ],
       "zones": [
@@ -149,7 +149,7 @@
       ],
       "plan": "Pavillon",
       "background": {
-        "file": "plans/Pavillon-plan.pdf",
+        "file": "/Plans/Position-plan/Exports/Figures/Pavillon-plan.pdf",
         "format": "pdf",
         "page": 1,
         "opacity": 0.45
@@ -175,9 +175,9 @@
         "text": 1.0
       },
       "figures": {
-        "de": "fire/Treppenhaus-de.svg",
-        "fr": "fire/Treppenhaus-fr.svg",
-        "en": "fire/Treppenhaus-en.svg"
+        "de": "/Plans/Fire-plan/Exports/Figures/Treppenhaus-de.svg",
+        "fr": "/Plans/Fire-plan/Exports/Figures/Treppenhaus-fr.svg",
+        "en": "/Plans/Fire-plan/Exports/Figures/Treppenhaus-en.svg"
       },
       "legend": true,
       "legend_lines": [
@@ -221,7 +221,7 @@
           "key": "exit",
           "text": "Notausgang",
           "term": "Notausgang",
-          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polygon points=\"2.378,2.51 5.556,2.51 5.556,3.75 7.622,1.875 5.556,0 5.556,1.24 2.378,1.24\" fill=\"#009900\" stroke=\"#000000\" stroke-width=\"0.167\"/></svg>"
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polygon points=\"2.378,2.51 5.556,2.51 5.556,3.75 7.622,1.875 5.556,0 5.556,1.24 2.378,1.24\" fill=\"#009900\" stroke=\"#1f1f1f\" stroke-width=\"0.167\"/></svg>"
         },
         {
           "key": "length",
@@ -239,19 +239,19 @@
           "key": "door:swing:EI 30",
           "text": "Türe / Tor EI 30",
           "term": "Türe / Tor EI 30",
-          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polygon points=\"3.125,3.75 6.875,3.75 6.857,3.382 6.803,3.018 6.714,2.661 6.59,2.315 6.432,1.982 6.243,1.667 6.024,1.371 5.777,1.098 5.504,0.851 5.208,0.632 4.893,0.443 4.56,0.285 4.214,0.161 3.857,0.072 3.493,0.018 3.125,0\" fill=\"#ffbf00\" stroke=\"#000000\" stroke-width=\"0.208\" stroke-linejoin=\"round\"/></svg>"
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polygon points=\"3.125,3.75 6.875,3.75 6.857,3.382 6.803,3.018 6.714,2.661 6.59,2.315 6.432,1.982 6.243,1.667 6.024,1.371 5.777,1.098 5.504,0.851 5.208,0.632 4.893,0.443 4.56,0.285 4.214,0.161 3.857,0.072 3.493,0.018 3.125,0\" fill=\"#ffbf00\" stroke=\"#1f1f1f\" stroke-width=\"0.208\" stroke-linejoin=\"round\"/></svg>"
         },
         {
           "key": "door:slide:E 30",
           "text": "Schiebetüre / Schiebetor E 30",
           "term": "Schiebetüre / Schiebetor E 30",
-          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polygon points=\"0,3.75 1.999,2.079 1.999,3.084 10,3.084 10,3.75\" fill=\"#fabafc\" stroke=\"#000000\" stroke-width=\"0.208\" stroke-linejoin=\"round\"/></svg>"
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polygon points=\"0,3.75 1.999,2.079 1.999,3.084 10,3.084 10,3.75\" fill=\"#fabafc\" stroke=\"#1f1f1f\" stroke-width=\"0.208\" stroke-linejoin=\"round\"/></svg>"
         },
         {
           "key": "door:swing",
           "text": "Türe ohne Feuerwiderstand",
           "engine": "fire.door.swing",
-          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polyline points=\"3.125,3.75 3.125,0 3.493,0.018 3.857,0.072 4.214,0.161 4.56,0.285 4.893,0.443 5.208,0.632 5.504,0.851 5.777,1.098 6.024,1.371 6.243,1.667 6.432,1.982 6.59,2.315 6.714,2.661 6.803,3.018 6.857,3.382 6.875,3.75\" fill=\"none\" stroke=\"#000000\" stroke-width=\"0.417\" stroke-linejoin=\"round\"/></svg>"
+          "swatch": "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 10 3.75\" width=\"10mm\" height=\"3.75mm\"><polyline points=\"3.125,3.75 3.125,0 3.493,0.018 3.857,0.072 4.214,0.161 4.56,0.285 4.893,0.443 5.208,0.632 5.504,0.851 5.777,1.098 6.024,1.371 6.243,1.667 6.432,1.982 6.59,2.315 6.714,2.661 6.803,3.018 6.857,3.382 6.875,3.75\" fill=\"none\" stroke=\"#1f1f1f\" stroke-width=\"0.417\" stroke-linejoin=\"round\"/></svg>"
         }
       ],
       "zones": [

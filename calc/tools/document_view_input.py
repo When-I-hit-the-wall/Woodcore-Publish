@@ -26,6 +26,8 @@ def _rounded(values):
 class PageAreaInputMixin:
     """Methods of document_view.PageArea, moved verbatim (issue #30): the class names this mixin among its bases."""
 
+    ZOOMS_ITSELF = True   # Ctrl+wheel zooms the pages, never the interface (nowheel.py, issue #85)
+
     def content_point(self, event):
         return event.position() + self.scroll()
 

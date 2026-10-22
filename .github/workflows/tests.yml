@@ -4,7 +4,7 @@
 #
 # Red when the runner exits with 1: a test failed, or a full run skipped more than MAX_SKIPPED (tests/run_tests.py's exit_code). The tests of time (PERF = True, `--perf`) do not run here: a shared runner is no measure of a start. The time of every file (`--times`) is kept as an artifact of the job, to follow what the suite costs.
 #
-# Linux at every push and pull request; Windows -- the engineer's platform, and the installer's -- on the default branch only, its minutes costing double. Only the actions GitHub itself publishes, each pinned by the commit of the release it names (tests/test_ci_workflow.py, as tests/test_site.py for site.yml); the token may only read, and no secret is used.
+# Linux, the whole suite, at every push and pull request. Windows -- the engineer's platform, and the installer's -- at every push and pull request too, but the fast tier only (`--fast`, TIER = "fast": the engine, the norms, the contracts, the export), its minutes costing double; the whole suite on Windows at a push to the default branch (spec 2026-10-19-base-saine-nettoyage, REQ-006: two defects of 19.10.2026 were Windows' alone, line endings the Ubuntu job could not see). Only the actions GitHub itself publishes, each pinned by the commit of the release it names (tests/test_ci_workflow.py, as tests/test_site.py for site.yml); the token may only read, and no secret is used.
 
 name: tests
 
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
-          python-version: "3.13"
+          python-version: "3.14"
           cache: pip
           cache-dependency-path: requirements.txt
       - name: Typst from the cache
@@ -55,14 +55,13 @@ jobs:
           if-no-files-found: ignore
 
   windows:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: windows-2025
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
-          python-version: "3.13"
+          python-version: "3.14"
           cache: pip
           cache-dependency-path: requirements.txt
       - name: Typst from the cache
@@ -75,7 +74,9 @@ jobs:
       - name: Run the tests
         shell: bash
         run: |
-          python tests/run_tests.py --times 2>&1 | tee test-times.txt
+          tier="--fast"
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/master" ]; then tier=""; fi
+          python tests/run_tests.py --times $tier 2>&1 | tee test-times.txt
           exit "${PIPESTATUS[0]}"
       - name: Keep the times
         if: always()

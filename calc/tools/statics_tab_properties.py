@@ -25,7 +25,6 @@ from statics_tab_build import (  # split out of this module (issue #30): every n
     SWATCH_INK,
     TOOL_GROUPS,
     _as_number,
-    _canvas,
     _fix_direction,
     _fix_kind,
     _fix_shape,

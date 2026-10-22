@@ -3,6 +3,8 @@
 What is held here: a task's result reaches the window's thread and only there; the loop keeps turning while it runs; an exception becomes a critical notice, not a box and not silence; a result made stale by a later task of the same key is not used; two tasks that write into the project never run at once; a blocking task holds the window with the card and lets it go.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import os
 import sys
 import threading

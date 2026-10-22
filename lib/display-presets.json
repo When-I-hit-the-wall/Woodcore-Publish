@@ -1,0 +1,216 @@
+{
+  "schema_version": "1.1",
+  "_comment": "What each level of detail sets of the fine display arguments of #var, #eq, #verify and #domain (spec docs/requirements/completed/2026-10-21-commandes-typst-refonte.md, REQ-007, ARCH-001). A level is a preset and nothing more: an argument the call writes wins over it, and lib/formula.typ's resolve-display reads the layers in the engineer's order -- the call's argument, the call's level, #calc-defaults of the domain, the domain's level, #calc-defaults of the document, the document's level; --input uniform=N alone overrides the arguments written (Q-005). Each level reproduces what the command printed at that level before the fine arguments existed, so a call written before them prints as it did. Read by Typst alone; tests/test_fine_display.py holds it complete and equal to the table of docs/typst/formulas.md. Since 1.1 a second family, `block` (spec Q-014, 21.10.2026): the same visibility at each level, the label after the line and the citation in the right-hand column, the line set apart -- what `note: \"line\"` printed, chosen for a domain by `#calc-defaults(presets: \"block\", scope: \"domain\")`, which a generated file writes once at its head; `commands` is the default family, `inline`.",
+  "commands": {
+    "var": {
+      "0": {
+        "display": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display": "variable-value-unit",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display": "variable-value-unit",
+        "label-position": "footnote",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display": "variable-value-unit",
+        "label-position": "footnote",
+        "descr-position": "footnote",
+        "norm-position": "footnote"
+      }
+    },
+    "eq": {
+      "0": {
+        "display-formula": "none",
+        "display-equation": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display-formula": "none",
+        "display-equation": "variable-value-unit",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display-formula": "variable",
+        "display-equation": "variable-value-unit",
+        "label-position": "footnote",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display-formula": "variable-value-unit",
+        "display-equation": "variable-value-unit",
+        "label-position": "footnote",
+        "descr-position": "footnote",
+        "norm-position": "footnote"
+      }
+    },
+    "verify": {
+      "0": {
+        "display": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display": "variable",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display": "value-unit",
+        "label-position": "footnote",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display": "variable-value-unit",
+        "label-position": "footnote",
+        "descr-position": "footnote",
+        "norm-position": "footnote"
+      }
+    },
+    "domain": {
+      "0": {
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "label-position": "before",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "label-position": "before",
+        "descr-position": "after",
+        "norm-position": "none"
+      },
+      "3": {
+        "label-position": "before",
+        "descr-position": "after",
+        "norm-position": "line-right"
+      }
+    }
+  },
+  "block": {
+    "var": {
+      "0": {
+        "display": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display": "variable-value-unit",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display": "variable-value-unit",
+        "label-position": "after",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display": "variable-value-unit",
+        "label-position": "after",
+        "descr-position": "footnote",
+        "norm-position": "line-right"
+      }
+    },
+    "eq": {
+      "0": {
+        "display-formula": "none",
+        "display-equation": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display-formula": "none",
+        "display-equation": "variable-value-unit",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display-formula": "variable",
+        "display-equation": "variable-value-unit",
+        "label-position": "after",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display-formula": "variable-value-unit",
+        "display-equation": "variable-value-unit",
+        "label-position": "after",
+        "descr-position": "footnote",
+        "norm-position": "line-right"
+      }
+    },
+    "verify": {
+      "0": {
+        "display": "none",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "display": "variable",
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "display": "value-unit",
+        "label-position": "after",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "3": {
+        "display": "variable-value-unit",
+        "label-position": "after",
+        "descr-position": "footnote",
+        "norm-position": "line-right"
+      }
+    },
+    "domain": {
+      "0": {
+        "label-position": "none",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "1": {
+        "label-position": "before",
+        "descr-position": "none",
+        "norm-position": "none"
+      },
+      "2": {
+        "label-position": "before",
+        "descr-position": "after",
+        "norm-position": "none"
+      },
+      "3": {
+        "label-position": "before",
+        "descr-position": "after",
+        "norm-position": "line-right"
+      }
+    }
+  }
+}

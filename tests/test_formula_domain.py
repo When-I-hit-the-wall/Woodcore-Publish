@@ -2,10 +2,10 @@
 
 What is held, requirement by requirement:
 
-* REQ-005, REQ-014 (v0.117) and REQ-005, D-06, D-10 (issue #15) -- a domain is one `#var-domain("<id>", title: "<name>")`, printed by `#include "/Formules/<id>.typ"` with its title as a heading, and read further down with `#val(domain: "<id>")`;
+* REQ-005, REQ-014 (v0.117) and REQ-005, D-06, D-10 (issue #15) -- a domain is one `#domain("<id>", label: "<name>")`, printed by `#include "/Domains/<id>.typ"` with its title as a heading, and read further down with `#val(domain: "<id>")`;
 * REQ-006 (issue #15) -- the engineer's own Typst between the commands, read back as typed, never computed; what Typst would compute and Python not, a tag line and unbalanced brackets refused before anything is written;
-* REQ-004 (issue #15) -- the id is the file's name: an id changed renames the file and rewrites `#var-domain`, what cites the old one is listed; another id than the file's name is `hand_edited`; a duplicate, an archive numbered rather than overwritten, a restore;
-* REQ-006, ARCH-004, D-20 -- the file written reads back to the same model and the same bytes (`canonical`), a file written by hand in another form is `hand_edited`, one that does not parse `unreadable`; a write changes the body between the tags and nothing else; the tags are read by `structure.pair_tags`, and the ten commands of a document still refuse a positional argument;
+* REQ-004 (issue #15) -- the id is the file's name: an id changed renames the file and rewrites `#var-domain`, what cites the old one is listed; another id than the file's name is `misnamed`; a duplicate, an archive numbered rather than overwritten, a restore;
+* REQ-006, ARCH-004, D-20 -- the file written reads back to the same model and the same bytes (`canonical`), a file written by hand in another form is `canonical` all the same and kept as written (since v0.119, ARCH-003 -- no state is `hand_edited` any more), one that does not parse `unreadable`; a write changes the body between the tags and nothing else; the tags are read by `structure.pair_tags`, and the ten commands of a document still refuse a positional argument;
 * REQ-007, ARCH-003 -- a variable's call writes only what differs from the signature;
 * REQ-008 -- a key made from the shown variable;
 * REQ-009, D-17 -- `12 N / 3000 mm` typed is `(12 "N") / (3000 "mm")`, 4 N/m, and its output unit; an unknown unit refused;
@@ -15,10 +15,14 @@ What is held, requirement by requirement:
 * the export: the index (2.0, by id), sorted, validated, seeded empty in a new project; two files declaring one `#var-domain`, and a file that cannot be read, stop it.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
+import os
 import re
 import shutil
 import subprocess
+from pathlib import Path
 
 import conftest
 from conftest import Skip
@@ -90,14 +94,14 @@ def test_twelve_newtons_over_three_metres_or_three_thousand_millimetres_is_four_
 def test_the_file_reads_back_to_the_same_model_and_the_same_bytes():
     domain = _domain()
     text = fd.file_text(domain)
-    blocks, problems = structure.pair_tags(text, object_types=(fd.TAG_TYPE,))
-    assert not problems and len(blocks) == 1 and blocks[0].type == fd.TAG_TYPE
+    # no tag since the unfolded checks (spec 2026-10-15, ARCH-006): the #var-domain call is what the file is found by
+    assert "// woodcore:" not in text
     d = conftest.tmpdir("formula_file")
     path = d / "poutre-p1.typ"
     path.write_text(text, encoding="utf-8", newline="")
     read = fd.read(path)
     assert read.state == "canonical" and read.name == "Poutre P1" and read.id == read.declared == "poutre-p1", (read.state, read.problem)
-    assert text.splitlines()[3] == '#var-domain("poutre-p1", title: "Poutre P1")['
+    assert text.splitlines()[2] == '#domain("poutre-p1", label: "Poutre P1")['
 
     assert [(c.kind, c.key, c.symbol, c.value, c.unit, c.formula, c.options) for c in read.commands] == \
            [(c.kind, c.key, c.symbol, c.value, c.unit, c.formula, c.options) for c in domain.commands]
@@ -109,7 +113,7 @@ def test_the_file_reads_back_to_the_same_model_and_the_same_bytes():
 
 def test_the_example_project_s_domain_reads_back_to_its_own_bytes():
     """REQ-006's criterion: the example's domain, written with no text between its commands, reads back canonical and is written back byte for byte."""
-    path = conftest.ROOT / "tests" / "projet-exemple" / "Formules" / "poutre-p1.typ"
+    path = conftest.ROOT / "tests" / "projet-exemple" / "Domains" / "poutre-p1.typ"
     read = fd.read(path)
     assert read.state == "canonical" and read.id == read.declared == "poutre-p1" and read.name == "Poutre P1", (read.state, read.problem)
     assert fd.write_text(read) == path.read_bytes().decode("utf-8")
@@ -130,10 +134,11 @@ def test_a_blank_line_beside_a_command_is_a_paragraph_and_is_kept():
     assert read.state == "canonical", (read.state, read.problem)
     assert [(c.kind, c.raw) for c in read.commands if c.is_text] == [(fd.TEXT, "Kraft"), (fd.TEXT, "\nNeuer Absatz\n"), (fd.TEXT, "")]
     assert fd.write_text(read) == text
-    # two blank lines are one paragraph: said as written by hand, written back with one
-    path.write_text(text.replace('"kN")\n\nNeuer', '"kN")\n\n\nNeuer'), encoding="utf-8", newline="")
+    # two blank lines, written by hand: kept as written -- a form of the engineer's own is no longer rewritten (spec 2026-10-15, D-17, which reverses issue #40's «written back with one»)
+    hand = text.replace('"kN")\n\nNeuer', '"kN")\n\n\nNeuer')
+    path.write_text(hand, encoding="utf-8", newline="")
     read = fd.read(path)
-    assert read.state == "hand_edited" and fd.write_text(read) == text
+    assert read.state == "canonical" and fd.write_text(read) == hand
     # the tidy form of what a tab hands over: no blank at the body's ends, two texts in a row one, an empty text only between two commands
     tidy = fd.tidy_items([fd.Command(fd.TEXT, raw="\n\nA\n"), fd.Command(fd.TEXT, raw="B\n\n\n"), fd.Command("var", key="F", value=1),
                           fd.Command(fd.TEXT, raw="\n\n"), fd.Command(fd.TEXT, raw="")])
@@ -151,7 +156,7 @@ def test_plain_spans_names_the_lines_a_command_may_stand_on():
 
 def _layout_case():
     F = fd.Command("var", key="F", value=5, unit="kN")
-    G = fd.Command("var", key="G", value=2, unit="kN", options={"note": "line"})
+    G = fd.Command("var", key="G", value=2, unit="kN", options={"label": "Gewicht"})
     M = fd.Command("eq", key="M", formula="F * 2")
     V = fd.Command("verify", formula="M <= F")
     return F, G, M, V
@@ -165,7 +170,7 @@ def test_the_pane_joins_a_command_printed_inline_into_its_sentence_and_reads_bac
              fd.Command(fd.TEXT, raw="\nNeuer Absatz"), G, fd.Command(fd.TEXT, raw="Satz $a +\nb$ Ende"), V, fd.Command(fd.TEXT, raw="Schluss")]
     paragraphs = fl.to_paragraphs(items)
     shape = [[v if k == "text" else "#" + v.key for k, v in p] for p in paragraphs]
-    assert shape == [["= Titre"], ["Kraft ", "#F", " und danach ", "#M"], ["Neuer Absatz"], ["#G"], ["Satz $a +"], ["b$ Ende"], ["#", " Schluss"]], shape
+    assert shape == [["= Titre"], ["Kraft ", "#F", " und danach ", "#M"], ["Neuer Absatz ", "#G"], ["Satz $a +"], ["b$ Ende"], ["#", " Schluss"]], shape
     back = fl.from_paragraphs(paragraphs)
     assert [(c.kind, c.raw) for c in back] == [(c.kind, c.raw) for c in fd.tidy_items(items)], [(c.kind, c.raw) for c in back]
     assert fl.to_paragraphs(back) == paragraphs
@@ -176,44 +181,10 @@ def test_the_pane_joins_a_command_printed_inline_into_its_sentence_and_reads_bac
     assert fl.to_paragraphs(written) == [[("text", "Kraft")], [("cmd", F), ("text", " und")]]
     # two pills side by side are one sentence, a space between them; the v0.117 example reads into paragraphs and back unchanged
     assert fl.to_paragraphs([F, M]) == [[("cmd", F), ("text", " "), ("cmd", M)]]
-    example = fd.read(conftest.ROOT / "tests" / "projet-exemple" / "Formules" / "poutre-p1.typ")
-    assert fd.body_of(fd.Domain(id=example.id, name=example.name, commands=fl.from_paragraphs(fl.to_paragraphs(example.commands)))) == fd.body_of(example)
-
-
-def test_where_a_pill_stands_follows_note_and_the_signature():
-    """REQ-002, D-03, ARCH-002 (issue #40): inline unless `note: "line"` on a `var`, `var-unit` or `eq`; `val` and `verify` never leave their sentence; a call that leaves `note:` out takes the signature's default, read and not copied."""
-    from domains import formula_layout as fl
-    from tools import build_reference as ref
-    F, G, M, V = _layout_case()
-    assert [fl.placement(c) for c in (F, G, M, V)] == ["inline", "line", "inline", "inline"]
-    assert fl.placement(fd.Command("val", key="F", options={"note": "line"})) == "inline"
-    assert fl.placement(fd.Command("var-unit", key="F", unit="N", options={"note": "line"})) == "line"
-    original = ref.signature_defaults
-    try:
-        ref.signature_defaults = lambda kind: {**original(kind), "note": '"line"'}
-        assert fl.placement(F) == "line", "the default is the signature's"
-    finally:
-        ref.signature_defaults = original
-
-
-def test_the_commands_that_leave_their_line_are_those_typst_prints_apart():
-    """ARCH-RISK-001 (issue #40): formula_layout.NOTE_LINE says which commands `note: "line"` sets on a line of their own; compiled, `Avant #cmd(…, note: "line") Après` breaks the line for those and only those -- `#val`'s and `#verify` never."""
-    from domains import formula_layout as fl
-    from pypdf import PdfReader
-    calls = {"var": '#var("F", 5, "kN"{note})', "var-unit": '#var("F", 5, "kN", level: 0)\nAvant #var-unit("F", "N"{note}) Apres',
-             "eq": '#eq("M", `2 * 3`{note})', "val": '#var("F", 5, "kN", level: 0)\nAvant #val("F"{note}) Apres', "verify": '#verify(`2 <= 3`)'}
-    for kind, call in calls.items():
-        for note in (("",) if kind == "verify" else ("", ', note: "line"')):
-            source = call.format(note=note)
-            if "Avant" not in source:
-                source = "Avant " + source + " Apres"
-            r, pages = _compile(f"formula_apart_{kind}_{bool(note)}", source + "\n", "pdf")
-            assert r.returncode == 0, r.stderr
-            text = PdfReader(str(pages[0])).pages[0].extract_text()
-            first = next(line for line in text.splitlines() if "Avant" in line)
-            apart = "Apres" not in first
-            expected = fl.placement(fd.Command(kind, options={"note": "line"} if note else {})) == "line"
-            assert apart == expected, (kind, note, text)
+    example = fd.read(conftest.ROOT / "tests" / "projet-exemple" / "Domains" / "poutre-p1.typ")
+    # the body below its header: a domain made anew writes `#domain` (spec 2026-10-21-commandes-typst-refonte, REQ-008), the example's file keeps the `#var-domain` it was written with
+    rebuilt = fd.body_of(fd.Domain(id=example.id, name=example.name, commands=fl.from_paragraphs(fl.to_paragraphs(example.commands))))
+    assert rebuilt.split("\n", 1)[1] == fd.body_of(example).split("\n", 1)[1]
 
 
 def test_a_pill_is_refused_where_it_would_change_the_text_or_its_reading():
@@ -231,31 +202,78 @@ def test_a_pill_is_refused_where_it_would_change_the_text_or_its_reading():
     assert fl.drop_refusal(paragraphs, (3, 0, 7)) is None, "quotes in markup are words, not a string"
 
 
-def test_a_file_written_by_hand_is_said_and_one_that_cannot_be_read_is_never_rewritten():
+def test_a_file_written_by_hand_is_kept_as_written_and_one_that_cannot_be_read_is_never_rewritten():
+    """ARCH-003, ARCH-006, D-17 (spec 2026-10-15, reversing issue #15's canonical rewrite): a domain written by hand -- a call's spaces, a comment after it, an argument over two lines, CRLF, a word before the call, the tag of the old files -- is read as it is and written back byte for byte; changing a command changes the arguments that changed and nothing else -- an option changed, added or taken away in a call over two lines included. A file whose call cannot be read is never rewritten."""
     d = conftest.tmpdir("formula_hand")
-    text = fd.file_text(_domain()).replace('  #var("l", 5, "m")', '  #var( "l" ,  5, "m")  // the span')
-    crlf = text.replace("\n", "\r\n").replace("// woodcore:object", "// a word of the engineer's\r\n// woodcore:object")
-    path = d / "a.typ"
+    text = fd.file_text(_domain()).replace('  #var("l", 5, "m")', '  #var( "l" ,  5, "m")  // the span').replace(
+        '  #var("q_d", 4.5, "kN/m", label: "Charge")', '  #var("q_d", 4.5, "kN/m",\n       label: "Charge")')
+    assert '"kN/m",\n       label' in text
+    # an old file: a word of the engineer's and the tag around the call, CRLF
+    old = text.replace('#domain(', '// a word of the engineer\'s\n// woodcore:object formula-domain domain\n#domain(', 1) + "// woodcore:/object domain\n"
+    crlf = old.replace("\n", "\r\n")
+    path = d / "poutre-p1.typ"   # its own id: a file named otherwise is the one case still written back (another id than its file's name)
     path.write_bytes(crlf.encode("utf-8"))
     read = fd.read(path)
-    assert read.state == "hand_edited" and len([c for c in read.commands if not c.is_text]) == 5, (read.state, read.problem)
-    written = fd.write_text(read)
-    assert "// the span" in written, "the engineer's comment after a call was lost"
-    assert "// a word of the engineer's\r\n" in written and "\r\n" in written and "\n" not in written.replace("\r\n", ""), "the bytes outside the body were not kept"
-    assert '#var("l", 5, "m")' in written
+    assert read.state == "canonical" and len([c for c in read.commands if not c.is_text]) == 5, (read.state, read.problem)
+    assert fd.STATES == ("canonical", "misnamed", "unreadable"), "a form of the engineer's own is no state any more (ARCH-006)"
+    assert fd.write_text(read) == crlf, "a domain written back unchanged changed its file"
+    # one value changed: that value alone is replaced -- the call's spaces and its comment stay (ARCH-003)
+    changed = [fd.replace(c, value=6) if c.key == "l" else c for c in read.commands]
+    written = fd.write_text(fd.replace(read, commands=changed))
+    assert written == crlf.replace('  #var( "l" ,  5, "m")  // the span', '  #var( "l" ,  6, "m")  // the span'), written
+    assert '#var("q_d", 4.5, "kN/m",\r\n       label: "Charge")' in written, "a call written over two lines and not changed was rewritten"
+    # in a call over two lines: an option changed, one added and one taken away -- each argument alone, the line break kept
+    q = next(c for c in read.commands if c.key == "q_d")
+    for options, line in (({"label": "Last"}, '  #var("q_d", 4.5, "kN/m",\r\n       label: "Last")'),
+                          ({"label": "Charge", "role": "result"}, '  #var("q_d", 4.5, "kN/m",\r\n       label: "Charge", role: "result")'),
+                          ({}, '  #var("q_d", 4.5, "kN/m")')):
+        changed = [fd.replace(c, options=options) if c is q else c for c in read.commands]
+        written = fd.write_text(fd.replace(read, commands=changed))
+        assert written == crlf.replace('  #var("q_d", 4.5, "kN/m",\r\n       label: "Charge")', line), (options, written)
+        assert '#var( "l" ,  5, "m")  // the span' in written
     broken = d / "b.typ"
     broken.write_text(fd.file_text(_domain()).replace("#verify(`M_d <= M_Rd`)", "#verify(`M_d <= M_Rd`"), encoding="utf-8")
     read = fd.read(broken)
     assert read.state == "unreadable" and read.problem
+    # no tag at all: read as any domain
     untagged = d / "c.typ"
-    untagged.write_text('#var-domain("X")[]\n', encoding="utf-8")
-    assert fd.read(untagged).state == "unreadable"
+    untagged.write_text('#domain("c")[]\n', encoding="utf-8")
+    assert fd.read(untagged).state == "canonical"
+    # no call: unreadable, and never rewritten
+    empty = d / "e.typ"
+    empty.write_text('Nothing here\n', encoding="utf-8")
+    assert fd.read(empty).state == "unreadable"
     try:
-        fd.write_text(fd.Domain("c", "X", [], path=untagged, text=untagged.read_text(encoding="utf-8")))
+        fd.write_text(fd.Domain("e", "X", [], path=empty, text=empty.read_text(encoding="utf-8")))
     except fd.DomainError as exc:
         assert exc.code == "unreadable"
     else:
-        raise AssertionError("a file whose tags cannot be read was rewritten")
+        raise AssertionError("a file with no #domain call was rewritten")
+
+
+def test_a_value_beside_domain_is_read_and_written_back():
+    """REQ-001, REQ-003, D-14 on the Python side: `#var(key, value, unit, domain: …)` reads as a literal checked by domain: -- its value computed with, written back as it was --; an unfolded check's header carries `gen:` and its check's id as it is (`ZT-01`)."""
+    d = conftest.tmpdir("formula_unfolded")
+    path = d / "ZT-01.typ"
+    path.write_text('#import "/000-Typst-Config/commands.typ": *\n\n#domain("ZT-01", label: "Zug")[\n'
+                    '  #var("N_t_d", "N_(t,d)", 25, "kN", domain: ("check", "ZT-01"))\n  #var("A", 20000, "mm²")\n'
+                    '  #eq("sigma", `N_t_d / A`, unit: "N/mm²")\n  #verify(`sigma <= 9 "N/mm²"`, id: "v-6")\n]\n', encoding="utf-8", newline="\n")
+    read = fd.read(path)
+    assert read.state == "canonical", (read.state, read.problem)
+    n = read.commands[0]
+    assert (n.value, n.unit, n.source) == (25, "kN", ("domain", ("check", "ZT-01")))
+    assert fd.to_call(n) == '#var("N_t_d", "N_(t,d)", 25, "kN", domain: ("check", "ZT-01"))'
+    assert read.commands[3].options == {"id": "v-6"}
+    assert abs(fd.compute(read)[2].value - 1.25) < 1e-9, "a literal beside domain: is computed with as written"
+    assert fd.write_text(read) == path.read_text(encoding="utf-8")
+    assert fd.header_of(read) == '#domain("ZT-01", label: "Zug")['
+    fd.check_id("ZT-01", [], unfolded=True)
+    try:
+        fd.check_id("ZT-01", [])
+    except fd.DomainError as exc:
+        assert exc.code == "id_invalid"
+    else:
+        raise AssertionError("a check's id was taken for a hand-written domain's")
 
 
 def test_a_file_changed_on_the_disk_since_it_was_read_is_never_written_over():
@@ -334,7 +352,7 @@ def test_a_variable_taken_from_elsewhere_reads_its_value_there_and_a_circle_is_r
 
 # --- the engineer's own Typst between the commands (REQ-006, issue #15) ----------------------------
 
-_TEXT_BODY = """#var-domain("x", title: "Essai")[
+_TEXT_BODY = """#domain("x", label: "Essai")[
 = Titre
 La charge :
   #var("F", 5, "kN")
@@ -352,9 +370,9 @@ Le moment #val("F") vaut.
 def test_text_between_the_commands_reads_back_as_typed_and_is_never_computed():
     declared, title, items = fd.parse_body(_TEXT_BODY)
     assert (declared, title) == ("x", "Essai")
-    assert [c.kind for c in items] == ["text", "var", "text", "eq", "text", "val"]
+    assert [c.kind for c in items] == ["text", "var", "text", "eq", "text"]
     assert items[0].raw == "= Titre\nLa charge :"
-    # a `#val` in a sentence, a `#var` inside a raw block: text, as Typst reads them
+    # a `#val` in a sentence -- a command retired, the export says (REQ-020) -- and a `#var` inside a raw block: text, as Typst reads them
     assert '#val("F") vaut' in items[2].raw and '#var("Z", 1)' in items[2].raw
     domain = fd.Domain(id="x", name="Essai", commands=items)
     assert fd.body_of(domain) == _TEXT_BODY, "a body with text did not write back to its own bytes"
@@ -369,8 +387,9 @@ def test_text_between_the_commands_reads_back_as_typed_and_is_never_computed():
 
 
 def test_what_a_text_may_not_hold_is_refused_and_nothing_is_written():
+    # a computing command typed into a text of the pane is refused there: the pane makes it a pill
     for bad, code in (('Texte #var("Q", 1)', "text_command"), ("$ #eq(\"A\", `1`) $", "text_command"),
-                      ('#var("Q", 1) ;', "text_trailing"), ('  #eq("A", `1`) , suite', "text_trailing"),
+                      ('#var("Q", 1) ;', "text_command"), ('#box[#var("Q", 1)]', "text_command"),
                       ("// woodcore:object x y", "text_tag"), ("texte ] fin", "text_unbalanced")):
         domain = fd.Domain(id="x", name="E", commands=[fd.Command("text", raw=bad)])
         try:
@@ -379,33 +398,104 @@ def test_what_a_text_may_not_hold_is_refused_and_nothing_is_written():
             assert exc.code == code, (bad, exc.code)
         else:
             raise AssertionError(f"{bad!r} was written")
-    # a hand-written file holding a computing command in a text cannot be read: Typst and Python would disagree
+    # a hand-written file holding a computing command Python cannot cut out of its text cannot be read: Typst and Python would disagree
     d = conftest.tmpdir("formula_text_bad")
     path = d / "x.typ"
-    path.write_text(fd.file_text(fd.Domain(id="x", name="E")).replace('[\n]', '[\nTexte #eq("A", `1`) ici\n]'), encoding="utf-8")
-    assert fd.read(path).state == "unreadable"
-    # the commonest of them, `#var(...) ;`, is said for what it is: the «;» after the call
+    for held in ('Texte #box[#eq("A", `1`)] ici', '#var("A", 1)[x]', '#var("A", 1).x', '$ #var("A", 1) $'):
+        path.write_text(fd.file_text(fd.Domain(id="x", name="E")).replace('[\n]', '[\n' + held + '\n]'), encoding="utf-8")
+        read = fd.read(path)
+        assert read.state == "unreadable" and "#" in read.problem, (held, read.state)
+    # `#var(...) ;`, refused until spec 2026-10-14-commandes-en-ligne-domaine (`text_trailing`), is a command glued to the text after it
     path.write_text(fd.file_text(fd.Domain(id="x", name="E")).replace('[\n]', '[\n  #var("b", 208, "mm") ;\n  #var("t", 8.5, "mm")\n]'), encoding="utf-8")
     read = fd.read(path)
-    assert read.state == "unreadable" and "';'" in read.problem and '#var("b", 208, "mm") ;' in read.problem, read.problem
-    assert '#var(..., sep: ";")' in read.problem, "the refusal does not name the argument that replaces the «;»"
-    # written as the argument it is (spec 2026-10-11-argument-sep-var), it reads back as Woodcore's own and is written again to the same bytes
-    written = fd.file_text(fd.Domain(id="x", name="E")).replace('[\n]', '[\n  #var("b", 208, "mm", sep: ";")\n  #var("t", 8.5, "mm")\n  #eq("c", `b*t`, sep: ",")\n]')
-    path.write_text(written, encoding="utf-8", newline="")
+    assert read.state == "canonical" and [(c.kind, c.raw, c.glued_after) for c in read.commands] == [("var", "", True), ("text", " ;", False), ("var", "", False)], (read.state, read.problem)
+
+
+# --- commands written inside a line (spec 2026-10-14-commandes-en-ligne-domaine) ---------------------
+
+_INLINE_BODY = """#domain("x", label: "Inline")[
+  #var("b", 2, "m")
+
+  #var("ak", 3, "kN/m") --- Auflast
+
+- $0°$ bis $30°$: #eq("g_1", "g_(d,1)", `b*ak`)
+    - Unter: #var("c", "c_(pe)", -1) $=>$ au besoin
+Zwei: #var("x1", 1) #var("x2", 2) Ende
+]"""
+
+
+def test_a_command_written_inside_a_line_is_read_computed_and_written_back_on_its_line():
+    """REQ-001, REQ-003, D-02: a computing command after a list's marker, before a text, or two on one line is a command, glued to what is beside it; it is computed, and the file is written back to its own bytes -- the command still in its list's item."""
+    items = fd.split_items(_INLINE_BODY[_INLINE_BODY.index("[") + 1:-1])
+    shape = [(c.kind, c.raw) if c.is_text else (c.key, c.glued_before, c.glued_after) for c in items]
+    assert shape == [("b", False, False), ("text", ""), ("ak", False, True), ("text", " --- Auflast\n\n- $0°$ bis $30°$: "),
+                     ("g_1", True, False), ("text", "    - Unter: "), ("c", True, True), ("text", " $=>$ au besoin\nZwei: "),
+                     ("x1", True, True), ("text", " "), ("x2", True, True), ("text", " Ende")], shape
+    domain = fd.Domain(id="x", name="Inline", commands=items)
+    assert fd.body_of(domain) == _INLINE_BODY, fd.body_of(domain)
+    results = fd.compute(domain)
+    g = results[[c.key for c in items].index("g_1")]
+    assert (g.value, g.error) == (6, ""), g
+    path = conftest.tmpdir("formula_inline") / "x.typ"
+    path.write_text(fd.file_text(domain), encoding="utf-8", newline="")
     read = fd.read(path)
-    assert read.state == "canonical" and [c.options.get("sep") for c in read.commands if not c.is_text] == [";", None, ","], (read.state, read.problem)
-    assert fd.write_text(read) == written
+    assert read.state == "canonical", (read.state, read.problem)
+    assert fd.write_text(read) == path.read_text(encoding="utf-8")
+    # an option changed on a glued command keeps it on its line; one moved to a line of its own is written there
+    read.commands[2].options["label"] = "Auflast"
+    assert '  #var("ak", 3, "kN/m", label: "Auflast") --- Auflast\n' in fd.write_text(read)
+    read.commands[2].glued_after = False
+    assert '  #var("ak", 3, "kN/m", label: "Auflast")\n --- Auflast\n' in fd.write_text(read)
+
+
+def test_the_pane_keeps_a_command_written_inside_a_line_in_its_paragraph():
+    """UI-001, D-02: the pane shows a glued command in the paragraph of the text beside it -- a list's item included, which `_joins` alone would part -- and its paragraphs give back the same items; a glued command moved to the start of a paragraph is glued to nothing before it."""
+    from domains import formula_layout as fl
+    items = fd.split_items(_INLINE_BODY[_INLINE_BODY.index("[") + 1:-1])
+    paragraphs = fl.to_paragraphs(items)
+    shape = [[v if k == "text" else "#" + v.key for k, v in p] for p in paragraphs]
+    assert shape == [["#b"], ["#ak", "  --- Auflast"], [], ["- $0°$ bis $30°$:  ", "#g_1"], ["    - Unter:  ", "#c", "  $=>$ au besoin"],
+                     ["Zwei:  ", "#x1", "   ", "#x2", "  Ende"]], shape
+    back = fl.from_paragraphs(paragraphs)
+    assert [fd.item_key(c) for c in back] == [fd.item_key(c) for c in items]
+    c = next(i for i in items if i.key == "c")
+    moved = fl.from_paragraphs(paragraphs[:4] + [[("text", "    - Unter:")], [("cmd", c), ("text", "  $=>$ au besoin")]] + paragraphs[5:])
+    assert not c.glued_before and c.glued_after
+    assert "    - Unter:\n  #var(\"c\", \"c_(pe)\", -1) $=>$ au besoin\n" in fd.body_of(fd.Domain(id="x", name="Inline", commands=moved))
+
+
+def test_a_project_whose_domains_hold_commands_inside_lines_exports():
+    """REQ-002: the export (formula_domain.prepare) reads such a domain -- the `export_failed` of one of the engineer's projects, 14.10.2026 --, and that project's domains folder, where `WOODCORE_INLINE_DOMAINS` names it on this machine, reads its every domain on a copy (CON-002). The folder is named by the environment, never written here: the repository names none of the engineer's projects (tests/test_no_third_party_name.py)."""
+    here = conftest.project_copy("formula_inline_export", data=True)
+    folder = here.formulas_dir
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "x.typ").write_text(fd.file_text(fd.Domain(id="x", name="Inline", commands=fd.split_items(_INLINE_BODY[_INLINE_BODY.index("[") + 1:-1]))), encoding="utf-8")
+    data, _notes = fd.prepare(here)
+    assert "x" in data["domains"], data
+    named = os.environ.get("WOODCORE_INLINE_DOMAINS")
+    dome = Path(named) if named else None
+    if dome is None or not dome.is_dir():
+        return
+    copy = conftest.tmpdir("formula_inline_dome")
+    for f in sorted(dome.glob("*.typ")):
+        shutil.copy(f, copy / f.name)
+        read = fd.read(copy / f.name)
+        assert read.state != "unreadable", (f.name, read.problem)
+        written = fd.write_text(read)
+        (copy / f.name).write_text(written, encoding="utf-8", newline="")
+        again = fd.read(copy / f.name)
+        assert [fd.item_key(c) for c in again.commands] == [fd.item_key(c) for c in read.commands] and fd.write_text(again) == written, f.name
 
 
 # --- the id is the file's name (REQ-004, issue #15) -------------------------------------------------
 
-def test_another_id_than_the_file_s_name_is_hand_edited_and_written_back_under_its_own():
+def test_another_id_than_the_file_s_name_is_misnamed_and_written_back_under_its_own():
     d = conftest.tmpdir("formula_declared")
     path = d / "copie.typ"
     path.write_text(fd.file_text(_domain()), encoding="utf-8")      # poutre-p1's text, copied under another name
     read = fd.read(path)
-    assert read.id == "copie" and read.declared == "poutre-p1" and read.state == "hand_edited"
-    assert '#var-domain("copie", title: "Poutre P1")[' in fd.write_text(read)
+    assert read.id == "copie" and read.declared == "poutre-p1" and read.state == "misnamed"
+    assert '#domain("copie", label: "Poutre P1")[' in fd.write_text(read)
 
 
 def test_an_id_changed_renames_the_file_and_lists_what_cites_the_old_one():
@@ -413,7 +503,7 @@ def test_an_id_changed_renames_the_file_and_lists_what_cites_the_old_one():
     domain = fd.save(here, _domain("Renommé", "renomme"))
     fd.save(here, _domain("Autre", "autre"))
     section = here.typst_root / "probe-section.typ"
-    section.write_text('#include "/Formules/renomme.typ"\nM = #val("M_d", domain: "renomme")\n', encoding="utf-8")
+    section.write_text('#include "/Domains/renomme.typ"\nM = #val("M_d", domain: "renomme")\n', encoding="utf-8")
     for bad, code in (("P 2", "id_invalid"), ("Poutre", "id_invalid"), ("autre", "id_taken")):
         try:
             fd.rename(here, domain, bad)
@@ -455,17 +545,17 @@ def _compile(name, source, fmt="svg"):
         raise Skip("typst is not on the path")
     d = conftest.probe_dir(name)
     doc = d / "probe.typ"
-    doc.write_text('#import "/commands.typ": *\n' + source, encoding="utf-8")
+    doc.write_text('#import "/000-Typst-Config/commands.typ": *\n' + source, encoding="utf-8")
     out = d / ("probe-{n}." + fmt)
     r = subprocess.run(["typst", "compile", "--root", str(TYPST_ROOT), str(doc), str(out)], capture_output=True, text=True, encoding="utf-8", errors="replace")
     return r, sorted(d.glob("probe-*." + fmt))
 
 
-def test_include_prints_the_domain_with_its_title_and_val_reads_it_by_its_id():
-    """REQ-005 (issue #15): `#include "/Formules/<id>.typ"` prints the domain where it stands -- its title a heading under the section's --, and `#val(domain: "<id>")` reads a value it computes."""
-    r, _pages = _compile("formula_include", '= Section\n#include "/Formules/poutre-p1.typ"\nM = #val("M_d", domain: "poutre-p1", level: 1)\n', "pdf")
+def test_include_prints_the_domain_with_its_title_and_var_reads_it_by_its_id():
+    """REQ-005 (issue #15): `#include "/Domains/<id>.typ"` prints the domain where it stands -- its title a heading under the section's --, and `#var(key, domain: "<id>")` reads a value it computes."""
+    r, _pages = _compile("formula_include", '= Section\n#include "/Domains/poutre-p1.typ"\nM = #var("M_d", domain: "poutre-p1", level: 1)\n', "pdf")
     assert r.returncode == 0, r.stderr
-    r, pages = _compile("formula_include_svg", '= Section\n#include "/Formules/poutre-p1.typ"\n')
+    r, pages = _compile("formula_include_svg", '= Section\n#include "/Domains/poutre-p1.typ"\n')
     assert r.returncode == 0, r.stderr
     # the same page as the domain's body written in the section by hand: the include prints its title and its five commands, nothing more, nothing less
     domain = next(d for d in fd.list_domains(project.current()) if d.id == "poutre-p1")
@@ -474,7 +564,7 @@ def test_include_prints_the_domain_with_its_title_and_val_reads_it_by_its_id():
     assert r2.returncode == 0, r2.stderr
     strip = lambda p: re.sub(r'id="[^"]*"|href="#[^"]*"', "", p.read_text(encoding="utf-8"))   # noqa: E731 -- glyph ids differ, what is drawn does not
     assert [strip(p) for p in pages] == [strip(p) for p in written], "#include printed something else than the domain"
-    assert fd.include_call(fd.Domain(id="poutre-p1", name="Poutre P1")) == '#include "/Formules/poutre-p1.typ"'
+    assert fd.include_call(fd.Domain(id="poutre-p1", name="Poutre P1")) == '#include "/Domains/poutre-p1.typ"'
 
 
 # --- the export ------------------------------------------------------------------------------------
@@ -487,7 +577,7 @@ def test_the_index_is_sorted_validated_and_seeded_and_two_files_of_one_name_stop
         (folder / f"{fid}.typ").write_text(fd.file_text(_domain(name, fid)), encoding="utf-8")
     data, notes = fd.prepare(here)
     assert list(data["domains"]) == ["alpha", "zeta"], list(data["domains"])
-    assert data["domains"]["alpha"] == {"title": "Alpha", "file": "Formules/alpha.typ"} and data["schema_version"] == "2.0"
+    assert data["domains"]["alpha"] == {"title": "Alpha", "file": "Domains/alpha.typ"} and data["schema_version"] == "2.0"
     assert not notes
     validation.validate_structure(data, "formulas")
     wrong = dict(data, schema_version="1.0")
@@ -546,15 +636,6 @@ def _levels_domain():
     return next(d for d in fd.list_domains(here) if d.id == "niveaux")
 
 
-def test_val_and_var_unit_are_computed_and_compile_in_a_domain():
-    domain = _levels_domain()
-    results = fd.compute(domain)
-    assert [r.error for r in results] == [""] * 6, [r.error for r in results]
-    assert (results[3].value, results[3].unit) == (12000.0, "N") and (results[4].value, results[4].unit) == (36, "kNm") and results[5].holds
-    r, _pages = _compile("formula_val_var_unit", '#include "/Formules/niveaux.typ"\n', "pdf")
-    assert r.returncode == 0, r.stderr
-
-
 def test_the_domain_modules_import_without_qt():
     """ARCH-001: the domain, the algebra and the Greek names are Qt-free -- what the export and a test without a window import."""
     import sys
@@ -562,3 +643,13 @@ def test_the_domain_modules_import_without_qt():
             "from domains import formula_domain, formula_layout; import units, greek; print('ok')") % (ROOT_CALC, ROOT_CALC / "tools")
     r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, encoding="utf-8", errors="replace")
     assert r.returncode == 0 and r.stdout.strip() == "ok", r.stderr
+
+
+
+def test_an_answer_given_another_unit_without_conversion_keeps_its_number_and_says_so():
+    """Spec 2026-10-21-commandes-typst-refonte, REQ-003, Q-004: `as-unit:` gives the answer another unit without converting it -- the number kept -- and the window says so beside the line, never the report."""
+    _declared, _title, items = fd.parse_body('#domain("x", label: "X")[\n  #var("M_d", 4.2, "kNm")\n  #eq("q", `M_d / (100 "mm")`, as-unit: "kN/m")\n]')
+    results = fd.compute(fd.Domain(id="x", name="X", commands=items))
+    q = results[-1]
+    assert q.error in (None, "") and q.unit == "kN/m" and q.warning and q.warning["as_unit"] and q.warning["wanted"] == "kN/m", q
+    assert abs(q.value - 42) < 1e-9, "4.2 kNm over 100 mm is 42 kN, the number kept"

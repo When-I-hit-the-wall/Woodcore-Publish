@@ -1,0 +1,372 @@
+{
+  "domains": {
+    "WL-Fluchttreppe+Geräte": {
+      "check": "WL-Fluchttreppe+Geräte",
+      "gen": {
+        "form": "82a6cf",
+        "kind": "wind-load",
+        "version": 2
+      },
+      "lines": {
+        "eq:qp": [
+          "28cbd842133c307d",
+          "28cbd842133c307d"
+        ],
+        "label:WL-Fluchttreppe-Ger-te-presets": [
+          "4217e84157cbaa97",
+          "4217e84157cbaa97"
+        ],
+        "label:WL-Fluchttreppe-Ger-te-table-1": [
+          "dd5e4b2b50bf2e59",
+          "dd5e4b2b50bf2e59"
+        ],
+        "label:WL-Fluchttreppe-Ger-te-table-1-note": [
+          "9d914673bb61b865",
+          "9d914673bb61b865"
+        ],
+        "label:WL-Fluchttreppe-Ger-te-table-1-title": [
+          "99995e0d1eb98946",
+          "99995e0d1eb98946"
+        ],
+        "label:WL-Fluchttreppe-Ger-te-table-2": [
+          "1e573e94ee3bcccc",
+          "1e573e94ee3bcccc"
+        ],
+        "label:WL-Fluchttreppe-Ger-te-table-2-note": [
+          "0b02b75fbf7c4dd2",
+          "0b02b75fbf7c4dd2"
+        ],
+        "label:WL-Fluchttreppe-Ger-te-table-2-title": [
+          "915808b97260d855",
+          "915808b97260d855"
+        ],
+        "var:alpha_r": [
+          "0b94a3c50b1f2671",
+          "0b94a3c50b1f2671"
+        ],
+        "var:b": [
+          "662d09d48d863ec5",
+          "662d09d48d863ec5"
+        ],
+        "var:cd": [
+          "1d1ead6eeb1948d3",
+          "1d1ead6eeb1948d3"
+        ],
+        "var:ch": [
+          "989a26e0cfe1c6b7",
+          "989a26e0cfe1c6b7"
+        ],
+        "var:cred_bh": [
+          "2a5e20525b09bd97",
+          "2a5e20525b09bd97"
+        ],
+        "var:cred_dh": [
+          "a147ee6106d1648a",
+          "a147ee6106d1648a"
+        ],
+        "var:cred_max": [
+          "5b63261401a77ca1",
+          "5b63261401a77ca1"
+        ],
+        "var:d": [
+          "6074dae1fa3ec315",
+          "6074dae1fa3ec315"
+        ],
+        "var:gelaendekategorie": [
+          "1ebbcfeaf7be20b3",
+          "1ebbcfeaf7be20b3"
+        ],
+        "var:h": [
+          "af6f3c66dd5bb487",
+          "af6f3c66dd5bb487"
+        ],
+        "var:qk_max_cf1": [
+          "71bbcd558023eff5",
+          "71bbcd558023eff5"
+        ],
+        "var:qk_max_cf2": [
+          "3195a40d6bf3b392",
+          "3195a40d6bf3b392"
+        ],
+        "var:qk_max_cf3": [
+          "9e6c75ff52acccc6",
+          "9e6c75ff52acccc6"
+        ],
+        "var:qk_min_cf1": [
+          "757a2546d3db8cb8",
+          "757a2546d3db8cb8"
+        ],
+        "var:qk_min_cf2": [
+          "a458ef1ad072e6de",
+          "a458ef1ad072e6de"
+        ],
+        "var:qk_min_cf3": [
+          "4adb6754f11db3f1",
+          "4adb6754f11db3f1"
+        ],
+        "var:qp0": [
+          "38d878deec2c74d6",
+          "38d878deec2c74d6"
+        ],
+        "var:tabelle": [
+          "c0f40f0952200592",
+          "c0f40f0952200592"
+        ],
+        "var:z": [
+          "f63130ad88782cb3",
+          "f63130ad88782cb3"
+        ],
+        "var:zg": [
+          "c37591e74dbba5c0",
+          "c37591e74dbba5c0"
+        ]
+      }
+    },
+    "WL-Pavillon": {
+      "check": "WL-Pavillon",
+      "gen": {
+        "form": "82a6cf",
+        "kind": "wind-load",
+        "version": 2
+      },
+      "lines": {
+        "eq:qp": [
+          "28cbd842133c307d",
+          "28cbd842133c307d"
+        ],
+        "label:WL-Pavillon-presets": [
+          "c21b60cc7871c487",
+          "c21b60cc7871c487"
+        ],
+        "label:WL-Pavillon-table-1": [
+          "8c924929d03113a0",
+          "8c924929d03113a0"
+        ],
+        "label:WL-Pavillon-table-1-note": [
+          "04014be5e324169a",
+          "04014be5e324169a"
+        ],
+        "label:WL-Pavillon-table-1-title": [
+          "a2f5ee3c3674aaa7",
+          "a2f5ee3c3674aaa7"
+        ],
+        "label:WL-Pavillon-table-2": [
+          "4ae562d7c31bf790",
+          "4ae562d7c31bf790"
+        ],
+        "label:WL-Pavillon-table-2-note": [
+          "2d46b9bb857137e6",
+          "2d46b9bb857137e6"
+        ],
+        "label:WL-Pavillon-table-2-title": [
+          "bd8c428a9db88c70",
+          "bd8c428a9db88c70"
+        ],
+        "var:alpha_r": [
+          "e149c5ad550ab63e",
+          "e149c5ad550ab63e"
+        ],
+        "var:b": [
+          "b48eaf1817c176a2",
+          "b48eaf1817c176a2"
+        ],
+        "var:cd": [
+          "4e6745b1caac0ffc",
+          "4e6745b1caac0ffc"
+        ],
+        "var:ch": [
+          "81058ae9765d1236",
+          "81058ae9765d1236"
+        ],
+        "var:cred_bh": [
+          "68766bb366c15d57",
+          "68766bb366c15d57"
+        ],
+        "var:cred_dh": [
+          "93bad020cfefe9cc",
+          "93bad020cfefe9cc"
+        ],
+        "var:cred_max": [
+          "739a99ad62d6c386",
+          "739a99ad62d6c386"
+        ],
+        "var:d": [
+          "db9a159c736b4fd6",
+          "db9a159c736b4fd6"
+        ],
+        "var:gelaendekategorie": [
+          "617ac519f03c2211",
+          "617ac519f03c2211"
+        ],
+        "var:h": [
+          "599b237d171d541a",
+          "599b237d171d541a"
+        ],
+        "var:qk_max_cf1": [
+          "a3e2f8d016a5f4ce",
+          "a3e2f8d016a5f4ce"
+        ],
+        "var:qk_max_cf2": [
+          "85afcdc6e75522cb",
+          "85afcdc6e75522cb"
+        ],
+        "var:qk_max_cf3": [
+          "9e7b1dd27679e2e6",
+          "9e7b1dd27679e2e6"
+        ],
+        "var:qk_min_cf1": [
+          "f1f6bb409323283c",
+          "f1f6bb409323283c"
+        ],
+        "var:qk_min_cf2": [
+          "0e8e6c9d50def136",
+          "0e8e6c9d50def136"
+        ],
+        "var:qk_min_cf3": [
+          "78bdb1eadbc1c71b",
+          "78bdb1eadbc1c71b"
+        ],
+        "var:qp0": [
+          "e7793ae83eb714aa",
+          "e7793ae83eb714aa"
+        ],
+        "var:tabelle": [
+          "869edcc3dcd27bc4",
+          "869edcc3dcd27bc4"
+        ],
+        "var:z": [
+          "b7891754faa263a2",
+          "b7891754faa263a2"
+        ],
+        "var:zg": [
+          "134cf4d4d9fd3b46",
+          "134cf4d4d9fd3b46"
+        ]
+      }
+    },
+    "WL-Velo": {
+      "check": "WL-Velo",
+      "gen": {
+        "form": "82a6cf",
+        "kind": "wind-load",
+        "version": 2
+      },
+      "lines": {
+        "eq:qp": [
+          "28cbd842133c307d",
+          "28cbd842133c307d"
+        ],
+        "label:WL-Velo-presets": [
+          "efb2a4c8f36b7efc",
+          "efb2a4c8f36b7efc"
+        ],
+        "label:WL-Velo-table-1": [
+          "5f9ca791f5a20c60",
+          "5f9ca791f5a20c60"
+        ],
+        "label:WL-Velo-table-1-note": [
+          "45f4d5b117493409",
+          "45f4d5b117493409"
+        ],
+        "label:WL-Velo-table-1-title": [
+          "4f1c444bdb14eff3",
+          "4f1c444bdb14eff3"
+        ],
+        "label:WL-Velo-table-2": [
+          "7475ca1cc0f167dd",
+          "7475ca1cc0f167dd"
+        ],
+        "label:WL-Velo-table-2-note": [
+          "1f7a7d6b76697d02",
+          "1f7a7d6b76697d02"
+        ],
+        "label:WL-Velo-table-2-title": [
+          "4f02016994cb1197",
+          "4f02016994cb1197"
+        ],
+        "var:alpha_r": [
+          "658f5d1a540ffdd8",
+          "658f5d1a540ffdd8"
+        ],
+        "var:b": [
+          "d7577aeaa9dc5cc7",
+          "d7577aeaa9dc5cc7"
+        ],
+        "var:cd": [
+          "c9c66096c147473d",
+          "c9c66096c147473d"
+        ],
+        "var:ch": [
+          "83d29e204a8d0954",
+          "83d29e204a8d0954"
+        ],
+        "var:cred_bh": [
+          "0eb332af3180b986",
+          "0eb332af3180b986"
+        ],
+        "var:cred_dh": [
+          "a774fbd1a4b4a4c9",
+          "a774fbd1a4b4a4c9"
+        ],
+        "var:cred_max": [
+          "7f191b7ab6437371",
+          "7f191b7ab6437371"
+        ],
+        "var:d": [
+          "1ae22fb301405b05",
+          "1ae22fb301405b05"
+        ],
+        "var:gelaendekategorie": [
+          "46c87f04d1874bfc",
+          "46c87f04d1874bfc"
+        ],
+        "var:h": [
+          "84390f4a307795cd",
+          "84390f4a307795cd"
+        ],
+        "var:qk_max_cf1": [
+          "634008295d1c24bf",
+          "634008295d1c24bf"
+        ],
+        "var:qk_max_cf2": [
+          "f8b285a60859ea26",
+          "f8b285a60859ea26"
+        ],
+        "var:qk_max_cf3": [
+          "c3bf9a2300933916",
+          "c3bf9a2300933916"
+        ],
+        "var:qk_min_cf1": [
+          "4560a1cb473e7088",
+          "4560a1cb473e7088"
+        ],
+        "var:qk_min_cf2": [
+          "3f8ff7bd51bd2c01",
+          "3f8ff7bd51bd2c01"
+        ],
+        "var:qk_min_cf3": [
+          "72cf81c682619d8e",
+          "72cf81c682619d8e"
+        ],
+        "var:qp0": [
+          "977f17f33933206f",
+          "977f17f33933206f"
+        ],
+        "var:tabelle": [
+          "529bacd05aec368a",
+          "529bacd05aec368a"
+        ],
+        "var:z": [
+          "c07b6cee1d258344",
+          "c07b6cee1d258344"
+        ],
+        "var:zg": [
+          "dd46b0043ff3b405",
+          "dd46b0043ff3b405"
+        ]
+      }
+    }
+  },
+  "format": "woodcore-unfold",
+  "schema_version": "1.0"
+}

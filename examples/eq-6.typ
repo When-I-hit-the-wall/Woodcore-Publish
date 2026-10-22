@@ -8,6 +8,5 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#var("R_k", 7, "kN", level: 0)
-Mit #var("gamma_M", 1.7, "") wird #eq("R_d", `R_k / gamma_M`, label: "Bemessungswert", norm: "SIA 265", norm-ref: "2.2.5", level: 3).
-#eq("R_d2", "R_(d,2)", `R_k / 1.7`, label: "Bemessungswert", descr: "Mit $gamma_M = 1.7$", norm: "SIA 265", norm-ref: "2.2.5", note: "line", level: 3)
+#var("g_k", 1.2, "kN/m²", level: 0)
+#eq("G_1_Ed", "G_(1,Ed)", `1.35 * g_k`, unit: "kN/m²")

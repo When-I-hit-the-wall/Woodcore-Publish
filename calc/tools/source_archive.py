@@ -17,6 +17,7 @@ from pathlib import Path
 
 import identity
 import notifications  # every error, warning and information, gathered in one place (calc/notifications.py, v0.117)
+import engine
 import notices_ui  # what was a message box is a notice since v0.117 (notices_ui.tell)
 
 FOLDER = "archives"
@@ -65,7 +66,7 @@ def archive(source_dir, sid, now=None):
         source.pop("id", None)
         source.pop("group", None)
         source[ARCHIVED] = {"id": sid, "at": now.strftime("%Y-%m-%dT%H:%M:%S")}
-        target.write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        engine.write_json(target, source)
     else:
         target.write_bytes(raw)
     path.unlink()
@@ -131,7 +132,7 @@ def restore(source_dir, key, group=""):
         ordered = {"id": sid, **ordered}
     if group:
         ordered["group"] = group
-    (source_dir / ("%s.json" % sid)).write_text(json.dumps(ordered, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    engine.write_json(source_dir / ("%s.json" % sid), ordered)
     path.unlink()
     return sid
 

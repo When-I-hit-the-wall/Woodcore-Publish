@@ -9,33 +9,24 @@
 Die Nutzungsdauer ist die Zeitspanne, während welcher das Bauwerk nach heutigen Erkenntnissen den in der Nutzungsvereinbarung definierten Nutzungsarten genügen soll. Sie wird mit der Bauherrschaft vereinbart; während dieser Zeit führt die Bauherrschaft die periodischen Unterhaltsarbeiten aus.
 // woodcore:/object p1
 
-// woodcore:object doc-choice service-life-class
-#doc-choice(
-  label: [Nutzungsdauer des Tragwerks (Richtwerte, SIA 260, Ziffer 2.3.2)],
-  options: (
-    (id: "temporary", label: [Temporäres Bauwerk: bis 10 Jahre]),
-    (id: "replaceable", label: [Austauschbares Bauteil: bis 25 Jahre]),
-    (id: "normal", label: [Gebäude und andere Bauwerke von normaler Bedeutung: 50 Jahre]),
-    (id: "major", label: [Bauwerk von übergeordneter Bedeutung: 100 Jahre]),
-  ),
-  selected: "normal",
-)
+// woodcore:object text service-life-class
+*Nutzungsdauer des Tragwerks (Richtwerte, SIA 260, Ziffer 2.3.2)*: Gebäude und andere Bauwerke von normaler Bedeutung: 50 Jahre
 // woodcore:/object service-life-class
 
-// woodcore:object doc-table service-life-table
-#doc-table(
-  columns: (
-    (id: "part", title: [Bauteil]),
-    (id: "years", title: [Nutzungsdauer]),
-    (id: "remark", title: [Bemerkung]),
-  ),
-  hidden: ("remark",),
-  rows: (
-    (part: [Tragwerk], years: [50 Jahre], remark: []),
-    (part: [Abdichtungen], years: [25 Jahre], remark: []),
-    (part: [Fassade], years: [25 Jahre], remark: []),
-    (part: [Bedachung], years: [25 Jahre], remark: []),
-    (part: [Austauschbare Bauteile], years: [25 Jahre], remark: []),
+// woodcore:object table service-life-table
+#figure(
+  table(
+    columns: (auto, auto),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Bauteil*], [*Nutzungsdauer*]),  // woodcore:hidden 3=[Bemerkung]
+    table.hline(stroke: 0.5pt),
+    [Tragwerk], [50 Jahre],  // woodcore:hidden 3=[]
+    [Abdichtungen], [25 Jahre],  // woodcore:hidden 3=[]
+    [Fassade], [25 Jahre],  // woodcore:hidden 3=[]
+    [Bedachung], [25 Jahre],  // woodcore:hidden 3=[]
+    [Austauschbare Bauteile], [25 Jahre],  // woodcore:hidden 3=[]
+    table.hline(stroke: 1pt),
   ),
   caption: [Vereinbarte Nutzungsdauer nach Bauteil],
 )

@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from json.decoder import scanstring
 from pathlib import Path
 
+import engine
 import positions_store
 import project
 import sharing
@@ -139,8 +140,10 @@ def typst_files(here):
     """Every .typ the engineer writes that may cite a position: the three documents' sections and the sheets of `Plans/` -- never the engine's copy and the export (`_woodcore/`), the archives, a form (`Template/`)."""
     import sheets
     roots = [here.document_dir(mode) for mode in here.modes]
-    roots.append(Path(here.typst_root) / sheets.FOLDER)
-    never = [Path(here.generated_dir).resolve(), Path(here.archives_dir).resolve(), (Path(here.typst_root) / project.TEMPLATE_FOLDER).resolve()]
+    roots += sheets.folders(here)   # Plans/ before, the sheets of each kind in their plan tab's exports laid out by folders (issue #64)
+    if here.has_folders:
+        roots += [here.formulas_dir] + [here.domain_dir(kind) for kind in project.DOMAIN_FOLDERS]   # the domains' files may cite a position too (issue #64)
+    never = [Path(here.generated_dir).resolve(), Path(here.archives_dir).resolve(), Path(here.template_dir).resolve()]
     found = []
     for root in roots:
         if not root.is_dir():
@@ -149,6 +152,8 @@ def typst_files(here):
             resolved = file.resolve()
             if any(resolved == n or n in resolved.parents for n in never):
                 continue
+            if here.has_folders and project.DOMAIN_ARCHIVES in file.relative_to(root).parts[:-1]:
+                continue   # a domain's or a sheet's archives: history, as the project's are
             if resolved not in found:
                 found.append(resolved)
     return found
@@ -363,7 +368,7 @@ def read_archive(here):
 def _archive_bytes(entries):
     data = {"schema_version": ARCHIVE_VERSION, "format": ARCHIVE_FORMAT, "positions": entries}
     validation.validate_structure(data, "positions-archive")
-    return (json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+    return engine.source_bytes(data)
 
 
 def apply(here, result, unchecked=()):
@@ -396,6 +401,7 @@ def apply(here, result, unchecked=()):
     backup = _backup(here, writes)
     sharing.commit(writes)
     _intent(backup, done=True)
+    positions_store.write_workbook(here)   # the workbook beside positions.json, never read, follows it (issue #64, D-24)
     return backup
 
 
@@ -429,7 +435,7 @@ def _intent(folder, files=None, created=None, done=False):
     if created is not None:
         data["created"] = created
     data["done"] = done
-    note.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    engine.write_json(note, data)
 
 
 def unfinished(here):

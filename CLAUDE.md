@@ -8,7 +8,7 @@ This file is the entry point and stays short. The reference is **`docs/`** — r
 
 - **One source of truth.** No value copied by hand; the norm is read from `calc/norms/`, the project's data from its own files. A copy that ages without saying so is the defect this project fears most.
 - **Domain logic is independent of the UI.** Calculations live in `calc/domains/` (Qt-free); a tab shows, edits and calls them, never recomputes. Typst prints what the export holds.
-- **No hardcoding.** Norm values live in `calc/norms/*.json`, words in `calc/i18n/` (three languages: de, fr, en), colours in `calc/tools/theme.json`, contracts in `schemas/`.
+- **No hardcoding.** Norm values live in `calc/norms/*.json`, words in three languages (de, fr, en) — the report's in `calc/i18n/`, the window's beside its tab in a `STRINGS` table (`calc/tools/*_words.py` or the tab's module), merged by `woodcore_gui_words.py` and held to the three languages by `tests/test_i18n.py` —, colours in `calc/tools/theme.json`, contracts in `schemas/`.
 - **Explicit, versioned data models.** Every exported JSON follows a schema with `schema_version`; every value has a unit and a provenance; data is validated before anything is written.
 - **SIA calculations stay traceable.** Every step cites its norm and clause; a value from a norm is read off a named edition in `ExternalFiles/000-Normes/`, never from memory.
 - **Preserve the architecture** unless there is a stated, justified reason to change it; when it changes, `docs/decisions.md` (§13) says why and what it costs.

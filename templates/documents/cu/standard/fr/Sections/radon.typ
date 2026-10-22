@@ -4,16 +4,11 @@
 == Radon
 // woodcore:/object title
 
-// woodcore:object doc-choice radon-risk
-#doc-choice(
-  label: [Risque radon (carte du radon de la Suisse, OFSP)],
-  options: (
-    (id: "low", label: [Risque faible : aucune mesure de gros œuvre]),
-    (id: "medium", label: [Risque moyen : mesures selon les recommandations de l'OFSP (p. ex. traversées de conduites étanches)]),
-    (id: "high", label: [Risque élevé : mesures selon les recommandations de l'OFSP (p. ex. traversées étanches, dalle de fond de classe d'étanchéité 1)]),
-  ),
-  selected: none,
-)
+// woodcore:object text radon-risk
+*Risque radon (carte du radon de la Suisse, OFSP)* :
+- Risque faible : aucune mesure de gros œuvre
+- Risque moyen : mesures selon les recommandations de l'OFSP (p. ex. traversées de conduites étanches)
+- Risque élevé : mesures selon les recommandations de l'OFSP (p. ex. traversées étanches, dalle de fond de classe d'étanchéité 1)
 // woodcore:/object radon-risk
 
 // woodcore:object text p1

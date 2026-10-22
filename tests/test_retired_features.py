@@ -9,6 +9,8 @@ What is held here:
 * a project file that still names RFEM -- the example project's does, on purpose, and the engineer's Musterprojekt does -- opens and exports, the key ignored and said at every export, and the export no longer writes `data/rfem*` and removes what an older one left.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import os
 import re
 import subprocess

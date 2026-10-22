@@ -3,7 +3,10 @@
 
 import math
 from domains import connector, figure_style, section as position_section
+import number_text  # the one trimming of a number (ARCH-004)
 from domains import dimension  # a dimension's geometry, shared with the static models and the plans (issue #9)
+from domains.dimension import _cross, _inside, _point_segment, grid_snap, index_of  # plane geometry written once (D4)
+from domains.dimension import normalize_angle  # plane geometry written once (D4)
 
 
 # A linear element's visible width: its height (the default -- "on voit leur hauteur") or its breadth.
@@ -64,35 +67,13 @@ ANGLE_DIGITS = 1
 
 def fmt_number(value, digits=DIGITS):
     """A number as the figure writes it: at most `digits` decimals, trailing zeros dropped (4.9788 -> 4.98, 3.50 -> 3.5, 20 -> 20) -- statics.py's fmt_number, in mm's own precision."""
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        return str(value)
-    text = f"{value:.{digits}f}"
-    if "." in text:
-        text = text.rstrip("0").rstrip(".")
-    return "0" if text in ("-0", "") else text
+    return number_text.plain(value, digits)
 
 
 def figure_number(value, digits=DIGITS):
     """A number as the figure *prints* it -- statics.py's figure_number: `fmt_number` with the real minus U+2212 for its sign, never a hyphen. For text set on the figure only; a cell Woodcore reads back keeps `fmt_number`."""
     text = fmt_number(value, digits)
     return "−" + text[1:] if text.startswith("-") else text
-
-
-def normalize_angle(degrees):
-    """An angle in degrees, brought into (-180, 180]."""
-    a = math.fmod(degrees, 360.0)
-    if a <= -180:
-        a += 360
-    elif a > 180:
-        a -= 360
-    return a
-
-
-def index_of(source, collection, eid):
-    for i, entry in enumerate(source.get(collection, [])):
-        if entry.get("id") == eid:
-            return i
-    return None
 
 
 def entry_of(source, collection, eid):
@@ -340,30 +321,20 @@ def dimension_anchor(source, anchor):
 
 def dimension_ends(source, dim):
     """A linear dimension's two ends, in mm, or None where either is unresolvable."""
-    a = dimension_anchor(source, dim.get("from"))
-    b = dimension_anchor(source, dim.get("to"))
-    return None if a is None or b is None else (a, b)
+    return dimension.ends(dimension_anchor, source, dim)
 
 
-def _midpoint(a, b):
-    return ((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0)
+_midpoint = dimension.midpoint   # written once (ARCH-004)
 
 
 def dimension_direction(source, dim):
     """The direction a linear dimension's line runs in, and the direction its offset is measured along."""
-    kind = dim.get("kind")
-    if kind in ("horizontal", "vertical"):
-        return dimension.direction(kind, None, None, SAME_POINT)
-    ends = dimension_ends(source, dim)
-    return None if ends is None else dimension.direction(kind, ends[0], ends[1], SAME_POINT)
+    return dimension.linear_direction(dim, dimension_ends(source, dim), SAME_POINT)
 
 
 def dimension_line(source, dim):
     """Where a linear dimension's line is drawn, in mm: the two ends projected onto it, `offset` from the middle of the two ends."""
-    ends = dimension_ends(source, dim)
-    if ends is None:
-        return None
-    return dimension.line(dim.get("kind"), ends[0], ends[1], dim.get("offset", 0.0), SAME_POINT)
+    return dimension.linear_line(dim, dimension_ends(source, dim), SAME_POINT)
 
 
 def _member_ray(source, kind, eid, centre, u):
@@ -413,12 +384,7 @@ def angle_rays(source, dim):
 
 def dimension_angle(source, dim):
     """An angle dimension's arc: where it starts, how far it sweeps (signed, degrees) and about which point -- statics.py's dimension_angle, ported."""
-    rays = angle_rays(source, dim)
-    if rays is None:
-        return None
-    centre, first, second = rays
-    sweep, start = dimension.arc(first, second, dim.get("bearing") is not None and float(dim.get("offset", 0.0)) < 0)
-    return centre, sweep, start
+    return dimension.angle_arc(angle_rays(source, dim), dim)
 
 
 def dimension_value(source, dim):
@@ -545,30 +511,6 @@ def rectangle_with_fixed_width(p1, p2, third, length):
     return rectangle_from_edge(p1, p2, length if side >= 0 else -length)
 
 
-def _point_segment(p, a, b):
-    """The distance from `p` to the segment a-b, and the nearest point on it."""
-    ax, ay = a
-    bx, by = b
-    dx, dy = bx - ax, by - ay
-    length2 = dx * dx + dy * dy
-    if length2 <= 0:
-        return math.dist(p, a), tuple(a)
-    t = max(0.0, min(1.0, ((p[0] - ax) * dx + (p[1] - ay) * dy) / length2))
-    q = (ax + t * dx, ay + t * dy)
-    return math.dist(p, q), q
-
-
-def _inside(p, polygon):
-    """Even-odd point-in-polygon -- plan.py's _inside, unchanged."""
-    inside = False
-    n = len(polygon)
-    for i in range(n):
-        (x1, y1), (x2, y2) = polygon[i], polygon[(i + 1) % n]
-        if (y1 > p[1]) != (y2 > p[1]) and p[0] < (x2 - x1) * (p[1] - y1) / (y2 - y1) + x1:
-            inside = not inside
-    return inside
-
-
 def hit_element(source, p, tolerance):
     """The id of the element under `p` -- a line within tolerance of its polyline, an area anywhere inside it (or within tolerance of its outline) -- the one drawn last, on top, where two overlap. None otherwise."""
     best = None
@@ -633,13 +575,6 @@ def hit_label(source, p, tolerance, frames=None):
     return schema_svg.hit_label(source, p, tolerance, frames)
 
 
-def grid_snap(p, step):
-    """`p` pulled onto the nearest crossing of a grid of that step, in mm."""
-    if not step or step <= 0:
-        return tuple(p)
-    return (round(p[0] / step) * step, round(p[1] / step) * step)
-
-
 def _all_segments(source, exclude=None):
     """Every element's segments as (element id, a, b), skipping the one being dragged."""
     out = []
@@ -649,17 +584,6 @@ def _all_segments(source, exclude=None):
         for a, b in segments_of(element):
             out.append((element["id"], a, b))
     return out
-
-
-def _cross(a, u, b, v):
-    """Where the line through `a` along `u` meets the one through `b` along `v`, with the two parameters, or None for parallels."""
-    det = u[0] * v[1] - u[1] * v[0]
-    if abs(det) < 1e-12:
-        return None
-    dx, dy = b[0] - a[0], b[1] - a[1]
-    t = (dx * v[1] - dy * v[0]) / det
-    s = (dx * u[1] - dy * u[0]) / det
-    return ((a[0] + t * u[0], a[1] + t * u[1]), t, s)
 
 
 def band_outlines(source, positions=None, exclude=None):
@@ -802,36 +726,17 @@ def tracking_rays(source, anchor, tolerance=SAME_POINT):
 
 def nearest_ray(rays, anchor, point, tolerance_deg=TRACK_TOLERANCE_DEG):
     """The ray of smallest angular deviation from `anchor` towards `point`, within the tolerance, and `point` projected onto it -- or (None, point)."""
-    dx, dy = point[0] - anchor[0], point[1] - anchor[1]
-    length = math.hypot(dx, dy)
-    if length <= SAME_POINT:
-        return None, tuple(point)
-    angle = math.degrees(math.atan2(dy, dx))
-    best, best_off = None, tolerance_deg
-    for ray in rays:
-        off = abs(normalize_angle(angle - ray["angle"]))
-        if off <= best_off:
-            best, best_off = ray, off
-    if best is None:
-        return None, tuple(point)
-    along_ray = dx * best["unit"][0] + dy * best["unit"][1]
-    return best, (anchor[0] + along_ray * best["unit"][0], anchor[1] + along_ray * best["unit"][1])
+    return dimension.nearest_ray(rays, anchor, point, tolerance_deg, SAME_POINT)
 
 
 def along(anchor, ray, distance):
     """The point `distance` mm from `anchor` along `ray`."""
-    return (anchor[0] + distance * ray["unit"][0], anchor[1] + distance * ray["unit"][1])
+    return dimension.along(anchor, ray, distance)
 
 
 def typed_point(anchor, ray, text):
     """Where a distance typed into Woodcore's field lands, or None where it is not a number. A comma is read as a decimal point."""
-    try:
-        distance = float(str(text).strip().replace(",", "."))
-    except (TypeError, ValueError):
-        return None
-    if not math.isfinite(distance):
-        return None
-    return along(anchor, ray, distance)
+    return dimension.typed_point(anchor, ray, text)
 
 
 def extension_lines(source, exclude=None):

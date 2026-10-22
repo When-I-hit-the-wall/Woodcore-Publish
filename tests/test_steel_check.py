@@ -11,6 +11,8 @@ Every number below is worked out by hand from SZS C5's row and SIA 263's equatio
 Tabelle 5 for the same web, c/t = 298/8 = 37.25: class 4 in pure compression (42 epsilon = 34.17 with epsilon = 0.814 -- the reference template's H20 says 4 too), class 1 in pure bending (72 epsilon = 58.6), class 2 at N = 500 kN with M_y (alpha = (1 + 500·10³·1.05/(298·8·355))/2 = 0.810: 396 epsilon/(13 alpha − 1) = 33.8 < 37.25 ≤ 456 epsilon/(13 alpha − 1) = 38.9).
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import math
 import subprocess
@@ -169,7 +171,7 @@ def _compile(body, name="steel_check"):
     from pypdf import PdfReader
     d = conftest.probe_dir(name)
     probe = d / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n' + body + "\n", encoding="utf-8")
     out = subprocess.run(["typst", "compile", "--root", str(TYPST_ROOT), str(probe), str(d / "probe.pdf")], capture_output=True, text=True, encoding="utf-8")
     if out.returncode != 0:
         return None, conftest.panic_message(out.stderr) or out.stderr
@@ -177,28 +179,30 @@ def _compile(body, name="steel_check"):
 
 
 def test_the_export_is_valid_and_the_report_prints_it():
-    """REQ-013, D-17: data/steel.json against its schema; `#show-check-steel` at levels 1 to 3 and -1, its verdict, its value published for `val`, and a check not calculable refused naming its reason."""
+    """REQ-013, D-17: data/steel.json against its schema; the check's domain as Woodcore writes it out (spec 2026-10-21-commandes-typst-refonte, REQ-017; `#show-check-steel` until then) printed at levels 1 to 3 with its verdict; a check not calculable written out by nothing."""
+    import project
+    from domains import steel_check, unfold
     data = _export(_src("bending", "ST-01", M_y={"value": 200, "unit": "kNm"}), _src("shear", "ST-02", V_z={"value": 500, "unit": "kN"}, M_y={"value": 150, "unit": "kNm"}),
                    _src("compression", "ST-03", N={"value": -1000, "unit": "kN"}), _src("class", "ST-04", N={"value": -500, "unit": "kN"}, M_y={"value": 100, "unit": "kNm"}))
     validation.validate_structure(data, "steel")
     assert set(data["checks"]) == {"ST-01", "ST-02", "ST-03", "ST-04"} and not data["checks"]["ST-03"]["calculable"]
+    records = unfold._module("steel").records(data)
+    assert not steel_check.is_unfolded(records["ST-03"]), "a check not calculable is said by its reason and printed by nothing"
+
+    def written(rid):
+        with project.using(conftest.PROJECT):
+            return unfold.generate(records[rid], "de", "steel").split("\n", 1)[1]
+
     for level in (1, 2, 3):
-        text, error = _compile('#show-check-steel("ST-01", level: %d)' % level)
+        text, error = _compile('#calc-defaults(level: %d, scope: "document")\n' % level + written("ST-01"))
         assert text is not None, error
         assert "ST-01" in text and "IPE 360" in text and "✔" in text, (level, text)
-    text, _ = _compile('#show-check-steel("ST-01", level: 3)')
+    text, _ = _compile('#calc-defaults(level: 3, scope: "document")\n' + written("ST-01"))
     assert "344" in text, "M_y,Rd at level 3"
-    text, error = _compile('#show-check-steel("ST-02", level: 3)\n#val("eta", domain: "ST-02-verify-steel-shear")')
-    assert text is not None, error
-    text, error = _compile('#show-check-steel("ST-01", level: -1, shown: (M_y_Rd: 2))')
-    assert text is not None, error
-    text, error = _compile('#show-check-steel("ST-04")')
-    assert text is not None and "2" in text, error
-    _, error = _compile('#show-check-steel("ST-03")')
-    assert error and "class 4" in error, error
-    _, error = _compile('#show-check-steel("ST-99")')
-    assert error and "ST-01" in error
-    text, error = _compile('#check-steel-ids().join(", ")')
+    for rid in ("ST-02", "ST-04"):
+        text, error = _compile(written(rid))
+        assert text is not None, (rid, error)
+    text, error = _compile('#ids("check-steel").join(", ")')
     assert text is not None and "ST-04" in text, error
 
 

@@ -4,4 +4,4 @@
 = Historique des versions
 // woodcore:/object title
 
-#show-journal()
+#include domain-file("journal", "bp")

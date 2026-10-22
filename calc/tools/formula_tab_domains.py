@@ -69,12 +69,16 @@ class FormulaDomainsMixin:
         for domain in self.domains:
             entry = {"id": domain.id, "text": domain.name or domain.id}
             if domain.state != "canonical":
-                entry["colour"] = theme.colour("warning" if domain.state == "hand_edited" else "danger")
+                entry["colour"] = theme.colour("warning" if domain.state == "misnamed" else "danger")
                 entry["tooltip"] = self.state_text(domain)
             results = self.block_results(domain, self.compute(domain)) if domain.state != "unreadable" else []
             commands = [c for c in domain.commands if not c.is_text]
             # a `val` in italics: a variable shown again, not one made (issue #19, D-04 -- in both views, the list being the same)
-            entry["children"] = [{"id": f"{domain.id}#{index}", "text": self.summary(c, r), "italic": c.kind == "val"} for index, (c, r) in enumerate(zip(commands, results))]
+            entry["children"] = [{"id": f"{domain.id}#{index}", "text": self.summary(c, r), "italic": False} for index, (c, r) in enumerate(zip(commands, results))]
+            group = fd.group_of(project.current(), domain)
+            if group is not None:
+                # a specialised tab's domain written out whole -- a member check unfolded -- in the group of its kind, «Traction», «Neige» …, which the engineer does not move (issue #64, REQ-016)
+                entry["group"], entry["fixed"] = self.group_label(group), True
             entries.append(entry)
         archived = self.backend.entries(None, self.list._t)
         shown = self.shown_index()
@@ -82,6 +86,20 @@ class FormulaDomainsMixin:
                               select=f"{self.current_id}#{shown}" if shown is not None else self.current_id)   # the line chosen stays chosen: an option written in «Affichage» saves and rebuilds the list
         self.empty.setVisible(not self.domains and not archived)
         self.update_list_marker()
+
+    def group_label(self, group):
+        """The name of the group a specialised tab's domain is shown in (REQ-016): a member check's kind in the words of the checks' tabs -- «Traction» --, a steel check's after «Acier», every other kind its own word (fm_group_*)."""
+        import member_check_tab_words
+        import steel_tab_words
+        kind, sub = group
+        lang = self.app.lang
+        if kind == "check":
+            words = member_check_tab_words.STRINGS.get(lang, member_check_tab_words.STRINGS["fr"])
+            return words.get("tab_mc_" + {"lateral-torsional": "ltb"}.get(sub, sub), sub)
+        if kind == "steel":
+            words = steel_tab_words.STRINGS.get(lang, steel_tab_words.STRINGS["fr"])
+            return self.t("fm_group_steel", kind=words.get("tab_st_" + {"lateral-torsional": "ltb"}.get(sub, sub), sub))
+        return self.t("fm_group_" + kind)
 
     def on_folders_changed(self):
         """A folder made, renamed or removed: an empty one kept in the project file as every tab keeps them, and the list rebuilt -- a domain's folder is written by the list itself (attach_order's `groups`)."""
@@ -96,8 +114,8 @@ class FormulaDomainsMixin:
         return f"{command.shown_symbol} = {units.shown(result.value, result.unit)}"
 
     def state_text(self, domain):
-        if domain.state == "hand_edited":
-            return self.t("fm_state_hand_edited")
+        if domain.state == "misnamed":
+            return self.t("fm_state_misnamed")
         if domain.state == "unreadable":
             return self.t("fm_state_unreadable", reason=domain.problem)
         return ""
@@ -179,6 +197,7 @@ class FormulaDomainsMixin:
             button.setToolTip(why if not usable else self.t("fm_import_tip") if button is self.import_button else "")   # a disabled button says why (tests/test_window.py)
         if not has:
             self.state_note.setVisible(False)
+            self.refresh_unfold()
             self.results = []
             self.fill_variables()
             self.show_right()
@@ -188,11 +207,13 @@ class FormulaDomainsMixin:
         self.id_edit.setText(domain.id)
         self.state_note.setText(self.state_text(domain))
         self.state_note.setVisible(domain.state != "canonical")
-        self.domain_file.setText(f"{project.FORMULAS_FOLDER}/{domain.id}.typ")
+        self.domain_file.setText(project.current().rel(domain.path) if domain.path is not None else "")   # Domains/<id>.typ, or the specialised tab's folder of a domain written there (issue #64)
         self.results = self.compute(domain)
         for command, result in zip(domain.commands, self.results):
             if not command.is_text:
                 self.blocks.append(self.new_block(command, result))
+        # an unfolded check: its lines' states, read before the pills are drawn with them (UI-002)
+        self.refresh_unfold()
         self.render()
         self.fill_variables()
         self.show_right()

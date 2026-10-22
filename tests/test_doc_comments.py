@@ -7,8 +7,10 @@ Tinymist reads these blocks and shows them as a tooltip while `Sections/*.typ` i
 * **a detached block** — a plain `//` line between the `///` block and the `#let`, which silently detaches the whole thing. `render-symbol` had carried one since v0.49 and showed no tooltip at all;
 * **no return line** — `-> any` in the tooltip, which says nothing about whether the thing can be put in a grid cell.
 
-⚠️ This parses the `.typ` files itself rather than importing `calc/tools/build_reference.py`, which has a parser of its own. Two reasons, and the second is the honest one: a guard should not fail because the tool it guards is mid-refactor, and the two parsers disagreeing is itself a signal worth having. The same argument `test_constants.py` makes for its copies.
+⚠️ This parses the `.typ` files itself rather than importing `calc/build_reference.py`, which has a parser of its own. Two reasons, and the second is the honest one: a guard should not fail because the tool it guards is mid-refactor, and the two parsers disagreeing is itself a signal worth having. The same argument `test_constants.py` makes for its copies.
 """
+
+TIER = "fast"  # tests/run_tests.py --fast
 
 import re
 
@@ -85,7 +87,7 @@ def test_the_library_is_documented_at_all():
     found = documented()
     assert len(found) >= 55, f"only {len(found)} documented bindings found — has the parser drifted?"
     names = {r[2] for r in found}
-    for expected in ("show-calc", "var", "eq", "verify", "unit", "var-unit", "t-str", "calc-block"):
+    for expected in ("var", "eq", "verify", "unit", "domain", "t-str", "image-positions-plan", "position"):
         assert expected in names, f"{expected} is not documented, or the parser missed it"
 
 

@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "_comment": "The vocabulary of the six image-* commands of a figure (spec 2026-10-21-commandes-typst-refonte, REQ-013, REQ-014, ARCH-012, D-13; image-polar-moment since the spec 2026-10-22-image-polar-moment): one table, read by lib/calc-engine-drawings.typ to refuse a value out of its list and by calc/build_reference_calls.py `call_image_figure` to write the call a «Copier» button copies. Each command: the command it replaces, what its first positional names, and the values `detail-figure` (what the drawing shows) and `detail-legend` (what is set under it) take, with their defaults -- the same word for the same thing in every command.",
+  "commands": {
+    "image-positions-plan": {
+      "replaces": "show-plan",
+      "id": "plan",
+      "detail-figure": ["length", "axes", "dimensions", "centres"],
+      "detail-figure-default": ["length", "axes", "dimensions", "centres"],
+      "detail-legend": ["none", "length", "objects", "scale-bar"],
+      "detail-legend-default": ["objects", "scale-bar"],
+      "options": ["highlight", "width", "frame", "zoom"]
+    },
+    "image-fire-plan": {
+      "replaces": "show-fire-plan",
+      "id": "plan",
+      "detail-figure": [],
+      "detail-figure-default": [],
+      "detail-legend": ["none", "objects", "scale-bar"],
+      "detail-legend-default": ["objects", "scale-bar"],
+      "options": ["width"]
+    },
+    "image-static-model": {
+      "replaces": "show-static-model",
+      "id": "model",
+      "detail-figure": ["loads", "dimensions"],
+      "detail-figure-default": ["loads", "dimensions"],
+      "detail-legend": ["none"],
+      "detail-legend-default": ["none"],
+      "options": ["highlight", "width"]
+    },
+    "image-schema": {
+      "replaces": "schema",
+      "id": "schema",
+      "detail-figure": ["aids"],
+      "detail-figure-default": ["aids"],
+      "detail-legend": ["none"],
+      "detail-legend-default": ["none"],
+      "options": ["highlight", "width"]
+    },
+    "image-extract": {
+      "replaces": "show-extract",
+      "id": "excerpt",
+      "detail-figure": [],
+      "detail-figure-default": [],
+      "detail-legend": ["none"],
+      "detail-legend-default": ["none"],
+      "options": ["width"]
+    },
+    "image-polar-moment": {
+      "replaces": "show-polar-moment",
+      "id": "connection",
+      "detail-figure": ["forces"],
+      "detail-figure-default": ["forces"],
+      "detail-legend": ["none"],
+      "detail-legend-default": ["none"],
+      "options": ["N", "V", "M", "width"]
+    }
+  }
+}

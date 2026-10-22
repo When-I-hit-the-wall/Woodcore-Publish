@@ -1,0 +1,2119 @@
+{
+ "about": "The level every line of the domains was exported at until v0.120, when Python wrote it (spec 2026-10-20-indices-et-niveaux, lot 3): collected by running the domain tests (dead load, snow, wind, live load, steel of every kind, connectors, connections) with engine.Calculation instrumented. tests/test_line_levels.py holds lib/line-levels.json to it, so that a report prints the same lines at the same level as before (CON-001), and the lines of the example project's exports as committed before v0.120 (its snow and wind read from workbooks).",
+ "lines": [
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "step",
+   "key": "I_p",
+   "level": 3
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "step",
+   "key": "I_px",
+   "level": 3
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "step",
+   "key": "I_pz",
+   "level": 3
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "var",
+   "key": "I_p",
+   "level": 2
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "var",
+   "key": "I_px",
+   "level": 3
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "var",
+   "key": "I_pz",
+   "level": 3
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "var",
+   "key": "alpha_N",
+   "level": 3
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "var",
+   "key": "alpha_V",
+   "level": 3
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "var",
+   "key": "n",
+   "level": 2
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "var",
+   "key": "theta_2",
+   "level": 3
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "var",
+   "key": "x_c",
+   "level": 3
+  },
+  {
+   "domain": "connection",
+   "kind": null,
+   "role": "var",
+   "key": "z_c",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "F_b_76",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "F_b_Rd",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "F_b_max",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "F_b_pin",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "K_ser",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "K_ser_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "K_ser_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "K_ser_Verb",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "M_u_k",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "R_d",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "R_d_Fachwerk",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "R_d_Verb",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "R_d_Verb_Fachwerk",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "beta_f",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "f_h_0_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "f_h_0_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "f_h_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "f_h_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "f_h_90_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "f_h_90_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "k_beta_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "k_beta_1_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "k_beta_1_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "k_beta_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "k_beta_2_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "k_beta_2_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "k_beta_max",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "k_red_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "k_red_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "t_c_1_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "t_c_1_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "t_c_2_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "step",
+   "key": "t_c_2_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "F_b_76",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "F_b_Rd",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "F_b_max",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "F_b_pin",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "K_ser",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "K_ser_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "K_ser_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "K_ser_Verb",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "M_u_k",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "R_d",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "R_d_Fachwerk",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "R_d_Verb",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "R_d_Verb_Fachwerk",
+   "level": 1
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "a_1_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "a_1_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "alpha_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "alpha_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "b",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "beta_f",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "d",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "d_0",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "e_1",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "e_2",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "eta_t",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "eta_w",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "eta_w_ser",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "f_h_0_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "f_h_0_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "f_h_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "f_h_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "f_h_90_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "f_h_90_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "f_u_k",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "f_u_pl",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "f_y_pl",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "gamma_M2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_alpha",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_beta",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_beta_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_beta_1_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_beta_1_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_beta_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_beta_2_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_beta_2_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_beta_max",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_red",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_red_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "k_red_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "n_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "n_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "n_pl",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "n_quer_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "n_quer_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "n_tot",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "p",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "p_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "p_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "p_k_beta",
+   "level": 2
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "rho_k_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "rho_k_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "t_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "t_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "t_c_1_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "t_c_1_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "t_c_2_1",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "t_c_2_2",
+   "level": 3
+  },
+  {
+   "domain": "connector",
+   "kind": null,
+   "role": "var",
+   "key": "t_pl",
+   "level": 2
+  },
+  {
+   "domain": "dead-load",
+   "kind": null,
+   "role": "step",
+   "key": "ak",
+   "level": 2
+  },
+  {
+   "domain": "dead-load",
+   "kind": null,
+   "role": "step",
+   "key": "gk",
+   "level": 2
+  },
+  {
+   "domain": "dead-load",
+   "kind": null,
+   "role": "step",
+   "key": "gk_ak",
+   "level": 2
+  },
+  {
+   "domain": "dead-load",
+   "kind": null,
+   "role": "step",
+   "key": "gk_ak_gew",
+   "level": 1
+  },
+  {
+   "domain": "dead-load",
+   "kind": null,
+   "role": "var",
+   "key": "ak",
+   "level": 2
+  },
+  {
+   "domain": "dead-load",
+   "kind": null,
+   "role": "var",
+   "key": "gk",
+   "level": 2
+  },
+  {
+   "domain": "dead-load",
+   "kind": null,
+   "role": "var",
+   "key": "gk_ak",
+   "level": 2
+  },
+  {
+   "domain": "dead-load",
+   "kind": null,
+   "role": "var",
+   "key": "gk_ak_gew",
+   "level": 1
+  },
+  {
+   "domain": "live-load",
+   "kind": null,
+   "role": "var",
+   "key": "Q_k",
+   "level": 1
+  },
+  {
+   "domain": "live-load",
+   "kind": null,
+   "role": "var",
+   "key": "beispiel",
+   "level": 2
+  },
+  {
+   "domain": "live-load",
+   "kind": null,
+   "role": "var",
+   "key": "hinweis",
+   "level": 1
+  },
+  {
+   "domain": "live-load",
+   "kind": null,
+   "role": "var",
+   "key": "kategorie",
+   "level": 1
+  },
+  {
+   "domain": "live-load",
+   "kind": null,
+   "role": "var",
+   "key": "nutzflaeche",
+   "level": 2
+  },
+  {
+   "domain": "live-load",
+   "kind": null,
+   "role": "var",
+   "key": "q_k",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "h_ref",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "q_k1",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "q_k11",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "q_k11h",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "q_k12",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "q_k12h",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "q_k1h",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "q_k2m",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "q_k3",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "q_k3h",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "step",
+   "key": "s_k",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "B",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "L",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "abgleiten",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "alpha_1",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "alpha_2",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "ce",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "ct",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "dachform",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "h_0",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "h_ref",
+   "level": 2
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "hoehenspruenge",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "hoehensprung",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "korrektur",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "lastmodell",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "mu_1",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "mu_11",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "mu_12",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "mu_2m",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "mu_3",
+   "level": 3
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "q_k1",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "q_k11",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "q_k11h",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "q_k12",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "q_k12h",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "q_k1h",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "q_k2m",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "q_k3",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "q_k3h",
+   "level": 1
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "s_k",
+   "level": 2
+  },
+  {
+   "domain": "snow-load",
+   "kind": null,
+   "role": "var",
+   "key": "schneeueberhang",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "M_y_N_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "M_y_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "M_z_N_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "M_z_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "N_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "a",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "a_y",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "a_z",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "alpha_N",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "beta_N",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "eta",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "n",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "xi",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "xi_y",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "step",
+   "key": "xi_z",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "A",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "M_y_Ed",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "M_y_N_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "M_y_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "M_z_Ed",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "M_z_N_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "M_z_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "N_Ed",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "N_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "QK",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "W_pl_y",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "W_pl_z",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "a",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "a_y",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "a_z",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "alpha_N",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "b",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "beta_N",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "eta",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "f_y",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "gamma_M1",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "h",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "n",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "t",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "t_f",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "xi",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "xi_y",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "bending",
+   "role": "var",
+   "key": "xi_z",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "class",
+   "role": "var",
+   "key": "M_y_Ed",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "class",
+   "role": "var",
+   "key": "N_Ed",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "class",
+   "role": "var",
+   "key": "QK",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "class",
+   "role": "var",
+   "key": "f_y",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "class",
+   "role": "var",
+   "key": "gamma_M1",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "compression",
+   "role": "step",
+   "key": "N_Rd",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "compression",
+   "role": "step",
+   "key": "eta",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "compression",
+   "role": "var",
+   "key": "A",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "compression",
+   "role": "var",
+   "key": "N_Ed",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "compression",
+   "role": "var",
+   "key": "N_Rd",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "compression",
+   "role": "var",
+   "key": "QK",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "compression",
+   "role": "var",
+   "key": "eta",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "compression",
+   "role": "var",
+   "key": "f_y",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "compression",
+   "role": "var",
+   "key": "gamma_M1",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "step",
+   "key": "M_V_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "step",
+   "key": "M_y_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "step",
+   "key": "V_z_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "step",
+   "key": "eta_M",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "step",
+   "key": "eta_V",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "step",
+   "key": "web_limit",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "step",
+   "key": "web_slenderness",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "A_v_z",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "E",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "M_V_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "M_y_Ed",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "M_y_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "QK",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "V_z_Ed",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "V_z_Rd",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "W_pl_y",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "b",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "eta_M",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "eta_V",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "f_y",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "gamma_M1",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "h",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "h_w",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "t_1",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "t_2",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "tau_y",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "web_limit",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "shear",
+   "role": "var",
+   "key": "web_slenderness",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "step",
+   "key": "N_Rd",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "step",
+   "key": "N_Rd_gross",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "step",
+   "key": "N_Rd_net",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "step",
+   "key": "eta",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "A",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "A_net",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "N_Ed",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "N_Rd",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "N_Rd_gross",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "N_Rd_net",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "eta",
+   "level": 1
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "f_u",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "f_y",
+   "level": 2
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "gamma_M1",
+   "level": 3
+  },
+  {
+   "domain": "steel",
+   "kind": "tension",
+   "role": "var",
+   "key": "gamma_M2",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "step",
+   "key": "ch",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "step",
+   "key": "qp",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "alpha_r",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "b",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "cd",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "ch",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "cred_bh",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "cred_dh",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "cred_max",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "d",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "gelaendekategorie",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "h",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_max_bh",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_max_cf1",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_max_cf2",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_max_cf3",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_max_cfs1",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_max_cfs2",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_max_cfs3",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_max_db",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_max_dh",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_min_bh",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_min_cf1",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_min_cf2",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_min_cf3",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_min_cfs1",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_min_cfs2",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_min_cfs3",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_min_db",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qk_min_dh",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qp",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "qp0",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "tabelle",
+   "level": 1
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "z",
+   "level": 3
+  },
+  {
+   "domain": "wind-load",
+   "kind": null,
+   "role": "var",
+   "key": "zg",
+   "level": 3
+  }
+ ]
+}

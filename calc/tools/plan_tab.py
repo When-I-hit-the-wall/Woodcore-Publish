@@ -15,7 +15,6 @@ The tab lives in its own module rather than in woodcore_gui.py, which lists it i
 
 import copy
 import json
-import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt
@@ -80,12 +79,13 @@ class PlanTab(PlanSelectionMixin, PlanBuildMixin, DrawingTab):
     """
 
     KIND = "position"
-    VIEW_KEY = "tab_plan"
+    KEY = "tab_plan"
+    GRAPH_KIND = "plan"   # issue #71
     STYLE_KIND = "plan"
     STYLE_PREFIX = "plan"
     ID_PREFIX = "P"
     PENDING_KEY = PENDING
-    WORDS = {}
+    WORD_MAP = {}
     domain = model
 
     # -- what DrawingTab asks of a position plan --
@@ -117,9 +117,6 @@ class PlanTab(PlanSelectionMixin, PlanBuildMixin, DrawingTab):
     def list_sources(self):
         return list_plans()
 
-    def plans_on(self, docid, page=None):
-        """[(id, source)] of the plans drawn on document `docid` -- on its page `page` where one is named --, in id order (DrawingTab.sources_on)."""
-        return self.sources_on(docid, page)
 
     def has_drawing(self, source):
         return bool(source.get("elements") or source.get("axes"))
@@ -185,7 +182,7 @@ class PlanTab(PlanSelectionMixin, PlanBuildMixin, DrawingTab):
             target = here.fire_dir / f"{fid}.json"
             try:
                 fire.check_source(detached, target.name)
-                target.write_text(json.dumps(detached, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+                engine.write_json(target, detached)
             except (validation.ValidationError, OSError) as exc:
                 notices_ui.tell(str(exc), notifications.CRITICAL, exc=exc, source="plan_tab")
                 continue
@@ -271,15 +268,15 @@ class PlanTab(PlanSelectionMixin, PlanBuildMixin, DrawingTab):
         self.position_ids = [p["position"] for p in self.positions]
         self.position_by_id = {p["position"]: p for p in self.positions}
 
-    def export_plans(self, done_text):
-        """Export the plans without naming one: what a drop needs, which changes a field and no drawing."""
+    def export_listed(self, text):
+        """The plans exported without naming one -- what a drop into a folder or an archive needs, which changes a field and no drawing."""
         self.finish_layer_export()   # a layer switched being exported in its thread: finished first (drawing_tab, v0.116)
         try:
-            model.export(project.current().plans_dir, project.current().root, project.current().data_dir, self.position_ids, self.text_values())
+            model.export(project.current().plans_dir, project.current().root, project.current().data_dir, self.position_ids, self.text_values(), positions_store.section_types(self.positions))
         except (validation.ValidationError, engine.EngineError, OSError) as exc:
             notices_ui.tell(self.t("plan_move_failed", error=exc), notifications.CRITICAL, exc=exc, key="plan_move_failed", args=dict(error=exc), source="plan_tab")
             return False
-        self.app.set_status(done_text)
+        self.app.set_status(text)
         return True
 
     def save(self, quiet=False):
@@ -291,6 +288,8 @@ class PlanTab(PlanSelectionMixin, PlanBuildMixin, DrawingTab):
         model.figure_text.refresh_all(source, self.text_values())
         if not source.get("texts"):
             source.pop("texts", None)   # the last text deleted: written as before one was placed
+        if not source.get("outlines"):
+            source.pop("outlines", None)   # and so for the building's outline (issue #54): an empty list is no field of a plan's file
         source["schema_version"] = model.version_of(source)
         pid = source.get("id", "")
         if not model.ID_PATTERN.match(pid):
@@ -323,7 +322,7 @@ class PlanTab(PlanSelectionMixin, PlanBuildMixin, DrawingTab):
         orphans = [] if quiet else self.orphaned(target if not renaming else project.current().plans_dir / f"{old}.json", source)
         try:
             project.current().plans_dir.mkdir(parents=True, exist_ok=True)
-            writes = [(target, (json.dumps(source, indent=2, ensure_ascii=False) + "\n").replace("\n", os.linesep).encode("utf-8"),
+            writes = [(target, engine.source_bytes(source),  # LF on every platform (spec 2026-10-19-base-saine-nettoyage, G1)
                        target.read_bytes() if target.is_file() else None)]
             store = positions_store.path(project.current())
             rows = positions_store.read(project.current())
@@ -341,6 +340,8 @@ class PlanTab(PlanSelectionMixin, PlanBuildMixin, DrawingTab):
                     positions_store.check_row(row)
                 writes.append((store, positions_store.encode([positions_store.check_row(row) for row in rows] + made), store.read_bytes() if store.is_file() else None))
             sharing.commit(writes)
+            if made or changed:
+                positions_store.write_workbook(project.current())   # the workbook beside positions.json, never read, follows it (issue #64, D-24)
             if renaming:
                 (project.current().plans_dir / f"{old}.json").unlink(missing_ok=True)
         except (OSError, validation.ValidationError) as exc:
@@ -416,7 +417,8 @@ class PlanTab(PlanSelectionMixin, PlanBuildMixin, DrawingTab):
         """The plans' part of the export, run here and now: data/plans.json and data/plans/, from every saved source. A failure -- another plan's file that no longer validates, a background that was moved -- leaves data/ as it was and says why."""
         self.finish_layer_export()   # a layer switched being exported in its thread: finished first (drawing_tab, v0.116)
         try:
-            notes = model.export(project.current().plans_dir, project.current().root, project.current().data_dir, self.position_ids, self.text_values())
+            # with the positions' section types, which a bracing wall's construction mode is held against (issue #54)
+            notes = model.export(project.current().plans_dir, project.current().root, project.current().data_dir, self.position_ids, self.text_values(), positions_store.section_types(self.positions))
         except (validation.ValidationError, engine.EngineError, OSError) as exc:
             if quiet:
                 self.app.set_status(self.t("plan_export_failed", id=pid, error=exc))

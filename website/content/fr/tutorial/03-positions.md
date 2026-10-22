@@ -28,8 +28,8 @@ Le numéro commence par la lettre du type — `T` pour une poutre, `S` pour un p
 
 ## Dans le rapport
 
-Chaque position apparaît dans la liste des matériaux du rapport sans rien écrire : la section `003-baustoffe.typ` parcourt toutes les positions avec `#member`, qui imprime la ligne d'une position au niveau 1 — et, pour le bois à section rectangulaire ou ronde, inscrit au passage ce que lisent les vérifications de la SIA 265 (étape 7). Si une position n'a pas de section ou de classe, `#member` dit ce qu'il ne peut pas calculer, et l'on donne alors les valeurs dans l'appel : `grade:`, `moisture-class:`, `b:`, `h:`.
+Chaque position apparaît dans la liste des matériaux du rapport sans rien écrire : la section `003-baustoffe.typ` parcourt toutes les positions avec `#position`, qui imprime la ligne d'une position — son id dans la couleur de son type, puis les champs demandés (`category-show:`), la section, la classe de résistance, la description.
 
-{{example member-3}}
+{{example position-2}}
 
 Une position ajoutée ou modifiée dans l'onglet arrive dans le rapport aussitôt : l'export suit l'enregistrement.

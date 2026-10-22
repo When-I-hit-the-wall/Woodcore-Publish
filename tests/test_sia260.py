@@ -2,7 +2,7 @@
 
 What a load combination will scale a variable action by (SIA 260 4.4.3, equations (16) to (23)) is ψ0, ψ1 or ψ2 of Tabelle 2. **They are transcribed and checked here for the combinations to come, and shown nowhere for the live loads** (the engineer, 01.10.2026): no instance of the live-load domain carries them any more, and no live-load table prints them -- the last tests of this file hold that. What is held here is what decides each of the table's words:
 
-* **the values are the page's.** Transcribed by hand from `ExternalFiles/000-Normes/SIA260-2013-DE.pdf` p. 33, so the table is written out a second time below, from the render of the page, and -- where the library is here -- read back out of the German, French and English editions' text layers, which print the same thirty-nine cells;
+* **the values are the page's.** Transcribed by hand from `SIA260-2013-DE.pdf` p. 33, so the table is written out a second time below, from the render of the page, and -- where the library is here -- read back out of the German, French and English editions' text layers, which print the same thirty-nine cells;
 * **the checks fire.** Every guard of `sia260._check_table_2` is exercised against a planted defect: a guard that has never fired is a guard nobody has tested, and these ones only ever run on a file that is already right;
 * **snow is a formula and is never evaluated** -- a number handed out for it would be a value the norm does not state;
 * **a category of SIA 261 Tabelle 8 reaches its row** (A1 to A3 to A, C1 to C3 to C), every one of the twelve, category E included although it has no load;
@@ -10,6 +10,8 @@ What a load combination will scale a variable action by (SIA 260 4.4.3, equation
 
 ⚠️ The page check is skipped where the reference library is not beside the program.
 """
+
+TIER = "fast"  # tests/run_tests.py --fast
 
 import copy
 import json
@@ -29,7 +31,7 @@ import validation
 
 PROJECT = conftest.PROJECT
 NAME = sia260.TAB02
-LIBRARY = ROOT.parent / "ExternalFiles" / "000-Normes"
+LIBRARY = conftest.norms_library()  # the folder of the norms' PDFs, named by WOODCORE_NORMS_LIBRARY on a machine that has it (spec 2026-10-19-base-saine-nettoyage, REQ-004)
 
 # Tabelle 2, p. 33, written out a second time from the render of the page (German edition): id, ψ0, ψ1, ψ2. Independent of the JSON on purpose -- a typo in one is caught by the other.
 PAGE_33 = (
@@ -326,7 +328,7 @@ def _factors(line):
 def test_the_values_are_p_33_of_the_german_french_and_english_editions():
     """The three editions' text layers print the same thirty-six numbers as the file and the same three snow formulas -- the stronger of the two checks on a hand transcription, and the one that needs the reference library (docs/architecture/reference-library.md §11bis)."""
     if not (LIBRARY / "SIA260-2013-DE.pdf").is_file():
-        raise Skip("no reference library beside the program (%s)" % LIBRARY)
+        raise Skip("no reference library here -- name the folder of the norms' PDFs in %s" % conftest.NORMS_ENV)
     for lang, (filename, stop, words, category) in WORDS.items():
         if not (LIBRARY / filename).is_file():
             raise Skip("%s is not in the reference library" % filename)
@@ -391,7 +393,8 @@ def test_no_category_carries_a_psi_and_the_loads_are_the_norms():
         assert names[-1] == ("hinweis" if category == "E" else "Q_k"), (category, names)
     a1 = instances["A1"]["vars"]
     assert (a1["q_k"]["value"], a1["Q_k"]["value"], a1["kategorie"]["value"]) == (2, 2, "A1")
-    assert a1["q_k"]["level"] == 1 and a1["nutzflaeche"]["level"] == 2
+    import line_levels   # a line carries no level since v0.120: lib/line-levels.json says it (UI-002)
+    assert line_levels.level("live-load", "q_k") == 1 and line_levels.level("live-load", "nutzflaeche") == 2 and "level" not in a1["q_k"]
     e = instances["E"]["vars"]
     assert "q_k" not in e and "Q_k" not in e and "hinweis" in e
 
@@ -429,18 +432,21 @@ def test_the_example_projects_frozen_export_carries_no_psi():
 
 
 def test_no_live_load_command_prints_a_psi():
-    """`#show-calc("live-load", …)` at level 3 has no row of Reduktionsbeiwerte, and a `live-load-table` has no ψ column."""
+    """A category of Tabelle 8 as Woodcore writes it out (spec 2026-10-21-commandes-typst-refonte, REQ-017; `#show-calc("live-load", …)` until then) has no row of Reduktionsbeiwerte at level 3."""
     if not conftest.have_typst():
         raise Skip("typst is not on the path")
     d = conftest.tmpdir("sia260_none")
-    for f in ("commands.typ", "config.typ"):
-        shutil.copyfile(PROJECT.typst_root / f, d / f)
+    for f in ("commands.typ", "config.typ"):   # where the project keeps them: 000-Typst-Config/ laid out by folders (issue #64)
+        source = PROJECT.config_dir / f
+        target = d / source.relative_to(PROJECT.typst_root)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
     relative = PROJECT.generated_dir.relative_to(PROJECT.typst_root)
     shutil.copytree(PROJECT.generated_dir, d / relative, copy_function=shutil.copyfile, ignore=shutil.ignore_patterns("out", "docs"))
     probe = d / ".probe" / "probe.typ"
     probe.parent.mkdir(parents=True, exist_ok=True)
-    probe.write_text('#import "/config.typ": conf\n#import "/commands.typ": *\n#show: conf\n#show-calc("live-load", "A1", level: 3)\n'
-                     '#live-load-table(rows: ((use: [Wohnen], category: "A1"),))\n', encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/config.typ": conf\n#import "/000-Typst-Config/commands.typ": *\n#show: conf\n#calc-defaults(level: 3, scope: "document")\n'
+                     + (PROJECT.root / "Variable-loads" / "Live" / "A1.typ").read_text(encoding="utf-8").split("\n", 1)[1], encoding="utf-8")
     out = d / ".probe" / "probe.pdf"
     run = subprocess.run(["typst", "compile", "--root", str(d), str(probe), str(out)], capture_output=True, text=True, encoding="utf-8", errors="replace")
     assert run.returncode == 0, run.stderr

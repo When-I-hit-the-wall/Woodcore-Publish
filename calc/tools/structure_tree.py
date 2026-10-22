@@ -49,9 +49,7 @@ SYNC_TOKENS = {"incoming": "override", "conflict": "danger", "ignored": "muted",
 # The icon of each kind of row: a group, a file, and an object by its type.
 KIND_ICONS = {
     "group": "kind_group", "file": "kind_file", "heading": "kind_heading", "text": "kind_text",
-    "doc-table": "kind_table", "dead-load-table": "kind_table", "live-load-table": "kind_load",
-    "doc-field": "kind_field", "doc-checklist": "kind_checklist", "doc-choice": "kind_choice",
-    "doc-image": "kind_image", "doc-plan": "kind_plan", "doc-fire-plan": "kind_fire_plan", "doc-extract": "kind_extract", "doc-annexes": "kind_annexes", "doc-signatures": "kind_signatures", "show-norm-list": "kind_norms",
+    "table": "kind_table", "show-norm-list": "kind_norms",
 }
 # What a row can be dragged as: the families a drop treats alike. A heading of a file that carries no tags is no object and goes with its file; an object taken out of the document (`removed`) goes nowhere until it is put back.
 DRAGGABLE = ("group", "file", "object")
@@ -260,19 +258,6 @@ class StructureTree(QTreeWidget):
             self._building = False
         return True
 
-    def set_stopped(self, ids, tip=""):
-        """The files whose sharing the engineer stopped, by node id: each shows its link mark **greyed** where it is shared with nobody -- the file is no longer shared, and the mark says it was -- and `tip` as that mark's tooltip. Applied to the rows there are now, and again to the rows `set_nodes` makes. Nothing is said."""
-        self.stopped, self.stopped_tip = set(ids), tip
-        for node_id, row in self.items.items():
-            node = self.nodes[node_id]
-            if node.shared_with:
-                continue
-            if node_id in self.stopped:
-                row.setIcon(LINK, chrome.icon("badge_link", theme.colour("muted"), LINK_PX))
-                row.setToolTip(LINK, tip)
-            else:
-                row.setIcon(LINK, QIcon())
-                row.setToolTip(LINK, "")
 
     def set_sync(self, sync, sync_tips=None):
         """The rows coloured and marked again by another `sync` function -- the state against the other documents changed, the rows did not. Nothing is said."""

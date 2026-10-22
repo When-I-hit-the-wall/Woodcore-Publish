@@ -35,8 +35,8 @@ def _main_window():
 
 
 def _editors(win):
-    """The tabs that have something to save: the plans, the static models and the polar moments."""
-    return [w for w in win.tabs if hasattr(w, "dirty")]
+    """The tabs that have something to save in a list of their own: the plans, the static models, the polar moments… -- not the «Projet» tab, whose one draft is the title page and which lists nothing (issue #87)."""
+    return [w for w in win.tabs if hasattr(w, "dirty") and hasattr(w, "list")]
 
 
 def _rows(tab):

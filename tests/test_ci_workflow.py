@@ -3,6 +3,8 @@
 Read as text, the standard library having no YAML reader -- the way tests/test_site.py reads site.yml.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import re
 
 from conftest import ROOT
@@ -21,7 +23,7 @@ def _jobs(ci):
     return dict(zip(parts[1::2], parts[2::2]))
 
 
-def test_the_suite_runs_at_every_push_and_pull_request_and_windows_on_the_default_branch():
+def test_the_suite_runs_at_every_push_and_pull_request_and_windows_runs_the_fast_tier_or_the_whole_suite_on_the_default_branch():
     ci = _text()
     triggers = re.search(r"^on:\n((?:[ \t]+.*\n|\n)+?)(?=^\S)", ci, re.M).group(1)
     assert re.findall(r"^  ([a-z_]+):", triggers, re.M) == ["push", "pull_request"], triggers
@@ -30,7 +32,9 @@ def test_the_suite_runs_at_every_push_and_pull_request_and_windows_on_the_defaul
     assert set(jobs) == {"linux", "windows"}, jobs.keys()
     assert "runs-on: ubuntu-" in jobs["linux"] and "if:" not in jobs["linux"].split("steps:")[0], "Linux runs at every push and pull request"
     assert "runs-on: windows-" in jobs["windows"]
-    assert "github.ref == 'refs/heads/master'" in jobs["windows"] and "github.event_name == 'push'" in jobs["windows"], "Windows on the default branch only (master, as site.yml's)"
+    head, steps = jobs["windows"].split("steps:", 1)
+    assert "if:" not in head, "Windows runs at every push and pull request (REQ-006, spec 2026-10-19-base-saine-nettoyage)"
+    assert 'tier="--fast"' in steps and '"${{ github.ref }}" = "refs/heads/master"' in steps and "run_tests.py --times $tier" in steps, "the fast tier on Windows, the whole suite at a push to master"
 
 
 def test_each_job_prepares_the_machine_with_the_bootstrap_alone_and_runs_the_runner():
@@ -53,4 +57,5 @@ def test_it_trusts_only_github_s_own_actions_pinned_by_commit_and_may_only_read(
     assert "secrets." not in ci, "the suite needs no secret"
     for action in re.findall(r"^\s+(?:- )?uses: (\S+)", ci, re.M):
         assert action.startswith("actions/") and re.search(r"@[0-9a-f]{40}$", action), f"{action}: only GitHub's own actions, pinned by the commit"
-    assert re.search(r'python-version: "3\.13"', ci), "the Python the build and the site use (packaging/notices.PYTHON)"
+    pinned = re.search(r'^PYTHON = "([\d.]+)"', (ROOT / "packaging" / "notices.py").read_text(encoding="utf-8"), re.M).group(1)
+    assert re.search(r'python-version: "' + re.escape(pinned) + '"', ci), "the Python the build and the site use (packaging/notices.PYTHON)"

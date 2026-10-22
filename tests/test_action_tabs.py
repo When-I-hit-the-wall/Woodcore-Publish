@@ -7,6 +7,8 @@ What is held: the two sections are sub-titles of the group «Actions», placed b
 ⚠️ Built off-screen; nothing here opens a menu or a dialog.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import os
 import sys
 from types import SimpleNamespace

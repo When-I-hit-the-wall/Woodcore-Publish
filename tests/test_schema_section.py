@@ -7,6 +7,8 @@ The engineer set three rules, and the file is written on them rather than on the
 What it also holds, because each was got wrong on the way: the label of a beam through a column sits on the beam's own visible part and not under the node (v0.72 to v0.74 put it on a two-point element's far END, and the first v0.75 draft on its middle, under the rotation centre); a construction line the report leaves out is drawn in the editor (it was invisible there since v0.72); and a 1.0 source reads as 1.1 without its drawing moving.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 import math
 
@@ -245,11 +247,11 @@ def test_the_exported_figures_carry_the_label():
     connectors = conftest.exported("connectors.json")["connectors"]
     for sid, element in followed:
         assert element["b"] and element["h"] and element["width"] in (element["b"], element["h"]), element
-        names = ["schemas/%s-de.svg" % sid]
+        names = [schemas[sid]["figures"]["de"]["file"]]
         names += [c["figure"]["files"]["de"] for c in connections.values() if c.get("schema") == sid]
         names += [c["figures"]["pattern"]["de"] for c in connectors.values() if c.get("schema") == sid and c.get("figures")]
         for name in names:
-            text = (conftest.PROJECT.data_dir / name).read_text(encoding="utf-8")
+            text = conftest.figure(conftest.PROJECT, name).read_text(encoding="utf-8")
             assert element["label"] in text, f"{name} does not carry the label {element['label']!r}"
 
 

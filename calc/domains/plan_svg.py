@@ -1,6 +1,6 @@
 """The drawing of a position plan, as SVG text: the STE symbols (STE Compact 02, «Plandarstellung im Holzbau») of every element with its position number, the axes with their bubbles and the lengths of the walls, over a white veil that lets the architect's plan show through; and the swatches of the symbols a plan uses, which show-plan sets in its legend beside what each stands for (docs/domain/position-plans.md §3.3sexies). The scale bar is the report's: show-plan draws it under the plan, where it hides nothing.
 
-One drawing serves both places it is seen. Woodcore's window shows it over the background while a plan is edited, and export writes it to data/plans/<id>.svg, which lib/calc-engine.typ's show-plan sets over the same background in the report -- so the plan the engineer drew is the plan the checker reads. That is why it is built as plain text here, with no Qt: export_all.py draws it too, without a window. The symbols follow the reference editor in 000-positionsPlan, whose code is not reused: its colours and proportions are the STE convention, and are what is taken from it.
+One drawing serves both places it is seen. Woodcore's window shows it over the background while a plan is edited, and export writes it to data/plans/<id>.svg (Plans/Position-plan/Exports/Figures/<id>.svg in a project laid out by folders, issue #64), which lib/calc-engine.typ's show-plan sets over the same background in the report -- so the plan the engineer drew is the plan the checker reads. That is why it is built as plain text here, with no Qt: export_all.py draws it too, without a window. The symbols follow the reference editor in 000-positionsPlan, whose code is not reused: its colours and proportions are the STE convention, and are what is taken from it.
 
 It is kept to what both renderers read alike. QtSvg implements SVG Tiny 1.2, which has no <pattern>, no clipPath, no <marker>, no CSS and no paint-order: a concrete wall's hatching is made of segments cut to its outline here, a text's white halo is the text drawn twice, and an arrowhead is a polygon. Coordinates are the plan's sheet units (plan.py), y down.
 
@@ -12,34 +12,43 @@ Since v0.99 the three sliders are two levels: the plan's own (`Sizes`, `sizes_of
 import math
 from xml.sax.saxutils import escape
 
+from domains import svg_draw  # the one writer of an SVG number and text (D6)
+from domains import dimension  # one unit vector and one label box (ARCH-004)
 from domains import figure_style
 from domains import figure_text  # a text placed with the Text tool, the four engines' one (issue #43)
 from domains import plan as model
+from domains import plan_centres  # where the stiffness centre and the mass centre are: computed there, drawn here (issue #54)
+from domains.dimension import _local  # plane geometry written once (D4)
 
 # The STE colours.
-ORANGE = "#E8841A"
-VIOLET = "#7C3AA0"
-BLUE = "#2E5FAA"
-GREEN = "#2E8B40"
-BROWN = "#8A5A2B"
-LIGHT_BLUE = "#3FA9D6"
-YELLOW = "#F4D03F"
-GREY = "#9AA4AC"
+ORANGE = svg_draw.colour("orange")
+VIOLET = svg_draw.colour("violet")
+BLUE = svg_draw.colour("blue")
+GREEN = svg_draw.colour("green")
+BROWN = svg_draw.colour("brown")
+LIGHT_BLUE = svg_draw.colour("light-blue")
+YELLOW = svg_draw.colour("yellow")
+GREY = svg_draw.colour("aid")
+INK = svg_draw.colour("ink")
+GROUND = svg_draw.colour("ground")
+MUTED = svg_draw.colour("muted")
+CONCRETE = svg_draw.colour("concrete")
+CONCRETE_DECK = svg_draw.colour("concrete-deck")
 COLOURS = {"V": ORANGE, "H": VIOLET, "W": ORANGE, "T": BLUE, "S": BLUE, "A": VIOLET, "D": BROWN,
            "M": GREEN, "L": LIGHT_BLUE, "Ö": YELLOW, "B": GREY, "PL": ORANGE, "LL": ORANGE}
 # A W carries both an orange and a violet symbol, so its number is set in black.
-LABEL_COLOURS = {"W": "#111111"}
+LABEL_COLOURS = {"W": INK}
 # The load-path plan's symbols (v0.116, STE Compact 02 pp. 14-15) take their colour from their subtype, not their type: a vertical load orange, a horizontal one violet, one acting both ways violet with orange in it -- its number then in black, as a W's.
 LOAD_COLOURS = {"vert": ORANGE, "horiz": VIOLET, "vh": VIOLET}
-LOAD_LABEL_COLOURS = {"vert": ORANGE, "horiz": VIOLET, "vh": "#111111"}
+LOAD_LABEL_COLOURS = {"vert": ORANGE, "horiz": VIOLET, "vh": INK}
 # A section's load transfer level (STE p. 14, «Niveau de reprise des charges»): a red dash-dot line, a red arrow coming down onto each end, and its words beside it.
-LOAD_LEVEL_COLOUR = "#D32F2F"
+LOAD_LEVEL_COLOUR = svg_draw.colour("red")
 # The types whose number sits in a stadium rather than a rectangle, as in the STE legend.
 STADIUM = {"T", "A", "D"}
-AXIS_COLOUR = "#333333"
-FLAG_COLOUR = "#ff3b30"
+AXIS_COLOUR = svg_draw.colour("axis")
+FLAG_COLOUR = svg_draw.colour("red")
 # One family, not a list: QtSvg takes the whole font-family string as a single name, so a list matched nothing and Woodcore set the numbers in a fallback face (statics_svg.FONT; periodic audit 260916, AUD-6-24).
-FONT = "Arial"
+FONT = svg_draw.FONT
 
 HIGHLIGHT_MARK = "<!-- highlight -->"
 AXES_OPEN = "<!-- axes -->"
@@ -60,6 +69,14 @@ DIMENSION_COLOUR = AXIS_COLOUR
 # The lengths written beside the elements (issue #9), between markers `show-plan(lengths: false)` takes out -- written only where a length is drawn.
 LENGTHS_OPEN = "<!-- lengths -->"
 LENGTHS_CLOSE = "<!-- /lengths -->"
+# The stiffness centre S, the mass centre M and the building's outline (issue #54, domains/plan_centres.py), between markers `show-plan(centres: false)` takes out -- two pairs of them, the outline under the symbols and the two centres over the numbers --, written only where there is one of the three to draw and only where `render` is asked for them: Woodcore's window always is, the export where the plan says so (`print_centres`). S is drawn in the bracing walls' violet, being theirs; M and the outline in the axes' ink.
+CENTRES_OPEN = "<!-- centres -->"
+CENTRES_CLOSE = "<!-- /centres -->"
+STIFFNESS_COLOUR = VIOLET
+MASS_COLOUR = AXIS_COLOUR
+OUTLINE_COLOUR = AXIS_COLOUR
+# Their three legend lines, by key -- the lines `centres: false` takes out of a legend (`legend_items` marks them).
+CENTRE_KEYS = ("Steifigkeitszentrum", "Massenzentrum", "Umriss")
 
 # The symbols' unit, in sheet units, is the longer side of the frame the report shows divided by this: at the report's full text width a position number then comes out about 6 pt high, whatever the frame, and the style sliders scale it from there.
 UNIT_DIVISOR = 850.0
@@ -90,25 +107,23 @@ LEGEND = (
     ("LL:vh", "Linienlast vertikal und horizontal"),
     ("Lastniveau", "Lastübergabeniveau"),
     ("Achse", "Achse"),
+    ("Steifigkeitszentrum", "Steifigkeitszentrum"),
+    ("Massenzentrum", "Massenzentrum"),
+    ("Umriss", "Gebäudeumriss"),
 )
 # A legend swatch, in mm, and the symbols' unit in it: fine lines, the symbols' own proportions -- the plan's sliders size the plan's symbols for the plan, and a legend drawn with them came out coarse.
 LEGEND_SWATCH = (10.0, 3.6)
 LEGEND_UNIT = 0.12
 
 
-def _f(value):
-    """A coordinate as short SVG text: three decimals at most, trailing zeros dropped."""
-    text = f"{value:.3f}".rstrip("0").rstrip(".")
-    return "0" if text in ("-0", "") else text
+_f = svg_draw.number_at(3)   # a coordinate at 3 decimals (svg_draw.py, D6)
 
 
 def _pts(points):
     return " ".join(f"{_f(x)},{_f(y)}" for x, y in points)
 
 
-def _unit(a, b):
-    d = math.dist(a, b) or 1.0
-    return ((b[0] - a[0]) / d, (b[1] - a[1]) / d)
+_unit = dimension.unit   # (ARCH-004: one copy, D-15)
 
 
 def base_unit(crop):
@@ -197,7 +212,7 @@ def _dotted(out, points, colour, sz, width=4.6):
 def _double(out, points, colour, sz, outer=7.0, core=3.8):
     """Two thin parallel lines -- a bracing wall: a thick coloured line with a white one down its middle."""
     _polyline(out, points, colour, sz.line(outer))
-    _polyline(out, points, "#ffffff", sz.line(core))
+    _polyline(out, points, GROUND, sz.line(core))
 
 
 def _arrowhead(out, tip, towards, colour, sz):
@@ -320,17 +335,17 @@ def opening_wedge(points, sz):
 
 def _opening(out, points, sz):
     """An opening: a yellow rectangle with a thin black outline, and a black wedge of two triangles meeting in its top right corner (STE; opening_wedge)."""
-    out.append(f'<polygon points="{_pts(points)}" fill="{YELLOW}" fill-opacity="0.92" stroke="#111111" stroke-width="{_f(sz.line(0.8))}"/>')
+    out.append(f'<polygon points="{_pts(points)}" fill="{YELLOW}" fill-opacity="0.92" stroke="{INK}" stroke-width="{_f(sz.line(0.8))}"/>')
     wedge = opening_wedge(points, sz)
     if wedge is not None:
-        out.append(f'<polygon points="{_pts(wedge)}" fill="#111111"/>')
+        out.append(f'<polygon points="{_pts(wedge)}" fill="{INK}"/>')
 
 
 def _concrete(out, element, points, sz):
     if element.get("subtype") == "decke":
-        out.append(f'<polygon points="{_pts(points)}" fill="#E2E5E8" fill-opacity="0.85" stroke="{GREY}" stroke-width="{_f(sz.line(1))}"/>')
+        out.append(f'<polygon points="{_pts(points)}" fill="{CONCRETE_DECK}" fill-opacity="0.85" stroke="{GREY}" stroke-width="{_f(sz.line(1))}"/>')
         return
-    out.append(f'<polygon points="{_pts(points)}" fill="#EDEFF1" fill-opacity="0.7" stroke="#7E8890" stroke-width="{_f(sz.line(1))}"/>')
+    out.append(f'<polygon points="{_pts(points)}" fill="{CONCRETE}" fill-opacity="0.7" stroke="{MUTED}" stroke-width="{_f(sz.line(1))}"/>')
     # crossed hatching at 45°, cut to the outline
     x0, y0, x1, y1 = model.bbox(points)
     spacing = sz.line(9)
@@ -343,7 +358,7 @@ def _concrete(out, element, points, sz):
         for k in range(-count, count + 1):
             through = (centre[0] + normal[0] * k * spacing, centre[1] + normal[1] * k * spacing)
             segments += model.line_in_polygon(through, direction, points)
-    _segments(out, segments, "#8A949C", sz.line(0.9))
+    _segments(out, segments, MUTED, sz.line(0.9))
 
 
 def _end_ticks(out, points, colour, sz):
@@ -436,7 +451,7 @@ def _symbol(out, element, sz, label="", compact=False):
             _square(out, p, sz.point(12), colour, angle=element.get("angle") or 0.0)   # turned about its centre (source 1.4)
         elif type_ == "L":
             s = sz.point(14)
-            _square(out, p, s, colour, fill="#ffffff", stroke=colour, stroke_width=sz.line(2), opacity=0.7)
+            _square(out, p, s, colour, fill=GROUND, stroke=colour, stroke_width=sz.line(2), opacity=0.7)
             _segments(out, [((p[0] - s / 2, p[1]), (p[0] + s / 2, p[1])), ((p[0], p[1] - s / 2), (p[0], p[1] + s / 2))], colour, sz.line(1.5))
 
 
@@ -469,7 +484,7 @@ def _text(out, point, content, size, colour, anchor="middle", bold=False, rotate
     body = escape(content)
     common = f'x="{_f(tx)}" y="{_f(ty)}" font-family="{FONT}" font-size="{_f(size)}" text-anchor="{anchor}"{weight}{transform}'
     if halo:
-        out.append(f'<text {common} fill="#ffffff" stroke="#ffffff" stroke-width="{_f(halo)}" stroke-linejoin="round">{body}</text>')
+        out.append(f'<text {common} fill="{GROUND}" stroke="{GROUND}" stroke-width="{_f(halo)}" stroke-linejoin="round">{body}</text>')
     out.append(f'<text {common} fill="{colour}">{body}</text>')
 
 
@@ -521,25 +536,13 @@ def number_frames(source):
     return frames
 
 
-def _local(frame, point):
-    """`point` in the frame of a number's box: from its centre, x along its text, y across it."""
-    a = math.radians(frame["angle"])
-    dx, dy = point[0] - frame["at"][0], point[1] - frame["at"][1]
-    return (dx * math.cos(a) + dy * math.sin(a), -dx * math.sin(a) + dy * math.cos(a))
-
-
 def on_number(frame, point, margin=0.0):
     """Whether `point` lies on a number's box, or within `margin` of it."""
     x, y = _local(frame, point)
     return abs(x) <= frame["hw"] + margin and abs(y) <= frame["hh"] + margin
 
 
-def number_corners(frame, margin=0.0):
-    """The four corners of a number's box, `margin` beyond its edges, turned with its text."""
-    a = math.radians(frame["angle"])
-    c, s = math.cos(a), math.sin(a)
-    (x, y), hw, hh = frame["at"], frame["hw"] + margin, frame["hh"] + margin
-    return [(x + u * c - v * s, y + u * s + v * c) for u, v in ((-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh))]
+number_corners = dimension.box_corners   # (ARCH-004: one copy)
 
 
 def _leader(out, element, sz):
@@ -594,7 +597,7 @@ def _number(out, element, sz, flagged=False):
     rx = hh if type_ in STADIUM else sz.text(3)
     rotate = f' transform="translate({_f(at[0])},{_f(at[1])}) rotate({_f(angle)})"' if angle else ""
     ox, oy = (0.0, 0.0) if angle else at
-    out.append(f'<rect x="{_f(ox - hw)}" y="{_f(oy - hh)}" width="{_f(2 * hw)}" height="{_f(2 * hh)}" rx="{_f(rx)}" ry="{_f(rx)}" fill="#ffffff" stroke="{border}" stroke-width="{_f(sz.text(1.6))}"{rotate}/>')
+    out.append(f'<rect x="{_f(ox - hw)}" y="{_f(oy - hh)}" width="{_f(2 * hw)}" height="{_f(2 * hh)}" rx="{_f(rx)}" ry="{_f(rx)}" fill="{GROUND}" stroke="{border}" stroke-width="{_f(sz.text(1.6))}"{rotate}/>')
     _text(out, at, label, sz.text(11.2), text_colour, bold=True, rotate=angle or None)
     if type_ == "M" and model.element_kind(element) == "line":
         # a green square beside the number, as in the legend
@@ -663,7 +666,7 @@ def _axes(out, source, crop, plan_sz):
             _polyline(out, [la, lb], AXIS_COLOUR, sz.line(0.8), dash=dash, join="miter")
         for show, centre in ((start, ca), (end, cb)):
             if show:
-                out.append(f'<circle cx="{_f(centre[0])}" cy="{_f(centre[1])}" r="{_f(radius)}" fill="#ffffff" stroke="{AXIS_COLOUR}" stroke-width="{_f(sz.line(1))}"/>')
+                out.append(f'<circle cx="{_f(centre[0])}" cy="{_f(centre[1])}" r="{_f(radius)}" fill="{GROUND}" stroke="{AXIS_COLOUR}" stroke-width="{_f(sz.line(1))}"/>')
                 _text(out, centre, axis["label"], sz.text(10), AXIS_COLOUR, bold=True)
 
 
@@ -698,11 +701,11 @@ def _storeys(out, source, sz):
         for centre in (ca, cb):
             rotate = f' transform="translate({_f(centre[0])},{_f(centre[1])}) rotate({_f(angle)})"' if angle else ""
             ox, oy = (0.0, 0.0) if angle else centre
-            out.append(f'<rect x="{_f(ox - hw)}" y="{_f(oy - hh)}" width="{_f(2 * hw)}" height="{_f(2 * hh)}" rx="{_f(hh)}" ry="{_f(hh)}" fill="#ffffff" stroke="{STOREY_COLOUR}" stroke-width="{_f(sz.line(1))}"{rotate}/>')
+            out.append(f'<rect x="{_f(ox - hw)}" y="{_f(oy - hh)}" width="{_f(2 * hw)}" height="{_f(2 * hh)}" rx="{_f(hh)}" ry="{_f(hh)}" fill="{GROUND}" stroke="{STOREY_COLOUR}" stroke-width="{_f(sz.line(1))}"{rotate}/>')
             _text(out, centre, storey, sz.text(10), STOREY_COLOUR, bold=True, rotate=angle or None)
 
 
-def _labelled_box(out, centre, text, sz, colour, size=10.0, fill="#ffffff"):
+def _labelled_box(out, centre, text, sz, colour, size=10.0, fill=GROUND):
     """A text in a rectangle of its own, centred on `centre`: a storey box's designation."""
     hw, hh = (len(text) * sz.text(0.62 * size) + sz.text(8)) / 2, sz.text(0.85 * size)
     out.append(f'<rect x="{_f(centre[0] - hw)}" y="{_f(centre[1] - hh)}" width="{_f(2 * hw)}" height="{_f(2 * hh)}" fill="{fill}" stroke="{colour}" stroke-width="{_f(sz.line(1))}"/>')
@@ -769,10 +772,12 @@ def _load_levels(out, source, sz, lang):
         _text(out, frame["at"], frame["text"], sz.text(9.5), LOAD_LEVEL_COLOUR, halo=sz.text(3))
 
 
-def render(source, window=None, flagged=(), lang="de", values=None):
+def render(source, window=None, flagged=(), lang="de", values=None, centres=False):
     """The plan's symbols as an SVG document over `window` ({x, y, w, h} in sheet units): the frame the report shows (the export) or the whole sheet (Woodcore's window, which also passes `flagged`, labels to outline in red -- unknown to Positionen.xlsx, or drawn twice). Sizes are always those of the report's frame, so Woodcore shows the symbols at the size they will be printed at. `source` needs only its sheet, crop, style, scale, show_lengths, axes and elements; `background` decides whether the veil is drawn.
 
     `values` are the export's, which a text's variables print (issue #43, figure_text); without them a text prints its variables' last values.
+
+    `centres` asks for the stiffness centre S, the mass centre M and the building's outline (issue #54): Woodcore's window always does, the export where the plan says so (`print_centres`), and nothing else -- another plan shown over the open one is drawn without its own. Without it, and on a plan that has none of the three, the drawing is byte for byte the one this module wrote before.
 
     `lang` is the language of the engine's words a section's load transfer levels write (v0.116) -- the one drawing that carries any: a plan without one is drawn alike in every language.
 
@@ -789,7 +794,7 @@ def render(source, window=None, flagged=(), lang="de", values=None):
     if background is not None:
         veil = 1.0 - float(background.get("opacity", model.DEFAULT_OPACITY))
         if veil > 0:
-            out.append(f'<rect x="{_f(window["x"])}" y="{_f(window["y"])}" width="{_f(window["w"])}" height="{_f(window["h"])}" fill="#ffffff" fill-opacity="{_f(veil)}"/>')
+            out.append(f'<rect x="{_f(window["x"])}" y="{_f(window["y"])}" width="{_f(window["w"])}" height="{_f(window["h"])}" fill="{GROUND}" fill-opacity="{_f(veil)}"/>')
     out.append(HIGHLIGHT_MARK)
     out.append(AXES_OPEN)
     _axes(out, source, crop, sz)
@@ -807,6 +812,12 @@ def render(source, window=None, flagged=(), lang="de", values=None):
         _load_levels(out, source, sz, lang)
         out.append(LEVELS_CLOSE)
     _dimensions(out, source, sz)
+    found = plan_centres.state(source) if centres else None
+    if found and found["outline"]:
+        # the building's outline under every symbol, so that a wall drawn along it stays the wall
+        out.append(CENTRES_OPEN)
+        _outline(out, found["outline"], sz)
+        out.append(CENTRES_CLOSE)
 
     elements = list(enumerate(source.get("elements", [])))
     elements.sort(key=lambda item: (model.TYPES[item[1]["type"]]["z"], item[0]))
@@ -841,16 +852,77 @@ def render(source, window=None, flagged=(), lang="de", values=None):
                 _side_lengths(lengths, element, entry_sizes(sz, element), per_m)
     if lengths:
         out += [LENGTHS_OPEN, *lengths, LENGTHS_CLOSE]
+    if found and (found["mass"] or found["stiffness"]):
+        # the two centres over every symbol and number: M first, so that an S that falls on it -- the bracing laid out symmetrically -- rings it rather than hides it
+        out.append(CENTRES_OPEN)
+        if found["mass"]:
+            _mass_mark(out, found["mass"]["point"], sz)
+        if found["stiffness"]:
+            _stiffness_mark(out, found["stiffness"]["point"], sz)
+        out.append(CENTRES_CLOSE)
     draw_texts(out, source, sz, values)
     out.append("</svg>")
     return "\n".join(out) + "\n"
+
+
+# --- The stiffness centre, the mass centre and the outline (issue #54) -------------------------
+
+# The two marks, in the plan's point unit, and their letters in its text unit: M a disc of this radius, S a ring wide enough to hold it with a cross reaching past the ring.
+MASS_RADIUS = 7.0
+STIFFNESS_RADIUS = 10.5
+STIFFNESS_REACH = 1.45
+CENTRE_LETTER = 12.0
+
+
+def _outline(out, points, sz):
+    """The building's outline: a thin broken line through its corners and back to the first -- broken, where an axis is dash-dot and a wall a full stroke."""
+    ring = [*points, points[0]]
+    _polyline(out, ring, OUTLINE_COLOUR, sz.line(1.2), dash=f"{_f(sz.line(10))} {_f(sz.line(6))}", join="miter")
+
+
+def _mass_mark(out, point, sz, letter=True):
+    """The mass centre: the centre-of-gravity mark, a disc quartered with two opposite quarters full, and its letter M below and to its left -- the side S's letter is not on, so the two read where the two centres fall on one point."""
+    x, y = point
+    r = sz.point(MASS_RADIUS)
+    out.append(f'<circle cx="{_f(x)}" cy="{_f(y)}" r="{_f(r)}" fill="{GROUND}" stroke="{GROUND}" stroke-width="{_f(sz.line(3.4))}"/>')
+    for start in (0.0, 180.0):
+        # a quarter as a fan of short chords: SVG Tiny has no arc both renderers read alike (_angle_dimension)
+        fan = [(x + r * math.cos(math.radians(start + 15 * k)), y + r * math.sin(math.radians(start + 15 * k))) for k in range(7)]
+        out.append(f'<polygon points="{_pts([(x, y), *fan])}" fill="{MASS_COLOUR}"/>')
+    out.append(f'<circle cx="{_f(x)}" cy="{_f(y)}" r="{_f(r)}" fill="none" stroke="{MASS_COLOUR}" stroke-width="{_f(sz.line(1.3))}"/>')
+    if letter:
+        size = sz.text(CENTRE_LETTER)
+        _text(out, (x - r - 0.55 * size, y + r + 0.45 * size), "M", size, MASS_COLOUR, bold=True, halo=0.3 * size)
+
+
+def _stiffness_mark(out, point, sz, letter=True):
+    """The stiffness centre: a ring crossed by a cross that reaches past it, in the bracing walls' colour, and its letter S above and to its right. The ring is not filled: an M inside it shows."""
+    x, y = point
+    r = sz.point(STIFFNESS_RADIUS)
+    reach = STIFFNESS_REACH * r
+    cross = (((x - reach, y), (x + reach, y)), ((x, y - reach), (x, y + reach)))
+    for colour, width in ((GROUND, sz.line(3.6)), (STIFFNESS_COLOUR, sz.line(1.5))):
+        out.append(f'<circle cx="{_f(x)}" cy="{_f(y)}" r="{_f(r)}" fill="none" stroke="{colour}" stroke-width="{_f(width)}"/>')
+        _segments(out, cross, colour, width)
+    if letter:
+        size = sz.text(CENTRE_LETTER)
+        _text(out, (x + r + 0.55 * size, y - r - 0.45 * size), "S", size, STIFFNESS_COLOUR, bold=True, halo=0.3 * size)
+
+
+def centre_keys(source):
+    """The legend lines of what a plan prints of its centres (`print_centres`), each only where it is drawn: S, M, the outline -- none on a plan that prints none, which is then exported as it was."""
+    if not source.get("print_centres"):
+        return ()
+    found = plan_centres.state(source)
+    there = {"Steifigkeitszentrum": found["stiffness"], "Massenzentrum": found["mass"], "Umriss": found["outline"]}
+    return tuple(key for key in CENTRE_KEYS if there[key])
 
 
 # --- The texts (issue #43) -------------------------------------------------------------------
 
 # A text's size, in the plan's text unit: a position number's (`_number`), so a note reads as the plan's own lettering.
 TEXT_SIZE = 11.2
-TEXT_COLOUR = "#1f1f1f"
+TEXT_COLOUR = INK
 
 
 def text_frames(source, values=None, sz=None):
@@ -959,6 +1031,7 @@ def legend_keys(source):
         keys.add("Achse")
     if source.get("load_levels"):
         keys.add("Lastniveau")
+    keys.update(centre_keys(source))   # the stiffness centre, the mass centre and the outline, where the plan prints them (issue #54)
     return keys
 
 
@@ -995,8 +1068,18 @@ def _swatch_body(out, key, width, height, sz, bubble=None):
         radius = bubble or min(height * 0.42, sz.text(8.5))
         _polyline(out, [(0.05 * width, height / 2), (width - 2.2 * radius, height / 2)], AXIS_COLOUR, sz.line(0.8), dash=dash, join="miter")
         centre = (width - 1.1 * radius, height / 2)
-        out.append(f'<circle cx="{_f(centre[0])}" cy="{_f(centre[1])}" r="{_f(radius)}" fill="#ffffff" stroke="{AXIS_COLOUR}" stroke-width="{_f(sz.line(1))}"/>')
+        out.append(f'<circle cx="{_f(centre[0])}" cy="{_f(centre[1])}" r="{_f(radius)}" fill="{GROUND}" stroke="{AXIS_COLOUR}" stroke-width="{_f(sz.line(1))}"/>')
         _text(out, centre, "A", radius * 1.15, AXIS_COLOUR, bold=True)
+        return
+    if key == "Umriss":
+        inset = 0.2 * height
+        _outline(out, [(0.08 * width, inset), (0.92 * width, inset), (0.92 * width, height - inset), (0.08 * width, height - inset)], sz)
+        return
+    if key in ("Steifigkeitszentrum", "Massenzentrum"):
+        # the mark as the plan draws it, its letter beside it rather than at its corner: a swatch is a line high
+        mark, letter, colour = (_stiffness_mark, "S", STIFFNESS_COLOUR) if key == "Steifigkeitszentrum" else (_mass_mark, "M", MASS_COLOUR)
+        mark(out, (0.34 * width, height / 2), sz, letter=False)
+        _text(out, (0.72 * width, height / 2), letter, sz.text(CENTRE_LETTER), colour, bold=True)
         return
     element = _sample(key, width, height)
     _symbol(out, element, sz, compact=True)
@@ -1019,6 +1102,8 @@ def legend_items(source):
     for key, text in LEGEND:
         if key in keys:
             item = {"key": key, "text": text, "swatch": legend_swatch(key)}
+            if key in CENTRE_KEYS:
+                item["centres"] = True   # what `centres: false` takes out of a legend with the symbols it takes out of the drawing (lib/calc-engine.typ's plan-legend)
             if key in measured:
                 item["quantity"] = measured[key]
             items.append(item)
@@ -1027,7 +1112,7 @@ def legend_items(source):
 
 def swatch(type_, subtype=None, width=26, height=18):
     """A tool's icon, drawn like its legend line: the symbol of `type_` (and `subtype`) in a width × height box, for Woodcore's tool bar."""
-    key = type_ if type_ in ("Achse", "Lastniveau") else (f"{type_}:{subtype}" if subtype else type_)
+    key = type_ if type_ in ("Achse", "Lastniveau", *CENTRE_KEYS) else (f"{type_}:{subtype}" if subtype else type_)
     if type_ == "D" and not subtype:
         key = "D:scheibe"
     sz = Sizes(0.55 * height / 18, {"line": 1.0, "point": 1.0, "text": 1.0})

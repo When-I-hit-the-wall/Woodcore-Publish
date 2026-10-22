@@ -25,9 +25,8 @@ A project grows a plan per building, a static model per beam and a connector per
 **A multiple selection is dragged whole.** Pressing on an entry of a Ctrl/Shift selection changed the current entry, a tab loaded it and rebuilt the list, and the drag that was starting was lost with the rebuilt rows -- so only one file could be dragged. A press on an already-selected entry now leaves the selection and the current entry alone until it is known whether it is a drag (it then carries every selected entry in one drop, one `moved`) or a click (it then selects that entry alone, as the explorer does).
 """
 
-from PySide6.QtCore import QByteArray, QItemSelectionModel, QLineF, QRectF, QSize, Qt, Signal
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPalette, QPen, QPixmap
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import QItemSelectionModel, QLineF, QSize, Qt, Signal
+from PySide6.QtGui import QColor, QFont, QIcon, QPalette, QPen
 import list_order  # the order of the lists and the «Formules» tab's folders (calc/list_order.py, issue #15)
 import notifications  # every error, warning and information, gathered in one place (calc/notifications.py, v0.117)
 import notices_ui  # what was a message box is a notice since v0.117 (notices_ui.tell)
@@ -44,6 +43,7 @@ from PySide6.QtWidgets import (
     QTreeWidgetItem,
     QWidget,
 )
+import svg_icons
 
 # What an item carries, beside its text.
 ID_ROLE = Qt.ItemDataRole.UserRole          # a leaf's id; a folder carries None
@@ -63,18 +63,10 @@ FOLDER_SVG = {
 
 
 def folder_icon(opened, colour):
-    """The icon of a folder, open or shut, in `colour`, rendered at the screen's pixel ratio."""
+    """The icon of a folder, open or shut, in `colour` (svg_icons.svg_icon)."""
     svg = ('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%s" '
            'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">%s</svg>' % (colour, FOLDER_SVG[bool(opened)]))
-    app = QApplication.instance()
-    ratio = max(1.0, app.devicePixelRatio()) if app is not None else 1.0
-    pixmap = QPixmap(round(FOLDER_PX * ratio), round(FOLDER_PX * ratio))
-    pixmap.setDevicePixelRatio(ratio)
-    pixmap.fill(Qt.GlobalColor.transparent)
-    painter = QPainter(pixmap)
-    QSvgRenderer(QByteArray(svg.encode("utf-8"))).render(painter, QRectF(0, 0, FOLDER_PX, FOLDER_PX))
-    painter.end()
-    return QIcon(pixmap)
+    return svg_icons.svg_icon(svg, FOLDER_PX)
 
 
 def _ink(name):
@@ -143,10 +135,6 @@ class GroupedList(QTreeWidget):
 
     # --- words ----------------------------------------------------------------
 
-    def set_strings(self, strings, lang=None):
-        """The tab's own STRINGS for this widget's words, re-set on a language switch."""
-        self._strings = strings or {}
-        self._lang = lang or self._lang
 
     def _t(self, key, fallback):
         """A word of this widget. The tabs hand over their own STRINGS, which do not carry the `grp_` words -- woodcore_gui merges those into its own table only -- so they are looked up here by language: until v0.77 the folder menu said French in a German window."""
@@ -164,7 +152,7 @@ class GroupedList(QTreeWidget):
         self._order = (key, store, groups, regroup)
 
     def set_entries(self, entries, empty_folders=(), select=None, archived=()):
-        """`entries` is a list of {id, text, group, children?, colour?, tooltip?} -- a child {id, text, italic?}; `empty_folders` the ones the project cannot record; `archived` the archived sources as source_archive.entries() lists them, set under «Archives», the last row. `colour` paints a row's text and `tooltip` says why.
+        """`entries` is a list of {id, text, group, children?, colour?, tooltip?, fixed?} -- a child {id, text, italic?}; `fixed` keeps an entry in the `group` it is given, whatever folder the kept order files it in (the «Domaines» tab's group of a specialised tab's domain, issue #64); `empty_folders` the ones the project cannot record; `archived` the archived sources as source_archive.entries() lists them, set under «Archives», the last row. `colour` paints a row's text and `tooltip` says why.
 
         What was selected is selected again, and a folder the previous contents used stays when nothing is left in it -- unless it was removed or renamed here.
         """
@@ -175,7 +163,7 @@ class GroupedList(QTreeWidget):
             order, kept = store.tab(key)
             entries = list_order.ordered(list(entries), order)
             if groups:
-                entries = [dict(e, group=kept.get(e["id"], ROOT_GROUP)) for e in entries]
+                entries = [e if e.get("fixed") else dict(e, group=kept.get(e["id"], ROOT_GROUP)) for e in entries]
         self._entries = list(entries)
         self._archived = list(archived)
         used = {e.get("group") or ROOT_GROUP for e in self._entries}
@@ -349,9 +337,6 @@ class GroupedList(QTreeWidget):
         if item is not None:
             item.setIcon(0, icon if icon is not None else QIcon())
 
-    def clear_marks(self):
-        for item in self._items(("leaf", "child")):
-            item.setIcon(0, QIcon())
 
     def _on_current(self, current, _previous):
         if self._filling:
@@ -614,15 +599,7 @@ def title_row(heading, grouped, size=20):
     button = QToolButton()
     button.setAutoRaise(True)
     ink = grouped.palette().windowText().color().name()
-    renderer = QSvgRenderer(QByteArray(FOLDER_PLUS_SVG.replace("{ink}", ink).encode("utf-8")))
-    ratio = max(1.0, grouped.devicePixelRatioF())
-    pixmap = QPixmap(int(size * ratio), int(size * ratio))
-    pixmap.fill(Qt.GlobalColor.transparent)
-    painter = QPainter(pixmap)
-    renderer.render(painter)
-    painter.end()
-    pixmap.setDevicePixelRatio(ratio)
-    button.setIcon(QIcon(pixmap))
+    button.setIcon(svg_icons.svg_icon(FOLDER_PLUS_SVG.replace("{ink}", ink), size))
     button.setIconSize(QSize(size, size))
     button.setToolTip(grouped._t("grp_new", "Nouveau dossier…"))
     button.clicked.connect(grouped.new_folder)

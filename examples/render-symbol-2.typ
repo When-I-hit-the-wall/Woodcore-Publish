@@ -8,4 +8,4 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#for n in ("h_ref", "ce", "s_k") [ #render-symbol(var-of("snow-load", "SL", n)) #h(1em) ]
+#for s in ("h_\"ref\"", "C_e", "s_k") [ #render-symbol((symbol: s)) #h(1em) ]

@@ -86,32 +86,20 @@ from typst_objects_parse import (  # split out of this module (issue #30): every
     variable_cell,
 )
 from typst_objects_models import (  # split out of this module (issue #30): every name it had is still importable from it
-    AnnexesModel,
     CHECK_OPTION_KEYS,
     CHOICE_OPTION_KEYS,
     COLUMN_KEYS,
     COLUMN_KINDS,
-    ChecklistModel,
-    ChoiceModel,
     Column,
     DEFAULTS,
-    ExtractModel,
-    FieldModel,
-    FirePlanModel,
-    ImageModel,
     KNOWN_COLUMNS,
     LIVE_LOAD_FILLED,
-    LiveLoadTableModel,
     Model,
     ModelError,
     NormListModel,
-    PlanModel,
     SIGNATURE_KEYS,
-    SignaturesModel,
-    TableModel,
     _COLUMN_ID,
     _KEEP,
-    _Options,
     _bool_value,
     _drop,
     _id_value,
@@ -120,7 +108,6 @@ from typst_objects_models import (  # split out of this module (issue #30): ever
     _number_value,
     _put,
     _text_value,
-    _width_value,
 )
 from typst_objects_sheets import (  # split out of this module (issue #30): every name it had is still importable from it
     FireLegendModel,
@@ -229,7 +216,7 @@ class Object:
     @property
     def canonical(self):
         """What Woodcore would write in place of the body: the canonical form of its call, or of the type's defaults where the body cannot be read -- for a heading or a paragraph the body as its model writes it, and the body as it is where no model can read it."""
-        return self.replacement() if self.markup else serialize(self.replacement())
+        return self.replacement() if self.markup else body_of(self.replacement())
 
     def replacement(self):
         """The call Woodcore writes here where the engineer edits nothing: the body's own call, or the type's defaults (`default_call`) where it is unreadable. For a heading or a paragraph, the **body** that is written, a string: the model's own, or the body as it is where it cannot be read -- markup is never replaced by a default."""
@@ -257,9 +244,24 @@ class Object:
         return "\n".join(difflib.unified_diff(before, after, "as written", "as Woodcore writes it", lineterm=""))
 
 
+def body_of(call):
+    """What Woodcore writes between the tags of the object `call`: its canonical call -- or, for an object placed on an export sheet, its raw `#place(…) <kind>` (calc/typst_sheet_place.py, spec 2026-10-21-commandes-typst-refonte, Q-015)."""
+    import typst_sheet_place
+    return typst_sheet_place.to_place(call) if call.type in typst_sheet_place.PLACED else serialize(call)
+
+
 def _state(kind, body):
     """(state, call, error) of a body under a tag naming `kind`."""
     text = _normalise(body)
+    import typst_sheet_place
+    if kind in typst_sheet_place.PLACED and text.lstrip().startswith("#place("):
+        # an object of a sheet written in raw Typst (Q-015); one written before, `#sheet-…(…)`, is read below as the call it is, and written back in this form at its next change
+        try:
+            found = typst_sheet_place.from_place(text, kind)
+            written = typst_sheet_place.to_place(found)
+        except (ParseError, ValueError) as exc:
+            return "unreadable", None, str(exc)
+        return ("canonical" if written == text else "hand_edited"), found, None
     if kind in MARKUP_TYPES:
         try:
             model = model_for_body(kind, text)
@@ -330,7 +332,8 @@ def _markup_body(value, kind):
     if isinstance(value, Call):
         raise ObjectError("type_mismatch", f"the tag names {kind}, which is markup, and the value is the call #{value.type}", type=kind, call=value.type)
     try:
-        if isinstance(value, (HeadingModel, TextModel)):
+        import typst_raw_table
+        if isinstance(value, (HeadingModel, TextModel, typst_raw_table.RawTableModel)):
             if value.type != kind:
                 raise ObjectError("type_mismatch", f"the tag names {kind} and the model is a {value.type}'s", type=kind, call=value.type)
             return value.to_body()
@@ -345,7 +348,7 @@ def suggest_id(text, kind, body=None):
     """An id for a new object of `kind` in the file `text`, free in it: made of the words of the heading or the paragraph it is to hold (`body`, markup as written -- `einleitung`, `die-bemessung-der`), the command's own name for a call (`doc-table`), `heading` or `text` where there is nothing to make it of; `-2`, `-3` … after it where another object has it. Only a proposal: it is what `insert_object` takes."""
     if kind not in OBJECT_TYPES:
         raise ObjectError("bad_type", f"{kind!r} is not a parametric object -- expected one of {', '.join(OBJECT_TYPES)}", type=kind)
-    if kind in MARKUP_TYPES:
+    if kind in ("heading", "text"):
         base = _id_base(Untagged(kind, 0, 0, body or "", 1 if kind == "heading" else None), 1, "slug")
     else:
         base = kind
@@ -360,6 +363,17 @@ def _checked_body(call, kind):
         raise ObjectError("not_written", f"an object is written from a Call -- got {call!r}")
     if call.type != kind:
         raise ObjectError("type_mismatch", f"the tag names {kind} and the call is #{call.type}", type=kind, call=call.type)
+    import typst_sheet_place
+    if kind in typst_sheet_place.PLACED:
+        # a sheet's object: its raw #place (Q-015), read back as itself
+        try:
+            body = typst_sheet_place.to_place(call)
+            back = typst_sheet_place.to_place(typst_sheet_place.from_place(body, kind))
+        except (ParseError, ValueError) as exc:
+            raise ObjectError("not_written", f"the {kind} cannot be written: {exc}", type=kind) from None
+        if back != body:
+            raise ObjectError("not_written", f"the {kind} would not read back as itself once written", type=kind)
+        return body
     try:
         body = serialize(call)
     except ValueError as exc:
@@ -454,7 +468,23 @@ def remove_object(text, object_id):
 # --- a heading and a paragraph: objects whose body is markup --------------------------------------
 
 
-MARKUP_MODELS = {"heading": HeadingModel, "text": TextModel}
+class RawTableBody:
+    """The model of a raw table (calc/typst_raw_table.py) as the markup objects' models are made: `from_body`, `to_body()`, a new one a small table to fill -- a table out of the subset Woodcore edits refused as a ModelError, so that it is shown read only and never rewritten (ARCH-004)."""
+    DEFAULT = "#table(\n  columns: 2,\n  table.header([…], […]),\n  […], […],\n)"
+
+    @classmethod
+    def from_body(cls, body):
+        import typst_raw_table
+        try:
+            return typst_raw_table.RawTableModel(body)
+        except typst_raw_table.RawTableError as exc:
+            raise ModelError(exc.code, str(exc), reason=exc.code) from None
+
+    def __new__(cls, body=None):
+        return cls.from_body(cls.DEFAULT if body is None else body)
+
+
+MARKUP_MODELS = {"heading": HeadingModel, "text": TextModel, "table": RawTableBody}
 
 
 def default_body(kind):
@@ -479,18 +509,6 @@ def model_of(item):
 
 
 MODELS = {
-    "doc-table": TableModel,
-    "live-load-table": LiveLoadTableModel,
-    "dead-load-table": TableModel,
-    "doc-field": FieldModel,
-    "doc-checklist": ChecklistModel,
-    "doc-choice": ChoiceModel,
-    "doc-image": ImageModel,
-    "doc-plan": PlanModel,
-    "doc-fire-plan": FirePlanModel,
-    "doc-extract": ExtractModel,
-    "doc-annexes": AnnexesModel,
-    "doc-signatures": SignaturesModel,
     "show-norm-list": NormListModel,
     "sheet-page": SheetPageModel,
     "sheet-text": SheetTextModel,
@@ -542,6 +560,13 @@ def object_title(obj, limit=60):
         return _plain(title) or title.strip() or obj.id
     if obj.type == "text":
         return _clip(_plain(obj.written) or obj.id, limit)
+    if obj.type == "table":
+        # a table written in raw Typst: the caption of the figure it stands in (spec 2026-10-21-commandes-typst-refonte, ARCH-004)
+        try:
+            caption = model_for_body("table", obj.written).get("caption")
+        except Exception:   # broad: a table the model cannot read is named by its id, never refused here
+            caption = None
+        return _clip(_plain(caption) if caption else obj.id, limit)
     call = obj.call
     if call is not None:
         for key in ("caption", "label", "body", "title"):

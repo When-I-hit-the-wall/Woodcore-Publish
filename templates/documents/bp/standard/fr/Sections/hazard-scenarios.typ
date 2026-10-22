@@ -8,36 +8,25 @@
 Les situations de danger possibles ont été examinées et les mesures propres à tenir ces dangers sous contrôle ou à les réduire à un niveau acceptable sont définies (SIA 260, ch. 2.4.4). Les situations de danger considérées, avec leurs mesures, la suite à donner et les hypothèses de dimensionnement, sont les suivantes :
 // woodcore:/object p1
 
-// woodcore:object doc-checklist hazard-influences
-#doc-checklist(
-  label: [Influences pouvant représenter un danger (SIA 260, ch. 2.4.5)],
-  options: (
-    (id: "deviations-actions", label: [Écarts par rapport aux valeurs admises pour les actions], checked: true),
-    (id: "ground-actions", label: [Actions du terrain de fondation], checked: false),
-    (id: "natural-hazards", label: [Actions dues à des dangers naturels d'origine gravitationnelle ou météorologique], checked: false),
-    (id: "physical", label: [Actions physiques, p. ex. humidité ou température], checked: true),
-    (id: "chemical", label: [Actions chimiques, p. ex. sel de déverglaçage ou eaux souterraines], checked: false),
-    (id: "biological", label: [Actions biologiques, p. ex. insectes ou champignons], checked: true),
-    (id: "resonance", label: [Effets de résonance], checked: false),
-    (id: "resistance-deviations", label: [Écarts par rapport aux valeurs prévues de la résistance ultime de la structure ou du terrain], checked: false),
-    (id: "deterioration", label: [Réduction de la résistance par corrosion, fragilité ou fatigue], checked: false),
-    (id: "accidental", label: [Réduction de la résistance par le feu, une explosion, un choc, une rupture de conduite ou un séisme], checked: true),
-  ),
-)
+// woodcore:object text hazard-influences
+*Influences pouvant représenter un danger (SIA 260, ch. 2.4.5)* :
+- *Écarts par rapport aux valeurs admises pour les actions*
+- *Actions physiques, p. ex. humidité ou température*
+- *Actions biologiques, p. ex. insectes ou champignons*
+- *Réduction de la résistance par le feu, une explosion, un choc, une rupture de conduite ou un séisme*
 // woodcore:/object hazard-influences
 
-// woodcore:object doc-table hazard-scenarios-table
-#doc-table(
-  columns: (
-    (id: "scenario", title: [Situation de danger]),
-    (id: "measures", title: [Mesures]),
-    (id: "followup", title: [Suite à donner]),
-    (id: "assumptions", title: [Hypothèses pour l'analyse et le dimensionnement]),
-  ),
-  hidden: (),
-  rows: (
-    (scenario: [[Incendie]], measures: [[Compartiments coupe-feu, résistance au feu, dimensions suffisantes des éléments, revêtement de protection incendie]], followup: [[Concept de protection incendie ; étude de protection incendie]], assumptions: [[R 60]]),
-    (scenario: [[Séisme]], measures: [[Dimensionnement ; mesures constructives selon SIA 261]], followup: [[Calcul statique]], assumptions: [[Zone, classe de terrain, classe d'ouvrage, q]]),
+// woodcore:object table hazard-scenarios-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Situation de danger*], [*Mesures*], [*Suite à donner*], [*Hypothèses pour l'analyse et le dimensionnement*]),
+    table.hline(stroke: 0.5pt),
+    [[Incendie]], [[Compartiments coupe-feu, résistance au feu, dimensions suffisantes des éléments, revêtement de protection incendie]], [[Concept de protection incendie ; étude de protection incendie]], [[R 60]],
+    [[Séisme]], [[Dimensionnement ; mesures constructives selon SIA 261]], [[Calcul statique]], [[Zone, classe de terrain, classe d'ouvrage, q]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Situations de danger et mesures],
 )

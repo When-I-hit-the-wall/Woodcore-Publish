@@ -1,0 +1,256 @@
+{
+  "domains": {
+    "SD-10": {
+      "check": "SD-10",
+      "gen": {
+        "form": "aa50ac",
+        "kind": "connector",
+        "version": 2
+      },
+      "lines": {
+        "eq:K_ser": [
+          "1527fab77b191979",
+          "1527fab77b191979"
+        ],
+        "eq:K_ser_Verb": [
+          "e5d815d11a56c6aa",
+          "e5d815d11a56c6aa"
+        ],
+        "eq:R_d": [
+          "52e43c226575d284",
+          "52e43c226575d284"
+        ],
+        "eq:R_d_Verb": [
+          "8d30aff490411659",
+          "8d30aff490411659"
+        ],
+        "eq:beta_f": [
+          "a8b1dbee94ddc81c",
+          "a8b1dbee94ddc81c"
+        ],
+        "eq:k_beta_1": [
+          "6347ee2e0265ccbd",
+          "6347ee2e0265ccbd"
+        ],
+        "eq:k_beta_1_1": [
+          "b2c73c2e36cc618f",
+          "b2c73c2e36cc618f"
+        ],
+        "eq:k_beta_1_2": [
+          "a6ce19d0849460d0",
+          "a6ce19d0849460d0"
+        ],
+        "eq:k_beta_2": [
+          "7a57f33c9c0df2ed",
+          "7a57f33c9c0df2ed"
+        ],
+        "eq:k_beta_2_2": [
+          "88fcd8b8796699af",
+          "88fcd8b8796699af"
+        ],
+        "eq:k_beta_max": [
+          "c7cd4118d5c41d7e",
+          "c7cd4118d5c41d7e"
+        ],
+        "label:SD-10-description": [
+          "8bec524ea78d3721",
+          "8bec524ea78d3721"
+        ],
+        "label:SD-10-figure-pattern": [
+          "113b9f6a58dfe1a1",
+          "113b9f6a58dfe1a1"
+        ],
+        "label:SD-10-figure-section": [
+          "c0f76d9efc456eba",
+          "c0f76d9efc456eba"
+        ],
+        "label:SD-10-member": [
+          "499e78ac3cbe3aaa",
+          "499e78ac3cbe3aaa"
+        ],
+        "label:SD-10-presets": [
+          "3c078d7e853b5991",
+          "3c078d7e853b5991"
+        ],
+        "label:SD-10-table-1-figure-1": [
+          "d28c63da7c0b9cda",
+          "d28c63da7c0b9cda"
+        ],
+        "label:SD-10-table-1-figure-2": [
+          "6ca1d32ee254cb46",
+          "6ca1d32ee254cb46"
+        ],
+        "label:SD-10-table-1-note": [
+          "e64eac0cced7566c",
+          "e64eac0cced7566c"
+        ],
+        "label:SD-10-table-1-title": [
+          "a1edb1a9355fe839",
+          "a1edb1a9355fe839"
+        ],
+        "label:SD-10-table-2": [
+          "54d2666c56d04a2c",
+          "54d2666c56d04a2c"
+        ],
+        "label:SD-10-table-2-note": [
+          "efb20d2823ccc476",
+          "efb20d2823ccc476"
+        ],
+        "label:SD-10-table-2-title": [
+          "9cb398c320252671",
+          "9cb398c320252671"
+        ],
+        "var:K_ser_1": [
+          "b4d3b1e7fc880f13",
+          "b4d3b1e7fc880f13"
+        ],
+        "var:K_ser_2": [
+          "5ae60b184a8c41d1",
+          "5ae60b184a8c41d1"
+        ],
+        "var:M_u_k": [
+          "420683fc44307b2b",
+          "420683fc44307b2b"
+        ],
+        "var:a_1_1": [
+          "925b85b03b896ba0",
+          "925b85b03b896ba0"
+        ],
+        "var:a_1_2": [
+          "4f863c3e7799a912",
+          "4f863c3e7799a912"
+        ],
+        "var:alpha_1": [
+          "71bef3b9bb95b7e9",
+          "71bef3b9bb95b7e9"
+        ],
+        "var:alpha_2": [
+          "2595ce548470e4ab",
+          "2595ce548470e4ab"
+        ],
+        "var:d": [
+          "141c3dec18ba1458",
+          "141c3dec18ba1458"
+        ],
+        "var:eta_t": [
+          "3dd8ffc5c0644695",
+          "3dd8ffc5c0644695"
+        ],
+        "var:eta_w": [
+          "f7dea2788877257d",
+          "f7dea2788877257d"
+        ],
+        "var:eta_w_ser": [
+          "9ef6ef53e90ce1a9",
+          "9ef6ef53e90ce1a9"
+        ],
+        "var:f_h_0_1": [
+          "d9fc3284b163a71a",
+          "d9fc3284b163a71a"
+        ],
+        "var:f_h_0_2": [
+          "2e2ff2d2405f921b",
+          "2e2ff2d2405f921b"
+        ],
+        "var:f_h_1": [
+          "1586cc9425c46c43",
+          "1586cc9425c46c43"
+        ],
+        "var:f_h_2": [
+          "9ac9f25ab0f9f6ad",
+          "9ac9f25ab0f9f6ad"
+        ],
+        "var:f_h_90_1": [
+          "7d999d8ac30daedf",
+          "7d999d8ac30daedf"
+        ],
+        "var:f_h_90_2": [
+          "528cb89170f11176",
+          "528cb89170f11176"
+        ],
+        "var:f_u_k": [
+          "a89e7353428f73fa",
+          "a89e7353428f73fa"
+        ],
+        "var:k_alpha": [
+          "c44b18fd5fd39aa1",
+          "c44b18fd5fd39aa1"
+        ],
+        "var:k_beta": [
+          "0caa6c2bba78cd25",
+          "0caa6c2bba78cd25"
+        ],
+        "var:k_red": [
+          "cf3a482c1f8444ce",
+          "cf3a482c1f8444ce"
+        ],
+        "var:k_red_1": [
+          "ec63bfd9bc32dfd8",
+          "ec63bfd9bc32dfd8"
+        ],
+        "var:k_red_2": [
+          "3bcb3f6b929535fb",
+          "3bcb3f6b929535fb"
+        ],
+        "var:n_1": [
+          "87682ba38d9599a7",
+          "87682ba38d9599a7"
+        ],
+        "var:n_2": [
+          "93c6975656949ccc",
+          "93c6975656949ccc"
+        ],
+        "var:n_quer_1": [
+          "b37386f1df6676b4",
+          "b37386f1df6676b4"
+        ],
+        "var:n_quer_2": [
+          "4fd31ef452799e92",
+          "4fd31ef452799e92"
+        ],
+        "var:n_tot": [
+          "940dee8c7f89b34f",
+          "940dee8c7f89b34f"
+        ],
+        "var:p": [
+          "a3ad9eb1b3bec8d1",
+          "a3ad9eb1b3bec8d1"
+        ],
+        "var:p_k_beta": [
+          "1994644d2e53e710",
+          "1994644d2e53e710"
+        ],
+        "var:rho_k_1": [
+          "6d8f27e56cdf4806",
+          "6d8f27e56cdf4806"
+        ],
+        "var:rho_k_2": [
+          "32e3da92dca1701e",
+          "32e3da92dca1701e"
+        ],
+        "var:t_1": [
+          "647f813402dfb3ab",
+          "647f813402dfb3ab"
+        ],
+        "var:t_2": [
+          "38e1e18c84ca5212",
+          "38e1e18c84ca5212"
+        ],
+        "var:t_c_1_1": [
+          "adbc6bf9c7f781e7",
+          "adbc6bf9c7f781e7"
+        ],
+        "var:t_c_1_2": [
+          "a7586a9cacb12036",
+          "a7586a9cacb12036"
+        ],
+        "var:t_c_2_2": [
+          "1dd773c91d7816aa",
+          "1dd773c91d7816aa"
+        ]
+      }
+    }
+  },
+  "format": "woodcore-unfold",
+  "schema_version": "1.0"
+}

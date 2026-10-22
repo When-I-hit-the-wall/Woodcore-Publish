@@ -1,0 +1,1364 @@
+{
+  "domains": {
+    "BI-01": {
+      "check": "BI-01",
+      "gen": {
+        "form": "(14)",
+        "kind": "bending",
+        "version": 2
+      },
+      "lines": {
+        "eq:W_y": [
+          "347375a116979aae",
+          "347375a116979aae"
+        ],
+        "eq:W_z": [
+          "b86e9ddbfabd3e0b",
+          "b86e9ddbfabd3e0b"
+        ],
+        "eq:eta": [
+          "9b798dfc3b74595a",
+          "9b798dfc3b74595a"
+        ],
+        "eq:eta_s": [
+          "f957d51571934b6c",
+          "f957d51571934b6c"
+        ],
+        "eq:sigma_m_y_d": [
+          "64f6d75bc68355fb",
+          "64f6d75bc68355fb"
+        ],
+        "eq:sigma_m_z_d": [
+          "6707ab1c335b2e47",
+          "6707ab1c335b2e47"
+        ],
+        "label:BI-01-member": [
+          "4c60ff436a32dda0",
+          "4c60ff436a32dda0"
+        ],
+        "label:BI-01-part": [
+          "b1ef0bad34066578",
+          "b1ef0bad34066578"
+        ],
+        "label:BI-01-presets": [
+          "22769bf161f4f752",
+          "22769bf161f4f752"
+        ],
+        "var:M_y_d": [
+          "faa570b4f330f142",
+          "faa570b4f330f142"
+        ],
+        "var:M_z_d": [
+          "42a161076185d85e",
+          "42a161076185d85e"
+        ],
+        "var:b": [
+          "871336104465b287",
+          "871336104465b287"
+        ],
+        "var:eta_t": [
+          "1ac52455f59a0c3b",
+          "1ac52455f59a0c3b"
+        ],
+        "var:eta_w": [
+          "993f9912a01b1b73",
+          "993f9912a01b1b73"
+        ],
+        "var:f_m_y_d": [
+          "44c307c0ad3fb6b1",
+          "44c307c0ad3fb6b1"
+        ],
+        "var:f_m_z_d": [
+          "00f3a5db6df186ed",
+          "00f3a5db6df186ed"
+        ],
+        "var:h": [
+          "6f60ed8a938386bd",
+          "6f60ed8a938386bd"
+        ],
+        "verify:v-14": [
+          "fa34b0ea00fab431",
+          "fa34b0ea00fab431"
+        ]
+      }
+    },
+    "BI-02": {
+      "check": "BI-02",
+      "gen": {
+        "form": "(22)",
+        "kind": "bending",
+        "version": 2
+      },
+      "lines": {
+        "eq:A": [
+          "9617af3ebb789002",
+          "9617af3ebb789002"
+        ],
+        "eq:W_y": [
+          "347375a116979aae",
+          "347375a116979aae"
+        ],
+        "eq:eta": [
+          "f9d0fcbb32daa0d8",
+          "f9d0fcbb32daa0d8"
+        ],
+        "eq:eta_s": [
+          "f1c13f2737ddc634",
+          "f1c13f2737ddc634"
+        ],
+        "eq:f_c_0_d": [
+          "1abec8b4ecb7f2e9",
+          "1abec8b4ecb7f2e9"
+        ],
+        "eq:sigma_c_0_d": [
+          "ab822906c5446e10",
+          "ab822906c5446e10"
+        ],
+        "eq:sigma_m_y_d": [
+          "64f6d75bc68355fb",
+          "64f6d75bc68355fb"
+        ],
+        "label:BI-02-member": [
+          "ebfd26fa323d827e",
+          "ebfd26fa323d827e"
+        ],
+        "label:BI-02-part": [
+          "49a8e4f12a4e817e",
+          "49a8e4f12a4e817e"
+        ],
+        "label:BI-02-presets": [
+          "460a8b90dae63842",
+          "460a8b90dae63842"
+        ],
+        "var:M_y_d": [
+          "dab4c7b9c458dcc9",
+          "dab4c7b9c458dcc9"
+        ],
+        "var:N_c_d": [
+          "5d046ef9de4e934e",
+          "5d046ef9de4e934e"
+        ],
+        "var:b": [
+          "b54d6ee279f82bc4",
+          "b54d6ee279f82bc4"
+        ],
+        "var:eta_t": [
+          "d2e53f69907f9fe6",
+          "d2e53f69907f9fe6"
+        ],
+        "var:eta_w": [
+          "c833d4cc0cb8aa8d",
+          "c833d4cc0cb8aa8d"
+        ],
+        "var:f_c_0_d_tab": [
+          "aed012bfd1b70c3a",
+          "aed012bfd1b70c3a"
+        ],
+        "var:f_m_y_d": [
+          "d699854efb6096cf",
+          "d699854efb6096cf"
+        ],
+        "var:h": [
+          "4ec1eee052fab6fb",
+          "4ec1eee052fab6fb"
+        ],
+        "verify:v-22": [
+          "014638a7a64ebbda",
+          "014638a7a64ebbda"
+        ]
+      }
+    },
+    "BI-03": {
+      "check": "BI-03",
+      "gen": {
+        "form": "(21), (9), (19), (20)",
+        "kind": "bending",
+        "version": 2
+      },
+      "lines": {
+        "eq:A": [
+          "9617af3ebb789002",
+          "9617af3ebb789002"
+        ],
+        "eq:W_y": [
+          "347375a116979aae",
+          "347375a116979aae"
+        ],
+        "eq:eta": [
+          "4593766da3190368",
+          "4593766da3190368"
+        ],
+        "eq:eta_m_c": [
+          "0d4daf105d56fcda",
+          "0d4daf105d56fcda"
+        ],
+        "eq:eta_m_t": [
+          "3ac7952425beb28f",
+          "3ac7952425beb28f"
+        ],
+        "eq:f_c_90_d": [
+          "41f897befbe8e6a4",
+          "41f897befbe8e6a4"
+        ],
+        "eq:f_t_0_d": [
+          "f3ff0c937fb438fc",
+          "f3ff0c937fb438fc"
+        ],
+        "eq:f_t_90_d": [
+          "07b1ea98bb09ab8f",
+          "07b1ea98bb09ab8f"
+        ],
+        "eq:f_t_alpha_d": [
+          "1d8cb7ce20c6b79a",
+          "1d8cb7ce20c6b79a"
+        ],
+        "eq:k_mc_alpha": [
+          "655d5c5365831c58",
+          "655d5c5365831c58"
+        ],
+        "eq:k_mt_alpha": [
+          "bcd55fefcc21d223",
+          "bcd55fefcc21d223"
+        ],
+        "eq:sigma_m_alpha_d": [
+          "c963f9d150a1b7b5",
+          "c963f9d150a1b7b5"
+        ],
+        "eq:sigma_t_alpha_d": [
+          "c95f8a8de84a2f56",
+          "c95f8a8de84a2f56"
+        ],
+        "label:BI-03-member": [
+          "354e6d780eb1dacf",
+          "354e6d780eb1dacf"
+        ],
+        "label:BI-03-part": [
+          "0c01e92a3d99694b",
+          "0c01e92a3d99694b"
+        ],
+        "label:BI-03-presets": [
+          "8eef2a8e7b15bd3e",
+          "8eef2a8e7b15bd3e"
+        ],
+        "var:M_y_d": [
+          "6052254c5166e27c",
+          "6052254c5166e27c"
+        ],
+        "var:N_t_d": [
+          "3f64ab1c457e06e1",
+          "3f64ab1c457e06e1"
+        ],
+        "var:alpha": [
+          "ff8935e119b206ef",
+          "ff8935e119b206ef"
+        ],
+        "var:b": [
+          "281573f97c4b5112",
+          "281573f97c4b5112"
+        ],
+        "var:eta_t": [
+          "af68f33cd157c26a",
+          "af68f33cd157c26a"
+        ],
+        "var:eta_w": [
+          "5da45500b1417315",
+          "5da45500b1417315"
+        ],
+        "var:f_c_90_d_tab": [
+          "444d79d3dcdaaca8",
+          "444d79d3dcdaaca8"
+        ],
+        "var:f_m_y_d": [
+          "92c36f1365178403",
+          "92c36f1365178403"
+        ],
+        "var:f_t_0_d_tab": [
+          "3a067540f1c37ea8",
+          "3a067540f1c37ea8"
+        ],
+        "var:f_t_90_d_tab": [
+          "db69ba3a695ddf14",
+          "db69ba3a695ddf14"
+        ],
+        "var:h": [
+          "b3c5ebc56d8c2f97",
+          "b3c5ebc56d8c2f97"
+        ],
+        "var:k_h_y": [
+          "c836c5989072abb1",
+          "c836c5989072abb1"
+        ],
+        "verify:v-21-9-19-20": [
+          "2b961db5beb9625a",
+          "2b961db5beb9625a"
+        ]
+      }
+    },
+    "DR-01": {
+      "check": "DR-01",
+      "gen": {
+        "form": "(11)",
+        "kind": "compression",
+        "version": 2
+      },
+      "lines": {
+        "eq:A_c": [
+          "9dc36009384c6e25",
+          "9dc36009384c6e25"
+        ],
+        "eq:eta": [
+          "952e21773507ba1d",
+          "952e21773507ba1d"
+        ],
+        "eq:f_c_90_d": [
+          "4a89c73f2bb4861a",
+          "4a89c73f2bb4861a"
+        ],
+        "eq:sigma_c_90_d": [
+          "6048170821e4397e",
+          "6048170821e4397e"
+        ],
+        "label:DR-01-member": [
+          "f883911dd51b4634",
+          "f883911dd51b4634"
+        ],
+        "label:DR-01-part": [
+          "9de02c17dc7195fe",
+          "9de02c17dc7195fe"
+        ],
+        "label:DR-01-presets": [
+          "8fd741f43d5857e6",
+          "8fd741f43d5857e6"
+        ],
+        "var:F_c_d": [
+          "14dbb74dbb55f4c7",
+          "14dbb74dbb55f4c7"
+        ],
+        "var:b": [
+          "c3563bc65e578e2e",
+          "c3563bc65e578e2e"
+        ],
+        "var:eta_t": [
+          "ff44b695baa55d5d",
+          "ff44b695baa55d5d"
+        ],
+        "var:eta_w": [
+          "87c89b1e275df0d7",
+          "87c89b1e275df0d7"
+        ],
+        "var:f_c_90_d_tab": [
+          "f0e8ac431c85a0ac",
+          "f0e8ac431c85a0ac"
+        ],
+        "var:h": [
+          "ed3c28c93cc00720",
+          "ed3c28c93cc00720"
+        ],
+        "var:l_c": [
+          "f4e0cfab31dcfd80",
+          "f4e0cfab31dcfd80"
+        ],
+        "var:w_c": [
+          "c255edc61834b7a9",
+          "c255edc61834b7a9"
+        ],
+        "verify:v-11": [
+          "33a634554bad3e11",
+          "33a634554bad3e11"
+        ]
+      }
+    },
+    "DR-02": {
+      "check": "DR-02",
+      "gen": {
+        "form": "(10)",
+        "kind": "compression",
+        "version": 2
+      },
+      "lines": {
+        "eq:A": [
+          "9617af3ebb789002",
+          "9617af3ebb789002"
+        ],
+        "eq:eta": [
+          "b0b461a92e5ce230",
+          "b0b461a92e5ce230"
+        ],
+        "eq:eta_s": [
+          "767e671fc6061e10",
+          "767e671fc6061e10"
+        ],
+        "eq:f_c_0_d": [
+          "ffb2174deed87ef3",
+          "ffb2174deed87ef3"
+        ],
+        "eq:sigma_c_0_d": [
+          "ab822906c5446e10",
+          "ab822906c5446e10"
+        ],
+        "label:DR-02-member": [
+          "7f38d77ce1172210",
+          "7f38d77ce1172210"
+        ],
+        "label:DR-02-part": [
+          "c53c9689a201727e",
+          "c53c9689a201727e"
+        ],
+        "label:DR-02-presets": [
+          "8f99321ece7b9cde",
+          "8f99321ece7b9cde"
+        ],
+        "var:N_c_d": [
+          "8501853299671abe",
+          "8501853299671abe"
+        ],
+        "var:b": [
+          "d0819e486541d0be",
+          "d0819e486541d0be"
+        ],
+        "var:eta_t": [
+          "de7a2b3cfac81528",
+          "de7a2b3cfac81528"
+        ],
+        "var:eta_w": [
+          "5121d73fbae076c9",
+          "5121d73fbae076c9"
+        ],
+        "var:f_c_0_d_tab": [
+          "db9c80ff68eb20f1",
+          "db9c80ff68eb20f1"
+        ],
+        "var:h": [
+          "3377fed4aa2747a1",
+          "3377fed4aa2747a1"
+        ],
+        "verify:v-10": [
+          "4c9dfa34f0039c01",
+          "4c9dfa34f0039c01"
+        ]
+      }
+    },
+    "FE-01": {
+      "check": "FE-01",
+      "gen": {
+        "form": "(14)",
+        "kind": "bending",
+        "version": 2
+      },
+      "lines": {
+        "eq:W_y": [
+          "347375a116979aae",
+          "347375a116979aae"
+        ],
+        "eq:b": [
+          "e13ea59e4fccb07b",
+          "e13ea59e4fccb07b"
+        ],
+        "eq:d_char_n": [
+          "b7fc5582526b9ac6",
+          "b7fc5582526b9ac6"
+        ],
+        "eq:d_ef": [
+          "09949d214ce13dc7",
+          "09949d214ce13dc7"
+        ],
+        "eq:eta": [
+          "e9eda09ea01ed3bf",
+          "e9eda09ea01ed3bf"
+        ],
+        "eq:eta_s": [
+          "8cf0dc377d022262",
+          "8cf0dc377d022262"
+        ],
+        "eq:h": [
+          "0ec6f7317b0ff89e",
+          "0ec6f7317b0ff89e"
+        ],
+        "eq:sigma_m_y_d": [
+          "64f6d75bc68355fb",
+          "64f6d75bc68355fb"
+        ],
+        "label:FE-01-member": [
+          "251d9ccd07e7980b",
+          "251d9ccd07e7980b"
+        ],
+        "label:FE-01-part": [
+          "bc65588302353983",
+          "bc65588302353983"
+        ],
+        "label:FE-01-presets": [
+          "e84f71829be53068",
+          "e84f71829be53068"
+        ],
+        "var:M_y_d": [
+          "8e9cfaf5b95be12d",
+          "8e9cfaf5b95be12d"
+        ],
+        "var:b_0": [
+          "4d673cd26a79958e",
+          "4d673cd26a79958e"
+        ],
+        "var:beta_n": [
+          "2163387131cf4265",
+          "2163387131cf4265"
+        ],
+        "var:d_red": [
+          "ab929cc2f52e0b3e",
+          "ab929cc2f52e0b3e"
+        ],
+        "var:eta_t": [
+          "579e7016c0688094",
+          "579e7016c0688094"
+        ],
+        "var:eta_w": [
+          "488bf99463b7ca38",
+          "488bf99463b7ca38"
+        ],
+        "var:f_m_y_d": [
+          "9b76985f1eb1ed39",
+          "9b76985f1eb1ed39"
+        ],
+        "var:h_0": [
+          "debf1adb112f6abe",
+          "debf1adb112f6abe"
+        ],
+        "var:k_fi": [
+          "29ceec590af02b07",
+          "29ceec590af02b07"
+        ],
+        "var:t_fi": [
+          "a0eb25e990c1119e",
+          "a0eb25e990c1119e"
+        ],
+        "verify:v-14": [
+          "a534ef953f92770c",
+          "a534ef953f92770c"
+        ]
+      }
+    },
+    "FE-02": {
+      "check": "FE-02",
+      "gen": {
+        "form": "(10), (29)",
+        "kind": "buckling",
+        "version": 2
+      },
+      "lines": {
+        "eq:A": [
+          "9617af3ebb789002",
+          "9617af3ebb789002"
+        ],
+        "eq:b": [
+          "e13ea59e4fccb07b",
+          "e13ea59e4fccb07b"
+        ],
+        "eq:d_char_n": [
+          "b7fc5582526b9ac6",
+          "b7fc5582526b9ac6"
+        ],
+        "eq:d_ef": [
+          "09949d214ce13dc7",
+          "09949d214ce13dc7"
+        ],
+        "eq:eta": [
+          "884b17c62ded2599",
+          "884b17c62ded2599"
+        ],
+        "eq:eta_s": [
+          "767e671fc6061e10",
+          "767e671fc6061e10"
+        ],
+        "eq:eta_y": [
+          "e269d6f38c0bfb1c",
+          "e269d6f38c0bfb1c"
+        ],
+        "eq:eta_z": [
+          "e6e4262c041d2b1b",
+          "e6e4262c041d2b1b"
+        ],
+        "eq:f_c_0_d": [
+          "04ca30b8be47a050",
+          "04ca30b8be47a050"
+        ],
+        "eq:h": [
+          "b8031bcce22ac0a4",
+          "b8031bcce22ac0a4"
+        ],
+        "eq:k_c_y": [
+          "e5281b51927e5e20",
+          "e5281b51927e5e20"
+        ],
+        "eq:k_c_z": [
+          "f7b337294478311a",
+          "f7b337294478311a"
+        ],
+        "eq:k_y": [
+          "be73c19f1a6cc972",
+          "be73c19f1a6cc972"
+        ],
+        "eq:k_z": [
+          "91899e4d017a3a42",
+          "91899e4d017a3a42"
+        ],
+        "eq:lambda_rel_y": [
+          "64a5eced81312114",
+          "64a5eced81312114"
+        ],
+        "eq:lambda_rel_z": [
+          "f3fb62c51110592e",
+          "f3fb62c51110592e"
+        ],
+        "eq:lambda_y": [
+          "f12561a1fa845111",
+          "f12561a1fa845111"
+        ],
+        "eq:lambda_z": [
+          "d36cafcccd5234b9",
+          "d36cafcccd5234b9"
+        ],
+        "eq:sigma_c_0_d": [
+          "ab822906c5446e10",
+          "ab822906c5446e10"
+        ],
+        "label:FE-02-member": [
+          "ce743c2e0ae095ce",
+          "ce743c2e0ae095ce"
+        ],
+        "label:FE-02-part": [
+          "9a568d7db5823414",
+          "9a568d7db5823414"
+        ],
+        "label:FE-02-presets": [
+          "030e625e4eafdea5",
+          "030e625e4eafdea5"
+        ],
+        "var:E_0_05": [
+          "0913059dbe8a8a63",
+          "0913059dbe8a8a63"
+        ],
+        "var:N_c_d": [
+          "c08bb2fb809746c8",
+          "c08bb2fb809746c8"
+        ],
+        "var:b_0": [
+          "094bc8a303dc5ccc",
+          "094bc8a303dc5ccc"
+        ],
+        "var:beta_c": [
+          "316f020fb3f99f2a",
+          "316f020fb3f99f2a"
+        ],
+        "var:beta_n": [
+          "3f3ae31e23944c7b",
+          "3f3ae31e23944c7b"
+        ],
+        "var:d_red": [
+          "b665853eed512a08",
+          "b665853eed512a08"
+        ],
+        "var:eta_t": [
+          "3cdfe80f66a684a1",
+          "3cdfe80f66a684a1"
+        ],
+        "var:eta_w": [
+          "89a877f2ff3f6eb4",
+          "89a877f2ff3f6eb4"
+        ],
+        "var:eta_w_E": [
+          "7244a1ec236955b7",
+          "7244a1ec236955b7"
+        ],
+        "var:f_c_0_d_tab": [
+          "1726d69a2a20ae41",
+          "1726d69a2a20ae41"
+        ],
+        "var:f_c_0_k": [
+          "2931896f804f7ede",
+          "2931896f804f7ede"
+        ],
+        "var:h_0": [
+          "4c137154dfc3e8e1",
+          "4c137154dfc3e8e1"
+        ],
+        "var:i_y": [
+          "4e2d79d189b184e4",
+          "4e2d79d189b184e4"
+        ],
+        "var:i_z": [
+          "a4ef5e9ef7008b71",
+          "a4ef5e9ef7008b71"
+        ],
+        "var:k_fi": [
+          "199cc567e874549e",
+          "199cc567e874549e"
+        ],
+        "var:l_k_y": [
+          "6776159013968cea",
+          "6776159013968cea"
+        ],
+        "var:l_k_z": [
+          "1912164317500c8d",
+          "1912164317500c8d"
+        ],
+        "var:t_fi": [
+          "7903db31d5798e94",
+          "7903db31d5798e94"
+        ],
+        "verify:v-10-29": [
+          "5bdde222a11b8cbe",
+          "5bdde222a11b8cbe"
+        ]
+      }
+    },
+    "KI-01": {
+      "check": "KI-01",
+      "gen": {
+        "form": "(38)",
+        "kind": "lateral-torsional",
+        "version": 2
+      },
+      "lines": {
+        "eq:W_y": [
+          "347375a116979aae",
+          "347375a116979aae"
+        ],
+        "eq:eta": [
+          "7f99642fd4476297",
+          "7f99642fd4476297"
+        ],
+        "eq:eta_m": [
+          "63b3e795b2cd91ea",
+          "63b3e795b2cd91ea"
+        ],
+        "eq:eta_s": [
+          "8cf0dc377d022262",
+          "8cf0dc377d022262"
+        ],
+        "eq:lambda_rel_m": [
+          "e4dd1429590b1b08",
+          "e4dd1429590b1b08"
+        ],
+        "eq:sigma_m_crit": [
+          "6a8194c9395ab35c",
+          "6a8194c9395ab35c"
+        ],
+        "eq:sigma_m_y_d": [
+          "64f6d75bc68355fb",
+          "64f6d75bc68355fb"
+        ],
+        "label:KI-01-member": [
+          "93ca7c6892e2e1ff",
+          "93ca7c6892e2e1ff"
+        ],
+        "label:KI-01-part": [
+          "c5f077d5fec08945",
+          "c5f077d5fec08945"
+        ],
+        "label:KI-01-presets": [
+          "cee4bced02abecd8",
+          "cee4bced02abecd8"
+        ],
+        "var:E_0_05": [
+          "23f3a27fc16464aa",
+          "23f3a27fc16464aa"
+        ],
+        "var:M_y_d": [
+          "dbc2e580ed0959f9",
+          "dbc2e580ed0959f9"
+        ],
+        "var:a": [
+          "54f6631ec149744f",
+          "54f6631ec149744f"
+        ],
+        "var:b": [
+          "234eeeee87a085e2",
+          "234eeeee87a085e2"
+        ],
+        "var:eta_t": [
+          "6b62b7509c820ae6",
+          "6b62b7509c820ae6"
+        ],
+        "var:eta_w": [
+          "f63a0986de1302d7",
+          "f63a0986de1302d7"
+        ],
+        "var:eta_w_E": [
+          "00a095c57e1a39b2",
+          "00a095c57e1a39b2"
+        ],
+        "var:f_c_0_k": [
+          "3ca3d212c95c5266",
+          "3ca3d212c95c5266"
+        ],
+        "var:f_m_k": [
+          "8b72ff90f954eb57",
+          "8b72ff90f954eb57"
+        ],
+        "var:f_m_y_d": [
+          "c29ae2ec5158e7c8",
+          "c29ae2ec5158e7c8"
+        ],
+        "var:h": [
+          "50ceac84a59d0174",
+          "50ceac84a59d0174"
+        ],
+        "var:i_y": [
+          "f7e30b5d2480f762",
+          "f7e30b5d2480f762"
+        ],
+        "var:i_z": [
+          "4dc6eadff04c7bdc",
+          "4dc6eadff04c7bdc"
+        ],
+        "var:k_m": [
+          "cfd2dd9bef882cff",
+          "cfd2dd9bef882cff"
+        ],
+        "verify:v-38": [
+          "1be7fb002f437ea0",
+          "1be7fb002f437ea0"
+        ]
+      }
+    },
+    "KI-02": {
+      "check": "KI-02",
+      "gen": {
+        "form": "(22), (37)",
+        "kind": "lateral-torsional",
+        "version": 2
+      },
+      "lines": {
+        "eq:A": [
+          "9617af3ebb789002",
+          "9617af3ebb789002"
+        ],
+        "eq:W_y": [
+          "347375a116979aae",
+          "347375a116979aae"
+        ],
+        "eq:eta": [
+          "884b17c62ded2599",
+          "884b17c62ded2599"
+        ],
+        "eq:eta_s": [
+          "f1c13f2737ddc634",
+          "f1c13f2737ddc634"
+        ],
+        "eq:eta_y": [
+          "d64935d3caa7aa9e",
+          "d64935d3caa7aa9e"
+        ],
+        "eq:eta_z": [
+          "e6e4262c041d2b1b",
+          "e6e4262c041d2b1b"
+        ],
+        "eq:f_c_0_d": [
+          "1abec8b4ecb7f2e9",
+          "1abec8b4ecb7f2e9"
+        ],
+        "eq:k_c_y": [
+          "e5281b51927e5e20",
+          "e5281b51927e5e20"
+        ],
+        "eq:k_c_z": [
+          "f7b337294478311a",
+          "f7b337294478311a"
+        ],
+        "eq:k_y": [
+          "be73c19f1a6cc972",
+          "be73c19f1a6cc972"
+        ],
+        "eq:k_z": [
+          "91899e4d017a3a42",
+          "91899e4d017a3a42"
+        ],
+        "eq:lambda_rel_m": [
+          "e4dd1429590b1b08",
+          "e4dd1429590b1b08"
+        ],
+        "eq:lambda_rel_y": [
+          "64a5eced81312114",
+          "64a5eced81312114"
+        ],
+        "eq:lambda_rel_z": [
+          "f3fb62c51110592e",
+          "f3fb62c51110592e"
+        ],
+        "eq:lambda_y": [
+          "f12561a1fa845111",
+          "f12561a1fa845111"
+        ],
+        "eq:lambda_z": [
+          "d36cafcccd5234b9",
+          "d36cafcccd5234b9"
+        ],
+        "eq:sigma_c_0_d": [
+          "ab822906c5446e10",
+          "ab822906c5446e10"
+        ],
+        "eq:sigma_m_crit": [
+          "6a8194c9395ab35c",
+          "6a8194c9395ab35c"
+        ],
+        "eq:sigma_m_y_d": [
+          "64f6d75bc68355fb",
+          "64f6d75bc68355fb"
+        ],
+        "label:KI-02-member": [
+          "d6e8a74c2a7810ab",
+          "d6e8a74c2a7810ab"
+        ],
+        "label:KI-02-part": [
+          "f7b9b139cc7eabe0",
+          "f7b9b139cc7eabe0"
+        ],
+        "label:KI-02-presets": [
+          "4b596a8d6a8b3a6b",
+          "4b596a8d6a8b3a6b"
+        ],
+        "var:E_0_05": [
+          "f39d9166858ca6d7",
+          "f39d9166858ca6d7"
+        ],
+        "var:M_y_d": [
+          "a6c372b6cb534493",
+          "a6c372b6cb534493"
+        ],
+        "var:N_c_d": [
+          "5458d7ec67a411b4",
+          "5458d7ec67a411b4"
+        ],
+        "var:a": [
+          "756df9a930ba66bf",
+          "756df9a930ba66bf"
+        ],
+        "var:b": [
+          "d134f152e2149647",
+          "d134f152e2149647"
+        ],
+        "var:beta_c": [
+          "1a0e64d23f036f20",
+          "1a0e64d23f036f20"
+        ],
+        "var:eta_t": [
+          "3733a8ef17132e66",
+          "3733a8ef17132e66"
+        ],
+        "var:eta_w": [
+          "8e9ab6ba196bca69",
+          "8e9ab6ba196bca69"
+        ],
+        "var:eta_w_E": [
+          "32c2a78ff10c9589",
+          "32c2a78ff10c9589"
+        ],
+        "var:f_c_0_d_tab": [
+          "acf9fd41cf544f68",
+          "acf9fd41cf544f68"
+        ],
+        "var:f_c_0_k": [
+          "ad080cda53ffed2f",
+          "ad080cda53ffed2f"
+        ],
+        "var:f_m_k": [
+          "c54219f6b0b571a4",
+          "c54219f6b0b571a4"
+        ],
+        "var:f_m_y_d": [
+          "6d381f17463ffebb",
+          "6d381f17463ffebb"
+        ],
+        "var:h": [
+          "f5bccecc9d499a27",
+          "f5bccecc9d499a27"
+        ],
+        "var:i_y": [
+          "46858d97bd4fb511",
+          "46858d97bd4fb511"
+        ],
+        "var:i_z": [
+          "597a9620a57b6292",
+          "597a9620a57b6292"
+        ],
+        "var:k_m": [
+          "13ffa2292c81c008",
+          "13ffa2292c81c008"
+        ],
+        "var:l_k_y": [
+          "3810d4a9293665f3",
+          "3810d4a9293665f3"
+        ],
+        "var:l_k_z": [
+          "68e275f71c44ab6c",
+          "68e275f71c44ab6c"
+        ],
+        "verify:v-22-37": [
+          "d229c24b40dc7aaa",
+          "d229c24b40dc7aaa"
+        ]
+      }
+    },
+    "KN-01": {
+      "check": "KN-01",
+      "gen": {
+        "form": "(10), (29)",
+        "kind": "buckling",
+        "version": 2
+      },
+      "lines": {
+        "eq:A": [
+          "9617af3ebb789002",
+          "9617af3ebb789002"
+        ],
+        "eq:eta": [
+          "884b17c62ded2599",
+          "884b17c62ded2599"
+        ],
+        "eq:eta_s": [
+          "767e671fc6061e10",
+          "767e671fc6061e10"
+        ],
+        "eq:eta_y": [
+          "e269d6f38c0bfb1c",
+          "e269d6f38c0bfb1c"
+        ],
+        "eq:eta_z": [
+          "e6e4262c041d2b1b",
+          "e6e4262c041d2b1b"
+        ],
+        "eq:f_c_0_d": [
+          "1abec8b4ecb7f2e9",
+          "1abec8b4ecb7f2e9"
+        ],
+        "eq:k_c_y": [
+          "e5281b51927e5e20",
+          "e5281b51927e5e20"
+        ],
+        "eq:k_c_z": [
+          "f7b337294478311a",
+          "f7b337294478311a"
+        ],
+        "eq:k_y": [
+          "be73c19f1a6cc972",
+          "be73c19f1a6cc972"
+        ],
+        "eq:k_z": [
+          "91899e4d017a3a42",
+          "91899e4d017a3a42"
+        ],
+        "eq:lambda_rel_y": [
+          "64a5eced81312114",
+          "64a5eced81312114"
+        ],
+        "eq:lambda_rel_z": [
+          "f3fb62c51110592e",
+          "f3fb62c51110592e"
+        ],
+        "eq:lambda_y": [
+          "f12561a1fa845111",
+          "f12561a1fa845111"
+        ],
+        "eq:lambda_z": [
+          "d36cafcccd5234b9",
+          "d36cafcccd5234b9"
+        ],
+        "eq:sigma_c_0_d": [
+          "ab822906c5446e10",
+          "ab822906c5446e10"
+        ],
+        "label:KN-01-member": [
+          "57ab002c855832ef",
+          "57ab002c855832ef"
+        ],
+        "label:KN-01-part": [
+          "fd4daac5688916bf",
+          "fd4daac5688916bf"
+        ],
+        "label:KN-01-presets": [
+          "aa3d056c8f38af59",
+          "aa3d056c8f38af59"
+        ],
+        "var:E_0_05": [
+          "fd8253909d047c14",
+          "fd8253909d047c14"
+        ],
+        "var:N_c_d": [
+          "38e6f0941e0c0450",
+          "38e6f0941e0c0450"
+        ],
+        "var:b": [
+          "de564444bb5fbbc2",
+          "de564444bb5fbbc2"
+        ],
+        "var:beta_c": [
+          "d387c867bd2f2139",
+          "d387c867bd2f2139"
+        ],
+        "var:eta_t": [
+          "856d769f3304baae",
+          "856d769f3304baae"
+        ],
+        "var:eta_w": [
+          "f77e285b55466495",
+          "f77e285b55466495"
+        ],
+        "var:eta_w_E": [
+          "c86ebda7051b6f1b",
+          "c86ebda7051b6f1b"
+        ],
+        "var:f_c_0_d_tab": [
+          "deec827d81da2018",
+          "deec827d81da2018"
+        ],
+        "var:f_c_0_k": [
+          "e1951dba98eafb13",
+          "e1951dba98eafb13"
+        ],
+        "var:h": [
+          "4dea52aec83609aa",
+          "4dea52aec83609aa"
+        ],
+        "var:i_y": [
+          "54e41e205c64fc36",
+          "54e41e205c64fc36"
+        ],
+        "var:i_z": [
+          "6a7c69ce743e1f21",
+          "6a7c69ce743e1f21"
+        ],
+        "var:l_k_y": [
+          "83932a5a1d0faf21",
+          "83932a5a1d0faf21"
+        ],
+        "var:l_k_z": [
+          "9f275f9faef0b832",
+          "9f275f9faef0b832"
+        ],
+        "verify:v-10-29": [
+          "5bdde222a11b8cbe",
+          "5bdde222a11b8cbe"
+        ]
+      }
+    },
+    "SC-01": {
+      "check": "SC-01",
+      "gen": {
+        "form": "(23)",
+        "kind": "shear",
+        "version": 2
+      },
+      "lines": {
+        "eq:A": [
+          "9617af3ebb789002",
+          "9617af3ebb789002"
+        ],
+        "eq:eta": [
+          "58fe5125acb46485",
+          "58fe5125acb46485"
+        ],
+        "eq:f_v_d": [
+          "d1475b11a2a80cc8",
+          "d1475b11a2a80cc8"
+        ],
+        "eq:tau_d": [
+          "afb9772dec9497e4",
+          "afb9772dec9497e4"
+        ],
+        "eq:tau_y_d": [
+          "e7f00048215fd466",
+          "e7f00048215fd466"
+        ],
+        "eq:tau_z_d": [
+          "1e38b7b58c5680c2",
+          "1e38b7b58c5680c2"
+        ],
+        "label:SC-01-member": [
+          "a66ad86d42384ff6",
+          "a66ad86d42384ff6"
+        ],
+        "label:SC-01-part": [
+          "e3d7db39f7776e64",
+          "e3d7db39f7776e64"
+        ],
+        "label:SC-01-presets": [
+          "a0f87a2ea6846f23",
+          "a0f87a2ea6846f23"
+        ],
+        "var:V_y_d": [
+          "93a5ff79b54667b0",
+          "93a5ff79b54667b0"
+        ],
+        "var:V_z_d": [
+          "e2c107856d81ef94",
+          "e2c107856d81ef94"
+        ],
+        "var:b": [
+          "934ea0ae05e78cbf",
+          "934ea0ae05e78cbf"
+        ],
+        "var:eta_t": [
+          "b2ffa00d0adf2739",
+          "b2ffa00d0adf2739"
+        ],
+        "var:eta_w": [
+          "bb37a44c6406e65c",
+          "bb37a44c6406e65c"
+        ],
+        "var:f_v_d_tab": [
+          "07c4ad5c036dff20",
+          "07c4ad5c036dff20"
+        ],
+        "var:h": [
+          "094ae5c870175a20",
+          "094ae5c870175a20"
+        ],
+        "verify:v-23": [
+          "cfcfbdada4c6425f",
+          "cfcfbdada4c6425f"
+        ]
+      }
+    },
+    "ZT-01": {
+      "check": "ZT-01",
+      "gen": {
+        "form": "(6)",
+        "kind": "tension",
+        "version": 2
+      },
+      "lines": {
+        "eq:A": [
+          "9617af3ebb789002",
+          "9617af3ebb789002"
+        ],
+        "eq:eta": [
+          "138f25da40c1ebf7",
+          "138f25da40c1ebf7"
+        ],
+        "eq:f_t_0_d": [
+          "895901ab70ab13ec",
+          "895901ab70ab13ec"
+        ],
+        "eq:sigma_t_0_d": [
+          "74fcfb304c5201ea",
+          "74fcfb304c5201ea"
+        ],
+        "label:ZT-01-part": [
+          "498b92b37c45541b",
+          "498b92b37c45541b"
+        ],
+        "label:ZT-01-presets": [
+          "cd0df6922edf5a9b",
+          "cd0df6922edf5a9b"
+        ],
+        "var:N_t_d": [
+          "a290fee4ce5960be",
+          "a290fee4ce5960be"
+        ],
+        "var:b": [
+          "d8386ff41f479b5c",
+          "d8386ff41f479b5c"
+        ],
+        "var:eta_t": [
+          "1dbeb488439b8842",
+          "1dbeb488439b8842"
+        ],
+        "var:eta_w": [
+          "06c2343c490ccbce",
+          "06c2343c490ccbce"
+        ],
+        "var:f_t_0_d_tab": [
+          "ce4bdb9db0d79a9a",
+          "ce4bdb9db0d79a9a"
+        ],
+        "var:h": [
+          "38318a5f6f225fdb",
+          "38318a5f6f225fdb"
+        ],
+        "verify:v-6": [
+          "36290e76d8f41112",
+          "36290e76d8f41112"
+        ]
+      }
+    },
+    "ZT-02": {
+      "check": "ZT-02",
+      "gen": {
+        "form": "(8)/(9)",
+        "kind": "tension",
+        "version": 2
+      },
+      "lines": {
+        "eq:A": [
+          "9617af3ebb789002",
+          "9617af3ebb789002"
+        ],
+        "eq:eta": [
+          "c030ccb7cc2b6e49",
+          "c030ccb7cc2b6e49"
+        ],
+        "eq:f_t_0_d": [
+          "f3ff0c937fb438fc",
+          "f3ff0c937fb438fc"
+        ],
+        "eq:f_t_90_d": [
+          "07b1ea98bb09ab8f",
+          "07b1ea98bb09ab8f"
+        ],
+        "eq:f_t_alpha_d": [
+          "98cc0b12da9743e3",
+          "98cc0b12da9743e3"
+        ],
+        "eq:sigma_t_alpha_d": [
+          "3bfa3fddc3f24f80",
+          "3bfa3fddc3f24f80"
+        ],
+        "label:ZT-02-part": [
+          "3c33e715e941740c",
+          "3c33e715e941740c"
+        ],
+        "label:ZT-02-presets": [
+          "647afe0991636e9e",
+          "647afe0991636e9e"
+        ],
+        "var:N_t_d": [
+          "1398505cca229fb2",
+          "1398505cca229fb2"
+        ],
+        "var:alpha": [
+          "f6aff24d793c19d4",
+          "f6aff24d793c19d4"
+        ],
+        "var:b": [
+          "11f1b92b6d1d8a64",
+          "11f1b92b6d1d8a64"
+        ],
+        "var:eta_t": [
+          "1a221df94e1d2a83",
+          "1a221df94e1d2a83"
+        ],
+        "var:eta_w": [
+          "1fe85eff16ef582c",
+          "1fe85eff16ef582c"
+        ],
+        "var:f_t_0_d_tab": [
+          "a1ca27a537a53bf5",
+          "a1ca27a537a53bf5"
+        ],
+        "var:f_t_90_d_tab": [
+          "d6f78486d7519d48",
+          "d6f78486d7519d48"
+        ],
+        "var:h": [
+          "201e766f9d6cbdae",
+          "201e766f9d6cbdae"
+        ],
+        "verify:v-8-9": [
+          "fc55c3a5f72319e8",
+          "fc55c3a5f72319e8"
+        ]
+      }
+    }
+  },
+  "format": "woodcore-unfold",
+  "schema_version": "1.0"
+}

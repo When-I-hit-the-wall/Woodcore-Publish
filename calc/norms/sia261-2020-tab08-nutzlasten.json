@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 261:2020 (Einwirkungen auf Tragwerke), Kapitel 8 «Gebäudenutzung», Tabelle 8 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA261-2020-DE.pdf p. 37. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json): every module that needs them reads this file, none restates them.",
+  "_source": "SIA 261:2020 (Einwirkungen auf Tragwerke), Kapitel 8 «Gebäudenutzung», Tabelle 8 -- transcribed by hand from the German edition, SIA261-2020-DE.pdf p. 37. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json): every module that needs them reads this file, none restates them.",
   "_note": "Decimals are written the way the report prints them (0.4, 3.5 t), not the norm's comma. A q_k / Q_k of null is a value the norm does not give -- category E, which SIA 261 8.2.2 leaves to the project.",
   "edition": "SIA 261:2020",
   "table_8": {

@@ -15,9 +15,8 @@ Les charges ne se saisissent pas dans l'onglet Positions : elles viennent du **c
 
 ## Imprimer un cas de charge
 
-Un cas s'imprime en entier avec `#show-calc` : la charge de neige de la feuille `SL`, la formule en lettres puis en chiffres, chaque valeur avec sa norme.
+Un cas s'imprime en entier par le fichier que Woodcore écrit pour lui, `#include domain-file("snow-load", "SL")` : la charge de neige de la feuille `SL`, la formule en lettres puis en chiffres, chaque valeur avec sa norme.
 
-{{example show-calc-1}}
 
 La section `004-einwirkungen.typ` d'un nouveau projet imprime déjà tous les cas de chaque charge avec une boucle ; nommez-les un par un pour choisir le niveau de chacun.
 
@@ -26,5 +25,5 @@ La section `004-einwirkungen.typ` d'un nouveau projet imprime déjà tous les ca
 Les charges utiles viennent du tableau 8 de la SIA 261, sans classeur : on nomme la catégorie de la surface.
 
 ```typ
-#show-live-load("A1")
+#include domain-file("live-load", "A1")
 ```

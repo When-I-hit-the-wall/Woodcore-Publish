@@ -41,6 +41,8 @@ from plan_canvas_render import (  # split out of this module (issue #30): every 
     tint_image,
     tint_svg,
 )
+from canvas_items import saved_at  # a coordinate rounded as it is saved, written once (D2)
+_round = saved_at(2)
 
 
 # A PDF page is rendered twice over, the part in view first. The part in view at the screen's own resolution, each time the view stops: the architect's lines are then as sharp as a PDF viewer shows them at every zoom, and no render is ever much larger than the screen. And the whole page, this many pixels along its longer side: what shows while the view moves, and wherever nothing sharper has come yet. The time a render takes grows faster than its pixels: an architect's sheet dense with hatching took 3.5 to 8 s at 2500 px, and takes about 1 s at 1200.
@@ -83,12 +85,6 @@ RENDERS = RenderCache(MEMORY_CACHE_BYTES)
 
 
 DISK = DiskCache(DISK_CACHE_DIR, DISK_CACHE_BYTES)
-
-
-def _round(value):
-    """A coordinate as it is saved: to a hundredth of a sheet unit, which is far below what a click can place."""
-    value = round(float(value), 2) + 0.0
-    return int(value) if value.is_integer() else value
 
 
 class PlanCanvasViewMixin:
@@ -494,7 +490,8 @@ class PlanCanvasViewMixin:
     def redraw(self):
         sheet = self.sheet_rect()
         window = {"x": 0.0, "y": 0.0, "w": sheet.width(), "h": sheet.height()}
-        svg = plan_svg.render(self.drawn_source(), window, flagged=self.flagged, lang=self.language, values=self.values)
+        # with the stiffness centre, the mass centre and the outline, whatever the plan prints of them: the window always shows them (issue #54)
+        svg = plan_svg.render(self.drawn_source(), window, flagged=self.flagged, lang=self.language, values=self.values, centres=True)
         self.overlay_renderer.load(QByteArray(svg.encode("utf-8")))
         self.overlay.set_rect(sheet)
         self.crop_item.setRect(self.crop_rect())

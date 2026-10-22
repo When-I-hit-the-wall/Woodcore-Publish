@@ -9,11 +9,12 @@ import html
 import textwrap
 import time
 
-from PySide6.QtCore import QByteArray, QEvent, QObject, QPoint, QRect, QRectF, QSize, Qt, QTimer
-from PySide6.QtGui import QCursor, QGuiApplication, QIcon, QPainter, QPixmap
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QSize, Qt, QTimer
+from PySide6.QtGui import QCursor, QIcon, QPixmap
 from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QHBoxLayout, QHeaderView, QLayout, QScrollArea, QSizePolicy,
                                QSplitter, QStyle, QStyleOptionComboBox, QStylePainter, QToolButton, QToolTip, QWidget)
+
+from svg_icons import pixel_ratio, svg_icon as svg_text_icon  # one way of rendering SVG text (D3); the names the tabs import from here
 
 # The measures of the static models' and the schemas' tool bars, one place for both (v0.94). The engineer: «Ces volets prennent trop de place et sont trop peu ergonomiques. Inspire-toi du module "Plan de positions". Les icônes sont suffisamment compréhensibles pour qu'il ne faille pas de nom.» So every tool is its symbol alone in a square button, the groups are parted by a thin line and no longer boxed under a title («Séparateurs fins, sans titres»), and a button is exactly as tall as a tool of the position plan's bar -- where from v0.87 a button was a 20 px symbol over its name, 42 px tall, and the groups stood in titled boxes, so at the window's own size the static models' bar took three rows and 242 px over the drawing.
 #
@@ -99,29 +100,9 @@ def symbol_px(font=None):
     return tool_height(font) - SYMBOL_INSET
 
 
-def pixel_ratio():
-    """The screen's device pixel ratio, what a symbol is rendered at so it stays sharp on a scaled display rather than being drawn at 20 px and blown up."""
-    app = QGuiApplication.instance()
-    return app.devicePixelRatio() if app is not None else 1.0
-
-
 def icon(name, size, ink):
     """One of the shared symbols (ICONS), `size` logical pixels square in `ink`, rendered at the screen's pixel ratio."""
     return svg_text_icon(ICONS[name].format(c=ink), size)
-
-
-def svg_text_icon(svg, size):
-    """An icon from SVG text, `size` logical pixels square, rendered at the screen's pixel ratio."""
-    renderer = QSvgRenderer(QByteArray(svg.encode("utf-8")))
-    ratio = pixel_ratio()
-    pixmap = QPixmap(round(size * ratio), round(size * ratio))
-    pixmap.setDevicePixelRatio(ratio)
-    pixmap.fill(Qt.GlobalColor.transparent)
-    painter = QPainter(pixmap)
-    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    renderer.render(painter, QRectF(0, 0, size, size))
-    painter.end()
-    return QIcon(pixmap)
 
 
 def size_tool(button, named=False):

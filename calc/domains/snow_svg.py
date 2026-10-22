@@ -5,25 +5,25 @@ No word is written: a block carries its coefficient (μ11, μ12/2, μ2m, μ3), a
 
 import math
 
+from domains import svg_draw  # the one writer of an SVG number and text (D6)
+from domains import svg_text  # the one plain text writer (ARCH-004)
 from domains import dead_load_svg, schema_svg
 
-FONT = dead_load_svg.FONT
+FONT = svg_draw.FONT
 TEXT = 15.0
 SMALL = 13.0
 INK = schema_svg.TEXT_COLOR
 MUTED = schema_svg.MUTED
 ROOF_FILL = schema_svg.ELEMENT_FILLS[0]
-SNOW_FILL = "#cfe3f3"
-SNOW_STROKE = "#5a86a8"
+SNOW_FILL = svg_draw.colour("snow")
+SNOW_STROKE = svg_draw.colour("snow-edge")
 WIDTH = 420.0          # the roof's span, drawn
 LEFT = 70.0
 ROW = 92.0             # the height of one row of loads
 MU_UNIT = 30.0         # drawn height of mu = 1
 
 
-def _f(value):
-    text = ("%.1f" % value).rstrip("0").rstrip(".")
-    return "0" if text in ("", "-0") else text
+_f = svg_draw.number_at(1)   # a coordinate at 1 decimals (svg_draw.py, D6)
 
 
 def _poly(out, points, fill, stroke, width=1.2):
@@ -31,16 +31,11 @@ def _poly(out, points, fill, stroke, width=1.2):
 
 
 def _text(out, x, y, content, size=SMALL, anchor="middle", colour=INK):
-    out.append('<text x="%s" y="%s" font-family="%s" font-size="%s" fill="%s" text-anchor="%s">%s</text>' % (_f(x), _f(y), FONT, _f(size), colour, anchor, content))
+    svg_text.plain(out, x, y, content, size, colour, _f, anchor)
 
 
 def _line(out, x1, y1, x2, y2, colour=MUTED, width=1.0):
     out.append('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="%s"/>' % (_f(x1), _f(y1), _f(x2), _f(y2), colour, _f(width)))
-
-
-def _mu(name):
-    """μ11, μ12, μ2m, μ3 -- the subscript set as plain digits, which both renderers draw."""
-    return "μ" + name.split("_", 1)[1] if "_" in name else name
 
 
 def _block(out, x0, x1, base, mu, label):

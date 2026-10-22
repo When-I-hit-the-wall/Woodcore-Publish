@@ -9,6 +9,8 @@ What is held:
 * **ARCH-003, ARCH-004** -- calculations 1.5: an instance computed from a source names it and no workbook; an id a sheet and a source both carry is refused; a domain with only sources is not warned about; the export writes the drawing under data/calculations/.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import io
 import json
 import sys
@@ -18,6 +20,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import conftest
+import project
+import engine
 import io_excel
 import registry
 import validation
@@ -230,17 +234,19 @@ def test_the_export_carries_sources_beside_sheets_and_refuses_one_id_twice():
     err = io.StringIO()
     with redirect_stderr(err):
         data = registry.build_calculations(workbooks, here, files)
-    assert data["schema_version"] == "1.5"
+    place = engine.Figures(here.data_dir, "dead-load", here)   # Permanent-loads/Exports/Figures/ laid out by folders, data/calculations/ before (issue #64)
+    assert data["schema_version"] == "1.8"   # every export since v0.120: no line carries a level, 1.8 holding 1.7's rooted drawings (UI-002)
     instances = data["domains"]["dead-load"]["instances"]
     assert list(instances) == ["EL+AL-Test", "DA-01"], "the sheets first, then the sources"
     source = instances["DA-01"]
     assert source["engine"] == "python" and source["source_file"] == "loads/dead/DA-01.json" and "workbook" not in source
-    assert source["figures"][0]["file"] == "calculations/dead-load-DA-01.svg" and "calculations/dead-load-DA-01.svg" in files
+    name = place.name("dead-load-DA-01.svg")
+    assert source["figures"][0]["file"] == name and name in files
     validation.validate_structure(data, "calculations")
     validation.validate_calculations_business(data)
     assert "dead-load" not in err.getvalue()
     registry.write_files(files, here.data_dir)
-    assert (here.data_dir / "calculations" / "dead-load-DA-01.svg").read_bytes().count(b"\r\n") == 0
+    assert place.path(name).read_bytes().count(b"\r\n") == 0
     # one id, two cases: refused, naming the source and the workbook
     (folder / "EL+AL-Test.json").write_text(json.dumps(_roof("EL+AL-Test")), encoding="utf-8")
     try:
@@ -254,9 +260,10 @@ def test_the_export_carries_sources_beside_sheets_and_refuses_one_id_twice():
     validation.validate_structure(old, "calculations")
 
 
-def test_show_calc_prints_the_drawing_from_level_2_and_the_case_entered_in_woodcore():
-    """UI-002 in the report: `show-calc("dead-load", id)` of a case entered in Woodcore prints its drawing from level 2 (its figure's level) and not at 1, its table at 3, and the values; at -1 the drawing is `figure-1`."""
+def test_the_written_out_load_prints_the_drawing_of_the_case_entered_in_woodcore():
+    """UI-002 in the report: the domain Woodcore writes out for a dead load entered in Woodcore (spec 2026-10-21-commandes-typst-refonte, REQ-017; `#show-calc("dead-load", id)` until then) carries its drawing, a figure with its caption, and prints it."""
     import subprocess
+    from domains import unfold
     if not conftest.have_typst():
         raise conftest.Skip("typst is not on the path")
     here = conftest.PROJECT
@@ -267,19 +274,17 @@ def test_show_calc_prints_the_drawing_from_level_2_and_the_case_entered_in_woodc
     try:
         path.write_text(json.dumps(_roof("DA-77", chosen=2.0), ensure_ascii=False), encoding="utf-8")
         registry.export(here)
-
-        def compile_(body, name):
-            d = conftest.probe_dir(name)
-            (d / "probe.typ").write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
-            out = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(d / "probe.typ"), str(d / "probe.svg")],
-                                 capture_output=True, text=True, encoding="utf-8")
-            assert out.returncode == 0, out.stderr
-            return (d / "probe.svg").read_text(encoding="utf-8")
-
-        two = compile_('#show-calc("dead-load", "DA-77", level: 2)', "dl_show_2")
-        one = compile_('#show-calc("dead-load", "DA-77", level: 1)', "dl_show_1")
-        picked = compile_('#show-calc("dead-load", "DA-77", level: -1, shown: (figure-1: 2))', "dl_show_m1")
-        assert "<image" in two and "<image" not in one and "<image" in picked
+        data = json.loads((here.data_dir / "calculations.json").read_text(encoding="utf-8"))
+        with project.using(here):
+            text = unfold.generate(unfold._module("dead-load").records(data)["DA-77"], "de", "dead-load")
+        assert "#figure(image(" in text and "caption: [Schichtaufbau]" in text, text[:600]
+        d = conftest.probe_dir("dl_written_out")
+        (d / "domain.typ").write_text(text, encoding="utf-8")
+        (d / "probe.typ").write_text('#import "/000-Typst-Config/commands.typ": *\n#include "domain.typ"\n', encoding="utf-8")
+        out = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(d / "probe.typ"), str(d / "probe.svg")],
+                             capture_output=True, text=True, encoding="utf-8")
+        assert out.returncode == 0, out.stderr
+        assert "<image" in (d / "probe.svg").read_text(encoding="utf-8")
     finally:
         path.unlink(missing_ok=True)
         (here.data_dir / "calculations.json").write_bytes(kept)

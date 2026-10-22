@@ -20,7 +20,9 @@ import math
 
 import engine
 import validation
+from domains._common import fail as _fail  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from norms import sia263, sia265
+import number_text
 
 # What a connector of this kind is called, in the `type` field of its source and of Positionen.xlsx's own list.
 TYPE = "Stabdübel"
@@ -56,8 +58,6 @@ ASSEMBLIES = {
     },
 }
 
-TIMBER_ASSEMBLIES = tuple(a for a, spec in ASSEMBLIES.items() if spec["family"] == "timber-timber")
-STEEL_ASSEMBLIES = tuple(a for a, spec in ASSEMBLIES.items() if spec["family"] == "steel-timber")
 
 # Configurations an engineer may well want and SIA 265 gives no k_beta for: Tabelle 45 covers ein- and zweischnittig only, Tabelle 46 zwei- and mehrschnittig only. They are named here so that asking for one is answered with the reason rather than with "unknown assembly" -- 6.1.1.11 sends a configuration the norm does not treat to testing, not to an equation applied outside its range.
 UNCOVERED_ASSEMBLIES = {
@@ -68,10 +68,6 @@ UNCOVERED_ASSEMBLIES = {
 
 # Two dowels closer than this (mm) are one point typed twice -- connection.py's own tolerance.
 SAME_POINT = 1e-6
-
-
-def _fail(where, message):
-    raise validation.ValidationError("%s: %s" % (where, message))
 
 
 # --- the pieces of equation (88) ---------------------------------------------
@@ -300,11 +296,11 @@ def _steel_resistance(inputs, warnings):
             if t_2 < over_t1 * t_1 - 1e-9:
                 warnings.append(
                     "Tabelle 46, Gleichung (130) gilt nur wenn t_2 >= %s · t_1; hier ist t_2 = %.1f mm und %s · t_1 = %.1f mm."
-                    % (_de(over_t1), t_2, _de(over_t1), over_t1 * t_1))
+                    % (_fmt(over_t1), t_2, _fmt(over_t1), over_t1 * t_1))
             if t_1 < over_t2 * t_2 - 1e-9:
                 warnings.append(
                     "Tabelle 46, Gleichung (131) gilt nur wenn t_1 >= %s · t_2; hier ist t_1 = %.1f mm und %s · t_2 = %.1f mm."
-                    % (_de(over_t2), t_1, _de(over_t2), over_t2 * t_2))
+                    % (_fmt(over_t2), t_1, _fmt(over_t2), over_t2 * t_2))
         k_beta = min(r["k_beta"] for r in rows)
 
     return {
@@ -654,16 +650,6 @@ def _column(label, kind, unit="", label_math=None):
         entry["label_math"] = label_math
     return entry
 
-def _fmt(value):
-    text = ("%.3f" % value).rstrip("0").rstrip(".")
-    return text or "0"
-
-
-def _de(value):
-    """A coefficient as a German sentence writes it: 0,35, 2."""
-    return _fmt(value).replace(".", ",")
-
-
 def _math(value):
     """A coefficient as Typst math source writes it: 0.3, -0.1 in parentheses, since a bare minus after a caret would bind to nothing."""
     text = _fmt(value)
@@ -824,15 +810,15 @@ def record(cid, result, timber, spacings=None, lengths=None):
     steel = "planes" in result
     outer_plates = result["assembly"] == "Stahl-Holz, Bleche aussen"
 
-    def add(name, value, unit, symbol, label, level, src=SOURCE, ref="6.2.1.1",
+    def add(name, value, unit, symbol, label, src=SOURCE, ref="6.2.1.1",
             description=None, group=None, group_label=None, keep=None, heading=None):
-        calc.add_var(name, value=value, unit=unit, symbol=symbol, label=label, level=level,
+        calc.add_var(name, value=value, unit=unit, symbol=symbol, label=label,
                      source=src, norm=NORM, norm_ref=ref, description=description,
                      group=group, group_label=group_label, keep=keep, heading=heading)
 
-    def add_step(name, level, produces, uses, formula, ref="6.2.1.1", description=None,
+    def add_step(name, produces, uses, formula, ref="6.2.1.1", description=None,
                  inline=True, bold=None):
-        calc.add_step(name=name, level=level, result=produces, uses=list(uses),
+        calc.add_step(name=name, result=produces, uses=list(uses),
                       norm=NORM, norm_ref=ref, formula=formula,
                       description=description, inline=inline, bold=bold)
 
@@ -840,16 +826,16 @@ def record(cid, result, timber, spacings=None, lengths=None):
     # «Anzahl Verbinder» is the classeur's own wording ('Stabdübel (Holz-Holz)'!A29) and is deliberately
     # not «Anzahl Verbindungsmittel», which connection.py uses for the fasteners of a polar moment: two
     # labels for two counts, so a glossary keyed by the German cannot conflate them.
-    add("d", result["d"], "mm", "d", "Durchmesser", 2, entered, group="input", keep=True)
-    add("n_tot", result["n_tot"], "", 'n_"tot"', "Anzahl Verbinder", 2, entered, group="input", keep=True)
+    add("d", result["d"], "mm", "d", "Durchmesser", entered, group="input", keep=True)
+    add("n_tot", result["n_tot"], "", 'n_"tot"', "Anzahl Verbinder", entered, group="input", keep=True)
     # f_u,k is the engineer's, or the f_u of the dowel's steel grade in SIA 263 Tabelle 1 (SN EN 14592 Tabelle G.9 giving none) -- said then, as the grade and the table it was read in (D-20)
     grade = result.get("dowel_steel") or ""
     if grade:
-        calc.add_var("f_u_k", value=result["f_u_k"], unit="N/mm²", symbol="f_(u,k)", label="char. Zugfestigkeit des Stabdübels", level=3,
+        calc.add_var("f_u_k", value=result["f_u_k"], unit="N/mm²", symbol="f_(u,k)", label="char. Zugfestigkeit des Stabdübels",
                      source="norm:%s, Tabelle 1" % sia263.edition(), norm="SIA 263", norm_ref="Tabelle 1", description="Stahl %s" % grade, group="input", keep=True)
     else:
         add("f_u_k", result["f_u_k"], "N/mm²", "f_(u,k)",
-            "char. Zugfestigkeit des Stabdübels", 3, entered, "6.1.4.4", group="input", keep=True)
+            "char. Zugfestigkeit des Stabdübels", entered, "6.1.4.4", group="input", keep=True)
 
     # --- per timber member: what it is made of, on one row, under the heading the book gives that block
     # «Charakteristische Lochleibungsfestigkeiten für C24:», Bemessungsbeispiele zur SIA 265 p. 291.
@@ -878,7 +864,7 @@ def record(cid, result, timber, spacings=None, lengths=None):
         # AUD-3-7 -- one string with every piece's provenance in a hole came out half German).
         provenance = member.get("provenance")
         add("rho_k_%d" % index, member["rho_k"], "kg/m³", "rho_(k,%d)" % index,
-            "Rohdichte", 3, _norm_source(member.get("table", "Tabelle 8")),
+            "Rohdichte", _norm_source(member.get("table", "Tabelle 8")),
             member.get("norm_ref", "3.3.2.1"),
             description=("Bauteil %d: %s." % (index, provenance)) if provenance else None,
             group="material", group_label=member_label(index), keep=True,
@@ -886,7 +872,7 @@ def record(cid, result, timber, spacings=None, lengths=None):
         # alpha keeps no row of its own: it is an operand of f_h,alpha,k and of k_red, and both
         # substituted formulas show it where it acts (docs/typst/api-conventions.md §10bis).
         add("alpha_%d" % index, member["alpha"], "°", "alpha_%d" % index,
-            "Winkel zwischen der Kraft- und Faserrichtung der Holzteile", 3, entered, "6.1.4.2",
+            "Winkel zwischen der Kraft- und Faserrichtung der Holzteile", entered, "6.1.4.2",
             group="material")
 
     # --- the Lochleibungsfestigkeit, Tabelle 22 written out (the engineer, v0.84)
@@ -895,24 +881,24 @@ def record(cid, result, timber, spacings=None, lengths=None):
         tag = "Bauteil %d" % index
         if member["predrilled"]:
             add("f_h_0_%d" % index, strength["f_h_0_k"], "N/mm²", "f_(h,0,%d)" % index,
-                "Lochleibungsfestigkeit parallel zur Faser", 3, SOURCE, "6.1.4.3")
+                "Lochleibungsfestigkeit parallel zur Faser", SOURCE, "6.1.4.3")
             add_step(
-                name="Lochleibungsfestigkeit parallel zur Faser %s" % tag, level=3,
+                name="Lochleibungsfestigkeit parallel zur Faser %s" % tag,
                 produces="f_h_0_%d" % index, uses=["d", "rho_k_%d" % index], ref="6.1.4.3",
                 formula="f_(h,0,%d) = %s dot (1 - %s dot d) dot rho_(k,%d)"
                         % (index, _math(t22["factor"]), _math(t22["predrilled_slope"]), index))
             add("f_h_90_%d" % index, strength["f_h_90_k"], "N/mm²", "f_(h,90,%d)" % index,
-                "Lochleibungsfestigkeit rechtwinklig zur Faser", 3, SOURCE, "6.1.4.3")
+                "Lochleibungsfestigkeit rechtwinklig zur Faser", SOURCE, "6.1.4.3")
             add_step(
-                name="Lochleibungsfestigkeit rechtwinklig zur Faser %s" % tag, level=3,
+                name="Lochleibungsfestigkeit rechtwinklig zur Faser %s" % tag,
                 produces="f_h_90_%d" % index, uses=["f_h_0_%d" % index, "d"], ref="6.1.4.3",
                 formula="f_(h,90,%d) = f_(h,0,%d) \\/ (%s + %s dot d)"
                         % (index, index, _math(t22["f_90_divisor"][member["species"]]),
                            _math(t22["f_90_diameter_term"])))
             add("f_h_%d" % index, strength["f_h_alpha_k"], "N/mm²", "f_(h,%d,k)" % index,
-                "Lochleibungsfestigkeit", 3, SOURCE, "6.1.4.3")
+                "Lochleibungsfestigkeit", SOURCE, "6.1.4.3")
             add_step(
-                name="Lochleibungsfestigkeit %s" % tag, level=3, produces="f_h_%d" % index,
+                name="Lochleibungsfestigkeit %s" % tag, produces="f_h_%d" % index,
                 uses=["f_h_90_%d" % index, "f_h_0_%d" % index, "alpha_%d" % index], ref="6.1.4.3",
                 formula="f_(h,%d,k) = f_(h,90,%d) + (f_(h,0,%d) - f_(h,90,%d)) dot (90 - alpha_%d) \\/ 90"
                         % (index, index, index, index, index),
@@ -921,9 +907,9 @@ def record(cid, result, timber, spacings=None, lengths=None):
             # Tabelle 22's undrilled row gives one value for both directions, so the angle does not enter
             # and there is nothing to interpolate: one line rather than three.
             add("f_h_%d" % index, strength["f_h_alpha_k"], "N/mm²", "f_(h,%d,k)" % index,
-                "Lochleibungsfestigkeit", 3, SOURCE, "6.1.4.3")
+                "Lochleibungsfestigkeit", SOURCE, "6.1.4.3")
             add_step(
-                name="Lochleibungsfestigkeit %s" % tag, level=3, produces="f_h_%d" % index,
+                name="Lochleibungsfestigkeit %s" % tag, produces="f_h_%d" % index,
                 uses=["d", "rho_k_%d" % index], ref="6.1.4.3",
                 formula="f_(h,%d,k) = %s dot d^%s dot rho_(k,%d)"
                         % (index, _math(t22["factor"]), _math(t22["undrilled_exponent"]), index),
@@ -936,9 +922,9 @@ def record(cid, result, timber, spacings=None, lengths=None):
         side, middle = t45["seitenholz"], t45["mittelholz"]
         exponent = _math(t45["t_exponent"])
         add("beta_f", result["beta_f"], "", "beta_f",
-            "Verhältnis der Lochleibungsfestigkeiten", 3, SOURCE, "A.1.1",
+            "Verhältnis der Lochleibungsfestigkeiten", SOURCE, "A.1.1",
             heading="Verhältnis der Lochleibungsfestigkeiten")
-        add_step(name="Verhältnis der Lochleibungsfestigkeiten", level=3, produces="beta_f",
+        add_step(name="Verhältnis der Lochleibungsfestigkeiten", produces="beta_f",
                  uses=["f_h_2", "f_h_1"], ref="A.1.1", formula="beta_f = f_(h,2,k) \\/ f_(h,1,k)")
 
     # --- what each piece is thick, on one row under the book's own «Holzdicken:»
@@ -949,19 +935,19 @@ def record(cid, result, timber, spacings=None, lengths=None):
         # what divide it into a side and a middle timber, which steel_geometry computes (t_1, t_2).
         geometry = result["geometry"]
         if not outer_plates:
-            add("b", timber[0]["t"], "mm", "b", "Bauteildicke", 3, entered, "A.1.2",
+            add("b", timber[0]["t"], "mm", "b", "Bauteildicke", entered, "A.1.2",
                 group="thickness", keep=True, heading="Holzdicken")
         add("t_1", geometry["t_1"], "mm", "t_1",
-            "Holzdicke" if outer_plates else "Holzdicke Seitenholz", 3,
+            "Holzdicke" if outer_plates else "Holzdicke Seitenholz",
             entered if outer_plates else SOURCE, "A.1.2",
             group="thickness", group_label=None if outer_plates else "Seitenholz", keep=True,
             heading="Holzdicken" if outer_plates else None)
         if geometry.get("t_2"):
-            add("t_2", geometry["t_2"], "mm", "t_2", "Holzdicke Mittelholz", 3, SOURCE, "A.1.2",
+            add("t_2", geometry["t_2"], "mm", "t_2", "Holzdicke Mittelholz", SOURCE, "A.1.2",
                 group="thickness", group_label="Mittelholz", keep=True)
     else:
         for index, member in enumerate(timber, start=1):
-            add("t_%d" % index, member["t"], "mm", "t_%d" % index, "Holzdicke", 3, entered, "A.1.2",
+            add("t_%d" % index, member["t"], "mm", "t_%d" % index, "Holzdicke", entered, "A.1.2",
                 group="thickness", group_label=member_label(index), keep=True,
                 heading="Holzdicken" if index == 1 else None)
 
@@ -970,9 +956,9 @@ def record(cid, result, timber, spacings=None, lengths=None):
     # ⚠️ The formulas written out are Anhang A's and not Tabelle 23's -- see this function's docstring.
     if not steel:
         add("k_beta_max", result["k_beta_max"], "", 'k_(beta,"max")',
-            "Grösstwert des Hilfswerts", 3, SOURCE, "A.1.1",
+            "Grösstwert des Hilfswerts", SOURCE, "A.1.1",
             heading="Erforderliche Holzdicken und Hilfswert $k_beta$")
-        add_step(name="Grösstwert des Hilfswerts", level=3, produces="k_beta_max", uses=["beta_f"],
+        add_step(name="Grösstwert des Hilfswerts", produces="k_beta_max", uses=["beta_f"],
                  ref="A.1.1",
                  formula='k_(beta,"max") = sqrt(%s dot beta_f \\/ (1 + beta_f))'
                          % _math(t45["k_max_numerator"]))
@@ -991,34 +977,34 @@ def record(cid, result, timber, spacings=None, lengths=None):
                 # The piece this run is about, on a line of its own, as the book sets it («Seitenhölzer»,
                 # «Mittelholz»): the symbols carry the member's number, and this is what adds the word.
                 add("t_c_%d_1" % i, corner["t_1"], "mm", names["t_1_sym"],
-                    "Holzdicke für den unteren Eckwert", 3, SOURCE, "A.1.1",
+                    "Holzdicke für den unteren Eckwert", SOURCE, "A.1.1",
                     heading=member_label(i))
-                add_step(name="Holzdicke %s, unterer Eckwert" % tag, level=3, produces="t_c_%d_1" % i,
+                add_step(name="Holzdicke %s, unterer Eckwert" % tag, produces="t_c_%d_1" % i,
                          uses=operands, ref="A.1.1",
                          formula="%s = %s dot %s dot %s"
                                  % (names["t_1_sym"], _math(side["t_1_factor"]), bracket, base))
                 add("k_beta_%d_1" % i, corner["k_1"], "", names["k_1_sym"],
-                    "Hilfswert zum unteren Eckwert", 3, SOURCE, "A.1.1")
-                add_step(name="Hilfswert %s, unterer Eckwert" % tag, level=3,
+                    "Hilfswert zum unteren Eckwert", SOURCE, "A.1.1")
+                add_step(name="Hilfswert %s, unterer Eckwert" % tag,
                          produces="k_beta_%d_1" % i, uses=["k_beta_max"], ref="A.1.1",
                          formula='%s = %s dot k_(beta,"max")'
                                  % (names["k_1_sym"], _math(side["k_1_share"])))
             factor = middle["t_2_factor"] if corner["shape"] == "mittelholz" else side["t_2_factor"]
             add("t_c_%d_2" % i, corner["t_2"], "mm", names["t_2_sym"],
-                "Holzdicke für den oberen Eckwert", 3, SOURCE, "A.1.1",
+                "Holzdicke für den oberen Eckwert", SOURCE, "A.1.1",
                 heading=member_label(i) if corner["shape"] == "mittelholz" else None)
-            add_step(name="Holzdicke %s, oberer Eckwert" % tag, level=3, produces="t_c_%d_2" % i,
+            add_step(name="Holzdicke %s, oberer Eckwert" % tag, produces="t_c_%d_2" % i,
                      uses=operands, ref="A.1.1",
                      formula="%s = %s dot %s dot %s" % (names["t_2_sym"], _math(factor), bracket, base))
             add("k_beta_%d_2" % i, corner["k_2"], "", names["k_2_sym"],
-                "Hilfswert zum oberen Eckwert", 3, SOURCE, "A.1.1")
-            add_step(name="Hilfswert %s, oberer Eckwert" % tag, level=3, produces="k_beta_%d_2" % i,
+                "Hilfswert zum oberen Eckwert", SOURCE, "A.1.1")
+            add_step(name="Hilfswert %s, oberer Eckwert" % tag, produces="k_beta_%d_2" % i,
                      uses=["k_beta_max"], ref="A.1.1",
                      formula='%s = k_(beta,"max")' % names["k_2_sym"])
             add("k_beta_%d" % i, corner["k_beta"], "", "k_(beta,%d)" % i,
-                "Hilfswert zur Scherfuge", 3, SOURCE, "A.1.1")
+                "Hilfswert zur Scherfuge", SOURCE, "A.1.1")
             formula, uses = _interpolation("k_(beta,%d)" % i, corner, names)
-            add_step(name="Hilfswert %s" % tag, level=3, produces="k_beta_%d" % i, uses=uses,
+            add_step(name="Hilfswert %s" % tag, produces="k_beta_%d" % i, uses=uses,
                      ref="A.1.1", formula=formula,
                      description="Zwischenwerte werden linear interpoliert (Figur 45)." if i == 1 else None)
     else:
@@ -1042,36 +1028,36 @@ def record(cid, result, timber, spacings=None, lengths=None):
             block_heading = "Erforderliche Holzdicken und Hilfswert $k_beta$" if order == 1 else None
             if spec["t_1_factor"]:
                 add("t_c_%d_1" % order, plane["t_1"], "mm", names["t_1_sym"],
-                    "Holzdicke für den unteren Eckwert", 3, SOURCE, "A.1.2",
+                    "Holzdicke für den unteren Eckwert", SOURCE, "A.1.2",
                     heading=block_heading)
                 block_heading = None
-                add_step(name="Holzdicke %s, unterer Eckwert" % tag, level=3,
+                add_step(name="Holzdicke %s, unterer Eckwert" % tag,
                          produces="t_c_%d_1" % order, uses=operands, ref="A.1.2",
                          formula="%s = %s dot %s" % (names["t_1_sym"], _math(spec["t_1_factor"]), base))
                 # The lower corner's own k_beta is the table's own number, not a formula: it is stated
                 # beside the upper one rather than on a line of its own.
                 add("k_beta_%d_1" % order, plane["k_1"], "", names["k_1_sym"],
-                    "Hilfswert zum unteren Eckwert", 3, _norm_source("Tabelle 46"), "A.1.2",
+                    "Hilfswert zum unteren Eckwert", _norm_source("Tabelle 46"), "A.1.2",
                     group="corners_%d" % order, group_label=tag, keep=True)
             add("t_c_%d_2" % order, plane["t_2"], "mm", names["t_2_sym"],
-                "Holzdicke für den oberen Eckwert", 3, SOURCE, "A.1.2",
+                "Holzdicke für den oberen Eckwert", SOURCE, "A.1.2",
                 heading=block_heading)
-            add_step(name="Holzdicke %s, oberer Eckwert" % tag, level=3, produces="t_c_%d_2" % order,
+            add_step(name="Holzdicke %s, oberer Eckwert" % tag, produces="t_c_%d_2" % order,
                      uses=operands, ref="A.1.2",
                      formula="%s = %s dot %s" % (names["t_2_sym"], _math(spec["t_2_factor"]), base))
             add("k_beta_%d_2" % order, plane["k_2"], "", names["k_2_sym"],
-                "Hilfswert zum oberen Eckwert", 3, _norm_source("Tabelle 46"), "A.1.2",
+                "Hilfswert zum oberen Eckwert", _norm_source("Tabelle 46"), "A.1.2",
                 group="corners_%d" % order,
                 group_label=None if spec["t_1_factor"] else tag, keep=True)
             if "k_2_root" in spec:
                 # equation (128)'s «sqrt 2», written as the root the norm prints
-                add_step(name="Hilfswert %s, oberer Eckwert" % tag, level=3,
+                add_step(name="Hilfswert %s, oberer Eckwert" % tag,
                          produces="k_beta_%d_2" % order, uses=[], ref="A.1.2",
                          formula="%s = sqrt(%s)" % (names["k_2_sym"], _math(spec["k_2_root"])))
             add("k_beta_%d" % order, plane["k_beta"], "", "k_(beta,%s)" % letter,
-                "Hilfswert zur Scherfuge", 3, SOURCE, "A.1.2")
+                "Hilfswert zur Scherfuge", SOURCE, "A.1.2")
             formula, uses = _interpolation("k_(beta,%s)" % letter, plane, names)
-            add_step(name="Hilfswert %s" % tag, level=3, produces="k_beta_%d" % order, uses=uses,
+            add_step(name="Hilfswert %s" % tag, produces="k_beta_%d" % order, uses=uses,
                      ref="A.1.2", formula=formula,
                      description="Zwischenwerte werden linear interpoliert (Figur 45)." if order == 1 else None)
 
@@ -1083,17 +1069,17 @@ def record(cid, result, timber, spacings=None, lengths=None):
         # act. The heading therefore hangs on k_red itself -- a var that prints nothing announces
         # nothing, which is the rule and the trap (calc/engine.py, `heading`).
         add("n_%d" % index, entry["n"], "", "n_%d" % index,
-            "Anzahl der in Faserrichtung des Holzes hintereinander angeordneten Verbindungsmittel", 3,
+            "Anzahl der in Faserrichtung des Holzes hintereinander angeordneten Verbindungsmittel",
             entered, "6.1.4.2")
         if entry["a_1"]:
             add("a_1_%d" % index, entry["a_1"], "mm", "a_(1,%d)" % index,
-                "Abstand der Verbindungsmittel untereinander in Faserrichtung", 3, entered, "6.1.4.2")
+                "Abstand der Verbindungsmittel untereinander in Faserrichtung", entered, "6.1.4.2")
         add("k_red_%d" % index, entry["k_red"], "", "k_(\"red\",%d)" % index,
-            "Reduktionsbeiwert", 3, SOURCE, "6.1.4.2",
+            "Reduktionsbeiwert", SOURCE, "6.1.4.2",
             heading="Reduktionsbeiwert" if index == 1 else None)
         if entry["n"] > 1:
             add_step(
-                name="Reduktionsbeiwert %s" % ("Bauteil %d" % index), level=3,
+                name="Reduktionsbeiwert %s" % ("Bauteil %d" % index),
                 produces="k_red_%d" % index,
                 uses=["n_%d" % index, "a_1_%d" % index, "d", "alpha_%d" % index], ref="6.1.4.2",
                 formula="k_(\"red\",%d) = n_%d^%s dot (a_(1,%d) \\/ (%s dot d))^%s dot (90 - alpha_%d) \\/ 90 + alpha_%d \\/ 90"
@@ -1109,27 +1095,27 @@ def record(cid, result, timber, spacings=None, lengths=None):
 
     # --- the yield moment, which only equation (88) reads: it stands where the book puts it, with the
     # resistance and not before k_beta, none of whose formulas uses it.
-    add("M_u_k", result["M_u_k"], "Nmm", "M_(u,k)", "char. Fliessmoment des Stabdübels", 3,
+    add("M_u_k", result["M_u_k"], "Nmm", "M_(u,k)", "char. Fliessmoment des Stabdübels",
         SOURCE, "6.1.4.4", heading="Fliessmoment")
     moment = sia265.yield_moment()
-    add_step(name="Fliessmoment", level=3, produces="M_u_k", uses=["f_u_k", "d"], ref="6.1.4.4",
+    add_step(name="Fliessmoment", produces="M_u_k", uses=["f_u_k", "d"], ref="6.1.4.4",
              formula="M_(u,k) = %s dot f_(u,k) dot d^%s"
                      % (_math(moment["factor"]), _math(moment["exponent"])))
 
     # --- the factors of equation (88), on one row (the engineer, v0.84): each carries `keep`, because
     # every one of them is an operand of some step and would otherwise be absorbed into its formula.
-    add("k_beta", result["k_beta"], "", "k_beta", "Hilfswert zur Scherfuge", 2, SOURCE, "A.1.1",
+    add("k_beta", result["k_beta"], "", "k_beta", "Hilfswert zur Scherfuge", SOURCE, "A.1.1",
         description="Massgebend ist der kleinste Hilfswert der beteiligten Holzteile "
                     "(Tabellen 45 und 46, zwischen den Eckwerten linear interpoliert).",
         group="factors", keep=True, heading="Bemessungswert des Tragwiderstands")
-    add("p", result["p"], "", "p", "Anzahl Scherfugen", 2, SOURCE, group="factors", keep=True)
+    add("p", result["p"], "", "p", "Anzahl Scherfugen", SOURCE, group="factors", keep=True)
     add("p_k_beta", result["p_k_beta"], "", "(p dot k_beta)",
-        "Scherfugen mit ihren Hilfswerten", 2, SOURCE,
+        "Scherfugen mit ihren Hilfswerten", SOURCE,
         description="Bei mehrschnittigen Stahl-Holz-Verbindungen wird die vorhandene Anzahl Scherfugen "
                     "mit dem zugehörigen Hilfswert berücksichtigt: $p dot k_beta = p_A dot k_(beta,1) + p_B dot k_(beta,2)$."
         if steel else None,
         group="factors", keep=True)
-    add("k_red", result["k_red"], "", 'k_"red"', "Massgebender Reduktionsbeiwert", 2, SOURCE, "6.1.4.2",
+    add("k_red", result["k_red"], "", 'k_"red"', "Massgebender Reduktionsbeiwert", SOURCE, "6.1.4.2",
         description="Bei unterschiedlichen Winkeln ist $k_\"red\"$ für alle Holzteile einzeln zu bestimmen und "
                     "der kleinste Wert einzusetzen.",
         group="factors", keep=True)
@@ -1138,23 +1124,23 @@ def record(cid, result, timber, spacings=None, lengths=None):
         # n_quer enters no equation -- it is the count across the grain the rows imply, which the
         # engineer checks the drawing against -- so it is stated beside the factors and never multiplied by.
         add("n_quer_%d" % index, entry["n_quer"], "", 'n_("quer",%d)' % index,
-            "Anzahl Verbindungsmittel quer zur Faserrichtung", 3, SOURCE, "6.1.4.2",
+            "Anzahl Verbindungsmittel quer zur Faserrichtung", SOURCE, "6.1.4.2",
             description="$n_\"quer\" = n_\"tot\" \\/ n$, aufgerundet." if index == 1 else None,
             group="factors", keep=True)
-    add("k_alpha", result["k_alpha"], "", "k_alpha", "Beiwert der Tragwiderstandsgleichung", 3,
+    add("k_alpha", result["k_alpha"], "", "k_alpha", "Beiwert der Tragwiderstandsgleichung",
         _norm_source("Ziffer 6.2.1.1"), "6.2.1.1", group="factors", keep=True)
-    add("eta_w", result["eta_w"], "", "eta_w", "Umrechnungsfaktor Holzfeuchte", 2,
+    add("eta_w", result["eta_w"], "", "eta_w", "Umrechnungsfaktor Holzfeuchte",
         _norm_source("Tabelle 4"), "3.2.1.3",
         description="Feuchteklasse %d." % result["moisture_class"], group="factors", keep=True)
-    add("eta_t", result["eta_t"], "", "eta_t", "Umrechnungsfaktor Einwirkungsdauer", 2,
+    add("eta_t", result["eta_t"], "", "eta_t", "Umrechnungsfaktor Einwirkungsdauer",
         _norm_source("Ziffer 2.2.6"), "2.2.6",
         description="Stossartige Einwirkung (Erdbeben, Anprall)." if result["eta_t"] != 1 else None,
         group="factors", keep=True)
 
     # --- the answer: ONE fastener first, then the connection (the engineer, v0.84)
-    add("R_d", result["R_d"], "kN", "R_d", "Tragwiderstand pro Verbindungsmittel", 1, SOURCE, "6.2.1.1")
+    add("R_d", result["R_d"], "kN", "R_d", "Tragwiderstand pro Verbindungsmittel", SOURCE, "6.2.1.1")
     add_step(
-        name="Tragwiderstand pro Verbindungsmittel", level=1, produces="R_d",
+        name="Tragwiderstand pro Verbindungsmittel", produces="R_d",
         uses=["k_alpha", "k_red", "p_k_beta", "M_u_k", "f_h_1", "d", "eta_w", "eta_t"], ref="6.2.1.1",
         formula="R_d = k_alpha dot k_\"red\" dot (p dot k_beta) dot "
                 "sqrt(M_(u,k) dot f_(h,1,k) dot d) dot eta_w dot eta_t",
@@ -1163,9 +1149,9 @@ def record(cid, result, timber, spacings=None, lengths=None):
         inline=False,
         description="Gleichung (88), ohne $n_\"tot\"$. Die Wurzel ergibt N; der Wert ist in kN angegeben. "
                     "Bei Holz-Holz-Verbindungen ist die Lochleibungsfestigkeit des Seitenholzes 1 einzusetzen.")
-    add("R_d_Verb", result["R_d_Verb"], "kN", 'R_(d,"Verb")', "Tragwiderstand der Verbindung", 1,
+    add("R_d_Verb", result["R_d_Verb"], "kN", 'R_(d,"Verb")', "Tragwiderstand der Verbindung",
         SOURCE, "6.2.1.1")
-    add_step(name="Tragwiderstand der Verbindung", level=1, produces="R_d_Verb",
+    add_step(name="Tragwiderstand der Verbindung", produces="R_d_Verb",
              uses=["n_tot", "R_d"], ref="6.2.1.1",
              formula="R_(d,\"Verb\") = n_\"tot\" dot R_d")
 
@@ -1175,15 +1161,15 @@ def record(cid, result, timber, spacings=None, lengths=None):
         # engineer, v0.84). Never folded into R_d, where a reader could not see it.
         factor = _math(result["truss_factor"])
         add("R_d_Fachwerk", result["R_d_truss"], "kN", 'R_(d,"Fachwerk")',
-            "Tragwiderstand pro Verbindungsmittel bei vereinfachter Fachwerkberechnung", 1,
+            "Tragwiderstand pro Verbindungsmittel bei vereinfachter Fachwerkberechnung",
             SOURCE, "5.3.6.2.2",
             description=sia265.clause("truss_reduction")["condition"])
-        add_step(name="Tragwiderstand pro Verbindungsmittel im Fachwerk", level=1,
+        add_step(name="Tragwiderstand pro Verbindungsmittel im Fachwerk",
                  produces="R_d_Fachwerk", uses=["R_d"], ref="5.3.6.2.2",
                  formula="R_(d,\"Fachwerk\") = %s dot R_d" % factor)
         add("R_d_Verb_Fachwerk", result["R_d_Verb_truss"], "kN", 'R_(d,"Verb,Fachwerk")',
-            "Tragwiderstand bei vereinfachter Fachwerkberechnung", 1, SOURCE, "5.3.6.2.2")
-        add_step(name="Tragwiderstand im Fachwerk", level=1, produces="R_d_Verb_Fachwerk",
+            "Tragwiderstand bei vereinfachter Fachwerkberechnung", SOURCE, "5.3.6.2.2")
+        add_step(name="Tragwiderstand im Fachwerk", produces="R_d_Verb_Fachwerk",
                  uses=["n_tot", "R_d_Fachwerk"], ref="5.3.6.2.2",
                  formula="R_(d,\"Verb,Fachwerk\") = n_\"tot\" dot R_(d,\"Fachwerk\")")
         results += ["R_d_Fachwerk", "R_d_Verb_Fachwerk"]
@@ -1195,42 +1181,42 @@ def record(cid, result, timber, spacings=None, lengths=None):
         norm263 = "norm:%s, Tabelle 16" % sia263.edition()
         table1 = "norm:%s, Tabelle 1" % sia263.edition()
 
-        def add263(name, value, unit, symbol, label, level, ref, src=norm263, **more):
-            calc.add_var(name, value=value, unit=unit, symbol=symbol, label=label, level=level, source=src, norm="SIA 263", norm_ref=ref, **more)
+        def add263(name, value, unit, symbol, label, ref, src=norm263, **more):
+            calc.add_var(name, value=value, unit=unit, symbol=symbol, label=label, source=src, norm="SIA 263", norm_ref=ref, **more)
 
-        def step263(name, level, produces, uses, formula, ref, **more):
-            calc.add_step(name=name, level=level, result=produces, uses=list(uses), norm="SIA 263", norm_ref=ref, formula=formula, inline=True, **more)
+        def step263(name, produces, uses, formula, ref, **more):
+            calc.add_step(name=name, result=produces, uses=list(uses), norm="SIA 263", norm_ref=ref, formula=formula, inline=True, **more)
 
-        add263("t_pl", plate["t"], "mm", 't_"pl"', "Blechdicke", 2, "Tabelle 16", src=entered, group="blech", group_label="Stahlblech", keep=True)
-        add263("e_1", plate["e1"], "mm", "e_1", "Randabstand in Kraftrichtung", 2, "Tabelle 16", src=entered, group="blech", keep=True)
-        add263("e_2", plate["e2"], "mm", "e_2", "Randabstand quer zur Kraftrichtung", 2, "Tabelle 16", src=entered, group="blech", keep=True)
-        add263("d_0", plate["d0"], "mm", "d_0", "Lochdurchmesser", 2, "Tabelle 16", src=entered, group="blech", keep=True)
+        add263("t_pl", plate["t"], "mm", 't_"pl"', "Blechdicke", "Tabelle 16", src=entered, group="blech", group_label="Stahlblech", keep=True)
+        add263("e_1", plate["e1"], "mm", "e_1", "Randabstand in Kraftrichtung", "Tabelle 16", src=entered, group="blech", keep=True)
+        add263("e_2", plate["e2"], "mm", "e_2", "Randabstand quer zur Kraftrichtung", "Tabelle 16", src=entered, group="blech", keep=True)
+        add263("d_0", plate["d0"], "mm", "d_0", "Lochdurchmesser", "Tabelle 16", src=entered, group="blech", keep=True)
         if plate["p1"] is not None:
-            add263("p_1", plate["p1"], "mm", "p_1", "Abstand in Kraftrichtung", 3, "Tabelle 16", src=SOURCE, group="blech_abstaende", group_label="Abstände der Stabdübel")
+            add263("p_1", plate["p1"], "mm", "p_1", "Abstand in Kraftrichtung", "Tabelle 16", src=SOURCE, group="blech_abstaende", group_label="Abstände der Stabdübel")
         if plate["p2"] is not None:
-            add263("p_2", plate["p2"], "mm", "p_2", "Abstand quer zur Kraftrichtung", 3, "Tabelle 16", src=SOURCE, group="blech_abstaende")
-        add263("f_u_pl", plate["f_u"], "N/mm²", 'f_(u,"pl")', "Zugfestigkeit des Blechs", 3, "Tabelle 1", src=table1,
+            add263("p_2", plate["p2"], "mm", "p_2", "Abstand quer zur Kraftrichtung", "Tabelle 16", src=SOURCE, group="blech_abstaende")
+        add263("f_u_pl", plate["f_u"], "N/mm²", 'f_(u,"pl")', "Zugfestigkeit des Blechs", "Tabelle 1", src=table1,
                description="Stahl %s" % plate["grade"], group="blech_stahl", group_label="Stahl des Blechs")
-        add263("f_y_pl", plate["f_y"], "N/mm²", 'f_(y,"pl")', "Streckgrenze des Blechs", 3, "Tabelle 1", src=table1, group="blech_stahl")
-        add263("gamma_M2", plate["gamma_M2"], "", "gamma_(M 2)", "Widerstandsbeiwert", 3, t16["gamma_M2"]["norm_ref"], group="blech_stahl")
+        add263("f_y_pl", plate["f_y"], "N/mm²", 'f_(y,"pl")', "Streckgrenze des Blechs", "Tabelle 1", src=table1, group="blech_stahl")
+        add263("gamma_M2", plate["gamma_M2"], "", "gamma_(M 2)", "Widerstandsbeiwert", t16["gamma_M2"]["norm_ref"], group="blech_stahl")
         if plate["tight"]:
-            add263("e_1_eff", plate["e1_eff"], "mm", 'e_(1,"eff")', "Massgebender Randabstand", 3, "Tabelle 16")
-            step263("Massgebender Randabstand", 3, "e_1_eff", ["p_1", "d_0"], 'e_(1,"eff") = p_1 - d_0 / 2', "Tabelle 16")
+            add263("e_1_eff", plate["e1_eff"], "mm", 'e_(1,"eff")', "Massgebender Randabstand", "Tabelle 16")
+            step263("Massgebender Randabstand", "e_1_eff", ["p_1", "d_0"], 'e_(1,"eff") = p_1 - d_0 / 2', "Tabelle 16")
         e1_name = "e_1_eff" if plate["tight"] else "e_1"
         e1_symbol = 'e_(1,"eff")' if plate["tight"] else "e_1"
-        add263("F_b_76", plate["F_76"], "kN", 'F_(b,"Rd",76)', "Lochleibungswiderstand nach Gleichung (76)", 3, "Tabelle 16 (76)")
-        step263("Lochleibungswiderstand nach Gleichung (76)", 3, "F_b_76", [e1_name, "d_0", "f_u_pl", "d", "t_pl", "gamma_M2"],
+        add263("F_b_76", plate["F_76"], "kN", 'F_(b,"Rd",76)', "Lochleibungswiderstand nach Gleichung (76)", "Tabelle 16 (76)")
+        step263("Lochleibungswiderstand nach Gleichung (76)", "F_b_76", [e1_name, "d_0", "f_u_pl", "d", "t_pl", "gamma_M2"],
                 'F_(b,"Rd",76) = %s dot %s / d_0 dot f_(u,"pl") dot d dot t_"pl" / gamma_(M 2)' % (_math(t16["factor"]), e1_symbol), "Tabelle 16 (76)")
-        add263("F_b_max", plate["F_max"], "kN", 'F_(b,"Rd,max")', "Obergrenze nach Gleichung (76)", 3, "Tabelle 16 (76)")
-        step263("Obergrenze nach Gleichung (76)", 3, "F_b_max", ["f_u_pl", "d", "t_pl", "gamma_M2"],
+        add263("F_b_max", plate["F_max"], "kN", 'F_(b,"Rd,max")', "Obergrenze nach Gleichung (76)", "Tabelle 16 (76)")
+        step263("Obergrenze nach Gleichung (76)", "F_b_max", ["f_u_pl", "d", "t_pl", "gamma_M2"],
                 'F_(b,"Rd,max") = %s dot f_(u,"pl") dot d dot t_"pl" / gamma_(M 2)' % _math(t16["limit"]), "Tabelle 16 (76)")
-        add263("F_b_pin", plate["F_pin"], "kN", 'F_(b,"Rd,Bolzen")', "Begrenzung für Bolzenverbindungen", 3, t16["pin"]["norm_ref"])
-        step263("Begrenzung für Bolzenverbindungen", 3, "F_b_pin", ["f_y_pl", "d", "t_pl", "gamma_M2"],
+        add263("F_b_pin", plate["F_pin"], "kN", 'F_(b,"Rd,Bolzen")', "Begrenzung für Bolzenverbindungen", t16["pin"]["norm_ref"])
+        step263("Begrenzung für Bolzenverbindungen", "F_b_pin", ["f_y_pl", "d", "t_pl", "gamma_M2"],
                 'F_(b,"Rd,Bolzen") = %s dot f_(y,"pl") dot d dot t_"pl" / gamma_(M 2)' % _math(t16["pin"]["factor"]), t16["pin"]["norm_ref"])
-        add263("n_pl", plate["count"], "", 'n_"pl"', "Anzahl Bleche je Stabdübel", 2, "Tabelle 16", src=entered)
-        add263("F_b_Rd", plate["F_b_Rd"], "kN", 'F_(b,"Rd")', "Lochleibungswiderstand der Bleche pro Stabdübel", 1, "Tabelle 16 (76)",
+        add263("n_pl", plate["count"], "", 'n_"pl"', "Anzahl Bleche je Stabdübel", "Tabelle 16", src=entered)
+        add263("F_b_Rd", plate["F_b_Rd"], "kN", 'F_(b,"Rd")', "Lochleibungswiderstand der Bleche pro Stabdübel", "Tabelle 16 (76)",
                description="Mit der Kraft auf einen Stabdübel nachzuweisen; nicht in R_d enthalten.")
-        step263("Lochleibungswiderstand der Bleche pro Stabdübel", 1, "F_b_Rd", ["n_pl", "F_b_76", "F_b_max", "F_b_pin"],
+        step263("Lochleibungswiderstand der Bleche pro Stabdübel", "F_b_Rd", ["n_pl", "F_b_76", "F_b_max", "F_b_pin"],
                 'F_(b,"Rd") = n_"pl" dot min(F_(b,"Rd",76), F_(b,"Rd,max"), F_(b,"Rd,Bolzen"))', "Tabelle 16 (76)", bold=True)
         results.append("F_b_Rd")
 
@@ -1241,7 +1227,7 @@ def record(cid, result, timber, spacings=None, lengths=None):
     # eta_w,Steif keeps no row -- it is an operand of K_ser's own formula, which shows it -- so the
     # block's heading hangs on the first K_ser that prints (calc/engine.py, `heading`).
     add("eta_w_ser", ser["eta_w"], "", 'eta_(w,"Steif")',
-        "Umrechnungsfaktor Holzfeuchte für die Steifigkeit", 3, _norm_source("Tabelle 4"), "3.2.1.3")
+        "Umrechnungsfaktor Holzfeuchte für die Steifigkeit", _norm_source("Tabelle 4"), "3.2.1.3")
 
     def kser_formula(symbol, index):
         return ("%s = (%s - (%s - %s) dot alpha_%d \\/ 90) dot rho_(k,%d)^%s dot d^%s dot eta_(w,\"Steif\")"
@@ -1256,30 +1242,30 @@ def record(cid, result, timber, spacings=None, lengths=None):
         for entry in per_member:
             i = entry["member"]
             add("K_ser_%d" % i, entry["K_ser"], "N/mm", 'K_("ser",%d)' % i,
-                "Verschiebungsmodul", 3, SOURCE, "6.2.1.4",
+                "Verschiebungsmodul", SOURCE, "6.2.1.4",
                 heading="Verschiebungsmodul" if i == per_member[0]["member"] else None)
-            add_step(name="Verschiebungsmodul Bauteil %d" % i, level=3, produces="K_ser_%d" % i,
+            add_step(name="Verschiebungsmodul Bauteil %d" % i, produces="K_ser_%d" % i,
                      uses=["alpha_%d" % i, "rho_k_%d" % i, "d", "eta_w_ser"], ref="6.2.1.4",
                      formula=kser_formula('K_("ser",%d)' % i, i),
                      description=kser_note if i == 1 else None)
-        add("K_ser", ser["K_ser"], "N/mm", 'K_"ser"', "Massgebender Verschiebungsmodul", 3,
+        add("K_ser", ser["K_ser"], "N/mm", 'K_"ser"', "Massgebender Verschiebungsmodul",
             SOURCE, "6.2.1.4")
-        add_step(name="Massgebender Verschiebungsmodul", level=3, produces="K_ser",
+        add_step(name="Massgebender Verschiebungsmodul", produces="K_ser",
                  uses=["K_ser_%d" % e["member"] for e in per_member], ref="6.2.1.4",
                  formula='K_"ser" = min(%s)'
                          % ", ".join('K_("ser",%d)' % e["member"] for e in per_member))
     else:
-        add("K_ser", ser["K_ser"], "N/mm", 'K_"ser"', "Verschiebungsmodul", 3, SOURCE, "6.2.1.4",
+        add("K_ser", ser["K_ser"], "N/mm", 'K_"ser"', "Verschiebungsmodul", SOURCE, "6.2.1.4",
             heading="Verschiebungsmodul")
-        add_step(name="Verschiebungsmodul", level=3, produces="K_ser",
+        add_step(name="Verschiebungsmodul", produces="K_ser",
                  uses=["alpha_1", "rho_k_1", "d", "eta_w_ser"], ref="6.2.1.4",
                  formula=kser_formula('K_"ser"', 1), description=kser_note)
     # Level 1: the engineer reads the connection's stiffness beside its resistance, at every level
     # (show-connector-resistance prints it under R_d,Verb).
     add("K_ser_Verb", ser["K_ser_Verb"], "N/mm", 'K_("ser","Verb")',
-        "Verschiebungsmodul der Verbindung", 1, SOURCE, "6.2.1.4",
+        "Verschiebungsmodul der Verbindung", SOURCE, "6.2.1.4",
         description="Der Schlupf beträgt rund %s mm (6.2.1.3)." % _fmt(ser["slip"]))
-    add_step(name="Verschiebungsmodul der Verbindung", level=1, produces="K_ser_Verb",
+    add_step(name="Verschiebungsmodul der Verbindung", produces="K_ser_Verb",
              uses=["n_tot", "p", "K_ser"], ref="6.2.1.4",
              formula='K_("ser","Verb") = n_"tot" dot p dot K_"ser"')
 
@@ -1291,3 +1277,8 @@ def record(cid, result, timber, spacings=None, lengths=None):
         tables.append(_spacing_table(result["d"], lengths or {}))
 
     return {"results": results, "tables": tables, **calc.to_dict()}
+
+
+def _fmt(value):
+    """A number as the dowel's formulas and tables write it: three decimals at most (calc/number_text.py's `trimmed`, UI-003)."""
+    return number_text.trimmed(value, 3)

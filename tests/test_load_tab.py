@@ -5,6 +5,8 @@ What is held: «Poids propre et surcharge» is one tab (D-08) that lists its bui
 ⚠️ Built off-screen; nothing here opens a dialog.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import os
 import sys
@@ -93,9 +95,9 @@ def test_the_dead_load_tab_edits_layers_shows_the_sums_and_the_drawing_and_saves
         exported = json.loads((here.data_dir / "calculations.json").read_text(encoding="utf-8"))
         instance = exported["domains"]["dead-load"]["instances"][cid]
         assert instance["source_file"] == "loads/dead/%s.json" % cid and instance["figures"]
-        assert (here.data_dir / instance["figures"][0]["file"]).is_file()
+        assert conftest.figure(here, instance["figures"][0]["file"]).is_file()
         import display_view
-        assert display_view.entry_call(tab.display_entries()[0]) == '#show-calc("dead-load", "%s")' % cid
+        assert display_view.entry_call(tab.display_entries()[0]) == '#include domain-file("dead-load", "%s")' % cid
         # the project's library, edited here and offered at once
         tab.add_project_material()
         tab.project_table.item(tab.project_table.rowCount() - 1, 1).setText("Hersteller OSB")
@@ -165,40 +167,6 @@ def test_the_wind_tab_offers_every_building_table_computes_at_once_and_saves():
         exported = json.loads((here.data_dir / "calculations.json").read_text(encoding="utf-8"))
         assert exported["domains"]["wind-load"]["instances"][cid]["source_file"] == "loads/wind/%s.json" % cid
         tab.dirty = False
-
-
-def _choices(tab):
-    entry = tab.display_entries()[0]
-    assert entry.command == "show-calc" and not entry.call, "the command's panel, not a call written out"
-    return [key for key, _words, _math in entry.context["shown"]]
-
-
-def test_the_three_load_tabs_offer_the_manual_selection_of_show_calc():
-    """Issues #56, #57 (spec 2026-10-14-neige-vent-affichage-altitude, REQ-001, ARCH-002, D-05): «Affichage» of the three load tabs is show-calc's panel -- its level, -1 «Sélection manuelle» among them -- with every var, table and drawing of the case as the export holds it; nothing before the first save; the snow offers no drawing (D-02). The call with `level: -1, shown:` is written as the other tabs write it."""
-    window, here = _window()
-    with project.using(here):
-        import display_options
-        import display_view
-        assert display_options.SPECS["show-calc"].options[0].kind == "detail"
-        for key, domain in (("tab_ac_selfweight", "dead-load"), ("tab_ac_snow", "snow-load"), ("tab_ac_wind", "wind-load")):
-            tab = _tab(window, key)
-            tab.dirty = False
-            tab.new()
-            if key == "tab_ac_wind":
-                _select(tab.table_box, "45")
-                tab.h_spin.setValue(9)
-            assert _choices(tab) == [], "a case not exported has nothing to tick yet"
-            assert tab.save(), tab.reason
-            cid = tab.current_id
-            exported = json.loads((here.data_dir / "calculations.json").read_text(encoding="utf-8"))["domains"][domain]["instances"][cid]
-            keys = _choices(tab)
-            assert keys[:len(exported["vars"])] == list(exported["vars"]), (key, keys)
-            assert ("figure-1" in keys) == (key == "tab_ac_selfweight"), (key, keys)
-            entry = tab.display_entries()[0]
-            assert entry.positional == (domain, cid)
-            call = display_view.entry_call(entry, {"level": -1, "shown": {keys[0]: 2}})
-            assert call.startswith('#show-calc("%s", "%s"' % (domain, cid)) and "level: -1" in call and "shown:" in call, call
-            tab.dirty = False
 
 
 def test_the_snow_tab_warns_above_the_limit_and_keeps_its_sketch():

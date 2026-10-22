@@ -4,20 +4,18 @@
 == Noise exposure in accordance with the LSV / OPB
 // woodcore:/object title
 
-// woodcore:object doc-table noise-exposure-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Item]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Land-use zone], text: [[…]]),
-    (item: [Sensitivity level], text: [[DS …]]),
-    (item: [External noise sources], text: [[…]]),
-    (item: [Immission limit values day / night], text: [[… dB / … dB]]),
+// woodcore:object table noise-exposure-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Land-use zone], [[…]],
+    [Sensitivity level], [[DS …]],
+    [External noise sources], [[…]],
+    [Immission limit values day / night], [[… dB / … dB]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Noise exposure],
-  header: false,
 )
 // woodcore:/object noise-exposure-table

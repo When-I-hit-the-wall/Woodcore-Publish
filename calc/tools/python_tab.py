@@ -11,10 +11,11 @@ The engineer: «Je souhaite avoir un onglet dans woodcore, où le user peut écr
 ⚠️ **The run is in a process of its own** and cannot take the window with it, which is the whole reason the tab is thin: it edits text, spawns `woodcore-cli run-script`, and shows what came back.
 """
 
+import source_editor  # Ctrl+S bound the one way (source_editor.save_shortcut)
 import re
 
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QColor, QFont, QKeySequence, QShortcut, QSyntaxHighlighter, QTextCharFormat
+from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat
 from PySide6.QtWidgets import (
     QAbstractItemView, QHBoxLayout, QHeaderView, QInputDialog, QLabel, QLineEdit, QMessageBox,
     QPlainTextEdit, QPushButton, QSplitter, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
@@ -37,7 +38,7 @@ TEMPLATE = '''# @name {name}
 
 What it is given, and nothing else:
     result(name, value, unit="", symbol=None, label=None, descr=None, norm=None, norm_ref="")
-        declares a value the report reads with #val(name, domain: ("script", "{id}"))
+        declares a value the report reads with #var(name, domain: ("script", "{id}"))
     value(domain, instance, name)
         a number out of the export: value("snow-load", "SL", "q_k11")
     PROJECT, DATA
@@ -211,8 +212,9 @@ def plain_label(text="", wrap=False):
     return label
 
 
-class PythonTab(QWidget):
+class PythonTab(source_editor.SourceEditorTab, QWidget):
     """Lists the project's scripts, edits one, runs it in a process of its own, and shows what it produced."""
+    SYNC_DOMAIN = True   # its sources are domains with a file of their own: every writer is followed by domain_file.sync (tab_guard.py, spec 2026-10-19-base-saine-nettoyage)
 
     SAVE_ON_FOCUS = False   # a script half typed would run at the next export: saved when the tab or the script is left, not when the window is (autosave.py, review A16)
 
@@ -237,9 +239,7 @@ class PythonTab(QWidget):
         self.splitter.setStretchFactor(1, 5)
         self.splitter.setStretchFactor(2, 3)
         layout.addWidget(self.splitter, 1)
-        shortcut = QShortcut(QKeySequence(QKeySequence.StandardKey.Save), self)
-        shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        shortcut.activated.connect(self.save)
+        source_editor.save_shortcut(self)   # Ctrl+S
         self.reload_list()
         self.restore(app.views.get("tab_python"))
 
@@ -482,8 +482,9 @@ class PythonTab(QWidget):
         if self.current is None:
             return
         names = [item["name"] for item in (self.report or {}).get("results", [])] or ["x"]
-        calls = [ref.call_val(name, model.DOMAIN, self.current) for name in names[:6]]
-        calls.append(ref.call_show_calc(model.DOMAIN, self.current))
+        # its values read by `#var`, and its file written out by the export (spec 2026-10-21-commandes-typst-refonte, REQ-009, REQ-017, UI-002)
+        calls = [ref.call_var_domain(model.DOMAIN, self.current, name) for name in names[:6]]
+        calls.append(ref.call_include_domain(model.DOMAIN, self.current))
         calls.append(ref.import_line())
         for call in calls:
             row = QHBoxLayout()
@@ -535,7 +536,7 @@ class PythonTab(QWidget):
         path = self.path_of(self.current)
         path.parent.mkdir(parents=True, exist_ok=True)
         text = self.editor.toPlainText()
-        path.write_text(text, encoding="utf-8")
+        path.write_text(text, encoding="utf-8", newline="\n")
         self.original = text
         self.dirty = False
         self.refresh_identity()
@@ -569,7 +570,7 @@ class PythonTab(QWidget):
             return
         path = self.path_of(name)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(TEMPLATE.format(name=name, id=name), encoding="utf-8")
+        path.write_text(TEMPLATE.format(name=name, id=name), encoding="utf-8", newline="\n")
         self.reload_list(select=name)
         self.load(name)
 
@@ -579,7 +580,7 @@ class PythonTab(QWidget):
         name = self.ask_name("py_new_name", self.current + "-2")
         if name is None:
             return
-        self.path_of(name).write_text(self.editor.toPlainText(), encoding="utf-8")
+        self.path_of(name).write_text(self.editor.toPlainText(), encoding="utf-8", newline="\n")
         self.reload_list(select=name)
         self.load(name)
 

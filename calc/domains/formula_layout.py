@@ -7,30 +7,14 @@ A paragraph is a list of runs, `("text", str)` or `("cmd", Command)`. A text run
 
 import re
 
-from tools import build_reference as ref
+import build_reference as ref
 from domains import formula_domain as fd
-
-# The commands that print inline and take `note:` to stand on a line of their own instead (docs/typst/formulas.md, `note:`): `#var`, `#var-unit` and `#eq` set `note: "line"` as a block of its own (lib/formula.typ). `#val`'s `note: "line"` is still a word of its sentence, its label after an em dash -- it never leaves the line -- and `#verify`, which takes no `note:`, is a word of its sentence too (`Avant 2 ⩽ 3 ✔ Après`). tests/test_formula_domain.py compiles the five and holds this table equal to what Typst prints.
-NOTE_LINE = ("var", "var-unit", "eq")
-ALWAYS_LINE = ()
 
 INLINE, LINE = "inline", "line"
 
 
-def note_of(command):
-    """The `note:` the command's call prints with: its own, or the signature's default (build_reference.signature_defaults, read off lib/formula.typ), unquoted."""
-    value = command.options.get("note")
-    if value is None:
-        value = ref.signature_defaults(command.kind).get("note")
-    return str(value).strip('"') if value is not None else None
-
-
 def placement(command):
-    """INLINE where the command prints as a word of its sentence, LINE where it prints on a line of its own (REQ-002): derived from its call, never stored -- `note:` changed in «Affichage» moves the pill, and nothing else is written (D-03)."""
-    if command.kind in ALWAYS_LINE:
-        return LINE
-    if command.kind in NOTE_LINE and note_of(command) == "line":
-        return LINE
+    """INLINE where the command prints as a word of its sentence, LINE where it prints on a line of its own (REQ-002): every command of a domain written by hand prints inline since `note:` was retired -- a domain sets its lines apart with `#calc-defaults(presets: "block")`, Woodcore's own files do (spec 2026-10-21-commandes-typst-refonte, Q-014) -- so the pane joins it to its sentence."""
     return INLINE
 
 
@@ -60,14 +44,17 @@ def _joins(a, b, place):
 
 
 def _tokens(items):
-    """The body as a stream: each line of a text (a blank one as ""), each command as itself. An empty text -- a blank line between two commands (D-07) -- is one blank line."""
-    out = []
+    """The body as a stream: each line of a text (a blank one as ""), each command as itself. An empty text -- a blank line between two commands (D-07) -- is one blank line. Also the indexes of the tokens the file writes on the line of the token before them: a command glued to what is beside it, and what follows a glued one (spec 2026-10-14-commandes-en-ligne-domaine, D-02)."""
+    out, glued, prev = [], set(), None
     for c in items:
+        if prev is not None and fd.same_line(prev, c):
+            glued.add(len(out))
         if c.is_text:
             out.extend(c.raw.split("\n"))
         else:
             out.append(c)
-    return out
+        prev = c
+    return out, glued
 
 
 def _space(paragraph):
@@ -89,8 +76,8 @@ def _space(paragraph):
 
 
 def to_paragraphs(items, place=placement):
-    """The pane's paragraphs of the domain's items (formula_domain.tidy_items' form). A blank line between two tokens that would run into one sentence is the paragraph break between them and shows as no line of its own; any other blank line is an empty paragraph, as typed."""
-    tokens = _tokens(fd.tidy_items(items))
+    """The pane's paragraphs of the domain's items (formula_domain.tidy_items' form). A blank line between two tokens that would run into one sentence is the paragraph break between them and shows as no line of its own; any other blank line is an empty paragraph, as typed. A command written on one line with a text (D-02) -- `- $0°$: #var(…)`, which Typst keeps in the list's item -- is in that text's paragraph whatever `_joins` says."""
+    tokens, glued = _tokens(fd.tidy_items(items))
     paragraphs, current = [], None
     for i, tok in enumerate(tokens):
         prev = tokens[i - 1] if i > 0 else None
@@ -103,7 +90,7 @@ def to_paragraphs(items, place=placement):
                 paragraphs.append([])
             continue
         run = ("text", tok) if isinstance(tok, str) else ("cmd", tok)
-        if current is not None and _joins(prev, tok, place):
+        if current is not None and (i in glued or _joins(prev, tok, place)):
             current.append(run)
         else:
             if current is not None:
@@ -131,13 +118,17 @@ def _unspaced(paragraph):
 
 
 def from_paragraphs(paragraphs, place=placement):
-    """The domain's items of the pane's paragraphs (formula_domain.tidy_items' form): each paragraph's runs in order, a text run a line, and, between two paragraphs whose ends Typst would run into one sentence, the blank line that keeps them apart -- the engineer's Enter beside a pill is a new paragraph in the report (D-05). Two runs in one paragraph that Typst would not join -- a heading and a pill, a command printed on a line of its own -- are written one after the other all the same: the pane shows them apart once it reads the file again (REQ-002)."""
+    """The domain's items of the pane's paragraphs (formula_domain.tidy_items' form): each paragraph's runs in order, a text run a line, and, between two paragraphs whose ends Typst would run into one sentence, the blank line that keeps them apart -- the engineer's Enter beside a pill is a new paragraph in the report (D-05). Two runs in one paragraph that Typst would not join -- a heading and a pill, a command printed on a line of its own -- are written one after the other all the same: the pane shows them apart once it reads the file again (REQ-002). A command glued to what is beside it (D-02) stays glued while it stands inside its paragraph; at the paragraph's start or end it is glued to nothing on that side -- the flag set on the command itself, which the tab knows by its identity."""
     tokens = []
     for paragraph in paragraphs:
         part = _unspaced(paragraph)
         if not part or part == [""]:
             tokens.append("")
             continue
+        if not isinstance(part[0], str):
+            part[0].glued_before = False
+        if not isinstance(part[-1], str):
+            part[-1].glued_after = False
         if tokens and tokens[-1] != "" and _joins(tokens[-1], part[0], place):
             tokens.append("")
         tokens.extend(part)

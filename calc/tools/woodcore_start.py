@@ -45,7 +45,7 @@ STEPS = (
 )
 # What the thread imports: no Qt, nothing that creates a window. Each a module name as calc/ and calc/tools/ are on the path.
 IMPORTS = {
-    "libraries": ("numpy", "openpyxl", "openpyxl.workbook", "openpyxl.writer.excel", "pypdf"),
+    "libraries": ("numpy", "openpyxl", "openpyxl.workbook", "openpyxl.writer.excel", "openpyxl.packaging.extended", "pypdf"),   # packaging.extended: what saving a workbook imports, as the «Projet» tab's preview makes a project (issue #88)
     "calc": ("project", "engine", "validation", "norms", "registry", "io_excel", "positions_store", "export_all", "build_reference",
              "domains.plan", "domains.plan_svg", "domains.fire", "domains.statics", "domains.schema", "domains.connector",
              "domains.member_check", "notifications", "typst_diagnostics"),
@@ -130,7 +130,7 @@ def write_weights(seconds):
     try:
         path = _weights_path()
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps({"schema_version": WEIGHTS_SCHEMA, "seconds": {k: round(v, 3) for k, v in seconds.items()}}, indent=1), encoding="utf-8")
+        path.write_text(json.dumps({"schema_version": WEIGHTS_SCHEMA, "seconds": {k: round(v, 3) for k, v in seconds.items()}}, indent=1), encoding="utf-8", newline="\n")
     except OSError:
         pass
 

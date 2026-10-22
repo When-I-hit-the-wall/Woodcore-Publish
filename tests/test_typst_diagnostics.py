@@ -1,5 +1,7 @@
 """Typst's diagnostics read once (calc/typst_diagnostics.py; spec docs/requirements/completed/2026-10-07-performance-erreurs-plans-legendes.md, REQ-011, ARCH-007): the file, the line and the column a notice opens, and Typst's own text kept as it was."""
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import subprocess
 
 import conftest

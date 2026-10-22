@@ -114,6 +114,18 @@ def document(plan_sources, position_rows):
     return {"schema_version": "1.0", "rows": found, "all": {"groups": groups, "totals": totals}, "plans": by_plan}, notes
 
 
+def write_document(here):
+    """data/quantities.json written from the project's position plans and positions as they are now -- what the export writes (export_all.py), for a caller that changed a plan and wants the «Métré» tab and the report to see it without a whole export. Returns the notes of what could not be measured."""
+    import engine
+    import positions_store
+    import validation
+    from domains import plan
+    data, notes = document(plan.position_plan_sources(here.plans_dir), positions_store.read(here))
+    validation.validate_structure(data, "quantities")
+    engine.write_json(here.data_dir / "quantities.json", data)
+    return notes
+
+
 def length_by_position(all_rows):
     """The length every position is drawn with, all its elements on every plan added up -- {position: metres, or None where none of its elements has a length (a point, a slab, a plan without a scale)}. What the Positions tab lists beside each position (issue #14); `summary(rows, "positions", positions=[p])` gives the same, `tests/test_quantities.py` holds them equal."""
     out = {}

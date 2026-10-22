@@ -1,0 +1,174 @@
+{
+  "domains": {
+    "EL+AL-Dach mit Wasser": {
+      "check": "EL+AL-Dach mit Wasser",
+      "gen": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "lines": {
+        "label:EL-AL-Dach-mit-Wasser-presets": [
+          "e8714be54bb71b0e",
+          "e8714be54bb71b0e"
+        ],
+        "label:EL-AL-Dach-mit-Wasser-table-1": [
+          "c68cfc915c10ca0a",
+          "c68cfc915c10ca0a"
+        ],
+        "label:EL-AL-Dach-mit-Wasser-table-1-note": [
+          "0d1d42bcea1e60ad",
+          "0d1d42bcea1e60ad"
+        ],
+        "label:EL-AL-Dach-mit-Wasser-table-1-title": [
+          "abbb6f87608a1e00",
+          "abbb6f87608a1e00"
+        ],
+        "var:ak": [
+          "2b4e1655bf047fb2",
+          "2b4e1655bf047fb2"
+        ],
+        "var:gk": [
+          "4758cf3f272c1c38",
+          "4758cf3f272c1c38"
+        ],
+        "var:gk_ak": [
+          "676468649c3e9972",
+          "676468649c3e9972"
+        ],
+        "var:gk_ak_gew": [
+          "5f3edc1c0d4396f1",
+          "5f3edc1c0d4396f1"
+        ]
+      }
+    },
+    "EL+AL-Dach ohne Wasser": {
+      "check": "EL+AL-Dach ohne Wasser",
+      "gen": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "lines": {
+        "label:EL-AL-Dach-ohne-Wasser-presets": [
+          "1ba6792541164409",
+          "1ba6792541164409"
+        ],
+        "label:EL-AL-Dach-ohne-Wasser-table-1": [
+          "a35949a90bad11b4",
+          "a35949a90bad11b4"
+        ],
+        "label:EL-AL-Dach-ohne-Wasser-table-1-note": [
+          "275b11c459144406",
+          "275b11c459144406"
+        ],
+        "label:EL-AL-Dach-ohne-Wasser-table-1-title": [
+          "a2482c9718faba6a",
+          "a2482c9718faba6a"
+        ],
+        "var:ak": [
+          "b6b06a3fc11f275d",
+          "b6b06a3fc11f275d"
+        ],
+        "var:gk": [
+          "a07da2846f50478d",
+          "a07da2846f50478d"
+        ],
+        "var:gk_ak": [
+          "e9aa2b54643b61f2",
+          "e9aa2b54643b61f2"
+        ],
+        "var:gk_ak_gew": [
+          "fd0f8c09ac96e3f2",
+          "fd0f8c09ac96e3f2"
+        ]
+      }
+    },
+    "EL+AL-DachRand": {
+      "check": "EL+AL-DachRand",
+      "gen": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "lines": {
+        "label:EL-AL-DachRand-presets": [
+          "cff582019906603f",
+          "cff582019906603f"
+        ],
+        "label:EL-AL-DachRand-table-1": [
+          "8beab4fdc47d2272",
+          "8beab4fdc47d2272"
+        ],
+        "label:EL-AL-DachRand-table-1-note": [
+          "5704ac8765674ed2",
+          "5704ac8765674ed2"
+        ],
+        "label:EL-AL-DachRand-table-1-title": [
+          "af04dd15730056ea",
+          "af04dd15730056ea"
+        ],
+        "var:ak": [
+          "98185864ab38c2d5",
+          "98185864ab38c2d5"
+        ],
+        "var:gk": [
+          "c93be3595e9fa8b3",
+          "c93be3595e9fa8b3"
+        ],
+        "var:gk_ak": [
+          "7652b8332868c8a3",
+          "7652b8332868c8a3"
+        ],
+        "var:gk_ak_gew": [
+          "f6b9b84526caf28e",
+          "f6b9b84526caf28e"
+        ]
+      }
+    },
+    "EL+AL-Wand": {
+      "check": "EL+AL-Wand",
+      "gen": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "lines": {
+        "label:EL-AL-Wand-presets": [
+          "07b09a3f290babd4",
+          "07b09a3f290babd4"
+        ],
+        "label:EL-AL-Wand-table-1": [
+          "77a6710a2eee8074",
+          "77a6710a2eee8074"
+        ],
+        "label:EL-AL-Wand-table-1-note": [
+          "9617b38f39146f6a",
+          "9617b38f39146f6a"
+        ],
+        "label:EL-AL-Wand-table-1-title": [
+          "3787630cadb05f84",
+          "3787630cadb05f84"
+        ],
+        "var:ak": [
+          "531f94ac180dfb6a",
+          "531f94ac180dfb6a"
+        ],
+        "var:gk": [
+          "cb99d9c1627f42b3",
+          "cb99d9c1627f42b3"
+        ],
+        "var:gk_ak": [
+          "b9a87eefe3d71760",
+          "b9a87eefe3d71760"
+        ],
+        "var:gk_ak_gew": [
+          "bcfd49b7c719f942",
+          "bcfd49b7c719f942"
+        ]
+      }
+    }
+  },
+  "format": "woodcore-unfold",
+  "schema_version": "1.0"
+}

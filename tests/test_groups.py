@@ -7,6 +7,8 @@ What has to be held is the decision underneath, because everything downstream re
 ⚠️ Skipped where PySide6 is not installed: a machine that only builds the report is a legitimate machine. Everything is built off-screen; a test run must never open a window.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import os
 import sys

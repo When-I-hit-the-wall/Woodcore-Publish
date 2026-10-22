@@ -3,6 +3,8 @@
 The values are held against hand calculations, never against the module's own arithmetic: an I of three rectangles, 200 x 100, web 6, flanges 10 -- A = 2·100·10 + 180·6 = 3080 mm², I_y = 100·200³/12 − 94·180³/12 = 21 006 667 mm⁴, W_el,y = I_y/100, W_pl,y = 2·(100·10·95 + 6·90·45) = 238 600 mm³, I_z = 2·10·100³/12 + 180·6³/12 = 1 669 907 mm⁴, W_pl,z = 2·10·100²/4 + 180·6²/4 = 51 620 mm³. An L 100 x 50 x 10 drawn from two rectangles, its centroid and plastic axis found off the middle.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 
 import conftest

@@ -3,6 +3,8 @@
 What is held: every type of domains/section.py has its fields, a type with several forms a form to choose, a CLT panel a field a layer that may be added and taken away; the fields read the text and write it back, and say so only when typed in; a text none of the type's forms reads is shown in no field.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import os
 import sys
 

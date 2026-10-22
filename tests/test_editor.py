@@ -194,8 +194,8 @@ def test_the_language_server_survives_a_call_into_the_engine():
     _tinymist()
     directory = conftest.probe_dir("editor")
     probe = directory / "call.typ"
-    relative = os.path.relpath(TYPST_ROOT / "commands.typ", directory).replace(os.sep, "/")
-    probe.write_text(f'#import "{relative}": *\n\n#val(1.5)\n\n#var("a", 2)\n#var("b", 3)\n#eq("x", `a dot b`)\n',
+    relative = os.path.relpath(conftest.PROJECT.commands_typ, directory).replace(os.sep, "/")
+    probe.write_text(f'#import "{relative}": *\n\n#var("c", 1.5)\n\n#var("a", 2)\n#var("b", 3)\n#eq("x", `a dot b`)\n',
                      encoding="utf-8")
     # The probe must itself compile: until the audit of 260916 it called `#show-eq(..., where: ...)`, a command removed in v0.61, and the test passed without calling the engine at all (AUD-6-17).
     if conftest.have_typst():
@@ -208,13 +208,13 @@ def test_the_language_server_survives_a_call_into_the_engine():
 
 
 def test_tinymist_takes_the_project_s_folder_for_the_root_its_settings_state():
-    """The engineer's safety net (30.09.2026): a project in three documents is compiled from its own folder -- a section imports the engine as `"/commands.typ"` -- and its `.vscode/settings.json` states `"tinymist.rootPath": "${workspaceFolder}"`, which the VS Code extension substitutes with the folder VS Code was opened on before Tinymist reads it. Held from both ends: the example's settings state it, and Tinymist told that root finds `/commands.typ` from a section of the report in its own folder -- where told the document's folder, the root it takes when VS Code is opened on that folder instead, it does not, which is what shows the check can fail."""
+    """The engineer's safety net (30.09.2026): a project in three documents is compiled from its own folder -- a section imports the engine as `"/000-Typst-Config/commands.typ"` -- and its `.vscode/settings.json` states `"tinymist.rootPath": "${workspaceFolder}"`, which the VS Code extension substitutes with the folder VS Code was opened on before Tinymist reads it. Held from both ends: the example's settings state it, and Tinymist told that root finds `/commands.typ` from a section of the report in its own folder -- where told the document's folder, the root it takes when VS Code is opened on that folder instead, it does not, which is what shows the check can fail."""
     exe = _tinymist()
     settings = (PROJECT.root / ".vscode" / "settings.json").read_text(encoding="utf-8")
     import project_migrate
     assert json.loads(project_migrate.jsonc_plain(settings)).get("tinymist.rootPath") == "${workspaceFolder}", "the example's settings do not state the project's folder as Tinymist's root"
     section = PROJECT.document_dir("rs") / "Sections" / "003-baustoffe.typ"
-    assert section.read_text(encoding="utf-8").startswith('#import "/commands.typ"'), "the section does not import from the project's root"
+    assert section.read_text(encoding="utf-8").startswith('#import "/000-Typst-Config/commands.typ"'), "the section does not import from the project's root"
 
     def not_found(root):
         server = _Server(exe, section, root=root)

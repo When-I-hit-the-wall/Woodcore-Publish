@@ -9,6 +9,7 @@
     python tests/run_tests.py -v              the traceback of a failure, not just its message
     python tests/run_tests.py --times         after the summary, the time per file and the slowest tests
     python tests/run_tests.py --perf          the tests of time too (files that set PERF = True), left out otherwise
+    python tests/run_tests.py --fast          the fast tier only (files that set TIER = "fast"): about three minutes, before every commit
 
 No framework, on purpose: this project already carries three dependencies outside the standard library (requirements.txt), and a fourth that exists only to call functions whose names start with `test_` would be one more thing to install before a report can be checked. `pytest`, if it happens to be there, discovers these same files unchanged -- the convention below is its own.
 
@@ -68,6 +69,11 @@ TEST_DEF = re.compile(r"^def (test_\w+)\s*\(", re.M)
 def is_perf(path):
     """Whether a test file declares itself a test of time: a line `PERF = True` at its top level, read off its text so that the file is not imported to know it."""
     return any(line.split("#")[0].strip() == "PERF = True" for line in path.read_text(encoding="utf-8").splitlines())
+
+
+def is_fast(path):
+    """Whether a test file belongs to the fast tier (`--fast`, spec 2026-10-19-base-saine-nettoyage REQ-005): a line `TIER = "fast"` at its top level, read off its text as `PERF` is. A file that says nothing is in the full suite only -- the default, so that a new test file costs the fast tier nothing until it is chosen for it."""
+    return any(line.split("#")[0].strip() in ('TIER = "fast"', "TIER = 'fast'") for line in path.read_text(encoding="utf-8").splitlines())
 
 
 def exit_code(failed, skipped, filtered):
@@ -353,6 +359,7 @@ def main():
     ap.add_argument("--related", nargs="+", metavar="PATH", help="only the test files naming one of these modules, and the previous run's failures")
     ap.add_argument("--times", action="store_true", help="print the time per file and the slowest tests after the summary")
     ap.add_argument("--perf", action="store_true", help="run the tests of time too (files that set PERF = True)")
+    ap.add_argument("--fast", action="store_true", help='only the fast tier (files that set TIER = "fast"): the engine, the norms, the contracts and the export, in about three minutes')
     ap.add_argument("--test-timeout", type=int, default=TEST_TIMEOUT_S, metavar="S", help=f"a test running longer is stopped and fails (default {TEST_TIMEOUT_S})")
     ap.add_argument("--worker", help=argparse.SUPPRESS)
     ap.add_argument("--names", help=argparse.SUPPRESS)
@@ -369,6 +376,8 @@ def main():
     files = sorted(HERE.glob("test_*.py"))
     left_out = [p.stem for p in files if not args.perf and is_perf(p)]
     files = [p for p in files if p.stem not in left_out]
+    if args.fast:
+        files = [p for p in files if is_fast(p)]
     work = select(args, files)
     if not work:
         print("no test selected" + (" -- the previous run failed nothing" if args.failed else ""))

@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Unfolded checks",
+  "description": "Formules/unfold.json -- what Woodcore last wrote of each member check printed unfolded as a domain of the «Formules» tab (calc/domains/unfold.py; spec docs/requirements/completed/2026-10-15-calculs-deplies-balises-figures-natives.md, REQ-007, ARCH-RISK-205). Woodcore's own file, beside the domains it describes so that an archive and a copy of the project carry it, written whole with sorted keys and no date, never edited by hand. For each domain: the check it was written from, the form (`gen`) it was written for, and, for each of its lines -- a command by its kind and key or id, a line of text the writer owns by its label -- the digest (sync.digest: 16 hex digits of SHA-256, line endings LF) of the line as Woodcore last wrote or took it: the base a line of the file and a line of a new writing are each compared with, so that a change made in VS Code is told from a change of the data.",
+  "type": "object",
+  "required": [
+    "format",
+    "schema_version",
+    "domains"
+  ],
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "woodcore-unfold"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "1.0 -- a file written at another version is refused rather than read as this one."
+    },
+    "domains": {
+      "type": "object",
+      "description": "One entry per unfolded domain, keyed by its id, which is its check's (D-14).",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": [
+            "check",
+            "gen",
+            "lines"
+          ],
+          "properties": {
+            "check": {
+              "type": "string",
+              "description": "The id of the record the domain is written from: a member check (sources/checks/<id>.json, in Timber-checks/unfold.json), a steel check (sources/steel/<id>.json, in Steel-checks/unfold.json, spec 2026-10-21-commandes-typst-refonte, REQ-017) -- one base per kind of domain, beside its files."
+            },
+            "gen": {
+              "type": "object",
+              "required": [
+                "kind",
+                "form",
+                "version"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string"
+                },
+                "form": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              },
+              "description": "The form the domain was written for, as its #var-domain(gen:) writes it."
+            },
+            "lines": {
+              "type": "object",
+              "description": "{line id: [own, seen]}: `var:<key>`, `eq:<key>`, `verify:<id>`, `label:<label>` -- `own` the digest of the file's line as Woodcore last wrote or took it, `seen` that of the writing's line then; the two differ where a line is kept as the engineer wrote it (REQ-009, REQ-010).",
+              "patternProperties": {
+                ".*": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

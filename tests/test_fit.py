@@ -9,6 +9,8 @@ Nothing in this folder touched the canvas before this file, so neither the defec
 ⚠️ Skipped where PySide6 is not installed: a machine that only builds the report is a legitimate machine. Every canvas here is built off-screen -- a test run must never open a window.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import os
 import sys
 

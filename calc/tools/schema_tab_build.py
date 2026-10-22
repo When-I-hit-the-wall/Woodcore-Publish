@@ -1,9 +1,8 @@
 """SchemaTab's building -- the list, the tool bar and its buttons, the canvas, the tables and the right pane's properties -- a mixin of methods moved verbatim out of calc/tools/schema_tab.py (issue #30). SchemaTab names it among its bases.
 """
 
-from PySide6.QtCore import QByteArray, QEvent, QRectF, QSize, Qt, Signal
-from PySide6.QtGui import QColor, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import QEvent, QSize, Qt, Signal
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QButtonGroup, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox,
     QFormLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox,
@@ -23,9 +22,10 @@ from domains import schema as model
 from domains import schema_svg
 import flowbar
 from flowbar import (BAR_SPACING, TOOL_ICON_PX, FlowLayout, FlowWidget, ResizableColumns, ToolBarArea,
-                     pixel_ratio, set_tip, size_tool, symbol_px, tool_group)
+                     set_tip, size_tool, symbol_px, tool_group)
 from schema_canvas import AREA_MODES, CONNECTOR_TOOLS, TOOLS, SchemaCanvas
 from schema_tab_words import STRINGS, TIPS, tip_key  # split out of this module (issue #30): every name it had is still importable from it
+import svg_icons
 
 
 # The grid steps the engineer may force, beside «auto» -- millimetres, a detail's own unit.
@@ -90,16 +90,8 @@ def plain_label(text, wrap=False):
 
 
 def icon_from_svg(text, size=ICON_PX):
-    """An icon from SVG text, `size` logical pixels square, rendered at the screen's own pixel ratio (flowbar.pixel_ratio) so it stays sharp on a scaled display."""
-    renderer = QSvgRenderer(QByteArray(text.encode("utf-8")))
-    ratio = pixel_ratio()
-    pixmap = QPixmap(QSize(round(size * ratio), round(size * ratio)))
-    pixmap.setDevicePixelRatio(ratio)
-    pixmap.fill(QColor(0, 0, 0, 0))
-    painter = QPainter(pixmap)
-    renderer.render(painter, QRectF(0, 0, size, size))
-    painter.end()
-    return QIcon(pixmap)
+    """An icon from SVG text, `size` logical pixels square (svg_icons.svg_icon)."""
+    return svg_icons.svg_icon(text, size)
 
 
 def swatch_kind(tool):
@@ -123,12 +115,10 @@ def swatch_kind(tool):
 
 
 def on_ground(svg):
-    """A swatch with the figure's black ink and white fill put into the scheme's ink and ground (theme.py, v0.90), the way statics_tab and connectors_tab recolour theirs: the four cotation tools and the fasteners were drawn black on the dark scheme's buttons, and all but invisible. The colours that say which symbol it is -- the wood, the construction grey, a point's green -- stay the figure's. Through sentinels, so an ink written as white is not then painted away by the fill's own substitution."""
+    """A swatch with the figure's black ink and white fill put into the scheme's ink and ground (theme.py, v0.90), the way statics_tab and connectors_tab recolour theirs: the four cotation tools and the fasteners were drawn black on the dark scheme's buttons, and all but invisible. The colours that say which symbol it is -- the wood, the construction grey, a point's green -- stay the figure's. Through svg_icons.recolour."""
     from domains import connector_svg
-    for ink in {schema_svg.DIMENSION, connector_svg.SWATCH_INK}:
-        svg = svg.replace(ink, "#000001")
-    svg = svg.replace(connector_svg.SWATCH_FILL, "#000002")
-    return svg.replace("#000001", theme.colour("ink")).replace("#000002", theme.colour("bg"))
+    svg = svg.replace(schema_svg.DIMENSION, connector_svg.SWATCH_INK)
+    return svg_icons.recolour(svg, connector_svg.SWATCH_INK, connector_svg.SWATCH_FILL, theme.colour("ink"), theme.colour("bg"))
 
 
 def tool_icon(tool, size=ICON_PX):
@@ -152,31 +142,6 @@ class SchemaBuildMixin:
     def note(self, text):
         """An explanation, muted and wrapping, as a card's note is (cards.note)."""
         return cards.note(text)
-
-    def build_list(self):
-        panel = QWidget()
-        box = QVBoxLayout(panel)
-        box.setContentsMargins(0, 0, 6, 0)
-        self.list = grouped_list.GroupedList(STRINGS.get(self.app.lang, STRINGS["fr"]), lang=self.app.lang)
-        self.archive = source_archive.Actions(self, lambda: project.current().details_dir, lambda text: self.export("", text), lambda select: self.reload_list(select), self.load_first)
-        self.archive.connect()
-        box.addWidget(grouped_list.title_row(self.heading(self.t("sc_list")), self.list))
-        self.list.setIconSize(self.app.mark_size)
-        self.list.currentIdChanged.connect(self.on_list_change)
-        self.list.moved.connect(self.on_moved)
-        self.list.foldersChanged.connect(self.on_folders_changed)
-        self.list.attach_order("tab_schema", self.app.list_store)   # the order the engineer gives the list by drag and drop, kept in Woodcore-Datei/lists.json (calc/list_order.py, issue #15)
-        self.list.reordered.connect(lambda: self.reload_list(select=self.current_id))
-        box.addWidget(self.list, 1)
-        self.empty_hint = self.note(self.t("sc_empty"))
-        box.addWidget(self.empty_hint)
-        row = QHBoxLayout()
-        for key, slot in (("sc_new", self.new), ("sc_duplicate", self.duplicate), ("sc_delete", self.delete)):
-            button = QPushButton(self.t(key))
-            button.clicked.connect(slot)
-            row.addWidget(button)
-        box.addLayout(row)
-        return panel
 
     def bar_tip(self, widget, name_key, tip_key):
         """Names a control of the bar and says how it is used (flowbar.set_tip), and keeps the two keys it said it with in `bar_tips` -- what tests/test_toolbar.py reads each language's words back by."""

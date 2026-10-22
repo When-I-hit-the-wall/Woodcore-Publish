@@ -77,6 +77,11 @@ def test_at_its_floor_no_button_of_the_pane_is_cut():
     for key, tab, pane in _panes():
         window.tab_widget.setCurrentWidget(tab)
         _settle(app)
+        for view in getattr(tab, "VIEWS", ()):   # a pane in a view not shown -- the «Projet» tab's «Templates» -- is laid out only once that view is
+            if pane.isVisible():
+                break
+            tab.set_view(view, enter=False)
+            _settle(app)
         splitter = pane.splitter()
         sizes = splitter.sizes()
         splitter.setSizes([0, sizes[1] + sizes[0]] + sizes[2:])   # as far left as it goes: Qt stops it at its minimum
@@ -89,6 +94,8 @@ def test_at_its_floor_no_button_of_the_pane_is_cut():
             assert right <= pane.width() + 1, f"{key}: «{button.text()}» ends at {right} px of a {pane.width()} px pane"
         splitter.setSizes(sizes)
         _settle(app)
+        if getattr(tab, "VIEWS", None):
+            window.reset_view(tab)
 
 
 def test_the_arrow_folds_every_pane_and_gives_its_width_back():
@@ -105,6 +112,27 @@ def test_the_arrow_folds_every_pane_and_gives_its_width_back():
         _settle(app)
         assert not pane.folded and abs(pane.width() - width) <= 2, (key, pane.width(), width)
         assert key not in window.folded_left_panes(), key
+
+
+def test_the_centre_takes_the_freed_width_at_once():
+    """Issue #91: folded, the centre pane comes up to the arrow at once, and unfolded gives the width back -- measured after one turn of the loop, with no resize of the window or of a pane."""
+    window, app = _window()
+    for key, tab, pane in _panes():
+        window.tab_widget.setCurrentWidget(tab)
+        _settle(app)
+        splitter = pane.splitter()
+        index = splitter.indexOf(pane)
+        neighbour = index + 1 if index + 1 < splitter.count() else index - 1
+        before = splitter.sizes()
+        pane.fold.click()
+        app.processEvents()
+        folded = splitter.sizes()
+        assert folded[neighbour] == before[neighbour] + before[index] - folded[index], (key, before, folded)
+        assert all(folded[i] == before[i] for i in range(len(before)) if i not in (index, neighbour)), (key, before, folded)
+        assert splitter.widget(neighbour).width() == folded[neighbour], (key, splitter.widget(neighbour).width(), folded)
+        pane.fold.click()
+        app.processEvents()
+        assert abs(splitter.sizes()[index] - before[index]) <= 2 and abs(splitter.sizes()[neighbour] - before[neighbour]) <= 2, (key, before, splitter.sizes())
 
 
 def test_a_pane_left_folded_is_folded_at_the_next_start():

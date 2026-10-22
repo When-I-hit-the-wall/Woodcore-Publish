@@ -28,7 +28,6 @@ import json
 import re
 
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QDoubleSpinBox, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton,
     QSplitter, QVBoxLayout, QWidget,
@@ -36,6 +35,8 @@ from PySide6.QtWidgets import (
 
 import build_reference as ref
 import cards  # the form and what is read off it in cards, after the website (cards.py)
+import reserved_tab  # the one class of a tab to come (spec 2026-10-19-base-saine-nettoyage, ARCH-001)
+from source_editor import SourceEditorTab  # the left pane every editor tab shares (spec 2026-10-19-base-saine-nettoyage, ARCH-001)
 import autosave  # saving without a question, and what is never saved without the engineer (autosave.py, v0.117)
 import grouped_list
 import display_view  # the «Affichage» view: the options, the call and the compiled page (display_view.py, v0.117)
@@ -78,45 +79,26 @@ SOON = {
 _check_strings()
 
 
-class SoonTab(QWidget):
-    """A module of the navigation that is not built yet: it says so, what it will hold and which command of the report does the work meanwhile. «Flexion» is bending combined with a normal force and «Effort tranchant» holds the shear and the compression perpendicular to the grain -- said in the sentence each takes its words from."""
-
-    def __init__(self, app, key):
-        super().__init__()
-        self.app = app
-        what_key, commands = SOON[key]
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 24, 24, 24)
-        self.title = QLabel(app.t(key))
-        self.title.setFont(app.title_font)
-        layout.addWidget(self.title)
-        self.status = QLabel(app.t("mc_soon_title"))
-        self.status.setFont(app.bold_font)
-        layout.addWidget(self.status)
-        what = app.t(what_key)
-        if commands:
-            text = app.t("mc_soon", what=what, commands=", ".join(commands))
-        else:
-            text = app.t("mc_soon_none", what=what)
-        self.message = QLabel(text)
-        self.message.setWordWrap(True)
-        self.message.setTextFormat(Qt.TextFormat.PlainText)
-        self.message.setMaximumWidth(640)
-        layout.addWidget(self.message)
-        layout.addStretch(1)
-
-    def view_state(self):
-        return {}
+def soon_tab(app, key):
+    """A module of the navigation that is not built yet (reserved_tab.ReservedTab): it says so, what it will hold and which command of the report does the work meanwhile. «Flexion» is bending combined with a normal force and «Effort tranchant» holds the shear and the compression perpendicular to the grain -- said in the sentence each takes its words from."""
+    what_key, commands = SOON[key]
+    what = app.t(what_key)
+    text = app.t("mc_soon", what=what, commands=", ".join(commands)) if commands else app.t("mc_soon_none", what=what)
+    return reserved_tab.ReservedTab(app, key, app.t(key), app.t("mc_soon_title"), text)
 
 
-class MemberCheckTab(MemberCheckActionsMixin, MemberCheckFormMixin, QWidget):
+class MemberCheckTab(MemberCheckActionsMixin, MemberCheckFormMixin, SourceEditorTab, display_view.DisplayTab, QWidget):
     """The tab of one kind of member check -- the list, the form in cards, the page, the options and the call; see the module's docstring. A kind is a subclass naming itself (`KEY`, `KIND`, `ID_PREFIX`, the keys of its title and of its empty list) and building its «Effort» card (`build_effort`) and the part of the source that card holds (`fill_effort`, `draft_effort`)."""
+    SYNC_DOMAIN = True   # its sources are domains with a file of their own: every writer is followed by domain_file.sync (tab_guard.py, spec 2026-10-19-base-saine-nettoyage)
 
     KEY = ""            # the tab's key: its title, its entry of the window's views and of the empty folders
     KIND = ""           # the kind of the checks it lists: `kind` of their source
+    GRAPH_KIND = "check"   # a timber check of the graph of dependencies (issue #71)
+    UNFOLDED = True    # every kind is printed unfolded, its domain written out by the export (spec 2026-10-15, D-11; spec 2026-10-21-commandes-typst-refonte, REQ-017): its page is that domain's, its call an #include of its file, and «Ouvrir dans Formules» goes to it
     ID_PREFIX = "Z_"
     LIST_KEY = "mc_list"
     EMPTY_KEY = "mc_empty"
+    WORDS = "mc"        # the prefix of its list's words (source_editor.SourceEditorTab)
     N_KEY = "mc_N"      # the label of the force
     ALPHA_KEY = "mc_alpha"   # the label of the angle
     N_MIN = 0.0         # the lowest force the field takes: a magnitude, but a bending's normal force is signed
@@ -160,17 +142,10 @@ class MemberCheckTab(MemberCheckActionsMixin, MemberCheckFormMixin, QWidget):
         self.refresh_timer.setSingleShot(True)
         self.refresh_timer.setInterval(OPTION_DELAY_MS)
         self.refresh_timer.timeout.connect(self.request_preview)   # the page is asked for a moment after the last edit; the results are not waited for
-        shortcut = QShortcut(QKeySequence(QKeySequence.StandardKey.Save), self)   # Ctrl+S, as in every editor tab
-        shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        shortcut.activated.connect(self.save)
+        self.install_save_shortcut()   # Ctrl+S, as in every editor tab
         self.restore(app.views.get(self.KEY))
 
     # --- small helpers ---------------------------------------------------------
-
-    def heading(self, text):
-        label = QLabel(text)
-        label.setFont(self.app.bold_font)
-        return label
 
     def tl(self, text):
         """A word the DATA carries, in the window's language -- through the glossary the report reads (docs/typst/language.md §4bis)."""
@@ -274,6 +249,22 @@ class MemberCheckTab(MemberCheckActionsMixin, MemberCheckFormMixin, QWidget):
         folder = self.sources_dir()
         return sorted(p.stem for p in folder.glob("*.json")) if folder.is_dir() else []
 
+    def prepare_display(self):
+        """Before «Affichage» opens: the call this tab builds itself, its options and its page (display_view.DisplayTab.set_view)."""
+        self.fill_command()
+
+    def duplicate_id(self, source):
+        return next_free_id(self._taken(), self.ID_PREFIX)   # every kind's checks share checks/: a copy's id is free among all of them
+
+    def export_sources(self):
+        self.DOMAIN.export(project.current())
+
+    def saved_ids(self):
+        return self._own_ids()
+
+    def archived_entries(self):
+        return self._archived_of_kind()
+
     def _own_ids(self):
         """The IDs of the checks of this tab's kind -- a source without a `kind` is a tension, the first kind there was."""
         folder = self.sources_dir()
@@ -349,10 +340,6 @@ class MemberCheckTab(MemberCheckActionsMixin, MemberCheckFormMixin, QWidget):
             "current_id": self.current_id,
             "dirty": self.dirty,
             "splitter": self.splitter.sizes(),
-            # the options by their values, never their place in a list: -1 added to the levels moved every index (ARCH-008)
-            "options": {"level": self.level_box.state(), "member": self.member_box.currentData(),
-                        "description": self.description_box.isChecked(), "title": self.title_box.currentData(),
-                        "title_text": self.title_text.text(), "unit": self.unit_box.currentData()},
             "empty_folders": list(self.empty_folders),
         }
 
@@ -371,19 +358,6 @@ class MemberCheckTab(MemberCheckActionsMixin, MemberCheckFormMixin, QWidget):
         self.current_id = state.get("current_id")
         self.dirty = bool(state.get("dirty"))
         self.empty_folders = list(state.get("empty_folders") or [])
-        options = state.get("options") or {}
-        if "level" in options:
-            self.level_box.blockSignals(True)
-            self.level_box.set_state(options["level"])
-            self.level_box.blockSignals(False)
-        for box, key in ((self.member_box, "member"), (self.title_box, "title"), (self.unit_box, "unit")):
-            if key in options:
-                box.blockSignals(True)
-                box.setCurrentIndex(max(box.findData(options[key]), 0))
-                box.blockSignals(False)
-        self.description_box.setChecked(bool(options.get("description")))
-        self.title_text.setText(options.get("title_text", ""))
-        self.title_text.setEnabled(self.title_box.currentData() == "text")
         self.reload_list(self.current_id)
         self.fill_form()
         if state.get("splitter"):
@@ -786,7 +760,7 @@ class LateralTab(BucklingLengths, MemberCheckTab):
 
 
 class ShearTab(MemberCheckTab):
-    """Effort tranchant: SIA 265 4.2.5.1 -- `#verify-shear`: the shear forces in the plane of h and of b, added as vectors at the centroid, and a member cut from the pith. No normal force and no angle; shear-off, shear with a stress perpendicular to the grain and torsion stay commands of the report, which the card says (issue #38)."""
+    """Effort tranchant: what the list at the head of its card says (spec 2026-10-21-commandes-typst-refonte, REQ-021, UI-005, Q-010: «le user choisit dans un menu déroulant quel type de cisaillement il souhaite calculer») -- the shear of SIA 265 4.2.5.1, the shear forces in the plane of h and of b added as vectors at the centroid and a member cut from the pith; the shear-off of 4.2.6, a force on a sheared length and width; the shear with a stress perpendicular to the grain of 4.2.7.1. Printed unfolded, as every check is since that spec (REQ-017). No normal force and no angle; torsion stays a command of the report."""
 
     KEY = "tab_mc_shear"
     KIND = "shear"
@@ -799,6 +773,7 @@ class ShearTab(MemberCheckTab):
         source.setdefault("V_z", {"value": 10, "unit": "kN"})
         source.setdefault("V_y", None)
         source.setdefault("pith", False)
+        source.setdefault("variant", "shear")
         return source
 
     def build_effort(self):
@@ -815,17 +790,65 @@ class ShearTab(MemberCheckTab):
         self.pith_box = QCheckBox(self.t("mc_pith"))
         self.pith_box.toggled.connect(self.touch)
         form.addRow("", self.pith_box)
+        # what the check checks: the list at the head of the card, each variant showing its own fields (REQ-021, UI-005)
+        from domains import member_check
+        self.variant_box = QComboBox()
+        for variant in member_check.SHEAR_VARIANTS:
+            self.variant_box.addItem(self.t("mc_shear_" + variant.replace("-", "_")), variant)
+        self.variant_box.currentIndexChanged.connect(self.variant_changed)
+        form.insertRow(0, self.t("mc_shear_variant"), self.variant_box)
+        self.f_off = self.spin(0.0, 1_000_000.0, 2, 1.0, " kN")
+        self.l_off = self.spin(0.0, 100_000.0, 0, 10.0, " mm")
+        self.w_off = self.spin(0.0, 100_000.0, 0, 10.0, " mm")
+        self.w_off.setSpecialValueText(self.t("mc_w_off_auto"))     # 0: the member's width
+        self.s90 = self.spin(-1000.0, 1000.0, 3, 0.1, " N/mm²")
+        for spin, label in ((self.f_off, "mc_F_off"), (self.l_off, "mc_l_off"), (self.w_off, "mc_w_off"), (self.s90, "mc_sigma_90")):
+            spin.valueChanged.connect(self.touch)
+            form.addRow(self.t(label), spin)
         form.addRow("", cards.note(self.t("mc_shear_hint")))
+        self.show_variant()
+
+    def variant(self):
+        return self.variant_box.currentData() or "shear"
+
+    def variant_changed(self, *_ignored):
+        """Another variant chosen: its fields shown, and the draft computed again."""
+        self.show_variant()
+        self.touch()
+
+    def show_variant(self):
+        """The fields of the variant chosen, and none of the others."""
+        variant = self.variant()
+        form = self.effort_form
+        form.setRowVisible(self.row_of(self.v_spins["V_z"]), variant in ("shear", "shear-perp"))
+        form.setRowVisible(self.row_of(self.v_spins["V_y"]), variant == "shear")
+        form.setRowVisible(self.pith_box, variant == "shear")
+        for spin in (self.f_off, self.l_off, self.w_off):
+            form.setRowVisible(spin, variant == "shear-off")
+        form.setRowVisible(self.s90, variant == "shear-perp")
 
     def fill_effort(self, s):
         self.alpha_spin.setValue(0.0)
         for key, spin in self.v_spins.items():
             spin.setValue(abs(float((s.get(key) or {}).get("value") or 0)))
         self.pith_box.setChecked(bool(s.get("pith")))
+        index = self.variant_box.findData(s.get("variant") or "shear")
+        self.variant_box.setCurrentIndex(max(index, 0))
+        self.f_off.setValue(abs(float((s.get("F") or {}).get("value") or 0)))
+        self.l_off.setValue(float(s.get("l") or 0))
+        self.w_off.setValue(float(s.get("w") or 0))
+        self.s90.setValue(float(s.get("sigma_90") or 0))
+        self.show_variant()
 
     def draft_effort(self, s):
         s["alpha"] = 0
         s.pop("N", None)
+        variant = self.variant()
+        s["variant"] = variant
         for key, spin in self.v_spins.items():
-            s[key] = {"value": spin.value(), "unit": "kN"} if spin.value() else None
-        s["pith"] = self.pith_box.isChecked()
+            s[key] = {"value": spin.value(), "unit": "kN"} if spin.value() and (variant == "shear" or key == "V_z" and variant == "shear-perp") else None
+        s["pith"] = self.pith_box.isChecked() and variant == "shear"
+        s["F"] = {"value": self.f_off.value(), "unit": "kN"} if variant == "shear-off" and self.f_off.value() else None
+        s["l"] = self.l_off.value() or None if variant == "shear-off" else None
+        s["w"] = self.w_off.value() or None if variant == "shear-off" else None
+        s["sigma_90"] = self.s90.value() if variant == "shear-perp" else None

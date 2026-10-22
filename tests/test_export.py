@@ -7,6 +7,8 @@ Three things, each of which was untrue or unchecked before v0.59:
 * the export is reproducible -- the same inputs give the same bytes, which is what makes a `git diff` on `data/` a diff of values rather than of noise.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import os
 import re

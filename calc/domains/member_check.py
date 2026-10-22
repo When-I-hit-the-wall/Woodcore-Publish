@@ -1,6 +1,6 @@
 """Member checks (vérifications d'élément): one source file each, written by Woodcore, resolved here, calculated in Typst (docs/domain/connectors.md §3.3nonies, docs/domain/member-checks.md §3.3undecies).
 
-A member check is the saved form of what `#member` and a `#verify-*` command write in the report by hand: which member, with which section, strength class and moisture class, under which action. It is a file of its own, `Woodcore-Datei/checks/<id>.json`, written by Woodcore and read by this module alone -- the arrangement of `connectors/`, for the same reasons (docs/decisions.md §13). **Nothing is computed here**: the check is computed in the report by `#show-check-member` (lib/timber.typ), which reads the record this module exports and calls `#member` and the `#verify-*` of its kind with the values written out -- `#verify-tension`; for a compression `#verify-compression(stability: false)` along the grain and `#verify-compression-perp` at an angle; for a bending `#verify-bending(stability: false)` without a normal force and `#verify-bending-normal(stability: false)` with one. What this module does is store, check and resolve -- the connector's reference pattern applied to a member.
+A member check is the saved form of what `#member` and a `#verify-*` command write in the report by hand: which member, with which section, strength class and moisture class, under which action. It is a file of its own, `Woodcore-Datei/checks/<id>.json`, written by Woodcore and read by this module alone -- the arrangement of `connectors/`, for the same reasons (docs/decisions.md §13). **The check is computed twice, on purpose** (the engineer, 19.10.2026: «c'est tout à fait normal de calculer en python, puis en typst»): here by `compute()`, quickly, for the window -- the rows and the verdict shown as the engineer types -- and in the report by `#show-check-member` (lib/timber.typ), the one the report prints. tests/test_member_check.py holds the two equal, every kind of IMPLEMENTED, every row within 1e-6 and the clause it cites (`_held_equal`). The report's is computed by `#show-check-member`, which reads the record this module exports and calls `#member` and the `#verify-*` of its kind with the values written out -- `#verify-tension`; for a compression `#verify-compression(stability: false)` along the grain and `#verify-compression-perp` at an angle; for a bending `#verify-bending(stability: false)` without a normal force and `#verify-bending-normal(stability: false)` with one. What this module does is store, check and resolve -- the connector's reference pattern applied to a member -- and compute the window's copy.
 
 **A value follows its position unless it is stated.** `grade`, `section` and `moisture_class` are `null` (follow the position the check names, read afresh at every export, so *Import données* is all it takes) or a value (written over, and staying so). The record says where each came from, `*_from`: "position", "stated", or None where neither gives one.
 
@@ -24,8 +24,12 @@ import engine
 import project
 import shown_variables
 import validation
-from domains import links
+from domains._common import fail as _fail, is_number as _number  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
+from domains import line_keys, links      # line_keys: what tells a row's formula computes its value (_with_keys)
 from norms import sia265, vkf
+from number_text import exact as _fmt  # a number as a section's text and a Typst call write it: six decimals, trailing zeros dropped (calc/number_text.py, UI-003)
+# the lines of `compute`, built by the engine (spec 2026-10-21-restes-issue-69, REQ-003): `_row` is timber_calc.line, NORM the norm a line cites where it states none of its own
+from domains.timber_calc import NORM, SOURCE, TimberCalculation, line as _row
 
 DOMAIN = "member-check"
 SOURCE_SCHEMA = "member-check-source"
@@ -39,6 +43,14 @@ SOURCE_SCHEMA_VERSIONS = (SOURCE_SCHEMA_VERSION, LINKED_SCHEMA_VERSION, FIRE_SCH
 EXPORT_SCHEMA_VERSION = "1.0"
 LINKED_EXPORT_VERSION = "1.1"
 FIRE_EXPORT_VERSION = "1.2"
+# 1.3 is 1.2 with `vars` and `gen` on a check printed unfolded (spec 2026-10-15, ARCH-007): what `#var(key, value, domain: ("check", id))` checks a literal against, and the form `#var-domain(id, gen:)` is compared with
+UNFOLDED_EXPORT_VERSION = "1.3"
+# 1.4 is 1.3 with `file` on a check printed unfolded (issue #64, D-16): the file of its domain from the Typst root, `/Timber-checks/Tension/<id>.typ`, or none where the file is still a stub -- what #show-check-member includes, where 1.3's engine included `/Formules/<id>.typ` of its own accord. Written once the checks are unfolded (`mark_unfolded_files`).
+UNFOLDED_FILE_EXPORT_VERSION = "1.4"
+# 1.5 is 1.4 with `fire.required` on a check whose duration VKF 15-15 requires (spec 2026-10-20-indices-et-niveaux, REQ-001, Q-004): the norm and the table the duration is cited by, `{"norm": "VKF 15-15", "norm_ref": "Tabelle 2"}` -- composed here once, copied by #show-check-member into #member's `fire: (required:)`
+REQUIRED_EXPORT_VERSION = "1.5"
+# 1.6 is 1.5 without `gen` (spec 2026-10-21-commandes-typst-refonte, ARCH-011): the form a check is written out from is the regeneration base's alone (calc/domains/unfold.py), the export no longer carries it -- every check printed unfolded is written at 1.6, with its `vars` and its `file`
+UNFOLDED_BASE_EXPORT_VERSION = "1.6"
 
 # The kinds a check in the fire situation may be (D-09: bending with its shear as two checks, buckling, compression and tension of the section -- no lateral torsional buckling), all along the grain
 FIRE_KINDS = ("tension", "compression", "bending", "shear", "buckling")
@@ -82,6 +94,8 @@ MOMENT_UNITS = ("kNm", "Nm", "MNm")
 MOMENTS = ("M_y", "M_z")
 # The shear forces of a shear check: in the plane of h (z) and of b (y)
 SHEAR_FORCES = ("V_z", "V_y")
+# What a shear check checks (spec 2026-10-21-commandes-typst-refonte, REQ-021, Q-010: «ajouter ces cisaillements dans l'onglet cisaillement, le user choisit dans un menu déroulant»): the shear of 4.2.5.1, the shear-off of 4.2.6 -- a force `F` on a length `l` and a width `w` --, the shear with a stress perpendicular to the grain of 4.2.7.1 -- V_z and `sigma_90`, transverse tension positive. Until then the two last were `#verify-shear-off` and `#verify-shear-perp`, computed in Typst alone.
+SHEAR_VARIANTS = ("shear", "shear-off", "shear-perp")
 # The system lengths and buckling length coefficients of a buckling check (and of a lateral torsional buckling with a compression): l_k = beta · l, about y and about z
 LENGTHS = ("l_y", "l_z")
 BETAS = ("beta_y", "beta_z")
@@ -97,29 +111,6 @@ LINKABLE = {
     "beta_y": "", "beta_z": "",
     "sigma_m_crit": "N/mm²",
 }
-
-
-def _fail(where, message):
-    raise validation.ValidationError("%s: %s" % (where, message))
-
-
-def _number(value):
-    return not isinstance(value, bool) and isinstance(value, (int, float))
-
-
-def _fmt(value):
-    """A number as a section's text and a Typst call write it: at most six decimals, trailing zeros dropped -- 100, 101.6."""
-    text = f"{float(value):.6f}".rstrip("0").rstrip(".")
-    return "0" if text in ("", "-0") else text
-
-
-def _typst_str(text):
-    return '"' + str(text).replace("\\", "\\\\").replace('"', '\\"') + '"'
-
-
-def _typst_dict(levels):
-    """`shown:` as Typst writes it: `(A: 2, W_y: 1)`, `(:)` where nothing is chosen -- every key a registry key, a bare identifier."""
-    return "(" + ", ".join("%s: %d" % (key, n) for key, n in levels.items()) + ")" if levels else "(:)"
 
 
 # --- the source ---------------------------------------------------------------
@@ -210,6 +201,14 @@ def check_source(src, where="checks"):
             _fail(where, "%s.unit is %r -- %s" % (key, shear.get("unit"), ", ".join(FORCE_UNITS)))
     if src.get("pith") is not None and not isinstance(src.get("pith"), bool):
         _fail(where, "pith is %r -- true or false" % (src.get("pith"),))
+    variant = src.get("variant")
+    if variant is not None and (kind != "shear" or variant not in SHEAR_VARIANTS):
+        _fail(where, "variant is %r -- a shear check's: %s, or null for shear" % (variant, ", ".join(SHEAR_VARIANTS)))
+    off = src.get("F")
+    if off is not None and (not isinstance(off, dict) or not _number(off.get("value")) or off.get("unit") not in FORCE_UNITS):
+        _fail(where, "F is %r -- a {value, unit} block, the design force sheared off (SIA 265 4.2.6), or null" % (off,))
+    if src.get("sigma_90") is not None and not _number(src.get("sigma_90")):
+        _fail(where, "sigma_90 is %r -- the design stress perpendicular to the grain in N/mm², transverse tension positive (4.2.7.1), or null" % (src.get("sigma_90"),))
     # buckling lengths: a system length in mm, 0 or above (0 held against buckling), and its coefficient, 0 or above
     for key in LENGTHS + BETAS:
         value = src.get(key)
@@ -278,6 +277,16 @@ def _check_fire(src, where):
         _fail(where, "fire.wood is %r -- %s, or null for a softwood grade" % (wood, ", ".join(sia265.FIRE_WOODS[1:])))
     if not isinstance(fire.get("top_level", False), bool):
         _fail(where, "fire.top_level is %r -- true or false" % (fire.get("top_level"),))
+
+
+def write_source(here, src):
+    """Writes one check's source, `checks/<id>.json`, as the «Traction» tab writes it (two spaces, the keys in their order, a last line ending) -- checked first (`check_source`: a malformed source stops, naming the field), written beside itself and moved into place. The one writer of a source outside the tab's draft (spec 2026-10-15, ARCH-RISK-206): «Importer» in the «Formules» tab writes a value changed in an unfolded check back here (REQ-009)."""
+    import sharing
+    check_source(src)
+    path = here.checks_dir / ("%s.json" % src["id"])
+    old = path.read_bytes() if path.is_file() else None
+    sharing._commit([(path, engine.source_bytes(src), old)])
+    return path
 
 
 def read_source(path):
@@ -396,10 +405,11 @@ def _contact(src, grade, section):
 
 def read_building(here=None):
     """The project's building (project.building_file), checked: None where the file is absent -- a gap of the project, which a check following VKF 15-15 then says --, a ValidationError naming the field where it is malformed (a file Woodcore wrote)."""
-    path = (here or project.current()).building_file
+    here = here or project.current()
+    path = here.building_file
     if not path.is_file():
         return None
-    where = "Woodcore-Datei/%s" % path.name
+    where = here.rel(path)
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
@@ -411,13 +421,14 @@ def read_building(here=None):
 
 def write_building(building, here=None):
     """Writes the project's building, checked first; stamps its schema_version. What the «Résistance au feu» tab saves (issue #46)."""
-    path = (here or project.current()).building_file
+    here = here or project.current()
+    path = here.building_file
     data = {"schema_version": BUILDING_SCHEMA_VERSION}
     data.update({key: building[key] for key in vkf.BUILDING_KEYS})
-    validation.validate_structure(data, BUILDING_SCHEMA, "Woodcore-Datei/%s" % path.name)
-    vkf.check_building(data, "Woodcore-Datei/%s" % path.name)
+    validation.validate_structure(data, BUILDING_SCHEMA, here.rel(path))
+    vkf.check_building(data, here.rel(path))
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    engine.write_json(path, data)
     return data
 
 
@@ -437,7 +448,9 @@ def _fire_block(src, grade, section, building):
     clause = sia265.fire()
     sides = [side for side in sia265.FIRE_SIDES if fire["sides"].get(side)]
     minutes, origin, requirement = fire_duration(fire, building)
-    out = {"duration": minutes if minutes else None, "duration_from": origin if minutes else None, "requirement": requirement, "sides": sides,
+    # the citation of a duration VKF 15-15 requires (REQ-001): its norm and the table it is read off, which the row t_fi then cites in the window and in the report; a duration the engineer states keeps SIA 265 4.5.2
+    required = {"norm": requirement["norm"], "norm_ref": "Tabelle " + requirement["table"]} if minutes and origin == "vkf" else None
+    out = {"duration": minutes if minutes else None, "duration_from": origin if minutes else None, "requirement": requirement, "required": required, "sides": sides,
            "wood": None, "top_level": bool(fire.get("top_level", False)), "beta_n": None, "d_ef": None, "b": None, "h": None}
     if minutes is None:
         return out, (requirement["reason"] + " -- state the fire resistance of this check" if requirement and requirement["reason"]
@@ -559,8 +572,22 @@ def resolve(src, positions, values=None, building=None):
             reason = "no M_%s -- lateral torsional buckling is the bending about the strong axis, %s; without M_%s check a bending" % (axis, axis, axis)
         elif src.get("a") is None and src.get("sigma_m_crit") is None:
             reason = "neither a nor sigma_m_crit -- lateral torsional buckling needs the distance between the lateral supports, or the critical stress of a finer calculation"
-    if not reason and kind == "shear" and shears["V_z"] is None and shears["V_y"] is None:
+    variant = src.get("variant") or "shear"
+    if not reason and kind == "shear" and variant == "shear" and shears["V_z"] is None and shears["V_y"] is None:
         reason = "no shear force -- a shear check needs V_z, V_y or both"
+    if not reason and kind == "shear" and variant == "shear-off":
+        clause = sia265.shear_off()
+        if not src.get("F") or src["F"]["value"] == 0:
+            reason = "no F -- a shear-off (SIA 265 4.2.6) reads the force sheared off"
+        elif not src.get("l"):
+            reason = "no l -- a shear-off reads the sheared length along the grain, in mm"
+        elif src["l"] < clause["min_shear_length"]:
+            reason = "l is %s mm -- SIA 265 4.2.6 reads a sheared length of %s mm at least" % (_fmt(src["l"]), _fmt(clause["min_shear_length"]))
+    if not reason and kind == "shear" and variant == "shear-perp":
+        if shears["V_z"] is None:
+            reason = "no V_z -- a shear with a stress perpendicular to the grain (SIA 265 4.2.7.1) reads V_z"
+        elif src.get("sigma_90") is None:
+            reason = "no sigma_90 -- a shear with a stress perpendicular to the grain reads that stress, transverse tension positive"
     moments = {key: (src.get(key) if src.get(key) and src[key]["value"] != 0 else None) for key in MOMENTS}
     if not reason and kind == "bending":
         # a bending's N is signed: any value is one; what it cannot do without is a moment, and at an angle M_z, which (17) to (20) do not read
@@ -631,6 +658,14 @@ def resolve(src, positions, values=None, building=None):
         for key in SHEAR_FORCES:
             out[key] = {"value": shears[key]["value"], "unit": shears[key]["unit"]} if shears[key] else None
         out["pith"] = bool(src.get("pith", False))
+        # the variant written where it is not the shear of 4.2.5.1, so that a project without one exports as before (REQ-021, additive)
+        variant = src.get("variant") or "shear"
+        if variant != "shear":
+            out["variant"] = variant
+        if variant == "shear-off":
+            out.update(F=dict(src["F"]) if src.get("F") else None, l=src.get("l"), w=src.get("w"))
+        if variant == "shear-perp":
+            out["sigma_90"] = src.get("sigma_90")
         if out["pith"] and grade and _family(grade) == "Brettschichtholz":
             # Tabelle 8 note 6 halves f_v,d of solid timber cut from the pith; Tabelle 9 has no such note -- the field stays as the source says, and is not applied (D-02 of spec 2026-10-12-audit-issues-47-48-49)
             warnings.append(engine.Note("check_pith_glulam", "%s: pith is true on %s, a glulam -- SIA 265 Tabelle 8 note 6 halves f_v,d of solid timber only, and Tabelle 9 has no such note: f_v,d is not halved" % (where, grade), check=cid, grade=grade))
@@ -643,108 +678,10 @@ def resolve(src, positions, values=None, building=None):
 
 # --- the Typst it comes to -----------------------------------------------------
 
-def force_text(force):
-    """The design force as `#show-check-member` hands it to `#verify-tension`: «25 kN»."""
-    return "%s %s" % (_fmt(force["value"]), force["unit"])
-
-
-def moment_text(moment):
-    """A design moment as `#show-check-member` hands it to `#verify-bending`: its magnitude, «12.5 kNm» -- the sign of a moment says nothing a section check reads."""
-    return "%s %s" % (_fmt(abs(moment["value"])), moment["unit"])
-
-
-def fire_typst(fire):
-    """A resolved `fire` as #member's `fire:` takes it: `(duration: 60, sides: ("bottom", "left", "right"), wood: "oak")` -- the four booleans of the source become the faces' names here and nowhere else (ARCH-RISK-009); a softwood's wood is none, which #member reads off the grade again."""
-    sides = ", ".join(_typst_str(s) for s in fire["sides"]) + ("," if len(fire["sides"]) == 1 else "")
-    wood = "none" if fire.get("wood") in (None, "softwood") else _typst_str(fire["wood"])
-    return "(duration: %d, sides: (%s), wood: %s)" % (fire["duration"], sides, wood)
-
-
-def draft_typst(record, level=None, member_level=1, description=False, title=None, unit=None, shown=None):
-    """The Typst `#show-check-member` prints for `record` -- `#member(...)` then the check of its kind, `#verify-tension(...)`, `#verify-compression(..., stability: false)` along the grain or `#verify-compression-perp(...)` at an angle, every value written out -- for Woodcore to compile as the preview of a draft not exported yet. It compiles after `#import "/commands.typ": *` in a project. `level`, `title`, `unit` are verify-tension's: None leaves them to their default (auto), `title=False` is `none`; `member_level` is the member line's level, None for no line (level 0). At `level=-1` (issue #20) `shown` -- {key: level} -- is split as `#show-check-member` splits it, the check's keys to the check and the rest to the member, whose own level gives way (spec D-11). A record that cannot be calculated comes to the panic `#show-check-member` gives it."""
-    cid = record["id"]
-    if not record.get("calculable"):
-        return "#panic(%s)\n" % _typst_str("show-check-member: %s cannot be checked -- %s" % (cid, record.get("reason", "")))
-    if record.get("kind") not in IMPLEMENTED:
-        return "#panic(%s)\n" % _typst_str("show-check-member: the %s check is not implemented yet" % record.get("kind"))
-    section = record["section"]
-    sides = ["d: %s" % _fmt(section["d"])] if section["type"] == "cir" else ["b: %s" % _fmt(section["b"]), "h: %s" % _fmt(section["h"])]
-    position = record.get("position") if record.get("position_found") else None
-    member = ["%s" % _typst_str(cid)] + sides + [
-        "grade: %s" % _typst_str(record["grade"]),
-        "moisture-class: %d" % record["moisture_class"],
-        "position: %s" % (_typst_str(position) if position else "none"),
-        "impact: %s" % ("true" if record.get("impact") else "false"),
-    ] + (["fire: %s" % fire_typst(record["fire"])] if record.get("fire") else []) + [
-        "description: %s" % ("true" if description else "false"),
-        "level: %s" % (-1 if level == -1 else 0 if member_level is None else member_level),
-    ]
-    command = shown_variables.check_command(record)
-    member_shown, check_shown = shown_variables.split_check_member(shown or {}, command)
-    if level == -1:
-        member.append("shown: %s" % _typst_dict(member_shown))
-    alpha = record.get("alpha", 0)
-    lengths = ["l-y: %s" % _fmt(record["l_y"]), "l-z: %s" % _fmt(record["l_z"]),
-               "beta-y: %s" % _fmt(record["beta_y"]), "beta-z: %s" % _fmt(record["beta_z"])] if record.get("l_y") is not None else []
-    if record["kind"] == "tension":
-        check = [_typst_str(cid), "N: %s" % _typst_str(force_text(record["N"])), "alpha: %s" % _fmt(alpha)]
-    elif record["kind"] == "shear":
-        # 4.2.5: the shear forces, each in its plane, and a member cut from the pith
-        check = [_typst_str(cid)] + ["%s: %s" % ("V" if key == "V_z" else "V-y", _typst_str(force_text(record[key]))) for key in SHEAR_FORCES if record.get(key)]
-        check.append("pith: %s" % ("true" if record.get("pith") else "false"))
-    elif record["kind"] == "buckling":
-        # 4.2.8: a compression along the grain with its stability, the buckling lengths beta · l about each axis
-        check = [_typst_str(cid), "N: %s" % _typst_str("-" + force_text(record["N"]))] + lengths
-    elif record["kind"] == "lateral-torsional":
-        # 4.2.9: a bending with its stability -- without a normal force (14) and (38), with a tension (21) and (38), with a compression (22) and (37), which reads the buckling lengths
-        check = [_typst_str(cid)]
-        if command == "verify-bending-normal":
-            check.append("N: %s" % _typst_str(force_text(record["N"])))
-        check += ["%s: %s" % (key.replace("_", "-"), _typst_str(moment_text(record[key]))) for key in MOMENTS if record.get(key)]
-        if record.get("a") is not None:
-            check.append("a: %s" % _fmt(record["a"]))
-        elif record.get("sigma_m_crit") is not None:
-            check.append("sigma-m-crit: %s" % _fmt(record["sigma_m_crit"]))
-        if command == "verify-bending-normal" and record["N"]["value"] < 0:
-            check += lengths
-    elif record["kind"] == "bending":
-        # the section alone: without a normal force (14) or (17) to (20), with one (21) or (22) -- N signed, tension positive
-        check = [_typst_str(cid)]
-        if command == "verify-bending-normal":
-            check.append("N: %s" % _typst_str(force_text(record["N"])))
-        check += ["%s: %s" % (key.replace("_", "-"), _typst_str(moment_text(record[key]))) for key in MOMENTS if record.get(key)]
-        check += ["alpha: %s" % _fmt(alpha), "stability: false"]
-    elif alpha == 0:
-        check = [_typst_str(cid), "N: %s" % _typst_str("-" + force_text(record["N"])), "stability: false"]
-    else:
-        check = [_typst_str(cid), "F: %s" % _typst_str(force_text(record["N"])), "l: %s" % _fmt(record["l"]), "w: %s" % _fmt(record["w"]),
-                 "alpha: %s" % _fmt(alpha), "case: %s" % _typst_str(record["case"]), "larger: %s" % ("true" if record.get("larger") else "false")]
-    if level is not None:
-        check.append("level: %s" % level)
-    if level == -1:
-        check.append("shown: %s" % _typst_dict(check_shown))
-    if title is False:
-        check.append("title: none")
-    elif title is not None:
-        check.append("title: %s" % _typst_str(title))
-    if unit is not None:
-        check.append("unit: %s" % _typst_str(unit))
-    return "#member(%s)\n#%s(%s)\n" % (", ".join(member), command, ", ".join(check))
-
-
 # --- the instant calculation -----------------------------------------------------
 
 # A force in kN, from the unit a source writes it in.
 _TO_KN = {"N": 1e-3, "kN": 1.0, "MN": 1e3}
-
-
-def _row(key, symbol, value, unit, formula=None, label=None):
-    row = {"key": key, "symbol": symbol, "value": value, "unit": unit}
-    if formula:
-        row["formula"] = formula
-    if label:
-        row["label"] = label
-    return row
 
 
 def compute(record):
@@ -798,11 +735,61 @@ def _indices(formula):
 
 
 def _compute(record):
+    """`_lines(record)` with its lines written by the engine (`_calculation`) and given back as rows -- the shape the window, `unfold`, `published_vars` and the parity with the report read (REQ-003) --, each row whose formula reads in the registry's keys given them (`_with_keys`). None where `_lines` gives none."""
+    result, calculation = _calculation(record)
+    if result is None:
+        return None
+    return dict(result, rows=_with_keys(calculation.rows(), record))
+
+
+def section_sides(record):
+    """[(key, symbol, value)] of the section's sides an unfolded check declares first: b and h, or d -- in the fire situation the initial section's, `b_0`, `h_0` (`d_0`), the rows of the residual section then being b and h, as #member(fire:) names them (spec 2026-10-21-commandes-typst-refonte, REQ-017)."""
+    section = record["section"]
+    sides = ("d",) if section["type"] == "cir" else ("b", "h")
+    suffix = "_0" if record.get("fire") else ""
+    return [(side + suffix, side + suffix, section[side]) for side in sides]
+
+
+def _with_keys(rows, record):
+    """`rows`, each that carries no `keys` but a formula given the formula in the registry's keys -- **only where that formula, computed as `#eq` computes it (calc/units.py), gives the row's own value** to 1e-9 (spec 2026-10-21-commandes-typst-refonte, REQ-017, ARCH-003): a row whose formula cannot be read that way -- a branch, a value of a table written as a number, a residual section in the fire situation -- keeps none, and an unfolded check writes its value as a literal checked by `domain:` (`published_vars`). The values a formula may name are those the unfolded file declares before it: the section's sides, then the rows above it and the values of their tables."""
+    known, values = {}, {}
+    for key, symbol, value in section_sides(record):
+        known[symbol], values[key] = key, (value, "mm")
+    out = []
+    for row in rows:
+        row = dict(row)
+        table = row.get("table")
+        if table:
+            known[table["symbol"]] = table["key"]
+            values[table["key"]] = (table["value"], table["unit"])
+        if not row.get("keys") and row.get("formula") and row["key"] != "eta":
+            keys = line_keys.keys_of(row["formula"], known)
+            if line_keys.computes(keys, values, row["key"], row["value"], row.get("unit")):
+                row["keys"] = keys
+        if row["key"] == "eta" and not row.get("keys") and row.get("formula"):
+            keys = line_keys.keys_of(row["formula"], known)
+            if line_keys.computes(keys, values, row["key"], row["value"], row.get("unit")):
+                row["keys"] = keys
+        known[row["symbol"]] = row["key"]
+        values[row["key"]] = (row["value"], row.get("unit") or "")
+        out.append(row)
+    return out
+
+
+def _calculation(record):
+    """The result of `_lines(record)` and the TimberCalculation its lines are written into, once, in the order the report prints them -- (None, None) where the record cannot be calculated."""
+    result = _lines(record)
+    if result is None:
+        return None, None
+    return result, TimberCalculation().take(result["rows"])
+
+
+def _lines(record):
     """The check of `record` computed at once, in Python, for Woodcore to show while a draft is typed -- with no Typst compile in the way (the engineer, 07.10.2026). **The report does not read it**: `#show-check-member` computes the same check in Typst, and `tests/test_member_check.py` holds the two equal. Every value of SIA 265 is read through `norms.sia265` (Tabelle 8 or 9, Tabelle 4's eta_w, 2.2.6's eta_t), never written here, and the arithmetic is lib/timber.typ's: a design value is the table's times eta_w times eta_t, A is b·h or π·d²/4, A_c is l·w, and f_alpha is (9) or (13).
 
     Gives None where the record cannot be calculated or its kind is not implemented; otherwise
-    {"kind", "equation", "clause", "rows": [{"key", "symbol", "value", "unit", "formula"?, "label"?}, …], "eta", "ok", "relation"},
-    the rows in the order the report prints them and named by the registry's keys (`symbol` the Typst math source the page sets), `eta` the utilisation, `ok` whether it holds (eta <= 1, a tie absorbed at 1e-9), `relation` the norm's inequality in those keys."""
+    {"kind", "equation", "clause", "rows": [Line, …], "eta", "ok", "relation"},
+    the rows -- timber_calc Lines -- in the order the report prints them and named by the registry's keys (`symbol` the Typst math source the page sets), `eta` the utilisation, `ok` whether it holds (eta <= 1, a tie absorbed at 1e-9), `relation` the norm's inequality in those keys."""
     if not record or not record.get("calculable") or record.get("kind") not in IMPLEMENTED:
         return None
     fire = record.get("fire")
@@ -820,14 +807,18 @@ def _compute(record):
         return base if n == 0 else "%s - d_(ef)" % base if n == 1 else "%s - %d dot d_(ef)" % (base, n)
 
     d_char = fire["beta_n"] * fire["duration"]
-    rows = [_row("t_fi", "t", fire["duration"], "min", label="R%d" % fire["duration"]),
-            _row("beta_n", "beta_n", fire["beta_n"], "mm/min"),
-            _row("d_char_n", "d_(char,n)", d_char, "mm", "beta_n dot t"),
-            _row("d_red", "d_(red)", clause["d_red"]["value"], "mm"),
-            _row("d_ef", "d_(ef)", fire["d_ef"], "mm", "d_(char,n) + d_(red)"),
-            _row("b", "b_(fi)", fire["b"], "mm", reduced("b_0", n_b)),
-            _row("h", "h_(fi)", fire["h"], "mm", reduced("h_0", n_h)),
-            _row("k_fi", "k_(fi)", k_fi, "")]
+    # each row cites the clause #member(fire:) cites for it (lib/timber.typ), so the window and the report say the same (C2, v0.120)
+    residual = clause["d_red"]["norm_ref"]
+    required = fire.get("required")
+    rows = [_row("t_fi", "t", fire["duration"], "min", label="R%d" % fire["duration"], clause=required["norm_ref"] if required else clause["norm_ref"],
+                 norm=required["norm"] if required else NORM),
+            _row("beta_n", "beta_n", fire["beta_n"], "mm/min", clause="Tabelle " + clause["charring"]["table"]),
+            _row("d_char_n", "d_(char,n)", d_char, "mm", "beta_n dot t", clause=residual),
+            _row("d_red", "d_(red)", clause["d_red"]["value"], "mm", clause=residual),
+            _row("d_ef", "d_(ef)", fire["d_ef"], "mm", "d_(char,n) + d_(red)", clause=residual),
+            _row("b", "b_(fi)", fire["b"], "mm", reduced("b_0", n_b), clause=residual),
+            _row("h", "h_(fi)", fire["h"], "mm", reduced("h_0", n_h), clause=residual),
+            _row("k_fi", "k_(fi)", k_fi, "", clause=clause["resistance_factor"]["norm_ref"])]
     result = _compute_section(dict(record, section={"type": "rec", "b": fire["b"], "h": fire["h"], "text": section.get("text", "")}), k_fi)
     result["rows"] = rows + result["rows"]
     return result
@@ -844,16 +835,20 @@ def _compute_section(record, k_fi=1.0):
     section = record["section"]
     if section["type"] == "cir":
         area = math.pi * section["d"] ** 2 / 4
-        area_row = _row("A", "A", area, "mm²", "pi dot d^2 / 4")
+        area_row = _row("A", "A", area, "mm²", "pi dot d^2 / 4", keys="pi dot d^2 / 4")
     else:
         area = section["b"] * section["h"]
-        area_row = _row("A", "A", area, "mm²", "b dot h")
-    factors = [_row("eta_w", "eta_w", eta_w, "", label="Feuchteklasse %d" % record["moisture_class"]),
-               _row("eta_t", "eta_t", eta_t, "")]
+        area_row = _row("A", "A", area, "mm²", "b dot h", keys="b dot h")
+    factors = [_row("eta_w", "eta_w", eta_w, "", label="Feuchteklasse %d" % record["moisture_class"], clause="Tabelle 4"),
+               _row("eta_t", "eta_t", eta_t, "", clause="2.2.6")]
+    tab_ref = "Tabelle %s" % sia265.grade_table(record["grade"])
 
     def design(key, symbol, table_value, label=None):
         value = k_fi * eta_w * eta_t * table_value
-        return value, _row(key, symbol, value, "N/mm²", "%seta_w dot eta_t dot %s" % ("k_(fi) dot " if fire else "", _fmt(table_value)), label)
+        # the table's own value, a var of the unfolded file (`table`): Tabelle 8/9 gives design values, which eta_w and eta_t then multiply (SIA 265 2.2.2, 3.3.2.1)
+        table = _row(key + "_tab", symbol[:-1] + ",\"Tab\")" if symbol.endswith(")") else symbol + "_\"Tab\"", table_value, "N/mm²", clause=tab_ref)
+        return value, _row(key, symbol, value, "N/mm²", "%seta_w dot eta_t dot %s" % ("k_(fi) dot " if fire else "", _fmt(table_value)), label,
+                           keys="%seta_w dot eta_t dot %s" % ("k_fi dot " if fire else "", table.key), clause=tab_ref, table=table)
 
     def at_angle(f0, f90):
         a = math.radians(alpha)
@@ -873,11 +868,11 @@ def _compute_section(record, k_fi=1.0):
         sigma = force * 1000 / area                                    # N/mm²
         if alpha == 0:
             f, f_row = design("f_t_0_d", "f_(t,0,d)", row["f_t_0_d"])
-            rows = [area_row, force_row] + factors + [f_row, _row("sigma_t_0_d", "sigma_(t,0,d)", sigma, "N/mm²", "N_(t,d) / A")]
+            rows = [area_row, force_row] + factors + [f_row, _row("sigma_t_0_d", "sigma_(t,0,d)", sigma, "N/mm²", "N_(t,d) / A", keys="N_t_d / A", clause="4.2.1.1")]
             out = {"equation": "(6)", "clause": "4.2.1.1", "relation": "sigma_t_0_d <= f_t_0_d"}
         elif alpha == 90:
             f, f_row = design("f_t_90_d", "f_(t,90,d)", row["f_t_90_d"])
-            rows = [area_row, force_row] + factors + [f_row, _row("sigma_t_90_d", "sigma_(t,90,d)", sigma, "N/mm²", "N_(t,d) / A")]
+            rows = [area_row, force_row] + factors + [f_row, _row("sigma_t_90_d", "sigma_(t,90,d)", sigma, "N/mm²", "N_(t,d) / A", keys="N_t_d / A", clause="4.2.1.2")]
             out = {"equation": "(7)", "clause": "4.2.1.2", "relation": "sigma_t_90_d <= f_t_90_d"}
         else:
             f0, f0_row = design("f_t_0_d", "f_(t,0,d)", row["f_t_0_d"])
@@ -885,8 +880,9 @@ def _compute_section(record, k_fi=1.0):
             f = at_angle(f0, f90)
             rows = [area_row, force_row, _row("alpha", "alpha", alpha, "°")] + factors + [
                 f0_row, f90_row,
-                _row("f_t_alpha_d", "f_(t,alpha,d)", f, "N/mm²", "f_(t,90,d) dot f_(t,0,d) / (f_(t,0,d) dot sin(alpha)^2 + f_(t,90,d) dot cos(alpha)^2)"),
-                _row("sigma_t_alpha_d", "sigma_(t,alpha,d)", sigma, "N/mm²", "N_(t,d) / A")]
+                _row("f_t_alpha_d", "f_(t,alpha,d)", f, "N/mm²", "f_(t,90,d) dot f_(t,0,d) / (f_(t,0,d) dot sin(alpha)^2 + f_(t,90,d) dot cos(alpha)^2)",
+                     keys="f_t_90_d dot f_t_0_d / (f_t_0_d dot sin(alpha)^2 + f_t_90_d dot cos(alpha)^2)", clause="4.2.1.3 (9)"),
+                _row("sigma_t_alpha_d", "sigma_(t,alpha,d)", sigma, "N/mm²", "N_(t,d) / A", keys="N_t_d / A", clause="4.2.1.3")]
             out = {"equation": "(8)/(9)", "clause": "4.2.1.3", "relation": "sigma_t_alpha_d <= f_t_alpha_d"}
     elif alpha == 0:
         # along the grain, the section alone: (10) with k_c = 1, buckling being a check of its own
@@ -916,12 +912,12 @@ def _compute_section(record, k_fi=1.0):
                      _row("sigma_c_alpha_d", "sigma_(c,alpha,d)", sigma, "N/mm²", "F_(c,90,d) / A_c")]
             out = {"equation": "(12)/(13)", "clause": "4.2.2.3", "relation": "sigma_c_alpha_d <= f_c_alpha_d"}
     eta = sigma / f
-    stress = rows[-1]["symbol"]
+    stress = rows[-1].symbol
     ratio = "%s / %s" % (stress, ("f" + stress[len("sigma"):]))
     if shown_variables.check_command(record) == "verify-compression":
         # verify-compression prints the section's verdict as eta_s and stores eta = eta_s (lib/timber.typ): the row the window offers at -1 (issue #58)
         rows.append(_row("eta_s", "eta_s", eta, "", ratio))
-    rows.append(_row("eta", "eta", eta, "", ratio))
+    rows.append(_row("eta", "eta", eta, "", ratio, keys=out["relation"].replace(" <= ", " / ")))
     return {"kind": kind, "equation": out["equation"], "clause": out["clause"], "rows": rows,
             "eta": eta, "ok": eta <= 1 + 1e-9, "relation": out["relation"]}
 
@@ -1090,6 +1086,64 @@ def _result(kind, equation, clause, rows, eta, relation):
 
 
 def _compute_shear(record, area, area_row, factors, design, row):
+    """`compute` for a shear check, by its variant (REQ-021): the shear of 4.2.5.1 (`_compute_shear_v`), the shear-off of 4.2.6, the shear with a stress perpendicular to the grain of 4.2.7.1."""
+    variant = record.get("variant") or "shear"
+    if variant == "shear-off":
+        return _compute_shear_off(record, factors, design, row)
+    if variant == "shear-perp":
+        return _compute_shear_perp(record, area, area_row, factors, design, row)
+    return _compute_shear_v(record, area, area_row, factors, design, row)
+
+
+def _compute_shear_off(record, factors, design, row):
+    """`compute` for a shear-off, SIA 265 4.2.6 -- verify-shear-off's arithmetic, now Python's (REQ-021): tau_a = F / (l · w), w the member's width where none is given, against k_a · f_v,d, k_a 0.6 for solid timber (26) and 0.8 for glulam (27), the sheared length at least the clause's."""
+    clause = sia265.shear_off()
+    family = _family(record["grade"])
+    force = abs(record["F"]["value"]) * _TO_KN[record["F"]["unit"]]        # kN
+    length = record["l"]
+    width = record.get("w") or record["section"].get("b") or record["section"].get("d")
+    tau = force * 1000 / (length * width)
+    k_a = clause["factor"][family]
+    rows = [_row("F_a_d", "F_(a,d)", force, "kN"), _row("l_a", "l_a", length, "mm"),
+            _row("w_a", "w_a", width, "mm", label=None if record.get("w") else "b"),
+            _row("tau_a_d", "tau_(a,d)", tau, "N/mm²", "F_(a,d) / (l_a dot w_a)", clause=clause["norm_ref"])]
+    rows += factors
+    f_v, f_v_row = design("f_v_d", "f_(v,d)", row["f_v_d"])
+    rows += [f_v_row, _row("k_a", "k_a", k_a, "", label=family, clause="%s (%s)" % (clause["norm_ref"], clause["equation"][family]))]
+    eta = tau / (k_a * f_v)
+    rows.append(_row("eta", "eta", eta, "", "tau_(a,d) / (k_a dot f_(v,d))"))
+    return _result("shear", "(%s)" % clause["equation"][family], clause["norm_ref"], rows, eta, "tau_a_d <= k_a dot f_v_d")
+
+
+def _compute_shear_perp(record, area, area_row, factors, design, row):
+    """`compute` for a shear with a stress perpendicular to the grain, SIA 265 4.2.7.1 -- verify-shear-perp's arithmetic, now Python's (REQ-021): tau_d = 1.5 · V_z / A (4/3 for a circle), sigma_90,d between -f_c,90,d and f_t,90,d, k_t,90 by its sign, and equation (28)."""
+    clause = sia265.shear_transverse()
+    factor = SHEAR_FACTORS[record["section"]["type"]]
+    force = abs(record["V_z"]["value"]) * _TO_KN[record["V_z"]["unit"]]
+    tau = factor * force * 1000 / area
+    sigma = record["sigma_90"]
+    k = clause["k_t_90"]["querzug" if sigma >= 0 else "querdruck"]
+    rows = [area_row, _row("V_z_d", "V_(z,d)", force, "kN"),
+            _row("tau_d", "tau_d", tau, "N/mm²", "%s dot V_(z,d) / A" % ("4/3" if factor != 1.5 else "1.5")),
+            _row("sigma_90_d", "sigma_(90,d)", sigma, "N/mm²"),
+            _row("k_t_90", "k_(t,90)", k, "", label="Querzug" if sigma >= 0 else "Querdruck", clause=clause["norm_ref"])]
+    rows += factors
+    f_c90_table = row["f_c_90_d"]["generell"]
+    f_c90_table = f_c90_table.get("value") if isinstance(f_c90_table, dict) else f_c90_table
+    f_c90, f_c90_row = design("f_c_90_d", "f_(c,90,d)", f_c90_table)
+    f_t90, f_t90_row = design("f_t_90_d", "f_(t,90,d)", row["f_t_90_d"])
+    f_v, f_v_row = design("f_v_d", "f_(v,d)", row["f_v_d"])
+    rows += [f_c90_row, f_t90_row, f_v_row]
+    resisted = f_c90 / (f_c90 + k * f_t90)
+    eta = ((f_c90 + sigma) / (f_c90 + k * f_t90)) ** 2 + (tau / f_v) ** 2 * (1 - resisted ** 2)
+    formula = "((f_(c,90,d) + sigma_(90,d)) / (f_(c,90,d) + k_(t,90) dot f_(t,90,d)))^2 + (tau_d / f_(v,d))^2 dot (1 - (f_(c,90,d) / (f_(c,90,d) + k_(t,90) dot f_(t,90,d)))^2)"
+    rows.append(_row("eta", "eta", eta, "", formula, clause=clause["norm_ref"]))
+    # (28) in the registry's keys, the relation an unfolded check verifies before its utilisation is written
+    relation = "((f_c_90_d + sigma_90_d) / (f_c_90_d + k_t_90 dot f_t_90_d))^2 + (tau_d / f_v_d)^2 dot (1 - (f_c_90_d / (f_c_90_d + k_t_90 dot f_t_90_d))^2) <= 1"
+    return _result("shear", "(28)", clause["norm_ref"], rows, eta, relation)
+
+
+def _compute_shear_v(record, area, area_row, factors, design, row):
     """`compute` for a shear, SIA 265 4.2.5.1 -- verify-shear's arithmetic: tau = factor · V / A at the centroid (1.5 for a rectangle, 4/3 for a circle: SHEAR_FACTORS, mechanics), the two planes added as vectors, against f_v,d -- halved for a member cut from the pith (Tabelle 8 note 6). Equation (23)."""
     factor = SHEAR_FACTORS[record["section"]["type"]]
     rows, taus = [area_row], []
@@ -1313,13 +1367,83 @@ def prepare(here, positions, values=None):
         record = resolve(src, positions, values, building)
         record["warnings"] = [str(note) for note in record["warnings"]]
         checks[src["id"]] = record
+        if is_unfolded(record):
+            record["vars"] = published_vars(record)
     linked = any("links" in record for record in checks.values())
     burning = any("fire" in record for record in checks.values())
-    version = FIRE_EXPORT_VERSION if burning else LINKED_EXPORT_VERSION if linked else EXPORT_SCHEMA_VERSION
+    unfolded_any = any(is_unfolded(record) for record in checks.values())
+    required_any = any((record.get("fire") or {}).get("required") for record in checks.values())
+    version = (UNFOLDED_BASE_EXPORT_VERSION if unfolded_any else REQUIRED_EXPORT_VERSION if required_any else FIRE_EXPORT_VERSION if burning
+               else LINKED_EXPORT_VERSION if linked else EXPORT_SCHEMA_VERSION)
     data = {"schema_version": version, "checks": checks}
     validation.validate_structure(data, EXPORT_SCHEMA)
     validation.validate_checks_business(data)
     return data
+
+
+def mark_unfolded_files(data, files):
+    """Each check of `data` printed unfolded given its `file` -- the file of its domain from the Typst root where `files` names one (domains/unfold.py `unfolded_files`), none where the engineer wrote another -- and the export's version made the one that carries it (1.6). Returns whether anything was marked."""
+    marked = False
+    for rid, record in data["checks"].items():
+        if is_unfolded(record):
+            record["file"] = files.get(rid)
+            marked = True
+    if marked:
+        data["schema_version"] = UNFOLDED_BASE_EXPORT_VERSION
+        validation.validate_structure(data, EXPORT_SCHEMA)
+    return marked
+
+
+def is_unfolded(record):
+    """Whether `record` is printed unfolded, as a domain of the «Formules» tab (spec 2026-10-15, D-11): a calculable check of a kind unfolded so far, not in the fire situation (D-15)."""
+    from domains import unfold
+    return bool(record.get("calculable")) and record.get("kind") in unfold.UNFOLDED_KINDS
+
+
+def form_of(record):
+    """The form an unfolded check is written from -- its kind, the equation of SIA 265 its verdict follows and the writer's version --, exactly as `#var-domain(..., gen:)` writes it (REQ-003). None where `record` is not unfolded."""
+    from domains import unfold
+    if not is_unfolded(record):
+        return None
+    return {"kind": record["kind"], "form": compute(record)["equation"], "version": unfold.GENERATOR_VERSION}
+
+
+def published_vars(record):
+    """The values an unfolded check's literals are checked against (`domain: ("check", id)`, ARCH-007): the section's sides, every row of `compute` that is an input -- one with no `keys`: the force, the angle, eta_w, eta_t -- and every value of SIA 265's tables a design value is computed from, each a var of the export (value, unit, symbol, and the norm and clause it is read from). Nothing is computed here that `compute` does not."""
+    if not is_unfolded(record):
+        return {}
+    source = SOURCE
+    out = {}
+
+    result = compute(record)
+
+    def put(key, symbol, value, unit, clause=None, label=None, norm=NORM):
+        # a value entered -- a side, a force, an angle -- cites the clause of the check it serves (Q-011, v0.120): every value names its norm
+        out[key] = {"value": value, "unit": unit, "symbol": symbol, "label": label, "description": None,
+                    "norm": norm, "norm_ref": clause or result["clause"], "source": source}
+
+    for key, symbol, value in section_sides(record):
+        put(key, symbol, value, "mm")
+    for row in result["rows"]:
+        # a row the unfolded file computes is an #eq of its own; every other is written as a literal checked here -- an input, or a value whose formula the file cannot compute (`_with_keys`), η among them where it is the largest of several
+        if not row.get("keys"):
+            put(row["key"], row["symbol"], row["value"], row["unit"], row.get("clause"), row.get("label"), row.get("norm", NORM))
+        table = row.get("table")
+        if table:
+            put(table["key"], table["symbol"], table["value"], table["unit"], table["clause"])
+    return out
+
+
+def utilisations(data):
+    """{check id: {"eta", "ok", "clause"}} of every check of `data` (data/checks.json) that can be calculated, computed as its tab computes it (`compute`): what the command palette shows beside a check and gathers among the warnings where it is above 1 (issue #83). A check that cannot be calculated, or whose computation gives nothing, is left out."""
+    out = {}
+    for ident, record in (data.get("checks") or {}).items():
+        if not record.get("calculable"):
+            continue
+        result = compute(record)
+        if result and isinstance(result.get("eta"), (int, float)):
+            out[ident] = {"eta": float(result["eta"]), "ok": bool(result.get("ok")), "clause": str(result.get("clause") or "")}
+    return out
 
 
 def warnings_of(data):
@@ -1339,4 +1463,13 @@ def export(here=None):
     import variable_sources   # the reader of data/'s variables, which imports the domains: imported here, as connector is
     data = prepare(here, connector.known_positions(here.data_dir), variable_sources.known_values(here.data_dir))
     write(data, here.data_dir)
+    # a check printed unfolded gets its domain when it is first saved (spec 2026-10-15, REQ-002), and the index of the domains lists it
+    from domains import formula_domain, unfold
+    if unfold.unfold_checks(here, data):
+        formula_domain.export(here)
     return data
+
+
+def references(record):
+    """What an exported check names of the project's other objects, [(kind, id, field)] -- its position (domains/dependency_graph.py, spec 2026-10-21-graphe-dependances, ARCH-RISK-1103). The variables its fields follow are read off its source (`links.references`)."""
+    return [("position", record["position"], "position")] if record.get("position") else []

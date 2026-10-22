@@ -21,20 +21,18 @@ In accordance with SIA 260 (2013), 2.1.2 and 2.2, the service requirements that 
 It thus contains the overriding decisions specific to the building and serves as the basis for the preliminary design. The objectives and the degree of protection are determined on the basis of a risk evaluation (2.2.3).
 // woodcore:/object p3
 
-// woodcore:object doc-table document-family
-#doc-table(
-  columns: (
-    (id: "item", title: [Item]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Service criteria agreement], text: [Overriding decisions specific to the building, prepared with the owner; basis for the preliminary design.]),
-    (item: [Basis of design], text: [Translates the service criteria agreement into the technical language of engineers, specialists and contractors: actions, material and ground properties, geometrical properties and the resulting effects.]),
-    (item: [Monitoring plan and maintenance plan], text: [Drawn up by the operator of the building: they set out the type of monitoring and inspection and any measures to be taken.]),
+// woodcore:object table document-family
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Service criteria agreement], [Overriding decisions specific to the building, prepared with the owner; basis for the preliminary design.],
+    [Basis of design], [Translates the service criteria agreement into the technical language of engineers, specialists and contractors: actions, material and ground properties, geometrical properties and the resulting effects.],
+    [Monitoring plan and maintenance plan], [Drawn up by the operator of the building: they set out the type of monitoring and inspection and any measures to be taken.],
+    table.hline(stroke: 1pt),
   ),
   caption: [The documents of the building],
-  header: false,
 )
 // woodcore:/object document-family
 

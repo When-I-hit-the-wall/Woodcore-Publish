@@ -3,6 +3,8 @@
 Held: the file's place (beside the sources, never in the generated folder), its schema pinned and its refusals naming the field; an id it does not know last by id, one it no longer lists ignored; a drop placed above an entry, at the end of a folder, a hidden id keeping its slot; `groups` refused for a tab whose sources carry their own folder; a file that cannot be read said once, the lists then following the ids, the file left untouched and a drop refused; a project opened read only writes nothing; an id renamed, forgotten, inserted after another; nothing written where nothing changes; and the module Qt-free.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import subprocess
 import sys
@@ -27,7 +29,10 @@ def _store(here, said=None, read_only=False):
 def test_the_file_lies_beside_the_sources_never_in_the_generated_folder():
     here = project.current()
     assert here.lists_file == here.sources_dir / "lists.json"
-    assert not str(here.lists_file.resolve()).startswith(str(here.generated_dir.resolve()))
+    # never in what the export rebuilds: laid out by folders the sources lie inside 000-Woodcore/, beside the export and apart from it (Project.generated_excludes, issue #64)
+    rebuilt = [here.data_dir, here.docs_dir, here.stamps_dir, here.generated_dir / "lib", here.generated_dir / "calc"]
+    assert not any(project._is_within(here.lists_file, folder) for folder in rebuilt)
+    assert not here.has_folders or project._is_within(here.lists_file, here.sources_dir)
 
 
 def test_an_order_kept_is_applied_and_what_it_does_not_name_comes_last_by_id():

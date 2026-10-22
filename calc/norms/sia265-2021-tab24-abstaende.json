@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, Tabelle 24 (clause 6.2.1.2) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 66; the French wording from ExternalFiles/000-Normes/SIA265-2021-FR.pdf p. 67.",
+  "_source": "SIA 265:2021, Tabelle 24 (clause 6.2.1.2) -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 66; the French wording from SIA265-2021-FR.pdf p. 67.",
   "_note": "Distances are multiples of the dowel diameter d. The loaded end also carries an absolute floor of 80 mm, which the norm prints in the cell as «7 · d (min. 80 mm)». SIA 265 6.2.1.1 makes equation (88) conditional on these distances being kept, which is why an assembly that breaks one is reported rather than silently calculated. The table's layout -- its head, its two columns as the page heads them (∥ zur Faserrichtung, ⊥ zur Faser), the fasteners it is stated for -- is what lib/distance.typ prints it from (v0.86); domains/dowel.py reads the rows alone.",
   "edition": "SIA 265:2021",
   "table_24": {

@@ -57,7 +57,7 @@ def install(app, log=LOG, stall_s=None):
         log.parent.mkdir(parents=True, exist_ok=True)
         if log.exists() and log.stat().st_size > LOG_LIMIT:
             log.unlink()
-        handle = open(log, "a", encoding="utf-8")
+        handle = open(log, "a", encoding="utf-8", newline="\n")
         handle.write(f"\n--- Woodcore started {time.strftime('%Y-%m-%d %H:%M:%S')}; below, a stack dump is the window stopped for more than {STALL_S} s, and a one-line entry the whole computer stopped for more than {HITCH_S} s\n")
         handle.flush()
     except OSError:

@@ -8,17 +8,16 @@
 [Falls eine Aufstockung oder Erweiterung vorgesehen ist: die Option, die betroffenen Geschosse und das im Tragwerk und in den Installationen bereits Vorinvestierte beschreiben. Die Lasten der Erweiterung (Eigengewicht, Auflasten, Nutzlasten) sind nachfolgend definiert; sie müssen in der weiteren Projektierung von der Tragwerksplanung freigegeben werden.]
 // woodcore:/object p1
 
-// woodcore:object doc-table extension-loads
-#doc-table(
-  columns: (
-    (id: "storey", title: [Geschoss]),
-    (id: "buildup", title: [Nutzung / Aufbau]),
-    (id: "dead", title: [Auflast], unit: "kN/m²", kind: "number"),
-    (id: "live", title: [Nutzlast], unit: "kN/m²", kind: "number"),
-  ),
-  hidden: (),
-  rows: (
-    (storey: [[…]], buildup: [[…]], dead: [[…]], live: [[…]]),
+// woodcore:object table extension-loads
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, right, right),
+    table.hline(stroke: 1pt),
+    table.header([*Geschoss*], [*Nutzung / Aufbau*], [*Auflast*], [*Nutzlast*]),
+    table.hline(stroke: 0.5pt),
+    [[…]], [[…]], [[…]], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Vorgesehene Lasten der Erweiterung],
 )

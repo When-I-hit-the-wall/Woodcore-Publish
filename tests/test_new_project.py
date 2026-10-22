@@ -39,21 +39,34 @@ def _tops(folder):
     return sorted(p.name for p in folder.iterdir())
 
 
+def _in_config(data):
+    """`data` -- a file's bytes or text -- with what a template, a form or a content template names at the root (`/config.typ`, `/commands.typ`, `/title.typ`, `/Template/…`) named where a project laid out by folders keeps it, in 000-Typst-Config/ (issue #64): what the creation rewrites, and nothing else."""
+    pairs = [(f'"/{name}', f'"/{project.CONFIG_FOLDER}/{name}') for name in ("config.typ", "commands.typ", "title.typ", "Template/")]
+    for old, new in pairs:
+        data = data.replace(old.encode(), new.encode()) if isinstance(data, bytes) else data.replace(old, new)
+    return data
+
+
 # --- the layout ------------------------------------------------------------------------------------
 
 def test_a_new_project_is_laid_out_in_three_documents():
-    """Three folders at the top, numbered and named in the project's language exactly as calc/documents.py writes them; beside them what the three share -- config.typ, commands.typ, references.bib, Images/ and the export's _woodcore/ -- no RFEM-Export/ since the RFEM import was retired in 0.117; and the layout stated in full in the project's own file, which reads nothing from DEFAULT_LAYOUT (the engineer's rule)."""
+    """Laid out by folders (issue #64, spec 2026-10-15-structure-projet-dossiers): what configures the three documents in 000-Typst-Config/ -- config.typ, commands.typ, references.bib, title.typ, the form's Template/ --, what is Woodcore's in 000-Woodcore/ -- the export, the engine, the sources, the archives --, the three documents in 100-, 200-, 300-, and one folder per kind of domain, every one there from the start (REQ-011) -- no RFEM-Export/ since the RFEM import was retired in 0.117; and the layout stated in full in the project's own file, schema 1.1, which reads nothing from DEFAULT_LAYOUT (the engineer's rule)."""
     folder = conftest.tmpdir("new_project") / "Halle Nord"
     here = project_template.create(folder, "Halle Nord", company="Musterbüro", number="  ")
     assert here.file == (folder / "Halle Nord.woodcore").resolve()
-    assert here.has_modes and here.modes == project.MODES
+    assert here.has_modes and here.modes == project.MODES and here.has_folders
     assert here.layout == documents.layout_for("de"), here.layout
     data = json.loads(here.file.read_text(encoding="utf-8"))
     assert list(data["layout"]) == list(project.LAYOUT_ORDER), "the layout is not stated in full"
+    assert data["schema_version"] == "1.1"
     assert data["company"] == "Musterbüro" and "number" not in data, data
-    names = documents.MODE_FOLDERS["de"]
-    assert _tops(folder) == sorted([".vscode", names["cu"], names["bp"], names["rs"], "Halle Nord.woodcore", "Images",
-                                    "Template", "Woodcore-Datei", "_Archiv", "_woodcore", "commands.typ", "config.typ", "references.bib", "title.typ"]), _tops(folder)
+    names = documents.MODE_FOLDERS
+    assert _tops(folder) == sorted([".vscode", names["cu"], names["bp"], names["rs"], "Halle Nord.woodcore", "Images", "000-Typst-Config", "000-Woodcore",
+                                    "Domains", "Positions", "Permanent-loads", "Variable-loads", "Plans", "Statics", "Details", "Connectors", "Connections",
+                                    "Timber-checks", "Steel-checks", "Scripts", "Appendix"]), _tops(folder)
+    assert sorted(p.name for p in (folder / "000-Typst-Config").iterdir()) == ["Template", "commands.typ", "config.typ", "references.bib", "title.typ"]
+    assert {"sources", "archives", "data", "lib", "calc", "VERSION"} <= {p.name for p in (folder / "000-Woodcore").iterdir()}
+    assert all(path.is_dir() for path in here.structure_folders()), "every folder of the layout is there from the start"
     assert not (folder / "Statischer Bericht (typst)").exists(), "the skeleton's own folder is renamed, not copied beside the three"
     assert not list((folder / "Images").iterdir()), "Images/ starts empty"
     report = folder / names["rs"]
@@ -66,10 +79,10 @@ def test_a_new_project_is_laid_out_in_three_documents():
     for mode in ("cu", "bp"):
         assert here.structure_file(mode).is_file(), mode
     assert here.report_typ == (report / "Statischer Rapport.typ").resolve(), "the report's entry file keeps its name"
-    assert here.typst_root == here.root and here.generated_dir == (folder / "_woodcore").resolve()
+    assert here.typst_root == here.root and here.generated_dir == (folder / "000-Woodcore").resolve()
     for part in ("config_typ", "commands_typ", "references_bib", "title_typ"):
         assert getattr(here, part).is_file(), part
-    assert (here.typst_root / project.TEMPLATE_FOLDER / "template.typ").is_file() and (here.typst_root / project.TEMPLATE_FOLDER / "form.json").is_file(), "the form is Template/ at the Typst root"
+    assert (here.template_dir / "template.typ").is_file() and (here.template_dir / "form.json").is_file(), "the form is Template/ in 000-Typst-Config/"
     import positions_store
     assert not here.positions_book.exists(), "no Positionen.xlsx is made since v0.114: the positions are Woodcore's own"
     assert positions_store.read(here) == [] and positions_store.path(here).is_file(), "an empty list of positions, Woodcore's own file"
@@ -83,18 +96,18 @@ def test_a_new_project_is_laid_out_in_three_documents():
 
 
 def test_each_language_names_the_three_folders_its_own_way():
-    """«1_Convention d'utilisation», «2_Base de projet», «3_Rapport de statique» in French, and so on: the folders, the entry files of the two documents beside the report and the languages every file states follow the one language chosen -- the report keeping its own entry file's name in all three."""
+    """The folders are the same in every language -- «100-Service criteria agreement», «200-Basis of design», «300-Statical report» (issue #64, D-07, D-14) --, and the entry files of the two documents beside the report and the languages every file states follow the one language chosen -- the report keeping its own entry file's name in all three."""
     base = conftest.tmpdir("new_languages")
     for lang in documents.LANGUAGES:
         here = project_template.create(base / lang, "Halle", document_language=lang, report_language=lang)
-        names = documents.MODE_FOLDERS[lang]
+        names = documents.MODE_FOLDERS
         assert {p.name for p in here.root.iterdir() if p.is_dir()} >= set(names.values()), (lang, _tops(here.root))
         for mode in project.MODES:
             assert here.document_typ(mode) == (here.root / names[mode] / documents.ENTRY_NAMES[lang][mode]).resolve(), (lang, mode)
             assert templates.read_languages(here.document_typ(mode)) == (lang, lang), (lang, mode)
         # the document's name is title.typ's, in the language the document is written in (v0.113): the entry asks for the convention's page
         assert '#title-page(document: "cu")' in here.document_typ("cu").read_text(encoding="utf-8"), "the convention d'utilisation does not set its title page"
-        assert (here.root / "title.typ").is_file(), "no title.typ at the top of the project"
+        assert (here.root / "000-Typst-Config" / "title.typ").is_file(), "no title.typ in 000-Typst-Config/"
         assert here.layout == documents.layout_for(lang), (lang, here.layout)
 
 
@@ -103,27 +116,29 @@ def test_the_report_s_paths_are_read_from_the_project_s_own_folder():
     standard = _legacy_template("new_paths_template")
     here = project_template.create(conftest.tmpdir("new_paths") / "Pfade", "Pfade", template=standard)
     entry = here.report_typ.read_text(encoding="utf-8")
-    assert '#import "/config.typ": conf' in entry and '#import "/commands.typ": *' in entry, entry[:400]
+    config, commands, title = (f'/{project.CONFIG_FOLDER}/{name}' for name in ("config.typ", "commands.typ", "title.typ"))
+    assert f'#import "{config}": conf' in entry and f'#import "{commands}": *' in entry, entry[:400]
     was = standard.report.read_text(encoding="utf-8")
     config_import, commands_import = '#import "config.typ": conf', '#import "commands.typ": *'   # the template's own imports, relative on purpose: what the creation rewrites
     title_import = '#import "title.typ": title-page'   # title.typ goes up with config.typ (v0.113); the template's own literal, relative on purpose
-    assert entry == was.replace(config_import, '#import "/config.typ": conf').replace(commands_import, '#import "/commands.typ": *').replace(title_import, '#import "/title.typ": title-page'), \
+    assert entry == was.replace(config_import, f'#import "{config}": conf').replace(commands_import, f'#import "{commands}": *').replace(title_import, f'#import "{title}": title-page'), \
         "the report's entry file changed beyond its two imports"
     for section in templates.sections(here.report_typ.parent):
         text = section.read_text(encoding="utf-8")
-        assert text.startswith('#import "/commands.typ": *'), section.name
+        assert text.startswith(f'#import "{commands}": *'), section.name
         original = (standard.sections_dir / section.name).read_text(encoding="utf-8")
-        assert text == original.replace('#import "../commands.typ": *', '#import "/commands.typ": *', 1), section.name   # the template's own import, relative on purpose
-    assert here.commands_typ.read_bytes() == (standard.report_dir / "commands.typ").read_bytes(), "commands.typ is rewritten, and its import of the engine resolves as it stands"
+        assert text == original.replace('#import "../commands.typ": *', f'#import "{commands}": *', 1).replace('project: "references.bib"', f'project: "{project.CONFIG_FOLDER}/references.bib"'), section.name   # the template's own import, relative on purpose
+    # commands.typ moved into 000-Typst-Config/: its import of the engine, `_woodcore/lib/…` beside it, is written from the root
+    assert here.commands_typ.read_text(encoding="utf-8") == (standard.report_dir / "commands.typ").read_text(encoding="utf-8").replace('"_woodcore/lib/', '"/000-Woodcore/lib/')
     assert here.config_typ.read_bytes() == standard.config.read_bytes(), "config.typ is rewritten where its language was already the one asked for"
     assert here.references_bib.read_bytes() == (standard.report_dir / "references.bib").read_bytes()
-    assert 'project: "references.bib"' in (here.report_typ.parent / "Sections" / "007-literatur.typ").read_text(encoding="utf-8")
+    assert f'project: "{project.CONFIG_FOLDER}/references.bib"' in (here.report_typ.parent / "Sections" / "007-literatur.typ").read_text(encoding="utf-8")
     import typst_paths
     for path in here.root.rglob("*.typ"):
         if here.generated_dir not in path.parents:
             for literal in typst_paths.literals(typst_paths.read_text(path)):
                 if literal.kind == "import":
-                    assert literal.value in ("/commands.typ", "/config.typ", "/title.typ") or path == here.commands_typ, (path, literal.value)
+                    assert literal.value in (commands, config, title) or path == here.commands_typ, (path, literal.value)
 
 
 def test_a_new_project_goes_into_an_empty_folder_only():
@@ -182,6 +197,18 @@ def test_the_three_documents_compile_once_there_is_an_export():
     folder = conftest.tmpdir("new_compiles") / "Neu"
     here = project_template.create(folder, "Neu")
     shutil.copytree(conftest.PROJECT.data_dir, here.data_dir, dirs_exist_ok=True)
+    # and the figures that export names, in the tabs' Exports/ and Appendix/, laid out by folders (issue #64, D-10)
+    for kind in project.FIGURE_KINDS:
+        if conftest.PROJECT.exports_dir(kind).is_dir():
+            shutil.copytree(conftest.PROJECT.exports_dir(kind), here.exports_dir(kind), dirs_exist_ok=True)
+    # and the domains that export wrote out, each in its file, which the report's sections include by domain-file(kind, id) (spec 2026-10-21-commandes-typst-refonte, REQ-017): their folders copied, data/domain-files.json listed again for this project -- its journals lie in its own documents' folders
+    from domains import unfold
+    for folder_name in sorted(set(path.split("/")[0] for path in project.DOMAIN_FOLDERS.values())):
+        if (conftest.PROJECT.root / folder_name).is_dir():
+            shutil.copytree(conftest.PROJECT.root / folder_name, here.root / folder_name, dirs_exist_ok=True)
+    data = {name: json.loads((here.data_dir / name).read_text(encoding="utf-8")) for name in ("checks.json", "steel.json", "calculations.json", "connectors.json", "connections.json", "scripts.json")}
+    files = unfold.domain_files(here, data["checks.json"], data["steel.json"], data["calculations.json"], data["connectors.json"], data["connections.json"], data["scripts.json"])
+    (here.data_dir / unfold.FILES_FILE).write_text(json.dumps(files, ensure_ascii=False), encoding="utf-8")
     for mode in here.modes:
         run = _typst(here, mode)
         assert run.returncode == 0, (mode, run.stdout + run.stderr)
@@ -239,7 +266,7 @@ def test_the_journals_of_the_three_documents_are_seeded_and_seeding_twice_writes
         assert data == {"schema_version": journal.EXPORT_SCHEMA_VERSION, "entries": []}, (mode, data)
     assert journal.EXPORT_FILES["rs"] == journal.EXPORT_FILE
     assert journal.EXPORT_FILES == project.JOURNAL_FILES, "the export's journals are not named as the sources'"
-    engine = (CALC.parent / "lib" / "calc-engine.typ").read_text(encoding="utf-8")
+    engine = conftest.engine_source()
     table = re.search(r"#let journal-files = \((.*?)\)\n", engine).group(1)
     assert dict(re.findall(r'(\w+): "([^"]+)"', table)) == journal.EXPORT_FILES, table
     before = {p.name: p.read_bytes() for p in here.data_dir.iterdir()}
@@ -256,12 +283,16 @@ def test_a_report_alone_is_seeded_as_it_always_was():
         "statics.json", "schemas.json", "journal.json", "scripts.json", "annexes.json", "fire.json",
         # the member checks (domains/member_check.py), seeded empty like every other export a report reads
         "checks.json",
+        # where the domains Woodcore writes stand, and their files (spec 2026-10-21-commandes-typst-refonte, ARCH-007, ARCH-008), which #domain and domain-file read
+        "domain-state.json", "domain-files.json",
         # the index of the «Formules» tab's domains (v0.117), which the «Variables» tab reads (issue #15)
         "formulas.json",
         # the quantities of the position plans (issue #9), which show-plan-quantities and sheet-quantities read
         "quantities.json",
         # the steel checks (domains/steel_check.py, issue #51), seeded empty like the member checks
-        "steel.json"]), sorted(p.name for p in here.data_dir.iterdir())
+        "steel.json",
+        # the graph of dependencies (issue #71), which the «Dépendances» tab reads before a first export
+        "dependencies.json"]), sorted(p.name for p in here.data_dir.iterdir())
     assert export_all.seed(here) == []
     (here.data_dir / "journal.json").unlink()
     assert export_all.seed(here) == ["journal.json"], "the report's journal is seeded as it always was"
@@ -327,7 +358,7 @@ def test_the_three_folders_are_named_at_creation():
     here = project_template.create(base / "Zwei", "Zwei", folders=("A", "B", "C"), document_language="en")
     assert [here.document_dir(mode).name for mode in project.MODES] == ["A", "B", "C"]
     here = project_template.create(base / "Drei", "Drei", folders={"bp": ""}, document_language="fr")
-    assert [here.document_dir(mode).name for mode in project.MODES] == list(documents.MODE_FOLDERS["fr"].values()), "an empty name is no name, and the language's is offered"
+    assert [here.document_dir(mode).name for mode in project.MODES] == list(documents.MODE_FOLDERS.values()), "an empty name is no name, and the fixed one is offered"
     stated = json.loads(here.file.read_text(encoding="utf-8"))["layout"]
     assert stated == here.layout and list(stated) == list(project.LAYOUT_ORDER)
 
@@ -337,7 +368,7 @@ def test_a_refused_folder_leaves_nothing_behind():
     folder = conftest.tmpdir("refused_folder") / "Halle"
     refused = [{"report_folder": bad} for bad in ("a/b", "..", "CON", "x?y")]
     refused += [{"folders": {"cu": "Gleich", "bp": "gleich"}}, {"folders": {"cu": "Images"}}, {"folders": {"bp": "config.typ"}},
-                {"folders": {"rs": "_woodcore"}}, {"folders": {"rs": "Statik"}, "report_folder": "Bericht"}, {"folders": ("A", "B")},
+                {"folders": {"rs": "000-Woodcore"}}, {"folders": {"cu": "000-Typst-Config"}}, {"folders": {"rs": "Statik"}, "report_folder": "Bericht"}, {"folders": ("A", "B")},
                 {"folders": {"xx": "X"}}]
     for kwargs in refused:
         try:
@@ -367,13 +398,12 @@ def test_a_refused_folder_leaves_nothing_behind():
 
 
 def test_the_folders_offered_are_the_language_own_words():
-    """«3_Rapport de statique» in French and «3_Statischer Bericht» in German -- the report's folder as the spec names it, a number and the document's name, where v0.100 offered «Rapport de statique» and the report was the only document."""
+    """«300-Statical report» in every language since the project laid out by folders (issue #64, D-07, D-14) -- the report's folder a number and the document's English name, where 0.111 to 0.118 offered «3_Rapport de statique» in French and «3_Statischer Bericht» in German."""
     standard = templates.standard()
-    for lang in documents.LANGUAGES:
-        assert templates.report_folder_offered(standard, lang) == documents.MODE_FOLDERS[lang]["rs"], lang
-        assert templates.folders_offered(standard, lang) == documents.MODE_FOLDERS[lang], lang
-    assert templates.REPORT_FOLDERS == {lang: folders["rs"] for lang, folders in documents.MODE_FOLDERS.items()}
-    assert templates.report_folder_offered(standard, "it") == documents.MODE_FOLDERS["de"]["rs"], "a language not of the three offers German's"
+    for lang in documents.LANGUAGES + ("it",):
+        assert templates.report_folder_offered(standard, lang) == documents.MODE_FOLDERS["rs"], lang
+        assert templates.folders_offered(standard, lang) == documents.MODE_FOLDERS, lang
+    assert templates.REPORT_FOLDERS == {lang: documents.MODE_FOLDERS["rs"] for lang in documents.LANGUAGES}
 
 
 # --- the command line --------------------------------------------------------------------------------
@@ -387,11 +417,11 @@ def test_the_command_line_makes_a_new_project_and_names_none_to_do_it():
     assert run.returncode == 0, run.stdout + run.stderr
     here = project.Project.load(folder / "Brücke.woodcore")
     assert here.name == "Brücke" and here.detail("author") == "Max Muster"
-    assert here.layout == documents.layout_for("de"), "woodcore-cli new lays a project out in three documents, named in its language"
+    assert here.layout == documents.layout_for("de"), "woodcore-cli new lays a project out by folders, its documents in three"
 
 
 def test_the_command_line_names_the_report_folder_and_the_language():
-    """`woodcore-cli new --language fr` writes both languages -- the document's in config.typ and the engine's in every entry file, one choice setting both (his answer C9) -- and names the three folders in that language; `--report-folder` names the report's."""
+    """`woodcore-cli new --language fr` writes both languages -- the document's in config.typ and the engine's in every entry file, one choice setting both (his answer C9) -- the three folders keeping their fixed names (issue #64); `--report-folder` names the report's."""
     base = conftest.tmpdir("new_cli_lang")
     env = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
     env.pop(project.ENV, None)
@@ -399,14 +429,14 @@ def test_the_command_line_names_the_report_folder_and_the_language():
                          capture_output=True, text=True, encoding="utf-8", errors="replace", env=env)
     assert run.returncode == 0, run.stdout + run.stderr
     here = project.Project.load(base / "Pont" / "Pont.woodcore")
-    assert [here.document_dir(mode).name for mode in project.MODES] == list(documents.MODE_FOLDERS["fr"].values()), here.layout
+    assert [here.document_dir(mode).name for mode in project.MODES] == list(documents.MODE_FOLDERS.values()), here.layout
     for mode in project.MODES:
         assert templates.read_languages(here.document_typ(mode)) == ("fr", "fr"), mode
     run = subprocess.run([sys.executable, str(CALC / "cli.py"), "new", str(base / "Steg"), "--language", "en", "--report-folder", "Statics"],
                          capture_output=True, text=True, encoding="utf-8", errors="replace", env=env)
     assert run.returncode == 0, run.stdout + run.stderr
     here = project.Project.load(base / "Steg" / "Steg.woodcore")
-    assert [here.document_dir(mode).name for mode in project.MODES] == ["1_Service criteria agreement", "2_Basis of design", "Statics"]
+    assert [here.document_dir(mode).name for mode in project.MODES] == ["100-Service criteria agreement", "200-Basis of design", "Statics"]
 
 
 # --- a report alone, which a project that states no layout still is --------------------------------------
@@ -539,11 +569,11 @@ def test_no_form_neutral_and_an_empty_name_all_make_the_neutral_form():
                           ("style", {"style": "neutral"}), ("empty", {"form": "", "style": ""})):
         here = project_template.create(base / label, "Halle", **kwargs)
         assert forms.current(here).ref == "builtin:neutral", label
-        assert here.config_typ.read_text(encoding="utf-8") == forms.config_text("de", "CH"), label
+        assert here.config_typ.read_text(encoding="utf-8") == _in_config(forms.config_text("de", "CH")), label
         assert not list(here.root.rglob("config.typ.new")), label
-        results[label] = (here.title_typ.read_bytes(), (here.typst_root / "Template" / "template.typ").read_bytes())
+        results[label] = (here.title_typ.read_bytes(), (here.template_dir / "template.typ").read_bytes())
     assert len(set(results.values())) == 1, "the neutral form was made differently by two ways of asking for it"
-    assert results["none"][0] == forms.default().title_typ.read_bytes() and results["none"][1] == forms.default().template_typ.read_bytes()
+    assert results["none"][0] == _in_config(forms.default().title_typ.read_bytes()) and results["none"][1] == forms.default().template_typ.read_bytes()
 
 
 def test_the_compact_form_is_the_neutral_ones_page_set_smaller_and_the_projects_language_is_kept():
@@ -553,8 +583,8 @@ def test_the_compact_form_is_the_neutral_ones_page_set_smaller_and_the_projects_
     neutral = project_template.create(base / "neutral", "Halle", document_language="fr", report_language="fr")
     here = project_template.create(base / "compact", "Halle", document_language="fr", report_language="fr", form="compact")
     assert forms.current(here).ref == "builtin:compact"
-    compact = (here.typst_root / "Template" / "template.typ").read_text(encoding="utf-8")
-    plain = (neutral.typst_root / "Template" / "template.typ").read_text(encoding="utf-8")
+    compact = (here.template_dir / "template.typ").read_text(encoding="utf-8")
+    plain = (neutral.template_dir / "template.typ").read_text(encoding="utf-8")
     assert compact != plain and "size: 10pt" in compact and "size: 11pt" not in compact, compact[:900]
     assert here.config_typ.read_bytes() == neutral.config_typ.read_bytes(), "the two forms hold their look in Template/, config.typ is the same file"
     assert templates.read_languages(here.report_typ) == ("fr", "fr"), "the project lost its language to the form"
@@ -588,7 +618,7 @@ def test_a_projects_form_is_switched_mid_project_and_its_language_and_adjustment
     here.config_typ.write_bytes(mine.encode("utf-8"))
     assert templates.replace_config(here, "compact") == here.config_typ
     assert forms.current(here).ref == "builtin:compact" and _text(here.config_typ) == mine, "config.typ is the engineer's and is kept"
-    assert "size: 10pt" in (here.typst_root / "Template" / "template.typ").read_text(encoding="utf-8")
+    assert "size: 10pt" in (here.template_dir / "template.typ").read_text(encoding="utf-8")
     archive = next(here.archives_dir.glob("*-forme*"))
     assert "size: 11pt" in (archive / "Template" / "template.typ").read_text(encoding="utf-8"), "the old form is kept"
     templates.replace_config(here, "neutral")
@@ -657,15 +687,15 @@ def test_the_report_of_a_new_project_is_the_rs_content_template_in_each_language
     for lang in ("fr", "de", "en"):
         here = project_template.create(base / lang, "Halle", document_language=lang, report_language=lang)
         content = doc_templates.find("builtin:rs/standard").language_dir(lang)
-        assert here.report_typ.read_bytes() == (content / "Statischer Rapport.typ").read_bytes(), lang
+        assert here.report_typ.read_bytes() == _in_config((content / "Statischer Rapport.typ").read_bytes()), lang
         sections = sorted(p.name for p in (here.report_typ.parent / "Sections").iterdir())
         assert sections == sorted(p.name for p in (content / "Sections").iterdir()), (lang, sections)
     legacy = _legacy_template("new_rs_explicit")
     own = project_template.create(base / "own", "Halle", template=legacy)
-    assert own.report_typ.read_bytes().replace(b'#import "/config.typ"', b'#import "config.typ"').replace(b'#import "/commands.typ"', b'#import "commands.typ"').replace(b'#import "/title.typ"', b'#import "title.typ"') == legacy.report.read_bytes(), "a template saved before forms makes its own report"   # relative on purpose: the legacy template's own imports, which the creation rewrites
+    assert own.report_typ.read_bytes() == _in_config(legacy.report.read_bytes().replace(b'#import "config.typ"', b'#import "/config.typ"').replace(b'#import "commands.typ"', b'#import "/commands.typ"').replace(b'#import "title.typ"', b'#import "/title.typ"')), "a template saved before forms makes its own report"   # relative on purpose: the legacy template's own imports, which the creation rewrites
     assert forms.current(own) is None, "a project template saved before forms is not given a form it did not ask for"
     custom = project_template.create(base / "mine", "Halle", document_templates={"rs": "builtin:rs/standard"}, template=legacy)
-    assert custom.report_typ.read_bytes() == (doc_templates.find("builtin:rs/standard").language_dir("de") / "Statischer Rapport.typ").read_bytes(), "a template that names the report's content gets it"
+    assert custom.report_typ.read_bytes() == _in_config((doc_templates.find("builtin:rs/standard").language_dir("de") / "Statischer Rapport.typ").read_bytes()), "a template that names the report's content gets it"
     assert forms.current(custom) is None
 
 
@@ -683,9 +713,9 @@ def test_a_template_saved_with_its_form_makes_a_project_with_that_form():
             os.environ.pop("WOODCORE_TEMPLATES", None)
         else:
             os.environ["WOODCORE_TEMPLATES"] = saved_env
-    assert (saved.folder / "Template" / "template.typ").is_file() and (saved.folder / "title.typ").is_file()
+    assert (saved.folder / project.CONFIG_FOLDER / "Template" / "template.typ").is_file() and (saved.folder / project.CONFIG_FOLDER / "title.typ").is_file()
     here = project_template.create(base / "Ziel", "Ziel", template=saved)
-    assert forms.current(here).ref == "builtin:bfh" and (here.typst_root / "Template" / "logo-bfh.png").is_file()
+    assert forms.current(here).ref == "builtin:bfh" and (here.template_dir / "logo-bfh.png").is_file()
     assert here.title_typ.read_bytes() == source.title_typ.read_bytes()
     other = project_template.create(base / "Anders", "Anders", template=saved, form="compact")
     assert forms.current(other).ref == "builtin:compact" and not list(other.archives_dir.glob("*-forme*")), "a new project has no old form to keep"
@@ -756,7 +786,7 @@ def test_a_new_project_made_from_a_saved_user_template_carries_its_disabled_sect
         assert f"// disabled: {second['id']} (" in made.document_typ("cu").read_text(encoding="utf-8"), "the entry does not say it"
         assert MARK in (made.document_dir("cu") / first["file"]).read_text(encoding="utf-8"), "the text the engineer wrote did not come across"
         builtin_bp = doc_templates.find("builtin:bp/standard").language_dir("fr")
-        assert (made.document_dir("bp") / "Sections" / "live-loads.typ").read_bytes() == (builtin_bp / "Sections" / "live-loads.typ").read_bytes(), \
+        assert (made.document_dir("bp") / "Sections" / "live-loads.typ").read_bytes() == _in_config((builtin_bp / "Sections" / "live-loads.typ").read_bytes()), \
             "the other document is not the builtin one"
         assert not doc_templates.settle_sharing(made).changes, "a project made from a template shared as its source shared is settled"
         if not conftest.have_typst():
@@ -826,3 +856,88 @@ def test_a_document_template_that_does_not_exist_in_the_projects_language_is_ref
         else:
             raise AssertionError("a convention written in French was made into a German project")
         assert not folder.exists() or not any(folder.iterdir()), "a refused creation left files behind"
+
+
+# --- a project made in two steps: the skeleton, then each document (issue #90) ---------------------------------
+
+def _two_steps(name, language="fr", **details):
+    root = conftest.tmpdir(name)
+    return project_template.create_skeleton(root / "Projet", "Probe", language, **details)
+
+
+def test_a_skeleton_has_its_language_its_layout_and_no_document():
+    """«Nouveau projet» asks the name, the folder and the language (the engineer, 22.10.2026) and makes no document: the three folders and the language are stated, every document waits for its content template."""
+    here = _two_steps("skeleton_bare", "fr", author="F. L.")
+    assert here.has_folders and here.modes == project.MODES and here.created_modes == ()
+    assert not any(here.is_created(mode) for mode in project.MODES)
+    assert templates.project_language(here, fallback="") == "fr" and templates.read_languages(here.report_typ, config=here.config_typ)[0] == "fr"
+    assert here.detail("author") == "F. L." and here.content_template("rs") == ""
+    assert json.loads((here.data_dir / "project.json").read_text(encoding="utf-8"))["author"] == "F. L."
+    for mode in project.MODES:   # no stray file in a document's folder: the document is made into an empty one
+        folder = here.document_dir(mode)
+        assert not folder.exists() or not any(folder.rglob("*")), (mode, sorted(folder.rglob("*")))
+    assert project.Project.load(here.file).created_modes == ()
+
+
+def test_each_document_made_later_is_the_one_a_whole_creation_makes():
+    """`create` is the skeleton and its three documents: made one by one, in any order, they come to the very bytes a creation in one step writes -- the sharing of the convention d'utilisation and the base de projet settled once both are there."""
+    import cli
+    root = conftest.tmpdir("skeleton_whole")
+    whole = project_template.create(root / "Whole", "Probe", document_language="fr", report_language="fr")
+    here = project_template.create_skeleton(root / "Steps", "Probe", "fr")
+    for mode in ("rs", "bp", "cu"):
+        here = project_template.create_document(here, mode)
+        assert here.is_created(mode) and here.content_template(mode) == f"builtin:{mode}/standard", mode
+    assert whole.data["content_templates"] == here.data["content_templates"] == {m: f"builtin:{m}/standard" for m in project.MODES}
+
+    def files(p):
+        engine = p.generated_dir
+        return {f.relative_to(p.root).as_posix(): f.read_bytes() for f in p.root.rglob("*")
+                if f.is_file() and f.suffix in (".typ", ".json", ".bib") and not project._is_within(f, engine)}
+
+    a, b = files(whole), files(here)
+    assert sorted(a) == sorted(b), (sorted(set(a) - set(b)), sorted(set(b) - set(a)))
+    differ = [name for name in a if a[name] != b[name] and not name.endswith(".woodcore")]
+    assert not differ, differ
+    assert cli.requested_documents(here) == project.MODES
+
+
+def test_a_document_is_made_once_and_from_a_template_that_exists():
+    here = project_template.create_document(_two_steps("skeleton_once"), "rs")
+    before = here.file.read_bytes()
+    try:
+        project_template.create_document(here, "rs")
+    except project.ProjectError:
+        pass
+    else:
+        raise AssertionError("a document made twice")
+    assert here.file.read_bytes() == before
+    try:
+        project_template.create_document(here, "cu", "builtin:cu/no-such-template")
+    except project.ProjectError:
+        pass
+    else:
+        raise AssertionError("an unknown content template accepted")
+    folder = here.document_dir("cu")
+    assert not here.is_created("cu") and (not folder.exists() or not any(folder.rglob("*"))), "a refused document left files behind"
+
+
+def test_the_command_line_exports_only_the_documents_made():
+    """`woodcore-cli export` on a project whose report alone is made: «all» is the report, and a document not made yet is refused by name rather than compiled against nothing."""
+    import cli
+    here = project_template.create_document(_two_steps("skeleton_cli"), "rs")
+    assert cli.requested_documents(here) == ("rs",) and cli.requested_documents(here, "all") == ("rs",)
+    try:
+        cli.requested_documents(here, "cu")
+    except project.ProjectError as exc:
+        assert "not made yet" in str(exc), exc
+    else:
+        raise AssertionError("a document not made yet was asked for")
+
+
+def test_a_report_made_alone_compiles():
+    if not conftest.have_typst():
+        raise conftest.Skip("typst is not installed here")
+    here = project_template.create_document(_two_steps("skeleton_compiles"), "rs")
+    done = _typst(here, "rs")
+    assert done.returncode == 0, done.stderr[-2000:]

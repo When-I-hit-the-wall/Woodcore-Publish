@@ -13,6 +13,7 @@ Reading is lenient, as the tabs' own lists are: a source that cannot be read is 
 import json
 from pathlib import Path
 
+import engine
 import positions_store
 from domains import fire, plan, plan_documents
 
@@ -63,8 +64,9 @@ def drawings_on(here, docid, page=None):
 
 
 def _write_position(here, source):
+    # the version the plan needs, as every writer of a plan asks it (plan.version_of): 1.6 was written here whatever the plan held until issue #54, so the page of a plan that holds a text could not be turned -- «holds a text at schema_version '1.6'»
     source = dict(source)
-    source["schema_version"] = plan.SOURCE_SCHEMA_VERSION
+    source["schema_version"] = plan.version_of(source)
     target = here.plans_dir / f"{source['id']}.json"
     plan.check_source(source, target.name)
     return target, source
@@ -72,7 +74,7 @@ def _write_position(here, source):
 
 def _write_fire(here, source):
     source = dict(source)
-    source["schema_version"] = fire.SOURCE_SCHEMA_VERSION
+    source["schema_version"] = fire.version_of(source)   # as a position plan's: 2.1 where it holds a text
     target = here.fire_dir / f"{source['id']}.json"
     fire.check_source(source, target.name)
     return target, source
@@ -80,7 +82,7 @@ def _write_fire(here, source):
 
 def _dump(target, source):
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    engine.write_json(target, source)
 
 
 def rotate_page(here, docid, page, delta):
@@ -145,7 +147,8 @@ def document_owner(doc, usage=None):
 
 def export_drawings(here):
     """The export both kinds of plan are in, run on its own: the position plans (data/plans.json and data/plans/), then the fire-protection plans, which may follow them (data/fire.json and data/fire/). Returns the warnings of both, in that order. A failure -- a source that no longer validates, a background that was moved -- is raised before anything of the failing kind is written, as each kind's own export does."""
-    positions = [row["position"] for row in positions_store.read(here)]
-    notes = list(plan.export(here.plans_dir, here.root, here.data_dir, positions))
+    rows = positions_store.read(here)
+    positions = [row["position"] for row in rows]
+    notes = list(plan.export(here.plans_dir, here.root, here.data_dir, positions, sections=positions_store.section_types(rows)))
     notes += fire.export(here.fire_dir, here.plans_dir, here.root, here.data_dir)
     return notes

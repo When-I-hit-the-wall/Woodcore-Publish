@@ -5,10 +5,10 @@ Four things, and no more than the drawing uses: the fire RESISTANCES a wall may 
 ⚠️ The sheets carry no document number, so nothing here cites one, and they are not in the repository: the engineer keeps them beside it. The file's `_source` says which page each value was read off and how it was checked.
 """
 
-import json
 from pathlib import Path
 
 import validation
+from norms import _loader  # how every reader of calc/norms/ opens its files (G3)
 
 NAME = "vkf-2016-symbole-brandschutzplan"
 PATH = Path(__file__).resolve().parent / (NAME + ".json")
@@ -35,15 +35,8 @@ def _rgb(value, what):
 def _read():
     if "data" in _cache:
         return _cache["data"]
-    try:
-        with PATH.open(encoding="utf-8") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        _fail("not found at %s -- the symbols of a fire-protection plan live in calc/norms/" % PATH)
-    except json.JSONDecodeError as exc:
-        _fail("is not valid JSON: %s" % exc)
-    if not data.get("edition"):
-        _fail("no 'edition'")
+    data = _loader.load(PATH)
+    _loader.edition(NAME, data)
     rows = data.get("resistances")
     if not isinstance(rows, list) or not rows:
         _fail("no 'resistances'")
@@ -174,13 +167,7 @@ def _rfail(what):
 def _read_requirement():
     if "requirement" in _cache:
         return _cache["requirement"]
-    try:
-        with REQUIREMENT_PATH.open(encoding="utf-8") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        _rfail("not found at %s" % REQUIREMENT_PATH)
-    except json.JSONDecodeError as exc:
-        _rfail("is not valid JSON: %s" % exc)
+    data = _loader.load(REQUIREMENT_PATH)
     if not data.get("edition"):
         _rfail("no 'edition'")
     req = data.get("requirement")
@@ -238,10 +225,6 @@ def _read_requirement():
 def requirement():
     """The block of 15-15 3.7.1 as the file states it: heights, uses, concepts, storeys, tables, notes, and the citation."""
     return _read_requirement()["requirement"]
-
-
-def requirement_edition():
-    return _read_requirement()["edition"]
 
 
 def building_ids(key):

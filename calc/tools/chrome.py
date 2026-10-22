@@ -5,25 +5,26 @@ What is here draws the frame and nothing else: which module a row opens is an in
 
 import functools
 
-from PySide6.QtCore import QByteArray, QEvent, QRectF, QSize, Qt, Signal
-from PySide6.QtGui import QActionGroup, QColor, QFont, QIcon, QPainter, QPainterPath, QPen, QPixmap
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import QEvent, QRectF, QSize, Qt, Signal
+from PySide6.QtGui import QActionGroup, QColor, QFont, QIcon, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import (
     QAbstractItemView, QButtonGroup, QComboBox, QFrame, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QMenu,
     QSizePolicy, QStyle, QStyledItemDelegate, QToolButton, QVBoxLayout, QWidget,
 )
 
 import theme
-from flowbar import pixel_ratio
+from svg_icons import pixel_ratio, svg_pixmap
 
 # --- the icons -------------------------------------------------------------------------------------------------
 # Line icons on a 24-unit square, drawn in one ink: the site's own feature icons are of this kind. Each says what its module draws or computes -- a floor plan, the sheet of positions, loads onto a beam, a sum, a beam on two supports, a joint, a bolt, a turn about a centre, a pair of brackets -- and none is a picture of a product. SVG Tiny: no arc command, circles and polylines only (docs/domain/connections.md §3.3quinquies).
 ICONS = {
     # A document's outline: a heading, and under it its two sections, hung on one line -- what «Structure du document» lists. Drawn as an indented list and not as a tree of boxes, which `tab_schema`'s pieces already are.
+    "tab_project": '<path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M10 21v-6h4v6"/>',
     "tab_structure": '<path d="M4 5h16"/><path d="M8 5v12h3M8 11h3"/><path d="M13 11h7M13 17h7"/>',
     "tab_plan": '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 10h8v11M11 3v4M15 10h6"/>',
     "tab_fire": '<path d="M12 3c1 3 5 5.5 5 10c0 2.8-2.2 5-5 5s-5-2.2-5-5c0-1.7.7-3 1.8-4 .2 1.3.9 2 1.7 2.2C10.2 8.4 10.7 5.6 12 3z"/>',
     "tab_positions": '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M9 4v16"/>',
+    "tab_metre": '<rect x="2" y="8" width="20" height="8" rx="1.5"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/>',
     # A revised page: the sheet with its folded corner, its lines, and the triangle a drawing marks a revision with. Kept away from the positions sheet's grid, which it would otherwise be read as.
     "tab_journal": '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 11l1.6-2.7L12.2 11z"/><path d="M9 14.5h6M9 18h6"/>',
     # The six tabs of «Actions» (action_tabs.py, v0.117), each drawn as what it is: a block on its support under its own weight; layers over it; a load put on a floor; a snowflake; wind round a line; the ground shaking.
@@ -45,6 +46,8 @@ ICONS = {
     # Names at the left and their values at the right, which is what the tab lists: two columns, and no chevron, which `tab_python` and `tab_commands` both already are.
     "tab_variables": '<path d="M4 7h3M11 7h9"/><path d="M4 12h3M11 12h6"/><path d="M4 17h3M11 17h8"/>',
     "tab_commands": '<path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/>',
+    # Three objects, one reading the two others: what the «Dépendances» tab lists (issue #71).
+    "tab_dependencies": '<circle cx="5" cy="12" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M7 11l9.8-4M7 13l9.8 4"/>',
     # The member checks of SIA 265 chapter 4 (member_check_tab.py), each drawn as the action it checks: a bar pulled at both ends, pressed at both ends, bent under a load, sheared, twisted, a column bowed and a beam tipping over, then -- serviceability -- a beam sagging under its original line and a wave.
     "tab_mc_tension": '<rect x="8" y="10" width="8" height="4"/><path d="M8 12H3M5.5 9.5L3 12l2.5 2.5"/><path d="M16 12h5M18.5 9.5L21 12l-2.5 2.5"/>',
     "tab_mc_compression": '<rect x="8" y="10" width="8" height="4"/><path d="M2 12h6M5 9.5L8 12l-3 2.5"/><path d="M22 12h-6M19 9.5L16 12l3 2.5"/>',
@@ -72,16 +75,6 @@ ICONS = {
     "kind_heading": '<path d="M6 5v14M18 5v14M6 12h12"/>',
     "kind_text": '<path d="M4 7h16M4 12h16M4 17h10"/>',
     "kind_table": '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 10h18M9 5v14"/>',
-    "kind_load": '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 10h18"/><path d="M12 12v5M10 15l2 2 2-2"/>',
-    "kind_field": '<rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 12h6"/>',
-    "kind_checklist": '<path d="M4 7l2 2 3-3M12 7h8"/><path d="M4 15l2 2 3-3M12 15h8"/>',
-    "kind_choice": '<circle cx="6" cy="7" r="2"/><circle cx="6" cy="17" r="2"/><path d="M11 7h9M11 17h9"/>',
-    "kind_image": '<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="9" cy="9" r="1.4"/>',
-    "kind_extract": '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 3v5H3M16 21v-5h5"/><rect x="9" y="9" width="6" height="6"/>',
-    "kind_annexes": '<path d="M16.5 7.5l-7 7a2 2 0 0 0 2.8 2.8l7.4-7.4a4 4 0 0 0-5.6-5.6l-7.4 7.4a6 6 0 0 0 8.5 8.5l6.3-6.3"/>',
-    "kind_plan": '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 10h8v11M11 3v4M15 10h6"/>',
-    "kind_fire_plan": '<path d="M12 3c1 3.2 4.5 5 4.5 9.2a4.5 4.5 0 0 1-9 0c0-1.9 1-3 1.8-4 .3 1.3 1 2 1.6 2.3C11 8.6 10.5 5.5 12 3z"/><path d="M5 21h14"/>',
-    "kind_signatures": '<path d="M4 17l3-6 3 5 2-3 3 3 3-6"/><path d="M4 21h16"/>',
     "kind_norms": '<path d="M5 4h14v16H8l-3-3z"/><path d="M9 8h6M9 12h6"/>',
     "home_new": '<path d="M3 5h6l2 2h10v12H3z"/><path d="M12 10v6M9 13h6"/>',
     "home_open": '<path d="M3 5h6l2 2h8v3"/><path d="M3 5v14h15l3-8H7l-4 8"/>',
@@ -92,17 +85,11 @@ ICONS = {
 
 @functools.lru_cache(maxsize=256)
 def _pixmap(key, colour, size, ratio):
+    """A symbol of ICONS in `colour`, `size` logical pixels square -- cached by the screen's `ratio` too, so a window moved to another screen renders it anew."""
     body = ICONS[key]
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{colour}" '
            f'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">{body}</svg>')
-    renderer = QSvgRenderer(QByteArray(svg.encode("utf-8")))
-    pixmap = QPixmap(QSize(round(size * ratio), round(size * ratio)))
-    pixmap.setDevicePixelRatio(ratio)
-    pixmap.fill(QColor(0, 0, 0, 0))
-    painter = QPainter(pixmap)
-    renderer.render(painter, QRectF(0, 0, size, size))
-    painter.end()
-    return pixmap
+    return svg_pixmap(svg, size)
 
 
 def icon(key, colour=None, size=18):
@@ -265,7 +252,9 @@ class FoldablePane(QWidget):
         self.foldedChanged.emit(self.folded)
 
     def set_folded(self, folded):
-        """Folded to the arrow, or open again at the width it had (the navigation's fold, for this pane)."""
+        """Folded to the arrow, or open again at the width it had (the navigation's fold, for this pane).
+
+        The width it frees goes to its neighbour -- the centre pane -- at once, and is taken back from it on unfolding (issue #91: the centre came up to the arrow only once the window was resized, a fixed width alone never asking the splitter to share out again). The unfold takes back only this pane's own width and not the whole list kept at folding, which a window resized meanwhile has made stale."""
         folded = bool(folded)
         if folded == self.folded:
             return
@@ -275,13 +264,28 @@ class FoldablePane(QWidget):
         self.content.setVisible(not folded)
         if folded:
             self.sizes = splitter.sizes() if splitter is not None else None
-            self.setFixedWidth(self.fold.sizeHint().width() + 4)
+            arrow = self.fold.sizeHint().width() + 4
+            self.setFixedWidth(arrow)
+            if self.sizes:
+                self._share(splitter, arrow)
         else:
             self.setMinimumWidth(0)
             self.setMaximumWidth(16777215)
             if self.sizes and splitter is not None:
-                splitter.setSizes(self.sizes)
+                self._share(splitter, self.sizes[splitter.indexOf(self)])
         self.updateGeometry()
+
+    def _share(self, splitter, width):
+        """This pane set to `width` in `splitter`, the difference given to or taken from its neighbour -- the next pane, or the one before where it is the last -- and the others left as they are."""
+        sizes = splitter.sizes()
+        index = splitter.indexOf(self)
+        if index < 0 or len(sizes) < 2:
+            return
+        neighbour = index + 1 if index + 1 < len(sizes) else index - 1
+        moved = sizes[index] - width
+        sizes[neighbour] = max(0, sizes[neighbour] + moved)
+        sizes[index] = width
+        splitter.setSizes(sizes)
 
 # --- the side navigation -----------------------------------------------------------------------------------------
 
@@ -291,6 +295,7 @@ DIRTY = Qt.ItemDataRole.UserRole + 2    # an entry's unsaved changes
 ICON_KEY = Qt.ItemDataRole.UserRole + 3
 TITLE = Qt.ItemDataRole.UserRole + 4   # a group's own title (v0.117)
 FOLDED = Qt.ItemDataRole.UserRole + 5  # whether a group is folded, its rows hidden (v0.117)
+OFF = Qt.ItemDataRole.UserRole + 6     # an entry the document shown cannot open yet -- its document not made (issue #90): greyed, not chosen, not counted by Ctrl+1 … Ctrl+9
 
 EXPANDED_WIDTH = 214
 COLLAPSED_WIDTH = 52
@@ -313,10 +318,10 @@ class NavDelegate(QStyledItemDelegate):
 
     def sizeHint(self, option, index):
         if index.data(KIND) == "group":
-            return QSize(10, 12 if self.nav.collapsed else GROUP_HEIGHT)
+            return QSize(10, theme.scaled(12 if self.nav.collapsed else GROUP_HEIGHT))
         if index.data(KIND) == "section":
-            return QSize(10, SECTION_LINE if self.nav.collapsed or not index.data(Qt.ItemDataRole.DisplayRole) else SECTION_HEIGHT)
-        return QSize(10, ENTRY_HEIGHT)
+            return QSize(10, theme.scaled(SECTION_LINE if self.nav.collapsed or not index.data(Qt.ItemDataRole.DisplayRole) else SECTION_HEIGHT))
+        return QSize(10, theme.scaled(ENTRY_HEIGHT))
 
     def paint(self, painter, option, index):
         painter.save()
@@ -355,14 +360,15 @@ class NavDelegate(QStyledItemDelegate):
                 painter.drawText(rect.adjusted(14, 8, -12, 0), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, "▸" if index.data(FOLDED) else "▾")
             painter.restore()
             return
-        selected = bool(option.state & QStyle.StateFlag.State_Selected)
-        hovered = bool(option.state & QStyle.StateFlag.State_MouseOver)
+        off = bool(index.data(OFF))
+        selected = bool(option.state & QStyle.StateFlag.State_Selected) and not off
+        hovered = bool(option.state & QStyle.StateFlag.State_MouseOver) and not off
         box = QRectF(rect.adjusted(6, 1, -6, -1))
         if selected or hovered:
             path = QPainterPath()
             path.addRoundedRect(box, 7, 7)
             painter.fillPath(path, QColor(theme.colour("accent-soft" if selected else "bg-soft")))
-        ink = theme.colour("accent-strong" if selected else "ink-soft")
+        ink = theme.colour("muted" if off else "accent-strong" if selected else "ink-soft")
         size = 18
         if self.nav.collapsed:
             x = rect.center().x() - size / 2
@@ -374,7 +380,7 @@ class NavDelegate(QStyledItemDelegate):
             font = QFont(option.font)
             font.setWeight(QFont.Weight.DemiBold if selected else QFont.Weight.Normal)
             painter.setFont(font)
-            painter.setPen(QColor(ink if selected else theme.colour("ink")))
+            painter.setPen(QColor(ink if selected or off else theme.colour("ink")))
             text_rect = rect.adjusted(16 + size + 10, 0, -24, 0)
             text = painter.fontMetrics().elidedText(index.data(Qt.ItemDataRole.DisplayRole), Qt.TextElideMode.ElideRight, text_rect.width())
             painter.drawText(text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, text)
@@ -410,6 +416,7 @@ class SideNav(QWidget):
         # v0.117: a group folded by a click on its title, its rows hidden -- kept apart from what the document shows (`set_visible`), so that a folded group neither shows a row the document hides nor takes one out of `order`, which Ctrl+1 … Ctrl+9 count by; and the width dragged at the grip
         self.folded = set(folded or ())
         self.shown = None   # the tab indices the document shows; None: all
+        self.off = set()    # the tab indices it shows and cannot open yet (issue #90)
         self.expanded_width = max(MIN_EXPANDED_WIDTH, min(MAX_EXPANDED_WIDTH, int(width))) if width else EXPANDED_WIDTH
         self.modes = list(modes or ())
         self._mode = None
@@ -492,7 +499,7 @@ class SideNav(QWidget):
         self.mode_button.setObjectName("modeButton")
         self.mode_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self.mode_button.setAutoRaise(False)
-        self.mode_button.setFixedSize(34, 28)
+        self.mode_button.setFixedSize(theme.scaled(34), theme.scaled(28))
         # the number alone: in a button 34 px wide the menu's arrow would stand on top of it
         self.mode_button.setStyleSheet("QToolButton::menu-indicator { image: none; width: 0px; }")
         menu = QMenu(self.mode_button)
@@ -551,6 +558,16 @@ class SideNav(QWidget):
     def _shows(self, item):
         return self.shown is None or item.data(INDEX) in self.shown
 
+    def set_unavailable(self, indices, tip=""):
+        """The rows of `indices` shown greyed, `tip` saying why, and neither chosen nor counted by Ctrl+1 … Ctrl+9 (`order`) -- a document not made yet, whose modules have nothing to work on (issue #90); every other row as it was."""
+        self.off = set(indices)
+        for index, item in self.rows.items():
+            off = index in self.off
+            item.setData(OFF, off)
+            item.setFlags(Qt.ItemFlag.NoItemFlags if off else Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+            item.setToolTip(tip if off and tip else item.text())
+        self.list.viewport().update()
+
     def _refresh_rows(self):
         """Each row shown where the document shows it and its group is not folded; a group's title hidden where the document shows none of its rows, its arrow saying whether it is folded."""
         for head, members in self.groups:
@@ -588,7 +605,7 @@ class SideNav(QWidget):
     def order(self):
         """The tab indices in the order the navigation lists them, the rows the document shows and no other -- what Ctrl+1 … Ctrl+9 count by; a folded group's rows count still."""
         return [self.list.item(i).data(INDEX) for i in range(self.list.count())
-                if self.list.item(i).data(KIND) == "entry" and self._shows(self.list.item(i))]
+                if self.list.item(i).data(KIND) == "entry" and self._shows(self.list.item(i)) and self.list.item(i).data(INDEX) not in self.off]
 
     def set_expanded_width(self, width, emit=True):
         width = max(MIN_EXPANDED_WIDTH, min(MAX_EXPANDED_WIDTH, int(width)))
@@ -637,7 +654,8 @@ class SideNav(QWidget):
         self.grip.place()
 
     def _apply_width(self):
-        self.setFixedWidth(COLLAPSED_WIDTH if self.collapsed else self.expanded_width)
+        # the widths are kept at 100 % -- the one dragged too, in layout_store -- and drawn at the zoom in force (issue #85)
+        self.setFixedWidth(theme.scaled(COLLAPSED_WIDTH if self.collapsed else self.expanded_width))
         self.grip.setVisible(not self.collapsed)
         self.grip.place()
         if self.mode_select is not None:   # folded, the document is its number
@@ -659,7 +677,8 @@ class _WidthGrip(QWidget):
         self.start = None
 
     def place(self):
-        self.setGeometry(self.nav.width() - GRIP_PX, 0, GRIP_PX, self.nav.height())
+        grip = theme.scaled(GRIP_PX)
+        self.setGeometry(self.nav.width() - grip, 0, grip, self.nav.height())
         self.raise_()
 
     def mousePressEvent(self, event):
@@ -668,12 +687,30 @@ class _WidthGrip(QWidget):
     def mouseMoveEvent(self, event):
         if self.start is not None:
             x, width = self.start
-            self.nav.set_expanded_width(width + event.globalPosition().x() - x, emit=False)
+            self.nav.set_expanded_width(width + (event.globalPosition().x() - x) * 100 / theme.zoom(), emit=False)   # dragged in pixels on screen, kept at 100 %
 
     def mouseReleaseEvent(self, _event):
         if self.start is not None:
             self.start = None
             self.nav.widthChanged.emit(self.nav.expanded_width)
+
+
+# --- the interface's zoom: its three actions, the same in the window's «Affichage» menu and on the start page (issue #85) ---
+
+# The keys of each, stated once. Ctrl+= beside Ctrl++, which a Swiss keyboard reaches by Shift; the numeric keypad's + and − match these, Qt leaving its modifier out of a shortcut.
+ZOOM_KEYS = (("zoom_in", ("Ctrl++", "Ctrl+=")), ("zoom_out", ("Ctrl+-",)), ("zoom_reset", ("Ctrl+0",)))
+
+
+def zoom_actions(parent, t):
+    """The three actions of the zoom -- *Zoom avant*, *Zoom arrière*, *Taille réelle* -- with their keys, parented to `parent`, each calling theme's own; `t` gives their words. A window puts them in its menu, the start page on itself."""
+    from PySide6.QtGui import QAction, QKeySequence
+    actions = []
+    for key, keys in ZOOM_KEYS:
+        action = QAction(t(key), parent)
+        action.setShortcuts([QKeySequence(k) for k in keys])
+        action.triggered.connect(getattr(theme, key))
+        actions.append(action)
+    return actions
 
 
 # --- the start page's cards --------------------------------------------------------------------------------------

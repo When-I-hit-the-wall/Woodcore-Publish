@@ -5,13 +5,14 @@
   "type": "object",
   "required": ["schema_version", "id", "name", "label", "mode"],
   "properties": {
-    "schema_version": {"type": "string", "const": "1.0", "description": "-- pinned: a file written at another version is refused rather than read as this one."},
+    "schema_version": {"type": "string", "enum": ["1.0", "1.1"], "description": "-- 1.0, or 1.1 where the record names its PDF in Appendix/ (`file`, issue #64): a file written at another version is refused rather than read as this one."},
     "id": {"type": "string", "description": "The file name of the record and of its PDF, and the string the report addresses the source by. Letters, digits and _ . + -."},
     "name": {"type": "string", "description": "What the report calls the source: in an excerpt's caption and on its annex's cover page."},
     "label": {"type": "string", "description": "Its description, in free text."},
     "group": {"type": "string", "description": "Kept for the window's own use; nothing in the report reads it."},
     "mode": {"type": "string", "enum": ["used", "all", "none"], "description": "What of the source the annexes carry: the pages an excerpt is taken from (used, the default), every page (all), or nothing (none)."},
     "original": {"type": "string", "description": "The name of the file it was copied from, as the engineer chose it -- said in the window, printed nowhere."},
+    "file": {"type": "string", "description": "1.1 (issue #64, D-11): the name of its PDF in the project's Appendix/, the name it was added under -- in a project laid out by folders, where the PDF lies there and no more beside this record as <id>.pdf. A file of that name written over from outside Woodcore is read again at the next export (annex.refresh_sources)."},
     "sha256": {"type": "string", "description": "The SHA-256 of its PDF when the window last wrote it -- what the window compares a replaced version with. The export computes its own from the file."}
   }
 }

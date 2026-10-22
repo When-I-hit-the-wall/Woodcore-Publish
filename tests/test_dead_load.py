@@ -8,6 +8,8 @@ The dead load is the one domain Python *calculates* rather than reads (docs/doma
 Both are refused now. These tests build a workbook carrying each defect, on purpose, and check that the export refuses it by name -- and that a correct workbook still passes.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import sys
 from pathlib import Path
 

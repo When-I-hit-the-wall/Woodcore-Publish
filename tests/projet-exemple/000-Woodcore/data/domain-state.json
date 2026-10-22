@@ -1,0 +1,727 @@
+{
+  "schema_version": "1.0",
+  "domains": {
+    "A1": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "c61e99",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/A1.typ"
+    },
+    "A2": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "c61e99",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/A2.typ"
+    },
+    "A3": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "c61e99",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/A3.typ"
+    },
+    "B": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "fe9da6",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "fe9da6",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/B.typ"
+    },
+    "BI-01": {
+      "kind": "check",
+      "check": "bending",
+      "written": {
+        "form": "(14)",
+        "kind": "bending",
+        "version": 2
+      },
+      "form": {
+        "kind": "bending",
+        "form": "(14)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Bending/BI-01.typ"
+    },
+    "BI-02": {
+      "kind": "check",
+      "check": "bending",
+      "written": {
+        "form": "(22)",
+        "kind": "bending",
+        "version": 2
+      },
+      "form": {
+        "kind": "bending",
+        "form": "(22)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Bending/BI-02.typ"
+    },
+    "BI-03": {
+      "kind": "check",
+      "check": "bending",
+      "written": {
+        "form": "(21), (9), (19), (20)",
+        "kind": "bending",
+        "version": 2
+      },
+      "form": {
+        "kind": "bending",
+        "form": "(21), (9), (19), (20)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Bending/BI-03.typ"
+    },
+    "C1": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "c61e99",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/C1.typ"
+    },
+    "C2": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "c61e99",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/C2.typ"
+    },
+    "C3": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "c61e99",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/C3.typ"
+    },
+    "D": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "c61e99",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/D.typ"
+    },
+    "DR-01": {
+      "kind": "check",
+      "check": "compression",
+      "written": {
+        "form": "(11)",
+        "kind": "compression",
+        "version": 2
+      },
+      "form": {
+        "kind": "compression",
+        "form": "(11)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Compression/DR-01.typ"
+    },
+    "DR-02": {
+      "kind": "check",
+      "check": "compression",
+      "written": {
+        "form": "(10)",
+        "kind": "compression",
+        "version": 2
+      },
+      "form": {
+        "kind": "compression",
+        "form": "(10)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Compression/DR-02.typ"
+    },
+    "E": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "57f3bc",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "57f3bc",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/E.typ"
+    },
+    "EL+AL-Dach mit Wasser": {
+      "kind": "dead-load",
+      "check": null,
+      "written": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "dead-load",
+        "form": "62e8eb",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Permanent-loads/EL+AL-Dach mit Wasser.typ"
+    },
+    "EL+AL-Dach ohne Wasser": {
+      "kind": "dead-load",
+      "check": null,
+      "written": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "dead-load",
+        "form": "62e8eb",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Permanent-loads/EL+AL-Dach ohne Wasser.typ"
+    },
+    "EL+AL-DachRand": {
+      "kind": "dead-load",
+      "check": null,
+      "written": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "dead-load",
+        "form": "62e8eb",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Permanent-loads/EL+AL-DachRand.typ"
+    },
+    "EL+AL-Wand": {
+      "kind": "dead-load",
+      "check": null,
+      "written": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "dead-load",
+        "form": "62e8eb",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Permanent-loads/EL+AL-Wand.typ"
+    },
+    "F": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "c61e99",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/F.typ"
+    },
+    "FE-01": {
+      "kind": "check",
+      "check": "bending",
+      "written": {
+        "form": "(14)",
+        "kind": "bending",
+        "version": 2
+      },
+      "form": {
+        "kind": "bending",
+        "form": "(14)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Bending/FE-01.typ"
+    },
+    "FE-02": {
+      "kind": "check",
+      "check": "buckling",
+      "written": {
+        "form": "(10), (29)",
+        "kind": "buckling",
+        "version": 2
+      },
+      "form": {
+        "kind": "buckling",
+        "form": "(10), (29)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Buckling/FE-02.typ"
+    },
+    "G": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "c61e99",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/G.typ"
+    },
+    "H": {
+      "kind": "live-load",
+      "check": null,
+      "written": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "live-load",
+        "form": "c61e99",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Live/H.typ"
+    },
+    "KI-01": {
+      "kind": "check",
+      "check": "lateral-torsional",
+      "written": {
+        "form": "(38)",
+        "kind": "lateral-torsional",
+        "version": 2
+      },
+      "form": {
+        "kind": "lateral-torsional",
+        "form": "(38)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Lateral-torsional/KI-01.typ"
+    },
+    "KI-02": {
+      "kind": "check",
+      "check": "lateral-torsional",
+      "written": {
+        "form": "(22), (37)",
+        "kind": "lateral-torsional",
+        "version": 2
+      },
+      "form": {
+        "kind": "lateral-torsional",
+        "form": "(22), (37)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Lateral-torsional/KI-02.typ"
+    },
+    "KN-01": {
+      "kind": "check",
+      "check": "buckling",
+      "written": {
+        "form": "(10), (29)",
+        "kind": "buckling",
+        "version": 2
+      },
+      "form": {
+        "kind": "buckling",
+        "form": "(10), (29)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Buckling/KN-01.typ"
+    },
+    "SC-01": {
+      "kind": "check",
+      "check": "shear",
+      "written": {
+        "form": "(23)",
+        "kind": "shear",
+        "version": 2
+      },
+      "form": {
+        "kind": "shear",
+        "form": "(23)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Shear/SC-01.typ"
+    },
+    "SD-10": {
+      "kind": "connector",
+      "check": null,
+      "written": {
+        "form": "aa50ac",
+        "kind": "connector",
+        "version": 2
+      },
+      "form": {
+        "kind": "connector",
+        "form": "aa50ac",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Connectors/SD-10.typ"
+    },
+    "SL": {
+      "kind": "snow-load",
+      "check": null,
+      "written": {
+        "form": "8f7c55",
+        "kind": "snow-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "snow-load",
+        "form": "8f7c55",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Snow/SL.typ"
+    },
+    "ST-01": {
+      "kind": "steel",
+      "check": "steel-bending",
+      "written": {
+        "form": "bending fe8b9f",
+        "kind": "steel-bending",
+        "version": 2
+      },
+      "form": {
+        "kind": "steel-bending",
+        "form": "bending fe8b9f",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Steel-checks/Bending/ST-01.typ"
+    },
+    "ST-02": {
+      "kind": "steel",
+      "check": "steel-shear",
+      "written": {
+        "form": "shear 5a8144",
+        "kind": "steel-shear",
+        "version": 2
+      },
+      "form": {
+        "kind": "steel-shear",
+        "form": "shear 5a8144",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Steel-checks/Shear/ST-02.typ"
+    },
+    "VU-MP-1": {
+      "kind": "connection",
+      "check": null,
+      "written": {
+        "form": "cbfe38-4-a",
+        "kind": "connection",
+        "version": 2
+      },
+      "form": {
+        "kind": "connection",
+        "form": "cbfe38-4-a",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Connections/VU-MP-1.typ"
+    },
+    "WL-Fluchttreppe+Geräte": {
+      "kind": "wind-load",
+      "check": null,
+      "written": {
+        "form": "82a6cf",
+        "kind": "wind-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "wind-load",
+        "form": "82a6cf",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Wind/WL-Fluchttreppe+Geräte.typ"
+    },
+    "WL-Pavillon": {
+      "kind": "wind-load",
+      "check": null,
+      "written": {
+        "form": "82a6cf",
+        "kind": "wind-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "wind-load",
+        "form": "82a6cf",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Wind/WL-Pavillon.typ"
+    },
+    "WL-Velo": {
+      "kind": "wind-load",
+      "check": null,
+      "written": {
+        "form": "82a6cf",
+        "kind": "wind-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "wind-load",
+        "form": "82a6cf",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Wind/WL-Velo.typ"
+    },
+    "ZT-01": {
+      "kind": "check",
+      "check": "tension",
+      "written": {
+        "form": "(6)",
+        "kind": "tension",
+        "version": 2
+      },
+      "form": {
+        "kind": "tension",
+        "form": "(6)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Tension/ZT-01.typ"
+    },
+    "ZT-02": {
+      "kind": "check",
+      "check": "tension",
+      "written": {
+        "form": "(8)/(9)",
+        "kind": "tension",
+        "version": 2
+      },
+      "form": {
+        "kind": "tension",
+        "form": "(8)/(9)",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Timber-checks/Tension/ZT-02.typ"
+    },
+    "dreigelenk": {
+      "kind": "script",
+      "check": null,
+      "written": {
+        "form": "010b6d",
+        "kind": "script",
+        "version": 2
+      },
+      "form": {
+        "kind": "script",
+        "form": "010b6d",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Scripts/dreigelenk.typ"
+    }
+  }
+}

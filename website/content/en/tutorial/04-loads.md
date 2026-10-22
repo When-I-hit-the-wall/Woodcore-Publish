@@ -15,9 +15,8 @@ Loads are not entered in the Positions tab: they come from the **load workbook**
 
 ## Print a load case
 
-A case is printed whole with `#show-calc`: the snow load of sheet `SL`, the formula in letters and then in numbers, every value with its standard.
+A case is printed whole by the file Woodcore writes for it, `#include domain-file("snow-load", "SL")`: the snow load of sheet `SL`, the formula in letters and then in numbers, every value with its standard.
 
-{{example show-calc-1}}
 
 The section `004-einwirkungen.typ` of a new project already prints every case of every load with a loop; name them one by one to choose each one's level.
 
@@ -26,5 +25,5 @@ The section `004-einwirkungen.typ` of a new project already prints every case of
 Live loads come from Table 8 of SIA 261, with no workbook: you name the surface's category.
 
 ```typ
-#show-live-load("A1")
+#include domain-file("live-load", "A1")
 ```

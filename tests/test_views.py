@@ -1,6 +1,6 @@
 """The views of a tab, chosen in the top bar (v0.117, calc/tools/views.py; spec docs/requirements/active/2026-10-07-vues-onglets-slider-et-volets.md, UI-001 to UI-005, REQ-006, REQ-010, ARCH-001).
 
-The engineer, 07.10.2026: «il y a pour l'instant trop d'informations dans les onglets. On se perd un peu» -- a switch left of FR · DE · EN, «document import, dessin, typst et document export» for the plans, «calcul et affichage» for a check, and the same for «la plupart des onglets». Held here: where the switch stands and what it holds for the tab in front; that every tab of the engineer's list that exists declares its views; that the plans' four views show their own boxes and their own pages; that a view is remembered in the user's settings, never in the project; and that a view remembered as one that compiles compiles nothing while the window is built (review A10).
+The engineer, 07.10.2026: «il y a pour l'instant trop d'informations dans les onglets. On se perd un peu» -- a switch left of FR · DE · EN, «document import, dessin, typst et document export» for the plans, «calcul et affichage» for a check, and the same for «la plupart des onglets». Held here: where the switch stands and what it holds for the tab in front; that every tab of the engineer's list that exists declares its views; that the plans' four views show their own boxes and their own pages; that a tab arrives in its first view and compiles nothing, its view holding while it stays in front and through a rebuild, never in the user's settings nor in the project (issue #86); and that the views kept by older versions are no longer read (review A10).
 """
 
 import contextlib
@@ -146,47 +146,99 @@ def test_the_plans_four_views_show_their_own_boxes_and_pages():
         assert not shown, shown
 
 
-def test_a_view_is_remembered_in_the_users_settings_and_never_in_the_project():
-    window, here = _window()   # a project begun on its convention d'utilisation, whose modules the journal is one of (MODE_TABS)
-    import usersettings
+@contextlib.contextmanager
+def _compiles():
+    """Every page asked of Typst -- a snippet or a document -- counted rather than compiled."""
+    import pdf_pane
+    asked = []
+    originals = (pdf_pane.PdfPane.request_snippet, pdf_pane.PdfPane.request)
+    pdf_pane.PdfPane.request_snippet = lambda self, *a, **k: asked.append(("snippet", a))
+    pdf_pane.PdfPane.request = lambda self, *a, **k: asked.append(("document", a))
+    try:
+        yield asked
+    finally:
+        pdf_pane.PdfPane.request_snippet, pdf_pane.PdfPane.request = originals
+
+
+def _shown(window):
+    """The window shown, as the engineer meets it: a tab's showEvent -- where «Affichage» compiles -- happens only on a window shown (issue #86's review: a hidden window passes a test of arrival wrongly)."""
+    from PySide6.QtWidgets import QApplication
+    window.show()
+    for _ in range(3):
+        QApplication.processEvents()
+
+
+def test_a_tab_arrives_in_its_first_view_and_compiles_nothing():
+    """Issue #86 (the engineer, 21.10.2026: «lorsque l'on ouvre un onglet, on est toujours en mode calcul et pas en mode affichage») -- a check left in «Affichage» and a plan left in «Typst» come back in «Calcul» and «Dessin», and arriving asks Typst for nothing."""
+    from PySide6.QtWidgets import QApplication
+    window, here = _window()
+    _shown(window)
     with project.using(here), _boxes():
+        rest, _other = _tab(window, "tab_positions")
+        for key, away, first in (("tab_mc_bending", "display", "calc"), ("tab_plan", "typst", "draw"), ("tab_statics", "display", "draw")):
+            index, tab = _tab(window, key)
+            with _compiles():
+                window.tab_widget.setCurrentIndex(index)
+                QApplication.processEvents()
+                window.on_view_chosen(away)
+                QApplication.processEvents()
+                assert tab.view == away, key
+                window.tab_widget.setCurrentIndex(rest)
+                QApplication.processEvents()
+            assert tab.view == first, f"{key}: left in «{away}», put back in «{tab.view}» rather than its first view"
+            with _compiles() as asked:
+                window.tab_widget.setCurrentIndex(index)
+                QApplication.processEvents()
+            assert tab.view == first and window.view_switch.current_key() == first, (key, tab.view)
+            assert not asked, f"{key}: arriving asked Typst for {asked}"
+
+
+def test_the_view_holds_while_the_tab_stays_in_front_and_through_a_rebuild():
+    """The view chosen holds while the tab is in front, through a rebuild of the window (an export, a change of language) -- carried in memory, never in the user's settings nor in the project."""
+    import usersettings
+    window, here = _window()
+    with project.using(here), _boxes(), _compiles():
         index, tab = _tab(window, "tab_journal")
         window.tab_widget.setCurrentIndex(index)
+        settings = usersettings.read().get("views")
         before = here.file.read_bytes()
         window.on_view_chosen("display")
-        assert usersettings.read()["views"]["tab_journal"] == "display"
-        assert here.file.read_bytes() == before, "a view is the engineer's preference, not the project's"
+        assert usersettings.read().get("views") == settings, "the view is written in the user's settings again"
+        assert here.file.read_bytes() == before, "a view is not the project's"
         window.rebuild()
         index, tab = _tab(window, "tab_journal")
-        assert tab.view == "display", "a rebuild of the window keeps the view"
+        assert window.tab_widget.currentIndex() == index and tab.view == "display", "a rebuild of the window loses the view of the tab in front"
+        window.refresh_tab("tab_journal")
+        index, tab = _tab(window, "tab_journal")
+        assert tab.view == "display", "a tab built again in its place loses its view"
         window.on_view_chosen("entry")
-        assert usersettings.read()["views"]["tab_journal"] == "entry"
 
 
-def test_a_view_that_compiles_compiles_nothing_while_the_window_is_built():
-    """Views remembered as «Typst» and «Affichage»: the window built off-screen and never shown asks Typst for nothing (review A10) -- the page is asked for when a tab is shown in that view."""
+def test_the_views_setting_is_neither_read_nor_written():
+    """Views kept by a version up to 0.121 -- «Typst» and «Affichage» -- are no longer read: the window is built with every tab in its first view and asks Typst for nothing (review A10); the key is left in the settings as it is."""
     _qt()
-    import pdf_pane
     import usersettings
     settings = usersettings.read()
     # «tab_loads» kept on purpose: the tab was retired in v0.117 (issue 13), and a user's settings that still name it must build the window all the same (review ARCH-RISK-008)
-    usersettings.write({**settings, "views": {"tab_plan": "typst", "tab_fire": "typst", "tab_mc_tension": "display", "tab_statics": "display", "tab_loads": "display"},
-                        "layouts": {"last_used": "old-screens", "old-screens": {"tab_loads": {"calc": {"panes": [0.7, 0.3]}}}}})
-    asked = []
-    original = pdf_pane.PdfPane.request_snippet
-    pdf_pane.PdfPane.request_snippet = lambda self, *a: asked.append(a)
+    kept = {"tab_plan": "typst", "tab_fire": "typst", "tab_mc_tension": "display", "tab_statics": "display", "tab_loads": "display"}
+    usersettings.write({**settings, "views": kept, "layouts": {"last_used": "old-screens", "old-screens": {"tab_loads": {"calc": {"panes": [0.7, 0.3]}}}}})
     try:
         here = conftest.project_copy("views_no_compile")
-        with project.using(here), _boxes():
+        with project.using(here), _boxes(), _compiles() as asked:
+            import views
             import woodcore_gui
             window = woodcore_gui.MainWindow()
             assert "tab_loads" not in [key for key, _factory in woodcore_gui.TABS] and len(window.tabs) == len(woodcore_gui.TABS), "no ghost of the retired loads tab"
-            index, plan = _tab(window, "tab_plan")
-            assert plan.view == "typst" and plan.view_pending, "the view is a state until the tab is shown"
+            for key in ("tab_plan", "tab_fire", "tab_mc_tension", "tab_statics"):
+                _index, tab = _tab(window, key)
+                assert tab.view == views.default(tab), f"{key}: built in «{tab.view}» from the old setting"
             assert not asked, f"{len(asked)} compile(s) asked for while the window was built"
+            index, plan = _tab(window, "tab_plan")
+            window.tab_widget.setCurrentIndex(index)
+            window.on_view_chosen("export")
+            assert usersettings.read()["views"] == kept, "the old key is rewritten"
             conftest.dispose(window)
     finally:
-        pdf_pane.PdfPane.request_snippet = original
         usersettings.write(settings)
 
 
@@ -260,7 +312,7 @@ def test_affichage_offers_each_tabs_commands_and_each_changes_the_call():
 
 
 def test_the_loads_offer_each_rows_commands_a_value_a_case_and_a_category():
-    """REQ-008 of v0.117 for the loads, carried to the Variables tab that took them over in v0.117 (issue 13, D-006, D-013): a value offers val, var, show-input and the bare objects; a case show-calc, each of its checks, the loop over its calculation's cases and the two summary tables; a category of SIA 261 Tabelle 8 show-live-load first -- and each gives its own call, its page asked for or a note saying why there is none."""
+    """REQ-008 of v0.117 for the loads, carried to the Variables tab that took them over in v0.117 (issue 13, D-006, D-013), in the forms of the spec 2026-10-21-commandes-typst-refonte: a value offers `#var`, read live (REQ-009); a case and a category of SIA 261 Tabelle 8 their file included, the loop over their calculation's cases (REQ-017) and the two load tables (Q-009) -- and each gives its own call, its page asked for or a note saying why there is none."""
     window, here = _window()
     with project.using(here), _boxes() as shown:
         index, tab = _tab(window, "tab_variables")
@@ -278,17 +330,17 @@ def test_the_loads_offer_each_rows_commands_a_value_a_case_and_a_category():
             "category": ("export", live.name, None),
         }
         expected = {
-            "value": ["val", "var", "show-input", "var-of"],
-            "case": ["show-calc"],
-            "category": ["show-live-load", "show-calc"],
+            "value": ["var"],
+            "case": ["domain-file"],
+            "category": ["domain-file"],
         }
         for what, key in rows.items():
             tab.select_key(key)
             titles = [display.chooser.itemText(n) for n in range(display.chooser.count())]
             assert titles[:len(expected[what])] == expected[what], (what, titles)
             if what != "value":
-                assert titles[-2:] == ["show-load-summary", "show-line-load-summary"], (what, titles)
-                assert display.t("ds_loop", command="show-calc") in titles, (what, titles)
+                assert titles[-2:] == ["var-table", "var-table — kN/m"], (what, titles)
+                assert display.t("ds_loop", command="domain-file") in titles, (what, titles)
             calls = []
             for n in range(display.chooser.count()):
                 before = len(asked)
@@ -300,3 +352,18 @@ def test_the_loads_offer_each_rows_commands_a_value_a_case_and_a_category():
         window.on_view_chosen("data")
         assert not shown, shown
 
+
+
+def test_a_page_zoomed_goes_back_to_its_width_when_its_tab_is_left():
+    """Issue #89: the zoom of a Typst page holds while its tab is in front, and the page is fitted to its pane again once the tab is left."""
+    window, here = _window()
+    import pdf_pane
+    from PySide6.QtPdfWidgets import QPdfView
+    with project.using(here), _boxes(), _compiles():
+        index, tab = _tab(window, "tab_structure")
+        window.tab_widget.setCurrentIndex(index)
+        pages = tab.findChildren(pdf_pane.ZoomablePdfView)
+        assert pages, "the Structure tab shows no page"
+        pages[0].setZoomMode(QPdfView.ZoomMode.Custom)
+        window.tab_widget.setCurrentIndex(_tab(window, "tab_positions")[0])
+        assert pages[0].zoomMode() == QPdfView.ZoomMode.FitToWidth, "a page left zoomed"

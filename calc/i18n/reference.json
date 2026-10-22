@@ -18,38 +18,6 @@
         "en": "Print what the export calculated: loads, positions, fasteners, plans, static models and schemas."
       }
     },
-    "timber": {
-      "label": {"fr": "Vérifier un élément (SIA 265)", "de": "Ein Bauteil nachweisen (SIA 265)", "en": "Checking a member (SIA 265)"},
-      "lead": {
-        "fr": "Les vérifications des éléments de la SIA 265, chapitre 4.2 : un élément décrit une fois, puis vérifié par son nom.",
-        "de": "Die Bauteilnachweise der SIA 265, Kapitel 4.2: ein Bauteil einmal beschrieben, dann mit seinem Namen nachgewiesen.",
-        "en": "The member checks of SIA 265, chapter 4.2: a member described once, then checked by its name."
-      }
-    },
-    "steel": {
-      "label": {"fr": "Vérifier l'acier (SIA 263)", "de": "Stahl nachweisen (SIA 263)", "en": "Checking steel (SIA 263)"},
-      "lead": {
-        "fr": "Les vérifications d'acier de la SIA 263 enregistrées dans les onglets « Acier » de Woodcore : calculées par l'export, imprimées ici.",
-        "de": "Die Stahlnachweise der SIA 263, in den Registern «Stahl» von Woodcore gespeichert: vom Export berechnet, hier ausgegeben.",
-        "en": "The steel checks of SIA 263 saved in Woodcore's «Acier» tabs: computed by the export, printed here."
-      }
-    },
-    "objects": {
-      "label": {"fr": "Objets des documents", "de": "Objekte der Dokumente", "en": "Document objects"},
-      "lead": {
-        "fr": "Les objets de la convention d'utilisation, de la base de projet et du rapport : tableaux, charges utiles et poids propre non-structural, champs, listes à cocher, choix, images, extraits de plan, signatures et normes citées.",
-        "de": "Die Objekte der Nutzungsvereinbarung, der Projektbasis und des Berichts: Tabellen, Nutz- und Auflasten, Felder, Listen zum Ankreuzen, Auswahlen, Bilder, Planausschnitte, Unterschriften und zitierte Normen.",
-        "en": "The objects of the service criteria agreement, the basis of design and the report: tables, live loads and non-structural self-weight, fields, lists to tick, choices, pictures, plan extracts, signatures and the norms cited."
-      }
-    },
-    "sheets": {
-      "label": {"fr": "Documents export", "de": "Exportblätter", "en": "Export sheets"},
-      "lead": {
-        "fr": "Les plans à remettre : une feuille A0 à A6 où les plans de position sont posés à l'échelle, avec la légende, une coupe schématique, des textes et le cartouche.",
-        "de": "Die Pläne zum Abgeben: ein Blatt A0 bis A6, auf dem die Positionspläne massstäblich gesetzt sind, mit der Legende, einem schematischen Schnitt, Texten und dem Plankopf.",
-        "en": "The sheets to hand over: a sheet A0 to A6 on which the position plans are set at a scale, with the legend, a schematic section, texts and the title block."
-      }
-    },
     "data": {
       "label": {"fr": "Lire les données", "de": "Die Daten lesen", "en": "Reading the data"},
       "lead": {

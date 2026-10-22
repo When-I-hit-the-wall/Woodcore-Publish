@@ -13,23 +13,23 @@ Jeder Abschnitt beginnt mit derselben Zeile, die alle Befehle von Woodcore verf�
 
 Die Schneelast wird nach SIA 261 ermittelt.
 
-#show-calc("snow-load", "SL")
+#include domain-file("snow-load", "SL")
 ```
 
-Der Text ist Ihrer, in der Sprache des Berichts; die Befehle drucken, was der Export berechnet hat. Die [Referenz](~/docs/) listet sie alle, mit ihren Beispielen.
+Der Text ist Ihrer, in der Sprache des Berichts; die Befehle drucken, was der Export berechnet hat: eine Berechnung von Woodcore steht vollst채ndig in einer eigenen Datei, die der Abschnitt einbindet. Die [Referenz](~/docs/) listet sie alle, mit ihren Beispielen.
 
 ## Berechnungen einer Position zuordnen
 
-`#calc-block` fasst die Berechnungen zusammen, die eine oder mehrere Positionen betreffen, und druckt als Kopf die Zeile, die `#member` auf Stufe 1 von jeder druckt:
+`#position` nennt eine Position auf einer Zeile, ihre ID in der Farbe ihres Typs, und die Berechnung, die sie betrifft, folgt in einem eigenen `#domain` -- oder in der Datei, die Woodcore f체r einen Nachweis geschrieben hat, `#include domain-file("check", "ZT-01")`:
 
-{{example calc-block-1}}
+{{example domain-1}}
 
 ## Drei Detailstufen
 
 Jeder Befehl druckt mehr oder weniger je nach **Stufe**: 1 das Ergebnis, f체r die Bauherrschaft; 2 die wichtige Berechnung, f체r die Ingenieurin oder den Ingenieur; 3 jedes Detail, f체r die Pr체fung. Die Stufe des Berichts wird beim Export gew채hlt (Schritt 8), und ein Aufruf kann seine eigene vorgeben:
 
 ```typ
-#show-calc("snow-load", "SL", level: 3)
+#var("s_k", domain: ("snow-load", "SL"), level: 3)
 ```
 
 > [!tip]

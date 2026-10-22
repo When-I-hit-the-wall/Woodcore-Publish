@@ -3,6 +3,8 @@
 Every check here builds its own small 000-TypstRapport/-shaped tree under tests/.tmp/ rather than touching the project's real 000-Archives/, with a .woodcore file of its own, and makes that the current project (calc/project.py), put back in a `finally`: every path the module uses is the current project's (docs/architecture/layout.md §11), so naming the project is the whole of the setup a test needs. Until v0.81 it reassigned the module's four path constants instead.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import sys
 
 import conftest
@@ -121,7 +123,7 @@ def test_an_archive_of_the_new_layout_holds_the_project_and_its_record():
                        # the revision journal, one file at the top of the sources rather than a folder of them (v0.99): an archive holds what the report's own page prints
                        here.journal_file,
                        # the project's positions, Woodcore's own since v0.114 (calc/positions_store.py) -- and a Positionen.xlsx left beside them, which is no source any more
-                       here.sources_dir / "positions.json",
+                       here.positions_dir / "positions.json",
                        here.positions_book, here.root / "Belastungsannahmen.xlsm",
                        here.archives_dir / "older.zip", here.typst_root / ".probe" / "p.typ"):
             _touch(target)
@@ -175,10 +177,9 @@ def test_the_window_s_route_is_gui_and_its_old_name_is_read_as_it():
 
 # --- a project laid out in three documents (the engineer's request of 30.09.2026) ---------------------------
 
-def _three(name):
-    """A project in three documents, its layout calc/documents.py's for German, every part it archives or leaves out touched once -- and the other documents' folders, the workbooks, the architect's plans and `.vscode/` beside them, which a walk of the Typst root (the project's own folder here) would sweep in."""
-    import documents
-    here = project.write(conftest.tmpdir(name) / "Drei.woodcore", "Drei", layout=documents.layout_for("de"))
+def _three(name, layout=None):
+    """A project in three documents, its layout one laid out before the folders of issue #64 (`conftest.legacy_modes_layout`, whose names the checks read as literals) unless `layout` is given, every part it archives or leaves out touched once -- and the other documents' folders, the workbooks, the architect's plans and `.vscode/` beside them, which a walk of the Typst root (the project's own folder here) would sweep in."""
+    here = project.write(conftest.tmpdir(name) / "Drei.woodcore", "Drei", layout=layout or conftest.legacy_modes_layout("de"))
     for mode in here.modes:
         _touch(here.document_typ(mode))
         _touch(here.document_dir(mode) / "Sections" / f"{mode}-section.typ")
@@ -189,11 +190,11 @@ def _three(name):
                    here.data_dir / "calculations.json", here.generated_dir / "lib" / "calc-engine.typ",
                    here.generated_dir / "VERSION", here.docs_dir / "typst-reference.xlsx",
                    here.generated_dir / "out" / "report-1.pdf", here.stamps_dir / "cu.json", here.stamps_dir / "cu.deps.json",
-                   here.typst_root / "Template" / "template.typ", here.typst_root / "Template" / "form.json", here.typst_root / "Template" / "logo.png",
+                   here.template_dir / "template.typ", here.template_dir / "form.json", here.template_dir / "logo.png",
                    here.images_dir / "plan.png", here.root / "RFEM-Export" / "Modell.xlsx",
                    here.connectors_dir / "SD-1.json", here.details_dir / "D.json",
                    *(here.journal_file_for(mode) for mode in here.modes),
-                   here.sources_dir / "positions.json",
+                   here.positions_dir / "positions.json",
                    here.positions_book, here.root / "Belastungsannahmen.xlsm", here.root / "01_Pläne" / "Grundriss.pdf",
                    here.root / ".vscode" / "settings.json", here.archives_dir / "older.zip",
                    here.generated_dir / "calc" / "__pycache__" / "x.pyc"):
@@ -231,6 +232,27 @@ def test_an_archive_of_one_document_holds_that_document_and_what_the_three_share
             assert name not in names, f"{name} reached the CU's archive"
         manifest = json.loads(zipfile.ZipFile(archive).read("archive-info.json"))
         assert manifest["document"] == "cu" and manifest["detail"] == "--input level=2" and manifest["project"] == {"name": "Drei"}, manifest
+
+
+def test_an_archive_of_a_project_laid_out_by_folders_never_takes_the_archives_in():
+    """Issue #64: 000-Woodcore/ holds the export and the engine, and the sources and the archives beside them. The archive of a document takes the export once, the sources once, the configuration of 000-Typst-Config/, the engineer's domains and the positions -- and never 000-Woodcore/archives/, which taken in would carry every earlier archive in the next one (spec 2026-10-15 ARCH-RISK-A01)."""
+    import documents
+    here = _three("archive_folders", documents.layout_for("fr"))
+    _touch(here.formulas_dir / "mine.typ")
+    _touch(here.formulas_dir / "archives" / "old-mine.typ")
+    _touch(here.domain_dir("snow-load") / "neige.typ")
+    with project.using(here):
+        here.document_pdf("cu").write_bytes(b"%PDF-1.4 cu\n")
+        archive = archive_export.run("woodcore-cli", "", mode="cu")
+        names = zipfile.ZipFile(archive).namelist()
+    assert len(names) == len(set(names)), "a file twice in one archive"
+    names = set(names)
+    for name in ("000-Typst-Config/config.typ", "000-Typst-Config/commands.typ", "000-Typst-Config/Template/form.json",
+                 "000-Woodcore/data/calculations.json", "000-Woodcore/lib/calc-engine.typ", "000-Woodcore/sources/connectors/SD-1.json",
+                 "Positions/positions.json", "Domains/mine.typ", "Variable-loads/Snow/neige.typ"):
+        assert name in names, f"{name} is not in the archive"
+    assert not any(name.startswith("000-Woodcore/archives/") for name in names), "the archives were archived"
+    assert "Domains/archives/old-mine.typ" not in names and "000-Woodcore/out/report-1.pdf" not in names
 
 
 def test_each_document_is_archived_apart_and_two_in_one_minute_do_not_overwrite_each_other():

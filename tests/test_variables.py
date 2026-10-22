@@ -46,7 +46,7 @@ _WINDOW = {}
 
 def _engine_state(name):
     """`state("<name>", <default>)` as `lib/calc-engine.typ` declares it, the default read by balancing its parentheses -- a regular expression cannot, the default being `(stack: ("",), domains: (:))`."""
-    source = (ROOT / "lib" / "calc-engine.typ").read_text(encoding="utf-8")
+    source = conftest.engine_source()
     opening = source.index(f'state("{name}", ') + len(f'state("{name}", ')
     depth, end = 0, None
     for index in range(opening, len(source)):
@@ -171,7 +171,7 @@ def test_a_report_that_does_not_compile_is_a_coded_refusal():
 
 def test_the_attachment_name_is_the_engine_own():
     """`lib/calc-engine.typ` attaches under this name and this module reads it back by it; a drift would not fail, it would leave the window quietly compiling on every opening for want of finding it."""
-    source = (ROOT / "lib" / "calc-engine.typ").read_text(encoding="utf-8")
+    source = conftest.engine_source()
     declared = re.search(r'#let variables-attachment = "([^"]+)"', source)
     assert declared, "lib/calc-engine.typ no longer declares variables-attachment"
     assert model.ATTACHMENT == declared.group(1), (model.ATTACHMENT, declared.group(1))
@@ -324,7 +324,8 @@ def test_a_reading_carries_no_wall_clock_value():
 
 
 def test_a_project_with_no_report_is_refused_by_name():
-    here = conftest.project_copy("variables-no-report")     # project_copy copies no report
+    here = conftest.project_copy("variables-no-report")
+    here.report_typ.unlink()     # project_copy copies each document's entry file since issue #90: the report taken away
     try:
         model.read(here)
     except model.VariablesError as exc:
@@ -396,7 +397,7 @@ def test_the_cache_round_trips_and_says_whether_it_still_answers():
         assert back is not None and back.count == 1
         var = next(back.variables())
         assert (var.key, var.value, var.unit, var.symbol) == ("R_d", 2.655, "kN", "R_d")
-        assert var.citation == "SIA 265 §6.2.1.1"
+        assert var.citation == "SIA 265 6.2.1.1"
         assert model.is_current(back, here)
         # and it stops answering the moment the report moves under it
         sections = sorted((here.document_dir("rs") / "Sections").glob("*.typ"))
@@ -417,10 +418,10 @@ def test_a_cache_of_another_shape_is_ignored_rather_than_read_wrongly():
 
 
 def test_a_citation_is_set_as_the_report_sets_one():
-    """A clause takes its §, a table and an annex do not -- `norm-text`'s own rule (§10)."""
+    """A clause, a table and an annex are set after the norm with no § (spec 2026-10-21-commandes-typst-refonte, UI-001) -- `norm-text`'s own rule (§10)."""
     def citation(norm, ref):
         return model.Variable(key="k", domain="", value=1, unit="", symbol="k", norm=norm, norm_ref=ref).citation
-    assert citation("SIA 265", "4.2.1") == "SIA 265 §4.2.1"
+    assert citation("SIA 265", "4.2.1") == "SIA 265 4.2.1"
     assert citation("SIA 265", "Tabelle 8") == "SIA 265 Tabelle 8"
     assert citation("SIA 261", "Anhang D") == "SIA 261 Anhang D"
     assert citation("bauforumstahl", "") == "bauforumstahl"
@@ -435,10 +436,8 @@ def test_domain_kind_reads_only_what_is_a_contract():
     assert model.domain_kind("T001") == "named"
     assert model.domain_kind("VU-MP-1") == "named"
     assert model.domain_kind("S10 - 0.55 kN Ende") == "named"
-    # the fragment is the engine's own, not a word chosen here: lib/summary.typ finds every check by it
+    # the fragment a member check published its values under until the spec 2026-10-15 (D-14): a domain of a report written before is still read as a check's
     assert model.CHECK_MARK in "S001-verify-bending"
-    summary = (ROOT / "lib" / "summary.typ").read_text(encoding="utf-8")
-    assert model.CHECK_MARK in summary, "lib/summary.typ no longer names -verify-: the contract moved"
 
 
 def test_the_units_of_a_reading_are_ordered_commonest_first():
@@ -451,10 +450,8 @@ def test_the_units_of_a_reading_are_ordered_commonest_first():
 # ---------------------------------------------------------------- the calls the tab copies
 
 def test_the_calls_are_spelled_by_build_reference_alone():
-    assert ref.call_val("R_d") == '#val("R_d")'
-    assert ref.call_val("M", domain="S10 - 0.55 kN Ende") == '#val("M", domain: "S10 - 0.55 kN Ende")'
-    assert ref.call_val("A", domain="T001", type_="expression") == '#val("A", domain: "T001", type: "expression")'
     assert ref.call_var_registry("M", "S10 - 0.55 kN Ende") == '#var("M", domain: "S10 - 0.55 kN Ende")'
+    assert ref.call_var_domain("snow-load", "SL", "s_k") == '#var("s_k", domain: ("snow-load", "SL"))'
     assert ref.call_find("T001") == '#find(object: "variable", domain: "T001")'
     assert ref.call_find() == '#find(object: "variable")'
     assert ref.call_find("T001", "name") == '#find(object: "variable", domain: "T001", type: "name")'
@@ -698,31 +695,26 @@ def test_the_detail_carries_what_the_loads_tab_showed():
 
 
 def test_the_export_offers_the_calls_the_loads_tab_offered():
-    """REQ-007: a variable of the export -- val, var, show-input, var-of, value-of --; a case -- show-calc, its checks, the loop over its calculation's cases (D-013) and the two load summaries --; a category of Tabelle 8, show-live-load as well."""
+    """REQ-007, in the forms of the spec 2026-10-21-commandes-typst-refonte: a variable of the export -- `#var`, read live (REQ-009) --; a case -- its file included, the loop over its calculation's cases (REQ-017, UI-002) and the two load tables (Q-009) --; a polar moment its file and its loop, no load table."""
     tab = _tab()
     export = _real_export()
     _fill(tab, _sample(), export)
     try:
         tab.select_key(_export_key("snow-load", "SL", "h_0"))
-        assert [e.key for e in tab.display_entries()] == ["val", "var", "input", "var-of", "value-of"]
-        calls = _calls(tab)
-        assert ref.call_var_of("snow-load", "SL", "h_0") in calls
-        assert ref.call_value_of("snow-load", "SL", "h_0") in calls
-        assert '#show-input("snow-load", "SL", "h_0")' in calls
+        assert [e.key for e in tab.display_entries()] == ["var"]
+        assert ref.call_var_domain("snow-load", "SL", "h_0") in _calls(tab)
         snow = next(d for d in export.domains if d.address == ("snow-load", "SL"))
         tab.select_key(("export", snow.name, None))
         keys = [e.key for e in tab.display_entries()]
-        assert keys[0] == "calc" and "loop" in keys and "summary" in keys and "line-summary" in keys, keys
-        assert [k for k in keys if k.startswith("check:")] == [f"check:{name}" for name in snow.checks]
-        assert ref.call_instance_loop("snow-load") in _calls(tab)
+        assert keys[0] == "file" and "loop" in keys and "summary" in keys and "line-summary" in keys, keys
+        calls = _calls(tab)
+        assert ref.call_include_domain("snow-load", "SL") in calls and ref.call_domain_loop("snow-load") in calls, calls
         assert tab.address(tab.selected_key()) == ("snow-load", "SL")
-        tab.select_key(_export_key("live-load", "A1"))
-        assert "live" in [e.key for e in tab.display_entries()]
-        # a polar moment is a calculation too, with no load summary
+        # a polar moment is a calculation too, with no load table
         connection = next(d for d in export.domains if d.calculation == "connection")
         tab.select_key(("export", connection.name, None))
         keys = [e.key for e in tab.display_entries()]
-        assert "calc" in keys and "summary" not in keys, keys
+        assert "file" in keys and "summary" not in keys, keys
     finally:
         _fill(tab, _sample())
 
@@ -788,12 +780,10 @@ def test_the_tab_offers_no_var_call_for_the_report_own_domain():
     _fill(tab, _sample())
     tab.select_key(_report("", "R_d"))
     calls = _calls(tab)
-    assert '#val("R_d")' in calls
     assert not [c for c in calls if c.startswith("#var(")], calls
     tab.select_key(_report("T001", "A"))
     calls = _calls(tab)
     assert '#var("A", domain: "T001")' in calls, calls
-    assert '#val("A", domain: "T001")' in calls
     assert ref.import_line() in calls
     assert tab.address(tab.selected_key()) is None
 

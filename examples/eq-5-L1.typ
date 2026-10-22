@@ -8,5 +8,6 @@
 #report-level.update(1)
 #number-digits.update(3)
 
-#var("g_k", 1.2, "kN/m²", level: 0)
-#eq("G_1_Ed", "G_(1,Ed)", `1.35 * g_k`, unit: "kN/m²")
+#var("M_d", 4.2, "kNm", level: 0)
+#eq("M_N", `M_d`, unit: "Nmm")
+#eq("q_d", `M_d / (100 "mm")`, as-unit: "kN/m")

@@ -5,7 +5,7 @@
   "type": "object",
   "required": ["schema_version", "sources", "excerpts"],
   "properties": {
-    "schema_version": {"type": "string", "const": "1.0", "description": "-- pinned."},
+    "schema_version": {"type": "string", "enum": ["1.0", "1.1"], "description": "-- 1.0, or 1.1 where the PDFs of the excerpts and the annexes are named from the Typst root (`/Appendix/Exports/E01.pdf`), written by a project laid out by folders (issue #64, D-19): an export written at another version is refused rather than read as this one."},
     "sources": {
       "type": "object",
       "description": "Keyed by id, in file-name order -- the order the annexes are lettered A, B, C in.",

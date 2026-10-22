@@ -2,7 +2,7 @@
 
 The engineer's request of 08.10.2026: in the left pane, under «Actions», two sections -- **Actions permanentes** (Poids propre, Surcharge) and **Actions variables** (Charge utile, Neige, Vent, Séisme) -- whose tabs «sont vides pour l'instant». The two sections are sub-titles of the group (`woodcore_gui.NAV_SECTIONS`, `chrome.SideNav`'s «section» row); «Combinaisons de charges» stays below them, after a thin line (decision D-005); «Charges» stood there too until v0.117, when issue 13 retired it into «Variables», which lists every one of its values.
 
-**What a tab says is `woodcore_gui.FutureTab`'s**: its name, «Implémentation future.» and what it will hold. Nothing is calculated here.
+**What a tab says is `reserved_tab.ReservedTab`'s** (`reserved_tab.future`; `woodcore_gui.FutureTab` until v0.120): its name, «Implémentation future.» and what it will hold. Nothing is calculated here.
 
 **The names come from the norms, not from memory** (docs/architecture/principles.md): SIA 260:2013 writes «Actions permanentes» and «Actions variables» in French, «Ständige Einwirkungen» and «Veränderliche Einwirkungen» in German, `Permanent actions` and `Variable actions` in English; SIA 260 and 261 «Charges utiles», «Séisme» and «Neige» / «Nutzlasten», «Erdbeben» and «Schnee» (SIA 261:2020 §«Eigenlast» for the self-weight, «Auflast» for what the glossary calls «Poids propre non-structural» -- `document.superimposed`, whose English words this follows). «Surcharge» is the engineer's own word for the permanent load that is not the structure's (D-013).
 

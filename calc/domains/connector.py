@@ -16,6 +16,7 @@ import re
 from pathlib import Path
 
 import validation
+from domains._common import fail as _fail  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import dowel
 from domains import links  # a field that follows a variable of the export (spec 2026-10-11-variables-liees-champs-et-textes)
 from norms import sia263, sia265, sn_en_14592
@@ -35,6 +36,10 @@ SOURCE_SCHEMA_VERSIONS = (SOURCE_SCHEMA_VERSION, LINKED_SCHEMA_VERSION, PLATE_SC
 PLATE_FIELDS = ("t", "e1", "e2", "d0")
 EXPORT_SCHEMA_VERSION = "3.0"
 LINKED_EXPORT_VERSION = "3.1"
+# 3.2 is 3.1 with a connector's drawings named from the Typst root (`/Connectors/Exports/Figures/S01-section.svg`): written by a project laid out by folders, where they lie in Connectors/Exports/Figures/ (issue #64, D-10)
+ROOTED_EXPORT_VERSION = "3.2"
+# 3.3 is 3.2 with no level on a line, lib/line-levels.json saying it (spec 2026-10-20-indices-et-niveaux, UI-002): written by every export from v0.120, links and rooted figures admitted
+LEVELS_EXPORT_VERSION = "3.3"
 
 # The fields a variable of the export may fill (REQ-009, issue #42), with the unit each is written in: the connector's own -- the diameter, the dowel's f_u,k, the plate's four lengths (spec 2026-10-12-audit-issues-47-48-49) -- and each member's -- its angle, its thickness (a steel plate's b where the joint is Stahl-Holz), its spacing, its slot and its t₁/t₂. The kinds, the grades, the moisture class, the counts are lists or whole numbers, and take none.
 LINKABLE = {
@@ -42,7 +47,7 @@ LINKABLE = {
     "members": {"alpha": "°", "t": "mm", "a_1": "mm", "plates.slot": "mm", "plates.ratio": ""},
 }
 
-# What calc/tools/migrate_to_schemas.py converts, and this module deliberately does not: a source at one of these carries its own drawing, and turning that drawing into a schema means writing a second file, which a reader has no business doing silently.
+# What Woodcore 0.119 and earlier converted (calc/tools/migrate_to_schemas.py, retired in v0.120, D-21), and this module deliberately does not: a source at one of these carries its own drawing, and turning that drawing into a schema means writing a second file, which a reader has no business doing silently.
 LEGACY_SOURCE_VERSIONS = ("1.0", "1.1")
 
 # The file data/connectors.json is written to.
@@ -73,7 +78,6 @@ MODULES = {dowel.TYPE: dowel}
 # Every assembly the interface may offer, and whether SIA 265 gives it a k_beta. This was `data_assembly`.
 ASSEMBLIES = dict(dowel.ASSEMBLIES)
 UNCOVERED_ASSEMBLIES = dict(dowel.UNCOVERED_ASSEMBLIES)
-ALL_ASSEMBLIES = tuple(list(ASSEMBLIES) + list(UNCOVERED_ASSEMBLIES))
 
 ROLES = ("timber", "steel")
 PLATE_ARRANGEMENTS = ("schlitzblech", "laschen")
@@ -86,15 +90,9 @@ TYPE_BLOCK = {"Stabdübel": "dowel"}
 # Two fasteners closer than this (mm) are one point typed twice.
 SAME_POINT = 1e-6
 
-# Where a connector's drawings are written, under data/.
-FIGURE_DIR = "connectors"
 
 # The languages a figure is drawn in. The **pattern** carries no legend, only data and, where a fastener is drawn larger than its d, one translated note; it is drawn once per language all the same, as a connection's figure is (docs/typst/language.md §4bis). The **section** carries only symbols (t_1, t_2, A, B, Ø) and numbers, so one file serves all three and the report falls back to it.
 FIGURE_LANGUAGES = ("de", "fr", "en")
-
-
-def _fail(where, message):
-    raise validation.ValidationError("%s: %s" % (where, message))
 
 
 def _quantity(entry, where, label, required=True):
@@ -176,7 +174,7 @@ def upgrade_source(source):
         plates = member.get("plates")
         if isinstance(plates, dict):
             plates.pop("thickness", None)   # never read: the plate's bearing reads the connector's `plate.t` (schema 2.2)
-    # 1.1 and not 2.0: a 1.0 file still carries its own drawing, and check_source sends a 1.1 to migrate_to_schemas.py by name. Relabelled 2.0, a real 1.0 slipped past that refusal and fell on «missing required field 'label'» (periodic audit 260916, AUD-7-120).
+    # 1.1 and not 2.0: a 1.0 file still carries its own drawing, and check_source refuses a 1.1 by name, sending it to Woodcore 0.119 or earlier. Relabelled 2.0, a real 1.0 slipped past that refusal and fell on «missing required field 'label'» (periodic audit 260916, AUD-7-120).
     source["schema_version"] = "1.1"
     return source
 
@@ -188,7 +186,7 @@ def check_source(source, where):
     # be buried under whichever of them the validator happened to reach first.
     version = source.get("schema_version") if isinstance(source, dict) else None
     if version in LEGACY_SOURCE_VERSIONS:
-        _fail(where, "schema_version is %r -- it carries its own drawing; run `python calc/tools/migrate_to_schemas.py --write` once, which writes that drawing out as a schema under details/ and leaves this file naming it" % version)
+        _fail(where, "schema_version is %r -- it carries its own drawing; a file of before v0.74, which this Woodcore no longer reads (spec 2026-10-19-base-saine-nettoyage, D-21): open the project once in Woodcore 0.119 or earlier, whose calc/tools/migrate_to_schemas.py writes that drawing out as a schema under details/" % version)
     validation.validate_structure(source, "connector-source")
     if version not in SOURCE_SCHEMA_VERSIONS:
         _fail(where, "schema_version is %r -- expected %s"
@@ -863,8 +861,8 @@ def preview(source, positions, detail=None):
 
 # --- the export ----------------------------------------------------------------
 
-def figures(source, detail=None, positions=None, record=None):
-    """A connector's drawings: {kind: {language: file name}} and {file name: svg}. `detail` is the schema source it is drawn on.
+def figures(source, detail=None, positions=None, record=None, place=None):
+    """A connector's drawings: {kind: {language: file name}} and {file name: svg}. `detail` is the schema source it is drawn on; `place` (an engine.Figures) names the files -- from the Typst root in a project laid out by folders, under data/ otherwise.
 
     The pattern is drawn per language because the drawing sizes its frame from its own words; the section is drawn once, carrying nothing but symbols and numbers.
 
@@ -873,9 +871,11 @@ def figures(source, detail=None, positions=None, record=None):
     ⚠️ `connector_svg` is imported here and not at the top of the file. It reads `schema_svg`, which reads `schema`, which reads this module for `TYPES` -- a cycle that breaks on two of five import orders when the edge is at module level, and none when it is here. The module already takes `dowel` the same way round, for the same kind of reason.
     """
     from domains import connector_svg
+    import engine
+    place = place or engine.Figures(None, "connector")
     cid = source["id"]
     names, files = {}, {}
-    section_name = "%s/%s-section.svg" % (FIGURE_DIR, cid)
+    section_name = place.name("%s-section.svg" % cid)
     files[section_name] = connector_svg.section_of(source)
     names["section"] = {lang: section_name for lang in FIGURE_LANGUAGES}
     if record is not None:
@@ -883,7 +883,7 @@ def figures(source, detail=None, positions=None, record=None):
         record["section_scaled"] = connector_svg.section_state_of(source) or ""
     names["pattern"] = {}
     for lang in FIGURE_LANGUAGES:
-        name = "%s/%s-pattern-%s.svg" % (FIGURE_DIR, cid, lang)
+        name = place.name("%s-pattern-%s.svg" % (cid, lang))
         files[name] = connector_svg.pattern_of(source, detail, lang=lang, positions=positions)
         names["pattern"][lang] = name
     for table in (record or {}).get("tables", []):
@@ -892,7 +892,7 @@ def figures(source, detail=None, positions=None, record=None):
             continue
         table["figures"] = []
         for curve in curves:
-            name = "%s/%s-kbeta-%d.svg" % (FIGURE_DIR, cid, curve["index"])
+            name = place.name("%s-kbeta-%d.svg" % (cid, curve["index"]))
             files[name] = connector_svg.k_beta_curve(curve)
             table["figures"].append({"file": name, "index": curve["index"], "label": curve["label"], "role": curve["role"]})
     return names, files
@@ -929,7 +929,7 @@ def stamp_version(source):
     return source
 
 
-def prepare(source_dir, positions=None, schemas=None, values=None):
+def prepare(source_dir, positions=None, schemas=None, values=None, place=None):
     """Every connector under `source_dir`, checked and built against the detail schemas `schemas` ({id: source}), with the warnings they earned. Nothing is written. A field that follows a variable takes the value `values` (`links.index`) give it now -- a load's, a script's, a «Formule» domain's, never a joint's (ARCH-005) --, one that cannot be read its last value with a warning; the record then carries `links`, where each came from (REQ-012)."""
     positions = positions or {}
     schemas = schemas if schemas is not None else {}
@@ -952,7 +952,7 @@ def prepare(source_dir, positions=None, schemas=None, values=None):
             record["links"] = provenance
         warnings.extend(schema_warnings(source, detail, schemas, "connectors/%s.json" % cid))
         try:
-            record["figures"], drawings = figures(source, detail, positions, record)
+            record["figures"], drawings = figures(source, detail, positions, record, place)
             images.update(drawings)
         except Exception as exc:  # broad: a drawing that fails must not lose the calculation
             record["figures"] = {}
@@ -967,27 +967,18 @@ def prepare(source_dir, positions=None, schemas=None, values=None):
             warnings.append("connectors/%s.json: id %r does not start with %r, the symbol of a %s."
                             % (cid, cid, symbol, source["type"]))
 
-    linked = any("links" in record for record in connectors.values())
-    data = {"schema_version": LINKED_EXPORT_VERSION if linked else EXPORT_SCHEMA_VERSION, "connectors": connectors}
+    data = {"schema_version": LEVELS_EXPORT_VERSION, "connectors": connectors}   # 3.3 holds what 3.1 (links) and 3.2 (rooted figures) hold
     validation.validate_structure(data, "connectors")
     validation.validate_connectors_business(data)
     return data, images, warnings
 
 
 def write(data, images, data_dir):
-    """data/connectors.json and the drawings under data/connectors/, with the files of a connector that is gone swept away -- connection.write's own arrangement."""
+    """data/connectors.json and the drawings under the names the records give them -- Connectors/Exports/Figures/ in a project laid out by folders, data/connectors/ otherwise (engine.Figures) --, those of a connector that is gone removed: only what the last export wrote, never a file of the engineer's."""
     import engine
-    engine.write_json(Path(data_dir) / EXPORT_FILE, data)
-    directory = Path(data_dir) / FIGURE_DIR
-    if images:
-        directory.mkdir(parents=True, exist_ok=True)
-    for name, svg in images.items():
-        (Path(data_dir) / name).write_text(svg, encoding="utf-8")
-    if directory.is_dir():
-        wanted = {Path(name).name for name in images}
-        for path in directory.glob("*.svg"):
-            if path.name not in wanted:
-                path.unlink()
+    data_dir = Path(data_dir)
+    engine.figures(data_dir, "connector").write(images, engine.previous_json(data_dir / EXPORT_FILE))
+    engine.write_json(data_dir / EXPORT_FILE, data)
 
 
 def export(source_dir, data_dir, positions=None, schema_dir=None, schemas=None, values=None):
@@ -1000,6 +991,26 @@ def export(source_dir, data_dir, positions=None, schema_dir=None, schemas=None, 
     if values is None:
         import variable_sources   # the reader of data/'s variables, which imports this module: imported here
         values = variable_sources.known_values(Path(data_dir))
-    data, images, warnings = prepare(source_dir, positions, schemas, values)
+    import engine
+    data, images, warnings = prepare(source_dir, positions, schemas, values, place=engine.figures(data_dir, "connector"))
     write(data, images, data_dir)
+    # a connector of the project open is written out when it is first saved, as a check is (spec 2026-10-21-commandes-typst-refonte, REQ-017)
+    import project
+    try:
+        here = project.current()
+    except project.ProjectError:
+        here = None
+    if here is not None and Path(data_dir) == here.data_dir:
+        from domains import formula_domain, unfold
+        if unfold.unfold_domains(here, "connector", data):
+            formula_domain.export(here)
     return data, warnings
+
+
+def references(record):
+    """What an exported connector names, [(kind, id, field)]: its schema and the positions its members follow -- its own `position` is its id, no reference (domains/dependency_graph.py, spec 2026-10-21-graphe-dependances, ARCH-RISK-1103)."""
+    out = [("schema", record["schema"], "schema")] if record.get("schema") else []
+    for i, member in enumerate(record.get("members") or ()):
+        if member.get("position_id") or member.get("position"):
+            out.append(("position", member.get("position_id") or member.get("position"), "members[%d].position" % i))
+    return out

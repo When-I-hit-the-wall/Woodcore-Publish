@@ -1,6 +1,6 @@
 """The «Structure du document» tab (calc/tools/structure_tab.py, structure_tree.py, import_dialog.py; the engineer's rework of 01.10.2026, work package R2-D1): **the one tab a document is written in**, in the convention d'utilisation, the base de projet and the report alike.
 
-What the tree, the panes, the model and the snippet each do has its own module's tests (tests/test_structure.py, test_object_panes.py, test_structure_preview.py, test_pdf_pane.py, test_doc_import.py, test_sync.py, test_typst_objects.py). What is held here is what the tab ties together and none of them can see alone: that the tree shows **chapters › sections › objects** with an icon, a box and a mark each; that choosing a row shows its pane and the page of **that row only**; that a pane writes **between the object's tags and nowhere else** -- the bytes outside unchanged, an object written by hand asked about first, a file changed under a pane refused -- and does not reload the pane it came from; that a drop on the tree is a move of the model and a refusal is said in the banner, translated by its code, never in a modal; that the import dialog's answer arrives at the bottom of the tree; that a file edited elsewhere -- VS Code -- is read again, and the files the tab wrote itself are not; that a project held read-only writes nothing; that what is shared with another document shows where the other copy changed (orange), where both did (red) and where the engineer chose to ignore it (grey), and is imported between the tags only; and that the project's layout template («template de forme», which replaced the style on 06.10.2026) switched from its properties makes the tab compile its page again -- the dialog's own checks being tests/test_project_dialog.py's --, and that a style is still chosen at `woodcore-cli new --style`. The switch of a document's content template («Changer de template de fond…») is tests/test_content_switch_dialog.py's.
+What the tree, the panes, the model and the snippet each do has its own module's tests (tests/test_structure.py, test_object_panes.py, test_structure_preview.py, test_pdf_pane.py, test_doc_import.py, test_sync.py, test_typst_objects.py). What is held here is what the tab ties together and none of them can see alone: that the tree shows **chapters › sections › objects** with an icon, a box and a mark each; that choosing a row shows its pane and the page of **that row only**; that a pane writes **between the object's tags and nowhere else** -- the bytes outside unchanged, an object written by hand asked about first, a file changed under a pane refused -- and does not reload the pane it came from; that a drop on the tree is a move of the model and a refusal is said in the banner, translated by its code, never in a modal; that the import dialog's answer arrives at the bottom of the tree; that a file edited elsewhere -- VS Code -- is read again, and the files the tab wrote itself are not; that a project held read-only writes nothing; that what is shared with another document shows where the other copy changed (orange), where both did (red) and where the engineer chose to ignore it (grey), and is imported between the tags only; and that the project's layout template («template de forme», which replaced the style on 06.10.2026) applied from the «Projet» tab makes the tab compile its page again -- the tab's own checks being tests/test_project_tab.py's --, and that a style is still chosen at `woodcore-cli new --style`.
 
 **No Typst code is ever shown**: the tab has no code editor and no highlighter, which one check holds.
 
@@ -59,7 +59,7 @@ def _copy(name):
     return project.Project.load(target / "Halle.woodcore")
 
 
-ASKS = ("ask_section", "ask_group", "ask_rename", "ask_import", "ask_confirm", "ask_choice", "ask_template", "ask_share", "ask_switch", "tell")
+ASKS = ("ask_section", "ask_group", "ask_rename", "ask_import", "ask_confirm", "ask_choice", "ask_template", "ask_share", "tell")
 
 
 def _unexpected(name):
@@ -196,8 +196,8 @@ def _body(text, object_id):
 
 
 def _rows(body):
-    """The rows of a table's body: its lines of four spaces and a bracket that are no column."""
-    return len(re.findall(r"^    \((?!id:)", body, re.M))
+    """The rows of a raw table's body (calc/typst_raw_table.py): its lines of four spaces and a cell's bracket."""
+    return len(re.findall(r"^    \[", body, re.M))
 
 
 def _object_ids(text):
@@ -229,20 +229,23 @@ def _banner(tab):
 
 # --- the tab in the window ----------------------------------------------------------------------
 
-def test_the_tab_is_the_only_document_tab_and_first_in_the_navigation_and_the_sections_tab_is_gone():
+def test_the_tab_is_the_only_document_tab_and_first_after_projet_in_the_navigation_and_the_sections_tab_is_gone():
+    """Second in the navigation since issue #87, under the «Projet» tab, the one the window opens on and every change of document brings forward."""
     _qt()
     import chrome
+    import project_tab
     import structure_tab
     import woodcore_gui
-    assert woodcore_gui.TABS[0][0] == "tab_structure" and woodcore_gui.TABS[0][1] is structure_tab.StructureTab
+    assert woodcore_gui.TABS[0][0] == "tab_project" and woodcore_gui.TABS[0][1] is project_tab.ProjectTab
+    assert woodcore_gui.TABS[1][0] == "tab_structure" and woodcore_gui.TABS[1][1] is structure_tab.StructureTab
     title, members = woodcore_gui.NAV_GROUPS[0]
-    assert title == "nav_document_group" and members == ("tab_structure",), woodcore_gui.NAV_GROUPS[0]
+    assert title == "nav_document_group" and members == ("tab_project", "tab_structure"), woodcore_gui.NAV_GROUPS[0]
     keys = [key for key, _factory in woodcore_gui.TABS]
     assert "tab_sections" not in keys
     named = set(keys) | {m for _t, group in woodcore_gui.NAV_GROUPS for m in group}
     for mode, tabs in woodcore_gui.MODE_TABS.items():
         named |= set(tabs)
-        assert tabs[0] == "tab_structure", mode
+        assert tabs[:2] == ("tab_project", "tab_structure"), mode
     named |= set(woodcore_gui.MODE_BOUND)
     assert "tab_sections" not in named, "a module nothing builds is named in the navigation or a document's modules"
     assert "tab_structure" in chrome.ICONS and "tab_sections" not in chrome.ICONS and "badge_link" in chrome.ICONS
@@ -262,7 +265,7 @@ def test_the_tab_is_the_only_document_tab_and_first_in_the_navigation_and_the_se
         assert getattr(defined[expected], "__wrapped__", None) is not None, f"{expected} is not guarded"
 
 
-def test_the_window_shows_the_tab_first_for_each_document_and_writes_what_a_pane_held_before_another_document_is_shown():
+def test_the_window_shows_the_tab_second_for_each_document_and_writes_what_a_pane_held_before_another_document_is_shown():
     _qt()
     import structure
     import structure_tab
@@ -279,13 +282,15 @@ def test_the_window_shows_the_tab_first_for_each_document_and_writes_what_a_pane
             for mode in project.MODES:
                 select.setCurrentIndex(select.findData(mode))
                 keys = [woodcore_gui.TABS[index][0] for index in window.nav.order()]
-                assert keys[0] == "tab_structure" and "tab_sections" not in keys, (mode, keys)
+                assert keys[:2] == ["tab_project", "tab_structure"] and "tab_sections" not in keys, (mode, keys)
+                assert window.tab_widget.currentIndex() == window.project_index(), "another document did not bring «Projet» forward"
                 tab = next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab))
                 assert tab.mode() == mode
                 assert tab.tree.ids() == [n.id for n in structure.flatten(structure.tree(here, mode))] and tab.tree.ids(), mode
                 assert window.t("st_heading", document=tab.document_name()) == tab.title.text()
             select.setCurrentIndex(select.findData("cu"))
             tab = next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab))
+            window.tab_widget.setCurrentWidget(tab)
             node = next(n for n in structure.flatten(tab.nodes) if n.kind == "object" and n.object_type == "text" and n.parent == "purpose")
             _choose(tab, node.id)
             pane = tab.host.pane()
@@ -324,7 +329,7 @@ def test_the_tree_shows_chapters_sections_and_objects_each_with_an_icon_a_box_an
         kinds = {n.kind for n in flat}
         assert {"group", "file", "object"} <= kinds, kinds
         types = {n.object_type for n in flat if n.kind == "object"}
-        assert {"heading", "text", "doc-table", "live-load-table", "doc-choice", "doc-checklist"} <= types, types
+        assert {"heading", "text", "table"} <= types, types   # the parametric objects of a document written in raw Typst since the spec 2026-10-21-commandes-typst-refonte (REQ-019)
         group = next(n for n in flat if n.kind == "group")
         assert tab.tree.row(group.id).parent() is None and tab.tree.row(group.id).font(0).bold()
         for node in flat:
@@ -424,7 +429,7 @@ def test_no_typst_code_is_ever_shown_and_the_tab_has_no_code_editor():
             _choose(tab, node.id)
             for edit in tab.findChildren(QPlainTextEdit) + tab.findChildren(QTextEdit):
                 assert not edit.document().findChildren(QSyntaxHighlighter), f"{node.id}: a highlighted editor ({type(edit).__name__})"
-        assert len(seen) >= 6, seen
+        assert len(seen) >= 3, seen
         source = conftest.module_source(TOOLS / "structure_tab.py") + (TOOLS / "structure_tree.py").read_text(encoding="utf-8") + (TOOLS / "import_dialog.py").read_text(encoding="utf-8")
         assert "TypstHighlighter" not in source and "CodeField" not in source and "typst_html" not in source
         texts = " ".join(label.text() for label in tab.findChildren(QLabel))
@@ -527,7 +532,7 @@ def test_a_table_chosen_loads_its_pane_and_a_row_added_is_written_between_its_ta
         rows_before = _rows(_body(before, "intended-use-table"))
         assert rows_before >= 3
         _choose(tab, "intended-use/intended-use-table")
-        assert tab.host.kind == "doc-table" and tab.subject["kind"] == "doc-table" and tab.subject["object"] == "intended-use-table"
+        assert tab.host.kind == "table" and tab.subject["kind"] == "table" and tab.subject["object"] == "intended-use-table"
         pane = tab.host.pane()
         assert pane.row_list.count() == rows_before
         row, loads = tab.tree.row("intended-use/intended-use-table"), []
@@ -545,19 +550,6 @@ def test_a_table_chosen_loads_its_pane_and_a_row_added_is_written_between_its_ta
         # a second edit in a row is written against the first
         pane.add_row()
         assert _rows(_body(_text(path), "intended-use-table")) == rows_before + 2 and _outside(_text(path), "intended-use-table") == _outside(before, "intended-use-table")
-
-
-def test_the_live_load_table_has_its_own_pane_and_is_written_the_same_way():
-    with _open("structure_tab_live_loads") as (tab, app, here):
-        path = _section_path(here, "cu", "live-loads")
-        before = _text(path)
-        _choose(tab, "live-loads/live-loads-table")
-        assert tab.host.kind == "live-load-table"
-        pane = tab.host.pane()
-        pane.add_row()
-        after = _text(path)
-        assert after != before and _outside(after, "live-loads-table") == _outside(before, "live-loads-table")
-        assert "psi" not in _body(after, "live-loads-table").lower()
 
 
 def test_a_paragraph_and_a_heading_are_edited_in_place_and_the_tree_label_follows():
@@ -586,30 +578,32 @@ def test_a_paragraph_and_a_heading_are_edited_in_place_and_the_tree_label_follow
 
 
 def test_an_object_written_by_hand_asks_first_naming_what_is_lost_and_nothing_is_written_without_a_yes():
+    """A parametric object written otherwise than Woodcore writes it -- the list of the norms, the one left since the spec 2026-10-21-commandes-typst-refonte (REQ-019); a raw table is never rewritten but where it is edited -- is asked about before it is written."""
     import typst_objects
     with _open("structure_tab_hand") as (tab, app, here):
-        path = _section_path(here, "cu", "intended-use")
+        path = _section_path(here, "cu", "norms")
         text = _text(path)
-        hand = text.replace("rows: (", "rows: (\n    // a note written in VS Code", 1)
+        hand = text.replace('    "SIA 260",\n', '    "SIA 260", // a note written in VS Code\n', 1)
         path.write_bytes(hand.encode("utf-8"))
         tab.reload()
-        assert typst_objects.find(hand, "intended-use-table").state == "hand_edited"
-        assert "hand" in tab.tree.row("intended-use/intended-use-table").toolTip(0).lower() or app.t("st_tip_hand") in tab.tree.row("intended-use/intended-use-table").toolTip(0)
+        assert typst_objects.find(hand, "norms-selection").state == "hand_edited"
+        assert "hand" in tab.tree.row("norms/norms-selection").toolTip(0).lower() or app.t("st_tip_hand") in tab.tree.row("norms/norms-selection").toolTip(0)
+        keys = len(typst_objects.find(hand, "norms-selection").call.args["keys"])
         asked = []
-        _choose(tab, "intended-use/intended-use-table")
+        _choose(tab, "norms/norms-selection")
         pane = tab.host.pane()
         with _patched(tab, ask_confirm=lambda words: asked.append(words) or False):
-            pane.add_row()
-        assert len(asked) == 1 and "intended-use-table" in asked[0] and "a note written in VS Code" in asked[0], asked
+            pane.line_add.click()
+        assert len(asked) == 1 and "norms-selection" in asked[0] and "a note written in VS Code" in asked[0], asked
         assert _bytes(path) == hand.encode("utf-8"), "a no wrote something"
-        assert tab.host.pane().row_list.count() == _rows(_body(hand, "intended-use-table")), "what was typed is given up: the pane shows the file again"
+        assert len(tab.host.pane().current().keys) == keys, "what was typed is given up: the pane shows the file again"
         with _patched(tab, ask_confirm=lambda words: asked.append(words) or True):
-            tab.host.pane().add_row()
+            tab.host.pane().line_add.click()
             assert len(asked) == 2
             written = _text(path)
-            assert "a note written in VS Code" not in written and _rows(_body(written, "intended-use-table")) == _rows(_body(hand, "intended-use-table")) + 1
-            assert _outside(written, "intended-use-table") == _outside(hand, "intended-use-table")
-            tab.host.pane().add_row()
+            assert "a note written in VS Code" not in written and len(typst_objects.find(written, "norms-selection").call.args["keys"]) == keys + 1
+            assert _outside(written, "norms-selection") == _outside(hand, "norms-selection")
+            tab.host.pane().line_add.click()
             assert len(asked) == 2, "an object the engineer said yes to is asked about once"
         # an object that cannot be read at all says so in its own words
         found = type("Found", (), {"state": "unreadable", "id": "x"})()
@@ -1052,7 +1046,7 @@ def test_an_object_of_every_kind_is_added_after_the_one_chosen_between_blank_lin
     import typst_objects
     with _open("structure_tab_add_object") as (tab, app, here):
         path = _section_path(here, "cu", "purpose")
-        assert len(structure_tab.OBJECT_KINDS) >= 8, structure_tab.OBJECT_KINDS
+        assert len(structure_tab.OBJECT_KINDS) >= 4, structure_tab.OBJECT_KINDS
         _choose(tab, "introduction")
         assert not tab.buttons["add_object"].isEnabled() and tab.buttons["add_object"].toolTip() == app.t("st_off_none"), "a chapter holds no object"
         assert tab.write_add_object("text") is False and _banner(tab) == app.t("st_off_none")
@@ -1290,7 +1284,7 @@ def test_what_is_imported_arrives_at_the_bottom_of_the_tree_chosen_linked_or_as_
         with _patched(tab, ask_import=lambda: ("cu", [table], False)):
             tab.on_import()
         chosen = tab.tree.selected_ids()
-        assert len(chosen) == 1 and chosen[0].endswith("/intended-use-table") and tab.tree.node(chosen[0]).object_type == "doc-table", chosen
+        assert len(chosen) == 1 and chosen[0].endswith("/intended-use-table") and tab.tree.node(chosen[0]).object_type == "table", chosen
         assert _top_level(here, "bp")[-1] == chosen[0].split("/")[0]
         # a refusal -- a block this document already holds -- is said in the banner and writes nothing
         sections = {p.name: p.read_bytes() for p in (here.document_dir("bp") / "Sections").glob("*.typ")}
@@ -1877,7 +1871,7 @@ def test_an_edit_in_the_right_pane_of_a_shared_object_writes_this_copy_only_and_
         bp_before = _bytes(bp)
         cu = _section_path(here, "cu", "service-life")
         _choose(tab, "service-life/service-life-table")
-        assert tab.host.kind == "doc-table"
+        assert tab.host.kind == "table"
         tab.host.pane().add_row()
         assert _bytes(bp) == bp_before, "the edit was written into the other document's copy"
         assert _rows(_body(_text(cu), "service-life-table")) == _rows(_body(bp_before.decode("utf-8"), "service-life-table")) + 1
@@ -2033,27 +2027,13 @@ def test_a_project_laid_out_as_one_report_has_the_tab_on_its_report_and_writes_i
         entry.write_bytes(original)
 
 
-# --- the layout template of the project, from its properties, and a style at `woodcore-cli new` ---------------------------------
-
-def _accepting(form=None, **fields):
-    """ProjectDialog.exec replaced by one that sets what it is told and accepts, as the engineer's clicks do."""
-    from PySide6.QtWidgets import QDialog
-
-    def accept(self):
-        if form is not None:
-            self.form_combo.setCurrentIndex(self.form_combo.findData(form))
-        for key, value in fields.items():
-            self.fields[key].setText(value)
-        accept.dialogs.append(self)
-        return QDialog.DialogCode.Accepted
-    accept.dialogs = []
-    return accept
-
+# --- the layout template of the project, from the «Projet» tab, and a style at `woodcore-cli new` ---------------------------------
 
 def test_the_window_tells_its_tabs_when_the_layout_template_was_switched_and_the_tab_compiles_its_page_again():
+    """«Propriétés du projet» opens the «Projet» tab (issue #87); a form applied there (issue #88) tells every tab that shows a compiled page, a title page saved does not."""
     _qt()
     import forms
-    import home_page
+    import project_tab
     import structure_tab
     import woodcore_gui
     from PySide6.QtWidgets import QMessageBox
@@ -2064,16 +2044,20 @@ def test_the_window_tells_its_tabs_when_the_layout_template_was_switched_and_the
             window.lang = "fr"
             window.mode = "rs"
             window.rebuild()
+            window.tab_widget.setCurrentWidget(next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab)))
+            window.edit_properties()
+            assert window.tab_widget.currentIndex() == window.project_index(), "«Propriétés du projet» did not open the «Projet» tab"
             tab = next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab))
+            projet = next(t for t in window.tabs if isinstance(t, project_tab.ProjectTab))
             told = []
             with _patched(tab, on_properties_changed=lambda changed: told.append(changed)), \
                     _patched(QMessageBox, question=staticmethod(lambda *a, **k: QMessageBox.StandardButton.Yes)):
-                with _patched(home_page.ProjectDialog, exec=_accepting(author="L. Exempel")):
-                    window.edit_properties()
-                assert told == [False], told
-                with _patched(home_page.ProjectDialog, exec=_accepting(form="builtin:compact")):
-                    window.edit_properties()
-                assert len(told) == 2 and forms.current(here).ref == "builtin:compact", told
+                projet.fields["author"].setText("L. Exempel")
+                projet.mark_dirty()
+                assert projet.save() and project.current().detail("author") == "L. Exempel"
+                assert told == [], told
+                assert projet.write_apply_form("builtin:compact")
+                assert told == [True] and forms.current(here).ref == "builtin:compact", told
         finally:
             conftest.dispose(window)
     # the tab itself: a layout template switched under it -- Template/ and title.typ, a config.typ of the new format left as it is -- compiles its page again, a change of nothing else does not

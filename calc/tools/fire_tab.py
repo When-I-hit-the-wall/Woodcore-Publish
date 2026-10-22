@@ -63,12 +63,13 @@ class FireTab(FireTabSelectionMixin, FireTabFormMixin, FireTabBuildMixin, Drawin
     """
 
     KIND = "fire"
-    VIEW_KEY = "tab_fire"
+    KEY = "tab_fire"
+    GRAPH_KIND = "fire"   # issue #71
     STYLE_KIND = "fire"
     STYLE_PREFIX = "plan"
     ID_PREFIX = "B"
     # The base says the position plan's words; these are said of fire plans instead.
-    WORDS = {
+    WORD_MAP = {
         "plan_list": "fp_list",
         "plan_empty": "fp_empty",
         "plan_page_plan_created": "fp_page_plan_created",
@@ -233,7 +234,7 @@ class FireTab(FireTabSelectionMixin, FireTabFormMixin, FireTabBuildMixin, Drawin
         """The «Commande Typst» builder for `#show-fire-plan` (plan_command_builder's FireCommandOptions and fire_command_text)."""
         return plan_command_builder.CommandBuilder(lang=self.app.lang, mono_font=self.app.mono_font, copy=self.app.copy,
                                                    options_factory=plan_command_builder.FireCommandOptions, command_fn=plan_command_builder.fire_command_text,
-                                                   cache_key=self.VIEW_KEY)
+                                                   cache_key=self.KEY)
 
     def build_entries(self, v):
         """What the plan open holds, one list per kind: the surfaces, the walls with their fire resistance, the doors, and the escape routes' three marks (their length, the emergency exits, their width) in one. Each is kept in step with the canvas's selection, both ways (on_rows, sync_rows)."""
@@ -376,7 +377,7 @@ class FireTab(FireTabSelectionMixin, FireTabFormMixin, FireTabBuildMixin, Drawin
             self.sources_dir().mkdir(parents=True, exist_ok=True)
             if renaming:
                 (self.sources_dir() / f"{old}.json").unlink(missing_ok=True)
-            target.write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            engine.write_json(target, source)
         except OSError as exc:
             return fail(str(exc))
         if background and "sha256" in background and self.source.get("background"):

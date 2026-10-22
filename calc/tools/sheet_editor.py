@@ -496,13 +496,6 @@ class SheetEditor(QObject):
         """The line above a plan on or off: on, «Nom — description, étage (éch. 1:n)» from the plan (auto); off, none."""
         return self.edit(object_id, lambda m: m.set_title(to.AUTO if on else None))
 
-    def set_list_scope(self, object_id, scope, storey=None):
-        """Which positions a list shows: those of the sheet's plans, every one, or one storey's -- its numbering character `storey`."""
-        def change(m):
-            m.set_scope(scope)
-            m.set_storey(storey if scope == "storey" else None)
-        return self.edit(object_id, change)
-
     def set_highlight(self, object_id, text):
         found = [part.strip() for part in (text or "").split(",") if part.strip()]
         value = None if not found else found[0] if len(found) == 1 else found
@@ -516,6 +509,8 @@ class SheetEditor(QObject):
                 m.set_dimensions(on)
             elif argument == "lengths":
                 m.set_lengths(on)
+            elif argument == "centres":
+                m.set_centres(on)   # the stiffness centre, the mass centre and the outline (issue #54)
             elif argument == "legend":
                 m.set_legend(on)
             else:
@@ -729,7 +724,7 @@ class SheetEditor(QObject):
     def _watch_paths(self):
         if self.watcher is None or self.here is None or self.sheet_id is None:
             return
-        wanted = [str(sheets.path(self.here, self.sheet_id)), str(sheets.folder(self.here))]
+        wanted = [str(sheets.path(self.here, self.sheet_id)), str(sheets.path(self.here, self.sheet_id).parent)]
         have = set(self.watcher.files()) | set(self.watcher.directories())
         missing = [p for p in wanted if p not in have and Path(p).exists()]
         if missing:

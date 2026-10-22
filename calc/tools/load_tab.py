@@ -8,9 +8,9 @@ Each tab lists the cases of one load domain that the project's own sources hold 
 
 import copy
 import json
+import traceback
 
 from PySide6.QtCore import QByteArray, Qt, QTimer
-from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QDoubleSpinBox, QHBoxLayout, QHeaderView, QLabel, QPushButton, QSizePolicy, QSplitter,
@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 import autosave
+import build_reference as ref  # the one place a Typst call is spelled out
 import cards
 import display_view
 import grouped_list
@@ -31,9 +32,11 @@ import source_archive
 import theme
 import validation
 import views
+import engine
 from domains import dead_load_source, links, materials, snow_source, wind_source
 from i18n import strings
-from member_check_tab import NEW_ROW, next_free_id
+from member_check_tab import next_free_id
+from source_editor import NEW_ROW, SourceEditorTab  # the left pane every editor tab shares (spec 2026-10-19-base-saine-nettoyage, ARCH-001)
 from norms import sia261_snow, sia261_wind
 
 OPTION_DELAY_MS = 150
@@ -87,7 +90,7 @@ STRINGS = {
         "ld_chosen": "Charge permanente retenue",
         "ld_chosen_sum": "la somme",
         "ld_box_project": "Bibliothèque du projet",
-        "ld_project_hint": "Les poids volumiques que vous ajoutez à la main, dans Woodcore-Datei/materials.json : un matériau que la SIA 261 et la bibliothèque Woodcore n’ont pas, ou celui d’un fabricant.",
+        "ld_project_hint": "Les poids volumiques que vous ajoutez à la main, dans materials.json, parmi les sources du projet : un matériau que la SIA 261 et la bibliothèque Woodcore n’ont pas, ou celui d’un fabricant.",
         "ld_col_id": "ID",
         "ld_col_name": "Nom",
         "ld_col_value": "Poids",
@@ -175,7 +178,7 @@ STRINGS = {
         "ld_chosen": "Gewählte ständige Last",
         "ld_chosen_sum": "die Summe",
         "ld_box_project": "Projektbibliothek",
-        "ld_project_hint": "Die Raumgewichte, die Sie von Hand ergänzen, in Woodcore-Datei/materials.json: ein Material, das SIA 261 und die Woodcore-Bibliothek nicht führen, oder das eines Herstellers.",
+        "ld_project_hint": "Die Raumgewichte, die Sie von Hand ergänzen, in materials.json, unter den Quellen des Projekts: ein Material, das SIA 261 und die Woodcore-Bibliothek nicht führen, oder das eines Herstellers.",
         "ld_col_id": "ID",
         "ld_col_name": "Name",
         "ld_col_value": "Gewicht",
@@ -263,7 +266,7 @@ STRINGS = {
         "ld_chosen": "Permanent load chosen",
         "ld_chosen_sum": "the sum",
         "ld_box_project": "Project library",
-        "ld_project_hint": "The unit weights you add by hand, in Woodcore-Datei/materials.json: a material SIA 261 and the Woodcore library lack, or a manufacturer's.",
+        "ld_project_hint": "The unit weights you add by hand, in materials.json, among the project's sources: a material SIA 261 and the Woodcore library lack, or a manufacturer's.",
         "ld_col_id": "ID",
         "ld_col_name": "Name",
         "ld_col_value": "Weight",
@@ -311,14 +314,20 @@ def _n(value):
     return "0" if text in ("", "-0") else text
 
 
-class LoadTab(QWidget):
+class LoadTab(SourceEditorTab, display_view.DisplayTab, QWidget):
     """The tab of one load domain entered in Woodcore -- see the module's docstring. A subclass names its module (`MODULE`: `FOLDER`, `DOMAIN`, `new_source`, `check_source`, `read_source`, `build_instance`, and where it has them `warnings` -- what the tab says and the report does not -- and `sketch` -- a drawing the tab shows and the export does not carry), its key, its ID prefix and its list's words, and builds its cards."""
+    SYNC_DOMAIN = True   # its sources are domains with a file of their own: every writer is followed by domain_file.sync (tab_guard.py, spec 2026-10-19-base-saine-nettoyage)
+    GRAPH_KIND = "load"   # a case of a load of the graph of dependencies, `<domain>/<id>` (issue #71)
+
+    def graph_id(self, cid):
+        return f"{self.MODULE.DOMAIN}/{cid}"
 
     KEY = ""
     MODULE = None
     ID_PREFIX = "L-"
     LIST_KEY = ""
     EMPTY_KEY = ""
+    WORDS = "ld"
     VIEWS = views.CALC_VIEWS
 
     def __init__(self, app):
@@ -342,9 +351,7 @@ class LoadTab(QWidget):
         self.splitter.addWidget(self.build_list())
         self.splitter.addWidget(self.build_form())
         self.splitter.addWidget(self.build_result())
-        self.display = display_view.DisplayView(self.t, mono_font=self.app.mono_font, copy=self.app.copy, cache_key=self.KEY, lang=self.app.lang,
-                                                import_fn=lambda: self.app.reexport(), import_text=self.t("reexport"), parent=self)
-        self.panes = display_view.ViewPanes(self.splitter, self.display)
+        self.install_display(self.KEY)   # «Affichage»: the call, its options and the page (display_view.DisplayTab)
         for index, stretch in enumerate((2, 6, 4)):
             self.splitter.setStretchFactor(index, stretch)
         layout.addWidget(self.splitter, 1)
@@ -352,20 +359,13 @@ class LoadTab(QWidget):
         self.refresh_timer.setSingleShot(True)
         self.refresh_timer.setInterval(OPTION_DELAY_MS)
         self.refresh_timer.timeout.connect(self.request_preview)
-        shortcut = QShortcut(QKeySequence(QKeySequence.StandardKey.Save), self)
-        shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        shortcut.activated.connect(self.save)
+        self.install_save_shortcut()
         self.restore(app.views.get(self.KEY))
 
     # --- helpers ---------------------------------------------------------------
 
     def tl(self, text):
         return strings.translate(text, self.app.lang)
-
-    def heading(self, text):
-        label = QLabel(text)
-        label.setFont(self.app.bold_font)
-        return label
 
     def spin(self, minimum, maximum, decimals=1, step=1.0, suffix=""):
         box = QDoubleSpinBox()
@@ -430,6 +430,21 @@ class LoadTab(QWidget):
     def folder(self):
         return project.current().sources_dir / self.MODULE.FOLDER
 
+    def sources_dir(self):
+        return self.folder()
+
+    def saved_ids(self):
+        return self._taken()
+
+    def export_sources(self):
+        registry.export(project.current())   # calculations.json rebuilt with the case saved
+
+    def read_saved(self, path):
+        try:
+            return self.MODULE.read_source(path)
+        except validation.ValidationError:
+            return json.loads(path.read_text(encoding="utf-8"))   # a source the module refuses is still opened, so that it can be repaired here
+
     def _taken(self):
         folder = self.folder()
         return sorted(p.stem for p in folder.glob("*.json")) if folder.is_dir() else []
@@ -445,105 +460,6 @@ class LoadTab(QWidget):
         self.refresh_timer.start()
 
     # --- left: the cases --------------------------------------------------------
-
-    def build_list(self):
-        box = QWidget()
-        column = QVBoxLayout(box)
-        self.list = grouped_list.GroupedList(STRINGS.get(self.app.lang, STRINGS["fr"]), lang=self.app.lang)
-        self.archive = source_archive.Actions(self, self.folder, self.export, lambda select: self.reload_list(select), self._after_archive)
-        self.archive.connect()
-        column.addWidget(grouped_list.title_row(self.heading(self.t(self.LIST_KEY)), self.list))
-        self.list.setIconSize(self.app.mark_size)
-        self.list.currentIdChanged.connect(self.on_list_change)
-        self.list.moved.connect(self.on_moved)
-        self.list.foldersChanged.connect(self.on_folders_changed)
-        self.list.attach_order(self.KEY, self.app.list_store)
-        self.list.reordered.connect(lambda: self.reload_list(self.current_id))
-        column.addWidget(self.list, 1)
-        self.empty_hint = cards.note(self.t(self.EMPTY_KEY))
-        column.addWidget(self.empty_hint)
-        row = QHBoxLayout()
-        for key, slot in (("ld_new", self.new), ("ld_duplicate", self.duplicate), ("ld_delete", self.delete)):
-            button = QPushButton(self.t(key))
-            button.clicked.connect(slot)
-            row.addWidget(button)
-        column.addLayout(row)
-        return box
-
-    def _group_of(self, cid):
-        try:
-            source = json.loads((self.folder() / ("%s.json" % cid)).read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return grouped_list.ROOT_GROUP
-        return grouped_list.group_of(source)
-
-    def reload_list(self, select=None):
-        self.loading = True
-        self.ids = self._taken()
-        entries = [{"id": cid, "text": cid, "group": self._group_of(cid)} for cid in self.ids]
-        if self.current_id is None:
-            entries.append({"id": NEW_ROW, "text": "%s %s" % ((self.source or {}).get("id") or "?", self.t("ld_new_item")), "group": grouped_list.ROOT_GROUP})
-        target = select if select in self.ids else (NEW_ROW if self.current_id is None else None)
-        self.list.set_entries(entries, self.empty_folders, target, archived=source_archive.entries(self.folder(), self.list._t))
-        self.empty_folders = self.list.empty_folders()
-        self.app.save_folder_settings(self.KEY, self.empty_folders)
-        self.empty_hint.setVisible(not self.ids)
-        self.loading = False
-        self.update_list_marker()
-
-    def on_folders_changed(self):
-        self.empty_folders = self.list.empty_folders()
-        self.reload_list(select=self.current_id)
-
-    def update_list_marker(self):
-        for cid in self.list.ids():
-            mine = cid == self.current_id or (self.current_id is None and cid == NEW_ROW)
-            self.list.set_mark(cid, self.app.dirty_mark(mine and self.dirty))
-        self.app.update_tab_marks()
-
-    def on_list_change(self, cid):
-        if self.loading or not cid or cid not in self.ids:
-            return
-        if not self.confirm_leave():
-            self.loading = True
-            if self.current_id in self.ids:
-                self.list.select(self.current_id)
-            self.loading = False
-            return
-        self.load(cid)
-        if NEW_ROW in self.list.ids():
-            self.reload_list(cid)
-
-    def on_moved(self, ids, group):
-        if not self.confirm_leave():
-            self.reload_list(self.current_id)
-            return
-        for cid in ids:
-            if cid == NEW_ROW:
-                continue
-            path = self.folder() / ("%s.json" % cid)
-            try:
-                source = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
-                continue
-            source["group"] = group or ""
-            path.write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-            if cid == self.current_id:
-                self.source["group"] = group or ""
-        self.export(self.t("ld_moved", count=len(ids), group=group or "—"))
-        self.reload_list(self.current_id)
-
-    def load(self, cid):
-        path = self.folder() / ("%s.json" % cid)
-        try:
-            source = self.MODULE.read_source(path)
-        except validation.ValidationError:
-            source = json.loads(path.read_text(encoding="utf-8"))
-        self.source = source
-        self.current_id = cid
-        self.dirty = False
-        self.fill_form()
-        self.refresh()
 
     # --- middle: the form ------------------------------------------------------------
 
@@ -693,8 +609,8 @@ class LoadTab(QWidget):
             try:
                 self.figure_svg.load(QByteArray(drawing.encode("utf-8")))
                 self.figure_svg.renderer().setAspectRatioMode(Qt.AspectRatioMode.KeepAspectRatio)
-            except Exception:  # broad: a drawing that fails must not empty the form
-                pass
+            except Exception:  # broad: a drawing that fails must not empty the form -- but it is said, never silent (spec 2026-10-19-base-saine-nettoyage, G5)
+                traceback.print_exc()
 
     # --- «Affichage» --------------------------------------------------------------
 
@@ -711,23 +627,15 @@ class LoadTab(QWidget):
         return self._choices[1]
 
     def display_entries(self):
-        """show-calc with its panel -- the level, -1 «Sélection manuelle» among them, and the title -- for the three loads alike (issues #56, #57; spec 2026-10-14-neige-vent-affichage-altitude, REQ-001, D-05), the polar moments' and the variables' own pattern."""
+        """The load's file, written out by the export and included where a section prints it -- `#include domain-file(kind, id)` (spec 2026-10-21-commandes-typst-refonte, REQ-017, UI-002) --, for the three loads alike: what it prints is the file's, which the engineer edits."""
         unsaved = self.current_id is None or self.dirty
         cid = self.draft().get("id") or ""
-        return [display_view.Entry("calc", "show-calc", "show-calc", positional=(self.MODULE.DOMAIN, cid), note_text=self.reason,
-                                   banner=self.t("ld_save_first") if unsaved else "", context={"shown": self.shown_choices(cid)})]
+        return [display_view.Entry("file", "domain-file", call=ref.call_include_domain(self.MODULE.DOMAIN, cid), note_text=self.reason,
+                                   banner=self.t("ld_save_first") if unsaved else "")]
 
     def fill_command(self):
         self.display.set_project(project.current(), self.app.current_document())
         self.display.set_entries(self.display_entries())
-
-    def set_view(self, key, enter=True):
-        if key not in self.VIEWS:
-            return
-        self.view = key
-        self.panes.show(key == "display", enter and self.live)
-        if key == "display":
-            self.fill_command()
 
     def request_preview(self):
         if not self.live or self.view != "display":
@@ -741,6 +649,10 @@ class LoadTab(QWidget):
             self.message.setText(richtext.prose_html(self.t("ld_invalid", error=str(exc))))
             self.message.setVisible(True)
 
+    def prepare_display(self):
+        """Before «Affichage» opens: the call this tab builds itself, its options and its page (display_view.DisplayTab.set_view)."""
+        self.fill_command()
+
     def on_shown(self):
         self.live = True
         dirty = self.dirty
@@ -750,63 +662,10 @@ class LoadTab(QWidget):
         self.dirty = dirty
         self.refresh()
 
-    def showEvent(self, event):
-        super().showEvent(event)
-        if not self.live:
-            self.live = True
-            self.panes.show(self.view == "display")
-
     def stop(self):
         self.display.pane.stop() if getattr(self.display, "pane", None) is not None else None
 
     # --- the buttons --------------------------------------------------------------
-
-    def new(self):
-        if not self.confirm_leave():
-            return
-        self.source = self.make_source()
-        self.current_id = None
-        self.dirty = True
-        self.fill_form()
-        self.refresh()
-        self.reload_list()
-
-    def duplicate(self):
-        if not self.confirm_leave():
-            return
-        source = self.draft()
-        source["id"] = next_free_id(self._taken(), self.ID_PREFIX)
-        source.pop("name", None)
-        self.source = source
-        self.current_id = None
-        self.dirty = True
-        self.fill_form()
-        self.refresh()
-        self.reload_list()
-
-    def revert(self):
-        if self.current_id:
-            self.load(self.current_id)
-        else:
-            self.new()
-
-    def delete(self):
-        if self.archive.delete():
-            return
-        self.dirty = False
-        self.reload_list()
-        if self.ids:
-            self.load(self.ids[0])
-            self.reload_list(self.ids[0])
-        else:
-            self.new()
-
-    def _after_archive(self):
-        self.reload_list()
-        self.new()
-
-    def fail(self, message):
-        return autosave.refuse(self, self.t(self.KEY), message)
 
     def save(self):
         source = self.draft()
@@ -827,7 +686,7 @@ class LoadTab(QWidget):
         folder.mkdir(parents=True, exist_ok=True)
         if self.current_id and self.current_id != cid:
             (folder / ("%s.json" % self.current_id)).unlink(missing_ok=True)
-        (folder / ("%s.json" % cid)).write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        engine.write_json(folder / ("%s.json" % cid), source)
         self.source = source
         self.current_id = cid
         self.dirty = False
@@ -835,18 +694,6 @@ class LoadTab(QWidget):
         self.reload_list(select=cid)
         self.fill_command()
         return True
-
-    def export(self, done):
-        """calculations.json rebuilt with the case saved (registry.export): a failure is said, the source stays saved."""
-        try:
-            registry.export(project.current())
-        except Exception as exc:  # broad: the exporter's own message is what helps, said in the status bar
-            self.app.set_status(self.t("ld_export_failed", error=str(exc)))
-            return
-        self.app.set_status(done)
-
-    def confirm_leave(self):
-        return autosave.confirm(self.app, self, self.t("ld_unsaved_title"), self.t("ld_unsaved", id=self.identity.id.text().strip() or "?"))
 
     # --- state across a rebuild ---------------------------------------------------
 
@@ -1130,7 +977,7 @@ class DeadLoadTab(LoadTab):
             return self.fail(self.t("ld_invalid", error=str(exc)))
         path = materials.project_file()
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        engine.write_json(path, data)
         layers = self.current_layers()
         self.fill_layers(layers)            # the project's materials offered at once in the layers
         self.app.set_status(self.t("ld_materials_saved"))

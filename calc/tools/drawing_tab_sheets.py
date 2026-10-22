@@ -22,7 +22,7 @@ from drawing_tab_documents import Blank, _Background, _export_layers, _run_layer
 
 
 # How many steps «Annuler» can go back.
-HISTORY = 200
+from canvas_editor import HISTORY  # «Annuler» and «Rétablir», once for every tab with a canvas (spec 2026-10-19-base-saine-nettoyage, ARCH-001)
 
 
 class DrawingSheetsMixin:
@@ -259,17 +259,10 @@ class DrawingSheetsMixin:
         return True
 
     def create_position_list(self):
-        """«Créer une liste des positions»: an A4 portrait sheet holding the list of the positions alone -- of the plans of the sheet chosen, of the bundle chosen, or of every position where neither is --, listed and opened."""
+        """«Créer une liste des positions»: an A4 portrait sheet holding the list of the positions alone -- the project's, every position (spec 2026-10-21-commandes-typst-refonte, Q-015) --, listed and opened."""
         here = project.current()
-        item = self.sheet_list.currentItem()
         try:
-            if item is not None and item.data(0, grouped_list.KIND_ROLE) == "folder":
-                plans = sheets.plans_of_bundle(here, item.data(0, grouped_list.GROUP_ROLE))
-            elif self.sheet_list.current_id():
-                plans = sheets.plans_of_sheet(here, self.sheet_list.current_id())
-            else:
-                plans = None
-            sid = sheets.new_position_list_sheet(here, plans=plans or None).stem
+            sid = sheets.new_position_list_sheet(here).stem
         except (sheets.SheetError, OSError) as exc:
             notices_ui.tell(self.sheet_error_text(exc), notifications.CRITICAL, exc=exc, source="drawing_tab")
             return None
@@ -278,7 +271,7 @@ class DrawingSheetsMixin:
             return sid
         self.reload_sheets(select=sid)
         self.open_sheet(sid)
-        self.app.set_status(self.bundle_text("se_position_list_made", id=sid, count=len(plans or ())))
+        self.app.set_status(self.bundle_text("se_position_list_made", id=sid))
         return sid
 
     def open_builder(self):
@@ -293,11 +286,6 @@ class DrawingSheetsMixin:
         if self.current_id:
             self.builder.set_plan(self.current_id)
 
-    def push_history(self):
-        self.undo_stack.append(copy.deepcopy(self.source))
-        del self.undo_stack[:-HISTORY]
-        self.redo_stack.clear()
-
     def replace_source(self, state):
         """The source replaced by `state` -- a step of «Annuler» or «Rétablir». An undo helper and never a writer: it must not be in woodcore_gui.WRITERS."""
         background_before = copy.deepcopy(self.source.get("background")), copy.deepcopy(self.source.get("sheet"))
@@ -310,16 +298,6 @@ class DrawingSheetsMixin:
         self.fill()
         self.on_changed()
         self.on_selection()
-
-    def undo(self):
-        if self.undo_stack:
-            self.redo_stack.append(copy.deepcopy(self.source))
-            self.replace_source(self.undo_stack.pop())
-
-    def redo(self):
-        if self.redo_stack:
-            self.undo_stack.append(copy.deepcopy(self.source))
-            self.replace_source(self.redo_stack.pop())
 
     def build_entry_style(self):
         """The card of the selected entry's own factors, one per factor it may state: at 100 % while it follows the plan, and in orange with «Reprendre» beside it once it states one -- an overridden b/h's own form (v0.75, stylefactors.py).

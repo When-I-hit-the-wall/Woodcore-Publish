@@ -92,7 +92,7 @@ def test_every_snippet_starts_with_the_projects_conf_a_page_as_tall_as_it_needs_
     node = _plain_sections(nodes)[1]
     snippet = structure_preview.build(here, "cu", nodes, [node.id])
     lines = snippet.source.splitlines()
-    assert lines[:4] == ['#import "/config.typ": conf', '#import "/commands.typ": *', "#show: conf", structure_preview.page_line(here)], lines[:4]
+    assert lines[:4] == ['#import "/000-Typst-Config/config.typ": conf', '#import "/000-Typst-Config/commands.typ": *', "#show: conf", structure_preview.page_line(here)], lines[:4]
     page = structure_preview.page_line(here)
     assert "height: auto" in page and "footer: none" in page and "header: none" in page and "numbering: none" in page
     assert page.startswith("#set page(width: ") and "margin: (x: 0.8cm, y: 1.0cm)" in page
@@ -155,9 +155,9 @@ def test_an_object_is_the_preamble_of_its_file_the_offset_of_its_section_and_its
     snippet = structure_preview.build(here, "cu", nodes, [paragraph.id])
     assert snippet.kind == "object" and snippet.ids == (paragraph.id,)
     body = _paragraph(here, paragraph)
-    assert "#set heading(offset: 0)" in snippet.source and '#import "/commands.typ": *' in snippet.source     # the file writes its headings at the level they print at
+    assert "#set heading(offset: 0)" in snippet.source and '#import "/000-Typst-Config/commands.typ": *' in snippet.source     # the file writes its headings at the level they print at
     assert body in snippet.source and "woodcore:object" not in snippet.source, "the tags are comments of the file and not part of what it prints"
-    assert structure_preview.preamble('#import "/commands.typ": *\n#let x = 1\n\n// woodcore:object text a\nhello\n// woodcore:/object a\n#set text(size: 9pt)\n') == '#import "/commands.typ": *\n#let x = 1\n'
+    assert structure_preview.preamble('#import "/000-Typst-Config/commands.typ": *\n#let x = 1\n\n// woodcore:object text a\nhello\n// woodcore:/object a\n#set text(size: 9pt)\n') == '#import "/000-Typst-Config/commands.typ": *\n#let x = 1\n'
     # the objects of one file chosen together stand one after the other, in the file's order
     two = structure_preview.build(here, "cu", nodes, [objects[1].id, objects[0].id])
     assert two.ids == (objects[0].id, objects[1].id)
@@ -242,7 +242,7 @@ def test_a_section_compiles_to_itself_only_and_a_chapter_to_its_own_sections():
 def test_a_table_is_a_page_the_height_of_a_table():
     here = _here()
     nodes = structure.tree(here, "cu")
-    table = next(n for n in structure.flatten(nodes) if n.kind == "object" and n.object_type == "doc-table")
+    table = next(n for n in structure.flatten(nodes) if n.kind == "object" and n.object_type == "table")
     source = structure_preview.build(here, "cu", nodes, [table.id]).source
     out = conftest.tmpdir("structure_preview_table") / "table.pdf"
     if not conftest.have_typst():

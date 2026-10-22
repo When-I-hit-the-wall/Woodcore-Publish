@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 import cards  # the properties in cards, after the website (cards.py)
 import identity
+import plan_canvas_edit  # Ctrl+C's and Ctrl+V's states (issue #61)
 import stylefactors  # the entries' own size factors, shown as an overridden b/h is (stylefactors.py)
 import theme  # the colours this tab states itself (theme.py)
 from drawing_tab import DrawingTab, number_text, plain_label
@@ -28,7 +29,8 @@ NAMES = {"select": "plan_tool_select", "pan": "plan_tool_pan", "ruler": "plan_to
 
 
 HINTS = {"select": "fp_hint_select", "pan": "fp_hint_pan", "ruler": "plan_hint_ruler", "move": "plan_hint_move", "copy": "plan_hint_copy", "polygon": "fp_hint_polygon", "wall": "fp_hint_wall", "door": "fp_hint_door",
-         "route": "fp_hint_route", "exit": "fp_hint_exit", "width": "fp_hint_width", "crop": "plan_hint_crop", "calibrate": "plan_hint_calibrate", "text": "plan_tip_text"}
+         "route": "fp_hint_route", "exit": "fp_hint_exit", "width": "fp_hint_width", "crop": "plan_hint_crop", "calibrate": "plan_hint_calibrate", "text": "plan_tip_text",
+         plan_canvas_edit.CLIP_BASE: "plan_hint_clip_base", plan_canvas_edit.PASTE: "plan_hint_paste"}   # Ctrl+C's base point and Ctrl+V's paste, no button of their own (issue #61)
 
 
 # What the next entry of each tool is drawn as until the engineer chooses another (the canvas's own defaults are the same).

@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, Tabelle 41 (clause 6.8.3.4) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 80, read off a render of the page; the French wording from ExternalFiles/000-Normes/SIA265-2021-FR.pdf p. 81.",
+  "_source": "SIA 265:2021, Tabelle 41 (clause 6.8.3.4) -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 80, read off a render of the page; the French wording from SIA265-2021-FR.pdf p. 81.",
   "_note": "The spacing between two rings along the grain depends on the angle alpha between the force and the grain (6.8.3.2), 4/3 · (3/2 - alpha/180°) · d: 2 d at 0°, 4/3 d at 90°. The norm's fractions are kept as [numerator, denominator]. d is the ring's outer diameter (6.8.3.1). Figur 41 also dimensions a few distances in mm (≥ 20, ≥ 30), which the table does not state and which are not transcribed.",
   "edition": "SIA 265:2021",
   "table_41": {

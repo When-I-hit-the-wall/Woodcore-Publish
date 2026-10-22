@@ -8,18 +8,17 @@
 Les points suivants sont à clarifier ou à étudier en détail dans la phase suivante du projet :
 // woodcore:/object p1
 
-// woodcore:object doc-table open-points-table
-#doc-table(
-  columns: (
-    (id: "point", title: [Point à clarifier]),
-    (id: "owner", title: [Responsable]),
-    (id: "phase", title: [Phase / échéance]),
-    (id: "status", title: [État]),
-  ),
-  hidden: ("status",),
-  rows: (
-    (point: [[…]], owner: [[…]], phase: [[…]], status: []),
-    (point: [[…]], owner: [[…]], phase: [[…]], status: []),
+// woodcore:object table open-points-table
+#figure(
+  table(
+    columns: (auto, auto, auto),
+    align: (left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Point à clarifier*], [*Responsable*], [*Phase / échéance*]),  // woodcore:hidden 4=[État]
+    table.hline(stroke: 0.5pt),
+    [[…]], [[…]], [[…]],  // woodcore:hidden 4=[]
+    [[…]], [[…]], [[…]],  // woodcore:hidden 4=[]
+    table.hline(stroke: 1pt),
   ),
   caption: [Points ouverts],
 )

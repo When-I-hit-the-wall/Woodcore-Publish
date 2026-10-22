@@ -12,18 +12,17 @@ Timber is a naturally growing raw material: knots, resin pockets (depending on t
 The timber surface changes over time: members directly exposed to the weather turn grey, which is not a defect but an optical change; timber surfaces in weather-protected areas darken through UV radiation. With changing air humidity, timber swells and shrinks, which can lead to isolated cracks in linear members (columns, beams).
 // woodcore:/object p2
 
-// woodcore:object doc-table appearance-classes-table
-#doc-table(
-  columns: (
-    (id: "member", title: [Member]),
-    (id: "product", title: [Product]),
-    (id: "class", title: [Appearance class]),
-    (id: "remark", title: [Remark]),
-  ),
-  hidden: ("remark",),
-  rows: (
-    (member: [[Exposed columns and beams]], product: [Solid timber and glulam], class: [N: normal quality (structural timber)], remark: []),
-    (member: [[Non-visible members]], product: [Solid timber and glulam], class: [I: industrial quality, no appearance requirements], remark: []),
+// woodcore:object table appearance-classes-table
+#figure(
+  table(
+    columns: (auto, auto, auto),
+    align: (left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Member*], [*Product*], [*Appearance class*]),  // woodcore:hidden 4=[Remark]
+    table.hline(stroke: 0.5pt),
+    [[Exposed columns and beams]], [Solid timber and glulam], [N: normal quality (structural timber)],  // woodcore:hidden 4=[]
+    [[Non-visible members]], [Solid timber and glulam], [I: industrial quality, no appearance requirements],  // woodcore:hidden 4=[]
+    table.hline(stroke: 1pt),
   ),
   caption: [Appearance classes by member],
 )

@@ -105,10 +105,10 @@ class WindowExportMixin:
             self.add_pdf_choice(menu, languages, name, code, self.pdf_lang, self.set_pdf_lang)
 
         here = project.current()
-        if len(here.modes) > 1:
+        if len(here.created_modes) > 1:
             menu.addSeparator()
             every = menu.addAction(self.t("pdf_all"))
-            every.triggered.connect(lambda _checked=False: self.export_pdf(modes=project.current().modes))
+            every.triggered.connect(lambda _checked=False: self.export_pdf(modes=project.current().created_modes))
 
         button.setMenu(menu)
         self.update_pdf_tooltip(button)
@@ -166,7 +166,7 @@ class WindowExportMixin:
             self.refuse_read_only()
             return
         here = project.current()
-        self.pdf_modes = [mode for mode in (modes or [self.current_document()]) if mode in here.modes]
+        self.pdf_modes = [mode for mode in (modes or [self.current_document()]) if mode in here.created_modes]
         self.compile_flags = self.pdf_input_args()
         self.reexport(chain_pdf=True)
 
@@ -359,7 +359,7 @@ class WindowExportMixin:
     def start_compiles(self):
         """The documents the PDF button asked for, compiled one after the other (compile_next). Reached only through export_done, so data/ has just been written and validated."""
         here = project.current()
-        self.compile_queue = [mode for mode in (self.pdf_modes or [self.current_document()]) if mode in here.modes]
+        self.compile_queue = [mode for mode in (self.pdf_modes or [self.current_document()]) if mode in here.created_modes]
         self.compile_single = len(self.compile_queue) == 1
         self.compile_messages = []
         self.last_pdf = None

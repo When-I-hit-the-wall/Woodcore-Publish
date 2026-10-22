@@ -21,7 +21,6 @@ from domains import connector, connector_svg, dowel, links
 from domains import schema as schema_model
 from i18n import strings
 from norms import sia263, sia265, sn_en_14592
-import shown_variables  # the variables -1 «Sélection manuelle» offers: the connector's own, read off the export (issue #20)
 from connectors_tab_form import COLUMN_LABEL_WIDTH, ICON_PX, LABEL_WIDTH, SYMBOL_WIDTH, TOOL_HEIGHT, TOOL_MIN_WIDTH, TOOL_TYPES, UNIT_WIDTH, _n, svg_icon, ConnectorsFormMixin  # split out of this module (issue #30): every name it had is still importable from it
 
 
@@ -606,18 +605,15 @@ class ConnectorsDraftMixin:
         self.update_display()
 
     def display_entries(self):
-        """What can show the connector open: its shear resistance, its line, its calculation, its value read into a variable -- which prints nothing -- and the loop over every connector."""
+        """What can show the connector open (spec 2026-10-21-commandes-typst-refonte, UI-002): its file written out by the export -- its line, its figures, its resistance -- included where a section prints it, one of its values read by `#var`, and the loop over every connector."""
         cid = self.draft()["id"] or "?"
         here = project.current()
         banner = display_view.saved_state(self.t, cid, self.t("ds_save_first"), self.current_id is None or self.dirty,
                                           here.data_dir / "connectors.json", "connectors", here.connectors_dir / f"{cid}.json")
-        shown = {"shown": shown_variables.export_choices(here.data_dir, connector.DOMAIN, cid)}   # what -1 offers to tick: the vars and tables of the connector's calculation, as exported
         return [
-            display_view.Entry("resistance", "show-connector-resistance", "show-connector-resistance", positional=(cid,), banner=banner, context=shown),
-            display_view.Entry("connector", "show-connector", "show-connector", positional=(cid,), banner=banner),
-            display_view.Entry("calc", "show-calc", "show-calc", positional=(connector.DOMAIN, cid), banner=banner, context=shown),
-            display_view.Entry("var", "var-of", call=ref.call_var_of(connector.DOMAIN, cid, "R_d"), note="ds_note_prints_nothing"),
-            self.loop_entry("show-connector-resistance", ref.call_connector_loop()),
+            display_view.Entry("file", "domain-file", call=ref.call_include_domain(connector.DOMAIN, cid), banner=banner),
+            display_view.Entry("var", "var", call=ref.call_var_domain(connector.DOMAIN, cid, "R_d"), banner=banner),
+            self.loop_entry("domain-file", ref.call_domain_loop(connector.DOMAIN)),
         ]
 
     def tick_all(self):

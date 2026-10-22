@@ -1,11 +1,10 @@
-"""What the report and an export sheet print of a fire-protection plan (v0.115): `#show-fire-plan`, `#fire-plan-ids`, the Structure-tab object `#doc-fire-plan`, and the two commands of an export sheet, `#sheet-fire-viewport` and `#sheet-fire-legend` (lib/calc-engine.typ, lib/document.typ, lib/sheet.typ).
+"""What the report and an export sheet print of a fire-protection plan (v0.115): `#image-fire-plan` -- `#show-fire-plan` until the spec 2026-10-21-commandes-typst-refonte (REQ-014) --, `#ids("fire-plan")`, and the objects of an export sheet, a fire plan and its legend (lib/calc-engine.typ, lib/document.typ, lib/sheet.typ).
 
 What is held:
 
-* a fire plan prints **in the report's language** -- its legend, drawn once per language by calc/domains/fire_svg.py, carries words -- with its figure number and its caption, its scale bar where it has a scale and its legend where the engineer left it on;
-* `legend: false` takes the legend **off the plan** and nothing else;
-* `fire-plan-ids()` lists the plans of data/fire.json, an unknown id is refused listing them;
-* `doc-fire-plan` is `show-fire-plan` with a frame while no plan is chosen, in the report's language, and refuses what is not an id;
+* a fire plan prints **in the report's language** -- its legend, drawn once per language by calc/domains/fire_svg.py, carries words -- with its figure number, its scale bar where it has a scale and its legend where `detail-legend` names it;
+* `detail-legend` without `objects` takes the legend **off the plan** and nothing else;
+* `ids("fire-plan")` lists the plans of data/fire.json, an unknown id is refused listing them;
 * on a sheet **the legend is both possible**: drawn on the plan (`legend: true`) and as an object of its own (`sheet-fire-legend`), once each, so a sheet may carry it twice, once or not at all; the scale a fire plan is printed at is the one the title block names; a plan with no scale cannot be given one, and the refusal says the fire-protection plan tab;
 * the fire legend's lines carry their own wording (`term` or `engine`), which `plan-legend` translates -- the position plan's STE lines still go by their key.
 
@@ -52,7 +51,7 @@ def _run(here, body, name, lang="de"):
     d = here.typst_root / ".probe" / name
     d.mkdir(parents=True, exist_ok=True)
     probe = d / "probe.typ"
-    probe.write_text('#import "/config.typ": conf\n#import "/commands.typ": *\n#show: conf\n'
+    probe.write_text('#import "/000-Typst-Config/config.typ": conf\n#import "/000-Typst-Config/commands.typ": *\n#report-level.update(2)\n#show: conf\n'
                      f'#set-report-language("{lang}")\n' + body + "\n", encoding="utf-8")
     out = d / "probe.pdf"
     run = subprocess.run([project.typst_executable(), "compile", "--root", str(here.typst_root), str(probe), str(out)],
@@ -82,57 +81,44 @@ FIGURE = {"de": "Abbildung 1", "fr": "Abbildung 1", "en": "Abbildung 1"}
 CAPTION = {"de": "Brandschutzplan Treppenhaus", "fr": "Plan de protection incendie Treppenhaus", "en": "Fire-protection plan Treppenhaus"}
 
 
-# --- show-fire-plan --------------------------------------------------------------------------------
+# --- image-fire-plan (spec 2026-10-21-commandes-typst-refonte, REQ-014: #show-fire-plan until then) ----------------------------
 
-def test_a_fire_plan_prints_in_the_reports_language_with_its_legend_and_its_caption():
+FIGURE_OF = '#figure(image-fire-plan("{plan}"{args}), kind: image, caption: [Plan])'
+
+
+def test_a_fire_plan_prints_in_the_reports_language_with_its_legend():
     here = _project("fire_print_languages")
     for lang in ("de", "fr", "en"):
-        text = _text(here, '#show-fire-plan("Treppenhaus")', f"lang-{lang}", lang)
-        assert CAPTION[lang] in text and "Regelgeschoss" in text, (lang, text)
+        text = _text(here, FIGURE_OF.format(plan="Treppenhaus", args=', detail-legend: ("objects", "scale-bar")'), f"lang-{lang}", lang)
         assert TITLE[lang] in text and WALL[lang] in text, (lang, text)
         assert FIGURE[lang] in text, (lang, text)
 
 
 def test_the_legend_is_taken_off_the_plan_and_nothing_else():
     here = _project("fire_print_legend")
-    on = _text(here, '#show-fire-plan("Treppenhaus")', "on")
-    off = _text(here, '#show-fire-plan("Treppenhaus", legend: false)', "off")
+    on = _text(here, FIGURE_OF.format(plan="Treppenhaus", args=', detail-legend: ("objects", "scale-bar")'), "on")
+    off = _text(here, FIGURE_OF.format(plan="Treppenhaus", args=', detail-legend: "scale-bar"'), "off")
     assert WALL["de"] in on and WALL["de"] not in off and "Legende" not in off
-    assert CAPTION["de"] in off, "the caption stays"
     assert re.search(r"^0 \d+ m$", on, re.M) and re.search(r"^0 \d+ m$", off, re.M), "the scale bar stays: the plan has a scale"
-    bare = _text(here, '#show-fire-plan("Treppenhaus", scale-bar: false, caption: none)', "bare")
-    assert not re.search(r"^0 \d+ m$", bare, re.M) and "Brandschutzplan" not in bare, bare
+    bare = _text(here, FIGURE_OF.format(plan="Treppenhaus", args=', detail-legend: "none"'), "bare")
+    assert not re.search(r"^0 \d+ m$", bare, re.M), bare
 
 
 def test_a_plan_following_a_position_plan_has_no_scale_bar_where_that_has_none():
     here = _project("fire_print_following")
-    text = _text(here, '#show-fire-plan("Pavillon-EG")', "following")
-    assert "Brandschutzplan Pavillon-EG" in text and "Erdgeschoss" in text
+    text = _text(here, FIGURE_OF.format(plan="Pavillon-EG", args=', detail-legend: "scale-bar"'), "following")
     assert not re.search(r"^0 \d+ m$", text, re.M) and "ca. 1:" not in text
 
 
 def test_the_ids_are_the_plans_of_the_export_and_an_unknown_one_is_refused_listing_them():
     here = _project("fire_print_ids")
-    assert "Pavillon-EG,Treppenhaus" in _text(here, '#fire-plan-ids().join(",")', "ids")
-    # an `assert`, as show-plan's: the message is in what Typst prints
-    code, err, _ = _run(here, '#show-fire-plan("Nope")', "unknown")
-    assert code != 0 and 'show-fire-plan: no plan "Nope" -- valid plans: Pavillon-EG, Treppenhaus' in err, err[:600]
+    assert "Pavillon-EG,Treppenhaus" in _text(here, '#ids("fire-plan").join(",")', "ids")
+    # an `assert`: the message is in what Typst prints
+    code, err, _ = _run(here, '#image-fire-plan("Nope")', "unknown")
+    assert code != 0 and 'image-fire-plan: no plan "Nope" -- valid plans: Pavillon-EG, Treppenhaus' in err, err[:600]
     # an id of the position plans is not one of the fire plans
-    code, err, _ = _run(here, '#show-fire-plan("Pavillon")', "position")
-    assert code != 0 and 'show-fire-plan: no plan "Pavillon"' in err, err[:600]
-
-
-# --- doc-fire-plan ---------------------------------------------------------------------------------
-
-def test_the_object_prints_the_plan_or_a_frame_in_the_reports_language():
-    here = _project("fire_print_object")
-    text = _text(here, '#doc-fire-plan(plan: none, caption: [Brandschutzplan Erdgeschoss])\n#doc-fire-plan(plan: "Treppenhaus", width: 60%, legend: false)', "object")
-    assert "[Auszug aus dem Brandschutzplan]" in text and "Brandschutzplan Erdgeschoss" in text, text
-    assert CAPTION["de"] in text and WALL["de"] not in text, "legend: false is the plan's own"
-    assert "[Extrait du plan de protection incendie]" in _text(here, "#doc-fire-plan()", "object-fr", "fr")
-    assert "[Extract from the fire-protection plan]" in _text(here, "#doc-fire-plan()", "object-en", "en")
-    message = _refusal(here, "#doc-fire-plan(plan: 3)", "object-bad")
-    assert message.startswith("doc-fire-plan: plan:"), message
+    code, err, _ = _run(here, '#image-fire-plan("Pavillon")', "position")
+    assert code != 0 and 'image-fire-plan: no plan "Pavillon"' in err, err[:600]
 
 
 # --- a sheet ---------------------------------------------------------------------------------------
@@ -175,8 +161,8 @@ def test_the_fire_legend_of_a_sheet_lists_the_symbols_of_the_plans_it_shows_and_
     assert text.count("Feuerwiderstand EI 30") == 1 and "Feuerwiderstand EI 60-RF1" in text and "Feuerwiderstand EI 60\n" in text + "\n"
     assert "Notausgang" in text and "Türe ohne Feuerwiderstand" in text, "an engine word of the legend, translated by its key"
     # the same sheet in French: the legend's lines say it themselves
-    (here.typst_root / "config.typ").write_text(
-        re.sub(r'#let doc-lang = "de"', '#let doc-lang = "fr"', (here.typst_root / "config.typ").read_text(encoding="utf-8")), encoding="utf-8")
+    (here.config_typ).write_text(
+        re.sub(r'#let doc-lang = "de"', '#let doc-lang = "fr"', (here.config_typ).read_text(encoding="utf-8")), encoding="utf-8")
     source = sheets.path(here, sid)
     source.write_text(source.read_text(encoding="utf-8").replace('set-report-language("de")', 'set-report-language("fr")'), encoding="utf-8")
     french = _compiled(here, sid)
@@ -203,7 +189,7 @@ def test_a_fire_plan_with_no_scale_cannot_be_given_one_and_the_refusal_names_the
     assert not ok and "sheet-fire-viewport" in message and "fire-protection plan tab" in message, message
     # an id of the position plans, or none at all, is refused naming the fire plans there are
     source = sheets.path(here, sid)
-    source.write_text(source.read_text(encoding="utf-8").replace('plan: "Pavillon-EG"', 'plan: "Pavillon"').replace("scale: 100", "width: 80mm"), encoding="utf-8")
+    source.write_text(source.read_text(encoding="utf-8").replace('"Pavillon-EG"', '"Pavillon"').replace("scale: 100", "width: 80mm"), encoding="utf-8")
     ok, message = sheets.compile(here, sid)
     assert not ok and "no fire-protection plan" in message and "Treppenhaus" in message, message
 
@@ -225,13 +211,13 @@ def test_a_sheet_viewport_with_no_plan_draws_the_frame_and_the_two_fire_objects_
 
 def test_the_legend_lines_of_a_fire_plan_say_their_own_wording_and_a_position_plans_go_by_their_key():
     """`plan-legend` reads `engine` before `term` before the STE key: the fire export's lines carry the first two, a position plan's neither."""
-    fire = json.loads((SAMPLE / "_woodcore" / "data" / "fire.json").read_text(encoding="utf-8"))
+    fire = json.loads((project.Project.load(next(SAMPLE.glob("*.woodcore"))).data_dir / "fire.json").read_text(encoding="utf-8"))
     for plan in fire["plans"].values():
         for line in plan["legend_lines"]:
             assert ("engine" in line) != ("term" in line), line
-    calc = (ROOT / "lib" / "calc-engine.typ").read_text(encoding="utf-8")
+    calc = conftest.engine_source()
     assert re.search(r'if "engine" in l \{ t-str\(l\.engine\) \}\s*else if "term" in l \{ tl-str\(l\.term\) \}', calc)
-    plans = json.loads((SAMPLE / "_woodcore" / "data" / "plans.json").read_text(encoding="utf-8"))
+    plans = json.loads((project.Project.load(next(SAMPLE.glob("*.woodcore"))).data_dir / "plans.json").read_text(encoding="utf-8"))
     for plan in plans["plans"].values():
         if isinstance(plan["legend"], list):
             assert all("engine" not in l and "term" not in l for l in plan["legend"])

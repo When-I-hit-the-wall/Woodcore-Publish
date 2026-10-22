@@ -13,23 +13,23 @@ Every section starts with the same line, which makes every command of Woodcore a
 
 Die Schneelast wird nach SIA 261 ermittelt.
 
-#show-calc("snow-load", "SL")
+#include domain-file("snow-load", "SL")
 ```
 
-The text is yours, in the report's language; the commands print what the export calculated. The [reference](~/docs/) lists them all, with their examples.
+The text is yours, in the report's language; the commands print what the export calculated: a calculation of Woodcore's is written out whole in a file of its own, which the section includes. The [reference](~/docs/) lists them all, with their examples.
 
 ## Tie calculations to a position
 
-`#calc-block` groups the calculations that concern one or several positions, and prints at its head the line `#member` prints of each at level 1:
+`#position` names a position on a line, its id in its type's colour, and the calculation that concerns it follows in a `#domain` of its own -- or in the file Woodcore wrote for a check, `#include domain-file("check", "ZT-01")`:
 
-{{example calc-block-1}}
+{{example domain-1}}
 
 ## Three levels of detail
 
 Every command prints more or less depending on the **level**: 1 the result, for the client; 2 the important calculation, for the engineer; 3 every detail, for the checking engineer. The report's level is chosen at the export (step 8), and a call may set its own:
 
 ```typ
-#show-calc("snow-load", "SL", level: 3)
+#var("s_k", domain: ("snow-load", "SL"), level: 3)
 ```
 
 > [!tip]

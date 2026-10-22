@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, Anhang A, Tabelle 45 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 95, read off a render of the page (the formulas are set as graphics).",
+  "_source": "SIA 265:2021, Anhang A, Tabelle 45 -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 95, read off a render of the page (the formulas are set as graphics).",
   "_note": "The general rows (beta_f = f_h,2,k / f_h,1,k), equations (120), (121), (124) and (125). base_i = sqrt(f_u,k / f_h,i,k) · d^t_exponent; k_max = sqrt(k_max_numerator · beta_f / (1 + beta_f)). A Seitenholz: t_i,1 = t_1_factor · bracket_i · base_i with k_beta,i,1 = k_1_share · k_max, and t_i,2 = t_2_factor · bracket_i · base_i with k_beta,i,2 = k_max -- bracket_1 = sqrt(beta_f/(1+beta_f)) + 1, bracket_2 = sqrt(1/(1+beta_f)) + 1. The Mittelholz of a zweischnittig joint: t_2,1 = 0, k_beta,2,1 = 0, t_2,2 = t_2_factor · base_2 / sqrt(1 + beta_f), k_beta,2,2 = k_max. The «Für beta_f = 1» rows (122), (123), (126), (127) are these evaluated and are not transcribed.",
   "edition": "SIA 265:2021",
   "table_45": {

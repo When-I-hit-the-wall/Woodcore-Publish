@@ -58,11 +58,12 @@
 
 ### Tests, tools and the way of working
 
+- *[in force]* «A domain is a source domain, an export domain or both, written as two Protocols, and wha…»
 - *[in force]* «A new project opens in the convention d'utilisation, and no console window may flash, sett…»
 - *[in force]* «Tinymist's root is stated, and a probe decided it, settled (v0.111).»
 - *[in force]* «The registry's default is written down twice and held equal by a test, settled (v0.100).»
 - *[in force]* «Typst is checked at every start, from the sources, and pinned in the same step, settled (v…»
-- *[in force]* «Every key is accepted, settled (v0.87, second half), reversing v0.79's refusal (periodic a…»
+- *[partly superseded in v0.120]* «Every key is accepted, settled (v0.87, second half), reversing v0.79's refusal (periodic a…»
 - *[in force]* «A frozen set carries every input the test restates, settled (v0.85.1).»
 - *[in force]* «The empty folders are written to settings.json as they change, and the tests never write t…»
 - *[in force]* «The versions of the tools are pinned, and Woodcore watches them, settled (v0.59).»
@@ -73,16 +74,21 @@
 
 ### The three documents, their structure and sharing
 
+- *[in force]* ««Changer de template de fond…» is retired with calc/content_switch.py, settled (v0.122, i…»
+- *[in force]* «A project is created with its name, its place and its language, and each document is made…»
+- *[in force]* «The export's figures lie in the tabs' folders, their one copy, and only what an export listed is r…»
+- *[in force]* «A project laid out by folders, schema 1.1 (v0.119, issue #64, spec `docs/requirements/completed/…»
+- *[in force]* «Rule 15 holds for the window and no longer for the calculations, settled (v0.118, issue #6…»
 - *[in force]* «The look of a project is a form: a folder `Template/` at the Typst root, `config.typ` keep…»
 - *[in force]* «The project templates are dissolved into one form and three contents, settled (v0.114).»
-- *[in force]* «The report has content templates, and switching any document's content is a comparison, se…»
+- *[superseded in v0.122]* «The report has content templates, and switching any document's content is a comparison, se…»
 - *[in force]* «The BFH form sets every piece of text in Lucida Sans, settled (v0.114).»
 - *[in force]* «No page-picker popup: a document is cut into plans in the centre, settled (v0.114).»
 - *[in force]* «A convention's and a base's headings are written at the level they print at, and a chapter…»
 - *[in force]* «An object taken out is not asked about, and can be put back where it stood, settled (v0.11…»
 - *[in force]* «The title page is a `title.typ` shared by the three documents, settled (v0.113).»
 - *[in force]* «The settings' templates are one page of three places, and a template is saved from a proje…»
-- *[in force]* «A document is edited in one tab, and no Typst code is ever shown in Woodcore, settled (v0.…»
+- *[partly superseded in v0.118]* «A document is edited in one tab, and no Typst code is ever shown in Woodcore, settled (v0.…»
 - *[in force]* «Every heading, every paragraph and every table is an object, and the report's files are ta…»
 - *[in force]* «A paragraph is a plain text box holding its markup as written, settled (v0.112).»
 - *[in force]* «The tree is chapters › sections › objects, several chosen at once, and moved by drag and d…»
@@ -160,7 +166,7 @@
 - *[in force]* «An excerpt and its annex page are linked by where they land, settled (v0.111).»
 - *[in force]* «The annexes carry the pages of the excerpts the report shows, by default, settled (v0.111)…»
 - *[in force]* ««Annexes» sits in the Projet group, after the journal, and in the three documents, settled…»
-- *[in force]* «An excerpt has no levels, settled (v0.111).»
+- *[superseded in v0.120]* «An excerpt has no levels, settled (v0.111).»
 - *[in force]* «`show-annexes`' examples are shown and not rendered, settled (v0.111).»
 - *[in force]* «The fire-protection plan is the position plan's tab a second time, on one shared base, set…»
 - *[in force]* «The documents are shared and a page's turn turns both kinds, settled (v0.115).»
@@ -181,8 +187,15 @@
 
 ### The window and its tabs
 
-- *[partly superseded in v0.118]* «The level -1 «Sélection manuelle» is four joined buttons per variable, `0 | 1 | 2 | 3`, the variables side…»
-- *[in force]* «The «Formules» tab shows a domain as one text, each command a pill where Typst prints it, an…»
+- *[in force]* «The command palette reads everything at its source each time it opens, the actions off th…»
+- *[in force]* «Every Typst page follows its pane's width and zooms by Ctrl+wheel through one view, settl…»
+- *[in force]* «The interface zooms from 70 to 200 % by steps of ten, kept in the user's settings; a «Vie…»
+- *[in force]* «A tab arrives in its first view every time, and the view is no longer kept in the user's …»
+- *[in force]* «The «Projet» tab is the first row and every change of document brings it forward; a title…»
+- *[in force]* «The four canvases' list is the base's, settled (v0.120, issue #69, spec `docs/requirem…»
+- *[retired in v0.120]* «The level -1 «Sélection manuelle» is four joined buttons per variable, `0 | 1 | 2 | 3`, the variables side…»
+- *[partly superseded in v0.118]* «The «Formules» tab shows a domain as one text, each command a pill where Typst prints it, an…»
+- *[in force]* «A computing command written inside a line of a domain is a command glued to what is beside it…»
 - *[in force]* «One tab «Poids propre et surcharge», settled (issue #35, 11.10.2026).»
 - *[in force]* «The «Formules» tab writes what a line is in «Calcul» and how it is printed in «Affichage»,…»
 - *[in force]* «A hidden PDF layer is stripped from the report's page, settled (v0.114).»
@@ -218,7 +231,7 @@
 - *[in force]* «After a position is saved the window is not built again; each tab is built again when it i…»
 - *[in force]* «k_h applies to glulam bending by default, settled (v0.88).»
 - *[in force]* «A table is cited «SIA 265 Tabelle 8», without §, settled (v0.88).»
-- *[in force]* «A word math does not know is quoted by asking math, settled (v0.87).»
+- *[partly superseded in v0.120]* «A word math does not know is quoted by asking math, settled (v0.87).»
 - *[in force]* «A negative number is printed with a minus sign, set where a number becomes text, settled (…»
 - *[in force]* «A load's colour leaves its label black, settled (v0.87).»
 - *[in force]* «A highlighted point is ringed over the pieces, settled (v0.87).»
@@ -278,9 +291,9 @@
 - *[in force]* «A bundle is a folder of the export list that makes one more PDF, settled (v0.116).»
 - *[in force]* «A sheet is of one kind, settled (v0.116).»
 - *[in force]* «The sheet editor's right pane follows the selection like the plan tabs', settled (v0.116).»
-- *[in force]* «Member checks are saved objects resolved by the export, named by ID in the report, and cal…»
+- *[superseded in v0.120]* «Member checks are saved objects resolved by the export, named by ID in the report, and cal…»
 - *[in force]* «The window's results are an instant Python calculation, REVERSING «Typst alone», settled (…»
-- *[in force]* «A tab shows one task at a time, chosen in the top bar, settled (v0.117).»
+- *[partly superseded in v0.122]* «A tab shows one task at a time, chosen in the top bar, settled (v0.117).»
 - *[in force]* «Every command of an *Affichage* has a panel written by hand, its defaults the signature's,…»
 - *[in force]* «Every error, warning and information goes through one store and is shown at the top right,…»
 - *[in force]* «The PDF views are not tiled; they render less, off the window's thread, in a better order,…»
@@ -291,6 +304,15 @@
 
 ### Position plans, schemas, static models, fire plans
 
+- *[in force]* «One canvas base, one SVG layer, one icon renderer, and the schema's size exported, settl…»
+- *[in force]* «The figures' colours and font are one palette, lib/figure-palette.json, the colours merg…»
+- *[in force]* «A plan's objects are copied to another plan through one clip in memory, the project's, and…»
+- *[in force]* «A paste gives every element the next number of its prefix on the target's storey, and «Copie…»
+- *[in force]* «A drawing command gives the drawing, and the figure is written in Typst as any figure is,…»
+- *[in force]* «A plan carries a bracing wall's construction mode, and the stiffness centre is computed for…»
+- *[in force]* «The stiffness centre and the mass centre are computed from the drawing and stored nowhere, …»
+- *[in force]* «The building's outline is a list of one and no element of the plan, settled (issue #54, 13…»
+- *[in force]* «A plan's own switch prints its centres, and a call may only leave them out, settled (issue…»
 - *[in force]* «CAD through ezdxf, DWG through the ODA File Converter if installed, settled (v0.114).»
 - *[in force]* «Export sheets live in `<typst_root>/Plans/`, a `.typ` the source of truth, settled (v0.114…»
 - *[in force]* «A plan is saved when left, and asks only when the save is refused, settled (v0.114).»
@@ -341,7 +363,9 @@
 
 ### Connectors, polar moments and member checks
 
-- *[in force]* «A check's verdict is a key of -1, named by its utilisation, and printed only where named, settled (issue #58, 14.10.2026).»
+- *[in force]* «A value the engineer enters cites the norm and the clause it serves, and steel builds it…»
+- *[in force]* «A member check is printed unfolded, its calculation written out as a domain of the «Formul…»
+- *[retired in v0.120]* «A check's verdict is a key of -1, named by its utilisation, and printed only where named, settled (issue #58, 14.10.2026).»
 - *[superseded in v0.118]* «A check's result is always printed at -1, settled (issue #39, 11.10.2026).»
 - *[in force]* «Buckling and lateral torsional buckling are kinds of their own, and a lateral torsional bu…»
 - *[in force]* «The η are found by walking the registry, not by registering, settled (v0.99).»
@@ -376,8 +400,18 @@
 
 ### Formulas, variables and the Typst commands
 
-- *[in force]* «`#eq` prints inline by default, as `#var` does, settled (v0.117, issue #19), reversing v0.…»
-- *[partly superseded in v0.117]* «The level of detail -1 lists what is printed: `level: -1, shown: (A: 2, W_y: 1)`, settled…»
+- *[in force]* «The report's Typst is a uniform core, one file per domain written out by Woodcore, the dr…»
+- *[in force]* «`#unit` and `#calc-defaults` hold for the next line unless a scope says otherwise, settle…»
+- *[in force]* «The force arrows on a polar moment's figure come back as a sixth image command, `#image-p…»
+- *[in force]* «What a retired command printed and the written-out domain does not, is lost and said, set…»
+- *[in force]* «Every command that prints a figure, a table or a list takes a level -- 1 alone, 2 with its…»
+- *[partly superseded in v0.120]* «The level each line of a calculation is printed from is written once, in lib/line-levels.json…»
+- *[in force]* «Every subscript is printed upright, in the norm's form, by one rule applied where math is…»
+- *[in force]* «A number is printed by one rule, written once in lib/number.typ and calc/number_text.py,…»
+- *[in force]* «A line is found by its call, never by a comment, and a «Formules» domain is written only w…»
+- *[in force]* «A value written beside `domain:` is a literal checked by it, and `own: true` the engineer'…»
+- *[partly superseded in v0.120]* «`#eq` prints inline by default, as `#var` does, settled (v0.117, issue #19), reversing v0.…»
+- *[retired in v0.120]* «The level of detail -1 lists what is printed: `level: -1, shown: (A: 2, W_y: 1)`, settled…»
 - *[in force]* «A table cell never carries a footnote, whatever the report's level: `doc-value`, settled w…»
 - *[in force]* «Nothing in a reading is a wall-clock value, settled (v0.100).»
 - *[in force]* «`style:` on `var`, `var-unit` and `val` wraps the whole line, not the value, settled (v0.1…»
@@ -386,7 +420,7 @@
 - *[in force]* «The cache carries no level and no language, settled (v0.100).»
 - *[in force]* «The PDF is not in the stamp, settled (v0.100).»
 - *[in force]* «`#var` is offered for a named domain only, settled (v0.100).»
-- *[in force]* «The summaries are three commands, without a level, settled (v0.99).»
+- *[partly superseded in v0.120]* «The summaries are three commands, without a level, settled (v0.99).»
 - *[in force]* «A line written by hand enters a summary by a mark, and its unit says which, settled (v0.99…»
 - *[in force]* «The unit is read where the variable ends up, not where it is declared, settled (v0.99).»
 - *[in force]* «A group is named by a bold row of its own, settled (v0.99).»
@@ -400,7 +434,7 @@
 - *[in force]* «A check is a run of `#eq` and `#verify`, not arithmetic of its own, settled (v0.88).»
 - *[in force]* «A bare number of `#verify` keeps the unit it is written with, settled (v0.88).»
 - *[in force]* «A formula too wide for its row is stacked at its `=` signs, not shrunk and not left to ove…»
-- *[in force]* «`#var` is inline, and where its extras go is an argument, settled (v0.87), reversing v0.61…»
+- *[partly superseded in v0.120]* «`#var` is inline, and where its extras go is an argument, settled (v0.87), reversing v0.61…»
 - *[in force]* «The PDF is written beside its `.typ`, settled (v0.87), reversing v0.23's place one level a…»
 - *[in force]* «`*` is read as a multiplication in the formula string, not by a show rule, settled (v0.87)…»
 - *[in force]* «`#distance` reads the norm's own files from Typst, settled (v0.87).»
@@ -419,16 +453,16 @@
 - *[in force]* «The positions table opens level 3, and a formula shares its row with its own numbers, sett…»
 - *[in force]* «The build environment is isolated, settled (v0.83).»
 - *[in force]* «The engine's copy is guarded, settled (v0.82).»
-- *[in force]* «One command prints one value: `val` absorbed `fmt`, `inline-value` and `live-load`, settle…»
-- *[in force]* «`val`'s parts are `val`, `unit`, `val+unit` and `expression`, settled (v0.80).»
-- *[in force]* «`val` prints its extras as one footnote, and its levels only govern them, settled (v0.80).»
-- *[in force]* «A unit written over is said on the page, in orange, settled (v0.80).»
-- *[in force]* «A row of declarations is a container, not a flag on each command, settled (v0.80).»
+- *[superseded in v0.120]* «One command prints one value: `val` absorbed `fmt`, `inline-value` and `live-load`, settle…»
+- *[retired in v0.120]* «`val`'s parts are `val`, `unit`, `val+unit` and `expression`, settled (v0.80).»
+- *[retired in v0.120]* «`val` prints its extras as one footnote, and its levels only govern them, settled (v0.80).»
+- *[partly superseded in v0.120]* «A unit written over is said on the page, in orange, settled (v0.80).»
+- *[retired in v0.120]* «A row of declarations is a container, not a flag on each command, settled (v0.80).»
 - *[in force]* «Figur 45 is drawn by Python, word-free, and set under the table it is read with, settled (…»
 - *[in force]* «Every norm value a Python calculation uses lives in `calc/norms/`, once, flat, named after…»
 - *[in force]* «Every export is archived by one script, called identically by all three routes, settled (v…»
 - *[in force]* «A load is a domain whose instances are Excel sheets, settled (v0.18).»
-- *[partly superseded in v0.117]* «Snow is calculated in Excel, not in Python, settled (v0.17).»
+- *[superseded in v0.120]* «Snow is calculated in Excel, not in Python, settled (v0.17).»
 - *[in force]* «Permanent loads are calculated in Python, settled (v0.18).»
 - *[in force]* «The local wind forces are enveloped in Python, settled (v0.29).»
 - *[in force]* «A norm table is a domain whose instances are its rows, settled (v0.49).»
@@ -467,6 +501,10 @@
 
 ### Data, norms and the export
 
+- *[in force]* «A project's graph of dependencies is built at every export, written to data/dependencies.json, and wh…»
+- *[in force]* «A load workbook's snow and wind sheets give their inputs; Woodcore computes them, settled…»
+- *[in force]* «A timber member check's lines are engine vars, settled (v0.120, issue #69, spec `docs/req…»
+- *[in force]* «The norm's values for snow and wind come from calc/norms/ on both paths; the workbook gi…»
 - *[in force]* «The materials of a build-up come from SIA 261, the Belastungsannahmen library and the proj…»
 - *[in force]* «The wind covers every building of Annexe C, settled (issue #37, 11.10.2026).»
 - *[in force]* «The curved roof is the third column of Figur 3, settled (issue #36, 11.10.2026).»
@@ -501,7 +539,7 @@
 - *[in force]* «No load-to-position link of any kind, settled (v0.10 + v0.11).»
 - *[in force]* «`show-calc` renders a whole calculation, settled (v0.18).»
 - *[in force]* «A calculation is printed in letters and then in numbers, settled (v0.20).»
-- *[partly superseded in v0.117]* «Wind is calculated in Excel, and its answer is a table, settled (v0.25).»
+- *[superseded in v0.120]* «Wind is calculated in Excel, and its answer is a table, settled (v0.25).»
 - *[in force]* «The load workbooks are found by name, settled (v0.26).»
 - *[in force]* «Category E is refused by the report, settled (v0.49).»
 - *[in force]* «A load's action is declared in the data, settled (v0.28).»

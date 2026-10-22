@@ -10,6 +10,6 @@
 
 #var("M", 4.2, "kNm")
 #var("l", 3, "m")
+#unit("N", scope: "document")
 #eq("V", `M / l`)
-#unit("N")
-#eq("V_N", `M / l`)
+#eq("V_2", `2 * M / l`)

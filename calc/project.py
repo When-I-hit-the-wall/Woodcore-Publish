@@ -13,6 +13,7 @@ import contextlib
 import difflib
 import hashlib
 import json
+from datetime import datetime
 import os
 import shutil
 import stat
@@ -24,16 +25,20 @@ import proc
 import validation
 
 # The program's version: what a project's engine copy and its export record, and what lets a program refuse a project a newer one wrote.
-VERSION = "0.118.0"
+VERSION = "0.122.0"
 
 EXTENSION = ".woodcore"
 FORMAT = "woodcore-project"
-SCHEMA_VERSION = "1.0"
+# 1.1 is the project laid out by folders (issue #64, spec 2026-10-15-structure-projet-dossiers D-20): 1.0 with `layout.config` stated. Written by every project Woodcore creates or migrates; a 1.0 file is read as it always was. The version is what makes a Woodcore older than 0.119 refuse such a project by name, where it would otherwise read it and look for its commands.typ at the top of the project.
+SCHEMA_VERSION = "1.1"
+SCHEMA_VERSIONS = ("1.0", SCHEMA_VERSION)
 # An environment variable naming the project, for a process started without an argument -- the tests' subprocesses, a script.
 ENV = "WOODCORE_PROJECT"
 
 # What a project file may say about the project besides its name: what the report's title page and the PDF's metadata print (v0.82). Each optional, and empty where the file leaves it out.
 DETAILS = ("number", "client", "address", "company", "author", "checker")
+# The content template each document was made from, {mode: reference}, written as a document is created (issue #88, #90): additive, the schema_version unchanged.
+CONTENT_TEMPLATES_KEY = "content_templates"
 
 # The Woodcore version a project asks to be opened with, where it asks for one: the launcher starts the newest installed version whose number begins with it (packaging/launcher.py, v0.83). Optional; absent, the newest installed version opens it.
 PIN_KEY = "woodcore_version"
@@ -54,7 +59,6 @@ def _program_root():
 # The program: fixed for the life of the process, so these are constants.
 APP_ROOT = _program_root()
 CALC_DIR = APP_ROOT / "calc"
-LIB_DIR = APP_ROOT / "lib"
 EXPORT_SCRIPT = CALC_DIR / "export_all.py"
 
 # Where each part of a project is, relative to its folder, when its .woodcore does not say: the layout a new project is created with. Each value is also a key of schemas/woodcore-project.schema.json's `layout`. The PDF is written beside its `.typ`, in the report's own folder, which is the Typst root and where Tinymist writes it by default (the engineer's request, v0.87); until then it was written one level above, at the top of the project folder, and a project whose .woodcore states `layout.pdf` keeps its own.
@@ -72,10 +76,12 @@ MODES = ("cu", "bp", "rs")
 REPORT_ONLY = ("rs",)
 # What a project laid out in three documents states beside DEFAULT_LAYOUT's keys -- **all of them or none**, which is what tells the two layouts apart (`Project.has_modes`): the Typst root, the pictures the three documents share, and the entry file and the PDF of the two documents the report is joined by. None of them has a default, so DEFAULT_LAYOUT is unchanged and a project that states none is read as it always was. The report keeps `report` and `pdf`, so every caller of `report_typ` and `report_pdf` goes on meaning the report. ⚠️ Until 0.117 a seventh, `rfem_export`, named the folder of the RFEM exports; the RFEM import was retired then (archive/rfem/), and a project that still states it is read with the key ignored and said (RETIRED_KEYS) -- a project made since states six, which a Woodcore older than 0.117 refuses by name: a one-way step, without a new schema_version (docs/decisions.md, «Retrait de RFEM»).
 MODE_KEYS = ("typst_root", "images", "report_cu", "pdf_cu", "report_bp", "pdf_bp")
+# What a project laid out by folders states beside MODE_KEYS (schema 1.1, issue #64): the folder holding config.typ, commands.typ, title.typ, references.bib and Template/. Valid only with `typst_root`; absent, those lie at the top of the Typst root, as in every project before 0.119.
+FOLDER_KEYS = ("config",)
 # Every key a project file's `layout` may state; each is also a key of schemas/woodcore-project.schema.json's `layout`, which tests/test_project.py holds.
-LAYOUT_KEYS = tuple(DEFAULT_LAYOUT) + MODE_KEYS
+LAYOUT_KEYS = tuple(DEFAULT_LAYOUT) + MODE_KEYS + FOLDER_KEYS
 # The order a layout in three documents is written in (full_layout): the root, then each document's entry and PDF in the order of MODES' folders, then what the three share -- the order a reader of the .woodcore looks for them in.
-LAYOUT_ORDER = ("typst_root", "report", "pdf", "report_cu", "pdf_cu", "report_bp", "pdf_bp",
+LAYOUT_ORDER = ("typst_root", "config", "report", "pdf", "report_cu", "pdf_cu", "report_bp", "pdf_bp",
                 "generated", "images", "sources", "archives")
 # Each document's entry file and PDF, by the layout key that names them.
 ENTRY_KEYS = {"cu": "report_cu", "bp": "report_bp", "rs": "report"}
@@ -97,6 +103,70 @@ FORMULAS_FOLDER = "Formules"
 STRUCTURE_FILE = "structure.json"
 # Where a compile writes what it read, one record per document, so that a document whose Typst did not change since its PDF is not compiled again -- inside the export's folder, which the three share.
 STAMPS_FOLDER = "stamps"
+
+# --- the project laid out by folders (issue #64, schema 1.1) ------------------------------
+# A project in three documents that states `layout.config` is laid out by folders (`Project.has_folders`): what configures the documents in one folder, what is Woodcore's in another, the three documents, then one folder per kind of domain. Every name below is fixed and English whatever the project's language (D-14), and only `config` is a key of the .woodcore: the domains' folders are this table, never the file's (D-20), so the names live here once.
+# The folder holding what configures the three documents: config.typ, commands.typ, title.typ, references.bib and the form's Template/ -- `layout.config`.
+CONFIG_FOLDER = "000-Typst-Config"
+# The folder holding what is Woodcore's and the engineer need not open: the export and the engine copied beside it (`generated`), with the sources Woodcore draws and the archives inside it (`sources`, `archives`).
+WOODCORE_FOLDER = "000-Woodcore"
+SOURCES_IN_WOODCORE = WOODCORE_FOLDER + "/sources"
+ARCHIVES_IN_WOODCORE = WOODCORE_FOLDER + "/archives"
+# The domains the engineer writes by hand in the «Domaines» tab (the «Formules» folder until 0.119, D-01).
+DOMAINS_FOLDER = "Domains"
+# The positions: Woodcore's positions.json, the source, and the Positions.xlsx written beside it at every change and never read (D-24).
+POSITIONS_FOLDER = "Positions"
+# One folder per kind of domain a specialised tab makes, by the domain's kind (D-03, D-22): one `<id>.typ` per domain in it (calc/domains/domain_file.py). A member check's and a steel check's lie one level deeper, in the folder of their kind (CHECK_KIND_FOLDERS, D-21).
+DOMAIN_FOLDERS = {
+    "snow-load": "Variable-loads/Snow",
+    "wind-load": "Variable-loads/Wind",
+    "live-load": "Variable-loads/Live",   # the live loads of SIA 261 Tabelle 8, one file per category written out (spec 2026-10-21-commandes-typst-refonte, REQ-017)
+    "dead-load": "Permanent-loads",
+    "connector": "Connectors",
+    "connection": "Connections",
+    "check": "Timber-checks",
+    "steel": "Steel-checks",
+    "script": "Scripts",
+}
+# The folder of each kind of member check (domains/member_check.py KINDS) and of steel check (domains/steel_check.py KINDS), under DOMAIN_FOLDERS' "check" and "steel": tests/test_project.py holds the two tables equal to the two KINDS.
+CHECK_KIND_FOLDERS = {
+    "tension": "Tension", "compression": "Compression", "bending": "Bending", "shear": "Shear", "torsion": "Torsion",
+    "buckling": "Buckling", "lateral-torsional": "Lateral-torsional", "deformation": "Deformation", "vibration": "Vibration",
+}
+STEEL_KIND_FOLDERS = {
+    "class": "Class", "tension": "Tension", "compression": "Compression", "bending": "Bending", "shear": "Shear",
+    "buckling": "Buckling", "lateral-torsional": "Lateral-torsional", "interaction": "Interaction", "bolts": "Bolts",
+    "welds": "Welds", "splice": "Splice",
+}
+KIND_FOLDERS = {"check": CHECK_KIND_FOLDERS, "steel": STEEL_KIND_FOLDERS}
+# The tabs that draw rather than compute, one folder each (D-15): what they import and what the export makes of them.
+# The parent of the two plan tabs' folders, which also keeps the PDF bundles of their sheets (calc/sheets.py).
+PLANS_FOLDER = "Plans"
+DRAWING_FOLDERS = {"plan": PLANS_FOLDER + "/Position-plan", "fire": PLANS_FOLDER + "/Fire-plan", "statics": "Statics", "details": "Details"}
+# Inside a drawing tab's folder: the documents imported to draw on (D-09), and the exports -- the export sheets at its top, the figures the export makes in Figures/ (D-17).
+IMPORTED_FOLDER = "Imported Plans"
+EXPORTS_FOLDER = "Exports"
+FIGURES_FOLDER = "Figures"
+# The documents the report draws on from outside -- the annexes' PDFs -- and the excerpts the export cuts from them, in its Exports/ (D-11, D-19).
+APPENDIX_FOLDER = "Appendix"
+# Each kind of figure the export draws, by the tab or the domain whose Exports/Figures/ holds it in a project laid out by folders (D-10, D-17), and the sub-folder of data/ it lay in until 0.119 -- where a project laid out before still has it written, and the name an old record is still read by (lib/calc-engine.typ `figure-path`).
+FIGURE_KINDS = {"plan": "plans", "fire": "fire", "statics": "statics", "details": "schemas", "connection": "connections", "connector": "connectors", "dead-load": "calculations", "annex": "annexes"}
+
+
+def tab_folder(kind):
+    """The folder from the Typst root of the drawing tab or the domain `kind` (DRAWING_FOLDERS, DOMAIN_FOLDERS), and of the annexes for "annex": `Plans/Position-plan`."""
+    if kind == "annex":
+        return APPENDIX_FOLDER
+    return DRAWING_FOLDERS.get(kind) or DOMAIN_FOLDERS[kind]
+
+
+def figures_folder(kind):
+    """Where the figures of `kind` (FIGURE_KINDS) lie from the Typst root in a project laid out by folders: `Plans/Position-plan/Exports/Figures` -- and the annexes' excerpts in `Appendix/Exports`, which holds nothing else (D-19)."""
+    if kind == "annex":
+        return f"{APPENDIX_FOLDER}/{EXPORTS_FOLDER}"
+    return f"{tab_folder(kind)}/{EXPORTS_FOLDER}/{FIGURES_FOLDER}"
+# Where a domain's file is archived, inside its own folder, as the «Formules» tab has always archived its own.
+DOMAIN_ARCHIVES = "archives"
 
 # The folders of `sources`, one per kind of thing Woodcore's window draws. `details/` and not `schemas/`, which is the contracts' own folder (docs/domain/detail-schemas.md §3.3decies). `annexes/` holds the documents the report draws on from outside and the excerpts it shows of them, in two sub-folders of its own, `sources/` and `excerpts/` (docs/domain/annexes.md §3.3undevicies, v0.115). `fire/` holds the fire-protection plans, one file per plan, as `plans/` holds the position plans they may follow (domains/fire.py). `checks/` holds the member checks, one file per check, the arrangement of `connectors/` (domains/member_check.py, v0.117). `loads/` holds the loads entered in Woodcore, one sub-folder per domain -- `dead/`, `snow/`, `wind/` -- and one file per case (registry.SOURCE_MODULES, issues #35-#37).
 SOURCE_FOLDERS = ("connectors", "connections", "plans", "statics", "details", "scripts", "annexes", "fire", "checks", "loads", "profiles", "steel")
@@ -138,6 +208,18 @@ class Project:
                 f"{self.file.name}: a project laid out in three documents states every one of "
                 f"{', '.join(MODE_KEYS)} -- this one states {', '.join(stated)} and not {missing}"
             )
+        version = data.get("schema_version")
+        if version is not None and (version == SCHEMA_VERSION) != ("config" in self.layout):   # a Project built in memory from a layout alone states no version and is not held to it
+            raise ProjectError(
+                f"{self.file.name}: a project laid out by folders states layout.config and schema_version "
+                f"{SCHEMA_VERSION}, one with the other -- this one states schema_version {version} "
+                f"and {'layout.config' if 'config' in self.layout else 'no layout.config'}"
+            )
+        if "config" in self.layout and not self.has_modes:
+            raise ProjectError(
+                f"{self.file.name}: layout.config ({self.layout['config']}) is stated without layout.typst_root -- "
+                f"only a project in three documents keeps its configuration in a folder of its own"
+            )
         if self.has_modes:
             self._check_documents()
         elif not _is_within(self.generated_dir, self.typst_root):
@@ -176,6 +258,19 @@ class Project:
                     f"each document keeps its structure, its sections and its PDF in a folder of its own"
                 )
             seen[os.path.normcase(str(folder))] = key
+        if self.has_folders:
+            config = self._path("config")
+            if config == self.root or config.parent != self.root:
+                raise ProjectError(
+                    f"{self.file.name}: layout.config ({self.layout['config']}) must be one folder at the top of the "
+                    f"project -- `/{self.layout['config']}/commands.typ` is how every section imports the engine"
+                )
+            for mode in MODES:
+                if self.document_dir(mode) == config:
+                    raise ProjectError(
+                        f"{self.file.name}: layout.config and layout.{ENTRY_KEYS[mode]} are one folder "
+                        f"({self._rel(config)}) -- the configuration has a folder of its own"
+                    )
 
     @classmethod
     def load(cls, file):
@@ -245,13 +340,6 @@ class Project:
                 found.append(engine.Note("retired_key", f"{self.file.name}: {section}.{key} is ignored -- {why}; take it out of the project file to silence this", file=self.file.name, key=f"{section}.{key}"))
         return found
 
-    def as_project_path(self, path):
-        """`path` written as the project file keeps it: relative to the project's folder where it lies inside it, absolute where it does not."""
-        path = Path(path).resolve()
-        try:
-            return path.relative_to(self.root).as_posix()
-        except ValueError:
-            return str(path)
 
     # --- the report, and the documents beside it ------------------------------
     @property
@@ -260,9 +348,29 @@ class Project:
         return "typst_root" in self.layout
 
     @property
+    def has_folders(self):
+        """True for a project laid out by folders (schema 1.1, issue #64) -- three documents whose .woodcore states `layout.config` -- where the configuration, Woodcore's files, the documents and one folder per kind of domain each lie apart. False for every project laid out before: it is read, and compiled, exactly as before, until it is migrated (calc/project_migrate.py)."""
+        return self.has_modes and "config" in self.layout
+
+    @property
     def modes(self):
-        """The documents this project is written as, in their order: MODES in three documents, the report alone (REPORT_ONLY) otherwise."""
+        """The documents this project is written as, in their order: MODES in three documents, the report alone (REPORT_ONLY) otherwise. The layout's, whether each document is there yet or not: `created_modes` says which are."""
         return MODES if self.has_modes else REPORT_ONLY
+
+    @property
+    def created_modes(self):
+        """The documents of `modes` whose entry file is there, in their order (issue #90): a new project is made without any, each created when the engineer chooses its content template (project_template.create_document). What compiles, exports, shares or opens a document asks this rather than `modes`, which is the layout."""
+        return tuple(mode for mode in self.modes if self.document_typ(mode).is_file())
+
+    def is_created(self, mode):
+        """Whether document `mode` is there -- its entry file written."""
+        return mode in self.modes and self.document_typ(mode).is_file()
+
+    def content_template(self, mode):
+        """The reference of the content template document `mode` was made from (`builtin:cu/standard`), as the project file keeps it in `content_templates` -- "" for a document made before 0.122, or not made yet (issue #88)."""
+        kept = self.data.get(CONTENT_TEMPLATES_KEY)
+        value = kept.get(mode) if isinstance(kept, dict) else None
+        return value if isinstance(value, str) else ""
 
     def _document(self, mode):
         """`mode` if it is one of this project's documents -- else a ProjectError saying which it is not."""
@@ -310,24 +418,40 @@ class Project:
 
     # --- what the documents share -----------------------------------------------
     @property
+    def config_dir(self):
+        """The folder holding config.typ, commands.typ, title.typ, references.bib and the form's Template/: `layout.config` in a project laid out by folders (000-Typst-Config/), the top of the Typst root in every project laid out before."""
+        if self.has_folders:
+            return self._path("config")
+        return self.typst_root
+
+    def from_root(self, path):
+        """`path` as a Typst file reads it from the Typst root: `/000-Typst-Config/commands.typ` -- the one spelling valid in every document's folder and at every depth."""
+        return "/" + Path(path).resolve().relative_to(self.typst_root).as_posix()
+
+    @property
     def config_typ(self):
-        """The config.typ the documents are styled by: one at the top of the project for the three, the report's own for a report alone."""
-        return self.typst_root / CONFIG_FILE
+        """The config.typ the documents are styled by: one in the configuration's folder for the three, the report's own for a report alone."""
+        return self.config_dir / CONFIG_FILE
 
     @property
     def commands_typ(self):
         """The commands.typ every entry file and every section imports the engine through (docs/typst/api-conventions.md §10bis)."""
-        return self.typst_root / COMMANDS_FILE
+        return self.config_dir / COMMANDS_FILE
 
     @property
     def title_typ(self):
-        """The title.typ every document's entry file sets its title page with, `#title-page(document: "cu")`: one at the top of the project for the three -- the engineer's to edit, never Woodcore's to rewrite -- and none in a report alone, whose entry keeps its own."""
-        return self.typst_root / TITLE_FILE
+        """The title.typ every document's entry file sets its title page with, `#title-page(document: "cu")`: one in the configuration's folder for the three -- the engineer's to edit, never Woodcore's to rewrite -- and none in a report alone, whose entry keeps its own."""
+        return self.config_dir / TITLE_FILE
 
     @property
     def references_bib(self):
-        """The project's own references.bib, which `#show-bibliography(project: "references.bib")` reads from the Typst root (docs/typst/citations.md §10)."""
-        return self.typst_root / REFERENCES_FILE
+        """The project's own references.bib, which `#show-bibliography(project: …)` reads from the Typst root (docs/typst/citations.md §10)."""
+        return self.config_dir / REFERENCES_FILE
+
+    @property
+    def template_dir(self):
+        """The form's folder, Template/ -- template.typ, form.json and its assets (calc/forms.py) -- beside config.typ."""
+        return self.config_dir / TEMPLATE_FOLDER
 
     @property
     def images_dir(self):
@@ -338,8 +462,66 @@ class Project:
 
     @property
     def formulas_dir(self):
-        """The calculation domains of the «Formule» tab: `Formules/` at the top of the Typst root, where every document reaches it as `/Formules/<id>.typ` (FORMULAS_FOLDER)."""
-        return self.typst_root / FORMULAS_FOLDER
+        """The domains the engineer writes in the «Domaines» tab: `Domains/` at the top of the Typst root in a project laid out by folders, `Formules/` in one laid out before -- where every document reaches one as `/<folder>/<id>.typ` (DOMAINS_FOLDER, FORMULAS_FOLDER)."""
+        return self.typst_root / (DOMAINS_FOLDER if self.has_folders else FORMULAS_FOLDER)
+
+    def domain_dir(self, kind, sub=None):
+        """The folder of the domains of `kind` (DOMAIN_FOLDERS) -- of its `sub` kind for a member check or a steel check (KIND_FOLDERS) -- in a project laid out by folders; None in one laid out before, which has no such folder."""
+        if not self.has_folders or kind not in DOMAIN_FOLDERS:
+            return None
+        folder = self.typst_root / DOMAIN_FOLDERS[kind]
+        if kind in KIND_FOLDERS:
+            if sub is None:
+                return folder
+            if sub not in KIND_FOLDERS[kind]:
+                raise ProjectError(f"unknown {kind} kind {sub!r} -- expected one of {', '.join(KIND_FOLDERS[kind])}")
+            return folder / KIND_FOLDERS[kind][sub]
+        return folder
+
+    def unfolded_dir(self, kind):
+        """Where a member check of `kind` is written unfolded (calc/domains/unfold.py): its kind's folder under Timber-checks/ in a project laid out by folders, `Formules/` beside the «Formules» domains in one laid out before."""
+        return self.domain_dir("check", kind) if self.has_folders else self.formulas_dir
+
+    @property
+    def positions_dir(self):
+        """The folder of positions.json: `Positions/` in a project laid out by folders, beside its Positions.xlsx; the sources' folder in one laid out before."""
+        return self.root / POSITIONS_FOLDER if self.has_folders else self.sources_dir
+
+    def drawing_dir(self, tab):
+        """The folder of drawing tab `tab` (DRAWING_FOLDERS: plan, fire, statics, details) in a project laid out by folders; None in one laid out before."""
+        return self.typst_root / DRAWING_FOLDERS[tab] if self.has_folders else None
+
+    def exports_dir(self, kind):
+        """The Exports/ of the drawing tab or the domain `kind` -- of Appendix/ for "annex" -- in a project laid out by folders: the export sheets at its top, the figures in Figures/ (D-17); None in one laid out before, whose exports lie in data/."""
+        return self.typst_root / tab_folder(kind) / EXPORTS_FOLDER if self.has_folders else None
+
+    def figures_dir(self, kind):
+        """The Exports/Figures/ the export writes the figures of `kind` (FIGURE_KINDS) into in a project laid out by folders -- their one copy, which Typst reads (D-10); None in one laid out before, whose figures lie in data/<FIGURE_KINDS[kind]>/."""
+        return self.typst_root / figures_folder(kind) if self.has_folders else None
+
+    def structure_folders(self):
+        """Every folder a project laid out by folders has, created with it and made again where one is missing (`ensure_folders`): the configuration, Woodcore's, the domains', the drawing tabs' with their imports and exports, the positions and the appendix. [] for a project laid out before."""
+        if not self.has_folders:
+            return []
+        folders = [self.config_dir, self.generated_dir, self.sources_dir, self.archives_dir, self.formulas_dir,
+                   self.images_dir, self.positions_dir]
+        for kind in DOMAIN_FOLDERS:
+            folders.append(self.domain_dir(kind))
+            folders += [self.domain_dir(kind, sub) for sub in KIND_FOLDERS.get(kind, ())]
+        for kind in FIGURE_KINDS:
+            folders.append(self.figures_dir(kind))   # the annexes' Appendix/Exports/ among them
+        for tab in ("plan", "fire"):
+            folders.append(self.drawing_dir(tab) / IMPORTED_FOLDER)
+        return folders
+
+    def ensure_folders(self):
+        """Creates every folder of `structure_folders` that is missing -- an empty folder is not kept by Git or by a zip, so a project cloned or unpacked has them made again as it opens. Returns the folders made."""
+        made = []
+        for folder in self.structure_folders():
+            if not folder.is_dir():
+                folder.mkdir(parents=True, exist_ok=True)
+                made.append(folder)
+        return made
 
     # --- what the engineer enters -----------------------------------------------
     @property
@@ -403,10 +585,6 @@ class Project:
         """The steel checks and connections, one source file each, written by the «Acier» tabs and resolved against the positions and the profiles at the export (domains/steel_check.py, D-12)."""
         return self.sources_dir / "steel"
 
-    @property
-    def loads_dir(self):
-        """The loads entered in Woodcore, `loads/dead`, `loads/snow`, `loads/wind`: one source file per case, computed at the export beside the sheets of a load workbook (registry.SOURCE_MODULES, issues #35-#37)."""
-        return self.sources_dir / "loads"
 
     @property
     def journal_file(self):
@@ -439,6 +617,11 @@ class Project:
     def archives_dir(self):
         return self._path("archives")
 
+    def generated_excludes(self):
+        """What lies inside the generated folder and is not generated: the sources and the archives of a project laid out by folders, both inside 000-Woodcore/ (D-08). Every walk of `generated` -- the archive of an export, the stamps, a renumbering -- leaves them out, by these resolved paths and never by a folder's name: an archive that took the archives in would carry every earlier archive in the next one (spec 2026-10-15 ARCH-RISK-A01)."""
+        generated = self.generated_dir
+        return [path for path in (self.sources_dir, self.archives_dir) if _is_within(path, generated) and path != generated]
+
     def __repr__(self):
         return f"Project({str(self.file)!r})"
 
@@ -446,7 +629,7 @@ class Project:
 # --- the engine a project compiles with ---------------------------------------------
 
 # The engine a project's report compiles with, copied into the project beside its export (docs/architecture/layout.md §11, v0.81): lib/'s three files, and the glossary lib/i18n.typ reads as `../calc/i18n/strings.json`. Typst reads nothing outside the report's folder, and the engine finds the export by the relative path `../data/`, so the copy sits in `generated`, beside data/ -- exactly the arrangement examples/ has used since v0.65.
-ENGINE_FILES = ("lib/calc-engine.typ", "lib/formula.typ", "lib/i18n.typ", "calc/i18n/strings.json")
+ENGINE_FILES = ("lib/calc-engine.typ", "lib/number.typ", "lib/subscript.typ", "lib/calc-engine-core.typ", "lib/calc-engine-drawings.typ", "lib/calc-engine-display.typ", "lib/calc-engine-records.typ", "lib/calc-engine-connections.typ", "lib/formula.typ", "lib/i18n.typ", "calc/i18n/strings.json")  # calc-engine.typ a façade over its five parts since v0.120 (G9)
 # lib/distance.typ and the norm tables it reads as `../calc/norms/<file>.json` (v0.87): the minimum distances of SIA 265, which `#distance` computes in the report from calc/norms/'s own files. tests/test_distance.py holds this list equal to the files lib/distance.typ names and calc/norms/sia265.py reads.
 ENGINE_FILES += ("lib/distance.typ",) + tuple("calc/norms/%s.json" % name for name in (
     "sia265-2021-tab24-abstaende",
@@ -464,33 +647,16 @@ ENGINE_FILES += ("lib/distance.typ",) + tuple("calc/norms/%s.json" % name for na
     "sia265-2021-6.4.1.1-nageldurchmesser",
     "sia265-2021-6.5.2.3.1-schraubendurchmesser",
 ))
-# lib/timber.typ and the norm files it reads (v0.88): the member checks of SIA 265 4.2, which `#member` and the `verify-*` commands compute in the report -- the design values of Tabellen 8 and 9, eta_w and eta_t, Anhang B's Tabellen 47 and 48, and the constants of 3.4.2.3 and 4.2.6 to 4.2.9. tests/test_timber.py holds this list equal to the files lib/timber.typ names.
-ENGINE_FILES += ("lib/timber.typ",) + tuple("calc/norms/%s.json" % name for name in (
-    "sia265-2021-tab04-eta-w",
-    "sia265-2021-2.2.6-eta-t",
-    "sia265-2021-tab08-vollholz",
-    "sia265-2021-tab09-brettschichtholz",
-    "sia265-2021-tab47-druckfestigkeit-e005-vollholz",
-    "sia265-2021-tab48-druckfestigkeit-e005-brettschichtholz",
-    "sia265-2021-3.4.2.3-k-h",
-    "sia265-2021-4.2.6-abscheren",
-    "sia265-2021-4.2.7-schub-querdruck",
-    "sia265-2021-4.2.8-knicken",
-    "sia265-2021-4.2.9-kippen",
-    "sia265-2021-4.5-brandfall",
-))
 # lib/bibliography.typ and the catalogue it reads (v0.99): the documents the engine can name in full, which `#show-bibliography` prints for every norm the report cites. calc/norms/norms.py checks the same file; tests/test_bibliography.py holds this pair equal to what lib/bibliography.typ names.
 ENGINE_FILES += ("lib/bibliography.typ", "calc/norms/norms.json")
-# lib/summary.typ (v0.99): the report's summary tables -- the area loads, the line loads and the main results, which `show-load-summary`, `show-line-load-summary` and `show-result-summary` gather from the export and from the registry. It reads no file of its own: the export it reads is already beside it, and the glossary it names is the one every other file of lib/ reads.
-ENGINE_FILES += ("lib/summary.typ",)
-# lib/steel.typ (issues #50-#52): the steel checks of the «Acier» tabs, printed as the export computed them -- it computes nothing and reads no norm file, data/steel.json carrying every value (spec 2026-10-12-section-acier D-09).
-ENGINE_FILES += ("lib/steel.typ",)
 # lib/document.typ (the three document modes, phase 3): the parametric objects of a project's documents -- the tables, the live loads and the non-structural self-weight, a field, a list to tick, a choice, a picture, a plan's extract, the signatures and the norms a section names. It reads no file of its own: the live loads come out of the export through `val`, and the norms out of norms.json through lib/bibliography.typ, both already beside it.
 ENGINE_FILES += ("lib/document.typ",)
 ENGINE_FILES += ("lib/sheet.typ", "lib/assets/logo-bfh.png")  # the export sheets (v0.114) and the logo of their title block -- copied as bytes by sync_engine
 ENGINE_FILES += ("lib/units.json",)  # the units lib/formula.typ reads as `json("units.json")` and calc/units.py reads too (v0.117, ARCH-005): one table for the report and the «Formule» tab
+ENGINE_FILES += ("lib/figure-palette.json",)  # the figures' colours and font, which lib/calc-engine-core.typ reads as `json("figure-palette.json")` and calc/domains/svg_draw.py reads too (v0.120, D5)
 ENGINE_FILES += ("lib/positions.typ",)  # the list of the positions (v0.116): `show-position-list`, and the table sheet.typ's `sheet-position-list` prints -- it reads the export beside it
-ENGINE_FILES += ("lib/shown-variables.json",)  # what `level: -1, shown:` may name, command by command (v0.117, issue #20): lib/calc-engine.typ reads it as `json("shown-variables.json")`, calc/shown_variables.py for the window's boxes
+ENGINE_FILES += ("lib/display-presets.json",)  # what each level sets of the fine display arguments of #var, #eq, #verify and #domain (spec 2026-10-21-commandes-typst-refonte, REQ-007, ARCH-001): lib/formula.typ reads it as `json("display-presets.json")`
+ENGINE_FILES += ("lib/image-vocabulary.json",)  # the words of the five image-* commands' detail-figure and detail-legend (spec 2026-10-21-commandes-typst-refonte, ARCH-012): lib/calc-engine-drawings.typ reads it as `json("image-vocabulary.json")`, calc/build_reference_calls.py `call_image_figure` too
 ENGINE_STAMP = "VERSION"
 # The states of engine_state an export replaces only once the engineer agrees: `--update-engine`, or the window's dialog (engine_consent).
 ASKED = ("older", "edited", "unknown")
@@ -603,7 +769,7 @@ def sync_engine(project, update=False):
     stamp = json.dumps({"version": VERSION, "files": hashes}, indent=2) + "\n"
     version = target / ENGINE_STAMP
     if not version.is_file() or version.read_text(encoding="utf-8") != stamp:
-        version.write_text(stamp, encoding="utf-8")
+        version.write_text(stamp, encoding="utf-8", newline="\n")
         written.append(ENGINE_STAMP)
     return written
 
@@ -710,9 +876,14 @@ def full_layout(layout):
     return full
 
 
+def schema_version_for(layout):
+    """The schema_version a project file with `layout` is written at: 1.1 for a layout by folders (`config` stated), which a Woodcore older than 0.119 must refuse, 1.0 for every other -- a project laid out before is not made unreadable to an older Woodcore by being saved."""
+    return SCHEMA_VERSION if layout and "config" in layout else SCHEMA_VERSIONS[0]
+
+
 def write(file, name, layout=None, **details):
     """Writes a project file: `name`, the DETAILS given, and `layout` -- a layout of a report alone as it is given, which its callers make what differs from DEFAULT_LAYOUT (templates.stated_layout), and a layout in three documents in full, every key stated (`full_layout`), whatever of it the caller left to the defaults. Returns the Project it describes."""
-    data = {"schema_version": SCHEMA_VERSION, "format": FORMAT, "name": name}
+    data = {"schema_version": schema_version_for(layout), "format": FORMAT, "name": name}
     for key in DETAILS:
         if details.get(key):
             data[key] = details[key]
@@ -720,7 +891,7 @@ def write(file, name, layout=None, **details):
         data["layout"] = full_layout(layout)
     validation.validate_structure(data, "woodcore-project")
     project = Project(file, data)
-    Path(file).write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    Path(file).write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     return project
 
 
@@ -739,16 +910,44 @@ def update(file, **changes):
             data.pop(key, None)
         elif key == "layout" and isinstance(value, dict):
             data[key] = full_layout(value)
+            data["schema_version"] = schema_version_for(value)
         else:
             data[key] = value
     validation.validate_structure(data, "woodcore-project")
     updated = Project(file, data)
     temporary = file.with_name(file.name + ".tmp")
-    temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     os.replace(temporary, file)
     if _current is not None and _current.file == updated.file:
         _current = updated
     return updated
+
+
+def details_of(here):
+    """The title page's fields of project `here` -- DETAILS, each "" where the file states none --, what the «Projet» tab and a preview of the templates read (issue #87)."""
+    return {key: here.detail(key) for key in DETAILS}
+
+
+def set_content_template(here, mode, ref):
+    """Writes into project `here`'s file the content template document `mode` was made from (`content_templates.<mode>`, issue #88), the file read again first so that nothing written meanwhile is lost. An additive key: the schema's version does not move, and a Woodcore older than 0.122 opens the project all the same. Returns the Project as it now stands."""
+    if mode not in MODES:
+        raise ProjectError(f"unknown document {mode!r} -- expected one of {', '.join(MODES)}")
+    current = Project.load(here.file)
+    kept = current.data.get(CONTENT_TEMPLATES_KEY)
+    kept = dict(kept) if isinstance(kept, dict) else {}
+    kept[mode] = ref
+    return update(here.file, **{CONTENT_TEMPLATES_KEY: kept})
+
+
+def last_export(here):
+    """(when the project was last exported, the version of the engine beside it) -- None and "" where it was not. The time is the one of data/calculations.json, which only an export (and the empty export a new project starts with) writes: not data/project.json, which the «Projet» tab rewrites as a title page's field is saved (issue #87)."""
+    stamp = here.data_dir / "calculations.json"
+    when = datetime.fromtimestamp(stamp.stat().st_mtime) if stamp.is_file() else None
+    try:
+        engine = str(json.loads((here.generated_dir / ENGINE_STAMP).read_text(encoding="utf-8")).get("version", ""))
+    except (OSError, ValueError, AttributeError):
+        engine = ""
+    return when, engine
 
 
 def set_empty_folders(here, tab, names):
@@ -803,6 +1002,20 @@ def current():
             f"no project: open one with --project <file{EXTENSION}>, or name it in the {ENV} environment variable"
         )
     return use(beside)
+
+
+def owning(data_dir):
+    """The project laid out by folders whose export folder is `data_dir` (`<root>/000-Woodcore/data`), or None -- for one laid out before, or a folder no project names, whose figures go on lying in data/ as they always have. What lets every writer of figures that is handed only its data/ (calc/engine.py `figures`) find the tab's Exports/Figures/ without each of the window's callers naming the project a second time."""
+    data_dir = Path(data_dir).resolve()
+    top = data_dir.parent.parent
+    for file in sorted(top.glob("*" + EXTENSION)) if top.is_dir() else ():
+        try:
+            here = Project.load(file)
+        except (ProjectError, validation.ValidationError):
+            continue
+        if here.has_folders and here.data_dir == data_dir:
+            return here
+    return None
 
 
 def checkout_project():

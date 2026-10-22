@@ -17,6 +17,7 @@ from pathlib import Path
 
 import engine
 import validation
+from domains._common import check_number as _number, fail as _fail  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import dimension  # a dimension's geometry, shared with the schemas and the plans (issue #9)
 from domains import figure_style
 from domains import figure_text  # a text placed with the Text tool, the four engines' one (issue #43, ARCH-003)
@@ -80,6 +81,8 @@ from domains.statics_geometry import (  # split out of this module (issue #30): 
     tracking_rays,
     typed_point,
 )
+from domains._common import source_paths  # one copy (G4)
+from domains import svg_draw
 
 # Of a source file (statics/<id>.json) and of the export (data/statics.json).
 SOURCE_SCHEMA_VERSION = "1.1"
@@ -90,6 +93,8 @@ SOURCE_SCHEMA_VERSIONS = ("1.0", SOURCE_SCHEMA_VERSION, LINKED_SCHEMA_VERSION)
 EXPORT_SCHEMA_VERSION = "1.1"
 # 1.2 is 1.1 with a model's `links`, where its linked fields came from (REQ-012), and its `texts`, what each printed: written only where one follows a variable or carries a text
 LINKED_EXPORT_VERSION = "1.2"
+# 1.3 is 1.2 with its figures named from the Typst root (`/Statics/Exports/Figures/M01-fr.svg`): written by a project laid out by folders, where they lie in the tab's Exports/Figures/ (issue #64, D-10)
+ROOTED_EXPORT_VERSION = "1.3"
 
 # A model's id is the file name of its source and the string the report addresses it by -- the rule the plans and the connections follow, for the same reason.
 ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.+-]*$")
@@ -141,11 +146,11 @@ LINE_LOAD_SHAPES = ("uniform", "linear")
 
 # The colours a load may be drawn in -- its arrows, its band and its cap -- by the name the source stores, each the ink the figure draws it with. Red is the one every load was drawn in until the engineer could choose, and a load stating no `color` is still drawn in it, so a model saved before the choice existed draws exactly as it did. Five inks dark enough to read on white paper, and apart enough to tell two load cases from each other on one figure. Held here, beside the names the source check allows, so that the names and the inks cannot drift apart; statics_svg reads the inks from here.
 LOAD_COLOURS = {
-    "red": "#c0392b",
-    "green": "#1e8449",
-    "orange": "#d35400",
-    "blue": "#1f5fbf",
-    "violet": "#7d3c98",
+    "red": svg_draw.colour("red"),
+    "green": svg_draw.colour("green"),
+    "orange": svg_draw.colour("orange"),
+    "blue": svg_draw.colour("blue"),
+    "violet": svg_draw.colour("violet"),
 }
 DEFAULT_LOAD_COLOUR = "red"
 
@@ -190,18 +195,6 @@ LINKABLE = {
     "point_loads": {"width": WIDTH_UNIT},
     "line_loads": {"width": WIDTH_UNIT},
 }
-
-
-def _fail(where, message):
-    raise validation.ValidationError(f"{where}: {message}")
-
-
-def _number(value, where, what, positive=False):
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
-        _fail(where, f"{what} must be a number, got {value!r}")
-    if positive and value <= 0:
-        _fail(where, f"{what} must be greater than 0, got {value!r}")
-    return value
 
 
 def _string(value, where, what, blank=False):
@@ -633,14 +626,6 @@ def new_source(sid):
     }
 
 
-def source_paths(source_dir):
-    """Every source in the folder, in file-name order; none where the folder does not exist yet."""
-    source_dir = Path(source_dir)
-    if not source_dir.is_dir():
-        return []
-    return sorted(source_dir.glob("*.json"), key=lambda p: p.name.lower())
-
-
 def snapshot(source):
     """A copy for the undo history."""
     return copy.deepcopy(source)
@@ -775,11 +760,6 @@ def rename(source, collection, old, new):
 
 
 # --- The values a load shows ----------------------------------------------------
-
-
-def values_of(calculations):
-    """A calculations record flattened to {domain: {instance: {var: record}}} -- what a magnitude may name (`links.index`, which also files the connections', connectors', scripts' and «Formule» domains' variables beside them). export_all.py passes the values it has just built, so the figure's numbers and the report's come from one read of the workbooks."""
-    return links.index(calculations)
 
 
 def known_values(data_dir):
@@ -1094,11 +1074,12 @@ def text_records(source, values, where, notes):
 # --- Export ---------------------------------------------------------------------
 
 
-def prepare(source_dir, values=None):
-    """Every static model, checked and built: (data, files, warnings). `files` is keyed by the path under data/. Nothing is written here, so an export that fails leaves data/ as it was. Until 0.117 it also took the models an RFEM import generated, held in memory; the import was retired then (archive/rfem/), and every model is one drawn in Woodcore."""
+def prepare(source_dir, values=None, place=None):
+    """Every static model, checked and built: (data, files, warnings). `files` is keyed by the figure's name in the JSON, which `place` (an engine.Figures) gives: from the Typst root in a project laid out by folders, under data/ otherwise. Nothing is written here, so an export that fails leaves data/ as it was. Until 0.117 it also took the models an RFEM import generated, held in memory; the import was retired then (archive/rfem/), and every model is one drawn in Woodcore."""
     from domains import statics_svg
 
     values = values or {}
+    place = place or engine.Figures(None, "statics")
     models, files, notes = {}, {}, []
     sources = [read_source(path, notes) for path in source_paths(source_dir)]
     for source in sources:
@@ -1113,34 +1094,26 @@ def prepare(source_dir, values=None):
         if texts:
             models[source["id"]]["texts"] = texts
         for lang, drawing in drawings.items():
-            files[f"statics/{source['id']}-{lang}.svg"] = statics_svg.render(drawing)
+            name = place.name(f"{source['id']}-{lang}.svg")
+            models[source["id"]]["figures"][lang]["file"] = name
+            files[name] = statics_svg.render(drawing)
     linked = any("links" in record or "texts" in record for record in models.values())
-    data = {"schema_version": LINKED_EXPORT_VERSION if linked else EXPORT_SCHEMA_VERSION, "models": models}
+    version = LINKED_EXPORT_VERSION if linked else EXPORT_SCHEMA_VERSION
+    data = {"schema_version": ROOTED_EXPORT_VERSION if place.here is not None else version, "models": models}
     validation.validate_structure(data, "statics")
     validation.validate_statics_business(data)
     return data, files, notes
 
 
 def write(data, files, data_dir):
-    """The only writer: data/statics.json and data/statics/, the figures of models that no longer exist swept out. A file whose content has not changed is left alone, so Git sees a change only where there is one."""
+    """The only writer: data/statics.json and the models' figures -- into the tab's Exports/Figures/ in a project laid out by folders, data/statics/ otherwise (engine.Figures) --, those of models that no longer exist removed: only what the last export wrote, never a file of the engineer's. A file whose content has not changed is left alone, so Git sees a change only where there is one."""
     data_dir = Path(data_dir)
+    engine.figures(data_dir, "statics").write(files, engine.previous_json(data_dir / "statics.json"))
     engine.write_json(data_dir / "statics.json", data)
-    folder = data_dir / "statics"
-    folder.mkdir(parents=True, exist_ok=True)
-    for name, content in files.items():
-        target = data_dir / name
-        payload = content.encode("utf-8") if isinstance(content, str) else content
-        if target.is_file() and target.read_bytes() == payload:
-            continue
-        target.write_bytes(payload)
-    wanted = {Path(name).name for name in files}
-    for stale in folder.iterdir():
-        if stale.is_file() and stale.name not in wanted:
-            stale.unlink()
 
 
 def export(source_dir, data_dir, values=None):
     """prepare + write, and the warnings -- what Woodcore's window runs when a model is saved, so the report sees it without the load workbooks being read again."""
-    data, files, notes = prepare(source_dir, values)
+    data, files, notes = prepare(source_dir, values, place=engine.figures(data_dir, "statics"))
     write(data, files, data_dir)
     return notes

@@ -8,4 +8,5 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#var("s_k", domain: ("snow-load", "SL"))
+#var("R_d", 5, "kN", norm: "SIA 265", norm-section: "6.5.5.2", level: 0)
+Der Widerstand beträgt #var("R_d") oder #var("R_d", unit: "N").

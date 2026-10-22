@@ -27,7 +27,7 @@ An entry carries `index`, `date`, `name`, `initials`, `label` — all required �
 
 **The PDF's metadata carry the latest revision** (the engineer's decision): `data/project.json` gains an optional `revision` — `{index, date, label, initials}` — passed to `project.record()` by `export_all` rather than read there, so `project.py` knows nothing of the journal and `seed()` writes a record without one. `woodcore-document` adds the keyword «Rev. 3 (2026-09-25)» beside the Woodcore and Typst versions, so two PDFs of one project can be told apart by their properties and not only by their pages. It is read from `project.json` and **not** from `journal.json`: a `set document` rule stands at the top of a document and cannot ask whether a file is there, so a second `json()` there would stop every report of a project whose engine was updated without being exported again. Its date is the engineer's typed day, so an unchanged journal still writes the same bytes (§12's own rule).
 
-**In Typst.** `show-journal(form:, level:, title:)` and `journal-entries()` (§10bis). The three forms are the engineer's own list:
+⚠️ *Retired by the spec 2026-10-21-commandes-typst-refonte (lot 19): `show-journal` -- write #include domain-file("journal", document) -- the journal written once in raw Typst beside the document's entry file, «Ajouter» in the «Journal» tab adding a revision. What follows describes it as it was.* **In Typst.** `show-journal(form:, level:, title:)` and `journal-entries()` (§10bis). The three forms are the engineer's own list:
 
 | form | what it sets |
 |---|---|

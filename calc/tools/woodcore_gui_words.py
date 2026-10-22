@@ -12,6 +12,8 @@ import display_options  # the option panels of the «Affichage» views, one per 
 import plan_tab  # noqa: E402
 import fire_tab  # noqa: E402  -- the fire protection plan tab (v0.115), the position plan's sibling on the same base: its texts join STRINGS below, its class TABS
 import positions_tab
+import metre_tab  # the «Métré» tab under «Positions» (spec 2026-10-21-commandes-typst-refonte, UI-003)  # noqa: E402
+import list_file_card  # the card of a list written once in raw Typst (spec 2026-10-21-commandes-typst-refonte, Q-008)  # noqa: E402
 import action_tabs  # the words of the six empty tabs of «Actions» (v0.117, docs/ui/window.md §10quater)  # noqa: E402
 import load_tab  # the loads entered in Woodcore: «Poids propre et surcharge», «Neige», «Vent» (issues #35-#37, docs/domain/loads.md)  # noqa: E402
 import fire_check_tab_words  # the words of the «Résistance au feu» tab (issue #46)  # noqa: E402
@@ -25,6 +27,9 @@ import formula_tab  # the «Formule» tab (v0.117): calculation domains written 
 import linkable_spin  # the button beside a field that may follow a variable, and its linked state (spec 2026-10-11-variables-liees-champs-et-textes)
 import text_pane  # the right pane of a text placed with the Text tool (issue #43)
 import variables_tab  # the «Variables» tab: every value the report itself computes, read back out of a compiled report (calc/variables.py)  # noqa: E402
+import command_palette  # the command palette, Ctrl+K (issue #83)  # noqa: E402
+import project_tab  # the «Projet» tab: the project's basic data, its templates and its documents (issues #87, #88, #90)  # noqa: E402
+import dependencies_tab  # the «Dépendances» tab: the graph of the project's objects (issue #71)  # noqa: E402
 import statics_tab  # noqa: E402
 import schema_tab  # noqa: E402
 import commands_tab
@@ -52,7 +57,7 @@ STRINGS = {
         "doc_stamp_unchanged": "{document} : inchangé depuis son PDF",
         "reload": "Recharger",
         "nav_document_group": "Document",
-        "nav_project": "Projet",
+        "nav_project": "Données",   # the group «Projet» until 0.122, the tab of that name first in the navigation since (issue #87); the key kept
         "nav_actions": "Actions",
         "nav_structure": "Structure",
         "nav_connections": "Assemblages",
@@ -73,6 +78,8 @@ STRINGS = {
         "polar_revert": "Annuler les modifications",
         "polar_revert_tip": "Remet le calcul tel qu'il est enregistré ; grisé tant que rien n'est modifié.",
         "polar_new_item": "(nouveau, non enregistré)",
+        "polar_moved": "{count} calcul(s) déplacé(s) dans « {group} ».",
+        "list_write_failed": "« {id} » n'a pas pu être écrit — le déplacement s'arrête là : {error}",
         "polar_empty": "Aucun calcul : « Nouveau calcul » en crée un sur le premier schéma de l'onglet « Schémas ».",
         "polar_list_hint": "Glissez les calculs dans des dossiers (clic droit : nouveau dossier).",
         "polar_name": "Nom",
@@ -179,11 +186,52 @@ STRINGS = {
         # the warnings of the editors, by the code a domain module's engine.Note carries (periodic audit 260916, AUD-4-11)
         "warn_plan_no_number": "Plan {plan}\u202f: l’élément {i} ({type}) n’a pas de numéro de position.",
         "warn_plan_unknown": "Plan {plan}\u202f: {label} n’est pas une position du projet — ajoutez-la dans l’onglet Positions.",
+        "warn_registry_no_sheet": "Aucune feuille «\u202f{prefix}…\u202f» dans {workbooks}\u202f: le domaine {domain} reste vide, et #var(…, domain: (\"{domain}\", …)) n’y trouvera rien.",
+        "warn_formula_misnamed": "{file} : le domaine déclare un autre nom que son fichier ({domain}) ; il est exporté tel quel, et l’onglet « Domaines » réécrit son id à la prochaine sauvegarde.",
+        "warn_sync_stale": "{file}, ligne {line} : #sync(\"{id}\") écrit {written}, et l'export tient {held} -- rafraîchir la valeur, ou retirer #sync pour la garder telle quelle.",
+        "warn_plan_dimensions_no_scale": "Plan {plan} : {count} cote(s) mesurent des longueurs et le plan n’a pas d’échelle ; calibrez-le, sinon elles ne sont pas dessinées.",
+        "warn_dep_changed": "{node} a changé depuis le dernier export ; en dépendent, {kind} : {ids}.",
+        "warn_dep_cycle": "{chain} : ces objets se lisent en cercle ; un export ne les accorde que par hasard.",
+        "warn_dep_kind_position": "positions",
+        "warn_dep_kind_load": "charges",
+        "warn_dep_kind_script": "scripts",
+        "warn_dep_kind_formula": "domaines",
+        "warn_dep_kind_check": "vérifications bois",
+        "warn_dep_kind_steel": "vérifications acier",
+        "warn_dep_kind_profile": "profilés",
+        "warn_dep_kind_connector": "connecteurs",
+        "warn_dep_kind_connection": "moments polaires",
+        "warn_dep_kind_schema": "schémas",
+        "warn_dep_kind_statics": "modèles statiques",
+        "warn_dep_kind_plan": "plans",
+        "warn_dep_kind_document": "documents",
+        "warn_dep_kind_fire": "plans de protection incendie",
+        "warn_dep_kind_extract": "extraits",
+        "warn_dep_kind_section": "sections du rapport",
+        "warn_sheet_value_differs": "{cell} : la feuille donne {name} = {excel}, Woodcore calcule {woodcore} à partir de ses entrées ; le rapport imprime la valeur de Woodcore.",
+        "warn_sheet_slope_empty": "{cell} : la deuxième pente du toit est vide ; calculée à 0°, comme le fait la feuille.",
+        "warn_sheet_direction_unknown": "{cell} : la direction du vent {direction} n’est pas une de celles du tableau {table} ; ses coefficients ne sont pas comparés.",
+        "warn_snow_above_limit": "{where} : h_0 = {h_0} m dépasse les {limit} m de la SIA 261 {ref} ; ses dispositions ne s’y appliquent pas, la charge est calculée quand même.",
+        "warn_wind_c_red_outside": "{where} : la surface de référence {area} a h = {h} m et β = {beta}, que la SIA 261 {ref} ne trace pas ; c_red est lu au bout de la courbe la plus proche.",
         "warn_plan_wrong_type": "Plan {plan}\u202f: {label} est dessiné avec le symbole {type} ({name}).",
         "warn_plan_outside": "Plan {plan}\u202f: {label} est hors du cadrage et n’apparaîtra pas dans le rapport.",
         "warn_script_failed": "Le script {script}\u202f: {reason}",
+        "warn_domain_file_orphan": "{file}\u202f: aucun domaine de ce dossier ne porte plus ce nom — le fichier est le vôtre et reste où il est.",
+        "warn_unfold_stub_edited": "{file}\u202f: la vérification {id} est imprimée dépliée, et son fichier contient ce que vous avez écrit à la place du stub de Woodcore — il reste tel quel, et la vérification est imprimée repliée tant que vous ne le videz pas.",
         "warn_retired_key": "{file}\u202f: {key} est ignoré — l’import RFEM a été retiré en 0.117 (archive/rfem/). Retirez la clé du fichier du projet pour ne plus voir ce message.",
         "warn_plan_number_outside": "Plan {plan}\u202f: le numéro de {label} a été déplacé hors du cadrage, le rapport le couperait.",
+        "warn_plan_centres_no_walls": "Plan {plan}\u202f: aucune paroi de contreventement (H, W) n’est dessinée — pas de centre de rigidité.",
+        "warn_plan_centres_no_mode": "Plan {plan}\u202f: {count} paroi(s) de contreventement sans mode de construction ({labels}) — le centre de rigidité n’est pas calculé.",
+        "warn_plan_centres_mixed": "Plan {plan}\u202f: les parois de contreventement n’ont pas toutes le même mode de construction (ossature bois\u202f: {timber_frame}, CLT\u202f: {clt}, béton\u202f: {concrete}) — le centre de rigidité ne se calcule que pour un seul mode.",
+        "warn_plan_centres_no_power": "Plan {plan}\u202f: les parois sont en CLT et la puissance de leur longueur (1,5 ou 2) n’est pas choisie — le centre de rigidité n’est pas calculé.",
+        "warn_plan_centres_one_direction": "Plan {plan}\u202f: toutes les parois de contreventement ont la même direction — le centre de rigidité demande des parois dans deux directions au moins.",
+        "warn_plan_centres_no_torsion": "Plan {plan}\u202f: les lignes d’action de toutes les parois de contreventement passent par un même point — l’étage n’a aucune rigidité en torsion.",
+        "warn_plan_centres_no_outline": "Plan {plan}\u202f: aucun contour du bâtiment n’est dessiné — pas de centre de masse.",
+        "warn_plan_centres_flat_outline": "Plan {plan}\u202f: le contour du bâtiment n’enferme aucune surface — pas de centre de masse.",
+        "warn_plan_centres_section": "Plan {plan}\u202f: la position de {label} a une section CLT et la paroi est dessinée en {mode} — corrigez l’un des deux.",
+        "warn_plan_construction_timber_frame": "ossature bois",
+        "warn_plan_construction_clt": "CLT",
+        "warn_plan_construction_concrete": "béton",
         "warn_statics_unread": "Modèle {model}\u202f: la valeur de la charge {load} n’a pas pu être lue — {detail}.",
         "warn_statics_unread_end": "Modèle {model}\u202f: la valeur de fin de la charge {load} n’a pas pu être lue — {detail}.",
         "warn_statics_no_variable": "la variable {ref} n’existe pas dans l’export",
@@ -192,7 +240,7 @@ STRINGS = {
         "warn_link_missing": "la variable {ref} n’existe pas dans l’export",
         "warn_link_not_a_number": "{ref} vaut {value}, qui n’est pas un nombre",
         "warn_link_unit": "{ref} est en {unit}, qui ne peut pas remplir une valeur en {field_unit}",
-        "warn_link_not_allowed": "{ref} ne peut pas être nommée ici — une charge ne suit qu’une autre charge ou un domaine de l’onglet « Formules »",
+        "warn_link_not_allowed": "{ref} ne peut pas être nommée ici — une charge ne suit qu’une autre charge ou un domaine de l’onglet « Domaines »",
         "warn_statics_not_a_number": "{ref} vaut {value}, qui n’est pas un nombre",
         "warn_statics_no_magnitude": "l’intensité n’est ni une valeur ni une variable",
         "warn_statics_width_unit": "une charge en {unit} ne se multiplie pas par une largeur d’influence, qui multiplie une charge par mètre ou par mètre carré",
@@ -231,7 +279,7 @@ STRINGS = {
         "doc_stamp_unchanged": "{document}: seit seinem PDF unverändert",
         "reload": "Neu laden",
         "nav_document_group": "Dokument",
-        "nav_project": "Projekt",
+        "nav_project": "Daten",
         "nav_actions": "Einwirkungen",
         "nav_structure": "Tragwerk",
         "nav_connections": "Verbindungen",
@@ -252,6 +300,8 @@ STRINGS = {
         "polar_revert": "Änderungen verwerfen",
         "polar_revert_tip": "Stellt die Berechnung wieder her, wie sie gespeichert ist; grau, solange nichts geändert ist.",
         "polar_new_item": "(neu, nicht gespeichert)",
+        "polar_moved": "{count} Berechnung(en) nach «{group}» verschoben.",
+        "list_write_failed": "«{id}» konnte nicht geschrieben werden — das Verschieben bricht hier ab: {error}",
         "polar_empty": "Keine Berechnung: »Neue Berechnung« legt eine auf dem ersten Schema des Reiters »Schemas« an.",
         "polar_list_hint": "Berechnungen lassen sich in Ordner ziehen (Rechtsklick: neuer Ordner).",
         "polar_name": "Name",
@@ -358,11 +408,52 @@ STRINGS = {
         # the warnings of the editors, by the code a domain module's engine.Note carries (periodic audit 260916, AUD-4-11)
         "warn_plan_no_number": "Plan {plan}: Element {i} ({type}) hat keine Positionsnummer.",
         "warn_plan_unknown": "Plan {plan}: {label} ist keine Position des Projekts – ergänzen Sie sie im Register Positionen.",
+        "warn_registry_no_sheet": "Kein Blatt «{prefix}…» in {workbooks}: die Domäne {domain} bleibt leer, und #var(…, domain: (\"{domain}\", …)) findet darin nichts.",
+        "warn_formula_misnamed": "{file}: der Bereich nennt sich anders als seine Datei ({domain}); er wird so exportiert, und der Reiter «Domaines» schreibt seine ID beim nächsten Speichern zurück.",
+        "warn_sync_stale": "{file}, Zeile {line}: #sync(\"{id}\") schreibt {written}, und der Export hält {held} -- den Wert auffrischen oder #sync entfernen, um ihn so zu behalten.",
+        "warn_plan_dimensions_no_scale": "Plan {plan}: {count} Kote(n) messen Längen und der Plan hat keinen Massstab; kalibrieren Sie ihn, sonst werden sie nicht gezeichnet.",
+        "warn_dep_changed": "{node} hat sich seit dem letzten Export geändert; davon hängen ab, {kind}: {ids}.",
+        "warn_dep_cycle": "{chain}: diese Objekte lesen einander im Kreis; ein Export stimmt sie nur zufällig ab.",
+        "warn_dep_kind_position": "Positionen",
+        "warn_dep_kind_load": "Lasten",
+        "warn_dep_kind_script": "Skripte",
+        "warn_dep_kind_formula": "Bereiche",
+        "warn_dep_kind_check": "Holznachweise",
+        "warn_dep_kind_steel": "Stahlnachweise",
+        "warn_dep_kind_profile": "Profile",
+        "warn_dep_kind_connector": "Verbindungsmittel",
+        "warn_dep_kind_connection": "polare Momente",
+        "warn_dep_kind_schema": "Schemas",
+        "warn_dep_kind_statics": "statische Modelle",
+        "warn_dep_kind_plan": "Pläne",
+        "warn_dep_kind_document": "Dokumente",
+        "warn_dep_kind_fire": "Brandschutzpläne",
+        "warn_dep_kind_extract": "Auszüge",
+        "warn_dep_kind_section": "Abschnitte des Berichts",
+        "warn_sheet_value_differs": "{cell}: das Blatt gibt {name} = {excel}, Woodcore berechnet aus seinen Eingaben {woodcore}; der Bericht druckt den Wert von Woodcore.",
+        "warn_sheet_slope_empty": "{cell}: die zweite Dachneigung ist leer; mit 0° gerechnet, wie es das Blatt tut.",
+        "warn_sheet_direction_unknown": "{cell}: die Windrichtung {direction} ist keine der Tabelle {table}; ihre Beiwerte werden nicht verglichen.",
+        "warn_snow_above_limit": "{where}: h_0 = {h_0} m liegt über den {limit} m der SIA 261 {ref}; ihre Bestimmungen gelten dort nicht, die Last wird trotzdem berechnet.",
+        "warn_wind_c_red_outside": "{where}: die Bezugsfläche {area} hat h = {h} m und β = {beta}, was SIA 261 {ref} nicht zeichnet; c_red wird am Ende der nächsten Kurve abgelesen.",
         "warn_plan_wrong_type": "Plan {plan}: {label} ist mit dem Symbol {type} ({name}) gezeichnet.",
         "warn_plan_outside": "Plan {plan}: {label} liegt ausserhalb des Ausschnitts und erscheint nicht im Bericht.",
         "warn_script_failed": "Das Skript {script}: {reason}",
+        "warn_domain_file_orphan": "{file}: kein Bereich dieses Ordners trägt diesen Namen mehr — die Datei gehört Ihnen und bleibt, wo sie ist.",
+        "warn_unfold_stub_edited": "{file}: der Nachweis {id} wird entfaltet gedruckt, und seine Datei enthält, was Sie an Stelle des Platzhalters von Woodcore geschrieben haben — sie bleibt, wie sie ist, und der Nachweis wird gefaltet gedruckt, bis Sie sie leeren.",
         "warn_retired_key": "{file}: {key} wird ignoriert — der RFEM-Import wurde in 0.117 entfernt (archive/rfem/). Entfernen Sie den Schlüssel aus der Projektdatei, damit diese Meldung verschwindet.",
         "warn_plan_number_outside": "Plan {plan}: Die Nummer von {label} wurde aus dem Ausschnitt geschoben; der Bericht würde sie abschneiden.",
+        "warn_plan_centres_no_walls": "Plan {plan}: Keine aussteifende Wand (H, W) gezeichnet – kein Steifigkeitszentrum.",
+        "warn_plan_centres_no_mode": "Plan {plan}: {count} aussteifende Wand/Wände ohne Bauweise ({labels}) – das Steifigkeitszentrum wird nicht berechnet.",
+        "warn_plan_centres_mixed": "Plan {plan}: Die aussteifenden Wände haben nicht alle dieselbe Bauweise (Holzrahmenbau: {timber_frame}, Brettsperrholz: {clt}, Beton: {concrete}) – das Steifigkeitszentrum wird nur für eine einzige Bauweise berechnet.",
+        "warn_plan_centres_no_power": "Plan {plan}: Die Wände sind aus Brettsperrholz und die Potenz ihrer Länge (1.5 oder 2) ist nicht gewählt – das Steifigkeitszentrum wird nicht berechnet.",
+        "warn_plan_centres_one_direction": "Plan {plan}: Alle aussteifenden Wände verlaufen in derselben Richtung – das Steifigkeitszentrum braucht Wände in mindestens zwei Richtungen.",
+        "warn_plan_centres_no_torsion": "Plan {plan}: Die Wirkungslinien aller aussteifenden Wände gehen durch einen Punkt – das Geschoss hat keine Torsionssteifigkeit.",
+        "warn_plan_centres_no_outline": "Plan {plan}: Kein Gebäudeumriss gezeichnet – kein Massenzentrum.",
+        "warn_plan_centres_flat_outline": "Plan {plan}: Der Gebäudeumriss umschliesst keine Fläche – kein Massenzentrum.",
+        "warn_plan_centres_section": "Plan {plan}: Die Position von {label} hat einen Brettsperrholz-Querschnitt und die Wand ist als {mode} gezeichnet – eines von beiden korrigieren.",
+        "warn_plan_construction_timber_frame": "Holzrahmenbau",
+        "warn_plan_construction_clt": "Brettsperrholz",
+        "warn_plan_construction_concrete": "Beton",
         "warn_statics_unread": "System {model}: Der Wert der Last {load} konnte nicht gelesen werden – {detail}.",
         "warn_statics_unread_end": "System {model}: Der Endwert der Last {load} konnte nicht gelesen werden – {detail}.",
         "warn_statics_no_variable": "die Variable {ref} gibt es im Export nicht",
@@ -371,7 +462,7 @@ STRINGS = {
         "warn_link_missing": "die Variable {ref} gibt es im Export nicht",
         "warn_link_not_a_number": "{ref} ist {value}, keine Zahl",
         "warn_link_unit": "{ref} ist in {unit} und kann keinen Wert in {field_unit} füllen",
-        "warn_link_not_allowed": "{ref} kann hier nicht verwendet werden – eine Last folgt nur einer anderen Last oder einem Bereich des Reiters «Formeln»",
+        "warn_link_not_allowed": "{ref} kann hier nicht verwendet werden – eine Last folgt nur einer anderen Last oder einem Bereich des Reiters «Domänen»",
         "warn_statics_not_a_number": "{ref} ist {value}, keine Zahl",
         "warn_statics_no_magnitude": "die Grösse ist weder ein Wert noch eine Variable",
         "warn_statics_width_unit": "eine Last in {unit} lässt sich nicht mit einer Einflussbreite multiplizieren, die eine Last pro Meter oder pro Quadratmeter multipliziert",
@@ -410,7 +501,7 @@ STRINGS = {
         "doc_stamp_unchanged": "{document}: unchanged since its PDF",
         "reload": "Reload",
         "nav_document_group": "Document",
-        "nav_project": "Project",
+        "nav_project": "Data",
         "nav_actions": "Actions",
         "nav_structure": "Structure",
         "nav_connections": "Connections",
@@ -431,6 +522,8 @@ STRINGS = {
         "polar_revert": "Discard changes",
         "polar_revert_tip": "Puts the calculation back as it is saved; greyed out while nothing has changed.",
         "polar_new_item": "(new, not saved)",
+        "polar_moved": "{count} calculation(s) moved to “{group}”.",
+        "list_write_failed": "“{id}” could not be written — the move stops there: {error}",
         "polar_empty": "No calculation: “New calculation” creates one on the first schema of the “Schemas” tab.",
         "polar_list_hint": "Drag calculations into folders (right click: new folder).",
         "polar_name": "Name",
@@ -537,11 +630,52 @@ STRINGS = {
         # the warnings of the editors, by the code a domain module's engine.Note carries (periodic audit 260916, AUD-4-11)
         "warn_plan_no_number": "Plan {plan}: element {i} ({type}) has no position number.",
         "warn_plan_unknown": "Plan {plan}: {label} is not a position of the project — add it in the Positions tab.",
+        "warn_registry_no_sheet": "No sheet named «{prefix}…» in {workbooks}: the domain {domain} stays empty, and #var(…, domain: (\"{domain}\", …)) will find nothing in it.",
+        "warn_formula_misnamed": "{file}: the domain declares another name than its file ({domain}); it is exported as it stands, and the «Domaines» tab writes its own id back at the next save.",
+        "warn_sync_stale": "{file}, line {line}: #sync(\"{id}\") writes {written}, and the export holds {held} -- refresh the value, or take #sync away to keep it as it is.",
+        "warn_plan_dimensions_no_scale": "Plan {plan}: {count} dimension(s) measure lengths and the plan has no scale; calibrate it, or they are not drawn.",
+        "warn_dep_changed": "{node} changed since the last export; depending on it, {kind}: {ids}.",
+        "warn_dep_cycle": "{chain}: these objects read each other in a circle; an export settles them only by chance.",
+        "warn_dep_kind_position": "positions",
+        "warn_dep_kind_load": "loads",
+        "warn_dep_kind_script": "scripts",
+        "warn_dep_kind_formula": "domains",
+        "warn_dep_kind_check": "timber checks",
+        "warn_dep_kind_steel": "steel checks",
+        "warn_dep_kind_profile": "profiles",
+        "warn_dep_kind_connector": "connectors",
+        "warn_dep_kind_connection": "polar moments",
+        "warn_dep_kind_schema": "schemas",
+        "warn_dep_kind_statics": "static models",
+        "warn_dep_kind_plan": "plans",
+        "warn_dep_kind_document": "documents",
+        "warn_dep_kind_fire": "fire plans",
+        "warn_dep_kind_extract": "excerpts",
+        "warn_dep_kind_section": "report sections",
+        "warn_sheet_value_differs": "{cell}: the sheet gives {name} = {excel}, Woodcore computes {woodcore} from its inputs; the report prints Woodcore’s value.",
+        "warn_sheet_slope_empty": "{cell}: the second roof slope is empty; computed at 0°, as the sheet does.",
+        "warn_sheet_direction_unknown": "{cell}: the wind direction {direction} is not one of table {table}; its coefficients are not compared.",
+        "warn_snow_above_limit": "{where}: h_0 = {h_0} m is above the {limit} m of SIA 261 {ref}; its provisions do not apply there, the load is computed all the same.",
+        "warn_wind_c_red_outside": "{where}: the reference area {area} has h = {h} m and β = {beta}, which SIA 261 {ref} does not draw; c_red is read at the end of the nearest curve.",
         "warn_plan_wrong_type": "Plan {plan}: {label} is drawn with the symbol {type} ({name}).",
         "warn_plan_outside": "Plan {plan}: {label} lies outside the crop and will not be seen in the report.",
         "warn_script_failed": "The script {script}: {reason}",
+        "warn_domain_file_orphan": "{file}: no domain of its folder bears this name any more — the file is yours and stays where it is.",
+        "warn_unfold_stub_edited": "{file}: the check {id} is printed unfolded, and its file holds what you wrote in place of Woodcore's stub — it stays as it is, and the check is printed folded until you empty it.",
         "warn_retired_key": "{file}: {key} is ignored — the RFEM import was retired in 0.117 (archive/rfem/). Take the key out of the project file to stop this message.",
         "warn_plan_number_outside": "Plan {plan}: the number of {label} was moved out of the crop, which will cut it off in the report.",
+        "warn_plan_centres_no_walls": "Plan {plan}: no bracing wall (H, W) is drawn — no stiffness centre.",
+        "warn_plan_centres_no_mode": "Plan {plan}: {count} bracing wall(s) without a construction mode ({labels}) — the stiffness centre is not calculated.",
+        "warn_plan_centres_mixed": "Plan {plan}: the bracing walls are not all built the same way (timber frame: {timber_frame}, CLT: {clt}, concrete: {concrete}) — the stiffness centre is calculated for one construction mode only.",
+        "warn_plan_centres_no_power": "Plan {plan}: the walls are CLT and the power of their length (1.5 or 2) is not chosen — the stiffness centre is not calculated.",
+        "warn_plan_centres_one_direction": "Plan {plan}: every bracing wall runs in the same direction — the stiffness centre needs walls in two directions at least.",
+        "warn_plan_centres_no_torsion": "Plan {plan}: the lines of action of every bracing wall pass through one point — the storey has no torsional stiffness.",
+        "warn_plan_centres_no_outline": "Plan {plan}: no building outline is drawn — no mass centre.",
+        "warn_plan_centres_flat_outline": "Plan {plan}: the building outline encloses no area — no mass centre.",
+        "warn_plan_centres_section": "Plan {plan}: the position of {label} has a CLT section and the wall is drawn as {mode} — set one of the two right.",
+        "warn_plan_construction_timber_frame": "timber frame",
+        "warn_plan_construction_clt": "CLT",
+        "warn_plan_construction_concrete": "concrete",
         "warn_statics_unread": "Model {model}: the value of load {load} could not be read — {detail}.",
         "warn_statics_unread_end": "Model {model}: the value at the far end of load {load} could not be read — {detail}.",
         "warn_statics_no_variable": "the export has no variable {ref}",
@@ -550,7 +684,7 @@ STRINGS = {
         "warn_link_missing": "the export has no variable {ref}",
         "warn_link_not_a_number": "{ref} is {value}, which is not a number",
         "warn_link_unit": "{ref} is in {unit}, which cannot fill a value in {field_unit}",
-        "warn_link_not_allowed": "{ref} may not be named here — a load follows only another load or a domain of the «Formulas» tab",
+        "warn_link_not_allowed": "{ref} may not be named here — a load follows only another load or a domain of the «Domains» tab",
         "warn_statics_not_a_number": "{ref} is {value}, which is not a number",
         "warn_statics_no_magnitude": "the magnitude is neither a value nor a variable",
         "warn_statics_width_unit": "a load in {unit} cannot be multiplied by an influence width, which multiplies a load per metre or per square metre",
@@ -597,6 +731,11 @@ for _lang, _texts in fire_tab.STRINGS.items():
 # The positions tab's, likewise, prefixed po_ (v0.94).
 for _lang, _texts in positions_tab.STRINGS.items():
     STRINGS[_lang].update(_texts)
+
+# The «Métré» tab's, prefixed mt_, and the card of a list's file, prefixed lf_ (spec 2026-10-21-commandes-typst-refonte, UI-003, Q-008).
+for _module in (metre_tab, list_file_card):
+    for _lang, _texts in _module.STRINGS.items():
+        STRINGS[_lang].update(_texts)
 
 
 # The member checks' tabs, likewise: the nine modules' and the two groups' titles, the placeholders' words and the tension check's form, prefixed mc_ (calc/tools/member_check_tab.py).
@@ -672,6 +811,21 @@ for _lang, _texts in formula_tab.STRINGS.items():
 
 # The «Variables» tab's, likewise, prefixed vr_.
 for _lang, _texts in variables_tab.STRINGS.items():
+    STRINGS[_lang].update(_texts)
+
+
+# The command palette's, likewise, prefixed cp_ (issue #83).
+for _lang, _texts in command_palette.STRINGS.items():
+    STRINGS[_lang].update(_texts)
+
+
+# The «Projet» tab's, likewise, prefixed pj_ and tpv_why_ (issues #87, #88, #90).
+for _lang, _texts in project_tab.STRINGS.items():
+    STRINGS[_lang].update(_texts)
+
+
+# The «Dépendances» tab's, likewise, prefixed dg_ (issue #71).
+for _lang, _texts in dependencies_tab.STRINGS.items():
     STRINGS[_lang].update(_texts)
 
 

@@ -6,7 +6,7 @@ A project written as three documents -- the convention d'utilisation, the base d
 
 A polar-moment calculation is saved as its source, connections/<id>.json, its id made from its name (connection.id_from_name) and naming no connector since v0.76, and exported at once by the same code export_all.py runs (calc/domains/connection.py) -- data/connections.json and the figures, without the load workbooks being read again.
 
-Launched by Woodcore.bat beside the code, by Woodcore.exe once installed, or `python calc/tools/woodcore_gui.py [--project <file>.woodcore] [--home]` -- `catalog_gui.py` until v0.96, which stays beside it as a shim: the launcher installed with Woodcore 0.83 to 0.90 starts the engineer's sources by that name. Started without a project it opens on the start page (home_page.py, v0.83); a project is opened in its own process, one project per window, and the *Fichier* menu opens another in a process of its own. A PySide6 (Qt) window since v0.30 -- standard-library tkinter before it -- carrying its own icon, woodcore.svg beside this file (typst-katalog.svg until v0.83), in its title bar and on the taskbar (docs/decisions.md §13).
+Launched by Woodcore.bat beside the code, by Woodcore.exe once installed, or `python calc/tools/woodcore_gui.py [--project <file>.woodcore] [--home]` -- `catalog_gui.py` until v0.96 (its shim, for the launchers of 0.83 to 0.90, removed in v0.120). Started without a project it opens on the start page (home_page.py, v0.83); a project is opened in its own process, one project per window, and the *Fichier* menu opens another in a process of its own. A PySide6 (Qt) window since v0.30 -- standard-library tkinter before it -- carrying its own icon, woodcore.svg beside this file (typst-katalog.svg until v0.83), in its title bar and on the taskbar (docs/decisions.md §13).
 """
 
 if __name__ == "__main__":
@@ -52,7 +52,7 @@ except ImportError as exc:
 # calc/ first: the tools below, and this window, find the project they work on through calc/project.py (v0.81) -- before the parts split out of this module (issue #30), whose words import home_page, which imports calc/doc_templates.py.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from woodcore_gui_words import STRINGS, _check_strings  # split out of this module (issue #30): every name it had is still importable from it
-from woodcore_gui_polar import (  # split out of this module (issue #30): every name it had is still importable from it
+from polar_tab import (  # split out of this module (issue #30): every name it had is still importable from it
     DIGITS,
     MAX_MEMBERS,
     MIN_MEMBERS,
@@ -93,6 +93,8 @@ import grouped_list  # the left pane of every editor tab: folders, drag and drop
 import source_archive  # «Supprimer» archives rather than deletes (source_archive.py)
 import identity  # the Nom · Description · ID rows the editor tabs share (identity.py)
 import chrome  # the window's frame after the website's: the language switch, the side navigation, the icons (chrome.py, v0.91)
+import command_palette  # the command palette, Ctrl+K (issue #83)
+import pdf_pane  # every Typst page of the window, zoomed by Ctrl+wheel and fitted back when its tab is left (issue #89)
 import views  # the views of a tab and the switch in the top bar that chooses one (views.py, v0.117)
 import autosave  # saving without a question when a tab, a view, a document or the window is left (autosave.py, v0.117)
 import notifications  # noqa: E402  -- every error, warning and information, gathered in one place (calc/notifications.py, v0.117)
@@ -122,6 +124,7 @@ import fire_tab  # noqa: E402  -- the fire protection plan tab (v0.115), the pos
 
 # The positions tab (v0.94): the project's positions, Woodcore's own since v0.114 (calc/positions_store.py) -- its texts join STRINGS below, its class TABS.
 import positions_tab
+import reserved_tab  # the one class of a tab to come: the six reserved tabs (spec 2026-10-19-base-saine-nettoyage, ARCH-001)  # noqa: E402
 import action_tabs  # the words of the six empty tabs of «Actions» (v0.117, docs/ui/window.md §10quater)  # noqa: E402
 import load_tab  # the loads entered in Woodcore: «Poids propre et surcharge», «Neige», «Vent» (issues #35-#37, docs/domain/loads.md)  # noqa: E402
 import fire_check_tab  # the «Résistance au feu» tab: the member checks in the design situation fire, SIA 265 4.5.2, and VKF 15-15 (issue #46)  # noqa: E402
@@ -173,119 +176,10 @@ def load_data(path=None):
 # --- Connections (docs/domain/connections.md §3.3quinquies) ---------------------------
 
 
-class FutureTab(QWidget):
-    """A tab reserved for a calculation the pipeline does not export yet: it says so, and what will fill it. Given `title_key` it carries its own name -- the six tabs of «Actions» (action_tabs.py, v0.117) --, «Implémentation future.» then standing under it."""
-
-    def __init__(self, app, message_key, title_key=None):
-        super().__init__()
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 24, 24, 24)
-        title = plain_label(app.t(title_key or "future"))
-        title.setFont(app.title_font)
-        layout.addWidget(title)
-        if title_key:
-            status = plain_label(app.t("future"))
-            status.setFont(app.bold_font)
-            layout.addWidget(status)
-        message = plain_label(app.t(message_key), wrap=True)
-        message.setMaximumWidth(640)
-        layout.addWidget(message)
-        layout.addStretch(1)
-
-    def view_state(self):
-        return {}
 
 
-# Every tab, in order: its title key and how to build it. A future calculation joins the window by replacing its FutureTab with a browser of its own.
-TABS = (
-    # What the document shown is made of, before everything the project holds beside it: its chapters, its sections and the objects of each, the page of what is chosen and the options of its kind -- the one tab a document is written in, in the three documents alike (the rework of 01.10.2026).
-    ("tab_structure", structure_tab.StructureTab),
-    ("tab_plan", plan_tab.PlanTab),
-    # The fire protection plans right under the position plans they are drawn beside -- on the same documents, often following them (v0.115).
-    ("tab_fire", fire_tab.FireTab),
-    ("tab_positions", positions_tab.PositionsTab),
-    # The report's revision journal, after the positions: both are what the project itself says of the report, written by hand and read by everything else (v0.99).
-    ("tab_journal", journal_tab.JournalTab),
-    # The annexes, after the journal: the documents the report draws on from outside and the excerpts it shows of them, in the three documents alike (v0.115).
-    ("tab_annexes", annex_tab.AnnexTab),
-    # The scripts, after the journal: both are what the engineer writes into the project himself, and a script's results are read by the report like any other calculation (v0.100).
-    ("tab_python", python_tab.PythonTab),
-    # The six tabs of «Actions», empty for now, before the loads they will take over from (action_tabs.py, v0.117): permanent actions -- the structure's own weight and what is added to it --, then the variable ones.
-    # «Poids propre et surcharge», one tab for the two (issue #35, D-08): the build-ups of permanent loads entered in Woodcore (load_tab.py)
-    ("tab_ac_selfweight", load_tab.DeadLoadTab),
-    ("tab_ac_imposed", lambda app: FutureTab(app, action_tabs.SOON["tab_ac_imposed"], "tab_ac_imposed")),
-    ("tab_ac_snow", load_tab.SnowTab),
-    ("tab_ac_wind", load_tab.WindTab),
-    ("tab_ac_seismic", lambda app: FutureTab(app, action_tabs.SOON["tab_ac_seismic"], "tab_ac_seismic")),
-    ("tab_combinations", lambda app: FutureTab(app, "future_combinations")),
-    ("tab_statics", statics_tab.StaticsTab),
-    # The schemas before the two tabs that name one: the detail is drawn first, then calculated (docs/domain/detail-schemas.md §3.3decies; periodic audit 260916).
-    ("tab_schema", schema_tab.SchemaTab),
-    ("tab_connections", connectors_tab.ConnectorsTab),
-    ("tab_polar", PolarTab),
-    # The member checks of SIA 265 chapter 4, in two navigation groups -- the structural safety and the serviceability --, **in the report alone** (MODE_TABS): «Traction», «Compression», «Flexion», «Effort tranchant», «Flambage» and «Déversement» are built (one base, member_check_tab.MemberCheckTab; issue #38), the three others say they are to come (member_check_tab.py).
-    ("tab_mc_tension", member_check_tab.TensionTab),
-    ("tab_mc_compression", member_check_tab.CompressionTab),
-    ("tab_mc_bending", member_check_tab.BendingTab),
-    ("tab_mc_shear", member_check_tab.ShearTab),
-    ("tab_mc_torsion", lambda app: member_check_tab.SoonTab(app, "tab_mc_torsion")),
-    ("tab_mc_buckling", member_check_tab.BucklingTab),
-    ("tab_mc_ltb", member_check_tab.LateralTab),
-    # issue #46: the same checks in the design situation fire, one tab of five kinds, last of «Sécurité structurale»
-    ("tab_mc_fire", fire_check_tab.FireCheckTab),
-    ("tab_sls_deformation", lambda app: member_check_tab.SoonTab(app, "tab_sls_deformation")),
-    ("tab_sls_vibration", lambda app: member_check_tab.SoonTab(app, "tab_sls_vibration")),
-    # The steel of SIA 263 (issues #50-#52, spec 2026-10-12-section-acier D-13): the profiles and the section class, then the checks of the section -- one group of their own, «Acier», in the report alone.
-    ("tab_st_profiles", profile_tab.ProfileTab),
-    ("tab_st_class", steel_tab.SteelClassTab),
-    ("tab_st_tension", steel_tab.SteelTensionTab),
-    ("tab_st_compression", steel_tab.SteelCompressionTab),
-    ("tab_st_bending", steel_tab.SteelBendingTab),
-    ("tab_st_shear", steel_tab.SteelShearTab),
-    # The keyword lines, beside the commands reference: both are what helps the engineer write his report (v0.100).
-    # The report's own variables between them: what there is to name in a call, where «Commandes» is what
-    # there is to call. This project's values rather than the engine's surface, so the more specific first.
-    ("tab_formula", formula_tab.FormulaTab),
-    ("tab_variables", variables_tab.VariablesTab),
-    ("tab_commands", commands_tab.CommandsTab),
-)
-
-# The side navigation's groups (v0.91), the site's sidebar's arrangement: what the project is, what acts on it (SIA 260's «actions», the report's Einwirkungen), what carries it, how it is joined, and the reference. Every key of TABS is in one group -- tests/test_chrome.py holds it; one left out would still get its row, under the last group.
-NAV_GROUPS = (
-    # The document written, first in the navigation (the drop-down above it chooses which): its structure.
-    ("nav_document_group", ("tab_structure",)),
-    ("nav_project", ("tab_plan", "tab_fire", "tab_positions", "tab_journal", "tab_annexes", "tab_python")),
-    ("nav_actions", ("tab_ac_selfweight", "tab_ac_imposed", "tab_ac_snow", "tab_ac_wind", "tab_ac_seismic", "tab_combinations")),
-    ("nav_structure", ("tab_statics", "tab_schema")),   # a detail drawn under the system it belongs to (v0.94, the engineer's order)
-    ("nav_connections", ("tab_connections", "tab_polar")),
-    # The member checks of SIA 265 chapter 4: 4.2 the structural safety -- «Flexion» is bending combined with a normal force, «Effort tranchant» holds the shear and the compression perpendicular to the grain --, then 4.3 and 4.4 the serviceability, fatigue included.
-    ("nav_safety", ("tab_mc_tension", "tab_mc_compression", "tab_mc_bending", "tab_mc_shear", "tab_mc_torsion", "tab_mc_buckling", "tab_mc_ltb", "tab_mc_fire")),
-    ("nav_service", ("tab_sls_deformation", "tab_sls_vibration")),
-    # The steel of SIA 263 (issues #50-#52, D-13): one group, its two sub-titles «Section» and «Sécurité structurale» (NAV_SECTIONS); the connections of lot 3 will be a third.
-    ("nav_steel", ("tab_st_profiles", "tab_st_class", "tab_st_tension", "tab_st_compression", "tab_st_bending", "tab_st_shear")),
-    ("nav_reference", ("tab_formula", "tab_variables", "tab_commands")),   # «Formule» what to write, «Variables» what there is to name in it, «Commandes» what there is to call (v0.117: «Formule» in the place of v0.100's «Formules»)
-)
-
-# The sub-titles inside a group (v0.117, the engineer's request of 08.10.2026: «dans "Actions", il faut deux sections différentes»): the tab a sub-title stands before -> the key of its words, "" for a thin line only. «Combinaisons de charges» stays below the two sections, after a line (spec D-005, D-009; «Charges» stood there too until v0.117, when issue 13 retired it into «Variables»); NAV_GROUPS keeps its shape, which a dozen tests read.
-NAV_SECTIONS = {
-    "tab_ac_selfweight": "nav_permanent",
-    "tab_ac_imposed": "nav_variable",
-    "tab_combinations": "",
-    # «Acier» (D-13): what the section is, then what it resists
-    "tab_st_profiles": "nav_steel_section",
-    "tab_st_tension": "nav_steel_safety",
-}
-
-# Which modules each of the three documents shows (the engineer's request of 30.09.2026): the report every module as today, and the convention d'utilisation and the base de projet what they are written from -- the structure of the document, the positions, the plan, their own journal, the variables and the commands. ⚠️ The «Structure du document» tab (tab_structure) is the one tab a document is written in, **in the three documents alike**: the «Sections» tab of phase 3, with its Typst code editor, is gone (the rework of 01.10.2026) -- no Typst code is shown in Woodcore. A key TABS does not have is simply not shown. A project laid out as a report alone has one document and shows MODE_TABS["rs"].
-DOCUMENT_TABS = ("tab_structure", "tab_plan", "tab_positions", "tab_journal", "tab_annexes", "tab_formula", "tab_variables", "tab_commands")   # «Formule» too since v0.117: its domains lie at the Typst root the three documents share, and any of them may print one (spec 2026-10-08-onglet-formule-domaines D-16)
-# The fire protection plan is the base de projet's and the report's, not the convention d'utilisation's (the engineer's answer of 06.10.2026).
-MODE_TABS = {
-    "rs": tuple(key for key, _factory in TABS),
-    "cu": DOCUMENT_TABS,
-    "bp": DOCUMENT_TABS + ("tab_fire",),
-}
-# The modules that hold one document's own work: the one the engineer is leaving is asked what to do with what is unsaved in them (`confirm_leave`) before another document is shown -- a journal entry half written belongs to the document it was written for, and what a pane of the structure tab holds pending is written.
-MODE_BOUND = ("tab_journal", "tab_structure")
+# Every tab, declared once in tab_registry.SPECS (spec 2026-10-19-base-saine-nettoyage, ARCH-001): the lists the window reads are derived from it, under the names it always read -- TABS, the side navigation's groups and sub-titles, which documents show which tab, the tabs bound to one document.
+from tab_registry import DOCUMENT_TABS, GUARDED_TABS, MODE_BOUND, MODE_TABS, NAV_GROUPS, NAV_SECTIONS, SPECS, TABS  # noqa: E402,F401
 
 
 def mode_tabs(mode):
@@ -298,56 +192,8 @@ def mode_key(file):
     """The key a project's document is remembered under in the user's settings: its file, as the platform compares names."""
     return os.path.normcase(str(Path(file).resolve()))
 
-# A project opened read-only -- another window holds it (project_lock.py) -- saves nothing. Every way an editor tab writes a source is refused here, once, rather than in each of five tabs: its «Enregistrer» and its Ctrl+S, «Supprimer» and a drop on «Archives» or out of it, a drop into a folder, and the several plans «Nouveau» makes from the pages of one PDF (v0.83). Wrapped on the classes, before any window is built, so the buttons are connected to the guarded methods.
-WRITERS = ("save", "delete", "on_moved", "create_plans", "delete_document", "delete_sheet", "write_enabled", "write_title",
-           "write_add_section", "write_add_group", "write_remove", "write_rename", "write_move",
-           "write_object", "write_node_state", "write_heading_line", "write_add_object", "write_remove_object", "write_tag", "write_import",
-           "write_sync_import", "write_sync_flag", "write_share", "write_stop_share", "add_annex_source", "replace_annex_source",
-           # v0.116: the plan tabs' PDF bundles, their sheets moved between them, the list of the positions made as a sheet, and a frame of the document view resized or deleted (drawing_tab.DrawingTab)
-           "new_bundle", "rename_bundle", "delete_bundle", "on_sheets_moved", "export_bundle", "create_position_list", "write_frame_crop", "on_frames_delete",
-           # issue #15: the «Formules» tab's domain duplicated, its id changed, an option of a closed block and a text written (formula_tab.FormulaTab)
-           "duplicate_domain", "rename_id", "write_options", "write_text",
-           # issue #19: a line's printing set in the «Formules» tab's «Affichage» (formula_tab.FormulaTab)
-           "write_display",
-           # issue #16: the annexes' excerpts made by a frame drawn, a range of pages or a frame found (annex_tab.AnnexTab)
-           "extract_annex_pages", "extract_annex_rects", "write_extracted",
-           # issues #35-#37: a load case saved, deleted or moved, and the project's own materials saved (load_tab.LoadTab, load_tab.DeadLoadTab)
-           "save_project_library",
-           # issue #46: the project's building for VKF 15-15, saved from the «Résistance au feu» tab (fire_check_tab.FireCheckTab)
-           "save_building")
-
-
-def refused_when_read_only(method):
-    """`method` refused, and said so, while the window it belongs to has its project read-only. Called with no more arguments than it takes: a Qt signal hands a slot what it carries -- «clicked» a bool -- and the method may take none."""
-    import inspect
-    parameters = list(inspect.signature(method).parameters.values())[1:]
-    variadic = any(p.kind == p.VAR_POSITIONAL for p in parameters)
-    positional = len([p for p in parameters if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)])
-
-    @functools.wraps(method)
-    def guarded(self, *args, **kwargs):
-        app = getattr(self, "app", None) or getattr(getattr(self, "tab", None), "app", None)
-        if getattr(app, "read_only", False):
-            app.refuse_read_only()
-            return False
-        return method(self, *(args if variadic else args[:positional]), **kwargs)
-    return guarded
-
-
-def own_classes(cls):
-    """`cls` and the mixins it is composed of -- the classes among its direct bases whose name ends in `Mixin`, each holding methods moved verbatim out of its module (issue #30): what «a method the class defines» means once a class is cut into mixins. A base class listed beside it (DrawingTab for PlanTab) is not its own: it is wrapped on its own entry, once."""
-    return [cls] + [base for base in cls.__bases__ if base.__name__.endswith("Mixin")]
-
-
-# The editor tabs whose writers are guarded (tests/test_home.py holds that each writer they reach is).
-GUARDED_TABS = (drawing_tab.DrawingTab, plan_tab.PlanTab, fire_tab.FireTab, positions_tab.PositionsTab, journal_tab.JournalTab, annex_tab.AnnexTab, structure_tab.StructureTab, python_tab.PythonTab, statics_tab.StaticsTab, schema_tab.SchemaTab, connectors_tab.ConnectorsTab, PolarTab, member_check_tab.MemberCheckTab, fire_check_tab.FireCheckTab, profile_tab.ProfileTab, formula_tab.FormulaTab, load_tab.LoadTab, load_tab.DeadLoadTab)
-for _tab in GUARDED_TABS:
-    for _owner in own_classes(_tab):
-        for _name in WRITERS:
-            if _name in vars(_owner):   # wrapped where it is defined, the class or its mixin, so no definition of it is left bare
-                setattr(_owner, _name, refused_when_read_only(vars(_owner)[_name]))
-for _name in ("archive", "restore", "purge"):
-    setattr(source_archive.Actions, _name, refused_when_read_only(vars(source_archive.Actions)[_name]))
+# The read-only guard and the domains' files after a writer (tab_guard.py, spec 2026-10-19-base-saine-nettoyage, ARCH-RISK-101): applied by tab_registry to every tab class, where each writer is defined, once.
+from tab_guard import WRITERS, own_classes, refused_when_read_only  # noqa: E402,F401
 
 
 def note_text(note, lang):
@@ -360,7 +206,7 @@ def note_text(note, lang):
     return table["warn_" + code].format(**args)
 
 
-class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
+class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWindowMixin, QMainWindow):
     # PyPI is asked in a thread of its own (check_dependencies), and Qt widgets may only be touched from the thread that made them -- so the answer comes back as a signal rather than as a call.
     updates_found = Signal(list)
 
@@ -392,6 +238,8 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         self.lang = self.settings.get("lang") if self.settings.get("lang") in LANGUAGES else "fr"
         install_qt_translation(self.lang)
         self.views = {}  # each tab's view_state(), by title key, carried through a rebuild
+        self.kept_views = {}  # the view each tab shows, by title key, carried through a rebuild (issue #86): never the user's settings
+        self.picking = False  # a variable being chosen in «Variables» for the tab that asked: that tab keeps its view while it waits (issue #86)
         self.tab_index = 0
         self.process = None  # the export or the compilation running, if any -- never both, they run one after the other
         self.close_requested = False
@@ -410,17 +258,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         QGuiApplication.instance().applicationStateChanged.connect(self.on_application_state)
         self.compiling = False  # which of the two the process is, for the one message that has to name it
 
-        base = QApplication.font()
-        self.bold_font = QFont(base)
-        self.bold_font.setBold(True)
-        self.title_font = QFont(self.bold_font)
-        self.title_size = "large"
-        if base.pointSizeF() > 0:
-            self.title_font.setPointSizeF(base.pointSizeF() * 1.25)
-            self.title_size = f"{self.title_font.pointSizeF():g}pt"
-        # The site's code font, Cascadia Mono on Windows (theme.py, v0.90) -- Consolas until then, where Qt's own fixed font, Courier New, was thin beside the text around it
-        self.mono_font = theme.mono_font(base.pointSizeF())
-        self.mark_size = QSize(MARK_PX, MARK_PX)
+        self.take_fonts()
         self.take_colours()
 
         # the project's name first, the way Word names its document: two windows on two projects are told apart on the taskbar (v0.82) -- and «•» before it while a tab holds unsaved changes (update_title, v0.83)
@@ -431,6 +269,11 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         self.status = plain_label("")
         self.status.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)  # a long call just copied must not widen the window
         self.statusBar().addWidget(self.status, 1)
+        # «Zoom 120 %» while the interface is not at its size (issue #85): built once with the status bar, as the status line is, and said again by `rezoom`
+        self.zoom_status = plain_label("")
+        self.zoom_status.setObjectName("meta")
+        self.statusBar().addPermanentWidget(self.zoom_status)
+        self.show_zoom()
 
         self.take_over_folders()
         self.load()
@@ -447,9 +290,10 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         here = project.current()
         kept = self.settings.get("document_modes")
         mode = kept.get(mode_key(here.file)) if isinstance(kept, dict) else None
-        if mode in here.modes:
+        if mode in here.created_modes:
             return mode
-        return "cu" if "cu" in here.modes else "rs"
+        # the first document made, in the navigation's order -- the report for a project just made, which has none yet (issue #90)
+        return next(iter(here.created_modes), "rs")
 
     def current_document(self):
         """The document the window works on -- `mode` where it is one of the current project's documents, else the report, which every project has. What a tab asks when it reads or writes one document's own files."""
@@ -481,6 +325,8 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         self.remember_mode()
         with busy.hold(self, self.t("busy_switching"), guard=False):
             self.apply_mode()
+            # every change of document brings the «Projet» tab forward, always -- even where the tab in front is one of both documents (the engineer, 21.10.2026, issue #87): nothing is compiled by the change itself
+            self.tab_widget.setCurrentIndex(self.project_index())
             for tab in self.tabs:
                 if hasattr(tab, "on_mode"):
                     tab.on_mode(mode)
@@ -492,10 +338,46 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         by_key = {key: index for index, (key, _factory) in enumerate(TABS)}
         shown = [by_key[key] for key in mode_tabs(self.current_document())]
         self.nav.set_visible(shown)
+        self.nav.set_unavailable([index for index in shown if not self.available(TABS[index][0])], self.t("pj_not_made_tip"))
+        for button in (getattr(self, "pdf_button", None),):
+            if button is not None:
+                button.setEnabled(project.current().is_created(self.current_document()))   # no PDF of a document not made yet
         order = self.nav.order()
         if order and self.tab_widget.currentIndex() not in order:
             self.tab_widget.setCurrentIndex(order[0])
         self.bind_shortcuts()
+
+    def project_index(self):
+        """The index of the «Projet» tab, the first row of the navigation (issue #87)."""
+        return next(index for index, (key, _factory) in enumerate(TABS) if key == "tab_project")
+
+    def available(self, key):
+        """Whether tab `key` can be opened in the document shown: every tab of a document that is made, and the «Projet» tab alone in one that is not yet (issue #90: «tout est grisé sauf l'onglet Projet»)."""
+        return key == "tab_project" or project.current().is_created(self.current_document())
+
+    def project_changed(self):
+        """The project file rewritten by the «Projet» tab: its name where the window shows it -- the top bar, the title -- and what the tabs that show a compiled page read (issue #87: the name in the top bar was never refreshed)."""
+        here = project.current()
+        if getattr(self, "brand", None) is not None:
+            self.brand.setText(here.name)
+        self.update_title()
+
+    def properties_written(self, look_changed):
+        """The project's look changed (a form applied): every tab that shows a compiled page told, so that it is compiled again with it."""
+        for tab in self.tabs:
+            hook = getattr(tab, "on_properties_changed", None)
+            if hook is not None:
+                hook(look_changed)
+
+    def document_created(self, mode):
+        """Document `mode` made from the «Projet» tab (issue #90): the window built again -- every tab was built against a document that was not there -- and that document shown, the «Projet» tab in front."""
+        if mode != self.mode and mode in project.current().modes:
+            self.mode = mode
+            self.remember_mode()
+        self.rebuild()
+        self.nav.set_mode(self.mode)
+        self.apply_mode()
+        self.tab_widget.setCurrentIndex(self.project_index())
 
     def bind_shortcuts(self):
         """Ctrl+1 … Ctrl+9: the modules in the order the navigation lists them, the ones it shows and no other -- made again, the old ones taken off the window, each time what it shows changes."""
@@ -556,7 +438,9 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         top = QHBoxLayout()
         top.setSpacing(8)
         brand = QLabel(project.current().name)
+        self.brand = brand   # named again when the «Projet» tab renames the project (project_changed)
         brand.setObjectName("brand")
+        brand.setFont(theme.brand_font())   # its size the zoom's, and not the style sheet's (issue #85)
         brand.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         top.addWidget(brand)
         top.addSpacing(4)
@@ -585,6 +469,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         self.language.setToolTip(self.t("language"))
         self.language.currentIndexChanged.connect(self.on_language)
         top.addWidget(self.language)
+        self.bind_palette(top)   # «Rechercher… Ctrl K», and Ctrl+K (issue #83)
         top.addSpacing(8)
         reload_button = QPushButton(self.t("reload"))
         reload_button.clicked.connect(self.reload)
@@ -604,9 +489,9 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
             layout.addWidget(banner)
 
         # A project laid out as one report, whose migration into three documents the engineer put off or which could not go through: said once, with the one button that asks again (migrate_dialog.py).
-        if self.migration_banner and not self.read_only and not project.current().has_modes:
+        if self.migration_banner and not self.read_only and not project.current().has_folders:
             row = QHBoxLayout()
-            note = plain_label(self.t("mg_banner"), wrap=True)
+            note = plain_label(self.t("mg_folders_banner" if project.current().has_modes else "mg_banner"), wrap=True)   # a project in three documents is offered the layout by folders (issue #64)
             note.setProperty("callout", "info")
             row.addWidget(note, 1)
             button = QPushButton(self.t("mg_banner_button"))
@@ -764,10 +649,15 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
 
     def on_tab_changed(self, index):
         """Another tab in front: the one left keeps nothing unsaved that can be saved (`leave_tab`, the engineer's rule of 07.10.2026), the view switch shows the views of the one now shown, and that one looks again at the disk (`on_tab_shown`) -- in this order, so a tab reads what the one left has just written (review A07)."""
+        if 0 <= index < len(self.tabs) and not self.available(TABS[index][0]):
+            # a door other than the navigation -- an object opened, the palette -- to a tab whose document is not made yet: the «Projet» tab instead (issue #90)
+            self.tab_widget.setCurrentIndex(self.project_index())
+            return
         previous = getattr(self, "shown_index", None)
         self.shown_index = index
         if previous is not None and previous != index and 0 <= previous < len(self.tabs):
             self.leave_tab(self.tabs[previous], "tab")
+            self.reset_view(self.tabs[previous])
         self.refresh_if_stale(index)
         self.sync_view_switch()
         self.on_tab_shown(index)
@@ -801,7 +691,8 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         if display is not None and getattr(new, "display", None) is not None:
             new.display.restore(display)
         if views.declared(new):
-            new.set_view(views.remembered(self.settings, key, new), enter=False)
+            kept = getattr(old, "view", None)
+            new.set_view(kept if kept in views.declared(new) else views.default(new), enter=False)
         self.bind_layout(key, new)
         self.update_tab_marks()
         self.sync_view_switch()
@@ -853,10 +744,25 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         return None
 
     def apply_views(self):
-        """Each tab that has views put in the one it was last left in, as the user's settings keep it -- a state set and nothing compiled (review A10): what a view compiles waits for the tab to be shown."""
+        """Each tab that has views put in its first, or in the one it showed before a rebuild (`kept_views`, issue #86) -- a state set and nothing compiled (review A10): what a view compiles waits for the tab to be shown."""
         for (key, _factory), tab in zip(TABS, self.tabs):
             if views.declared(tab):
-                tab.set_view(views.remembered(self.settings, key, tab), enter=False)
+                kept = self.kept_views.get(key)
+                tab.set_view(kept if kept in views.declared(tab) else views.default(tab), enter=False)
+
+    def reset_view(self, tab):
+        """`tab`, being left, put back in its first view as a state, its panes in that view's sizes (issue #86: «lorsque l'on ouvre un onglet, on est toujours en mode calcul et pas en mode affichage»). Done as the tab is left and not as it arrives: Qt shows the page before it says the tab changed, and a view put back then would come after its compilation. Not while a variable is chosen for that tab (`picking`): it waits in the view it asked from."""
+        if self.picking:
+            return
+        for page in tab.findChildren(pdf_pane.ZoomablePdfView):
+            page.fit()   # a page zoomed by Ctrl+wheel back to its pane's width once its tab is left (issue #89)
+        first = views.default(tab)
+        if first is None or getattr(tab, "view", None) == first:
+            return
+        tab.set_view(first, enter=False)
+        binding = getattr(self, "layout_bindings", {}).get(self.tab_key(tab))
+        if binding is not None:
+            binding.restore()   # the first view's own sizes (layout_store)
 
     def sync_view_switch(self):
         """The switch given the views of the tab in front, the one it shows pressed; hidden for a tab without views."""
@@ -870,7 +776,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         switch.setVisible(bool(buttons))
 
     def on_view_chosen(self, key):
-        """The engineer chose another view of the tab in front: what it holds unsaved is saved first, as a tab left is, then the tab shows the view and the settings keep it."""
+        """The engineer chose another view of the tab in front: what it holds unsaved is saved first, as a tab left is, then the tab shows the view, which holds until the tab is left (issue #86)."""
         index = self.tab_widget.currentIndex()
         tab = self.tabs[index] if 0 <= index < len(self.tabs) else None
         if tab is None or key not in views.declared(tab) or key == getattr(tab, "view", None):
@@ -878,6 +784,20 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         self.leave_tab(tab, "view")
         tab.set_view(key)
         self.view_changed(tab)
+
+    # -- an object of the graph of dependencies opened where it is edited (issue #71, spec 2026-10-21-graphe-dependances, UI-001) --
+
+    def open_object(self, node, file=None):
+        """`node` (`check:ZT-01`, `section:rs/Sections/004-einwirkungen.typ`) opened where it is edited: a section in the editor, any other object in the tab that lists it -- the one whose `GRAPH_KIND` is its kind and which `lists_object` it --, the draft there left as every change of source leaves it (`open_object`). False where no tab lists it: a case read from a workbook, a document."""
+        kind, ident = node.split(":", 1)
+        if kind == "section":
+            return bool(file) and open_in_editor(project.current().root / file)
+        for tab in self.tabs:
+            if getattr(tab, "GRAPH_KIND", None) == kind and tab.lists_object(ident):
+                self.tab_widget.setCurrentWidget(tab)
+                tab.open_object(ident)
+                return True
+        return False
 
     # -- a variable chosen in «Variables» for the «Formule» tab (v0.117, spec 2026-10-08-onglet-formule-domaines REQ-015, UI-007) --
 
@@ -890,6 +810,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         back = self.tab_widget.currentIndex()   # the tab that asked, in front as it asks
 
         def done(key):
+            self.picking = False
             self.nav.setEnabled(True)
             for shortcut in self.shortcuts:
                 shortcut.setEnabled(True)
@@ -904,6 +825,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
             self.tab_widget.setCurrentIndex(back)
 
         self.leave_tab(self.tabs[back], "leave")
+        self.picking = True
         self.tab_widget.setCurrentWidget(tab)
         self.nav.setEnabled(False)
         for shortcut in self.shortcuts:
@@ -915,7 +837,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         return True
 
     def view_changed(self, tab):
-        """`tab` shows another view -- chosen in the switch, or reached from inside the tab (a frame of a document opening its plan): the switch follows where the tab is in front, and the user's settings keep it. Allowed in a project opened read-only: the settings are the engineer's, not the project's."""
+        """`tab` shows another view -- chosen in the switch, or reached from inside the tab (a frame of a document opening its plan): the panes take that view's sizes and the switch follows where the tab is in front. Nothing is written: the view holds while the tab stays in front (issue #86; the user's settings kept it from v0.117 to 0.121)."""
         key = self.tab_key(tab)
         view = getattr(tab, "view", None)
         if key is None or view is None:
@@ -925,11 +847,6 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
             binding.restore()   # the view's own sizes, on these screens (layout_store)
         if self.tabs and self.tab_widget.currentWidget() is tab:
             self.view_switch.set_current(view)
-        kept = self.settings.get("views") if isinstance(self.settings.get("views"), dict) else {}
-        if kept.get(key) != view:
-            settings = views.with_view(read_settings(), key, view)
-            write_settings(settings)
-            self.settings = settings
 
     def new_position(self, symbol=None, floor=None):
         """A new position opened in the «Positions» tab, brought forward -- how another tab asks for one (a schema element's panel; the plan's alert where the project has no position of a tool's letter, until the plan tab wrote a blank one itself, v0.114), reaching that tab through the window rather than importing it (v0.94). True where the draft was opened."""
@@ -953,11 +870,14 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, QMainWindow):
         """Builds the window's content again -- after a language switch or a reload -- keeping the tab, and each tab's state: the loads' search, open rows and selection, the connection being edited with its unsaved changes."""
         self.tab_index = self.tab_widget.currentIndex()
         self.views = {key: tab.view_state() for (key, _factory), tab in zip(TABS, self.tabs)}
+        self.kept_views = {key: tab.view for (key, _factory), tab in zip(TABS, self.tabs) if getattr(tab, "view", None)}
         # the options chosen in each tab's «Affichage» view survive the rebuild every export ends in (v0.117, the engineer: they were lost at each save): kept in memory, never in a file
         displays = {key: tab.display.snapshot() for (key, _factory), tab in zip(TABS, self.tabs) if getattr(tab, "display", None) is not None}
         # Seconds of widgets built on the main thread (5 s for the example project, measured on 03.10.2026): the window held with the card over it rather than frozen (busy.py, v0.113)
         with busy.hold(self, self.t("busy_loading"), guard=False):
             self.build()
+        self.kept_views = {}
+        self.show_zoom()   # «Zoom 120 %» in the language the window now speaks
         for (key, _factory), tab in zip(TABS, self.tabs):
             if key in displays and getattr(tab, "display", None) is not None:
                 tab.display.restore(displays[key])
@@ -1084,7 +1004,7 @@ def open_project(app, file, parent=None, quiet=False, migrate=False):
             newer, read_only = detail, True
             project_lock.release(here)
     migration_banner = False
-    if not read_only and not quiet and not here.has_modes:
+    if not read_only and not quiet and not here.has_folders:
         # A project laid out as one report, offered its migration into three documents (the engineer's request of 30.09.2026) -- after the lock, which the migration runs under (its `--lock-owner` is this process), and before anything is seeded, which the migration would move. «Plus tard» opens it as it is, the banner offering it again; a migration that went through is the project read again, in three documents.
         try:
             outcome = migrate_dialog.offer(parent, lang, here, forced=migrate)
@@ -1106,6 +1026,25 @@ def open_project(app, file, parent=None, quiet=False, migrate=False):
             import positions_store
             positions_note = positions_store.migrate(here)
         except Exception:  # broad: the export migrates too, and says what is wrong
+            traceback.print_exc()
+    if not read_only:
+        # The report commands renamed in v0.120 -- the thirteen `*-ids` now `ids(kind)`, the eight `get-*` now `get(v, field)`, `show-line-load-summary` now `show-load-summary(unit:)` -- rewritten in the project's sections once, each file saved first into the archives (calc/domains/commands_migrate.py, spec 2026-10-19-base-saine-nettoyage, D-13).
+        try:
+            from domains import commands_migrate
+            for change in commands_migrate.migrate(here):
+                print(f"woodcore: {here.rel(change.path)} migrated: " + "; ".join(change.notes))
+            # what was taken away is never rewritten: said here, at its file and line, and refused by the export (spec 2026-10-21-commandes-typst-refonte, REQ-020)
+            import notices_ui
+            notices_ui.tell_removed_commands(commands_migrate.removals(here), here)
+            notices_ui.tell_unscoped_units(commands_migrate.unit_scope_notes(here), here)   # a #unit written before its scope: existed (CON-007)
+        except Exception:  # broad: a file the migration could not rewrite is left as it was, and the export names it
+            traceback.print_exc()
+        # The values of the snow and wind sheets renamed in v0.120, the sheets being computed by Woodcore -- `q_k11` of a flat roof now `q_k1`, `qk_max_bh` now `qk_max_cf1` -- rewritten in the project's sections, scripts and sources once, each file saved first into the archives (calc/domains/loads_migrate.py, spec 2026-10-21-restes-issue-69, D-06). What cannot be rewritten safely is left, and the export names it.
+        try:
+            from domains import loads_migrate
+            for change in loads_migrate.migrate(here):
+                print(f"woodcore: {here.rel(change.path)} migrated: " + "; ".join(change.notes))
+        except Exception:  # broad: a file the migration could not rewrite is left as it was, and the export names it
             traceback.print_exc()
     if not read_only:
         # A project whose data/ lacks a file its report reads -- one «Nouveau projet» made before v0.86.1 wrote them -- gets it, empty, so its report compiles in Tinymist before its first export (export_all.seed); a file already there is never touched, and a failure here keeps no project from opening.

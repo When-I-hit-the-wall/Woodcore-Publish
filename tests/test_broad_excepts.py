@@ -3,6 +3,8 @@
 (a) A file that does not read stops, naming the file: an annex, a plan's background, a document of an export, a DXF. (b) What a tab leaves out is said: a schema that does not read is a warning notice naming the file and why, the tab going on with the others. (c) A handler narrowed to the exception it expects lets any other through: a defect is no longer turned into silence.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import contextlib
 import json
 import shutil
@@ -12,7 +14,6 @@ import conftest
 from conftest import ROOT, Skip
 
 import validation
-import content_switch
 import project_lock
 import sheets
 import sync
@@ -151,8 +152,8 @@ def test_a_file_whose_tags_do_not_read_is_compared_whole_and_a_defect_is_not_swa
         raise TypeError("a defect of the reader")
 
     with _patched(typst_objects, objects=unreadable):
-        assert sync._top_objects("text") == [] and content_switch._objects("woodcore:object") == []
-    for call in (lambda: sync._top_objects("text"), lambda: content_switch._objects("woodcore:object")):
+        assert sync._top_objects("text") == []
+    for call in (lambda: sync._top_objects("text"),):
         with _patched(typst_objects, objects=defect):
             try:
                 call()

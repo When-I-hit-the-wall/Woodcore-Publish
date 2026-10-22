@@ -9,4 +9,4 @@
 #number-digits.update(3)
 
 #var("d", 1.6, "cm")
-#distance("d", "dowel", title: none)
+#distance("d", "dowel", label: none)

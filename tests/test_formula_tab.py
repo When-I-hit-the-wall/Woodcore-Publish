@@ -13,6 +13,7 @@ from conftest import ROOT, Skip
 import list_order
 import project
 from domains import formula_domain as fd
+from domains import unfold
 
 TOOLS = ROOT / "calc" / "tools"
 _STATE = {}
@@ -97,8 +98,8 @@ def test_the_tab_is_first_in_reference_in_three_languages_with_its_icon():
     assert "tab_formula" in chrome.ICONS
     words = [set(formula_tab.STRINGS[lang]) for lang in ("fr", "de", "en")]
     assert words[0] == words[1] == words[2], sorted(words[0] ^ words[1] | words[0] ^ words[2])
-    # issue #15, UI-001: «Formules / Formeln / Formulas»
-    assert [woodcore_gui.STRINGS[lang]["tab_formula"] for lang in ("fr", "de", "en")] == ["Formules", "Formeln", "Formulas"]
+    # issue #15, UI-001, renamed by issue #64 (UI-001): «Domaines / Domänen / Domains»
+    assert [woodcore_gui.STRINGS[lang]["tab_formula"] for lang in ("fr", "de", "en")] == ["Domaines", "Domänen", "Domains"]
     assert not [k for lang in ("fr", "de", "en") for k, v in formula_tab.STRINGS[lang].items() if "show-formula" in v], "a word of the tab still names #show-formula"
     own = {k: v for c in reversed(woodcore_gui.own_classes(formula_tab.FormulaTab)) for k, v in vars(c).items()}  # the class and its mixins (issue #30)
     for name in woodcore_gui.WRITERS:
@@ -138,7 +139,7 @@ def test_a_domain_is_named_on_its_first_line_its_id_made_from_it_and_written_on_
     path = project.current().formulas_dir / "essai-a.typ"
     read = fd.read(path)
     assert path.is_file() and read.name == "Essai A" and read.declared == "essai-a"
-    assert '#var-domain("essai-a", title: "Essai A")[' in path.read_text(encoding="utf-8")
+    assert '#domain("essai-a", label: "Essai A")[' in path.read_text(encoding="utf-8")
     # a name changed once the domain is written renames nothing: the ID is the file's (REQ-004)
     tab.name_edit.setText("Essai A bis")
     tab.name_done()
@@ -156,7 +157,7 @@ def test_an_id_changed_renames_the_file_and_one_that_is_no_id_is_refused():
     tab.list.drop_ids([old_id], tab.list._item_for(old_id), "Essais")
     place = list_order.tab_of(list_order.read(project.current()), tab.KEY)[0].index(old_id)
     section = project.current().typst_root / "probe-cite.typ"
-    section.write_text(f'#include "/Formules/{tab.current_id}.typ"\n', encoding="utf-8")
+    section.write_text(f'#include "/Domains/{tab.current_id}.typ"\n', encoding="utf-8")
     import notices_ui
     told = []
     saved_tell = notices_ui.tell
@@ -182,7 +183,7 @@ def test_an_id_changed_renames_the_file_and_one_that_is_no_id_is_refused():
     assert groups.get("essai-i2") == "Essais" and order.index("essai-i2") == place, (order, groups)
     assert tab.list._item_for("essai-i2").parent().text(0) == "Essais"
     tab.app.list_store.forget(tab.KEY, ["essai-i2"])
-    assert '#var-domain("essai-i2", title: "Essai I")[' in new.read_text(encoding="utf-8")
+    assert '#domain("essai-i2", label: "Essai I")[' in new.read_text(encoding="utf-8")
     assert told and "probe-cite.typ:1" in told[0], told
     _cleanup(tab, "Essai I")
 
@@ -233,6 +234,8 @@ def test_blocks_are_written_in_fields_validated_on_enter_and_shown_as_what_matte
     window.show()
     window.tab_widget.setCurrentWidget(tab)
     _pump()
+    # brought to the front, the tab reads its domains again (on_shown) and its blocks are new: the one of `V` is found again
+    block = next(b for b in tab.blocks if not b.command.is_text and b.command.key == "V")
     zone = tab.zones[0]
     centre = QPointF(zone.pill_rect(block.uid).center())
     event = QMouseEvent(QEvent.Type.MouseButtonDblClick, centre, centre, Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier)
@@ -244,7 +247,7 @@ def test_blocks_are_written_in_fields_validated_on_enter_and_shown_as_what_matte
     assert not block.editing and tab.open_block is None and len(tab.zones) == 1
     # «Affichage» offers the line a section prints it with (issue #15, D-01)
     entries = tab.display_entries()
-    assert [(e.key, e.call) for e in entries] == [("include", f'#include "/Formules/{tab.current_id}.typ"')]
+    assert [(e.key, e.call) for e in entries] == [("include", f'#include "/Domains/{tab.current_id}.typ"')]
     _cleanup(tab, "Essai B")
 
 
@@ -295,14 +298,7 @@ def test_a_single_click_on_a_block_validated_shows_its_options_and_writes_them()
     tab.add_block("verify")
     tab.open_block.fields["formula"].setText("M <= 20 kN")
     tab.open_block.validate()
-    tab.add_block("val")
-    tab.open_block.fields["key"].setText("M")
-    tab.open_block.validate()
-    tab.add_block("var-unit")
-    tab.open_block.fields["key"].setText("F")
-    tab.open_block.fields["unit"].setText("N")
-    tab.open_block.validate()
-    assert [b.command.kind for b in tab.blocks] == ["var", "eq", "verify", "val", "var-unit"] and not any(b.editing for b in tab.blocks), [b.error.text() for b in tab.blocks if b.editing]
+    assert [b.command.kind for b in tab.blocks] == ["var", "eq", "verify"] and not any(b.editing for b in tab.blocks), [b.error.text() for b in tab.blocks if b.editing]
     tab.chosen_block = None
     tab.show_right()
     assert tab.right_cards() == ["variables", "commands"]
@@ -409,11 +405,12 @@ def test_typst_of_one_s_own_is_written_around_the_pills_and_a_command_goes_where
 
 
 def test_a_variable_is_imported_through_the_variables_tab_every_other_module_unavailable():
-    """REQ-015, UI-007 of v0.117: «Importer…» brings «Variables» forward in its choosing mode, the navigation and Ctrl+n off; «Annuler» changes nothing; a value of the export chosen comes back as `#var(key, var-of(…))` with the export's value."""
+    """REQ-015, UI-007 of v0.117: «Importer…» brings «Variables» forward in its choosing mode, the navigation and Ctrl+n off; «Annuler» changes nothing; a value of the export chosen comes back as `#var(key, domain: (calculation, instance))` with the export's value (spec 2026-10-21-commandes-typst-refonte, REQ-009: `var-of` merged into `#var`)."""
     window, tab = _tab()
     path = _new(tab, "Essai C")
     import variables_tab
     listing = next(t for t in window.tabs if isinstance(t, variables_tab.VariablesTab))
+    window.tab_widget.setCurrentWidget(tab)   # «Annuler» goes back to the tab that asked, which is in front when the engineer asks
     tab.import_variable()
     assert window.tab_widget.currentWidget() is listing and not window.nav.isEnabled() and not listing.pick_bar.isHidden()
     assert all(not s.isEnabled() for s in window.shortcuts)
@@ -425,7 +422,7 @@ def test_a_variable_is_imported_through_the_variables_tab_every_other_module_una
     listing.select_key((*key, "ce"))
     listing.pick_chosen()                                     # «Importer»
     assert window.nav.isEnabled() and window.tab_widget.currentWidget() is tab
-    assert '#var("ce", var-of("snow-load", "SL", "ce"))' in path.read_text(encoding="utf-8")
+    assert '#var("ce", domain: ("snow-load", "SL"))' in path.read_text(encoding="utf-8")
     assert tab.results[0].value == listing.variable((*key, "ce")).value and not tab.results[0].error
     # the tab's own domains are a source of the «Variables» tab, under their id (D-06)
     assert any(origin == variables_tab.FORMULAS and name == "poutre-p1" for origin, name in listing.domains), sorted(listing.domains)
@@ -508,10 +505,10 @@ def test_a_value_changed_by_hand_is_read_again_and_affichage_compiles_and_copies
     try:
         tab.update_display(force=True)
         view = tab.display
-        line = f'#include "/Formules/{tab.current_id}.typ"'
+        line = f'#include "/Domains/{tab.current_id}.typ"'
         assert view.command() == line
         source = view.source()
-        assert source.rstrip().endswith(line) and "/commands.typ" in source, source
+        assert source.rstrip().endswith(line) and "/000-Typst-Config/commands.typ" in source, source
         copied = []
         view.copy_text = copied.append
         view.copy_button.click()
@@ -523,8 +520,8 @@ def test_a_value_changed_by_hand_is_read_again_and_affichage_compiles_and_copies
 
 def test_a_file_changed_on_the_disk_while_the_tab_holds_it_is_never_written_over():
     """The lines written in VS Code (or by an engine synced) while the tab held the domain open were dropped by its next save: the save is refused, said, and the domain read again as the file now is."""
+    _window, tab = _tab()   # calc/tools is on the path once the window is built: a module of it is imported after
     import notices_ui
-    _window, tab = _tab()
     path = _new(tab, "Essai D")
     _var(tab, "F", 5, "kN")
     elsewhere = path.read_text(encoding="utf-8").replace('#var("F", 5, "kN")', '#var("F", 5, "kN")\n  #var("G", 2, "m")')
@@ -560,31 +557,25 @@ def test_calcul_says_what_a_line_is_and_affichage_how_it_is_printed():
     eq.fields["symbol"].setText("M")
     eq.fields["formula"].setText("F * 2")
     eq.validate()
-    tab.add_block("val")
-    tab.open_block.fields["key"].setText("M")
-    tab.open_block.validate()
     press = QMouseEvent(QEvent.Type.MouseButtonPress, QPointF(5, 5), QPointF(5, 5), Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier)
     for block in tab.blocks[:2]:
         block.mousePressEvent(press)
         controls = set(tab.panel.controls)
         assert controls == {"label", "descr", "norm", "norm-ref"}, (block.command.kind, controls)
-    # a val in italics, a var not -- the list being the same in both views
-    assert _child(tab, 2).font(0).italic() and not _child(tab, 0).font(0).italic() and not _child(tab, 1).font(0).italic()
     tab.set_view("display", enter=False)
     try:
-        assert _child(tab, 2).font(0).italic()
         tab.on_tree_clicked(_child(tab, 1))
         view = tab.display
         assert [e.key.split(":")[0] for e in view.entries] == ["line", "include"] and view.current().command == "eq", [e.key for e in view.entries]
-        assert view.command() == f'#include "/Formules/{tab.current_id}.typ"', "the call to copy stays the include (D-06)"
+        assert view.command() == f'#include "/Domains/{tab.current_id}.typ"', "the call to copy stays the include (D-06)"
         panel = view.panel()
-        assert {"level", "note", "style", "summary"} <= set(panel.controls) and "label" not in panel.controls, set(panel.controls)
+        assert {"level", "style"} <= set(panel.controls) and "label" not in panel.controls, set(panel.controls)
         order = []
         original = view.refresh
-        view.refresh = lambda: (order.append(("refresh", "note: \"line\"" in path.read_text(encoding="utf-8"))), original())[1]
-        option, combo = panel.controls["note"]
-        combo.setCurrentIndex(combo.findData("line"))
-        assert '#eq("M", `F * 2`, note: "line")' in path.read_text(encoding="utf-8"), path.read_text(encoding="utf-8")
+        view.refresh = lambda: (order.append(("refresh", "style: \"bold\"" in path.read_text(encoding="utf-8"))), original())[1]
+        option, combo = panel.controls["style"]
+        combo.setCurrentIndex(combo.findData("bold"))
+        assert '#eq("M", `F * 2`, style: "bold")' in path.read_text(encoding="utf-8"), path.read_text(encoding="utf-8")
         assert order and order[0] == ("refresh", True), f"the page was asked for before the file was written: {order}"
         view.refresh = original
         assert _child(tab, 1).isSelected(), "the line chosen stays chosen through the save"
@@ -592,7 +583,7 @@ def test_calcul_says_what_a_line_is_and_affichage_how_it_is_printed():
         window.read_only = True
         try:
             before = path.read_text(encoding="utf-8")
-            combo.setCurrentIndex(combo.findData("footnote"))
+            combo.setCurrentIndex(combo.findData("underline"))
             assert path.read_text(encoding="utf-8") == before
         finally:
             window.read_only = False
@@ -609,7 +600,7 @@ def test_calcul_says_what_a_line_is_and_affichage_how_it_is_printed():
     tab.panel.changed.emit(tab.panel.values())
     tab.write_options()
     text = path.read_text(encoding="utf-8")
-    assert 'label: "Moment"' in text and 'note: "line"' in text, text
+    assert 'label: "Moment"' in text and 'style: "bold"' in text, text
     _cleanup(tab, "Essai V")
 
 
@@ -726,7 +717,7 @@ def test_the_index_is_rewritten_at_every_save_and_lists_the_domain_under_its_id(
     _new(tab, "Essai O")
     _var(tab, "F", 5, "kN")
     data = json.loads((project.current().data_dir / fd.EXPORT_FILE).read_text(encoding="utf-8"))
-    assert data["domains"][tab.current_id] == {"title": "Essai O", "file": f"Formules/{tab.current_id}.typ"}
+    assert data["domains"][tab.current_id] == {"title": "Essai O", "file": f"Domains/{tab.current_id}.typ"}
     found = fd.variable_domains(data)
     domain = next(d for d in found if d.name == tab.current_id)
     assert domain.label == "Essai O" and [(v.key, v.value, v.unit) for v in domain.variables] == [("F", 5, "kN")]
@@ -774,13 +765,11 @@ def test_a_command_validated_is_a_pill_inline_in_its_sentence_or_on_a_line_of_it
     tab.render()
     assert tab.zones[0].paragraphs()[0][:2] == [("text", "Kraft "), ("cmd", f.uid)], tab.zones[0].paragraphs()
     before = path.read_text(encoding="utf-8")
-    # `note: "line"` written in «Affichage»: the pill alone on its line, nothing else rewritten
-    assert tab.write_display(tab.ref_of(f.command), {"note": "line"})
+    # an option written in «Affichage»: that argument alone written, the pill still in its sentence -- every command of a domain prints inline since `note:` was retired (Q-014)
+    assert tab.write_display(tab.ref_of(f.command), {"style": "bold"})
     after = path.read_text(encoding="utf-8")
-    assert after == before.replace('#var("F", 5, "kN")', '#var("F", 5, "kN", note: "line")'), after
-    assert tab.zones[0].paragraphs()[:2] == [[("text", "Kraft")], [("cmd", f.uid)]], tab.zones[0].paragraphs()
-    assert tab.write_display(tab.ref_of(f.command), {"note": "footnote"})
-    assert tab.zones[0].paragraphs()[0][:2] == [("text", "Kraft "), ("cmd", f.uid)]
+    assert after == before.replace('#var("F", 5, "kN")', '#var("F", 5, "kN", style: "bold")'), after
+    assert tab.zones[0].paragraphs()[0][:2] == [("text", "Kraft "), ("cmd", f.uid)], tab.zones[0].paragraphs()
     _cleanup(tab, "Essai P")
 
 
@@ -908,3 +897,70 @@ def test_a_variable_is_typed_shown_variable_first_its_key_following_until_writte
     finally:
         window.hide()
     _cleanup(tab, "Essai R")
+
+
+def test_an_unfolded_check_shows_its_lines_states_and_imports_them():
+    """UI-002 (spec 2026-10-15): a domain unfolded from a check shows its card -- the check it is written from, the lines not in step with their state -- and marks its pills: a formula changed outside Woodcore is `local`, its pill drawn in the warning's colour; «Tout importer» takes it, the card then says every line is up to date. Every action is a writer, refused in a project opened read only."""
+    from domains import member_check, unfold
+    _window, tab = _tab()
+    import woodcore_gui   # after _tab(), which puts calc/tools on the path
+    import formula_tab
+    here = project.current()
+    path = unfold.domain_path(here, "ZT-01")   # Timber-checks/Tension/ laid out by folders (issue #64)
+    with project.using(here):
+        member_check.export(here)
+    try:
+        assert path.is_file()
+        path.write_text(path.read_text(encoding="utf-8").replace("`N_t_d / A`", "`N_t_d / (A)`"), encoding="utf-8")
+        tab.reload(keep="ZT-01")
+        _pump()
+        assert "unfold" in tab.right_cards()
+        listed = [tab.unfold_list.topLevelItem(i).text(0) for i in range(tab.unfold_list.topLevelItemCount())]
+        assert listed == ["eq:sigma_t_0_d"], listed
+        sigma = next(b for b in tab.blocks if b.command.key == "sigma_t_0_d")
+        assert tab.pill_state(sigma) == "local"
+        assert tab.unfold_buttons["import_all"].isEnabled() and not tab.unfold_buttons["regenerate"].isEnabled()
+        assert tab.write_unfold_import_all() is True
+        assert tab.unfold_list.topLevelItemCount() == 0 and not tab.unfold_none.isHidden()
+        assert "`N_t_d / (A)`" in path.read_text(encoding="utf-8")
+        # a value of the norm changed in the file and imported: the engineer's own, its pill in the override's colour, «Reprendre» offered
+        path.write_text(path.read_text(encoding="utf-8").replace('"f_(t,0,d,\\"Tab\\")", 8.5', '"f_(t,0,d,\\"Tab\\")", 9'), encoding="utf-8")
+        tab.reload(keep="ZT-01")
+        tab.unfold_list.setCurrentItem(tab.unfold_list.topLevelItem(0))
+        assert tab.write_unfold_import() is True
+        tab.unfold_list.setCurrentItem(tab.unfold_list.topLevelItem(0))
+        table = next(b for b in tab.blocks if b.command.key == "f_t_0_d_tab")
+        assert tab.pill_state(table) == "own" and tab.unfold_buttons["take_back"].isEnabled()
+        assert tab.write_unfold_take_back() is True and tab.unfold_list.topLevelItemCount() == 0
+        # a line taken out: listed «ligne supprimée», put back by «Réinsérer»
+        text = path.read_text(encoding="utf-8")
+        line = next(l for l in text.split("\n") if l.strip().startswith('#eq("f_t_0_d"'))
+        path.write_text(text.replace(line + "\n", ""), encoding="utf-8")
+        tab.reload(keep="ZT-01")
+        tab.unfold_list.setCurrentItem(tab.unfold_list.topLevelItem(0))
+        assert tab.unfold_list.topLevelItem(0).text(0) == "eq:f_t_0_d" and tab.unfold_buttons["reinsert"].isEnabled()
+        assert tab.write_unfold_reinsert() is True and line in path.read_text(encoding="utf-8")
+        # a conflict: both changed; «Prendre celle de l'export» writes the export's line, its pill drawn in the danger's colour until then
+        path.write_text(path.read_text(encoding="utf-8").replace('"N_(t,d)", 25, "kN"', '"N_(t,d)", 31, "kN"'), encoding="utf-8")
+        source = json.loads((here.checks_dir / "ZT-01.json").read_text(encoding="utf-8"))
+        with project.using(here):
+            member_check.write_source(here, dict(source, N={"value": 27, "unit": "kN"}))
+            member_check.export(here)
+        tab.reload(keep="ZT-01")
+        n = next(b for b in tab.blocks if b.command.key == "N_t_d")
+        assert tab.pill_state(n) == "conflict"
+        tab.unfold_list.setCurrentItem(tab.unfold_list.topLevelItem(0))
+        assert tab.unfold_buttons["theirs"].isEnabled() and tab.write_unfold_choice("theirs") is True
+        assert '"N_(t,d)", 27, "kN"' in path.read_text(encoding="utf-8")
+        with project.using(here):
+            member_check.write_source(here, source)
+            member_check.export(here)
+        own = {k: v for c in reversed(woodcore_gui.own_classes(formula_tab.FormulaTab)) for k, v in vars(c).items()}
+        for name in ("write_unfold_import", "write_unfold_import_all", "write_unfold_take_back", "write_unfold_reinsert", "write_unfold_choice", "write_unfold_regenerate"):
+            assert name in woodcore_gui.WRITERS and hasattr(own[name], "__wrapped__"), name
+    finally:
+        path.unlink(missing_ok=True)
+        base = unfold.read_base(here)
+        base["domains"].pop("ZT-01", None)
+        unfold.write_base(here, base)
+        tab.reload(keep="")

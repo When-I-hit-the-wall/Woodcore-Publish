@@ -3,6 +3,8 @@
 Every check builds a PlanCanvas of its own, off-screen, with a source dictionary of its own: nothing here needs a window or the example project.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import os
 import sys
 

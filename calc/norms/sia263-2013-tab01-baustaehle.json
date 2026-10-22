@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 263:2013, Tabelle 1 (clause 3.2.2.3) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA263-2013-DE.pdf p. 18. The table is a graphic and does not extract as text, so it was read off a render of that page. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
+  "_source": "SIA 263:2013, Tabelle 1 (clause 3.2.2.3) -- transcribed by hand from the German edition, SIA263-2013-DE.pdf p. 18. The table is a graphic and does not extract as text, so it was read off a render of that page. The only copy of these values in the project (docs/architecture/layout.md §11; one file per table or clause, named <norm>-<year>-<table or clause>-<designation>.json).",
   "_note": "The classeur Verbindung.xlsm carries the same numbers in its Daten sheet (T1:Z5) for S235, S275 and S355 -- they agree to the digit -- but it does NOT carry S460, which the norm gives. That is the whole reason a norm value is read from the norm and not from a workbook's restatement of it (section 2 rule 13). 3.2.2.3 adds that SN EN 10025, 10137, 10155, 10210 and 10219 may be used for a more accurate calculation; none of those editions is in the reference library, so nothing here reaches for them.",
   "edition": "SIA 263:2013",
   "table_1": {

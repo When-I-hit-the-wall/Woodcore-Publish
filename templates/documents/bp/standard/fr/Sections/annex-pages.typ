@@ -4,8 +4,6 @@
 = Annexes
 // woodcore:/object title
 
-// woodcore:object doc-annexes annexes
-#doc-annexes(
-  heading: 2,
-)
+// woodcore:object text annexes
+#show-annexes()
 // woodcore:/object annexes

@@ -16,14 +16,8 @@ $ E_d <= R_d $
 For the limit state of Type 1 (overall stability), $E_(d,"dst")$ ≤ $E_(d,"stb")$ is verified (4.4.3.2); for Type 4 (fatigue), $E_d$ ≤ $R_d$ (4.4.3.8). In buildings, the limit state of Type 2 (ultimate resistance of the structure) is generally governing. [The decision not to verify a limit state is justified in the section “Omitted verifications”.]
 // woodcore:/object p3
 
-// woodcore:object doc-checklist limit-state-types
-#doc-checklist(
-  label: [Ultimate limit states verified],
-  options: (
-    (id: "type-1", label: [Type 1: overall stability (overturning, lift-off, floating)], checked: true),
-    (id: "type-2", label: [Type 2: ultimate resistance of the structure or of one of its members], checked: true),
-    (id: "type-3", label: [Type 3: ultimate resistance of the ground], checked: false),
-    (id: "type-4", label: [Type 4: fatigue resistance], checked: false),
-  ),
-)
+// woodcore:object text limit-state-types
+*Ultimate limit states verified*:
+- *Type 1: overall stability (overturning, lift-off, floating)*
+- *Type 2: ultimate resistance of the structure or of one of its members*
 // woodcore:/object limit-state-types

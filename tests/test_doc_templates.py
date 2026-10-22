@@ -65,6 +65,13 @@ OBJECT_START = re.compile(r"^// woodcore:object (?P<type>[a-z-]+) (?P<id>\S+)$")
 MARKUP = ("heading", "text")
 
 
+
+def _in_config(data):
+    """A template's bytes as a project laid out by folders holds them once made: what it names at the root -- `/config.typ`, `/commands.typ`, `/title.typ` -- named in 000-Typst-Config/ (issue #64, documents.relocate_config_paths)."""
+    for name in ("config.typ", "commands.typ", "title.typ"):
+        data = data.replace(f'"/{name}'.encode(), f'"/{project.CONFIG_FOLDER}/{name}'.encode())
+    return data
+
 def _template(mode):
     template = doc_templates.find(f"builtin:{mode}/standard")
     assert not template.error, template.error
@@ -264,7 +271,7 @@ def test_the_section_files_write_their_headings_at_the_level_they_print_at():
                 assert "../" not in text, f"{where}: a relative path"
                 assert text.endswith("\n") and "\r" not in text, f"{where}: not LF with a final newline"
             assert [line for line in files[f"{first_leaf}.typ"].split("\n") if line.startswith("=")][0] == f"== {titles[lang]}", (mode, lang)
-            assert files["journal.typ"] == (f'#import "/commands.typ": *\n\n// woodcore:object heading title\n= {JOURNAL[lang]}\n// woodcore:/object title\n\n#show-journal()\n'), (mode, lang)
+            assert files["journal.typ"] == (f'#import "/commands.typ": *\n\n// woodcore:object heading title\n= {JOURNAL[lang]}\n// woodcore:/object title\n\n#include domain-file("journal", "{mode}")\n'), (mode, lang)
 
 
 # --- ids, tags, objects ------------------------------------------------------------------------------
@@ -294,7 +301,7 @@ def test_every_object_is_one_call_in_the_canonical_form():
             for name, text in _sections(mode, lang).items():
                 for kind, object_id, body in _objects(text):
                     where = f"{mode}/{lang}/{name}#{object_id}"
-                    if kind in MARKUP:
+                    if kind in MARKUP or kind == "table":   # a raw table is markup, read by its own model (ARCH-004)
                         continue
                     kinds.add(kind)
                     assert body[0] == f"#{kind}(" and body[-1] == ")", f"{where}: not one call"
@@ -317,11 +324,12 @@ def test_every_object_is_one_call_in_the_canonical_form():
                     assert all(n in order for n in names), f"{where}: {names} -- {kind} takes {order}"
                     assert names == sorted(names, key=order.index), f"{where}: {names} not in the order of {kind}'s signature {order}"
                     assert len(names) == len(set(names)), where
-    assert kinds == set(structure.OBJECT_TYPES) - set(MARKUP) - {k for k in structure.OBJECT_TYPES if k.startswith("sheet-")} - {"doc-field", "doc-plan", "doc-fire-plan", "doc-extract"}, kinds
+    # the templates written in raw Typst (spec 2026-10-21-commandes-typst-refonte, REQ-019, lot 18): their tables, signatures, choices and lists are raw tables, markup read by its own model (ARCH-004); the list of the norms is the one call left
+    assert kinds == {"show-norm-list"}, kinds
 
 
 def test_every_heading_and_every_paragraph_is_an_object_with_the_same_ids_in_every_language():
-    """The engineer's rework of 01.10.2026: a section file is its import line, tags and objects -- **every heading and every paragraph between tags** (`heading title`, `heading h2`, `text p1`, `text p2` …), nothing else standing outside them but the import line, the shared tags and a call that is code (the journal's `#show-journal()`). The same objects with the same ids in fr, de and en, so that a shared section has the same ids in both documents. A heading is one line `= Titel`, a paragraph has no blank line in it, and every one reads as canonical."""
+    """The engineer's rework of 01.10.2026: a section file is its import line, tags and objects -- **every heading and every paragraph between tags** (`heading title`, `heading h2`, `text p1`, `text p2` …), nothing else standing outside them but the import line, the shared tags and the journal's inclusion, `#include domain-file("journal", document)`. The same objects with the same ids in fr, de and en, so that a shared section has the same ids in both documents. A heading is one line `= Titel`, a paragraph has no blank line in it, and every one reads as canonical."""
     import typst_objects
     for mode in MODES:
         ids = {}
@@ -342,7 +350,7 @@ def test_every_heading_and_every_paragraph_is_an_object_with_the_same_ids_in_eve
                 for o in sorted(objects, key=lambda o: -o.start):
                     del rest[o.start:o.end + 1]
                 left = [line for line in rest if line.strip() and not line.startswith(("// woodcore:shared", "// woodcore:/shared", "#import"))]
-                assert left in ([], ["#show-journal()"]), f"{where}: {left}"
+                assert left == [] or (len(left) == 1 and re.fullmatch(r'#include domain-file\("journal", "(cu|bp|rs)"\)', left[0])), f"{where}: {left}"
                 ids.setdefault(name, []).append([o.id for o in objects if o.type in MARKUP])
         for name, per_language in ids.items():
             assert per_language[0] == per_language[1] == per_language[2], f"{mode}/{name}: the languages carry different headings and paragraphs: {per_language}"
@@ -390,19 +398,19 @@ def test_the_sections_shared_by_default_are_one_file_in_both_documents():
 
 
 def test_the_live_loads_are_the_live_load_table_in_both_documents():
-    """SIA 261 8.2.2 wants the live loads in the Nutzungsvereinbarung and in the Projektbasis: one shared section, whose table is the `live-load-table` -- a category of Tabelle 8 a row's own, q_k and Q_k `auto`, read from the export, and **no ψ column** (the Reduktionsbeiwerte are never shown for live loads)."""
+    """SIA 261 8.2.2 wants the live loads in the Nutzungsvereinbarung and in the Projektbasis: one shared section, whose table is written in raw Typst (spec 2026-10-21-commandes-typst-refonte, REQ-019) -- a category of Tabelle 8 a row's own, q_k and Q_k each a `#sync` read live by `#var(…, domain: ("live-load", category), display: "value")` (Q-007), printed the same at every level, the uniform one included, and **no ψ column** (the Reduktionsbeiwerte are never shown for live loads)."""
     for mode in MODES:
         for lang in LANGS:
             text = _sections(mode, lang)["live-loads.typ"]
-            [(kind, object_id, body)] = [o for o in _objects(text) if o[0] == "live-load-table"]
-            call = "\n".join(body)
-            assert object_id == "live-loads-table"
-            assert "  hidden: ()," in body and "psi" not in call and "ψ" not in call, (mode, lang)
-            for column in ("zone", "storey", "use", "category", "q_k", "Q_k"):
-                assert f'    (id: "{column}"),' in body, (mode, lang, column)
-            assert len([line for line in body if line.startswith('    (id: "')]) == 6, (mode, lang)
-            assert re.search(r'category: "A1", q_k: auto, Q_k: auto\)', call) and re.search(r'category: "H", q_k: auto, Q_k: auto\)', call), call
-            assert "dead-load-table" in _sections(mode, lang)["superimposed-dead-loads.typ"]
+            [(kind, object_id, body)] = [o for o in _objects(text) if o[1] == "live-loads-table"]
+            table = "\n".join(body)
+            assert kind == "table" and "columns: (auto, auto, 1fr, auto, auto, auto)," in table, (mode, lang)
+            assert "psi" not in table and "ψ" not in table, (mode, lang)
+            for category in ("A1", "H"):
+                for key in ("q_k", "Q_k"):
+                    assert f'#sync("live-load/{category}/{key}")[#var("{key}", domain: ("live-load", "{category}"), display: "value"' in table, (mode, lang, category, key)
+            [(dead_kind, _id, _body)] = [o for o in _objects(_sections(mode, lang)["superimposed-dead-loads.typ"]) if o[1] == "superimposed-table"]
+            assert dead_kind == "table", (mode, lang)
 
 
 # --- words ---------------------------------------------------------------------------------------------
@@ -435,7 +443,8 @@ def test_no_eszett_no_clients_name_and_the_french_spaced():
                 continue
             if line.startswith("//") or line.startswith("#import"):
                 continue
-            prose = re.findall(r"\[((?:[^\[\]]|\[[^\[\]]*\])*)\]", line) if inside else [line]
+            line = re.sub(r'#[a-z-]+\((?:[^()"]|"[^"]*"|\([^()]*\))*\)', "", line)   # a call in a cell, `#sync(…)`, `#var(…, domain: (…))`: code, its arguments no prose
+            prose = re.findall(r"\[((?:[^\[\]]|\[[^\[\]]*\])*)\]", line) if inside or line.lstrip().startswith("#") else [line]   # a call written in a paragraph has its prose in its content blocks
             for part in prose:
                 part = re.sub(r"\$[^$]*\$", "", re.sub(r"#[a-z-]+\([^)]*\)", "", part))
                 for m in re.finditer(r"(.)([:;!?])(?=\s|$)", part):
@@ -713,16 +722,17 @@ def test_every_mode_in_every_language_compiles_in_a_new_project_as_its_structure
 
 
 def test_a_document_compiles_at_every_level_and_its_cells_carry_no_footnote():
-    """The three report levels, a level forced with `--input uniform=3` included, compile the base de projet -- the level reaching every `val` whatever it was given, and none of the template's cells, which quote their values with `doc-value`."""
+    """The three report levels, a level forced with `--input uniform=3` included, compile the base de projet -- the level reaching every `val` whatever it was given, and none of the template's cells, which quote their values with `doc-value`. Since v0.120 every command that prints takes a level (spec 2026-10-20-indices-et-niveaux, UI-003): at 1 a plan, a list or a table of the document prints alone, so level 1 may differ; 2, 3 and the uniform 3 print the same, the document's objects citing nothing more at 3."""
     if not conftest.have_typst():
         raise Skip("no typst on the path")
     here = _project("de")
     texts = {}
-    for flags in (["--input", "level=1"], ["--input", "level=3"], ["--input", "uniform=3"]):
+    for flags in (["--input", "level=1"], ["--input", "level=2"], ["--input", "level=3"], ["--input", "uniform=3"]):
         run, _seconds = _compile(here, "bp", flags)
         assert run.returncode == 0 and "warning" not in run.stderr, (flags, run.stderr[:2000])
         texts[" ".join(flags)] = _text(here.document_pdf("bp"))
-    assert len(set(texts.values())) == 1, "a level changed what a document of text and objects prints"
+    texts.pop("--input level=1")   # compiles; at 1 the document's figures and tables print alone (UI-003)
+    assert len(set(texts.values())) == 1, "level 2, 3 or the uniform 3 changed what a document of text and objects prints"
 
 
 def test_a_document_with_its_structure_changed_compiles_as_the_structure_says():
@@ -873,10 +883,11 @@ def test_a_new_project_made_from_a_saved_template_carries_its_choices_and_its_te
         template = doc_templates.save_from_document(here, "cu", "Convention courte", settings=ctx.settings)
         made = project_template.create(conftest.tmpdir("dt_from_saved_new") / "Neuf", "Neuf", document_language="fr", report_language="fr",
                                        document_templates={"cu": template.ref})
-        assert _files(made.document_dir("cu")) == _saved_files(here, "cu") and made.document_typ("cu").is_file()
-        for rel in _files(made.document_dir("cu")):
+        # the template's files, and the journal the new project is given beside its entry (export_all.seed: the templates carry none)
+        assert _files(made.document_dir("cu")) == sorted(_saved_files(here, "cu") + ["journal.typ"]) and made.document_typ("cu").is_file()
+        for rel in [f for f in _files(made.document_dir("cu")) if f != "journal.typ"]:
             if rel != "structure.json" and not rel.endswith("Convention d'utilisation.typ"):
-                assert (made.document_dir("cu") / rel).read_bytes() == (template.language_dir("fr") / rel).read_bytes(), rel
+                assert (made.document_dir("cu") / rel).read_bytes() == _in_config((template.language_dir("fr") / rel).read_bytes()), rel
         kept = structure.read(made.structure_file("cu"))
         assert structure.find(kept, second["id"])[0]["enabled"] is False, "the section switched off stays switched off"
         assert f"// disabled: {second['id']} (" in _read(made.document_typ("cu")), "and the entry says so"
@@ -884,7 +895,7 @@ def test_a_new_project_made_from_a_saved_template_carries_its_choices_and_its_te
         assert structure.sync_entry(made.document_typ("cu"), made.structure_file("cu"), "fr") is False, "the entry's block is what the structure says"
         # the other document is the builtin one, and the two share what they shared: every flag has its other side, and settling changes nothing
         builtin_bp = doc_templates.find("builtin:bp/standard").language_dir("fr")
-        assert (made.document_dir("bp") / "Sections" / "live-loads.typ").read_bytes() == (builtin_bp / "Sections" / "live-loads.typ").read_bytes()
+        assert (made.document_dir("bp") / "Sections" / "live-loads.typ").read_bytes() == _in_config((builtin_bp / "Sections" / "live-loads.typ").read_bytes())
         cu_shared = {node["id"]: node["shared_with"] for node in _leaves(made, "cu") if node.get("shared_with")}
         bp_shared = {node["id"]: node["shared_with"] for node in _leaves(made, "bp") if node.get("shared_with")}
         assert "live-loads" in cu_shared and cu_shared["live-loads"] == ["bp"] and bp_shared["live-loads"] == ["cu"]
@@ -1018,7 +1029,7 @@ def test_saving_refuses_what_it_cannot_save_with_a_code_and_writes_nothing():
         _refused("no_folder", here, "cu", "Courte", place="office", settings={})
         _refused("no_folder", here, "cu", "Courte", place="shared", settings={})
         _refused("bad_language", here, "cu", "Courte", language="it", settings=s)
-        legacy = project.Project(conftest.tmpdir("dt_refusals_legacy") / "Old.woodcore", {"schema_version": project.SCHEMA_VERSION, "format": project.FORMAT, "name": "Old"})
+        legacy = project.Project(conftest.tmpdir("dt_refusals_legacy") / "Old.woodcore", {"schema_version": project.SCHEMA_VERSIONS[0], "format": project.FORMAT, "name": "Old"})
         _refused("no_such_document", legacy, "cu", "Courte", settings=s)
         for bad in ("", "   ", None, {"de": "Kurz"}, {"fr": "  "}, "a\nb", 5):
             _refused("no_name", here, "cu", bad, settings=s)

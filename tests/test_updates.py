@@ -3,6 +3,8 @@
 What is held: the manifest is read only when it has its shape and names an installer over HTTPS on its own host or exactly in Woodcore's Releases on GitHub (v0.117: the installer is too large for the site); a version is offered only when it is newer, not installed, not set aside and not put off for the day; the download is refused -- and leaves nothing behind -- where it is cut short, cancelled, or not the file the manifest states; a checkout and a test run ask nothing; and the window's question, its three answers and its install, driven off-screen with the network and the installer replaced. A real HTTP server on 127.0.0.1 stands in for the site, so the network code is the one that runs.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import hashlib
 import http.server
 import json

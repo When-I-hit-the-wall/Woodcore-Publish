@@ -1,4 +1,4 @@
-"""Wind loads entered in Woodcore (issue #37): one building per source, its wind computed here from SIA 261:2020 chapter 6 and Annexe C -- every coefficient out of `norms/sia261_wind.py`, never from the Belastungsannahmen workbook, whose `WL-*` sheets stay read beside it (domains/wind.py, docs/domain/loads.md §3.3quater, decision D-04).
+"""Wind loads entered in Woodcore (issue #37): one building per source, its wind computed here from SIA 261:2020 chapter 6 and Annexe C -- every coefficient out of `norms/sia261_wind.py`. Since v0.120 the one calculation of the wind: a `WL-*` sheet of the Belastungsannahmen workbook is read for its inputs alone and computed here too (domains/wind.py, spec 2026-10-21-restes-issue-69, REQ-002, ARCH-002; docs/domain/loads.md §3.3quater).
 
 **A source** is `Woodcore-Datei/loads/wind/<id>.json` (schemas/wind-source.schema.json, 1.0): q_p0 at the site (Annexe E, kN/m²), the terrain category of Tableau 4, the building's b, d and h (m) and the height z the dynamic pressure is taken at (null: h, 6.2.2.3), the table of Annexe C whose coefficients the building takes -- any building's of Tableaux 31 to 60b, 63 and 64 (D-06) -- and c_d (1.0 unless SIA 261/1 gives another, 6.3.5).
 
@@ -14,11 +14,12 @@ from pathlib import Path
 
 import project
 import validation
+from domains._common import fail as _fail, is_number as _number, plain as _fmt  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import links  # a field that follows a variable of the export (spec 2026-10-11-variables-liees-champs-et-textes)
-from domains import wind
 from norms import sia261_wind
 
-DOMAIN = wind.DOMAIN
+# The domain's name, held here: domains/wind.py, the reader of the sheets, takes it from its calculation (ARCH-RISK-806, no import the other way)
+DOMAIN = "wind-load"
 SOURCE_SCHEMA = "wind-source"
 SOURCE_SCHEMA_VERSION = "1.0"
 # 1.1 is 1.0 with `links` (spec 2026-10-11-variables-liees-champs-et-textes, D-17): written only by a source that carries one, so a load following no variable is saved and exported as before
@@ -30,14 +31,6 @@ FOLDER = "loads/wind"
 SOURCE = "python:domains/wind_source.py"
 NORM = "SIA 261"
 ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.+-]*$")
-
-
-def _fail(where, message):
-    raise validation.ValidationError("%s: %s" % (where, message))
-
-
-def _number(value):
-    return not isinstance(value, bool) and isinstance(value, (int, float))
 
 
 def folder(here=None):
@@ -74,23 +67,45 @@ def check_source(src, where="loads/wind"):
         _fail(where, str(exc))
     if not ID_PATTERN.match(src.get("id") or ""):
         _fail(where, "id %r -- letters, digits and _ . + - only, starting with a letter or digit" % src.get("id"))
+    check_fields(src, lambda _field, message: _fail(where, message))
+
+
+def check_fields(src, fail):
+    """The fields the calculation reads, each checked against SIA 261: `fail(field, message)` stops, naming the field -- a source names its file, a sheet of the workbook the cell the field is read from (domains/wind.py, ARCH-RISK-807)."""
     if not _number(src.get("q_p0")) or src["q_p0"] <= 0:
-        _fail(where, "q_p0 is %r -- the reference dynamic pressure of Annexe E, kN/m², above 0" % (src.get("q_p0"),))
+        fail("q_p0", "q_p0 is %r -- the reference dynamic pressure of Annexe E, kN/m², above 0" % (src.get("q_p0"),))
     try:
         sia261_wind.terrain(src.get("terrain"))
     except validation.ValidationError as exc:
-        _fail(where, str(exc))
+        fail("terrain", str(exc))
     for key in ("b", "d", "h"):
         if not _number(src.get(key)) or src[key] <= 0:
-            _fail(where, "%s is %r -- a dimension of the building in m, above 0" % (key, src.get(key)))
+            fail(key, "%s is %r -- a dimension of the building in m, above 0" % (key, src.get(key)))
     if src["h"] > 200:
-        _fail(where, "h is %g m -- SIA 261 6.1.2: the provisions apply to buildings up to 200 m" % src["h"])
+        fail("h", "h is %g m -- SIA 261 6.1.2: the provisions apply to buildings up to 200 m" % src["h"])
     if src.get("z") is not None and (not _number(src["z"]) or src["z"] <= 0):
-        _fail(where, "z is %r -- the height above ground the dynamic pressure is taken at, m, or null for h" % (src.get("z"),))
+        fail("z", "z is %r -- the height above ground the dynamic pressure is taken at, m, or null for h" % (src.get("z"),))
     if src.get("table") not in sia261_wind.NUMBERS:
-        _fail(where, "table is %r -- the buildings of SIA 261 Annexe C are Tableaux %s" % (src.get("table"), ", ".join(sia261_wind.NUMBERS)))
+        fail("table", "table is %r -- the buildings of SIA 261 Annexe C are Tableaux %s" % (src.get("table"), ", ".join(sia261_wind.NUMBERS)))
     if not _number(src.get("c_d")) or src["c_d"] <= 0:
-        _fail(where, "c_d is %r -- the dynamic factor, above 0 (1.0, SIA 261 6.3.5)" % (src.get("c_d"),))
+        fail("c_d", "c_d is %r -- the dynamic factor, above 0 (1.0, SIA 261 6.3.5)" % (src.get("c_d"),))
+
+
+def warnings(src):
+    """What is said about a valid source and the report never prints, [(code, params)]: `c_red_outside`, a facade's (h, beta) that Figur 9 does not draw -- c_red is then read at the nearest curve's end (sia261_wind.c_red, spec 2026-10-21-restes-issue-69, D-08)."""
+    out = []
+    for area, side in (("b·h", "b"), ("d·h", "d")):
+        beta = src[side] / src["h"]
+        if not sia261_wind.in_range(src["h"], beta):
+            out.append(("c_red_outside", {"area": area, "h": src["h"], "beta": round(beta, 3), "ref": sia261_wind.clause()["c_red"]["norm_ref"]}))
+    return out
+
+
+def notes_of(src, where):
+    """`warnings(src)` as the export's warnings (engine.Note), `where` the file or the sheet they are of."""
+    import engine
+    return [engine.Note("wind_" + code, "%s: the reference area %s has h = %g m and beta = %g, which SIA 261 %s does not draw -- c_red is read at the end of the nearest curve" % (where, p["area"], p["h"], p["beta"], p["ref"]),
+                        where=where, **p) for code, p in warnings(src)]
 
 
 def read_source(path):
@@ -111,11 +126,6 @@ def _values(value):
     if value is None or value == "direct":
         return []
     return list(value) if isinstance(value, list) else [value]
-
-
-def _fmt(value):
-    text = ("%.6f" % value).rstrip("0").rstrip(".")
-    return "0" if text in ("", "-0") else text
 
 
 def area_label(column):
@@ -185,51 +195,54 @@ def local_pressures(table, qp):
     return out
 
 
-def build_instance(src, here=None):
-    """One instance of `wind-load`: the site, the building, q_p, c_red and c_d as vars, the global forces as results printed by their table, the local pressures as a table after them."""
+def build_instance(src, here=None, inputs=None):
+    """One instance of `wind-load`: the site, the building, q_p, c_red and c_d as vars, the global forces as results printed by their table, the local pressures as a table after them. `inputs` says where each field of `src` was read, {field: source} -- a sheet's cells, `excel:<workbook>!<cell>` (domains/wind.py) --, a field it does not name being entered in Woodcore."""
     import engine
     clause = sia261_wind.clause()
     table = sia261_wind.table(src["table"])
     calc = engine.Calculation()
     where = "%s/%s.json" % (FOLDER, src["id"])
-    entered = "entered:%s" % where
+    inputs = inputs or {}
 
-    def var(name, value, symbol, unit, label, level, norm_ref, **more):
-        calc.add_var(name=name, value=value, unit=unit, symbol=symbol, label=label, level=level,
+    def entered(field):
+        return inputs.get(field, "entered:%s" % where)
+
+    def var(name, value, symbol, unit, label, norm_ref, **more):
+        calc.add_var(name=name, value=value, unit=unit, symbol=symbol, label=label,
                      source=more.pop("source", SOURCE), norm=NORM, norm_ref=norm_ref, **more)
 
-    var("qp0", src["q_p0"], "q_(p 0)", "kN/m²", "Referenzwert des Staudrucks", 3, "Anhang E", source=entered,
+    var("qp0", src["q_p0"], "q_(p 0)", "kN/m²", "Referenzwert des Staudrucks", "Anhang E", source=entered("q_p0"),
         description="Referenzwert des Staudrucks am Standort nach SIA 261.")
-    var("b", src["b"], "b", "m", "Gebäudelänge", 3, "6.3", source=entered, group="geometrie", group_label="Gebäude Geometrie")
-    var("d", src["d"], "d", "m", "Gebäudebreite", 3, "6.3", source=entered, group="geometrie")
-    var("h", src["h"], "h", "m", "Gebäudehöhe", 3, "6.3", source=entered, group="geometrie")
+    var("b", src["b"], "b", "m", "Gebäudelänge", "6.3", source=entered("b"), group="geometrie", group_label="Gebäude Geometrie")
+    var("d", src["d"], "d", "m", "Gebäudebreite", "6.3", source=entered("d"), group="geometrie")
+    var("h", src["h"], "h", "m", "Gebäudehöhe", "6.3", source=entered("h"), group="geometrie")
     choices = [{"value": t["id"], "desc": "$z_g$ = %s m, $alpha_r$ = %s" % (_fmt(t["z_g"]), _fmt(t["alpha_r"]))} for t in clause["terrain"]["categories"]]
-    var("gelaendekategorie", src["terrain"], '"Geländekategorie"', "", "Geländekategorie", 1, clause["terrain"]["norm_ref"], source=entered, choices=choices,
+    var("gelaendekategorie", src["terrain"], '"Geländekategorie"', "", "Geländekategorie", clause["terrain"]["norm_ref"], source=entered("terrain"), choices=choices,
         description="Die Geländekategorie bestimmt die Gradientenhöhe und die Bodenrauigkeit des Windprofils.")
     z = src["z"] if src.get("z") is not None else src["h"]
     c_h, z_used, profile = sia261_wind.c_h(z, src["terrain"])
     t = sia261_wind.terrain(profile)
-    var("zg", t["z_g"], "z_g", "m", "Gradientenhöhe", 3, clause["terrain"]["norm_ref"], group_label="Gradientenhöhe")
-    var("alpha_r", t["alpha_r"], "alpha_r", "", "Bodenrauigkeit", 3, clause["terrain"]["norm_ref"], group_label="Bodenrauigkeit")
-    var("z", z_used, "z", "m", "Höhe über Boden", 3, clause["c_h"]["norm_ref"], group_label="Höhe über Boden",
+    var("zg", t["z_g"], "z_g", "m", "Gradientenhöhe", clause["terrain"]["norm_ref"], group_label="Gradientenhöhe")
+    var("alpha_r", t["alpha_r"], "alpha_r", "", "Bodenrauigkeit", clause["terrain"]["norm_ref"], group_label="Bodenrauigkeit")
+    var("z", z_used, "z", "m", "Höhe über Boden", clause["c_h"]["norm_ref"], group_label="Höhe über Boden",
         description="Höhe über Boden, für die der Staudruck bestimmt wird; die Norm setzt sie mindestens zu 5 m an (10 m in Geländekategorie IV).")
     ch = clause["c_h"]
-    var("ch", c_h, "c_h", "", "Windprofilbeiwert", 3, ch["norm_ref"], group_label="Windprofilbeiwert")
-    calc.add_step(name="Windprofilbeiwert", level=3, result="ch", uses=["z", "zg", "alpha_r"],
+    var("ch", c_h, "c_h", "", "Windprofilbeiwert", ch["norm_ref"], group_label="Windprofilbeiwert")
+    calc.add_step(name="Windprofilbeiwert", result="ch", uses=["z", "zg", "alpha_r"],
                   formula="c_h = %s dot ((z / z_g)^alpha_r + %s)^2" % (_fmt(ch["factor"]), _fmt(ch["offset"])), norm=NORM, norm_ref="%s (%s)" % (ch["norm_ref"], ch["equation"]))
     cred = {"bh": sia261_wind.c_red(src["h"], src["b"] / src["h"]), "dh": sia261_wind.c_red(src["h"], src["d"] / src["h"])}
-    var("cred_bh", cred["bh"], 'c_("red", "b/h")', "", "Reduktionsfaktor b", 3, clause["c_red"]["norm_ref"], group_label="Reduktionsfaktor b",
+    var("cred_bh", cred["bh"], 'c_("red", "b/h")', "", "Reduktionsfaktor b", clause["c_red"]["norm_ref"], group_label="Reduktionsfaktor b",
         description="Reduktionsfaktor für die Bezugsfläche b·h, aus dem Verhältnis Länge (b) zu Höhe (h).")
-    var("cred_dh", cred["dh"], 'c_("red", "d/h")', "", "Reduktionsfaktor d", 3, clause["c_red"]["norm_ref"], group_label="Reduktionsfaktor d",
+    var("cred_dh", cred["dh"], 'c_("red", "d/h")', "", "Reduktionsfaktor d", clause["c_red"]["norm_ref"], group_label="Reduktionsfaktor d",
         description="Reduktionsfaktor für die Bezugsfläche d·h, aus dem Verhältnis Breite (d) zu Höhe (h).")
     if takes_max(table):
-        var("cred_max", max(cred["bh"], cred["dh"]), 'c_("red", "max")', "", "Reduktionsfaktor schräge Windrichtung", 3, clause["c_red"]["directions"]["norm_ref"], group_label="Reduktionsfaktor schräg",
+        var("cred_max", max(cred["bh"], cred["dh"]), 'c_("red", "max")', "", "Reduktionsfaktor schräge Windrichtung", clause["c_red"]["directions"]["norm_ref"], group_label="Reduktionsfaktor schräg",
             description="Für eine Windrichtung, die um 15° oder mehr von den Bezugsrichtungen abweicht, gilt der ungünstigere (grössere) der beiden Reduktionsfaktoren.")
-    var("cd", src["c_d"], "c_d", "", "Dynamischer Faktor", 3, clause["c_d"]["norm_ref"], source=entered, group_label="dynamischer Faktor")
+    var("cd", src["c_d"], "c_d", "", "Dynamischer Faktor", clause["c_d"]["norm_ref"], source=entered("c_d"), group_label="dynamischer Faktor")
     qp = c_h * src["q_p0"]
-    var("qp", qp, "q_p", "kN/m²", "Staudruck", 3, "6.2 (11)")
-    calc.add_step(name="Staudruck", level=3, result="qp", uses=["ch", "qp0"], formula="q_p = c_h dot q_(p 0)", bold=True, norm=NORM, norm_ref="6.2 (11)")
-    var("tabelle", table["number"], '"Tabelle"', "", "Tabelle der Druckbeiwerte", 1, "Anhang C", source=entered,
+    var("qp", qp, "q_p", "kN/m²", "Staudruck", "6.2 (11)")
+    calc.add_step(name="Staudruck", result="qp", uses=["ch", "qp0"], formula="q_p = c_h dot q_(p 0)", bold=True, norm=NORM, norm_ref="6.2 (11)")
+    var("tabelle", table["number"], '"Tabelle"', "", "Tabelle der Druckbeiwerte", "Anhang C", source=entered("table"),
         description="SIA 261, Anhang C, Tabelle %s, h : b : d = %s." % (table["number"], table["ratio"]))
     # --- the global forces: results, printed by their table
     results = []
@@ -239,7 +252,7 @@ def build_instance(src, here=None):
         for kind, value in (("max", hi), ("min", lo)):
             key = "qk_%s_%s" % (kind, name)
             var(key, value, 'q_(k,"%s","%s")' % (kind, area_label(column)), "kN/m²",
-                "%s globale Windkraft, Bezugsfläche %s" % ("Maximale" if kind == "max" else "Minimale", area_label(column)), 1, "6.2.3.2")
+                "%s globale Windkraft, Bezugsfläche %s" % ("Maximale" if kind == "max" else "Minimale", area_label(column)), "6.2.3.2")
             results.append(key)
     tables = []
     if computed:

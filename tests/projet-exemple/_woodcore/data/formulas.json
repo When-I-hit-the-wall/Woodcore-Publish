@@ -1,9 +1,0 @@
-{
-  "schema_version": "2.0",
-  "domains": {
-    "poutre-p1": {
-      "title": "Poutre P1",
-      "file": "Formules/poutre-p1.typ"
-    }
-  }
-}

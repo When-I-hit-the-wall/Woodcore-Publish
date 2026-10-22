@@ -9,11 +9,11 @@ The other tabs reach this one through the window (`MainWindow.new_position`), ne
 The tab lives in its own module, which woodcore_gui.py lists in its TABS and whose STRINGS it merges into its own: the keys carry a `po_` prefix of their own, and `warn_positions_*` the sentences of positions_store's notes (`note_text`).
 """
 
+import source_editor  # Ctrl+S bound the one way (source_editor.save_shortcut)
 import json
 import re
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QAbstractItemView, QApplication, QComboBox, QFileDialog, QFormLayout, QHBoxLayout, QHeaderView, QLabel,
     QLineEdit, QMessageBox, QPlainTextEdit, QPushButton, QSplitter, QTreeWidget, QTreeWidgetItem,
@@ -28,16 +28,15 @@ import positions_store as store   # the project's positions, Woodcore's own file
 import renumbering  # a position renamed everywhere it is cited, by the table a renumbering writes (issue #9)
 import renumber_dialog  # deleting a position, the ones after it numbered again (issue #9)
 import section_fields  # the dimension typed in fields of its type, the one widget this tab and the plan's pane share (issue #9)
-import build_reference as ref  # the one place a Typst call is spelled out
 import project  # where the project this tab works on is (calc/project.py)
 import theme  # the colours this tab states itself (theme.py)
 import validation
 from domains import section
-from domains import plan as plan_model   # the position plans the quantities measure (issue #14)
-from domains import quantities   # the lengths and the quantities of what the plans draw, computed there and only shown here (issue #14)
-from i18n import strings as engine_words   # the quantities' words, the report's own (calc/i18n/strings.json, `quantities.*`)
+from domains import quantities   # the lengths of what the plans draw, added up from the export's rows (issue #14; the «Métré» tab shows the rest)
+from domains import list_files   # the list of the positions written once in raw Typst (spec 2026-10-21-commandes-typst-refonte, Q-008)
 import notifications  # every error, warning and information, gathered in one place (calc/notifications.py, v0.117)
 import notices_ui  # what was a message box is a notice since v0.117 (notices_ui.tell)
+import list_file_card  # the list of the positions written once in raw Typst (spec 2026-10-21-commandes-typst-refonte, Q-008)
 
 # A position's fields, as positions_store keeps them (calc/positions_store.py's KEYS).
 STRENGTH = "strength_class"
@@ -54,11 +53,9 @@ COLUMNS = (
 # The column after them: the length the plans draw a position with, all its elements added up (issue #14, quantities.length_by_position). Shown, never edited, never written -- it is not a field of positions.json, and stays out of COLUMNS, which the form compares and saves.
 LENGTH_COLUMN = len(COLUMNS)
 
-# The scopes of the quantities card, by the summary's own name (quantities.SCOPES), each with its words' key.
-QUANTITY_SCOPES = (("all", "po_q_scope_all"), ("plans", "po_q_scope_plan"), ("positions", "po_q_scope_selected"))
 
 # The row that stands for the position nobody has written yet. Not an id: positions_store.ID_PATTERN allows no angle bracket.
-NEW_ROW = "<new>"
+from source_editor import NEW_ROW  # the list's row of the draft, the one constant (spec 2026-10-20-indices-et-niveaux, ARCH-005)
 
 # A refusal of positions_store, by its code, and the window's sentence for it; any other code is said with po_refused_other and the module's own English sentence.
 REFUSALS = {
@@ -82,9 +79,6 @@ STRINGS = {
         "po_col_id": "ID", "po_col_type": "Type", "po_col_material": "Matériau", "po_col_strength": "Classe de résistance",
         "po_col_section": "Type de section", "po_col_dimension": "Dimension", "po_col_units": "Unités", "po_col_moisture": "Classe d’humidité",
         "po_col_length": "Longueur [m]", "po_col_length_tip": "La longueur dessinée sur les plans de positions, tous ses éléments additionnés",
-        "po_q_scope": "Périmètre", "po_q_scope_all": "Tout ce qui est dessiné", "po_q_scope_plan": "Un plan", "po_q_scope_selected": "Positions sélectionnées",
-        "po_q_plan": "Plan", "po_q_none_selected": "Aucune position sélectionnée : Ctrl ou Maj + clic dans la liste.",
-        "po_q_unreadable": "Les plans de positions ne peuvent pas être lus : {error}",
         "po_new": "Nouvelle position", "po_duplicate": "Dupliquer", "po_delete": "Supprimer",
         "po_import": "Importer depuis Excel…",
         "po_import_tip": "Lire les positions d’un classeur Positionen.xlsx (feuille « Positions Element ») et les ajouter au projet.",
@@ -155,9 +149,6 @@ STRINGS = {
         "po_col_id": "ID", "po_col_type": "Typ", "po_col_material": "Material", "po_col_strength": "Festigkeitsklasse",
         "po_col_section": "Querschnittstyp", "po_col_dimension": "Abmessung", "po_col_units": "Einheit", "po_col_moisture": "Feuchteklasse",
         "po_col_length": "Länge [m]", "po_col_length_tip": "Die auf den Positionsplänen gezeichnete Länge, alle Elemente zusammengezählt",
-        "po_q_scope": "Umfang", "po_q_scope_all": "Alles Gezeichnete", "po_q_scope_plan": "Ein Plan", "po_q_scope_selected": "Ausgewählte Positionen",
-        "po_q_plan": "Plan", "po_q_none_selected": "Keine Position ausgewählt: Strg oder Umschalt + Klick in der Liste.",
-        "po_q_unreadable": "Die Positionspläne können nicht gelesen werden: {error}",
         "po_new": "Neue Position", "po_duplicate": "Duplizieren", "po_delete": "Löschen",
         "po_import": "Aus Excel importieren …",
         "po_import_tip": "Die Positionen einer Arbeitsmappe Positionen.xlsx (Blatt «Positions Element») lesen und dem Projekt hinzufügen.",
@@ -228,9 +219,6 @@ STRINGS = {
         "po_col_id": "ID", "po_col_type": "Type", "po_col_material": "Material", "po_col_strength": "Strength class",
         "po_col_section": "Section type", "po_col_dimension": "Dimension", "po_col_units": "Units", "po_col_moisture": "Moisture class",
         "po_col_length": "Length [m]", "po_col_length_tip": "The length the position plans draw, all its elements added up",
-        "po_q_scope": "Scope", "po_q_scope_all": "Everything drawn", "po_q_scope_plan": "One plan", "po_q_scope_selected": "Selected positions",
-        "po_q_plan": "Plan", "po_q_none_selected": "No position selected: Ctrl or Shift + click in the list.",
-        "po_q_unreadable": "The position plans cannot be read: {error}",
         "po_new": "New position", "po_duplicate": "Duplicate", "po_delete": "Delete",
         "po_import": "Import from Excel…",
         "po_import_tip": "Read the positions of a Positionen.xlsx workbook (sheet «Positions Element») and add them to the project.",
@@ -359,10 +347,13 @@ class PositionList(QTreeWidget):
         return next((item for item, key in self.rows() if key == pid), None)
 
 
-class PositionsTab(display_view.DisplayTab, QWidget):
+class PositionsTab(source_editor.SourceEditorTab, display_view.DisplayTab, QWidget):
     """Lists the project's positions, edits one at a time, and writes it back through positions_store."""
+    WORDS = "po"   # the prefix of its words for the question about unsaved changes (source_editor.SourceEditorTab)
+
 
     VIEWS = views.ENTRY_VIEWS   # «Saisie» and «Affichage» (views.py, v0.117)
+    GRAPH_KIND = "position"   # a position of the graph of dependencies, opened here by MainWindow.open_object -- the palette's «@T001» (issue #83)
 
     def __init__(self, app):
         super().__init__()
@@ -380,7 +371,6 @@ class PositionsTab(display_view.DisplayTab, QWidget):
         self.fitted = False     # the list's columns sized to what they hold, once: a width the engineer dragged is kept after that
         self.quantity_rows = []  # what the position plans draw, one row an element (quantities.rows), read with the positions (issue #14)
         self.lengths = {}        # the length each position is drawn with (quantities.length_by_position)
-        self.plan_ids = []       # the position plans measured, in their order
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(6, 6, 6, 6)
@@ -392,15 +382,13 @@ class PositionsTab(display_view.DisplayTab, QWidget):
         self.splitter.setStretchFactor(0, 3)
         self.splitter.setStretchFactor(1, 2)
         layout.addWidget(self.splitter, 1)
-        shortcut = QShortcut(QKeySequence(QKeySequence.StandardKey.Save), self)   # Ctrl+S, as in every editor tab
-        shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        shortcut.activated.connect(self.save)
+        source_editor.save_shortcut(self)   # Ctrl+S, as in every editor tab
         self.restore(app.views.get("tab_positions"))
 
     def display_entries(self):
-        """What prints the positions (v0.117, «Affichage»): the list of the positions, `show-position-list` -- all of them, those of the plans ticked, or those of one storey --, the plans offered being those the export holds. The positions tab offered no call at all until then."""
-        plans = sorted(ref.load_plans(project.current().data_dir).get("plans", {}))
-        return [display_view.Entry("list", "show-position-list", "show-position-list", context={"plans": plans})]
+        """What prints the positions (v0.117, «Affichage»): the list of the positions, written once in raw Typst and included where a section prints it (spec 2026-10-21-commandes-typst-refonte, Q-008, UI-002) -- the card «Fichier de la liste» writes it."""
+        here = project.current()
+        return [display_view.Entry("list", "include", call=f'#include "{here.from_root(list_files.path(here, "position-list"))}"')]
 
     # -- building ---------------------------------------------------------------------
 
@@ -434,7 +422,6 @@ class PositionsTab(display_view.DisplayTab, QWidget):
         self.list.setUniformRowHeights(True)
         # several positions selected with Ctrl and Shift, for the quantities of «Positions sélectionnées» (issue #14, D-011); the one the form holds is still the current one
         self.list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
-        self.list.itemSelectionChanged.connect(self.refresh_quantities)
         self.list.setIconSize(self.app.mark_size)
         self.list.header().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.list.header().setStretchLastSection(False)
@@ -535,7 +522,9 @@ class PositionsTab(display_view.DisplayTab, QWidget):
         self.description_edit.textChanged.connect(self.changed)
         self.add_row(form, "description", "po_description", self.description_edit)
         box.addWidget(group)
-        box.addWidget(self.build_quantities())
+        # the list of the positions, written once in raw Typst and added to (spec 2026-10-21-commandes-typst-refonte, Q-008)
+        self.list_card = list_file_card.ListFileCard(self.app, "position-list")
+        box.addWidget(self.list_card.card)
         box.addStretch(1)
         shell.addWidget(area, 1)
 
@@ -551,96 +540,15 @@ class PositionsTab(display_view.DisplayTab, QWidget):
         shell.addLayout(actions)
         return outer
 
-    def build_quantities(self):
-        """The card «Métrés» (issue #14, D-011): what the position plans draw, by material and section -- pieces, length, volume -- and a total for each material, of everything drawn, of one plan, or of the positions selected in the list. Read off `quantities.summary`, the report's own (show-plan-quantities prints the same); nothing is added up here."""
-        card = cards.card(engine_words.text("quantities.title", self.app.lang))
-        v = QVBoxLayout(card)
-        row = QHBoxLayout()
-        row.addWidget(QLabel(self.t("po_q_scope")))
-        self.scope_combo = QComboBox()
-        for scope, key in QUANTITY_SCOPES:
-            self.scope_combo.addItem(self.t(key), scope)
-        self.scope_combo.currentIndexChanged.connect(self.refresh_quantities)
-        row.addWidget(self.scope_combo, 1)
-        v.addLayout(row)
-        plan_row = QHBoxLayout()
-        self.plan_caption = QLabel(self.t("po_q_plan"))
-        plan_row.addWidget(self.plan_caption)
-        self.plan_combo = QComboBox()
-        self.plan_combo.currentIndexChanged.connect(self.refresh_quantities)
-        plan_row.addWidget(self.plan_combo, 1)
-        v.addLayout(plan_row)
-        self.quantity_table = QTreeWidget()
-        words = lambda key: engine_words.text(key, self.app.lang)
-        self.quantity_table.setHeaderLabels([words("quantities.material"), words("quantities.section"), words("quantities.pieces"), words("quantities.length"), words("quantities.volume")])
-        self.quantity_table.setRootIsDecorated(False)
-        self.quantity_table.setUniformRowHeights(True)
-        self.quantity_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-        self.quantity_table.setMinimumHeight(8 * self.fontMetrics().height())
-        v.addWidget(self.quantity_table)
-        self.quantity_note = plain_label("", wrap=True)
-        self.quantity_note.setVisible(False)
-        v.addWidget(self.quantity_note)
-        return card
-
     def read_quantities(self):
-        """What the position plans draw, measured afresh with the positions just read (quantities.rows on plan.position_plan_sources, the export's own reading). A plan that cannot be read is a notice, and the quantities are then empty -- never a tab that does not open."""
-        self.quantity_rows, self.lengths, self.plan_ids = [], {}, []
-        if self.error is not None:
-            return
+        """The length the plans draw each position with, read from the export (`data/quantities.json`'s rows, added up by `quantities.length_by_position`) -- nothing measured in the window since the «Métré» tab took the card «Métrés» (spec 2026-10-21-commandes-typst-refonte, UI-003). An export not written yet, or one that does not read, gives no length."""
+        self.quantity_rows, self.lengths = [], {}
         try:
-            sources = plan_model.position_plan_sources(project.current().plans_dir)
-            self.quantity_rows, _notes = quantities.rows(sources, self.rows)
-        except (validation.ValidationError, OSError, ValueError, KeyError) as exc:
-            notifications.report("positions_quantities", self.t("po_q_unreadable", error=exc), notifications.WARNING, source="positions", args={"error": str(exc)})
+            data = json.loads((project.current().data_dir / "quantities.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError, project.ProjectError):
             return
-        self.plan_ids = [source.get("id", "") for source in sources]
+        self.quantity_rows = data.get("rows", [])
         self.lengths = quantities.length_by_position(self.quantity_rows)
-
-    def selected_ids(self):
-        return [item.data(0, PositionList.ID_ROLE) for item in self.list.selectedItems() if item.data(0, PositionList.ID_ROLE) != NEW_ROW]
-
-    def refresh_quantities(self, *_args):
-        """The card's table for the scope chosen: groups by material and section, then each material's total in bold (quantities.summary)."""
-        if not hasattr(self, "quantity_table"):
-            return
-        scope = self.scope_combo.currentData() or "all"
-        wanted = self.plan_combo.currentData()
-        self.plan_combo.blockSignals(True)
-        self.plan_combo.clear()
-        for pid in self.plan_ids:
-            self.plan_combo.addItem(pid, pid)
-        index = self.plan_combo.findData(wanted)
-        self.plan_combo.setCurrentIndex(index if index >= 0 else 0)
-        self.plan_combo.blockSignals(False)
-        self.plan_caption.setVisible(scope == "plans")
-        self.plan_combo.setVisible(scope == "plans")
-        chosen = self.selected_ids()
-        note = self.t("po_q_none_selected") if scope == "positions" and not chosen else ""
-        groups, totals = quantities.summary(self.quantity_rows, scope, plans=[self.plan_combo.currentData()] if scope == "plans" else (), positions=chosen)
-        self.quantity_table.clear()
-        bold = QFont(self.quantity_table.font())
-        bold.setBold(True)
-        for total in totals:
-            for group in (g for g in groups if g["material"] == total["material"]):
-                self.quantity_table.addTopLevelItem(self.quantity_item(group["material"], group["section"], group))
-            if len(totals) > 1 or len(groups) > 1:
-                item = self.quantity_item(engine_words.text("quantities.total", self.app.lang) + (" " + total["material"] if total["material"] else ""), "", total)
-                for column in range(5):
-                    item.setFont(column, bold)
-                self.quantity_table.addTopLevelItem(item)
-        if not groups and not note:
-            note = engine_words.text("quantities.empty", self.app.lang)
-        for column in range(5):
-            self.quantity_table.resizeColumnToContents(column)
-        self.quantity_note.setText(note)
-        self.quantity_note.setVisible(bool(note))
-
-    def quantity_item(self, material, section_text, values):
-        item = QTreeWidgetItem([material, section_text, str(values["pieces"]), quantities.metres(values["length_m"]), quantities.metres(values["volume_m3"], 3)])
-        for column in (2, 3, 4):
-            item.setTextAlignment(column, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        return item
 
     def add_row(self, form, header, key, widget, note=None):
         caption = QLabel(self.t(key))
@@ -683,6 +591,17 @@ class PositionsTab(display_view.DisplayTab, QWidget):
 
     def ids(self):
         return [row["position"] for row in self.rows if row["position"]]
+
+    def lists_object(self, ident):
+        """Whether position `ident` is one of the project's (MainWindow.open_object): its rows, Woodcore's own positions.json, and not a folder of sources."""
+        return ident in self.ids()
+
+    def open_object(self, ident):
+        """Position `ident` opened in the form, the draft open left as choosing another row leaves it (`confirm_leave`)."""
+        if ident == self.current_id or ident not in self.ids() or not self.confirm_leave():
+            return
+        self.load(ident)
+        self.reload_list(ident)
 
     def fill_choices(self):
         """What the type, material, strength class and units offer: the STE types, a few materials, SIA 265's and SIA 263's classes, the timber units -- and whatever the project's positions already hold."""
@@ -740,7 +659,7 @@ class PositionsTab(display_view.DisplayTab, QWidget):
         self.apply_search()
         self.loading = loading
         self.update_list_marker()
-        self.refresh_quantities()
+        self.list_card.refresh()
 
     def apply_search(self, _text=None):
         words = self.search.text().strip().lower().split()
@@ -1003,10 +922,6 @@ class PositionsTab(display_view.DisplayTab, QWidget):
     def untouched_draft(self):
         """Whether the draft is a new position the engineer has not typed into: its ID and type are proposed, so it would save -- as a position nobody asked for."""
         return self.current_id is None and self.form_values() == getattr(self, "draft_start", None)
-
-    def confirm_leave(self):
-        """True when the form may be replaced: nothing unsaved, or the engineer saved or discarded it."""
-        return autosave.confirm(self.app, self, self.t("po_unsaved_title"), self.t("po_unsaved", id=self.id_edit.text().strip() or "?"))   # saved without a question where it can be, else the one question (autosave.py, v0.117)
 
     def new_position(self, symbol=None, floor=None):
         """A new position in the form, this tab brought forward -- what the other tabs open through the window (`MainWindow.new_position`): the schemas tab's element panel, with no symbol. Without a symbol, the type of the position selected, so an ID is proposed at once. True where the draft was opened."""

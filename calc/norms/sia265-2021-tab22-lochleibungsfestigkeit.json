@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, Tabelle 22 (clause 6.1.4.3) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 64, read off a render of the page (the formulas are set as graphics).",
+  "_source": "SIA 265:2021, Tabelle 22 (clause 6.1.4.3) -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 64, read off a render of the page (the formulas are set as graphics).",
   "_note": "f_h,0,k = factor · (1 - predrilled_slope · d) · rho_k where predrilled, factor · d^undrilled_exponent · rho_k where not (the same in both directions); f_h,90,k = f_h,0,k / (f_90_divisor[species] + f_90_diameter_term · d). In N/mm² with rho_k in kg/m³ and d in mm. Laubholz has a predrilled row only; its absence without predrilling is the norm's, and is refused. Footnote 1: a force oblique to the grain is interpolated linearly.",
   "edition": "SIA 265:2021",
   "table_22": {

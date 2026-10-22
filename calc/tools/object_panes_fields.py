@@ -184,68 +184,6 @@ class Switch(QCheckBox):
         self.blockSignals(was)
 
 
-class OverrideField(QWidget):
-    """A value the norm gives and the engineer may write over: `[ 3 ] norme` while it follows the norm, `[ 3.5 ] [Reprendre]` in orange the moment it is written over -- b/h's rule of v0.75, «typing the very value the norm holds still writes it over», and «Reprendre» is the one way back."""
-    overridden = Signal(object)
-    reverted = Signal()
-
-    def __init__(self, lang, parent=None):
-        super().__init__(parent)
-        self.lang = lang
-        row = QHBoxLayout(self)
-        row.setContentsMargins(0, 0, 0, 0)
-        self.edit = QLineEdit()
-        self.edit.textEdited.connect(self.typed)
-        self.edit.editingFinished.connect(self.finished)
-        self.note = QLabel(text("op_norm_value", lang))
-        self.note.setEnabled(False)
-        self.back = QPushButton(text("op_override_back", lang))
-        self.back.setToolTip(text("op_override_tip", lang))
-        self.back.clicked.connect(self.revert)
-        row.addWidget(self.edit, 1)
-        row.addWidget(self.note)
-        row.addWidget(self.back)
-        self.auto = None
-        self.stated = None
-        self.set_state(None, None)
-
-    def set_state(self, auto, stated, enabled=True):
-        """`auto` the norm's value (None where it gives none), `stated` the engineer's own number or None."""
-        self.auto, self.stated = auto, stated
-        was = self.edit.blockSignals(True)
-        shown = stated if stated is not None else auto
-        self.edit.setText("" if shown is None else show_number(shown))
-        self.edit.setPlaceholderText(text("op_project_specific", self.lang) if auto is None and stated is None else "")
-        self.edit.blockSignals(was)
-        written = stated is not None
-        self.edit.setStyleSheet(f"color: {theme.colour('override')};" if written else "")
-        self.edit.setEnabled(enabled)
-        self.back.setVisible(written)
-        self.note.setVisible(not written)
-
-    def typed(self, shown):
-        number = parse_number(shown)
-        if number is None:
-            return
-        self.stated = number
-        self.edit.setStyleSheet(f"color: {theme.colour('override')};")
-        self.back.setVisible(True)
-        self.note.setVisible(False)
-        self.overridden.emit(number)
-
-    def finished(self):
-        """The field left: an emptied field goes back to the norm; a text that is no number is put back as it was."""
-        shown = self.edit.text().strip()
-        if not shown and self.stated is not None:
-            self.revert()
-        elif not shown or parse_number(shown) is None:
-            self.set_state(self.auto, self.stated)
-
-    def revert(self):
-        self.set_state(self.auto, None)
-        self.reverted.emit()
-
-
 class CellField(QWidget):
     """One cell of the chosen row as the right pane edits it: the text as written; or, where it holds a variable of the calculation, that variable -- `g_k = 1.9 kN/m²`, never the call -- with the button that takes it out; or, where it was written as an expression, a line saying so. `edited` carries the text typed (a string) or, for a variable, its content; an emptied cell carries ''."""
     edited = Signal(object)
@@ -556,14 +494,6 @@ class Pane(QWidget):
         edit.setPlaceholderText(expression_words if found is None else edit.placeholderText())
         edit.setEnabled(found is not None)
         edit.blockSignals(was)
-
-
-def make_combo():
-    """A drop-down that never asks for the width of its longest item -- the category «Park- und Verkehrsflächen für Fahrzeuge von 3.5 t bis 16 t» would set the width of the whole column."""
-    combo = QComboBox()
-    combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
-    combo.setMinimumContentsLength(12)
-    return combo
 
 
 def _between(items, index):

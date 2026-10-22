@@ -8,7 +8,7 @@
 #report-level.update(1)
 #number-digits.update(3)
 
-#var("F_Ed", 2.037, "kN", level: 0)
-#var("R_d", 4.969, "kN", level: 0)
-#verify(`F_Ed <= R_d`, level: 0)
-#eq("eta", `F_Ed / R_d`)
+#var("sigma_t_d", 0.893, "N/mm²", level: 0)
+#var("f_t_d", 1.187, "N/mm²", level: 0)
+#verify(`sigma_t_d <= f_t_d`, name-calc: "eta", name-visible: "eta", display: "variable-value-unit")
+Le taux de travail vaut #var("eta").

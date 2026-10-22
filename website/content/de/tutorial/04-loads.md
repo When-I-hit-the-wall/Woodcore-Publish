@@ -15,9 +15,8 @@ Die Lasten werden nicht im Register Positionen erfasst: sie kommen aus der **Las
 
 ## Einen Lastfall drucken
 
-Ein Fall wird mit `#show-calc` vollst채ndig gedruckt: die Schneelast des Blatts `SL`, die Formel in Buchstaben und dann in Zahlen, jeder Wert mit seiner Norm.
+Ein Fall wird vollst채ndig durch die Datei gedruckt, die Woodcore f체r ihn schreibt, `#include domain-file("snow-load", "SL")`: die Schneelast des Blatts `SL`, die Formel in Buchstaben und dann in Zahlen, jeder Wert mit seiner Norm.
 
-{{example show-calc-1}}
 
 Der Abschnitt `004-einwirkungen.typ` eines neuen Projekts druckt bereits alle F채lle jeder Last mit einer Schleife; nennen Sie sie einzeln, um die Stufe jedes Falls zu w채hlen.
 
@@ -26,5 +25,5 @@ Der Abschnitt `004-einwirkungen.typ` eines neuen Projekts druckt bereits alle F�
 Die Nutzlasten kommen aus Tabelle 8 der SIA 261, ohne Arbeitsmappe: man nennt die Kategorie der Fl채che.
 
 ```typ
-#show-live-load("A1")
+#include domain-file("live-load", "A1")
 ```

@@ -3,10 +3,10 @@
 EN 14592:2022 Anhang G, G.4 and Tabelle G.9 (PDF p. 81) ask of a dowel's bar a minimum yield stress of 235 N/mm² and give **no** tensile strength. SIA 265 6.1.4.4 equation (87) reads f_u,k, so Woodcore takes it from the bar's steel grade in SIA 263:2013 Tabelle 1 (`sia263.f_u`) -- one value, one place (spec 2026-10-12-audit-issues-47-48-49, D-06, D-20). Until then the project credited 510 N/mm² to SN EN 14592+A1:2012, an edition not in the library; 510 is S355's f_u, and S355 stays the grade a new Stabdübel starts with.
 """
 
-import json
 from pathlib import Path
 
 import validation
+from norms import _loader  # how every reader of calc/norms/ opens its files (G3)
 from norms import sia263
 
 NAME = "sn-en-14592-2022-stabduebel-werkstoff"
@@ -22,15 +22,8 @@ def _fail(what):
 def _read():
     if "data" in _cache:
         return _cache["data"]
-    try:
-        with PATH.open(encoding="utf-8") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        _fail("not found at %s -- the values of SN EN 14592 live in calc/norms/" % PATH)
-    except json.JSONDecodeError as exc:
-        _fail("is not valid JSON: %s" % exc)
-    if not data.get("edition"):
-        _fail("no 'edition'")
+    data = _loader.load(PATH)
+    _loader.edition(NAME, data)
     block = data.get("stabduebel")
     if not isinstance(block, dict):
         _fail("no 'stabduebel' block")

@@ -5,6 +5,8 @@ The Typst found is compared with the one requirements.txt pins, offline -- a mod
 Nothing here installs or downloads anything: every subprocess and every request is replaced, and the pin is rewritten in copies of the two files, never in the real ones.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import contextlib
 import io
 import json

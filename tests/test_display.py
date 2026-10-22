@@ -17,8 +17,9 @@ PROJECT = conftest.PROJECT
 MINUS = "−"
 # a hyphen standing where a number's sign stands: at the start, or after a space, a bracket, `=`, `:`, `;`, `,` or `/`, and right before a digit (calc-engine.typ's `sign-hyphen`)
 SIGN_HYPHEN = re.compile(r"(^|[\s(\[=:;,/])-\d")
-# a colour no drawing of the project uses but the halo: schema-halo's own
-HALO = "#ffd34d"
+# the halo's colour, the palette's yellow (lib/figure-palette.json, v0.120): no schema draws in it, so in a schema's figure it is schema-halo's alone
+from domains import svg_draw  # noqa: E402
+HALO = svg_draw.colour("yellow")
 
 
 def _guard():
@@ -29,8 +30,11 @@ def _guard():
 def _root(name):
     """A copy of the example project's report folder -- its config.typ and commands.typ -- and of its generated folder (the engine and the export), laid out as the project lays them out: a Typst root of this test's own."""
     d = conftest.tmpdir(name)
-    for f in ("commands.typ", "config.typ"):
-        shutil.copyfile(PROJECT.typst_root / f, d / f)
+    for f in ("commands.typ", "config.typ"):   # where the project keeps them: 000-Typst-Config/ laid out by folders (issue #64)
+        source = PROJECT.config_dir / f
+        target = d / source.relative_to(PROJECT.typst_root)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
     relative = PROJECT.generated_dir.relative_to(PROJECT.typst_root)
     shutil.copytree(PROJECT.generated_dir, d / relative, copy_function=shutil.copyfile, ignore=shutil.ignore_patterns("out", "docs"))
     return d, d / relative / "data"
@@ -42,7 +46,7 @@ def _compile(root, body, name, fmt="pdf"):
     d = root / ".probe" / name
     d.mkdir(parents=True, exist_ok=True)
     probe = d / "probe.typ"
-    probe.write_text('#import "/config.typ": conf\n#import "/commands.typ": *\n#show: conf\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/config.typ": conf\n#import "/000-Typst-Config/commands.typ": *\n#show: conf\n' + body + "\n", encoding="utf-8")
     out = d / f"probe.{fmt}"
     run = subprocess.run(["typst", "compile", "--root", str(root), "--format", fmt, str(probe), str(out)],
                          capture_output=True, text=True, encoding="utf-8", errors="replace")
@@ -63,7 +67,7 @@ def _query(root, body, name):
     d = root / ".probe" / name
     d.mkdir(parents=True, exist_ok=True)
     probe = d / "probe.typ"
-    probe.write_text('#import "/config.typ": conf\n#import "/commands.typ": *\n#show: conf\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/config.typ": conf\n#import "/000-Typst-Config/commands.typ": *\n#show: conf\n' + body + "\n", encoding="utf-8")
     run = subprocess.run(["typst", "query", "--root", str(root), str(probe), "<out>", "--field", "value", "--one"],
                          capture_output=True, text=True, encoding="utf-8", errors="replace")
     assert run.returncode == 0, run.stderr
@@ -71,7 +75,7 @@ def _query(root, body, name):
 
 
 def _embedded_svgs(svg_file):
-    """The SVG images a page compiled to SVG carries, decoded: the figure show-schema set, as it was handed to Typst."""
+    """The SVG images a page compiled to SVG carries, decoded: the drawing schema() set, as it was handed to Typst."""
     text = svg_file.read_text(encoding="utf-8")
     return [base64.b64decode(b).decode("utf-8", "replace") for b in re.findall(r"data:image/svg\+xml;base64,([A-Za-z0-9+/=]+)", text)]
 
@@ -93,13 +97,11 @@ def test_a_negative_number_prints_a_minus_sign_and_never_a_hyphen():
     Planted back (fmt-number without `signed-text`), the wind var and the table cells come out with hyphens and this fails naming the lines.
     """
     instance, name = _wind_instance()
-    connections = json.loads((PROJECT.data_dir / "connections.json").read_text(encoding="utf-8"))["connections"]
-    polar = next(iter(connections), None)
-    body = (f'#show-input("wind-load", "{instance}", "{name}")\n'
-            f'#fmt-number(-0.25, "kN") #fmt-value(var-of("wind-load", "{instance}", "{name}"))\n'
-            f'#show-calc("wind-load", "{instance}", level: 2)\n'
-            '#show-input("snow-load", "SL", "korrektur", level: 2)\n'
-            + (f'#show-polar-moment("{polar}", N: -7.5, V: 25, M: -6.6, level: 3)\n' if polar else ""))
+    # the wind var read live, its file written out -- its tables' cells --, and a choice of «-200 m» described at level 3 (spec 2026-10-21-commandes-typst-refonte, REQ-009, REQ-017)
+    body = (f'#var("{name}", domain: ("wind-load", "{instance}"))\n'
+            f'#fmt-number(-0.25, "kN") #var("{name}", domain: ("wind-load", "{instance}"), display: "value-unit")\n'
+            f'#include domain-file("wind-load", "{instance}")\n'
+            '#var("korrektur", domain: ("snow-load", "SL"), level: 3)\n')
     text = _text(conftest.TYPST_ROOT, body, "display_minus")
     hyphens = [line for line in text.splitlines() if SIGN_HYPHEN.search(line)]
     assert not hyphens, "a negative number printed with a hyphen:\n" + "\n".join(hyphens)
@@ -121,8 +123,8 @@ def test_a_negative_answer_in_a_numbers_line_prints_a_minus_sign():
         "checks": [],
     }
     (data / "calculations.json").write_text(json.dumps(calcs, ensure_ascii=False), encoding="utf-8")
-    text = re.sub(r"\s+", " ", _text(root, f'#show-calc("{domain}", "PROBE", level: 3)', "answer"))
-    assert MINUS + "2 kN" in text, text
+    text = re.sub(r"\s+", " ", _text(root, '#var("a", -3, "kN", level: 0)\n#var("b", 1, "kN", level: 0)\n#eq("c", `a + b`, level: 3)', "answer"))
+    assert re.search(MINUS + r"2\)? kN", text), text
     assert not SIGN_HYPHEN.search(text), text
 
 
@@ -152,41 +154,16 @@ def test_a_position_without_a_dimension_prints_neither_it_nor_its_unit():
     index = json.loads((data / "positions-index.json").read_text(encoding="utf-8"))
     index["positions"] += list(planted)
     (data / "positions-index.json").write_text(json.dumps(index), encoding="utf-8")
-    body = "\n\n".join(f'#member("{pid}", level: 1)' for pid in planted) + '\n\n#calc-block("T901", axes: "Achse 1")[Body]'
+    body = "\n\n".join(f'#position("{pid}", category-show: ("type", "material", "strength-class", "dimension", "units", "moisture-class"))' for pid in planted)
     text = _text(root, body, "positions")
     lines = [line.strip() for line in text.splitlines() if line.strip().startswith("T90")]
-    assert len(lines) == 4, text
+    assert len(lines) == 3, text
     for line in lines:
         assert "mm" not in line, f"a unit printed without its dimension: {line!r}"
         assert ", ," not in line and not line.rstrip().endswith(",") and ",  " not in line, f"a dangling separator: {line!r}"
-        assert "Feuchteklasse" in line, line
-    assert "(Achse 1)" in lines[-1], lines[-1]
+        assert "Feuchteklasse" in line or "NK" in line, line
     # the dimension, where there is one, is still printed with its unit
-    assert re.sub(r"\s+", " ", _text(root, '#member("T001", level: 1)', "position_t001")).count(f"{base['dimension']} {base['units']}") == 1
-
-
-def test_a_position_s_line_prints_its_section_as_the_export_read_it():
-    """v0.94: the line reads the `section` the export wrote -- «Ø 200 mm», «20/30/20 mm (70 mm)», «ROR 101.6×10» -- and nothing reads the dimension text again; a record exported before, with no `section`, is printed as it was, its dimension and its unit. S002 of the example project is the engineer's steel column."""
-    from domains import section
-    root, data = _root("display_sections")
-    base = json.loads((data / "positions" / "T001.json").read_text(encoding="utf-8"))
-    planted = {
-        "S903": {"type": "Stütze", "section_type": "cir", "dimension": "200", "section": section.parse("cir", "200", "mm")},
-        "D904": {"type": "Decke", "section_type": "clt", "dimension": "20/30/20", "section": section.parse("clt", "20/30/20", "mm")},
-        "T905": {"dimension": "12/24", "units": "cm"},
-    }
-    for pid, fields in planted.items():
-        record = dict(base, position=pid, **fields)
-        if pid == "T905":
-            record.pop("section")
-            record.pop("section_type")
-        (data / "positions" / f"{pid}.json").write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
-    index = json.loads((data / "positions-index.json").read_text(encoding="utf-8"))
-    index["positions"] += list(planted)
-    (data / "positions-index.json").write_text(json.dumps(index), encoding="utf-8")
-    text = re.sub(r"\s+", " ", _text(root, "\n\n".join(f'#member("{pid}", level: 1)' for pid in ("S002", *planted)), "sections"))
-    for want in ("S002: Stütze, Stahl S355, ROR 101.6×10, Feuchteklasse 2", "S903: Stütze, Fichte C24, Ø 200 mm", "D904: Decke, Fichte C24, 20/30/20 mm (70 mm)", "T905: Träger, Fichte C24, 12/24 cm"):
-        assert want in text, (want, text)
+    assert re.sub(r"\s+", " ", _text(root, '#position("T001", category-show: ("type", "material", "strength-class", "dimension", "units", "moisture-class"))', "position_t001")).count(f"{base['dimension']} {base['units']}") == 1
 
 
 # --- a point's halo over the pieces of a schema -----------------------------------------
@@ -246,12 +223,12 @@ def test_a_point_s_halo_is_drawn_over_the_pieces():
     svg_file = (data / "schemas" / "T_HALO-de.svg").read_text(encoding="utf-8")
     assert "<!-- highlight-points -->" in svg_file, "today's schema export carries no <!-- highlight-points --> marker"
     for ident in ("C1", "A1", "A2"):
-        svg = _figure(root, f'#show-schema("T_HALO", highlight: "{ident}")', "halo_" + ident)
+        svg = _figure(root, f'#image-schema("T_HALO", highlight: "{ident}")', "halo_" + ident)
         before, total = _halo_position(svg)
         assert before == total, f"{ident}'s halo stands under {total - before} of the {total} pieces"
         assert "<circle" in svg[svg.index(HALO):] and 'fill="none"' in svg[svg.index(HALO) - 200:svg.index(HALO) + 80], f"{ident}'s halo is not a ring"
     # the marker is drawn on its halo, not under it: the halo's own element names C1's place before its colour, the marker's after
-    svg = _figure(root, '#show-schema("T_HALO", highlight: "C1")', "halo_c1_marker")
+    svg = _figure(root, '#image-schema("T_HALO", highlight: "C1")', "halo_c1_marker")
     assert 'cx="110"' in svg[svg.index(HALO):], "C1's marker is drawn under its halo"
     # and so is the box its id is set over (v0.99): a ring over a marker's number would hide what it points at
     from domains import schema_svg
@@ -259,7 +236,7 @@ def test_a_point_s_halo_is_drawn_over_the_pieces():
     assert grounds, "no text is set over a box"
     assert any(start > svg.index(HALO) for start in grounds), "a marker's own label is drawn under the halo"
     # a piece keeps its halo under the pieces
-    svg = _figure(root, '#show-schema("T_HALO", highlight: "E2")', "halo_e2")
+    svg = _figure(root, '#image-schema("T_HALO", highlight: "E2")', "halo_e2")
     assert _halo_position(svg)[0] == 0, "a piece's halo left its place under the pieces"
 
 
@@ -268,7 +245,7 @@ def test_a_point_s_halo_falls_back_to_the_old_marker_on_an_older_export():
     root, data = _exported_root("display_halo_old")
     for f in (data / "schemas").glob("T_HALO-*.svg"):
         f.write_text(f.read_text(encoding="utf-8").replace("<!-- highlight-points -->\n", ""), encoding="utf-8")
-    svg = _figure(root, '#show-schema("T_HALO", highlight: ("A2", "E1"))', "halo_old")
+    svg = _figure(root, '#image-schema("T_HALO", highlight: ("A2", "E1"))', "halo_old")
     assert "highlight-points" not in svg
     assert svg.count(HALO) == 2 and svg.rindex(HALO) < svg.index("<polygon"), "an older export's halos did not go at <!-- highlight -->"
 
@@ -340,7 +317,7 @@ def test_a_formula_too_wide_for_its_row_is_stacked_at_its_signs():
     Planted back (annotated-rows laying a formula-chain out as its one line), the numbers run past the column on the citation's line and this fails naming the runs."""
     root = conftest.TYPST_ROOT
     # a line of its own: an #eq is inline by default since v0.117 (issue #19), and stacking at the signs is a line's
-    runs = _runs(root, "#report-level.update(3)\n" + BEAM + f'#eq("B_v", {REACTION}, norm: "SIA 260", norm-ref: "4.4", note: "line")', "display_stack_eq")
+    runs = _runs(root, "#report-level.update(3)\n" + BEAM + '#calc-defaults(presets: "block", scope: "next")\n' + f'#eq("B_v", {REACTION}, norm: "SIA 260", norm-ref: "4.4")', "display_stack_eq")
     equals, cite, overrun = _stacked(runs, "SIA 260")
     assert not overrun, f"the formula runs into the citation column: {overrun}"
     assert len(equals) >= 3, f"the formula is not stacked at its signs: {equals}"
@@ -348,8 +325,8 @@ def test_a_formula_too_wide_for_its_row_is_stacked_at_its_signs():
     assert max(xs) - min(xs) < 0.2, f"the stacked lines' = do not stand one under the other: {equals}"
     assert abs(cite[0] - equals[0][0]) < 2.5, f"the citation ({cite[0]:.1f}) is not level with the first line ({equals[0][0]:.1f})"
     # with the label on the line and the answer ruled twice, and with the extras in a footnote: what the line ends on ends its last line
-    text = re.sub(r"\s+", " ", _text(root, "#report-level.update(3)\n" + BEAM + f'#eq("B_v", {REACTION}, label: "Auflagerkraft", style: "double", norm: "SIA 260", norm-ref: "4.4", note: "line")\n'
-                                     f'#eq("B_w", "B_w", {REACTION}, label: "Auflagerkraft", note: "footnote")', "display_stack_eq_extras"))
+    text = re.sub(r"\s+", " ", _text(root, "#report-level.update(3)\n" + BEAM + '#calc-defaults(presets: "block", scope: "next")\n' + f'#eq("B_v", {REACTION}, label: "Auflagerkraft", style: "double", norm: "SIA 260", norm-ref: "4.4")\n'
+                                     f'#eq("B_w", "B_w", {REACTION}, label: "Auflagerkraft")', "display_stack_eq_extras"))
     assert text.count("Auflagerkraft") == 2, text   # once after the first answer, once in the second's footnote
     assert "— Auflagerkraft" in text, text
 
@@ -371,40 +348,6 @@ def test_a_formula_that_fits_is_set_exactly_as_before():
     assert chained < plain - 5, f"a line carrying no citation wrapped in the column rather than span it: {chained} pt against {plain} pt"
 
 
-def test_a_step_of_show_calc_too_wide_for_its_row_is_stacked():
-    """`show-calc` meets the same line: a step whose letters, numbers and answer stand on one row (`inline`), or whose numbers and answer do, is a formula-chain too. A step with a display fraction too wide for its row is planted in a copy of the export -- once inline, once on the two rows a step takes -- and each is stacked at its signs, the citation on its first line and nothing past the column there."""
-    root, data = _root("display_stack_calc")
-    calcs = json.loads((data / "calculations.json").read_text(encoding="utf-8"))
-    domain = next(iter(calcs["domains"]))
-    # the inputs cite another norm than the step, so the step's own citation is the one the check finds
-    var = lambda value, unit, symbol, level: {"value": value, "unit": unit, "symbol": symbol, "label": symbol, "level": level,
-                                              "norm": "SIA 261", "norm_ref": "1", "source": "python:test"}
-    inputs = {"q": var(20.1, "kN/m", "q", 3), "L": var(6.5, "m", "L", 3), "Q_1": var(50.1, "kN", "Q_1", 3), "Q_2": var(40.2, "kN", "Q_2", 3),
-              "l_1": var(3.1, "m", "l_1", 3), "l_2": var(1.25, "m", "l_2", 3)}
-    formula = "B_v = ((q dot L) dot L/2 + Q_1 dot l_1 + Q_2 dot (l_1 + l_2))/L"
-    for name, inline in (("INLINE", True), ("ROWS", False)):
-        step = {"name": "Auflager", "level": 1, "result": "B_v", "uses": list(inputs), "formula": formula, "norm": "SIA 260", "norm_ref": "4.4"}
-        if inline:
-            step["inline"] = True
-        calcs["domains"][domain]["instances"][name] = {
-            "results": ["B_v"], "vars": dict(inputs, B_v=var(116.122, "kN", "B_v", 1)), "steps": [step], "checks": [],
-        }
-    (data / "calculations.json").write_text(json.dumps(calcs, ensure_ascii=False), encoding="utf-8")
-    for name in ("INLINE", "ROWS"):
-        runs = _runs(root, f'#show-calc("{domain}", "{name}", level: 3, title: none)', "stack_" + name)
-        equals, cite, overrun = _stacked(runs, "SIA 260")
-        assert not overrun, f"{name}: the step runs into the citation column: {overrun}"
-        assert max(r[1] for r in runs) < TEXT_RIGHT, f"{name}: the step runs off the page"
-        # the first `=` of each line from the step's own down -- the inputs' rows above it carry theirs
-        starts = {}
-        for y, x, _ in (r for r in equals if r[0] <= cite[0] + 1):
-            starts[round(y, 1)] = min(x, starts.get(round(y, 1), x))
-        if name == "INLINE":
-            # the letters, the numbers and the answer are one formula: it takes more than one line, each `=` under the first
-            assert len(starts) >= 2, f"the inline step is not stacked at its signs: {equals}"
-            assert max(starts.values()) - min(starts.values()) < 0.2, f"the stacked lines' = do not stand one under the other: {starts}"
-
-
 def test_a_relation_too_wide_for_its_line_is_stacked_and_one_that_fits_stays_in_its_sentence():
     """`#verify` at level 3 prints a side that is a formula as its letters, numbers and value, and the engineer's reaction is one: the relation ran off the page, its ✔ on a line of its own. It is stacked at its signs now, as `#eq` is -- the letters, then `= <numbers>`, then `= 116.122 kN ⩽ 200 kN`, the `=` one under the other -- double-ruled and marked. A relation that fits is left in its sentence."""
     root = conftest.TYPST_ROOT
@@ -421,54 +364,3 @@ def test_a_relation_too_wide_for_its_line_is_stacked_and_one_that_fits_stays_in_
 
 
 # --- the level of detail -1 (issue #20, v0.117): show-calc, show-connector-resistance, show-polar-moment --------------------
-
-def test_a_connector_at_minus_one_prints_what_is_chosen_and_its_headline():
-    """REQ-003 (D-12, D-14): a connector at -1 prints its headline as a title, and of its calculation only the vars and tables chosen -- a result not chosen goes like any other value; the keys are the export's own (calc/shown_variables.py `export_keys`), every one of them compiles, and a key it does not have is refused."""
-    import shown_variables
-    connectors = json.loads((PROJECT.data_dir / "connectors.json").read_text(encoding="utf-8"))["connectors"]
-    cid, entry = next((k, v) for k, v in connectors.items() if v.get("calculated"))
-    keys = shown_variables.export_keys(entry)
-    assert "R_d" in keys and "table-1" in keys
-    none = _text(conftest.TYPST_ROOT, f'#show-connector-resistance("{cid}", level: -1, shown: (:))', "minus1_connector_none")
-    one = _text(conftest.TYPST_ROOT, f'#show-connector-resistance("{cid}", level: -1, shown: (R_d: 1))', "minus1_connector_one")
-    assert one.count("=") > none.count("="), (none, one)
-    every = "(" + ", ".join(f"{k}: 3" for k in keys) + ")"
-    code, err, _ = _compile(conftest.TYPST_ROOT, f'#show-connector-resistance("{cid}", level: -1, shown: {every})', "minus1_connector_every")
-    assert code == 0, err
-    code, err, _ = _compile(conftest.TYPST_ROOT, f'#show-connector-resistance("{cid}", level: -1, shown: (nope: 1))', "minus1_connector_bad")
-    assert code != 0 and "nope" in err and "R_d" in err, err
-
-
-def test_show_calc_at_minus_one_prints_only_what_is_chosen():
-    """REQ-003: show-calc at -1 prints the vars and tables `shown:` names -- the export's own keys -- and drops a result not chosen."""
-    instance, name = _wind_instance()
-    calcs = json.loads((PROJECT.data_dir / "calculations.json").read_text(encoding="utf-8"))
-    import shown_variables
-    entry = calcs["domains"]["wind-load"]["instances"][instance]
-    body = f'#show-calc("wind-load", "{instance}", level: -1, shown: ({name}: 2), title: none)'
-    text = _text(conftest.TYPST_ROOT, body, "minus1_calc_one")
-    empty = _text(conftest.TYPST_ROOT, f'#show-calc("wind-load", "{instance}", level: -1, shown: (:), title: none)', "minus1_calc_none")
-    assert "=" in text and "=" not in empty, (text, empty)
-    if entry is not None:
-        every = "(" + ", ".join(f"{k}: 3" for k in shown_variables.export_keys(entry)) + ")"
-        code, err, _ = _compile(conftest.TYPST_ROOT, f'#show-calc("wind-load", "{instance}", level: -1, shown: {every})', "minus1_calc_every")
-        assert code == 0, err
-
-
-def test_a_polar_moment_at_minus_one_prints_its_groups_of_lines_as_chosen():
-    """REQ-003, D-14: show-polar-moment at -1 -- its heading always; F_max at 1 its one line, at 2 its working; I_p at 3 its working; nothing of what is not chosen; every key of lib/shown-variables.json compiles at 3."""
-    import shown_variables
-    connections = json.loads((PROJECT.data_dir / "connections.json").read_text(encoding="utf-8"))["connections"]
-    polar = next((k for k, v in connections.items() if v.get("calculated", True)), None)
-    if polar is None:
-        raise Skip("the example project has no polar moment")
-    call = f'#show-polar-moment("{polar}", N: 7.5, V: 25, M: 6.6, level: -1, shown: %s)'
-    none = _text(conftest.TYPST_ROOT, call % "(:)", "minus1_polar_none")
-    assert "max" not in none and "I_p" not in none.replace(" ", ""), none
-    fmax = _text(conftest.TYPST_ROOT, call % "(F_max: 1)", "minus1_polar_fmax")
-    assert "max" in fmax and "sqrt" not in fmax and "√" not in fmax, fmax
-    working = _text(conftest.TYPST_ROOT, call % "(F_max: 2)", "minus1_polar_working")
-    assert "√" in working, working
-    every = "(" + ", ".join(f"{k}: 3" for k in shown_variables.keys("show-polar-moment")) + ")"
-    code, err, _ = _compile(conftest.TYPST_ROOT, call % every, "minus1_polar_every")
-    assert code == 0, err

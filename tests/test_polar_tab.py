@@ -211,7 +211,7 @@ def test_a_drop_files_a_calculation_and_never_renames_it():
         written = json.loads((folder / "SD_01-V1.json").read_text(encoding="utf-8"))
         assert written["group"] == "Halle Nord" and written["id"] == "SD_01-V1"
         assert [p.name for p in folder.glob("*.json")] == ["SD_01-V1.json"], "a folder is a field, never a directory"
-        assert exported == ["SD_01-V1"]
+        assert exported == [""], "a drop exports the connections naming none of them (export_listed)"
         assert tab.form_group == "Halle Nord", "the draft being edited is refiled with its file"
         tab.on_moved(["SD_01-V1"], "")
         assert "group" not in json.loads((folder / "SD_01-V1.json").read_text(encoding="utf-8"))

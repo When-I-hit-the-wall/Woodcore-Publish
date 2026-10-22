@@ -19,12 +19,13 @@ from pathlib import Path
 
 import documents
 import project
+import project_migrate
 import typst_paths
 
 # The report's folder as every project was laid out before the three documents: project.DEFAULT_LAYOUT's, which the example stated by stating no layout at all.
 REPORT = Path(project.DEFAULT_LAYOUT["report"]).parent.name
 # What the migration took up to the top of the project, in the order it moved them (calc/project_migrate.py plan()).
-TAKEN_UP = (documents.GENERATED_FOLDER, project.IMAGES_FOLDER, project.CONFIG_FILE, project.COMMANDS_FILE, project.REFERENCES_FILE)
+TAKEN_UP = (documents.LEGACY_GENERATED_FOLDER, project.IMAGES_FOLDER, project.CONFIG_FILE, project.COMMANDS_FILE, project.REFERENCES_FILE)
 # What a copy of the migrated example leaves out: the engine a sync wrote, the stamps a compile wrote, the archives.
 _ENGINE = {"lib", "calc", project.ENGINE_STAMP, "stamps"}
 
@@ -34,7 +35,7 @@ def _ignore(top):
         here = Path(directory)
         if here == top:
             return {n for n in names if n in ("_Archiv",) or n.endswith(".lock")}
-        if here.name == documents.GENERATED_FOLDER and here.parent == top:
+        if here.name == documents.LEGACY_GENERATED_FOLDER and here.parent == top:
             return {n for n in names if n in _ENGINE}
         return set()
     return ignore
@@ -64,8 +65,13 @@ def build(dest, source=None):
     if not here.has_modes:
         raise ValueError(f"{source} is laid out as one report already: there is nothing to undo")
     dest = Path(dest)
-    shutil.copytree(here.root, dest, ignore=_ignore(here.root.resolve()))
-    copy = project.Project.load(dest / source.name)
+    if here.has_folders:
+        # laid out by folders since issue #64: first back to the three documents of 0.111 (tests/fixtures/legacy_three.py), then on as below
+        from fixtures import legacy_three
+        copy = legacy_three.build(dest, source)
+    else:
+        shutil.copytree(here.root, dest, ignore=_ignore(here.root.resolve()))
+        copy = project.Project.load(dest / source.name)
     top = copy.root
     rs = copy.document_dir("rs")
 
@@ -81,13 +87,24 @@ def build(dest, source=None):
 
     # the report's folder under its old name, and what went up put back into it
     old = top / REPORT
-    os.rename(rs, old)
+    project_migrate._rename(rs, old)
     for name in TAKEN_UP:
         if (top / name).exists():
-            os.rename(top / name, old / name)
+            project_migrate._rename(top / name, old / name)
+    # the domains the export wrote out, which the report includes by domain-file(kind, id) (spec 2026-10-21-commandes-typst-refonte, ARCH-008): beside it under the report's root, and data/domain-files.json naming them from there -- the journal the report's own, the two documents' gone with them
+    for name in sorted({folder.split("/")[0] for folder in project.DOMAIN_FOLDERS.values()}):
+        if (top / name).is_dir():
+            project_migrate._rename(top / name, old / name)
+    listing = old / documents.LEGACY_GENERATED_FOLDER / "data" / "domain-files.json"
+    if listing.is_file():
+        files = json.loads(listing.read_text(encoding="utf-8"))
+        journals = files["files"].pop("journal", {})
+        if "rs" in journals:
+            files["files"]["journal"] = {"rs": "/" + journals["rs"].split("/", 2)[2]}
+        listing.write_text(json.dumps(files, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     # its paths relative again
-    generated = old / documents.GENERATED_FOLDER
+    generated = old / documents.LEGACY_GENERATED_FOLDER
     for file in sorted(old.rglob("*.typ")):
         if generated in file.parents:
             continue

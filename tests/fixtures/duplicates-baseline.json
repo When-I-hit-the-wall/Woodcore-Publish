@@ -1,0 +1,171 @@
+{
+ "003513c89eefdd1a": [
+  "calc/doc_import.py:_put",
+  "calc/sharing.py:_put",
+  "calc/structure.py:_put"
+ ],
+ "05871040f915a305": [
+  "calc/domains/schema_edit.py:next_id",
+  "calc/domains/statics.py:next_id"
+ ],
+ "25c06ffd570af740": [
+  "calc/tools/schema_tab.py:duplicate",
+  "calc/tools/statics_tab.py:duplicate"
+ ],
+ "2cac4096fea885d8": [
+  "calc/domains/schema_geometry.py:add",
+  "calc/domains/statics_geometry.py:add"
+ ],
+ "432870ef7af39f72": [
+  "calc/tools/profile_tab.py:revert",
+  "calc/tools/source_editor.py:revert"
+ ],
+ "4a0d114022102a2f": [
+  "calc/positions_store.py:_text",
+  "calc/tools/positions_tab.py:cell_text"
+ ],
+ "4c8f6379c1aaa5ac": [
+  "calc/tools/schema_tab_build.py:bar_tip",
+  "calc/tools/statics_tab_build.py:bar_tip"
+ ],
+ "4e122e36f4acce21": [
+  "calc/tools/annex_tab.py:plain_label",
+  "calc/tools/journal_tab.py:plain_label",
+  "calc/tools/structure_tab.py:plain_label"
+ ],
+ "4f57a138e2153dd6": [
+  "calc/domains/plan_background.py:_file_state",
+  "calc/tools/plan_canvas_render.py:file_key"
+ ],
+ "4f7cb3707e42333e": [
+  "calc/doc_import.py:_replace",
+  "calc/doc_templates.py:_move",
+  "calc/sharing.py:_replace",
+  "calc/structure.py:_replace"
+ ],
+ "5957b1dba652c614": [
+  "calc/doc_import.py:_with_import",
+  "calc/sharing.py:_with_import"
+ ],
+ "60504140e9cf461c": [
+  "calc/domains/schema_edit.py:find_entry",
+  "calc/domains/statics.py:find_entry"
+ ],
+ "60b519e7e7e35ffb": [
+  "calc/domains/script_runner.py:_load",
+  "calc/engine.py:previous_json"
+ ],
+ "6b31a33dd51857ce": [
+  "calc/tools/load_tab.py:spin",
+  "calc/tools/member_check_tab.py:spin"
+ ],
+ "745e5c35b06d6c43": [
+  "calc/tools/schema_tab.py:revert",
+  "calc/tools/statics_tab.py:revert"
+ ],
+ "7d47741b1e7b7d31": [
+  "calc/domains/profile.py:list_sources",
+  "calc/domains/steel_check.py:list_sources"
+ ],
+ "7f4b1df8d00e935c": [
+  "calc/tools/journal_tab.py:document_mode",
+  "calc/tools/structure_tab.py:document_mode"
+ ],
+ "88cdb06850771dc8": [
+  "calc/tools/schema_tab_draft.py:_as_number",
+  "calc/tools/statics_tab_build.py:_as_number"
+ ],
+ "91187dc8f86fd89b": [
+  "calc/domains/dead_load_source.py:list_sources",
+  "calc/domains/member_check.py:list_sources"
+ ],
+ "93c9c4506cc362e4": [
+  "calc/tools/journal_tab.py:changed",
+  "calc/tools/positions_tab.py:changed"
+ ],
+ "93ce2b64d540bac0": [
+  "calc/domains/schema.py:text_records",
+  "calc/domains/statics.py:text_records"
+ ],
+ "99278b9d558173c3": [
+  "calc/tools/commands_tab.py:plain_label",
+  "calc/tools/drawing_tab_panes.py:plain_label",
+  "calc/tools/polar_tab.py:plain_label",
+  "calc/tools/positions_tab.py:plain_label",
+  "calc/tools/schema_tab_build.py:plain_label",
+  "calc/tools/statics_tab_build.py:plain_label"
+ ],
+ "9d3c5e8dd31e378b": [
+  "calc/tools/sheet_editor.py:stop_watching_file",
+  "calc/tools/structure_tab_view.py:stop_watching"
+ ],
+ "a04306604b952102": [
+  "calc/domains/dead_load_source.py:read_source",
+  "calc/domains/snow_source.py:read_source",
+  "calc/domains/wind_source.py:read_source"
+ ],
+ "a16e083a8664bfb1": [
+  "calc/project.py:_version_tuple",
+  "calc/tools/updates.py:version_tuple"
+ ],
+ "a21c4648e061fb77": [
+  "calc/tools/display_view.py:_edited",
+  "calc/tools/plan_command_builder.py:_edited"
+ ],
+ "a31b731aa7979c2c": [
+  "calc/tools/object_panes_words.py:_french",
+  "calc/tools/structure_words.py:_french"
+ ],
+ "be9e3d9041f60115": [
+  "calc/tools/connectors_tab.py:schemas",
+  "calc/tools/polar_tab.py:schemas"
+ ],
+ "c0cff3f8d4169205": [
+  "calc/domains/schema.py:_string",
+  "calc/domains/statics.py:_string"
+ ],
+ "c20b4b51ccbd4216": [
+  "calc/tools/load_tab.py:touch",
+  "calc/tools/member_check_tab.py:touch"
+ ],
+ "d1fd476573d7b27f": [
+  "calc/tools/journal_tab.py:note",
+  "calc/tools/positions_tab.py:note"
+ ],
+ "d2229df1039b0887": [
+  "calc/doc_import.py:_read",
+  "calc/sharing.py:_read"
+ ],
+ "d9ef4c866fa95a1d": [
+  "calc/tools/fire_tab_form.py:apply",
+  "calc/tools/plan_tab_build.py:apply"
+ ],
+ "dc177a1e7e393ebe": [
+  "calc/tools/drawing_tab.py:revert",
+  "calc/tools/polar_tab.py:revert"
+ ],
+ "e46f816017843171": [
+  "calc/tools/fire_check_tab.py:on_duration_source",
+  "calc/tools/member_check_tab.py:on_size"
+ ],
+ "e5407ca5c2706753": [
+  "calc/norms/sia260.py:_read",
+  "calc/norms/sia261.py:_read"
+ ],
+ "ebf9751208f5361b": [
+  "calc/sharing.py:_block",
+  "calc/sync.py:_block"
+ ],
+ "f5e9a0022df1009b": [
+  "calc/tools/member_check_tab_form.py:on_field",
+  "calc/tools/member_check_tab_form.py:on_position"
+ ],
+ "f6ded185614ff310": [
+  "calc/domains/schema_geometry.py:dimension_value_text",
+  "calc/domains/statics_geometry.py:dimension_value_text"
+ ],
+ "ff697bcc6528d7aa": [
+  "calc/domains/schema_edit.py:remove",
+  "calc/domains/statics.py:remove"
+ ]
+}

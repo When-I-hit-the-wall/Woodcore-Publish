@@ -8,6 +8,4 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#var("b", 208, "mm", sep: ";")
-#var("t", 8.5, "mm", sep: ";")
-#var("epsilon", 124)
+#var("R_k", 7, "kN", label: "Kapazität Sherpa XS", descr: "Aus dem Katalog des Herstellers", norm: "Sherpa", norm-section: "ETA-12/0197", label-position: "after", norm-position: "line-right", level: 3)

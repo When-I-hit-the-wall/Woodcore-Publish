@@ -4,19 +4,17 @@
 == Verwendung von Baustoffen
 // woodcore:/object title
 
-// woodcore:object doc-table fire-materials-table
-#doc-table(
-  columns: (
-    (id: "category", title: [Kategorie]),
-    (id: "element", title: [Bauteil]),
-    (id: "basis", title: [Grundlage]),
-    (id: "requirement", title: [Anforderung]),
-    (id: "execution", title: [Ausführung / Werte]),
-  ),
-  hidden: (),
-  rows: (
-    (category: [Gebäudehülle], element: [[Aussenwandbekleidung]], basis: [[VKF 14-15]], requirement: [[RF3 (cr)]], execution: [[…]]),
-    (category: [Innenausbau: vertikale Fluchtwege], element: [[Wand- und Deckenbekleidungen]], basis: [[VKF 14-15]], requirement: [[RF1]], execution: [[…]]),
+// woodcore:object table fire-materials-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto),
+    align: (left, left, left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Kategorie*], [*Bauteil*], [*Grundlage*], [*Anforderung*], [*Ausführung / Werte*]),
+    table.hline(stroke: 0.5pt),
+    [Gebäudehülle], [[Aussenwandbekleidung]], [[VKF 14-15]], [[RF3 (cr)]], [[…]],
+    [Innenausbau: vertikale Fluchtwege], [[Wand- und Deckenbekleidungen]], [[VKF 14-15]], [[RF1]], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Verwendung von Baustoffen],
 )

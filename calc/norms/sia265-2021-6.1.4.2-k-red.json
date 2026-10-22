@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, clause 6.1.4.2, equation (86), and Tabelle 21 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 63, read off a render of the page (the equation is set as a graphic).",
+  "_source": "SIA 265:2021, clause 6.1.4.2, equation (86), and Tabelle 21 -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 63, read off a render of the page (the equation is set as a graphic).",
   "_note": "k_red = n^n_exponent · (a_1 / (spacing_reference · d))^spacing_exponent · (90° - alpha)/90° + alpha/90°, jedoch k_red <= maximum. `single_fastener` is Tabelle 21's column n = 1: with one dowel in a row there is nothing to reduce, which equation (86) does not state by itself.",
   "edition": "SIA 265:2021",
   "clause": {

@@ -8,6 +8,4 @@
 #report-level.update(1)
 #number-digits.update(3)
 
-#var("a", 145, "mm", sep: ";")
-#var("r", 27, "mm", sep: ";")
-#eq("b_2", `a - r`)
+#var("gamma_M", 1.7, label: "Teilsicherheitsbeiwert", label-position: "before", norm: "SIA 265", norm-section: "2.2.5", norm-position: "in-line")

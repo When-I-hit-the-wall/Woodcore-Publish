@@ -20,6 +20,7 @@ import engine
 import proc
 import project
 import project_migrate
+import project_migrate_folders
 import usersettings
 
 # The projects whose migration the engineer put off, in the user's settings, by project file: asked again only through the banner's «Migrer…» (`forced`).
@@ -32,6 +33,15 @@ LOG_PREFIX = "migrate: "
 STRINGS = {
     "fr": {
         "mg_title": "Migrer en trois documents",
+        "mg_folders_title": "Organiser le projet par dossiers",
+        "mg_folders_intro": "« {name} » est organisé comme avant la version 0.119. Woodcore peut l'organiser par dossiers :",
+        "mg_folders_what": "• 000-Typst-Config — config.typ, commands.typ, title.typ, references.bib et la forme (Template)\n• 000-Woodcore — l'export, le moteur, les sources et les archives\n• 100-, 200-, 300- — la convention d'utilisation, la base de projet et le rapport de statique\n• Domains, Variable-loads, Timber-checks… — vos domaines et un dossier par type de domaine, un fichier .typ par domaine",
+        "mg_folders_safe": "Rien n'est supprimé : les fichiers et les dossiers sont renommés, et une sauvegarde et un journal sont écrits d'abord. Les trois documents sont comparés avant et après ; au moindre écart, tout est défait.",
+        "mg_then_folders": "Ensuite, le projet est aussi organisé par dossiers (000-Typst-Config, 000-Woodcore, 100-, 200-, 300-…), dans la même opération.",
+        "mg_folders_running": "Organisation de « {name} » par dossiers…",
+        "mg_why_not_three_documents": "le projet est organisé en un seul rapport : il passe d'abord en trois documents",
+        "mg_why_already_folders": "le projet est déjà organisé par dossiers",
+        "mg_folders_banner": "Ce projet est organisé comme avant la version 0.119. Organisé par dossiers, chaque domaine a son propre fichier Typst.",
         "mg_intro": "« {name} » est organisé en un seul rapport. Woodcore peut l'organiser en trois documents, chacun dans son dossier :",
         "mg_folder_new": "{folder} — {document}, créé",
         "mg_folder_renamed": "{folder} — {document} : le dossier « {old} », renommé",
@@ -66,6 +76,15 @@ STRINGS = {
     },
     "de": {
         "mg_title": "In drei Dokumente überführen",
+        "mg_folders_title": "Projekt nach Ordnern gliedern",
+        "mg_folders_intro": "«{name}» ist wie vor Version 0.119 angelegt. Woodcore kann es nach Ordnern gliedern:",
+        "mg_folders_what": "• 000-Typst-Config — config.typ, commands.typ, title.typ, references.bib und die Vorlage (Template)\n• 000-Woodcore — der Export, die Engine, die Quellen und die Archive\n• 100-, 200-, 300- — die Nutzungsvereinbarung, die Projektbasis und der statische Bericht\n• Domains, Variable-loads, Timber-checks… — Ihre Bereiche und ein Ordner pro Bereichstyp, eine .typ-Datei pro Bereich",
+        "mg_folders_safe": "Nichts wird gelöscht: Dateien und Ordner werden umbenannt, und zuerst werden eine Sicherung und ein Protokoll geschrieben. Die drei Dokumente werden vorher und nachher verglichen; bei der kleinsten Abweichung wird alles rückgängig gemacht.",
+        "mg_then_folders": "Anschliessend wird das Projekt im selben Vorgang auch nach Ordnern gegliedert (000-Typst-Config, 000-Woodcore, 100-, 200-, 300-…).",
+        "mg_folders_running": "«{name}» wird nach Ordnern gegliedert…",
+        "mg_why_not_three_documents": "das Projekt ist als ein einziger Bericht angelegt: es wird zuerst in drei Dokumente überführt",
+        "mg_why_already_folders": "das Projekt ist bereits nach Ordnern gegliedert",
+        "mg_folders_banner": "Dieses Projekt ist wie vor Version 0.119 angelegt. Nach Ordnern gegliedert, hat jeder Bereich seine eigene Typst-Datei.",
         "mg_intro": "«{name}» ist als ein einziger Bericht angelegt. Woodcore kann ihn in drei Dokumente überführen, jedes in seinem eigenen Ordner:",
         "mg_folder_new": "{folder} — {document}, neu angelegt",
         "mg_folder_renamed": "{folder} — {document}: der Ordner «{old}», umbenannt",
@@ -100,6 +119,15 @@ STRINGS = {
     },
     "en": {
         "mg_title": "Migrate into three documents",
+        "mg_folders_title": "Lay the project out by folders",
+        "mg_folders_intro": "«{name}» is laid out as before version 0.119. Woodcore can lay it out by folders:",
+        "mg_folders_what": "• 000-Typst-Config — config.typ, commands.typ, title.typ, references.bib and the form (Template)\n• 000-Woodcore — the export, the engine, the sources and the archives\n• 100-, 200-, 300- — the service criteria agreement, the basis of design and the statical report\n• Domains, Variable-loads, Timber-checks… — your domains and one folder per kind of domain, one .typ file per domain",
+        "mg_folders_safe": "Nothing is deleted: files and folders are renamed, and a backup and a log are written first. The three documents are compared before and after; at the slightest difference, everything is undone.",
+        "mg_then_folders": "Then the project is laid out by folders too (000-Typst-Config, 000-Woodcore, 100-, 200-, 300-…), in the same operation.",
+        "mg_folders_running": "Laying «{name}» out by folders…",
+        "mg_why_not_three_documents": "the project is laid out as one report: it is moved into three documents first",
+        "mg_why_already_folders": "the project is laid out by folders already",
+        "mg_folders_banner": "This project is laid out as before version 0.119. Laid out by folders, every domain has a Typst file of its own.",
         "mg_intro": "“{name}” is laid out as one report. Woodcore can lay it out as three documents, each in a folder of its own:",
         "mg_folder_new": "{folder} — {document}, made",
         "mg_folder_renamed": "{folder} — {document}: the folder “{old}”, renamed",
@@ -170,11 +198,13 @@ def prepare(here, lock_owner=None):
     """
     state, detail = project.engine_state(here)
     update_engine = state in project.ASKED
+    # a project in three documents takes the second step alone, into the layout by folders (calc/project_migrate_folders.py, issue #64); a report alone the first, which the command then follows with the second
+    migration = project_migrate_folders if here.has_modes else project_migrate
     try:
-        plan = project_migrate.plan(here)
-        refusals = project_migrate.check(plan, update_engine=update_engine, lock_owner=os.getpid() if lock_owner is None else lock_owner)
+        plan = migration.plan(here)
+        refusals = migration.check(plan, update_engine=update_engine, lock_owner=os.getpid() if lock_owner is None else lock_owner)
     except (project.ProjectError, OSError) as exc:
-        plan = project_migrate.Plan(here=here)
+        plan = migration.Plan(here=here)
         refusals = [engine.Note("unreadable", str(exc))]
     import positions_store
     return plan, refusals, update_engine, (state, detail), not (here.positions_book.is_file() or positions_store.path(here).is_file())
@@ -195,6 +225,13 @@ def refusal_text(note, lang):
 def message(lang, here, plan, refusals, engine_state):
     """(the question's text, its details) -- what the migration will do, from its own plan, in the window's language; the migration's own description of every move and every rewrite, in English, for «Afficher les détails»."""
     t = _t(lang)
+    if isinstance(plan, project_migrate_folders.Plan):
+        lines = [t["mg_folders_intro"].format(name=here.name), "", t["mg_folders_what"]]
+        if refusals:
+            lines += ["", t["mg_refused"], *("• " + refusal_text(note, lang) for note in refusals)]
+        else:
+            lines += ["", t["mg_folders_safe"]]
+        return "\n".join(lines), "\n".join(project_migrate_folders.describe(plan, refusals))
     lines = [t["mg_intro"].format(name=here.name), ""]
     if plan.folders:
         old = here.rel(plan.old_report_dir) if plan.old_report_dir is not None else ""
@@ -206,7 +243,7 @@ def message(lang, here, plan, refusals, engine_state):
                 lines.append("• " + t["mg_folder_renamed"].format(folder=folder, document=name, old=old))
             else:
                 lines.append("• " + t["mg_folder_new"].format(folder=folder, document=name))
-        lines += ["", t["mg_shared"]]
+        lines += ["", t["mg_shared"], "", t["mg_then_folders"]]
     state, detail = engine_state
     if state in project.ASKED and not refusals:
         lines += ["", t["mg_engine_" + state].format(detail=detail, ours=project.VERSION)]
@@ -217,10 +254,10 @@ def message(lang, here, plan, refusals, engine_state):
     return "\n".join(lines), "\n".join(project_migrate.describe(plan, refusals))
 
 
-def ask(parent, lang, text, details, can_migrate):
-    """The question itself -- «now» or «later» -- and the one modal of this module a test replaces. Where the migration cannot run there is nothing to agree to, and «Plus tard» is the one button."""
+def ask(parent, lang, text, details, can_migrate, title=None):
+    """The question itself -- «now» or «later» -- and the one modal of this module a test replaces. Where the migration cannot run there is nothing to agree to, and «Plus tard» is the one button. `title` is the window's, «Migrer en trois documents» where none is given."""
     t = _t(lang)
-    box = QMessageBox(QMessageBox.Icon.Question if can_migrate else QMessageBox.Icon.Information, t["mg_title"], text, parent=parent)  # dialog-ok: the migration offered, which waits for its answer
+    box = QMessageBox(QMessageBox.Icon.Question if can_migrate else QMessageBox.Icon.Information, title or t["mg_title"], text, parent=parent)  # dialog-ok: the migration offered, which waits for its answer
     box.setDetailedText(details)
     now = box.addButton(t["mg_now"], QMessageBox.ButtonRole.AcceptRole) if can_migrate else None
     later = box.addButton(t["mg_later"], QMessageBox.ButtonRole.RejectRole)
@@ -257,8 +294,9 @@ def run(parent, lang, here, update_engine=False, skip_data=False):
     environment.insert("PYTHONIOENCODING", "utf-8")
     process.setProcessEnvironment(environment)
     process.setWorkingDirectory(str(project.APP_ROOT))
-    dialog = QProgressDialog(t["mg_running"].format(name=here.name), None, 0, 0, parent)
-    dialog.setWindowTitle(t["mg_title"])
+    folders = here.has_modes   # a project in three documents is laid out by folders (issue #64), a report alone moved into three documents first
+    dialog = QProgressDialog(t["mg_folders_running" if folders else "mg_running"].format(name=here.name), None, 0, 0, parent)
+    dialog.setWindowTitle(t["mg_folders_title" if folders else "mg_title"])
     dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
     dialog.setMinimumDuration(0)
     dialog.setAutoClose(False)
@@ -310,13 +348,14 @@ def entries_text(here):
 
 def offer(parent, lang, here, forced=False):
     """Offers project `here`, laid out as one report, its migration into three documents -- where the engineer has not put it off, or where he asks again (`forced`, the banner's «Migrer…»). Returns what became of it: «migrated» (the project is laid out in three documents now, and is to be read again), «later» (put off, and remembered), «refused» (it cannot run, and says why), «failed» (it ran and was undone) or «postponed» (not asked, having been put off before)."""
-    if here.has_modes:
+    if here.has_folders:
         return "migrated"
     if not forced and postponed(here):
         return "postponed"
     plan, refusals, update_engine, engine_state, skip_data = prepare(here)
     text, details = message(lang, here, plan, refusals, engine_state)
-    if ask(parent, lang, text, details, can_migrate=not refusals) != "now":
+    title = _t(lang)["mg_folders_title"] if here.has_modes else None
+    if ask(parent, lang, text, details, can_migrate=not refusals, title=title) != "now":
         set_postponed(here, True)
         return "refused" if refusals else "later"
     ok, output = run(parent, lang, here, update_engine=update_engine, skip_data=skip_data)

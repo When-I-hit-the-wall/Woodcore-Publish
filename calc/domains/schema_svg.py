@@ -1,6 +1,6 @@
 """The figure of a detail schema, as SVG text: the pieces, the fastener markers, the construction aids that are shown, and the dimensions (docs/domain/detail-schemas.md §3.3decies).
 
-One drawing serves both places it is seen: Woodcore's window shows it live while a schema is edited, and export writes it to data/schemas/<id>-<lang>.svg, which show-schema sets in the report. It is built as plain text here, with no Qt, so export_all.py draws it too, without a window.
+One drawing serves both places it is seen: Woodcore's window shows it live while a schema is edited, and export writes it to data/schemas/<id>-<lang>.svg (Details/Exports/Figures/ in a project laid out by folders, issue #64), which show-schema sets in the report. It is built as plain text here, with no Qt, so export_all.py draws it too, without a window.
 
 **A schema is a detail at its real size, in millimetres -- not a scale-free sketch normalised to 1000 figure units the way a static model's is.** Its coordinates are used as they stand, scaled to PAPER_MM only when the SVG's own width/height are set, exactly as connector_svg.section() already does; that is what will let a *Connecteurs* or *Moments polaires* calculation place its own force arrows over a copy of this drawing with no conversion (module docstring of schema.py).
 
@@ -18,30 +18,32 @@ Ported from connection_svg.py (the members' bands, their fill and stroke, a piec
 import math
 from xml.sax.saxutils import escape
 
+from domains import svg_draw  # the one writer of an SVG number and text (D6)
+from domains import dimension  # one unit vector and one label box (ARCH-004)
 from domains import figure_style
 from domains import figure_text  # a text placed with the Text tool (issue #43)
 from domains import schema as model
 from i18n import strings
 
 # The pieces' fill, in the same rotation connection_svg.py uses, so a detail drawn in both tabs reads the same way.
-ELEMENT_FILLS = ("#ecd9b4", "#d9bf8c", "#e4cf9f", "#cdb17c", "#efdfbf", "#d2b889")
+ELEMENT_FILLS = svg_draw.colours("wood")
 ELEMENT_OPACITY = 0.75
-ELEMENT_STROKE = "#8a6a3a"
-CONNECTOR_FILL = "#2b2b2b"
-CONNECTOR_LABEL = "#2b2b2b"
-TEXT_COLOR = "#222222"
-MUTED = "#8a8a8a"
-AID_COLOUR = "#9aa4ac"
-AID_SHOWN_COLOUR = "#5b6b78"
+ELEMENT_STROKE = svg_draw.colour("brown")
+CONNECTOR_FILL = svg_draw.colour("ink")
+CONNECTOR_LABEL = svg_draw.colour("ink")
+TEXT_COLOR = svg_draw.colour("ink")
+MUTED = svg_draw.colour("muted")
+AID_COLOUR = svg_draw.colour("aid")
+AID_SHOWN_COLOUR = svg_draw.colour("ink-soft")
 # A named point (an aid of kind `point`) is a green cross, drawn in front of everything, the construction lines included, so it is always seen (v0.77, the engineer's rule).
-POINT_COLOUR = "#1e9e3a"
-DIMENSION = "#1f1f1f"
-LABEL = "#1f1f1f"
+POINT_COLOUR = svg_draw.colour("green")
+DIMENSION = svg_draw.colour("ink")
+LABEL_COLOUR = svg_draw.colour("ink")
 # The white a text placed with the Text tool is drawn over first, as a share of its size -- statics_svg.TEXT_HALO's.
 TEXT_HALO = 0.3
-HIGHLIGHT = "#e67e22"
+HIGHLIGHT = svg_draw.colour("orange")
 
-FONT = "Arial"
+FONT = svg_draw.FONT
 
 HIGHLIGHT_MARK = "<!-- highlight -->"
 # Where the report puts the halo of a **connector marker or a named point**: over the pieces, the dimensions and their labels, and under the markers and the aids themselves, so the ring shows round what it marks. At HIGHLIGHT_MARK, under the pieces, a point's halo was hidden beneath the pieces' fill -- «un point doit être affiché au-dessus de tout». HIGHLIGHT_MARK stays where it was, for a piece's own halo and a dimension's, which a piece's fill is drawn over on purpose. Emitted by `body`, outside AIDS_OPEN/AIDS_CLOSE, so `aids: false` leaves it in place.
@@ -59,7 +61,8 @@ LABEL_TEXT = 1.0
 LINE_SPACING = 1.25
 
 # What a text is set over: its own box, filled white and **translucent**. A schema's label sits ON the piece it names -- the middle of the longest stretch no other piece covers (v0.75) -- so an opaque ground would take a bite out of that piece's fill and out of the dimension lines the value stands on. At 0.85 the piece is still read through the box and the text still reads over the piece; set it to 1.0 for an opaque white, which is the one number to change.
-LABEL_GROUND = "#ffffff"
+GROUND = svg_draw.colour("ground")
+LABEL_GROUND = GROUND
 LABEL_GROUND_OPACITY = 0.85
 
 # The three quantities a schema is drawn with, as shares of the drawing's own extent: the font (the unit the rest is expressed in), the stroke, and the radius a fastener marker is drawn at where it states no diameter -- with a floor under the radius so a marker is never thinner than the lines around it.
@@ -129,9 +132,7 @@ def entry_sizes(sz, entry):
     return sz.scaled(figure_style.stated(entry))
 
 
-def _f(value):
-    text = f"{value:.2f}".rstrip("0").rstrip(".")
-    return "0" if text in ("-0", "") else text
+_f = svg_draw.number_at(2)   # a coordinate at 2 decimals (svg_draw.py, D6)
 
 
 def _pt(point):
@@ -142,9 +143,7 @@ def _add(p, u, t=1.0):
     return (p[0] + t * u[0], p[1] + t * u[1])
 
 
-def _unit(a, b):
-    d = math.dist(a, b)
-    return (1.0, 0.0) if d < 1e-12 else ((b[0] - a[0]) / d, (b[1] - a[1]) / d)
+_unit = dimension.unit   # (ARCH-004: one copy, D-15)
 
 
 def _perp(u):
@@ -154,7 +153,7 @@ def _perp(u):
 def _text(out, point, content, size, colour, anchor="middle", bold=False, rotate=None, halo=None, raw=False):
     """A (possibly subscripted) text -- svg_text.draw, the one text engine of every figure (D-19). `halo` is (colour, width), drawn first so the text reads over what is behind it; `raw` sets it as it is written, no subscript cut."""
     svg_text.draw(out, point, content, size, colour, anchor, bold, rotate,
-                  halo[1] if halo else None, halo[0] if halo else "#ffffff", raw)
+                  halo[1] if halo else None, halo[0] if halo else LABEL_GROUND, raw)
 
 
 def _line(out, a, b, colour, width, dash=None, cap="round"):
@@ -210,7 +209,7 @@ def on_label(frame, point, margin=0.0):
     return abs(x) <= frame["hw"] + margin and abs(y) <= frame["hh"] + margin
 
 
-def _draw_label(out, frame, sz, scale=1.0, colour=LABEL):
+def _draw_label(out, frame, sz, scale=1.0, colour=LABEL_COLOUR):
     """A label's lines, over a white rectangle: **its own box** (`hw`, `hh`), turned with its text, at `LABEL_GROUND_OPACITY`.
 
     Until v0.99 the ground was each line drawn a second time with a wide white stroke, which puts a cloud round every letter rather than a ground under the word -- the very finding statics_svg.py records for its own labels (v0.77), made here again by the engineer on a schema. The box is drawn as a polygon of the corners `label_corners` already computes, not as a `<rect>` with a `transform`: a polygon needs no transform to be read, which is one thing fewer for either renderer to agree about.
@@ -244,7 +243,7 @@ def _on_own_piece(frame, kind, points, width):
     return len(points) >= 3 and model._inside(at, points)
 
 
-def _leader(out, frame, sz, scale=1.0, colour=LABEL, dot=True):
+def _leader(out, frame, sz, scale=1.0, colour=LABEL_COLOUR, dot=True):
     """A thin line from what a label names back to the label dragged clear of it. It starts at the frame's `anchor` -- a marker's centre, a dimension line's middle, a point's place -- or, for a piece, at the label's own place on the piece. `dot` is false where the anchor is already a mark of its own (a marker, a point).
 
     `scale` is the label's share of the drawing's font, as in `_draw_label`: the gap it leaves is a text's and the width it is drawn at is a line's, so the two follow the entry's `text` and `line` factors respectively.
@@ -672,12 +671,7 @@ def _at(a, b, t):
     return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
 
 
-def label_corners(frame, margin=0.0):
-    """The four corners of a label's box, `margin` beyond its edges, turned with its text -- statics_svg.label_corners, unchanged: Woodcore outlines a selected label with it."""
-    a = math.radians(frame["angle"])
-    c, s = math.cos(a), math.sin(a)
-    (x, y), hw, hh = frame["at"], frame["hw"] + margin, frame["hh"] + margin
-    return [(x + u * c - v * s, y + u * s + v * c) for u, v in ((-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh))]
+label_corners = dimension.box_corners   # Woodcore outlines a selected label with it (ARCH-004: one copy)
 
 
 def meta(drawing):
@@ -780,7 +774,7 @@ def render(drawing, highlight=None, background=True, aid_lines=True, aid_points=
         f'width="{_f(view_w * scale)}mm" height="{_f(view_h * scale)}mm">',
     ]
     if background:
-        out.append(f'<rect x="{_f(x0)}" y="{_f(y0)}" width="{_f(view_w)}" height="{_f(view_h)}" fill="#ffffff"/>')
+        out.append(f'<rect x="{_f(x0)}" y="{_f(y0)}" width="{_f(view_w)}" height="{_f(view_h)}" fill="{GROUND}"/>')
     out.append(HIGHLIGHT_MARK)
     body(out, drawing, highlight, aid_lines=aid_lines, aid_points=aid_points)
     out.append("</svg>")
@@ -823,7 +817,7 @@ def body(out, drawing, highlight=None, markers=True, aid_lines=True, aid_points=
     # The texts placed with the Text tool (issue #43), over the pieces and the dimensions: figure_text sets them, with no ground and no bold line -- a note on the drawing, not the name of a part of it
     for t in drawing.get("texts", ()):
         font = t["sz"].font
-        figure_text.draw(out, t["frame"]["at"], t["frame"]["lines"], font, LABEL, halo=TEXT_HALO * font)
+        figure_text.draw(out, t["frame"]["at"], t["frame"]["lines"], font, LABEL_COLOUR, halo=TEXT_HALO * font)
 
     # A marker's or a named point's halo goes here, over everything above and under the markers and the aids below (HIGHLIGHT_POINTS_MARK): at HIGHLIGHT_MARK a point's halo lay under the pieces' fill and could not be seen.
     out.append(HIGHLIGHT_POINTS_MARK)
@@ -836,7 +830,7 @@ def body(out, drawing, highlight=None, markers=True, aid_lines=True, aid_points=
             _leader(out, c["frame"], csz, 0.72, CONNECTOR_LABEL, dot=False)
             if highlight == ("connectors", c["id"]):
                 _circle(out, c["at"], 2.0 * r, "none", HIGHLIGHT, 0.6 * csz.stroke)
-            _circle(out, c["at"], r, CONNECTOR_FILL, "#ffffff", 0.5 * csz.stroke)
+            _circle(out, c["at"], r, CONNECTOR_FILL, LABEL_GROUND, 0.5 * csz.stroke)
             _draw_label(out, c["frame"], csz, 0.72, CONNECTOR_LABEL)
 
     if highlight and highlight[0] == "elements":

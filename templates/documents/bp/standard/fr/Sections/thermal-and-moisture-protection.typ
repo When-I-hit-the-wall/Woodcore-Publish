@@ -8,18 +8,17 @@
 Les coefficients de transmission thermique maximaux $U_"max"$ selon la norme #cite-norm(norm: "SIA 180") doivent être respectés. Pour la preuve par performances ponctuelles, les valeurs de la réglementation cantonale sur l'énergie [canton, ordonnance] s'appliquent aux constructions neuves. [Label visé (Minergie …) ou non.]
 // woodcore:/object p1
 
-// woodcore:object doc-table u-values-table
-#doc-table(
-  columns: (
-    (id: "element", title: [Élément]),
-    (id: "against", title: [Contre]),
-    (id: "U", title: [Coefficient de transmission thermique $U$], unit: "W/(m²K)", kind: "number"),
-    (id: "basis", title: [Base]),
-  ),
-  hidden: (),
-  rows: (
-    (element: [Toiture], against: [Extérieur], U: [[…]], basis: [[ordonnance cantonale]]),
-    (element: [Paroi extérieure], against: [Extérieur], U: [[…]], basis: [[ordonnance cantonale]]),
+// woodcore:object table u-values-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, right, left),
+    table.hline(stroke: 1pt),
+    table.header([*Élément*], [*Contre*], [*Coefficient de transmission thermique $U$*], [*Base*]),
+    table.hline(stroke: 0.5pt),
+    [Toiture], [Extérieur], [[…]], [[ordonnance cantonale]],
+    [Paroi extérieure], [Extérieur], [[…]], [[ordonnance cantonale]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Valeurs limites des coefficients de transmission thermique],
 )

@@ -22,10 +22,12 @@ from pathlib import Path
 
 import engine
 import validation
+from domains._common import check_number as _number  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import dimension  # a dimension's geometry, the static models' and the schemas' own (issue #9)
 from domains import figure_style
 from domains import figure_text  # a text placed with the Text tool, the four engines' one (issue #43, ARCH-003)
 from domains import lines  # a construction aid's geometry: a line through two points, parallel at a distance (issue #18)
+from domains import plan_centres  # the stiffness centre S and the mass centre M, and the fields they are computed from (issue #54)
 from domains.plan_geometry import (  # split out of this module (issue #30): every name it had is still importable from it
     LENGTH_TYPES,
     MIN_POINTS,
@@ -45,7 +47,6 @@ from domains.plan_geometry import (  # split out of this module (issue #30): eve
     axis_direction,
     axis_distance,
     axis_normal,
-    axis_orientation,
     axis_scheme,
     axis_segment,
     axis_sort_key,
@@ -99,13 +100,15 @@ from domains.plan_background import (  # split out of this module (issue #30): e
     background_format,
     background_path,
     file_hash,
-    pdf_page_count,
     preload,
     relative_background,
     sheet_of,
     storey_floor,
     storey_index,
 )
+from domains.dimension import normalize_angle  # plane geometry written once (D4)
+from domains._common import source_paths  # one copy (G4)
+from domains import svg_draw
 
 # Of a source file (plans/<id>.json) and of the export (data/plans.json). Export 1.1: the legend is a list of lines, each with its swatch, which show-plan lays out -- 1.0 pointed at one SVG of the whole legend. Source 1.1 and export 1.2: an element's number may be moved by hand (label_offset), and the export says where every number is drawn (label_at). A 1.0 source is read as it is, every number in its own place.
 # ⚠️ Neither moved for v0.99's `style` on an element or an axis: a field whose absence has a meaning -- «follows the plan's own three» -- is additive, so no file needs migrating and a plan drawn before it is read, and drawn, exactly as it was (the v0.69 rule for `group`, docs/decisions.md §13).
@@ -116,15 +119,34 @@ from domains.plan_background import (  # split out of this module (issue #30): e
 SOURCE_SCHEMA_VERSION = "1.6"   # 1.6 (issue #18): the construction aids, `aids` -- a file of 1.5 has none, and is read as it is
 # 1.7 is 1.6 with `texts`, the Text tool's (issue #43, spec 2026-10-11-variables-liees-champs-et-textes): written only by a plan that holds one (`version_of`), so a plan without a text is saved and exported as before
 TEXT_SCHEMA_VERSION = "1.7"
-SOURCE_SCHEMA_VERSIONS = ("1.0", "1.1", "1.2", "1.3", "1.4", "1.5", SOURCE_SCHEMA_VERSION, TEXT_SCHEMA_VERSION)
+# 1.8 is 1.7 with what the stiffness centre S and the mass centre M are computed from (issue #54, spec 2026-10-13-plan-positions-centre-rigidite-centre-masse): a bracing wall's `construction`, the plan's `outlines`, `clt_power` and `print_centres` -- written only by a plan that carries one of them (`plan_centres.uses_centres`). ⚠️ The versions **nest**: a 1.8 file may hold texts as a 1.7 one does, so a plan with a text and an outline has one version to be written at, the higher (ARCH-006).
+CENTRES_SCHEMA_VERSION = "1.8"
+SOURCE_SCHEMA_VERSIONS = ("1.0", "1.1", "1.2", "1.3", "1.4", "1.5", SOURCE_SCHEMA_VERSION, TEXT_SCHEMA_VERSION, CENTRES_SCHEMA_VERSION)
+# the versions a plan that holds a text may be written at
+TEXT_SCHEMA_VERSIONS = (TEXT_SCHEMA_VERSION, CENTRES_SCHEMA_VERSION)
 EXPORT_SCHEMA_VERSION = "1.3"
 # 1.4 is 1.3 with a plan's `texts`, what each printed: written only where one holds a text
 TEXT_EXPORT_VERSION = "1.4"
+# 1.5 is 1.4 with a plan's `centres` -- S, M and the outline it prints, and what S was computed from --, written only where a plan prints them
+CENTRES_EXPORT_VERSION = "1.5"
+# 1.6 is 1.5 with its figures -- the overlay, the figures of each language, the background -- named from the Typst root (`/Plans/Position-plan/Exports/Figures/P01.svg`): written by a project laid out by folders, where they lie in the tab's Exports/Figures/ (issue #64, D-10); a name without its leading slash is under data/ as before
+ROOTED_EXPORT_VERSION = "1.6"
 
 
 def version_of(source):
-    """The schema_version Woodcore writes a plan at: 1.7 where it holds a text, 1.6 where it does not -- what every writer of a plan's file asks, so that a plan without a text is written as before."""
+    """The schema_version Woodcore writes a plan at, the highest it needs and no higher: 1.8 where it carries a field of the stiffness and mass centres, 1.7 where it holds a text, 1.6 otherwise -- what **every** writer of a plan's file asks, so that a plan without either is written as before."""
+    if plan_centres.uses_centres(source):
+        return CENTRES_SCHEMA_VERSION
     return TEXT_SCHEMA_VERSION if source.get("texts") else SOURCE_SCHEMA_VERSION
+
+
+def export_version_of(plans, rooted=False):
+    """The schema_version of data/plans.json for these records, the highest one of them needs: 1.6 where the figures are named from the Typst root (`rooted`), 1.5 where a plan prints its centres, 1.4 where one holds a text, 1.3 otherwise."""
+    if rooted:
+        return ROOTED_EXPORT_VERSION
+    if any("centres" in record for record in plans.values()):
+        return CENTRES_EXPORT_VERSION
+    return TEXT_EXPORT_VERSION if any("texts" in record for record in plans.values()) else EXPORT_SCHEMA_VERSION
 
 # What a plan is: a floor plan, whose positions it locates, or a section, which shows the storeys a floor plan refers to.
 ROLES = ("plan", "section")
@@ -157,24 +179,6 @@ SAME_POINT = 1e-6
 # The order the tools and the legend list the types in -- the STE position types; the load symbols, which are no positions, are LOAD_TYPES.
 TYPE_ORDER = ("V", "H", "W", "T", "S", "A", "D", "Ö", "B", "M", "L")
 LOAD_TYPES = ("PL", "LL")
-
-
-def _number(value, where, what, positive=False):
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
-        _fail(where, f"{what} must be a number, got {value!r}")
-    if positive and value <= 0:
-        _fail(where, f"{what} must be greater than 0, got {value!r}")
-    return value
-
-
-def normalize_angle(degrees):
-    """An angle in degrees, brought into (-180, 180]."""
-    a = math.fmod(degrees, 360.0)
-    if a <= -180:
-        a += 360
-    elif a > 180:
-        a -= 360
-    return a
 
 
 def plan_type(source):
@@ -219,7 +223,7 @@ CAD_SUFFIXES = (".dxf", ".dwg")
 
 # The colours the superposed plan may be shown in: as it is, in grey, or in one of five colours -- its background always, its elements too where `tint_elements` says so.
 SUPERPOSITION_COLOURS = ("normal", "grey", "green", "blue", "yellow", "red", "pink")
-SUPERPOSITION_INKS = {"grey": "#8a8a8a", "green": "#2e9d4a", "blue": "#1f6fd1", "yellow": "#d9a400", "red": "#d32f2f", "pink": "#e754a6"}
+SUPERPOSITION_INKS = {name: svg_draw.colour(token) for name, token in (("grey", "muted"), ("green", "green"), ("blue", "blue"), ("yellow", "ochre"), ("red", "red"), ("pink", "pink"))}
 SUPERPOSITION_OPACITY = (0.05, 1.0)
 SUPERPOSITION_DEFAULT = {"elements": True, "opacity": 0.5, "colour": "red", "tint_elements": False}
 
@@ -485,19 +489,24 @@ def check_source(source, where):
                            may=figure_style.allowed("plan", "elements"), what=f"{at} ({type_}): style")
     check_dimensions(source, where)
     check_aids(source, where)
-    check_texts(source, where, "plan", TEXT_SCHEMA_VERSION)
+    check_texts(source, where, "plan", TEXT_SCHEMA_VERSIONS)
+    # the stiffness and mass centres' fields (issue #54): a wall's construction mode, the outline, the CLT power, the printing switch -- and the version a plan that carries one is written at, so that an older Woodcore says the file is newer rather than dropping them
+    plan_centres.check(source, lambda message: _fail(where, message))
+    if plan_centres.uses_centres(source) and source.get("schema_version") not in (None, CENTRES_SCHEMA_VERSION):
+        _fail(where, f"carries a construction mode, an outline or the centres' settings at schema_version {source.get('schema_version')!r} -- a plan with them is {CENTRES_SCHEMA_VERSION!r}")
 
 
 # --- Texts (issue #43) ---------------------------------------------------------------------
 # A text placed with the Text tool: `{points: [[x, y]], text, vars?, style?}`, its one point its centre on the sheet; what it prints is figure_text's, the four engines' one (ARCH-003). Shared with the fire-protection plans, which hold theirs the same way (with an id, as every entry of theirs): a list of one point rather than a `point`, since every entry of a fire plan is moved, copied and turned by its `points`, and a plan's elements, lines and dimensions are too.
 
 def check_texts(source, where, kind, version):
-    """A drawing's texts as a source must state them: a point of two numbers, figure_text's token text and variables (D-13), and only the `text` factor of a style (figure_style). Only at `version` or later -- a file of an earlier version has none. Each failure names the file and the text."""
+    """A drawing's texts as a source must state them: a point of two numbers, figure_text's token text and variables (D-13), and only the `text` factor of a style (figure_style). Only at `version` -- one version, or the several a drawing with texts may be written at, a position plan's 1.7 and the 1.8 that contains it -- a file of an earlier version has none. Each failure names the file and the text."""
     texts = source.get("texts", [])
     if not isinstance(texts, list):
         _fail(where, "texts is not a list")
-    if texts and source.get("schema_version") is not None and source.get("schema_version") != version:
-        _fail(where, f"holds a text at schema_version {source.get('schema_version')!r} -- a drawing with texts is {version!r}")
+    versions = (version,) if isinstance(version, str) else tuple(version)
+    if texts and source.get("schema_version") is not None and source.get("schema_version") not in versions:
+        _fail(where, f"holds a text at schema_version {source.get('schema_version')!r} -- a drawing with texts is {' or '.join(map(repr, versions))}")
     for i, text in enumerate(texts, start=1):
         at = f"text {i}"
         if not isinstance(text, dict):
@@ -563,7 +572,12 @@ def hit_aid(source, point, tolerance, window):
 # --- An object moved or copied (issue #18) ----------------------------------------------------
 # What a selection of the plan may be, and the list of the source it is an index into -- the canvas's SELECTION_LISTS, said once here.
 ENTRY_LISTS = {"element": "elements", "axis": "axes", "storey-line": "storey_lines", "storey-box": "storey_boxes",
-               "load-level": "load_levels", "dimension": "dimensions", "aid": "aids", "text": "texts"}
+               "load-level": "load_levels", "dimension": "dimensions", "aid": "aids", "text": "texts",
+               "outline": "outlines"}   # the building's outline (issue #54): a list of one at most, so that it is selected, moved and deleted as every other entry is
+
+
+# What is drawn once on a plan and is therefore not copied: the building's outline -- a second one is a file `check_source` refuses.
+SINGLE_ENTRIES = ("outline",)
 
 
 def shifted(points, dx, dy):
@@ -584,7 +598,9 @@ def translate_entry(source, kind, index, dx, dy):
 
 
 def copy_entry(source, kind, index, dx, dy, window):
-    """A copy of the entry `index` of `kind`, moved by (dx, dy) and added to the source: (its index, the axes renamed). A copied element keeps its position number -- a second occurrence of the same position, as a copy in the schemas keeps it (D-004) --; a copied axis is named by where it lands among the others (`insert_axis`), the others renamed after it."""
+    """A copy of the entry `index` of `kind`, moved by (dx, dy) and added to the source: (its index, the axes renamed). A copied element keeps its position number -- a second occurrence of the same position, as a copy in the schemas keeps it (D-004) --; a copied axis is named by where it lands among the others (`insert_axis`), the others renamed after it. The building's outline is not copied (SINGLE_ENTRIES): a ValueError, which Woodcore never lets it come to."""
+    if kind in SINGLE_ENTRIES:
+        raise ValueError(f"a plan has one {kind}: it is moved, not copied")
     entries = source.setdefault(ENTRY_LISTS[kind], [])
     copy_ = copy.deepcopy(entries[index])
     entries.append(copy_)
@@ -705,14 +721,6 @@ def new_source(pid, floor="0"):
     }
 
 
-def source_paths(source_dir):
-    """Every plan source, in file-name order -- the order they are listed in, exported in, and shown in the report."""
-    source_dir = Path(source_dir)
-    if not source_dir.is_dir():
-        return []
-    return sorted(source_dir.glob("*.json"), key=lambda p: p.name.lower())
-
-
 # --- Geometry -------------------------------------------------------------------
 # Tolerant of a draft: Woodcore calls these on every movement of the mouse.
 
@@ -756,14 +764,12 @@ def set_element_angle(element, degrees):
     return True
 
 
-# What a drawing tool remembers for the next element it draws (issue #9: «à l'activation d'un outil de dessin, afficher tout de suite les options de l'objet» -- set there, they are the next element's).
-TOOL_DEFAULT_KEYS = ("subtype", "angle", "show_length", "span", "diagonal", "style")
-
-
 def apply_defaults(element, defaults):
-    """Gives a new `element` -- its type and points set -- what its tool's `defaults` hold that such an element may carry, and nothing else: a subtype its type has, an angle where it is turnable (an Auflager drawn with two points takes none), a length shown or hidden where it has one, a slab's span and diagonal, the style factors an element may state. A source written so is one `check_source` accepts. Returns the element."""
+    """Gives a new `element` -- its type and points set -- what its tool's `defaults` hold that such an element may carry, and nothing else: a subtype its type has, an angle where it is turnable (an Auflager drawn with two points takes none), a length shown or hidden where it has one, a slab's span and diagonal, the style factors an element may state, a bracing wall's construction mode (issue #54). A source written so is one `check_source` accepts. Returns the element."""
     defaults = defaults or {}
     type_ = element["type"]
+    if type_ in plan_centres.WALL_TYPES and defaults.get("construction") in plan_centres.MODES:
+        element["construction"] = defaults["construction"]
     subtypes = TYPES[type_].get("subtypes")
     if subtypes and defaults.get("subtype") in subtypes:
         element["subtype"] = defaults["subtype"]
@@ -813,8 +819,10 @@ def missing_rows(source, position_ids):
     return "\n".join(rows)
 
 
-def warnings(source, position_ids, where=None):
-    """What does not stop the report but should be looked at, as sentences: a label Positionen.xlsx does not have, a label that does not begin with its type's letter, a labelled element without a number, an element outside the frame the report shows, a number moved by hand out of that frame. A number drawn on several elements is not one of them: identical elements share their position, on one plan or on several -- Woodcore's tools draw the same number every time -- and what is said of it is said once."""
+def warnings(source, position_ids, where=None, sections=None):
+    """What does not stop the report but should be looked at, as sentences: a label Positionen.xlsx does not have, a label that does not begin with its type's letter, a labelled element without a number, an element outside the frame the report shows, a number moved by hand out of that frame. A number drawn on several elements is not one of them: identical elements share their position, on one plan or on several -- Woodcore's tools draw the same number every time -- and what is said of it is said once.
+
+    `sections` is the project's {position id: section type} (`positions_store.section_types`), which the stiffness centre's own warnings read: a bracing wall whose position has a CLT section and which the plan draws in another construction mode (issue #54). A caller that has no positions at hand leaves it out, and that one warning is not looked for."""
     from domains import plan_svg  # where a number is drawn is the drawing module's to say
 
     pid = source.get("id") or "?"
@@ -847,6 +855,8 @@ def warnings(source, position_ids, where=None):
     if linear and not units_per_m(source):
         # a length cannot be measured without a scale: the dimensions are drawn nowhere, and said (issue #9, D-016)
         out.append(engine.Note("plan_dimensions_no_scale", f"{where}: {len(linear)} dimension(s) measure lengths and the plan has no scale -- calibrate it, or they are not drawn", plan=pid, count=len(linear)))
+    # the stiffness and mass centres (issue #54): what the plan asks to print and cannot, and a wall's mode against its position's section
+    out += plan_centres.warnings(source, sections)
     return list(dict.fromkeys(out))
 
 
@@ -955,6 +965,10 @@ def build_record(source, sheet, background=None):
                              "values": [_clean(part["value"]) for part in parts], "unit": parts[0]["unit"]})
     if measured:
         record["dimensions"] = measured
+    # issue #54: the stiffness centre, the mass centre and the outline, where the plan prints them -- computed here from what is drawn, never read from the source, with what S was computed from and the method cited; a plan that prints none is exported as it was
+    centres = plan_centres.record(source, _clean)
+    if centres is not None:
+        record["centres"] = centres
     return record
 
 
@@ -993,59 +1007,62 @@ def _previous(data_dir):
         return {}
 
 
-def prepare(source_dir, project_root, data_dir, position_ids, values=None):
-    """(data, files, warnings): data/plans.json as it will be written, every file under data/plans/ it refers to (path relative to data/ -> bytes or text), and the warnings to print -- built and validated from every source file, nothing written yet, so export_all.py can check the plans along with everything else before it writes anything. A background already extracted from the same file and page is kept as it is: pypdf would write the same page with a new document id, and Git would see a change that is none."""
+def prepare(source_dir, project_root, data_dir, position_ids, values=None, sections=None, place=None):
+    """(data, files, warnings): data/plans.json as it will be written, every figure it refers to (its name in the JSON -> bytes or text; `place`, an engine.Figures, says where they lie and how they are named -- the tab's Exports/Figures/ in a project laid out by folders, data/plans/ otherwise), and the warnings to print -- built and validated from every source file, nothing written yet, so export_all.py can check the plans along with everything else before it writes anything. A background already extracted from the same file and page is kept as it is: pypdf would write the same page with a new document id, and Git would see a change that is none. `sections` is `warnings`' own: the positions' section types."""
     from domains import plan_svg
 
     data_dir = Path(data_dir)
+    place = place or engine.figures(data_dir, "plan")
     previous = _previous(data_dir)
     plans, files, notes = {}, {}, []
     sources = [read_source(path) for path in source_paths(source_dir)]
-    sections = {source["id"] for source in sources if source.get("role", "plan") == "section"}
+    section_plans = {source["id"] for source in sources if source.get("role", "plan") == "section"}   # the plans that are sections -- not `sections`, the positions' section types
     for source in sources:
         pid = source["id"]
         where = f"plans/{pid}.json"
         sheet = (float(source["sheet"]["width"]), float(source["sheet"]["height"]))
         background = None
         spec = source.get("background")
-        document = document_background(spec, project_root, source_dir, data_dir, f"plans/{pid}-plan", previous.get(pid, {}).get("background", {}), where, f"plan {pid}", files, notes, plan=pid) if spec and spec.get("document") else None
+        document = document_background(spec, project_root, source_dir, place, place.name(f"{pid}-plan"), previous.get(pid, {}).get("background", {}), where, f"plan {pid}", files, notes, plan=pid) if spec and spec.get("document") else None
         if document is not None:
             background, actual = document
             if abs(actual[0] - sheet[0]) > 0.5 or abs(actual[1] - sheet[1]) > 0.5:
                 notes.append(engine.Note("plan_sheet_moved", f"plan {pid}: page {spec['page']} of document {spec['document']} is now {actual[0]:.0f} × {actual[1]:.0f} and not {sheet[0]:.0f} × {sheet[1]:.0f} as when it was drawn on -- open the plan in Woodcore and check its symbols", plan=pid, document=spec["document"], page=spec["page"]))
                 sheet = actual
             spec = None  # drawn
-        if source.get("section_plan") and source["section_plan"] not in sections:
+        if source.get("section_plan") and source["section_plan"] not in section_plans:
             notes.append(engine.Note("plan_section_missing", f"plan {pid}: its section {source['section_plan']} is not a section plan of this project", plan=pid, section=source["section_plan"]))
         if spec is not None:
-            background, sheet, more = file_background(spec, sheet, project_root, data_dir, f"plans/{pid}-plan", previous.get(pid, {}).get("background", {}), where, f"plan {pid}", files)
+            background, sheet, more = file_background(spec, sheet, project_root, place, place.name(f"{pid}-plan"), previous.get(pid, {}).get("background", {}), where, f"plan {pid}", files)
             notes += more
         drawn = {**source, "sheet": {"width": sheet[0], "height": sheet[1]}}
-        notes += warnings(drawn, position_ids)
+        notes += warnings(drawn, position_ids, sections=sections)
         record = build_record(drawn, sheet, background)
+        record["overlay"] = place.name(f"{pid}.svg")
         record["unknown"] = sorted({label for label in record["labels"] if label not in set(position_ids)})
         texts = text_records(drawn, values, f"plan {pid}", notes)
         if texts:
             record["texts"] = texts
         plans[pid] = record
         crop = record["crop"]
-        files[record["overlay"]] = plan_svg.render(drawn, crop, values=values)
+        printed = bool(drawn.get("print_centres"))   # S, M and the outline on the exported plan where the plan says so, and nowhere else (issue #54)
+        files[record["overlay"]] = plan_svg.render(drawn, crop, values=values, centres=printed)
         if drawn.get("load_levels"):
             # a load transfer level writes «Niveau de reprise des charges (x0xx)» on the plan, the engine's words: such a section is drawn once per language, as a fire-protection plan is, and show-plan sets the report's (lib/calc-engine.typ's plan-figure reads `figures`). Its `overlay` stays, the German one, for whatever reads it.
             from i18n import strings
             record["figures"] = {}
             for lang in strings.LANGUAGES:
-                name = f"plans/{pid}-{lang}.svg"
+                name = place.name(f"{pid}-{lang}.svg")
                 record["figures"][lang] = name
-                files[name] = plan_svg.render(drawn, crop, lang=lang, values=values)
-    data = {"schema_version": TEXT_EXPORT_VERSION if any("texts" in r for r in plans.values()) else EXPORT_SCHEMA_VERSION, "plans": plans}
+                files[name] = plan_svg.render(drawn, crop, lang=lang, values=values, centres=printed)
+    data = {"schema_version": export_version_of(plans, rooted=place.here is not None), "plans": plans}
     validation.validate_structure(data, "plans")
     validation.validate_plans_business(data)
     return data, files, notes
 
 
-def document_background(spec, project_root, plans_dir, data_dir, stem, old, where, what, files, notes, plan=None):
-    """(the record's background, the page's sheet) for a drawing made on a page of a document of plans/documents/ -- the page flattened to a PDF of its own with the document's switched-off layers taken out, or a drawing's layout as an SVG (calc/domains/plan_documents.py) -- or None where the document is gone, said in a warning and the drawing then drawn on its file as it was saved (`background.file`). `spec` is the source's `background`, `plans_dir` the folder the documents live under (plans/documents/), `stem` the file's name under data/ without its extension (`plans/<id>-plan`), `old` the background the last export recorded for this drawing, `what` how the notes name it (`plan P01`), `where` how a refusal names its file. The file written is put in `files` (its path under data/ -> bytes) and the notes in `notes`. A background already written for the same file, page, rotation and layers is kept as it is, as for any plan: pypdf would write the same page with a new document id, and Git would see a change that is none. A function of its own since a fire-protection plan drawn on a page exports its background the same way."""
+def document_background(spec, project_root, plans_dir, figures, stem, old, where, what, files, notes, plan=None):
+    """(the record's background, the page's sheet) for a drawing made on a page of a document of plans/documents/ -- the page flattened to a PDF of its own with the document's switched-off layers taken out, or a drawing's layout as an SVG (calc/domains/plan_documents.py) -- or None where the document is gone, said in a warning and the drawing then drawn on its file as it was saved (`background.file`). `spec` is the source's `background`, `plans_dir` the folder the documents live under (plans/documents/), `figures` the engine.Figures its file is written by, `stem` the file's name in the JSON without its extension (`figures.name("<id>-plan")`), `old` the background the last export recorded for this drawing, `what` how the notes name it (`plan P01`), `where` how a refusal names its file. The file written is put in `files` (its name in the JSON -> bytes) and the notes in `notes`. A background already written for the same file, page, rotation and layers is kept as it is, as for any plan: pypdf would write the same page with a new document id, and Git would see a change that is none. A function of its own since a fire-protection plan drawn on a page exports its background the same way."""
     from domains import plan_documents
 
     place = plan_documents.Place(project_root, plans_dir)
@@ -1064,7 +1081,7 @@ def document_background(spec, project_root, plans_dir, data_dir, stem, old, wher
     key = plan_documents.export_key(doc, page)
     fmt = "pdf" if doc["kind"] == "pdf" else ("svg" if doc["kind"] in ("cad", "svg") or key["rotation"] else background_format(path))
     name = f"{stem}.{fmt}"
-    kept = Path(data_dir) / name
+    kept = figures.path(name)
     if (old.get("file") == name and old.get("sha256") == digest and old.get("origin_page") == page
             and old.get("document") == doc["id"] and old.get("rotation") == key["rotation"]
             and old.get("layers_off") == key["layers_off"] and kept.is_file()):
@@ -1091,11 +1108,8 @@ def document_background(spec, project_root, plans_dir, data_dir, stem, old, wher
     return background, actual
 
 
-_document_background = document_background  # the name the function had until it was shared
-
-
-def file_background(spec, sheet, project_root, data_dir, stem, old, where, what, files):
-    """(the record's background, the sheet as the file now gives it, the notes to print) for a drawing made directly on a file of the project -- a PDF reduced to the page drawn on, a PNG, a JPEG or an SVG copied. `spec` is the source's `background`, `sheet` its sheet as (width, height), `stem` the file's name under data/ without its extension, `old` the background the last export recorded for this drawing; the file written is put in `files`. A background already extracted from the same file and page is kept as it is -- pypdf would write the same page with a new document id, and Git would see a change that is none. A function of its own since a fire-protection plan with a frame of its own exports its background by the very same steps."""
+def file_background(spec, sheet, project_root, figures, stem, old, where, what, files):
+    """(the record's background, the sheet as the file now gives it, the notes to print) for a drawing made directly on a file of the project -- a PDF reduced to the page drawn on, a PNG, a JPEG or an SVG copied. `spec` is the source's `background`, `sheet` its sheet as (width, height), `figures` the engine.Figures its file is written by, `stem` the file's name in the JSON without its extension, `old` the background the last export recorded for this drawing; the file written is put in `files`. A background already extracted from the same file and page is kept as it is -- pypdf would write the same page with a new document id, and Git would see a change that is none. A function of its own since a fire-protection plan with a frame of its own exports its background by the very same steps."""
     notes = []
     path = background_path(project_root, spec["file"])
     if path is None:
@@ -1109,7 +1123,7 @@ def file_background(spec, sheet, project_root, data_dir, stem, old, where, what,
     if spec.get("sha256") and spec["sha256"] != digest:
         notes.append(f"{what}: {spec['file']} has changed since the plan was saved -- check that the symbols still sit on it, then save the plan again")
     name = f"{stem}.{fmt}"
-    kept = Path(data_dir) / name
+    kept = figures.path(name)
     if (old.get("file") == name and old.get("sha256") == digest and old.get("origin_page") == spec["page"]
             and old.get("origin") == spec["file"] and kept.is_file()):
         files[name] = kept.read_bytes()
@@ -1136,26 +1150,16 @@ def file_background(spec, sheet, project_root, data_dir, stem, old, where, what,
 
 
 def write(data, files, data_dir):
-    """Writes data/plans.json and data/plans/, and removes the files of a plan that no longer exists -- that folder is generated, like the rest of data/. A file whose content has not changed is left alone."""
+    """Writes data/plans.json and the plans' figures -- into the tab's Exports/Figures/ in a project laid out by folders, data/plans/ otherwise (engine.Figures) --, and removes those of a plan that no longer exists: only what the last export wrote, never a file of the engineer's (engine.write_managed). A file whose content has not changed is left alone."""
     data_dir = Path(data_dir)
+    previous = engine.previous_json(data_dir / "plans.json")
+    engine.figures(data_dir, "plan").write(files, previous)
     engine.write_json(data_dir / "plans.json", data)
-    folder = data_dir / "plans"
-    folder.mkdir(parents=True, exist_ok=True)
-    for name, content in files.items():
-        target = data_dir / name
-        payload = content.encode("utf-8") if isinstance(content, str) else content
-        if target.is_file() and target.read_bytes() == payload:
-            continue
-        target.write_bytes(payload)
-    wanted = {Path(name).name for name in files}
-    for stale in folder.iterdir():
-        if stale.is_file() and stale.name not in wanted:
-            stale.unlink()
 
 
-def export(source_dir, project_root, data_dir, position_ids, values=None):
-    """The plans' part of the export, on its own: what Woodcore's window runs when a plan is saved, so the report sees it without the load workbooks being read again. export_all.py runs the same two steps. `values` are the export's, which a text's variables print (issue #43). Returns the warnings."""
-    data, files, notes = prepare(source_dir, project_root, data_dir, position_ids, values)
+def export(source_dir, project_root, data_dir, position_ids, values=None, sections=None):
+    """The plans' part of the export, on its own: what Woodcore's window runs when a plan is saved, so the report sees it without the load workbooks being read again. export_all.py runs the same two steps. `values` are the export's, which a text's variables print (issue #43); `sections` the positions' section types, `warnings`' own (issue #54). Returns the warnings."""
+    data, files, notes = prepare(source_dir, project_root, data_dir, position_ids, values, sections)
     write(data, files, data_dir)
     return notes
 
@@ -1230,6 +1234,8 @@ def _turn_quarter(source, width, height):
             dim["kind"] = "vertical" if dim["kind"] == "horizontal" else "horizontal"
     for text in source.get("texts") or []:
         text["points"] = [turn_point(p, height) for p in text.get("points", [])]   # a text stays where it was written, and reads upright on the turned page
+    for outline in source.get("outlines") or []:
+        outline["points"] = [turn_point(p, height) for p in outline.get("points", [])]   # the building's outline turns with the building (issue #54); S and M follow, being computed from what is drawn
     for aid in source.get("aids") or []:
         aid["point"] = turn_point(aid["point"], height)
         aid["angle"] = _clean(lines.normal_angle(float(aid["angle"]) + 90))
@@ -1255,3 +1261,14 @@ def rotate_source(source, quarter_turns, old_sheet):
 def snapshot(source):
     """A deep copy of a source, for an undo history."""
     return copy.deepcopy(source)
+
+
+def references(record):
+    """What an exported plan names, [(kind, id, field)]: the positions its labels print, its section plan and the document it is drawn on (domains/dependency_graph.py, spec 2026-10-21-graphe-dependances, ARCH-RISK-1103)."""
+    out = [("position", label, "labels") for label in record.get("labels") or ()]
+    if record.get("section_plan"):
+        out.append(("plan", record["section_plan"], "section_plan"))
+    document = (record.get("background") or {}).get("document")
+    if document:
+        out.append(("document", document, "background.document"))
+    return out

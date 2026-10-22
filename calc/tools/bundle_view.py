@@ -12,10 +12,10 @@ from pathlib import Path
 
 from PySide6.QtCore import QBuffer, QByteArray, QIODevice, Qt, Signal
 from PySide6.QtPdf import QPdfDocument
-from PySide6.QtPdfWidgets import QPdfView
 from PySide6.QtWidgets import QFormLayout, QLabel, QLineEdit, QStackedWidget, QVBoxLayout, QWidget
 
 import cards
+import pdf_pane
 
 STRINGS = {
     "fr": {
@@ -85,16 +85,14 @@ def pages_pdf(here, sheet_ids):
 class BundlePages(QStackedWidget):
     """Every page of an export document, read-only, one under the other (QtPdf's multi-page view), or a line saying why there are none."""
 
-    def __init__(self, t, parent=None):
+    def __init__(self, t, parent=None, lang="en"):
         super().__init__(parent)
         self.t = t
         self.note = QLabel()
         self.note.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.note.setWordWrap(True)
         self.addWidget(self.note)
-        self.view = QPdfView()
-        self.view.setPageMode(QPdfView.PageMode.MultiPage)
-        self.view.setZoomMode(QPdfView.ZoomMode.FitToWidth)
+        self.view = pdf_pane.ZoomablePdfView(lang=lang)   # the window's one page view: fitted to the width with its bar always there, zoomed by Ctrl+wheel (issue #89)
         self.addWidget(self.view)
         self.document = None
         self.buffer = None

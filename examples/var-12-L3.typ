@@ -8,4 +8,4 @@
 #report-level.update(3)
 #number-digits.update(3)
 
-#var("W_y_erf", "W_(y,erf)", 12.5, "cm³")
+#var("R_d", 4.969, "kN", style: "bold")

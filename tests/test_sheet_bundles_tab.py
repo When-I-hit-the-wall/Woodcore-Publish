@@ -62,9 +62,16 @@ def _window():
         conftest.exported("plans.json")
         here = conftest.project_copy("sheet_bundles_tab")
         import shutil
-        for name in ("commands.typ", "config.typ", "title.typ"):     # what a sheet imports: the copy carries the report's folders and not these
-            if not (here.typst_root / name).is_file():
-                shutil.copy2(ROOT / "tests" / "projet-exemple" / name, here.typst_root / name)
+        example = project.Project.load(ROOT / "tests" / "projet-exemple" / "Exemple.woodcore")
+        for name in ("commands.typ", "config.typ", "title.typ"):     # what a sheet imports: the copy carries the report's folders and not these -- in 000-Typst-Config/ laid out by folders (issue #64)
+            target = here.config_dir / name
+            if not target.is_file():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(example.config_dir / name, target)
+        # the plans' figures the export drew, which a sheet's viewport reads (Plans/Position-plan/Exports/Figures/): the copy carries the export's data/ that names them and not them
+        figures = conftest.PROJECT.figures_dir("plan")
+        if figures is not None and figures.is_dir() and not here.figures_dir("plan").is_dir():
+            shutil.copytree(figures, here.figures_dir("plan"))
         project.sync_engine(here)
         for path in here.plans_dir.glob("*.json"):
             source = json.loads(path.read_text(encoding="utf-8"))
@@ -216,7 +223,7 @@ def test_a_bundle_is_exported_as_one_pdf_in_the_lists_order_renamed_and_deleted(
         # deleted: the sheets stay, the PDF goes to the archives
         assert plan.delete_bundle("Gesamt")
         assert plan.sheet_list.bundle_names() == [] and sorted(plan.sheet_list.ids()) == ["A", "B"]
-        assert not sheets.bundle_pdf(here, "Gesamt").is_file() and list((here.typst_root / "Plans" / "archives").glob("*Gesamt.pdf"))
+        assert not sheets.bundle_pdf(here, "Gesamt").is_file() and list((sheets.folder(here, "position") / "archives").glob("*Gesamt.pdf"))
 
 
 def test_a_deleted_sheet_leaves_its_bundle_and_a_fire_bundle_gathers_fire_sheets_alone():
@@ -253,20 +260,21 @@ def test_the_list_of_the_positions_is_made_for_the_sheet_the_bundle_or_every_pos
         made = plan.create_position_list()
         plan.sheet_editor.stop()
         assert made and sheets.page(here, made).size() == (210, 297), "an A4 portrait sheet"
-        assert sheets.model(here, made, "positions").get("plans") == ["Geratehaus"], "the plans of the sheet chosen"
+        # the list on a sheet is the project's file, included (spec 2026-10-21-commandes-typst-refonte, Q-015): the same for a sheet, a bundle and every position
+        assert '#include "/Positions/position-list.typ"' in sheets.read(here, made)
         assert made in plan.sheet_list.ids() and plan.view_kind == "sheet"
         plan.show_plan_view()
-        # a bundle chosen: the plans of its sheets
+        # a bundle chosen: the project's list all the same
         plan.sheet_list.setCurrentItem(_folder(plan.sheet_list, "Pos"))
         again = plan.create_position_list()
         plan.sheet_editor.stop()
-        assert sheets.model(here, again, "positions").get("plans") == ["Geratehaus"]
+        assert '#include "/Positions/position-list.typ"' in sheets.read(here, again)
         plan.show_plan_view()
         # nothing chosen: every position
         plan.sheet_list.setCurrentItem(None)
         every = plan.create_position_list()
         plan.sheet_editor.stop()
-        assert sheets.model(here, every, "positions").get("scope") == "all"
+        assert '#include "/Positions/position-list.typ"' in sheets.read(here, every)
         plan.show_plan_view()
         # the fire tab lists no positions
         assert "list" not in fire.bundle_buttons
@@ -353,7 +361,7 @@ def test_an_export_document_chosen_shows_all_its_pages_and_its_fields_taken_from
     with project.using(here), _boxes(names=["Gesamt"]):
         first = sheets.new_sheet(here).stem
         second = sheets.new_sheet(here).stem
-        sheets.add_viewport(here, first, "Pavillon", 20, 20)
+        sheets.add_viewport(here, first, "Pavillon", 20, 20, width=150)   # a size, as the window gives one (sheet_editor.add_viewport): the plan is not calibrated, and a viewport without one does not compile
         sheets.create_bundle(here, "Gesamt", sheets=[first, second])
         plan.reload_sheets()
         assert plan.sheet_list.select_folder("Gesamt")

@@ -14,9 +14,8 @@ import json
 import math
 from pathlib import Path
 
-from PySide6.QtCore import QByteArray, QEvent, QRectF, QSize, Qt, Signal
-from PySide6.QtGui import QColor, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import QEvent, QSize, Qt, Signal
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QButtonGroup, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox,
     QFormLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox,
@@ -47,7 +46,7 @@ from domains import schema as model
 from domains import schema_svg
 import flowbar
 from flowbar import (BAR_SPACING, TOOL_ICON_PX, FlowLayout, FlowWidget, ResizableColumns, ToolBarArea,
-                     pixel_ratio, set_tip, size_tool, symbol_px, tool_group)
+                     set_tip, size_tool, symbol_px, tool_group)
 from schema_canvas import AREA_MODES, CONNECTOR_TOOLS, TOOLS, SchemaCanvas
 from schema_tab_words import STRINGS, TIPS, tip_key  # split out of this module (issue #30): every name it had is still importable from it
 from schema_tab_build import AREA_MODE_SVG, GRID_CHOICES, ICON_PX, TOOL_GROUPS, icon_from_svg, on_ground, plain_label, swatch_kind, tool_icon, SchemaBuildMixin  # split out of this module (issue #30): every name it had is still importable from it
@@ -57,7 +56,7 @@ from schema_tab_draft import NEW_ROW, _as_number, list_schemas, next_free_id, Sc
 
 
 # How many steps «Annuler» can go back.
-HISTORY = 200
+from canvas_editor import CanvasEditorTab  # «Annuler» and «Rétablir», once for every tab with a canvas (spec 2026-10-19-base-saine-nettoyage, ARCH-001)
 
 
 # A cell that cannot be read takes theme.colour("danger-soft"); a side of an element's section written over its position's, theme.colour("override") -- the orange the connectors' tab already uses for exactly that (v0.75), the scheme's since v0.90.
@@ -177,8 +176,15 @@ class GridDialog(QDialog):
         }
 
 
-class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWidget):
+class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, CanvasEditorTab, display_view.DisplayTab, QWidget):
     """Draws a detail schema, saves it as its source, exports it, and copies the call that prints it."""
+    KEY = "tab_schema"
+    GRAPH_KIND = "schema"   # issue #71
+    LIST_KEY = "sc_list"
+    EMPTY_KEY = "sc_empty"
+    WORDS = "sc"
+    UNSAVED_WORDS = ("sc_unsaved_title", "sc_unsaved")   # the question before the draft is left (SourceEditorTab.confirm_leave)
+    DISCARD_OPENS_FIRST = True
 
     VIEWS = views.DRAW_VIEWS   # «Dessin» and «Affichage» (views.py, v0.117)
 
@@ -190,10 +196,10 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
         self.dirty = False
         self.current_id = None
         self.source = model.new_source("D01")
-        self.undo_stack, self.redo_stack = [], []
+        self.init_history()
         self.grid_values = None  # the last marker grid accepted, for the next one to start from
-        self.empty_folders = list(app.folder_settings("tab_schema"))
-        self.saved_ids = []
+        self.empty_folders = list(app.folder_settings(self.KEY))
+        self.ids = []
         self.from_table = False
         self.positions = connector_model.known_positions(project.current().data_dir)
 
@@ -204,7 +210,7 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
         self.splitter.addWidget(self.build_list())
         self.splitter.addWidget(self.build_center())
         self.splitter.addWidget(self.build_properties())
-        self.install_display("tab_schema")   # «Affichage»: show-schema's options, its call and its page (v0.117)
+        self.install_display("tab_schema")   # «Affichage»: schema()'s options, the figure it is copied in and its page (v0.117)
         for index, stretch in enumerate((2, 7, 3)):
             self.splitter.setStretchFactor(index, stretch)
         layout.addWidget(self.splitter, 1)
@@ -273,23 +279,14 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
         """One step of «Annuler», taken before a change rather than after it."""
         if self.loading:
             return
-        self.undo_stack.append(model.snapshot(self.source))
-        del self.undo_stack[:-HISTORY]
-        self.redo_stack.clear()
+        self.push_history()
 
-    def undo(self):
-        if not self.undo_stack:
-            return
-        self.redo_stack.append(model.snapshot(self.source))
-        self.source = self.undo_stack.pop()
-        self.canvas.set_source(self.source)
-        self.after_change()
+    def snapshot(self, state):
+        return model.snapshot(state)   # the schema's own copy, which keeps its drawing's caches out
 
-    def redo(self):
-        if not self.redo_stack:
-            return
-        self.undo_stack.append(model.snapshot(self.source))
-        self.source = self.redo_stack.pop()
+    def replace_source(self, state):
+        """A step of «Annuler» or «Rétablir»: the source is the state put back, the canvas drawn from it."""
+        self.source = state
         self.canvas.set_source(self.source)
         self.after_change()
 
@@ -597,67 +594,21 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
 
     # -- the list ----------------------------------------------------------------------
 
-    def reload_list(self, select=None):
-        self.loading = True
-        self.saved_ids = []
-        entries = []
-        for sid, label, group in list_schemas():
-            self.saved_ids.append(sid)
-            entries.append({"id": sid, "text": f"{sid} — {label}" if label else sid, "group": group})
-        if self.current_id is None:
-            entries.append({"id": NEW_ROW, "text": self.t("sc_new_item"), "group": grouped_list.ROOT_GROUP})
-        target = select if select is not None else self.current_id
-        if target not in self.saved_ids:
-            target = NEW_ROW if self.current_id is None else None
-        self.list.set_entries(entries, self.empty_folders, target, archived=source_archive.entries(project.current().details_dir, self.list._t))
-        self.empty_folders = self.list.empty_folders()
-        self.app.save_folder_settings("tab_schema", self.empty_folders)
-        self.empty_hint.setVisible(not self.saved_ids)
-        self.loading = False
-        self.update_list_marker()
+    def sources_dir(self):
+        return project.current().details_dir
 
-    def on_folders_changed(self):
-        """A folder made, renamed or removed in the list: what the widget now holds is what the tab keeps. ⚠️ Connecting `foldersChanged` straight to `reload_list` rebuilt the list from the tab's own copy of the empty folders, taken BEFORE the new one was added -- so a folder just made vanished the moment it was made."""
-        self.empty_folders = self.list.empty_folders()
-        self.reload_list(select=self.current_id)
+    def listed(self):
+        """The schemas, «id — label», in the folder each names (list_schemas)."""
+        return [(sid, f"{sid} — {label}" if label else sid, group) for sid, label, group in list_schemas()]
 
-    def on_list_change(self, sid):
-        if self.loading or not sid or sid == NEW_ROW or sid == self.current_id:
+    def export_listed(self, text):
+        """The schemas exported without naming one -- what a drop into a folder or an archive needs; a failure said in the status bar."""
+        try:
+            model.export(project.current().details_dir, project.current().data_dir, self.known_positions(), self.values)
+        except Exception as exc:  # broad: the exporter's own message is what helps
+            self.app.set_status(self.t("sc_move_failed", error=str(exc)))
             return
-        if not self.confirm_leave():
-            self.reload_list(select=self.current_id)
-            return
-        self.load(sid)
-
-    def on_moved(self, ids, group):
-        """A drag wrote a folder: the field goes into each source, the schemas are exported, the list is rebuilt from the files -- statics_tab's own handler (v0.69, docs/ui/window.md §10quater)."""
-        moved = 0
-        for sid in ids:
-            if sid == NEW_ROW:
-                continue
-            path = project.current().details_dir / f"{sid}.json"
-            try:
-                source = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
-                continue
-            if group:
-                source["group"] = group
-            else:
-                source.pop("group", None)
-            try:
-                path.write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-            except OSError as exc:
-                self.app.set_status(self.t("sc_move_failed", error=str(exc)))
-                return
-            moved += 1
-            if sid == self.current_id:
-                if group:
-                    self.source["group"] = group
-                else:
-                    self.source.pop("group", None)
-        if moved:
-            self.export_schemas(self.t("sc_saved", id=", ".join(i for i in ids if i != NEW_ROW)))
-        self.reload_list(select=self.current_id)
+        self.app.set_status(text)
 
     # -- the calls -----------------------------------------------------------------
 
@@ -666,7 +617,7 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
         self.update_display()
 
     def display_entries(self):
-        """`#show-schema` of the schema open -- the parts it may highlight are the schema's own ids, the one selected ticked -- and the loop over every schema."""
+        """`#figure(schema(…))` of the schema open -- the parts it may highlight are the schema's own ids, the one selected ticked -- and the loop over every schema."""
         sid = self.source.get("id", "") or "?"
         here = project.current()
         if self.current_id is None or self.dirty:
@@ -674,11 +625,14 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
         else:
             exported = sid in ref.load_schemas(here.data_dir).get("schemas", {})
             banner = display_view.export_state(self.t, sid, exported, here.details_dir / f"{sid}.json", here.data_dir / "schemas.json")
+        # «Copier» copies a figure of the report's own (spec 2026-10-15, UI-001, D-16): the drawing in it, the schema's label its caption and a label to cite it by
+        caption = self.source.get("label") or sid
         return [
-            display_view.Entry("schema", "show-schema", "show-schema", positional=(sid,), banner=banner,
-                               context={"highlight": sorted(model.all_ids(self.source))},
-                               preset={"highlight": [entry["id"]] if (entry := self.canvas.selected()[1]) is not None else []}),   # what is selected on the drawing, ticked: the call that lights it, as the block of calls led with until v0.117
-            self.loop_entry("show-schema", ref.call_schema_loop()),
+            display_view.Entry("schema", "image-schema", "image-schema", positional=(sid,), banner=banner,
+                               context={"highlight": sorted(model.all_ids(self.source)), "detail-figure": ref.image_vocabulary()["image-schema"]["detail-figure"]},
+                               preset={"highlight": [entry["id"]] if (entry := self.canvas.selected()[1]) is not None else []},   # what is selected on the drawing, ticked: the call that lights it, as the block of calls led with until v0.117
+                               call_fn=lambda values: ref.figure_of_panel("image-schema", sid, values, caption)),   # the drawing as an image (spec 2026-10-21-commandes-typst-refonte, REQ-014, ARCH-012)
+            self.loop_entry("image-schema", ref.call_figure_loop("image-schema", "schema")),
         ]
 
     def update_warnings(self):
@@ -690,9 +644,6 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
         return connector_model.known_positions(project.current().data_dir)
 
     # -- new, duplicate, delete, save ------------------------------------------------
-
-    def confirm_leave(self):
-        return autosave.confirm(self.app, self, self.t("sc_unsaved_title"), self.t("sc_unsaved", id=self.id_edit.text().strip() or "?"), discard=lambda: (setattr(self, "dirty", False), self.current_id is None and self.load_first()))   # saved without a question where it can be, else the one question (autosave.py, v0.117)
 
     def taken_ids(self):
         return [sid for sid, _label, _group in list_schemas()]
@@ -717,13 +668,6 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
             self.load_first()
         else:
             self.load(self.current_id)
-
-    def delete(self):
-        """«Supprimer»: what is selected goes to «Archives», its ID removed (source_archive.py, v0.77) -- or, an archived entry selected, is deleted for good. A schema never saved is simply discarded."""
-        if self.archive.delete():
-            return
-        self.dirty = False
-        self.load_first()
 
     def fail(self, message):
         return autosave.refuse(self, self.t("sc_save_failed_title"), message)
@@ -750,9 +694,7 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
             project.current().details_dir.mkdir(parents=True, exist_ok=True)
             if renaming:
                 (project.current().details_dir / f"{old}.json").unlink(missing_ok=True)
-            (project.current().details_dir / f"{sid}.json").write_text(
-                json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-            )
+            engine.write_json(project.current().details_dir / f"{sid}.json", source)
         except OSError as exc:
             return self.fail(str(exc))
         self.current_id = sid
@@ -780,7 +722,7 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
                 if isinstance(source, dict) and source.get("schema") == old:
                     source["schema"] = new
                     try:
-                        path.write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+                        engine.write_json(path, source)
                     except OSError as exc:
                         self.app.set_status(self.t("sc_move_failed", error=str(exc)))
                         continue
@@ -800,14 +742,6 @@ class SchemaTab(SchemaDraftMixin, SchemaBuildMixin, display_view.DisplayTab, QWi
         if names:
             self.app.set_status(self.t("sc_renamed_references", old=old, new=new, names=", ".join(names)))
         return names
-
-    def export_schemas(self, done_text):
-        try:
-            model.export(project.current().details_dir, project.current().data_dir, self.known_positions(), self.values)
-        except Exception as exc:  # broad: the exporter's own message is what helps
-            self.app.set_status(self.t("sc_move_failed", error=str(exc)))
-            return
-        self.app.set_status(done_text)
 
     def export(self, sid, done_text):
         """The schemas' part of the export, run here and now: data/schemas.json and data/schemas/, from every saved source."""

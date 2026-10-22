@@ -9,20 +9,19 @@
 Die Durchbiegungen werden auf die Richtwerte der Norm SIA 260, Anhang A, Tabelle 3 begrenzt; sie sind nach den Normen SIA 262 bis 266 zu bestimmen. Abweichende Grenzwerte können in Abstimmung auf die Nutzungsanforderungen vereinbart werden, insbesondere für sekundäre Bauteile; sie werden in der Projektbasis festgelegt. [Die Bauherrschaft stellt keine erhöhten Anforderungen gegenüber der Norm: ja / nein.]
 // woodcore:/object p1
 
-// woodcore:object doc-table deformation-table
-#doc-table(
-  columns: (
-    (id: "element", title: [Bauteil]),
-    (id: "criterion", title: [Kriterium]),
-    (id: "limit", title: [Grenzwert], kind: "math"),
-    (id: "load_case", title: [Lastfall (SIA 260, Tab. 3)]),
-  ),
-  hidden: (),
-  rows: (
-    (element: [Decken und Balken], criterion: [Einbauten mit sprödem Verhalten], limit: [$w <= l \/ 500$], load_case: [selten (20)]),
-    (element: [Decken und Balken], criterion: [Einbauten mit duktilem Verhalten], limit: [$w <= l \/ 350$], load_case: [häufig (21)]),
-    (element: [Decken und Balken], criterion: [Nutzung, Betrieb und Komfort (Durchbiegung infolge veränderlicher Einwirkungen)], limit: [$w <= l \/ 350$], load_case: [häufig (21)]),
-    (element: [Decken und Balken], criterion: [Aussehen (nach Abzug einer allfälligen Überhöhung)], limit: [$w <= l \/ 300$], load_case: [quasi-ständig (22)]),
+// woodcore:object table deformation-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, center, left),
+    table.hline(stroke: 1pt),
+    table.header([*Bauteil*], [*Kriterium*], [*Grenzwert*], [*Lastfall (SIA 260, Tab. 3)*]),
+    table.hline(stroke: 0.5pt),
+    [Decken und Balken], [Einbauten mit sprödem Verhalten], [$w <= l \/ 500$], [selten (20)],
+    [Decken und Balken], [Einbauten mit duktilem Verhalten], [$w <= l \/ 350$], [häufig (21)],
+    [Decken und Balken], [Nutzung, Betrieb und Komfort (Durchbiegung infolge veränderlicher Einwirkungen)], [$w <= l \/ 350$], [häufig (21)],
+    [Decken und Balken], [Aussehen (nach Abzug einer allfälligen Überhöhung)], [$w <= l \/ 300$], [quasi-ständig (22)],
+    table.hline(stroke: 1pt),
   ),
   caption: [Zulässige Durchbiegungen],
 )

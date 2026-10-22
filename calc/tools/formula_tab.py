@@ -13,11 +13,11 @@ The engineer, 08.10.2026: «Il faut un nouveau onglet en référence qui s'appel
 Everything the blocks compute is calc/domains/formula_domain.py's, at once and in Python (D-10 of v0.117); the tab shows and edits, and computes nothing itself.
 """
 
+import source_editor  # Ctrl+S bound the one way (source_editor.save_shortcut)
 import html
 from dataclasses import replace
 
 from PySide6.QtCore import QEvent, QObject, Qt, QTimer, Signal
-from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QGridLayout, QHeaderView, QLabel, QLineEdit, QPlainTextEdit, QPushButton,
                                QScrollArea, QSplitter, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
@@ -40,11 +40,15 @@ import theme
 import views
 from formula_tab_widgets import Block, FIELDS, FORMULA_FIELDS, FormulaText, _ClickOutside, _Keys, math  # split out of this module (issue #30): every name it had is still importable from it
 from formula_tab_domains import FormulaDomainsMixin  # split out of this module (issue #30): every name it had is still importable from it
+from formula_tab_unfold import FormulaUnfoldMixin  # an unfolded check's card, the states of its lines (spec 2026-10-15, UI-002)
 from formula_tab_blocks import FormulaBlocksMixin, merged_options  # split out of this module (issue #30): every name it had is still importable from it
 
 STRINGS = {
     "fr": {
-        "tab_formula": "Formules",
+        "tab_formula": "Domaines",
+        # the groups of the list a specialised tab's domain written out whole is shown in (issue #64, REQ-016): its kind of domain; a member check's and a steel check's by the word of its kind, the checks' tabs' own
+        "fm_group_snow-load": "Neige", "fm_group_live-load": "Charges utiles", "fm_group_wind-load": "Vent", "fm_group_dead-load": "Charges permanentes", "fm_group_connector": "Connecteurs",
+        "fm_group_connection": "Moment polaire", "fm_group_script": "Scripts", "fm_group_steel": "Acier – {kind}",
         "fm_domains": "Domaines de calcul",
         "fm_empty": "Aucun domaine de calcul. Choisissez « Domaine » à droite pour en créer un.",
         "fm_no_domain": "Ouvrez un domaine à gauche, ou créez-en un avec « Domaine » à droite.",
@@ -53,7 +57,7 @@ STRINGS = {
         "fm_commands": "Commandes",
         "fm_commands_hint": "Choisissez la commande à ajouter au domaine.",
         "fm_cmd_domain": "Domaine",
-        "fm_cmd_domain_tip": "Un nouveau domaine de calcul : un fichier Formules/<id>.typ du projet",
+        "fm_cmd_domain_tip": "Un nouveau domaine de calcul : un fichier Domains/<id>.typ du projet",
         "fm_cmd_var": "var — une variable",
         "fm_cmd_eq": "eq — équation",
         "fm_cmd_verify": "verify — vérification",
@@ -63,6 +67,37 @@ STRINGS = {
         "fm_variables_tip": "Un clic écrit la variable dans le calcul en cours, sous le nom affiché.",
         "fm_variables_none": "Aucune variable encore.",
         "fm_import": "Importer…",
+        "fm_unfold": "Vérification dépliée",
+        "fm_unfold_head": "Écrite depuis la vérification {id}",
+        "fm_unfold_gone": "la vérification n’est plus dans l’export",
+        "fm_unfold_no_match": "sa forme ne correspond plus aux données : régénérer",
+        "fm_unfold_in_step": "Toutes les lignes sont à jour.",
+        "fm_unfold_state_own": "valeur de l’ingénieur",
+        "fm_unfold_state_data": "donnée changée",
+        "fm_unfold_state_local": "modifiée hors de Woodcore",
+        "fm_unfold_state_conflict": "conflit",
+        "fm_unfold_state_missing": "ligne supprimée",
+        "fm_unfold_state_in_sync": "à jour",
+        "fm_unfold_import": "Importer",
+        "fm_unfold_import_tip": "Reprend dans Woodcore la ligne modifiée dans le fichier : une valeur de la vérification y est écrite, une autre devient la valeur de l’ingénieur",
+        "fm_unfold_import_all": "Tout importer",
+        "fm_unfold_import_all_tip": "Importe toutes les lignes modifiées dans le fichier",
+        "fm_unfold_take_back": "Reprendre",
+        "fm_unfold_take_back_tip": "Remet la valeur de l’export à la place de la valeur de l’ingénieur",
+        "fm_unfold_reinsert": "Réinsérer",
+        "fm_unfold_reinsert_tip": "Remet la ligne supprimée à sa place",
+        "fm_unfold_mine": "Garder la mienne",
+        "fm_unfold_mine_tip": "Garde la ligne du fichier dans ce conflit",
+        "fm_unfold_theirs": "Prendre celle de l’export",
+        "fm_unfold_theirs_tip": "Écrit la ligne de l’export dans ce conflit",
+        "fm_unfold_regenerate": "Régénérer",
+        "fm_unfold_regenerate_tip": "Réécrit le calcul selon la forme de la vérification maintenant, en gardant les lignes de l’ingénieur",
+        "fm_unfold_conflicts": "Conflit sur {lines} : choisissez quelle version garder.",
+        "fm_unfold_done_import": "{id} : {line} importée",
+        "fm_unfold_done_import_all": "{id} : lignes importées",
+        "fm_unfold_done_take_back": "{id} : {line} reprend la valeur de l’export",
+        "fm_unfold_done_reinsert": "{id} : {line} réinsérée",
+        "fm_unfold_done_regenerate": "{id} : régénéré",
         "fm_import_tip": "Reprendre une variable de l'export, d'un autre domaine ou d'un document, choisie dans l'onglet « Variables »",
         "fm_import_unavailable": "L'import de variables arrive avec la nouvelle version de l'onglet « Variables ».",
         "fm_import_refused": "« {name} » est une variable du domaine propre au document, qui ne se reprend pas : elle n'a pas de domaine nommé.",
@@ -77,21 +112,21 @@ STRINGS = {
         "fm_f_formula_tip": "Les variables par leur nom affiché, des nombres, une unité après un nombre (12 N / 3000 mm) ; + − * / ^, parenthèses, sqrt, min, max…",
         "fm_f_relation": "Relation",
         "fm_f_relation_tip": "Deux côtés et un signe : M_d <= M_(R,d) ; ≤ ≥ < > = ≠",
-        "fm_f_what": "Variable",
         "fm_keys": "Tab : champ suivant · Entrée : valider · Échap : abandonner",
         "fm_out_unit": "Unité de sortie",
         "fm_out_auto": "automatique ({unit})",
         "fm_options": "Options de {command}",
         "fm_domain_options": "Le domaine",
         "fm_domain_file": "Fichier",
-        "fm_domain_note": "Une section imprime le domaine par #include \"/Formules/<id>.typ\" et lit une valeur par #val(clé, domain: \"<id>\") : changer l'ID oblige à corriger ces appels, que Woodcore liste.",
+        "fm_domain_note": "Une section imprime le domaine par #include \"/Domains/<id>.typ\" et lit une valeur par #var(clé, domain: \"<id>\") : changer l'ID oblige à corriger ces appels, que Woodcore liste.",
         "fm_delete_domain": "Supprimer le domaine…",
         "fm_delete_block": "Supprimer ce bloc",
-        "fm_state_hand_edited": "Écrit à la main dans une autre forme : il sera réécrit dans celle de Woodcore à la prochaine validation.",
+        "fm_state_misnamed": "Son #var-domain nomme un autre id que celui de son fichier : l'id du fichier y sera réécrit à la prochaine validation.",
         "fm_state_unreadable": "Ce fichier ne peut pas être lu : {reason}. Corrigez-le dans VS Code.",
         "fm_changed_on_disk": "{file} a été modifié sur le disque depuis que Woodcore l'a lu : rien n'a été écrit par-dessus. Le domaine est relu tel qu'il est maintenant ; refaites la modification.",
         "fm_double_click": "Double-cliquer pour modifier",
         "fm_imported": "repris de {source}",
+        "fm_as_unit": "unité attribuée sans conversion : {natural} → {wanted}",
         "fm_new_name": "Nouveau domaine",
         "fm_display_call": "#include",
         "fm_saved": "Domaine « {name} » enregistré.",
@@ -99,7 +134,7 @@ STRINGS = {
         "fm_key_taken": "« {name} » est déjà défini dans ce domaine : choisissez un autre nom.",
         "fm_not_number": "« {text} » n'est pas un nombre.",
         "fm_id": "ID",
-        "fm_id_tip": "Le nom du fichier Formules/<id>.typ, et ce que #val(domain:) reçoit : tiré du nom tant que le domaine n'est pas enregistré ; le changer renomme le fichier.",
+        "fm_id_tip": "Le nom du fichier Domains/<id>.typ, et ce que #var(domain:) reçoit : tiré du nom tant que le domaine n'est pas enregistré ; le changer renomme le fichier.",
         "fm_id_invalid": "« {id} » n'est pas un ID : des minuscules, des chiffres et des traits d'union, en commençant par une lettre.",
         "fm_id_taken": "L'ID « {id} » est déjà celui d'un autre domaine.",
         "fm_rename_failed": "{file} ne peut pas être renommé : est-il ouvert dans un autre programme ?",
@@ -110,7 +145,6 @@ STRINGS = {
         "fm_text_tip": "Du Typst à vous : un titre (= Titre), une phrase, une formule ($ … $). Imprimé tel quel, jamais calculé.",
         "fm_text_placeholder": "Titre, texte ou formule en Typst…",
         "fm_text_command": "Un texte ne peut pas contenir #{command} : écrivez-le comme un bloc, que Woodcore calcule.",
-        "fm_text_trailing": "« {line} » : le « {rest} » après #{command}(...) sur la même ligne est refusé -- il fait de la ligne un texte, que Woodcore ne calcule pas. Écrivez {hint}, sans « {rest} » après l'appel : plusieurs variables écrites l'une sous l'autre s'impriment sur une même ligne (en ligne par défaut, note: \"line\" en met une sur sa propre ligne).",
         "fm_index_refused": "Le domaine est enregistré, mais l'index des domaines (data/formulas.json) n'a pas pu être mis à jour : {reason}",
         "fm_text_tag": "Un texte ne peut pas contenir une ligne de balises de Woodcore (// woodcore:).",
         "fm_text_unbalanced": "Ce texte ne se relirait pas tel quel une fois écrit : ses crochets sont-ils équilibrés ?",
@@ -121,7 +155,9 @@ STRINGS = {
         "fm_drop_order": "Déplacement refusé : {reason}",
     },
     "de": {
-        "tab_formula": "Formeln",
+        "tab_formula": "Domänen",
+        "fm_group_snow-load": "Schnee", "fm_group_live-load": "Nutzlasten", "fm_group_wind-load": "Wind", "fm_group_dead-load": "Ständige Lasten", "fm_group_connector": "Verbindungsmittel",
+        "fm_group_connection": "Polares Trägheitsmoment", "fm_group_script": "Skripte", "fm_group_steel": "Stahl – {kind}",
         "fm_domains": "Berechnungsbereiche",
         "fm_empty": "Noch kein Berechnungsbereich. Wählen Sie rechts «Bereich», um einen anzulegen.",
         "fm_no_domain": "Öffnen Sie links einen Bereich oder legen Sie rechts mit «Bereich» einen an.",
@@ -130,7 +166,7 @@ STRINGS = {
         "fm_commands": "Befehle",
         "fm_commands_hint": "Wählen Sie den Befehl, der dem Bereich hinzugefügt wird.",
         "fm_cmd_domain": "Bereich",
-        "fm_cmd_domain_tip": "Ein neuer Berechnungsbereich: eine Datei Formules/<id>.typ des Projekts",
+        "fm_cmd_domain_tip": "Ein neuer Berechnungsbereich: eine Datei Domains/<id>.typ des Projekts",
         "fm_cmd_var": "var — Variable",
         "fm_cmd_eq": "eq — Gleichung",
         "fm_cmd_verify": "verify — Nachweis",
@@ -140,6 +176,37 @@ STRINGS = {
         "fm_variables_tip": "Ein Klick schreibt die Variable unter ihrem angezeigten Namen in die laufende Berechnung.",
         "fm_variables_none": "Noch keine Variable.",
         "fm_import": "Importieren…",
+        "fm_unfold": "Entfalteter Nachweis",
+        "fm_unfold_head": "Geschrieben aus dem Nachweis {id}",
+        "fm_unfold_gone": "der Nachweis ist nicht mehr im Export",
+        "fm_unfold_no_match": "seine Form entspricht nicht mehr den Daten: neu erzeugen",
+        "fm_unfold_in_step": "Alle Zeilen sind aktuell.",
+        "fm_unfold_state_own": "Wert des Ingenieurs",
+        "fm_unfold_state_data": "Daten geändert",
+        "fm_unfold_state_local": "ausserhalb von Woodcore geändert",
+        "fm_unfold_state_conflict": "Konflikt",
+        "fm_unfold_state_missing": "Zeile gelöscht",
+        "fm_unfold_state_in_sync": "aktuell",
+        "fm_unfold_import": "Übernehmen",
+        "fm_unfold_import_tip": "Übernimmt die in der Datei geänderte Zeile in Woodcore: ein Wert des Nachweises wird dort geschrieben, ein anderer wird zum Wert des Ingenieurs",
+        "fm_unfold_import_all": "Alle übernehmen",
+        "fm_unfold_import_all_tip": "Übernimmt alle in der Datei geänderten Zeilen",
+        "fm_unfold_take_back": "Zurücksetzen",
+        "fm_unfold_take_back_tip": "Setzt den Wert des Exports anstelle des Wertes des Ingenieurs",
+        "fm_unfold_reinsert": "Wieder einfügen",
+        "fm_unfold_reinsert_tip": "Setzt die gelöschte Zeile an ihren Platz zurück",
+        "fm_unfold_mine": "Meine behalten",
+        "fm_unfold_mine_tip": "Behält in diesem Konflikt die Zeile der Datei",
+        "fm_unfold_theirs": "Die des Exports nehmen",
+        "fm_unfold_theirs_tip": "Schreibt in diesem Konflikt die Zeile des Exports",
+        "fm_unfold_regenerate": "Neu erzeugen",
+        "fm_unfold_regenerate_tip": "Schreibt die Berechnung nach der jetzigen Form des Nachweises neu und behält die Zeilen des Ingenieurs",
+        "fm_unfold_conflicts": "Konflikt bei {lines}: Wählen Sie, welche Fassung bleibt.",
+        "fm_unfold_done_import": "{id}: {line} übernommen",
+        "fm_unfold_done_import_all": "{id}: Zeilen übernommen",
+        "fm_unfold_done_take_back": "{id}: {line} übernimmt wieder den Wert des Exports",
+        "fm_unfold_done_reinsert": "{id}: {line} wieder eingefügt",
+        "fm_unfold_done_regenerate": "{id}: neu erzeugt",
         "fm_import_tip": "Eine Variable aus dem Export, einem anderen Bereich oder einem Dokument übernehmen, im Register «Variablen» gewählt",
         "fm_import_unavailable": "Der Import von Variablen kommt mit der neuen Fassung des Registers «Variablen».",
         "fm_import_refused": "«{name}» ist eine Variable des eigenen Bereichs des Dokuments, die sich nicht übernehmen lässt: Sie hat keinen benannten Bereich.",
@@ -154,21 +221,21 @@ STRINGS = {
         "fm_f_formula_tip": "Die Variablen mit ihrem angezeigten Namen, Zahlen, eine Einheit nach einer Zahl (12 N / 3000 mm); + − * / ^, Klammern, sqrt, min, max…",
         "fm_f_relation": "Beziehung",
         "fm_f_relation_tip": "Zwei Seiten und ein Zeichen: M_d <= M_(R,d); ≤ ≥ < > = ≠",
-        "fm_f_what": "Variable",
         "fm_keys": "Tab: nächstes Feld · Enter: bestätigen · Esc: verwerfen",
         "fm_out_unit": "Ausgabeeinheit",
         "fm_out_auto": "automatisch ({unit})",
         "fm_options": "Optionen von {command}",
         "fm_domain_options": "Der Bereich",
         "fm_domain_file": "Datei",
-        "fm_domain_note": "Ein Abschnitt druckt den Bereich mit #include \"/Formules/<id>.typ\" und liest einen Wert mit #val(Schlüssel, domain: \"<id>\"): Wer die ID ändert, muss diese Aufrufe korrigieren, die Woodcore auflistet.",
+        "fm_domain_note": "Ein Abschnitt druckt den Bereich mit #include \"/Domains/<id>.typ\" und liest einen Wert mit #var(Schlüssel, domain: \"<id>\"): Wer die ID ändert, muss diese Aufrufe korrigieren, die Woodcore auflistet.",
         "fm_delete_domain": "Bereich löschen…",
         "fm_delete_block": "Diesen Block löschen",
-        "fm_state_hand_edited": "Von Hand in einer anderen Form geschrieben: Er wird bei der nächsten Bestätigung in der Form von Woodcore neu geschrieben.",
+        "fm_state_misnamed": "Sein #var-domain nennt eine andere id als den Namen seiner Datei: Die id der Datei wird bei der nächsten Bestätigung hineingeschrieben.",
         "fm_state_unreadable": "Diese Datei lässt sich nicht lesen: {reason}. Korrigieren Sie sie in VS Code.",
         "fm_changed_on_disk": "{file} wurde auf der Festplatte geändert, seit Woodcore sie gelesen hat: Nichts wurde überschrieben. Der Bereich wird so neu gelesen, wie er jetzt ist; nehmen Sie die Änderung erneut vor.",
         "fm_double_click": "Doppelklick zum Bearbeiten",
         "fm_imported": "übernommen aus {source}",
+        "fm_as_unit": "Einheit ohne Umrechnung zugewiesen: {natural} → {wanted}",
         "fm_new_name": "Neuer Bereich",
         "fm_display_call": "#include",
         "fm_saved": "Bereich «{name}» gespeichert.",
@@ -176,7 +243,7 @@ STRINGS = {
         "fm_key_taken": "«{name}» ist in diesem Bereich bereits definiert: Wählen Sie einen anderen Namen.",
         "fm_not_number": "«{text}» ist keine Zahl.",
         "fm_id": "ID",
-        "fm_id_tip": "Der Name der Datei Formules/<id>.typ und das, was #val(domain:) erhält: aus dem Namen gebildet, solange der Bereich nicht gespeichert ist; eine Änderung benennt die Datei um.",
+        "fm_id_tip": "Der Name der Datei Domains/<id>.typ und das, was #var(domain:) erhält: aus dem Namen gebildet, solange der Bereich nicht gespeichert ist; eine Änderung benennt die Datei um.",
         "fm_id_invalid": "«{id}» ist keine ID: Kleinbuchstaben, Ziffern und Bindestriche, mit einem Buchstaben am Anfang.",
         "fm_id_taken": "Die ID «{id}» gehört schon einem anderen Bereich.",
         "fm_rename_failed": "{file} lässt sich nicht umbenennen: Ist die Datei in einem anderen Programm geöffnet?",
@@ -187,7 +254,6 @@ STRINGS = {
         "fm_text_tip": "Eigenes Typst: ein Titel (= Titel), ein Satz, eine Formel ($ … $). So gedruckt, wie es steht, nie berechnet.",
         "fm_text_placeholder": "Titel, Text oder Formel in Typst…",
         "fm_text_command": "Ein Text darf kein #{command} enthalten: Schreiben Sie es als Block, den Woodcore berechnet.",
-        "fm_text_trailing": "«{line}»: Das «{rest}» nach #{command}(...) auf derselben Zeile wird abgelehnt -- es macht die Zeile zu einem Text, den Woodcore nicht berechnet. Schreiben Sie {hint}, ohne «{rest}» nach dem Aufruf: Mehrere untereinander geschriebene Variablen werden auf einer Zeile gedruckt (standardmässig in der Zeile, note: \"line\" setzt eine auf ihre eigene Zeile).",
         "fm_index_refused": "Der Bereich ist gespeichert, aber das Verzeichnis der Bereiche (data/formulas.json) konnte nicht aktualisiert werden: {reason}",
         "fm_text_tag": "Ein Text darf keine Zeile der Markierungen von Woodcore enthalten (// woodcore:).",
         "fm_text_unbalanced": "Dieser Text liesse sich nach dem Schreiben nicht unverändert zurücklesen: Sind seine Klammern ausgeglichen?",
@@ -198,7 +264,9 @@ STRINGS = {
         "fm_drop_order": "Verschieben abgelehnt: {reason}",
     },
     "en": {
-        "tab_formula": "Formulas",
+        "tab_formula": "Domains",
+        "fm_group_snow-load": "Snow", "fm_group_live-load": "Live loads", "fm_group_wind-load": "Wind", "fm_group_dead-load": "Permanent loads", "fm_group_connector": "Connectors",
+        "fm_group_connection": "Polar moment", "fm_group_script": "Scripts", "fm_group_steel": "Steel – {kind}",
         "fm_domains": "Calculation domains",
         "fm_empty": "No calculation domain yet. Choose «Domain» on the right to make one.",
         "fm_no_domain": "Open a domain on the left, or make one with «Domain» on the right.",
@@ -207,7 +275,7 @@ STRINGS = {
         "fm_commands": "Commands",
         "fm_commands_hint": "Choose the command to add to the domain.",
         "fm_cmd_domain": "Domain",
-        "fm_cmd_domain_tip": "A new calculation domain: a file Formules/<id>.typ of the project",
+        "fm_cmd_domain_tip": "A new calculation domain: a file Domains/<id>.typ of the project",
         "fm_cmd_var": "var — variable",
         "fm_cmd_eq": "eq — equation",
         "fm_cmd_verify": "verify — check",
@@ -217,6 +285,37 @@ STRINGS = {
         "fm_variables_tip": "A click writes the variable into the calculation being typed, by its shown name.",
         "fm_variables_none": "No variable yet.",
         "fm_import": "Import…",
+        "fm_unfold": "Unfolded check",
+        "fm_unfold_head": "Written from the check {id}",
+        "fm_unfold_gone": "the check is no longer in the export",
+        "fm_unfold_no_match": "its form no longer matches the data: regenerate",
+        "fm_unfold_in_step": "Every line is up to date.",
+        "fm_unfold_state_own": "the engineer's value",
+        "fm_unfold_state_data": "data changed",
+        "fm_unfold_state_local": "changed outside Woodcore",
+        "fm_unfold_state_conflict": "conflict",
+        "fm_unfold_state_missing": "line taken out",
+        "fm_unfold_state_in_sync": "up to date",
+        "fm_unfold_import": "Import",
+        "fm_unfold_import_tip": "Takes the line changed in the file into Woodcore: a value of the check is written there, any other becomes the engineer's own",
+        "fm_unfold_import_all": "Import all",
+        "fm_unfold_import_all_tip": "Imports every line changed in the file",
+        "fm_unfold_take_back": "Take back",
+        "fm_unfold_take_back_tip": "Puts the export's value back in place of the engineer's",
+        "fm_unfold_reinsert": "Reinsert",
+        "fm_unfold_reinsert_tip": "Puts the line taken out back where it was",
+        "fm_unfold_mine": "Keep mine",
+        "fm_unfold_mine_tip": "Keeps the file's line in this conflict",
+        "fm_unfold_theirs": "Take the export's",
+        "fm_unfold_theirs_tip": "Writes the export's line in this conflict",
+        "fm_unfold_regenerate": "Regenerate",
+        "fm_unfold_regenerate_tip": "Writes the calculation again in the check's form now, keeping the engineer's lines",
+        "fm_unfold_conflicts": "Conflict on {lines}: choose which version to keep.",
+        "fm_unfold_done_import": "{id}: {line} imported",
+        "fm_unfold_done_import_all": "{id}: lines imported",
+        "fm_unfold_done_take_back": "{id}: {line} takes the export's value again",
+        "fm_unfold_done_reinsert": "{id}: {line} put back",
+        "fm_unfold_done_regenerate": "{id}: regenerated",
         "fm_import_tip": "Take a variable from the export, another domain or a document, chosen in the «Variables» tab",
         "fm_import_unavailable": "Importing variables comes with the new version of the «Variables» tab.",
         "fm_import_refused": "«{name}» is a variable of the document's own domain, which cannot be taken: it has no named domain.",
@@ -231,21 +330,21 @@ STRINGS = {
         "fm_f_formula_tip": "The variables by their shown name, numbers, a unit after a number (12 N / 3000 mm); + − * / ^, parentheses, sqrt, min, max…",
         "fm_f_relation": "Relation",
         "fm_f_relation_tip": "Two sides and a sign: M_d <= M_(R,d); ≤ ≥ < > = ≠",
-        "fm_f_what": "Variable",
         "fm_keys": "Tab: next field · Enter: validate · Esc: give up",
         "fm_out_unit": "Output unit",
         "fm_out_auto": "automatic ({unit})",
         "fm_options": "Options of {command}",
         "fm_domain_options": "The domain",
         "fm_domain_file": "File",
-        "fm_domain_note": "A section prints the domain with #include \"/Formules/<id>.typ\" and reads a value with #val(key, domain: \"<id>\"): changing the ID means correcting those calls, which Woodcore lists.",
+        "fm_domain_note": "A section prints the domain with #include \"/Domains/<id>.typ\" and reads a value with #var(key, domain: \"<id>\"): changing the ID means correcting those calls, which Woodcore lists.",
         "fm_delete_domain": "Delete the domain…",
         "fm_delete_block": "Delete this block",
-        "fm_state_hand_edited": "Written by hand in another form: it is written again in Woodcore's at the next validation.",
+        "fm_state_misnamed": "Its #var-domain names another id than its file's name: the file's id is written into it at the next validation.",
         "fm_state_unreadable": "This file cannot be read: {reason}. Correct it in VS Code.",
         "fm_changed_on_disk": "{file} changed on the disk since Woodcore read it: nothing was written over it. The domain is read again as it is now; make the change again.",
         "fm_double_click": "Double-click to edit",
         "fm_imported": "taken from {source}",
+        "fm_as_unit": "unit given without conversion: {natural} → {wanted}",
         "fm_new_name": "New domain",
         "fm_display_call": "#include",
         "fm_saved": "Domain «{name}» saved.",
@@ -253,7 +352,7 @@ STRINGS = {
         "fm_key_taken": "«{name}» is defined already in this domain: choose another name.",
         "fm_not_number": "«{text}» is not a number.",
         "fm_id": "ID",
-        "fm_id_tip": "The name of the file Formules/<id>.typ, and what #val(domain:) is given: made from the name until the domain is saved; changing it renames the file.",
+        "fm_id_tip": "The name of the file Domains/<id>.typ, and what #var(domain:) is given: made from the name until the domain is saved; changing it renames the file.",
         "fm_id_invalid": "«{id}» is no ID: lower-case letters, digits and hyphens, starting with a letter.",
         "fm_id_taken": "The ID «{id}» is another domain's already.",
         "fm_rename_failed": "{file} cannot be renamed: is it open in another program?",
@@ -264,7 +363,6 @@ STRINGS = {
         "fm_text_tip": "Typst of your own: a title (= Title), a sentence, a formula ($ … $). Printed as it stands, never computed.",
         "fm_text_placeholder": "Title, text or formula in Typst…",
         "fm_text_command": "A text cannot hold #{command}: write it as a block, which Woodcore computes.",
-        "fm_text_trailing": "«{line}»: the «{rest}» after #{command}(...) on the same line is refused -- it makes the line a text, which Woodcore does not compute. Write {hint}, without «{rest}» after the call: several variables written one under the other print on one line (inline by default, note: \"line\" sets one on a line of its own).",
         "fm_index_refused": "The domain is saved, but the index of the domains (data/formulas.json) could not be updated: {reason}",
         "fm_text_tag": "A text cannot hold a line of Woodcore's tags (// woodcore:).",
         "fm_text_unbalanced": "This text would not read back as it is once written: do its brackets balance?",
@@ -277,9 +375,9 @@ STRINGS = {
 }
 
 # the commands the right pane offers, in order (D-04)
-PALETTE = ("var", "eq", "verify", "val", "var-unit")
+PALETTE = ("var", "eq", "verify")
 # the commands whose printing «Affichage» sets line by line (issue #19) -- every one the palette writes: a `verify`'s level is how it is printed, and «Calcul» offers it no more
-PRINTED = ("var", "eq", "verify", "val", "var-unit")
+PRINTED = ("var", "eq", "verify")
 
 
 def display_preset(command):
@@ -299,13 +397,13 @@ def display_preset(command):
     return preset
 
 
-class FormulaTab(FormulaBlocksMixin, FormulaDomainsMixin, display_view.DisplayTab, QWidget):
+class FormulaTab(FormulaUnfoldMixin, FormulaBlocksMixin, FormulaDomainsMixin, source_editor.SourceEditorTab, display_view.DisplayTab, QWidget):
     """See the module's docstring."""
 
     VIEWS = views.CALC_VIEWS
     KEY = "tab_formula"
     # The domain's own refusals (formula_domain.DomainError), by code, as the window says them: English stays the export's
-    REFUSALS = {"id_invalid": "fm_id_invalid", "id_taken": "fm_id_taken", "rename_failed": "fm_rename_failed", "changed_on_disk": "fm_changed_on_disk", "text_command": "fm_text_command", "text_trailing": "fm_text_trailing",
+    REFUSALS = {"id_invalid": "fm_id_invalid", "id_taken": "fm_id_taken", "rename_failed": "fm_rename_failed", "changed_on_disk": "fm_changed_on_disk", "text_command": "fm_text_command",
                 "text_tag": "fm_text_tag", "text_unbalanced": "fm_text_unbalanced", "name_empty": "fm_name_empty", "name_line": "fm_name_line"}
 
     def __init__(self, app):
@@ -342,9 +440,7 @@ class FormulaTab(FormulaBlocksMixin, FormulaDomainsMixin, display_view.DisplayTa
         for index, stretch in enumerate((2, 6, 3)):
             self.splitter.setStretchFactor(index, stretch)
         layout.addWidget(self.splitter, 1)
-        shortcut = QShortcut(QKeySequence(QKeySequence.StandardKey.Save), self)
-        shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        shortcut.activated.connect(self.save)
+        source_editor.save_shortcut(self)   # Ctrl+S
         # the text written, and an option of a closed block, saved once the typing pauses -- not at every key (ARCH-RISK-103)
         self.text_timer = QTimer(self)
         self.text_timer.setSingleShot(True)
@@ -448,6 +544,8 @@ class FormulaTab(FormulaBlocksMixin, FormulaDomainsMixin, display_view.DisplayTa
         cv.addWidget(self.import_button, 0, Qt.AlignmentFlag.AlignLeft)
         self.var_card = var_card
         v.addWidget(var_card)
+        # an unfolded check: where each of its lines stands, and what to do with it (spec 2026-10-15, UI-002)
+        v.addWidget(self.build_unfold_card())
         # the options of the block chosen -- a block being written, or one validated, a single click away (REQ-003)
         self.options_box = QWidget()
         self.options_layout = QVBoxLayout(self.options_box)
@@ -496,7 +594,7 @@ class FormulaTab(FormulaBlocksMixin, FormulaDomainsMixin, display_view.DisplayTa
 
     def right_cards(self):
         """What the right pane shows now, in its order -- what the tests read."""
-        cards_ = [("variables", self.var_card), ("options", self.options_box), ("domain", self.domain_card), ("commands", self.palette)]
+        cards_ = [("variables", self.var_card), ("unfold", self.unfold_card), ("options", self.options_box), ("domain", self.domain_card), ("commands", self.palette)]
         return [name for name, widget in cards_ if not widget.isHidden()]
 
     def show_right(self):
@@ -556,7 +654,7 @@ class FormulaTab(FormulaBlocksMixin, FormulaDomainsMixin, display_view.DisplayTa
         self.domains = fd.list_domains(project.current())
         self.fill_tree()
         self.state_note.setVisible(False)
-        self.domain_file.setText(f"{project.FORMULAS_FOLDER}/{saved.id}.typ")
+        self.domain_file.setText(project.current().rel(saved.path))   # Domains/<id>.typ, or the specialised tab's folder of a domain written there (issue #64)
         self.update_list_marker()
         self.app.set_status(self.t("fm_saved", name=self.domain.name))
         return True
@@ -613,9 +711,19 @@ class FormulaTab(FormulaBlocksMixin, FormulaDomainsMixin, display_view.DisplayTa
     # --- the window's hooks -------------------------------------------------------------------------
 
     def on_shown(self):
-        """The tab brought to the front: the domains read again -- a domain VS Code changed is shown as it is now."""
-        if not any(b.editing for b in self.blocks) and not self.text_timer.isActive():
-            self.reload()
+        """The tab brought to the front: the domains read again -- a domain VS Code changed is shown as it is now. The domain open is read again only where its file changed: one that did not keeps its blocks, the one chosen and the pills laid out (a reading of it renews them all)."""
+        if any(b.editing for b in self.blocks) or self.text_timer.isActive():
+            return
+        if self.domain is not None and self.domain.path is not None and self.domain.path.is_file():
+            try:
+                fd.check_unchanged(self.domain)
+            except fd.DomainError:
+                self.reload()
+                return
+            self.domains = fd.list_domains(project.current())
+            self.fill_tree()
+            return
+        self.reload()
 
     def on_mode(self, _mode):
         self.update_display()

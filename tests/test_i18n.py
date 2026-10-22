@@ -365,6 +365,18 @@ def _window_strings_named():
                 prefixes.add(node.values[0].value)
             elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add) and isinstance(node.left, ast.Constant) and isinstance(node.left.value, str):
                 prefixes.add(node.left.value)
+    # a tab of sources names its list's words by its prefix and the suffixes of its base (source_editor.WORD_SUFFIXES, spec 2026-10-19-base-saine-nettoyage)
+    editor = ast.parse((tools / "source_editor.py").read_text(encoding="utf-8"))
+    suffixes = next(ast.literal_eval(n.value) for n in editor.body if isinstance(n, ast.Assign) and any(getattr(t, "id", None) == "WORD_SUFFIXES" for t in n.targets))
+    for path in sorted(tools.glob("*.py")):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "WORDS" for t in node.targets) and isinstance(node.value, ast.Constant) and node.value.value:
+                literals.update(f"{node.value.value}_{suffix}" for suffix in suffixes)
+            elif isinstance(node, ast.Assign) and isinstance(node.value, ast.Tuple) and any(isinstance(t, ast.Tuple) and any(getattr(e, "id", None) == "WORDS" for e in t.elts) for t in node.targets):
+                for target in node.targets:
+                    for name, value in zip(target.elts, node.value.elts):
+                        if getattr(name, "id", None) == "WORDS" and isinstance(value, ast.Constant) and value.value:
+                            literals.update(f"{value.value}_{suffix}" for suffix in suffixes)
     dead = sorted((module, key) for key, module in defined.items()
                   if key not in literals and not any(len(p) >= 3 and key.startswith(p) for p in prefixes))
     return defined, dead
@@ -409,7 +421,7 @@ def test_a_choice_the_norm_names_is_translated_inside_the_sentence_that_quotes_i
     if not conftest.have_typst():
         return
     probe = conftest.probe_dir("i18n") / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n#metadata(tl-of("fr", "%s")) <out>\n' % german, encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n#metadata(tl-of("fr", "%s")) <out>\n' % german, encoding="utf-8")
     out = subprocess.run(["typst", "query", "--root", str(conftest.TYPST_ROOT), str(probe), "<out>", "--field", "value", "--one"],
                          capture_output=True, text=True, encoding="utf-8")
     assert out.returncode == 0, out.stderr
@@ -509,7 +521,6 @@ def test_the_editors_warnings_speak_the_window_s_language():
 # The labels that name the level of detail -- `level:` --, by module and key: issue #20 has the French call it «Niveau de détail» everywhere. A «Niveau» that is not the level of detail stays (the storey, a heading's level, the level a load is carried at).
 DETAIL_LEVEL_LABELS = {
     "display_options.py": ("ds_opt_level",),
-    "member_check_tab.py": ("mc_opt_level",),
     "variables_tab.py": ("vr_level",),
     "journal_tab.py": ("jo_levels",),
     "woodcore_gui.py": ("pdf_base_level", "pdf_uniform_level"),

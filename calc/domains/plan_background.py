@@ -8,6 +8,7 @@ import struct
 import xml.etree.ElementTree as ET
 from pathlib import Path
 import validation
+from domains._common import fail as _fail  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 
 
 # The storeys a plan's «Étage» offers, by language, the same index the same storey; free text is accepted as well (the engineer's answer of 06.10.2026: «storey» a free designation of any length, «floor» the one character of the positions' numbers, proposed from it -- storey_floor).
@@ -30,10 +31,6 @@ _STOREY_ATTIC = 8
 
 # The backgrounds a plan may be drawn on, by file suffix.
 BACKGROUND_FORMATS = {".pdf": "pdf", ".png": "png", ".jpg": "jpg", ".jpeg": "jpg", ".svg": "svg"}
-
-
-def _fail(where, message):
-    raise validation.ValidationError(f"{where}: {message}")
 
 
 def background_format(path):
@@ -196,11 +193,6 @@ def sheet_of(path, fmt, page=1, where="background"):
     if not size or size[0] <= 0 or size[1] <= 0:
         _fail(where, f"{path.name}: its size cannot be read")
     return float(size[0]), float(size[1])
-
-
-def pdf_page_count(path):
-    """How many pages a PDF has -- the pages a plan may be drawn on."""
-    return len(_pdf_reader(path).pages)
 
 
 def file_hash(path):

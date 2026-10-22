@@ -14,6 +14,7 @@ from pathlib import Path
 
 import project
 import validation
+from domains._common import fail as _fail, is_number as _number  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 
 SOURCE_SCHEMA = "profile-source"
 SOURCE_SCHEMA_VERSION = "1.0"
@@ -38,14 +39,6 @@ C5_TEMPLATES = {
     "IPE": "I", "IPEA": "I", "IPN": "I", "HEA": "I", "HEB": "I", "HEM": "I", "HD": "I", "HL": "I",
     "UPE": "U", "UPN": "U", "T": "T", "IPET": "T", "HEAT": "T", "HEBT": "T", "L": "L", "RRK": "RHS", "RRW": "RHS", "VKT": "plate",
 }
-
-
-def _fail(where, message):
-    raise validation.ValidationError("%s: %s" % (where, message))
-
-
-def _number(value):
-    return not isinstance(value, bool) and isinstance(value, (int, float))
 
 
 # --- the models -----------------------------------------------------------------
@@ -212,6 +205,8 @@ def check_source(src, where="profiles"):
         _fail(where, "is not a JSON object")
     if src.get("schema") != SOURCE_SCHEMA or src.get("schema_version") != SOURCE_SCHEMA_VERSION:
         _fail(where, "schema %r %r -- expected %r %r" % (src.get("schema"), src.get("schema_version"), SOURCE_SCHEMA, SOURCE_SCHEMA_VERSION))
+    # the contract first, schemas/profile-source.schema.json, as every other domain reads its own (v0.120, C3); the checks below say in the engineer's words what it leaves out
+    validation.validate_structure(src, "profile-source", where)
     pid = src.get("id")
     if not isinstance(pid, str) or not ID_PATTERN.match(pid):
         _fail(where, "id %r -- letters, digits and _ . + - only" % (pid,))

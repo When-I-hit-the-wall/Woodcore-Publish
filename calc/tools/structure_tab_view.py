@@ -389,6 +389,9 @@ class StructureTabViewMixin:
         here, mode = project.current(), self.mode()
         self.pane_loaded = True
         self.form_seen = self.form_signature()
+        if not here.is_created(mode):   # a document not made yet (issue #90): nothing to show, nothing to compile
+            self.pane.clear()
+            return
         try:
             self.pane.set_document(here, mode)
         except project.ProjectError:
@@ -420,6 +423,8 @@ class StructureTabViewMixin:
         if not self.pane_loaded or self.error:
             return None
         here, mode = project.current(), self.mode()
+        if not here.is_created(mode):
+            return None
         snippet = None
         if ids:
             try:
@@ -437,9 +442,6 @@ class StructureTabViewMixin:
         self.pane.request_snippet(here, mode, snippet.source, snippet.key)
         return snippet
 
-    def request_compile(self):
-        """What the page shows compiled again, a moment from now: the snippet of what is chosen, or the document where nothing is."""
-        self.request_preview(force=True)
 
     def compile_now(self, _checked=False):
         """The button: the whole document compiled at once, in the background -- the page showing it where nothing is chosen."""

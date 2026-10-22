@@ -4,16 +4,16 @@
 == Plans du concept de la structure
 // woodcore:/object title
 
-// woodcore:object doc-table concept-drawings-table
-#doc-table(
-  columns: (
-    (id: "no", title: [Plan n°]),
-    (id: "title", title: [Titre]),
-    (id: "status", title: [État (indice, date)]),
-  ),
-  hidden: (),
-  rows: (
-    (no: [[…]], title: [[Indications statiques, sous-sol]], status: [[…]]),
+// woodcore:object table concept-drawings-table
+#figure(
+  table(
+    columns: (auto, auto, auto),
+    align: (left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Plan n°*], [*Titre*], [*État (indice, date)*]),
+    table.hline(stroke: 0.5pt),
+    [[…]], [[Indications statiques, sous-sol]], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Plans du concept de la structure],
 )

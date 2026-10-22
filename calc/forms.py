@@ -25,6 +25,7 @@ from pathlib import Path
 import project
 import templates
 import validation
+import usersettings
 
 FILE = "form.json"
 FORMAT = "woodcore-form"
@@ -42,8 +43,8 @@ ARCHIVES = "archives"
 STAGING = ".forming"
 # What a project's archives folder gets when a form is switched: `<yymmdd-hhmmss>-forme`.
 ARCHIVE_LABEL = "forme"
-# `#import "/Template/template.typ": template`: what makes a config.typ the new format.
-_FORM_IMPORT = re.compile(r'^[ \t]*#import[ \t]+"/Template/template\.typ"', re.M)
+# `#import "/Template/template.typ": template` -- `"/000-Typst-Config/Template/template.typ"` in a project laid out by folders (issue #64): what makes a config.typ the new format.
+_FORM_IMPORT = re.compile(r'^[ \t]*#import[ \t]+"(?:/[^"/]+)?/Template/template\.typ"', re.M)
 _TEMPLATE_DEF = re.compile(r"^[ \t]*#let[ \t]+template[ \t]*\(", re.M)
 _TITLE_DEF = re.compile(r"^[ \t]*#let[ \t]+title-page[ \t]*\(", re.M)
 _LANG_VALUE = re.compile(r"^[A-Za-z-]*$")
@@ -77,7 +78,7 @@ def place_dir(place, settings=None):
         return templates.BUILTIN_DIR / "forms"
     if place not in PLACES:
         _refuse("bad_place", f"unknown place of forms {place!r} -- expected one of {', '.join(PLACES)}", place=str(place))
-    settings = settings if settings is not None else templates._usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     root = templates.place_dir(place, settings)
     return None if root is None else Path(root) / "forms"
 
@@ -179,7 +180,7 @@ def read(folder, place):
 
 def list_forms(settings=None):
     """Every form of the three places, builtin first (`neutral`, then the others in the order of their names), then the engineer's, then the office's. A folder holding no form.json is not a form and is left out; one whose form.json is wrong is listed, its `error` saying why."""
-    settings = settings if settings is not None else templates._usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     out = []
     for place in PLACES:
         root = place_dir(place, settings)
@@ -225,7 +226,7 @@ def default():
 
 def default_ref(settings=None):
     """The reference of the form «Nouveau projet» offers first: the settings' `forms.default`, else builtin neutral -- `templates.default_ref`'s arrangement for the forms. `settings` is read where none is given."""
-    settings = settings if settings is not None else templates._usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     ref = (settings.get("forms") if isinstance(settings.get("forms"), dict) else {}).get("default")
     return ref.strip() if isinstance(ref, str) and ref.strip() else f"builtin:{NEUTRAL}"
 
@@ -242,7 +243,7 @@ def set_default(settings, ref):
 
 def default_form(settings=None):
     """The form the settings name as the default, else builtin neutral -- and neutral where the one named is gone or cannot be used, as `templates.default_template` falls back to Standard."""
-    settings = settings if settings is not None else templates._usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     try:
         return find(default_ref(settings), settings)
     except FormError:
@@ -252,8 +253,8 @@ def default_form(settings=None):
 # --- the form a project is written in ---------------------------------------------------------
 
 def template_dir(here):
-    """`here`'s `Template/`, at its Typst root."""
-    return Path(here.typst_root) / TEMPLATE_DIR
+    """`here`'s `Template/`: beside its config.typ, in 000-Typst-Config/ laid out by folders, at its Typst root before (project.Project.template_dir)."""
+    return Path(here.template_dir)
 
 
 def current(here):
@@ -405,6 +406,13 @@ Everything is checked and staged first, beside the project, and what is moved or
             if not keep_config:
                 staged_config = stage / "config.typ"
                 staged_config.write_text(config_text(language, region), encoding="utf-8", newline="")
+            # laid out by folders, what the form's title page and a new config.typ name at the root -- `/commands.typ`, `/Template/…` -- named where 000-Typst-Config/ keeps it, staged before anything is put in place (issue #64); nothing for a project laid out before
+            import documents
+            for staged in [staged_title] + ([staged_config] if staged_config is not None else []):
+                text = staged.read_text(encoding="utf-8")
+                moved = documents.relocate_config_text(here, text)
+                if moved != text:
+                    staged.write_bytes(moved.encode("utf-8"))
             # 2. keep what was there
             old = [(target, TEMPLATE_DIR), (title, TITLE_FILE)] + ([] if keep_config else [(config, "config.typ")])
             old = [(path, name) for path, name in old if path.exists()]
@@ -422,7 +430,7 @@ Everything is checked and staged first, beside the project, and what is moved or
             if staged_config is not None:
                 _retried(os.replace, staged_config, config)
                 undo.append((os.replace, config, staged_config))
-        except Exception as exc:
+        except Exception as exc:  # broad: whatever stopped a move, the moves done are undone first, then raised again
             for call, source, destination in reversed(undo):
                 try:
                     _retried(call, source, destination)
@@ -471,7 +479,7 @@ def import_folder(source, replace=False, settings=None):
     """«Importer un dossier…»: the form in the folder `source` -- a folder holding a form.json, a template.typ and a title.typ -- copied into the engineer's own place (`place_dir("user")`) under its folder's name. Returns the form as it now stands there.
 
     **Checked before anything is written**: `source` must be a folder (`not_a_folder`) holding a form.json (`no_form`) that `check` finds sound (`invalid`, its reason in `error`), not named as a builtin form (`name_is_builtin`), and not one of the engineer's own already (`already_mine`). A form of that folder's name in his place is refused (`exists`) unless `replace`, which moves the old one into the place's `archives/` -- never deleted -- and puts it back if the copy then fails. The copy is staged beside the place and read back first, so a failure (`write_failed`) leaves nothing half copied."""
-    settings = settings if settings is not None else templates._usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     source = Path(source)
     if not source.is_dir():
         _refuse("not_a_folder", f"{source} is not a folder", folder=str(source))
@@ -519,7 +527,7 @@ def save_from_project(here, name, place="user", settings=None, description=""):
     """«Enregistrer comme forme»: the form of project `here` -- its `Template/` and its title.typ -- made a form named `name` in `place`, in a folder of its own: everything of `Template/` but its form.json, which is written afresh with `name` and `description`, the same in the three languages (the engineer wrote them in one). Returns the new form.
 
     Refused where the project has no `Template/` with a template.typ (`no_project_form`: a project from before forms has its look in config.typ, which is the project's own and not a form), where the name is empty or a builtin form's, and where the place is builtin or shared without a folder. Staged and read back before it is moved into place, so a form that would not be sound is never left."""
-    settings = settings if settings is not None else templates._usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     root = Path(_writable_root(place, settings))
     name = _check_folder_name(name)
     folder_id = templates.folder_name(name)

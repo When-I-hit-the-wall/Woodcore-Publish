@@ -9,10 +9,13 @@ What is held, in each engine on a copy of the example project:
 ⚠️ Built off-screen; nothing here compiles Typst.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import sys
 
 import conftest
+import engine
 from conftest import ROOT, Skip
 
 import project
@@ -102,7 +105,7 @@ def test_a_text_is_placed_written_saved_and_exported_in_the_static_models():
         statics.check_source(saved, "TX1.json")
         exported = json.loads((here.data_dir / "statics.json").read_text(encoding="utf-8"))
         assert exported["models"]["TX1"]["texts"][0]["lines"] == ["Charge L = 17.5 m"]
-        svg = (here.data_dir / "statics" / "TX1-de.svg").read_text(encoding="utf-8")
+        svg = engine.Figures(here.data_dir, "statics", here).path(engine.Figures(here.data_dir, "statics", here).name("TX1-de.svg")).read_text(encoding="utf-8")
         assert ">Charge L = 17.5 m<" in svg
         # its size, the selection's own `text` factor, and «Retirer», which takes the variable and its token
         tab.set_entry_style(entry, "text", 1.5)
@@ -135,9 +138,9 @@ def test_a_text_is_placed_written_saved_and_exported_in_the_schemas():
         assert saved["schema_version"] == schema.TEXT_SCHEMA_VERSION and saved["texts"][0]["vars"]["1"]["last"]["value"] == 17.5
         schema.check_source(saved, "TX1.json")
         exported = json.loads((here.data_dir / "schemas.json").read_text(encoding="utf-8"))
-        assert exported["schema_version"] == schema.TEXT_EXPORT_VERSION
+        assert exported["schema_version"] == schema.SIZE_EXPORT_VERSION, "1.4 contains 1.3 and 1.2: every export since v0.120 (D7)"
         assert exported["schemas"]["TX1"]["texts"][0]["lines"] == ["Charge L = 17.5 m"]
-        assert ">Charge L = 17.5 m<" in (here.data_dir / "schemas" / "TX1-de.svg").read_text(encoding="utf-8")
+        assert ">Charge L = 17.5 m<" in conftest.figure(here, exported["schemas"]["TX1"]["figures"]["de"]["file"]).read_text(encoding="utf-8")
         # the text deleted, the schema is 1.1 again
         tab.canvas.select(("texts", "T1"))
         tab.canvas.delete_selection()
@@ -235,10 +238,10 @@ def test_a_text_is_placed_written_saved_and_exported_in_a_fire_protection_plan()
         assert saved["texts"][0]["vars"]["1"]["last"]["value"] == 17.5
         fire.check_source(saved, "Treppenhaus.json")
         exported = json.loads((here.data_dir / "fire.json").read_text(encoding="utf-8"))
-        assert exported["schema_version"] == fire.TEXT_EXPORT_VERSION
+        assert exported["schema_version"] == (fire.ROOTED_EXPORT_VERSION if here.has_folders else fire.TEXT_EXPORT_VERSION), "laid out by folders, 2.2 contains 2.1 (issue #64)"
         record = exported["plans"]["Treppenhaus"]
         assert record["texts"][0]["lines"] == ["Charge L = 17.5 m"] and record["texts"][0]["id"] == "X1"
-        assert ">Charge L = 17.5 m<" in (here.data_dir / record["figures"]["de"]).read_text(encoding="utf-8")
+        assert ">Charge L = 17.5 m<" in conftest.figure(here, record["figures"]["de"]).read_text(encoding="utf-8")
         # the plan turned with its page: the text with it
         turned = fire.rotate_source(saved, 1, (1000.0, 700.0))
         assert turned["texts"][0]["points"] == [[700 - at[1], at[0]]]

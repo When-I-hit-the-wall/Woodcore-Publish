@@ -5,6 +5,8 @@ The panes sit over the models of calc/typst_objects.py, whose own tests (tests/t
 ⚠️ Built off-screen. Every dialog the engineer would be asked in -- the variable picker, the picture's file chooser -- is replaced by a function of the context, as a modal off-screen never comes back.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import ast
 import os
 import re
@@ -51,65 +53,6 @@ def _pump(seconds=0.0):
 
 # --- samples, in the canonical form the editor writes ----------------------------------------------------
 
-DOC_TABLE = """#doc-table(
-  columns: (
-    (id: "part", title: [Bauteil]),
-    (id: "value", title: [Wert], kind: "number"),
-  ),
-  hidden: (),
-  rows: (
-    (part: [Decke], value: 3),
-    (part: [Dach], value: 4.5),
-  ),
-  caption: [Lasten],
-)"""
-
-LIVE_LOAD = """#live-load-table(
-  hidden: ("zone",),
-  rows: (
-    (storey: [EG], use: [Büro], category: "B", q_k: auto, Q_k: auto),
-    (storey: [Dach], use: [Unterhalt], category: "H", q_k: 0.5, Q_k: auto),
-  ),
-)"""
-
-# a table written before the rework: its three ψ columns are among the columns `auto` stands for
-LIVE_LOAD_AUTO = """#live-load-table(
-  rows: (
-    (storey: [EG], use: [Büro], category: "B", q_k: auto, Q_k: auto),
-  ),
-)"""
-
-DEAD_LOAD = """#dead-load-table(
-  hidden: ("zone",),
-  rows: (
-    (storey: [OG], buildup: [Bodenaufbau], load: 1.5),
-    (storey: [Dach], buildup: [Dachaufbau], load: [#doc-value("gk_ak_gew", domain: ("dead-load", "EL+AL-Dach"))]),
-  ),
-)"""
-
-CHOICE = """#doc-choice(
-  label: [Nutzungsdauer],
-  options: (
-    (id: "a", label: [50 Jahre]),
-    (id: "b", label: [100 Jahre]),
-  ),
-  selected: "a",
-)"""
-
-CHECKLIST = """#doc-checklist(
-  label: [Einwirkungen],
-  options: (
-    (id: "snow", label: [Schnee], checked: true),
-    (id: "wind", label: [Wind], checked: false, text: [Nach SIA 261.]),
-  ),
-)"""
-
-SIGNATURES = """#doc-signatures(
-  rows: (
-    (group: [Bauherrschaft], role: [Vertreter], name: [A. Muster]),
-    (group: [Ingenieur], role: [Projektleiter]),
-  ),
-)"""
 
 NORMS = """#show-norm-list(
   keys: (
@@ -117,44 +60,6 @@ NORMS = """#show-norm-list(
     [Merkblatt des Büros],
   ),
 )"""
-
-FIELD = """#doc-field(
-  label: [Tragwerksklasse],
-  value: 2,
-  unit: "–",
-)"""
-
-IMAGE = """#doc-image(
-  file: "Images/profil.png",
-  caption: [Profil],
-  width: 60%,
-)"""
-
-PLAN = """#doc-plan(
-  plan: "P1",
-  highlight: "T001",
-  detail: true,
-  zoom: 2,
-)"""
-
-EXTRACT = """#doc-extract(
-  excerpt: "CO1-My",
-  width: 70%,
-)"""
-
-FIRE_PLAN = """#doc-fire-plan(
-  plan: "Treppenhaus",
-  legend: false,
-)"""
-
-FIRE_PLANS = [{"id": "Pavillon-EG", "label": "Erdgeschoss"}, {"id": "Treppenhaus", "label": "Regelgeschoss"}]
-
-ANNEXES = """#doc-annexes(
-  heading: 3,
-)"""
-
-EXCERPTS = [{"id": "CO1-My", "name": "Biegemomente", "source": "Rapport", "page": 3, "resolved": True},
-            {"id": "CO1-N", "name": "Normalkräfte", "source": "Rapport", "page": 4, "resolved": False}]
 
 
 def _model(text):
@@ -265,11 +170,11 @@ def test_every_kind_of_object_has_its_pane_and_the_aliases_of_the_tree_reach_one
     for kind in ("heading", "text", "section", "chapter"):
         assert isinstance(op.pane_for(kind, _context()), op.Pane)
     assert type(op.pane_for("file")).__name__ == "SectionPane" and type(op.pane_for("group")).__name__ == "ChapterPane"
-    assert type(op.pane_for("live-load-table")).__name__ == "LiveLoadPane"
+    assert type(op.pane_for("table")).__name__ == "RawTablePane"
     try:
         op.pane_for("doc-unknown")
     except KeyError as exc:
-        assert "doc-table" in str(exc)
+        assert "show-norm-list" in str(exc)
     else:
         raise AssertionError("an unknown kind was given a pane")
 
@@ -278,250 +183,50 @@ def test_a_pane_loads_a_model_a_call_an_object_or_text_and_says_nothing():
     op = _panes()
     objects = _objects()
     context = _context()
-    for subject in (_model(DOC_TABLE), objects.parse_call(DOC_TABLE), DOC_TABLE):
-        pane = op.pane_for("doc-table", context)
+    for subject in (_model(NORMS), objects.parse_call(NORMS), NORMS):
+        pane = op.pane_for("show-norm-list", context)
         emitted = []
         pane.changed.connect(emitted.append)
         pane.load(subject, context)
-        assert pane.row_list.count() == 2 and not emitted, type(subject).__name__
-        assert pane.current().serialize() == DOC_TABLE
-    text = f"// woodcore:object doc-table t\n{DOC_TABLE}\n// woodcore:/object t\n"
-    found = objects.find(text, "t")
-    pane = op.pane_for("doc-table", context)
+        assert pane.line_list.count() == 1 and not emitted, type(subject).__name__
+        assert pane.current().serialize() == NORMS
+    text = f"// woodcore:object show-norm-list n\n{NORMS}\n// woodcore:/object n\n"
+    found = objects.find(text, "n")
+    pane = op.pane_for("show-norm-list", context)
     pane.load(found, context)
-    assert pane.current().serialize() == DOC_TABLE
+    assert pane.current().serialize() == NORMS
 
 
 def test_the_snapshot_an_edit_emits_is_a_model_of_its_own():
-    pane, emitted = _pane("doc-table", DOC_TABLE)
-    pane.add_row()
+    pane, emitted = _pane("show-norm-list", NORMS)
+    pane.line_add.click()
     first = emitted[-1]
-    pane.add_row()
-    assert first.row_count == 3 and emitted[-1].row_count == 4, "a snapshot followed the pane's later edits"
-    assert pane.current().row_count == 4
+    pane.line_add.click()
+    assert len(first.keys) == 3 and len(emitted[-1].keys) == 4, "a snapshot followed the pane's later edits"
+    assert len(pane.current().keys) == 4
 
 
 # --- the tables ---------------------------------------------------------------------------------------------------
 
-def test_a_table_lists_its_rows_and_shows_the_fields_of_the_chosen_one():
-    pane, _ = _pane("doc-table", DOC_TABLE)
-    assert [pane.row_list.item(i).text() for i in range(2)] == ["1. Decke · 3", "2. Dach · 4.5"]
-    assert list(pane.cell_fields) == ["part", "value"]
-    assert pane.cell_fields["part"].text.toPlainText() == "Decke"
-    assert pane.cell_fields["value"].text.toPlainText() == "3"
-    pane.row_list.setCurrentRow(1)
-    assert pane.cell_fields["part"].text.toPlainText() == "Dach"
-    assert pane.cell_fields["value"].text.toPlainText() == "4.5"
-    assert pane.cell_fields["part"].text.isEnabled()
-    _assert_no_code(pane)
-
-
-def test_the_buttons_of_the_rows_add_remove_and_move_and_each_is_emitted_at_once():
-    pane, emitted = _pane("doc-table", DOC_TABLE)
-    reference = _model(DOC_TABLE)
-
-    pane.row_list.setCurrentRow(0)
-    pane.row_add.click()
-    reference.add_row(1)
-    assert emitted[-1].serialize() == reference.serialize() and pane.row_list.currentRow() == 1
-
-    pane.row_down.click()
-    reference.move_row(1, 2)
-    assert emitted[-1].serialize() == reference.serialize() and pane.row_list.currentRow() == 2
-
-    pane.row_up.click()
-    pane.row_up.click()
-    reference.move_row(2, 1)
-    reference.move_row(1, 0)
-    assert emitted[-1].serialize() == reference.serialize() and pane.row_list.currentRow() == 0
-
-    pane.row_remove.click()
-    reference.remove_row(0)
-    assert emitted[-1].serialize() == reference.serialize()
-    assert len(emitted) == 5, "a button's edit is one emission"
-    assert not pane.row_up.isEnabled(), "the first row cannot go up"
-    pane.row_list.setCurrentRow(pane.row_list.count() - 1)
-    assert not pane.row_down.isEnabled(), "the last row cannot go down"
-
-
-def test_a_text_typed_in_a_cell_is_emitted_once_after_the_debounce_and_not_before():
-    op = _panes()
-    pane, emitted = _pane("doc-table", DOC_TABLE)
-    field = pane.cell_fields["part"]
-    for typed in ("B", "Bo", "Bod", "Boden"):
-        field.text.setPlainText(typed)
-        _pump(0.02)
-    assert not emitted, "typing was emitted before the debounce"
-    assert pane.current().cell(0, "part").markup == "Boden", "the model follows the typing"
-    assert pane.row_list.item(0).text() == "1. Boden · 3", "the list follows the typing"
-    _pump(op.DEBOUNCE_MS / 1000 + 0.3)
-    assert len(emitted) == 1 and emitted[0].cell(0, "part").markup == "Boden"
-    reference = _model(DOC_TABLE)
-    reference.set_cell(0, "part", "Boden")
-    assert emitted[0].serialize() == reference.serialize()
-
-
-def test_a_number_typed_in_a_number_column_is_a_number_and_an_emptied_cell_leaves_the_row():
-    pane, emitted = _pane("doc-table", DOC_TABLE)
-    pane.cell_fields["value"].text.setPlainText("7,5")
-    pane.flush()
-    assert emitted[-1].cell(0, "value") == 7.5
-    pane.cell_fields["value"].text.setPlainText("12")
-    pane.flush()
-    assert emitted[-1].cell(0, "value") == 12 and isinstance(emitted[-1].cell(0, "value"), int)
-    pane.cell_fields["value"].text.setPlainText("inkl.")
-    pane.flush()
-    assert emitted[-1].cell(0, "value").markup == "inkl.", "a word in a number column stays a word"
-    pane.cell_fields["value"].text.setPlainText("")
-    pane.flush()
-    assert "value" not in emitted[-1].rows[0]
-    pane.cell_fields["part"].text.setPlainText("Boden [")
-    pane.flush()
-    assert pane.message.isVisibleTo(pane) and "[" not in pane.message.text() and emitted[-1].cell(0, "part").markup == "Decke", "a refused text is said in the pane and leaves the model"
-    pane.cell_fields["part"].text.setPlainText("Boden")
-    pane.flush()
-    assert not pane.message.isVisibleTo(pane) and emitted[-1].cell(0, "part").markup == "Boden"
-
-
 def test_a_pending_edit_is_emitted_before_the_next_object_is_loaded():
     op = _panes()
     context = _context()
-    pane, emitted = _pane("doc-table", DOC_TABLE, context)
-    pane.cell_fields["part"].text.setPlainText("Boden")
+    pane, emitted = _pane("show-norm-list", NORMS, context)
+    pane.line_list.setCurrentRow(0)
+    pane.line_edit_widget.textEdited.emit("Boden")
     assert not emitted
-    pane.load(_model(DOC_TABLE), context)
-    assert len(emitted) == 1 and emitted[0].cell(0, "part").markup == "Boden", "the edit of the object left was lost"
-    assert pane.current().cell(0, "part").markup == "Decke" and len(emitted) == 1, "loading is not an edit"
+    pane.load(_model(NORMS), context)
+    assert len(emitted) == 1 and "[Boden]" in emitted[0].serialize(), "the edit of the object left was lost"
+    assert pane.current().serialize() == NORMS and len(emitted) == 1, "loading is not an edit"
     # and the host does it before it moves its own notion of the selection
     host = op.ObjectPaneHost(context)
     seen = []
     host.changed.connect(lambda kind, payload: seen.append((kind, payload)))
-    host.show_object("doc-table", _model(DOC_TABLE))
-    host.pane().cell_fields["part"].text.setPlainText("Boden")
-    host.show_object("doc-field", _model(FIELD))
-    assert [k for k, _ in seen] == ["doc-table"] and seen[0][1].cell(0, "part").markup == "Boden"
-
-
-def test_the_columns_are_listed_hidden_or_shown_renamed_added_removed_and_moved():
-    pane, emitted = _pane("doc-table", DOC_TABLE)
-    reference = _model(DOC_TABLE)
-    assert [pane.column_list.item(i).text() for i in range(2)] == ["Bauteil", "Wert"]
-    from PySide6.QtCore import Qt
-    assert all(pane.column_list.item(i).checkState() == Qt.CheckState.Checked for i in range(2))
-
-    _check_item(pane.column_list, 0, False)
-    reference.hide_column("part")
-    assert emitted[-1].serialize() == reference.serialize()
-    assert list(pane.cell_fields) == ["value"], "a hidden column has no field in the row"
-    assert pane.row_list.item(0).text() == "1. 3", "nor a word in the row's summary"
-    _check_item(pane.column_list, 0, True)
-    reference.show_column("part")
-    assert emitted[-1].serialize() == reference.serialize() and list(pane.cell_fields) == ["part", "value"]
-
-    pane.column_list.setCurrentRow(1)
-    pane.column_title_edit.setText("Last")
-    pane.column_title_edit.textEdited.emit("Last")
-    pane.flush()
-    reference.set_column("value", title="Last")
-    assert emitted[-1].serialize() == reference.serialize() and pane.column_list.item(1).text() == "Last"
-
-    pane.col_add.click()
-    reference.add_column("col1", title="Colonne 1")
-    assert emitted[-1].serialize() == reference.serialize()
-    assert pane.column_list.count() == 3 and pane.column_list.currentRow() == 2 and "col1" in pane.cell_fields
-    assert pane.column_list.item(2).text() == "Colonne 1"
-
-    pane.col_up.click()
-    reference.move_column("col1", 1)
-    assert emitted[-1].serialize() == reference.serialize() and pane.column_list.currentRow() == 1
-
-    pane.col_remove.click()
-    reference.remove_column("col1")
-    assert emitted[-1].serialize() == reference.serialize() and pane.column_list.count() == 2
-
-
-def test_a_known_column_is_hidden_and_never_removed_and_carries_the_usual_title():
-    pane, emitted = _pane("dead-load-table", DEAD_LOAD)
-    ids = [pane.column_list.item(i).data(0x0100) for i in range(pane.column_list.count())]
-    assert ids == ["zone", "storey", "buildup", "load"]
-    assert pane.column_list.item(0).text() == "Zone" and pane.column_list.item(3).text() == "Poids propre non-structural"
-    pane.column_list.setCurrentRow(0)
-    assert not pane.col_remove.isEnabled(), "a known column cannot be removed, only hidden"
-    assert pane.column_title_edit.placeholderText(), "its usual title is said in its place"
-    # a title written and then emptied goes back to the usual one
-    pane.column_title_edit.textEdited.emit("Teil")
-    pane.flush()
-    assert emitted[-1].column("zone").title.markup == "Teil" and pane.column_list.item(0).text() == "Teil"
-    pane.column_title_edit.textEdited.emit("")
-    pane.flush()
-    assert emitted[-1].column("zone").title is None and pane.column_list.item(0).text() == "Zone"
-
-
-def test_the_caption_the_notes_and_the_header_of_a_table_are_written_through_the_model():
-    pane, emitted = _pane("doc-table", DOC_TABLE)
-    reference = _model(DOC_TABLE)
-    assert pane.caption_edit.text() == "Lasten"
-    pane.caption_edit.textEdited.emit("Charges")
-    pane.flush()
-    reference.set_caption("Charges")
-    assert emitted[-1].serialize() == reference.serialize()
-
-    pane.notes_edit.setPlainText("Erste Notiz")
-    pane.flush()
-    reference.set_notes("Erste Notiz")
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.notes_edit.setPlainText("Erste Notiz\nZweite")
-    pane.flush()
-    reference.set_notes(["Erste Notiz", "Zweite"])
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.notes_edit.setPlainText("")
-    pane.flush()
-    reference.set_notes(None)
-    assert emitted[-1].serialize() == reference.serialize()
-
-    pane.header_check.setChecked(False)
-    reference.set_header(False)
-    assert emitted[-1].serialize() == reference.serialize()
-    assert pane.header_check.isVisibleTo(pane)
-    dead, _ = _pane("dead-load-table", DEAD_LOAD)
-    assert not dead.header_check.isVisibleTo(dead), "only a document's table has a header row to choose"
-
-
-def test_a_variable_in_a_cell_is_picked_from_the_context_shown_as_the_variable_and_written_as_a_call():
-    op = _panes()
-    objects = _objects()
-    picked = []
-
-    def pick(parent):
-        picked.append(parent)
-        return op.PaneContext._as_variables([VARIABLES[0]])[0]
-
-    pane, emitted = _pane("doc-table", DOC_TABLE, _context(pick_variable=pick))
-    pane.cell_fields["value"].pick.click()
-    assert picked and emitted, "the picker was not asked, or the choice not emitted at once"
-    expected = objects.variable_cell("g_k", ("dead-load", "D1"))
-    assert emitted[-1].cell(0, "value") == expected
-    reference = _model(DOC_TABLE)
-    reference.set_cell(0, "value", expected)
-    assert emitted[-1].serialize() == reference.serialize()
-    field = pane.cell_fields["value"]
-    assert field.chip.isVisibleTo(pane) and not field.text.isVisibleTo(pane)
-    shown = re.sub(r"<[^>]+>", "", field.chip.text())
-    assert "1.9" in shown and "kN/m²" in shown and "dead-load" in shown, shown
-    assert pane.row_list.item(0).text() == "1. Decke · g_k"
-    _assert_no_code(pane)
-
-    # a cell that holds one is shown as the variable the moment it is loaded
-    other = _model(DEAD_LOAD)
-    again = op.pane_for("dead-load-table", _context())
-    again.load(other, _context())
-    again.row_list.setCurrentRow(1)
-    assert again.cell_fields["load"].variable == ("gk_ak_gew", ("dead-load", "EL+AL-Dach"))
-    _assert_no_code(again)
-
-    # taking it out leaves an empty cell of a number column
-    field.clear.click()
-    assert "value" not in emitted[-1].rows[0] and field.text.isVisibleTo(pane)
+    host.show_object("show-norm-list", _model(NORMS))
+    host.pane().line_list.setCurrentRow(0)
+    host.pane().line_edit_widget.textEdited.emit("Boden")
+    host.show_object("heading", "= Titel")
+    assert [k for k, _ in seen] == ["show-norm-list"] and "[Boden]" in seen[0][1].serialize()
 
 
 def test_a_variable_of_the_report_and_of_the_export_are_told_apart_by_their_domain_and_read_back_from_the_call():
@@ -585,32 +290,32 @@ def test_an_object_written_in_a_form_the_editor_cannot_edit_says_so_and_offers_n
     op = _panes()
     objects = _objects()
     context = _context()
-    pane = op.pane_for("doc-table", context)
-    pane.load(objects.parse_call("#doc-table(columns: my-columns, rows: ())"), context)
+    pane = op.pane_for("show-norm-list", context)
+    pane.load(objects.parse_call("#show-norm-list(keys: my-keys)"), context)
     assert pane.broken and pane.model is None
     shown = _visible_texts(pane)
     assert any("VS Code" in t for t in shown), shown
-    assert not hasattr(pane, "row_list") or not pane.row_list.isVisibleTo(pane)
-    pane.load(_model(DOC_TABLE), context)
-    assert not pane.broken and pane.row_list.count() == 2, "a good object after a bad one is edited again"
+    assert not hasattr(pane, "line_list") or not pane.line_list.isVisibleTo(pane)
+    pane.load(_model(NORMS), context)
+    assert not pane.broken and pane.line_list.count() == 1, "a good object after a bad one is edited again"
 
 
 def test_an_object_written_by_hand_or_unreadable_is_flagged_before_it_is_edited_and_the_flag_follows_the_language():
     op = _panes()
     objects = _objects()
     context = _context("fr")
-    pane = op.pane_for("doc-table", context)
-    hand = DOC_TABLE.replace("  hidden: (),\n", "  // a comment of his own\n  hidden: (),\n")
-    text = f"// woodcore:object doc-table t\n{hand}\n// woodcore:/object t\n"
-    found = objects.find(text, "t")
+    pane = op.pane_for("show-norm-list", context)
+    hand = NORMS.replace('    "SIA 260",\n', '    "SIA 260", // a comment of his own\n')
+    text = f"// woodcore:object show-norm-list n\n{hand}\n// woodcore:/object n\n"
+    found = objects.find(text, "n")
     assert found.state == "hand_edited"
     pane.load(found, context)
-    assert pane.notice.isVisibleTo(pane) and "écrit à la main" in pane.notice.text() and pane.row_list.count() == 2
+    assert pane.notice.isVisibleTo(pane) and "écrit à la main" in pane.notice.text() and pane.line_list.count() == 1
     pane.set_language("de")
     assert "von Hand" in pane.notice.text()
-    pane.load(_model(DOC_TABLE), context)
+    pane.load(_model(NORMS), context)
     assert not pane.notice.isVisibleTo(pane), "an object Woodcore wrote is edited without a word"
-    broken = objects.find("// woodcore:object doc-table t\n#doc-table(columns: (\n// woodcore:/object t\n", "t")
+    broken = objects.find("// woodcore:object show-norm-list n\n#show-norm-list(keys: (\n// woodcore:/object n\n", "n")
     assert broken.state == "unreadable"
     pane.set_language("fr")
     pane.load(broken, context)
@@ -619,12 +324,12 @@ def test_an_object_written_by_hand_or_unreadable_is_flagged_before_it_is_edited_
 
 def test_a_context_may_be_given_as_a_dictionary_of_its_arguments():
     op = _panes()
-    pane = op.pane_for("live-load-table", {"lang": "de", "categories": CATEGORIES})
-    pane.load(_model(LIVE_LOAD))
-    assert pane.cell_fields["category"].itemText(1) == "A1 — Surfaces d'habitation" and pane.row_add.text() == "Hinzufügen"
+    pane = op.pane_for("show-norm-list", {"lang": "de", "norm_groups": NORM_GROUPS})
+    pane.load(_model(NORMS))
+    assert pane.tree.topLevelItem(0).child(0).text(0) == "SIA 260:2013 — Grundlagen der Projektierung" and pane.line_add.text() == "Hinzufügen"
     host = op.ObjectPaneHost({"lang": "en"})
-    host.show_object("doc-choice", _model(CHOICE), {"lang": "fr", "categories": CATEGORIES})
-    assert host.pane().opt_add.text() == "Ajouter"
+    host.show_object("show-norm-list", _model(NORMS), {"lang": "fr", "norm_groups": NORM_GROUPS})
+    assert host.pane().line_add.text() == "Ajouter"
 
 
 def test_the_default_picker_is_a_dialog_that_returns_the_variable_chosen_and_none_when_cancelled():
@@ -656,211 +361,7 @@ def test_the_default_picker_is_a_dialog_that_returns_the_variable_chosen_and_non
 
 # --- the live loads -------------------------------------------------------------------------------------------------
 
-def test_the_category_is_chosen_in_a_dropdown_in_the_windows_language_and_the_values_follow_it():
-    from PySide6.QtCore import Qt
-    pane, emitted = _pane("live-load-table", LIVE_LOAD)
-    field = pane.cell_fields["category"]
-    assert [field.itemText(i) for i in range(field.count())][:3] == ["— choisir —", "A1 — Surfaces d'habitation", "B — Bureaux"]
-    assert field.currentData() == "B"
-    assert pane.cell_fields["q_k"].edit.text() == "3" and pane.cell_fields["Q_k"].edit.text() == "2"
-    assert not pane.cell_fields["q_k"].back.isVisibleTo(pane), "a value that follows the norm has nothing to take back"
-    assert field.itemData(1, Qt.ItemDataRole.ToolTipRole) == "Locaux d'habitation"
-
-    field.setCurrentIndex(field.findData("A1"))
-    reference = _model(LIVE_LOAD)
-    reference.set_category(0, "A1")
-    assert emitted[-1].serialize() == reference.serialize()
-    assert pane.cell_fields["q_k"].edit.text() == "2" and pane.cell_fields["Q_k"].edit.text() == "2"
-    assert pane.row_list.item(0).text() == "1. EG · Büro · A1"
-
-    field.setCurrentIndex(field.findData("E"))
-    assert pane.cell_fields["q_k"].edit.text() == "" and pane.cell_fields["q_k"].edit.placeholderText() == "à fixer par le projet"
-    field.setCurrentIndex(0)
-    assert emitted[-1].category(0) is None or "category" not in emitted[-1].rows[0]
-
-    german = _context("de")
-    pane.set_language("de")
-    pane.context = german
-    pane.load(_model(LIVE_LOAD), german)
-    assert pane.cell_fields["category"].itemText(0) == "— wählen —"
-
-
-def test_a_category_unknown_to_the_norm_is_kept_in_the_dropdown_and_marked():
-    text = LIVE_LOAD.replace('category: "B"', 'category: "X9"')
-    pane, _ = _pane("live-load-table", text)
-    field = pane.cell_fields["category"]
-    assert field.currentData() == "X9" and field.currentText() == "X9 (?)"
-
-
-def test_a_value_written_over_is_orange_and_emitted_and_reprendre_goes_back_to_the_norm():
-    from PySide6.QtCore import Qt
-    from PySide6.QtTest import QTest
-    op = _panes()
-    import theme
-    orange = theme.colour("override")
-    pane, emitted = _pane("live-load-table", LIVE_LOAD)
-    field = pane.cell_fields["q_k"]
-    assert orange not in field.edit.styleSheet()
-
-    field.edit.selectAll()
-    QTest.keyClicks(field.edit, "3.5")
-    pane.flush()
-    reference = _model(LIVE_LOAD)
-    reference.override(0, "q_k", 3.5)
-    assert emitted[-1].serialize() == reference.serialize() and emitted[-1].is_override(0, "q_k")
-    assert orange in field.edit.styleSheet(), "a value written over is orange"
-    assert field.back.isVisibleTo(pane) and not field.note.isVisibleTo(pane)
-
-    field.back.click()
-    reference.clear_override(0, "q_k")
-    assert emitted[-1].serialize() == reference.serialize() and emitted[-1].cell(0, "q_k") is op.AUTO
-    assert orange not in field.edit.styleSheet() and field.edit.text() == "3" and not field.back.isVisibleTo(pane)
-
-    # the very value the norm holds, typed, still writes it over; emptied, it goes back
-    field.edit.selectAll()
-    QTest.keyClicks(field.edit, "30")
-    QTest.keyClick(field.edit, Qt.Key.Key_Backspace)   # the text is the norm's own "3" again
-    pane.flush()
-    assert field.edit.text() == "3" and emitted[-1].is_override(0, "q_k") and emitted[-1].cell(0, "q_k") == 3 and orange in field.edit.styleSheet()
-    field.edit.selectAll()
-    QTest.keyClick(field.edit, Qt.Key.Key_Backspace)
-    field.edit.editingFinished.emit()
-    assert not emitted[-1].is_override(0, "q_k") and field.edit.text() == "3"
-
-    # a value written over before is shown as one the moment it is loaded
-    pane.row_list.setCurrentRow(1)
-    stated = pane.cell_fields["q_k"]
-    assert stated.edit.text() == "0.5" and orange in stated.edit.styleSheet() and stated.back.isVisibleTo(pane)
-    assert pane.cell_fields["Q_k"].edit.text() == "1"
-
-
-def test_no_psi_is_ever_shown_whether_the_table_hides_it_or_was_written_with_it():
-    for text in (LIVE_LOAD, LIVE_LOAD_AUTO):
-        pane, emitted = _pane("live-load-table", text)
-        shown = " ".join(_visible_texts(pane))
-        assert not re.search(r"psi|ψ|Reduktionsbeiwert", shown, re.IGNORECASE), shown
-        assert not [k for k in pane.cell_fields if k.startswith("psi_")]
-        ids = [pane.column_list.item(i).data(0x0100) for i in range(pane.column_list.count())]
-        assert not [i for i in ids if i.startswith("psi_")]
-        pane.add_row()
-        pane.col_add.click()
-        for i in range(pane.column_list.count()):
-            pane.column_list.setCurrentRow(i)
-        pane.row_list.setCurrentRow(0)
-        shown = " ".join(_visible_texts(pane))
-        assert not re.search(r"psi|ψ|Reduktionsbeiwert", shown, re.IGNORECASE), shown
-    # no ψ in the module's words or code
-    source = conftest.module_source(SOURCE)
-    words = [v for table in _panes().STRINGS.values() for v in table.values()]
-    assert not [w for w in words if re.search(r"ψ|psi|Reduktionsbeiwert", w, re.IGNORECASE)]
-    assert "psi_shown" not in source and "set_psi_shown" not in source
-
-
-def test_the_live_loads_summary_leaves_the_two_values_out_and_a_dead_load_takes_a_variable_in_its_load():
-    pane, _ = _pane("live-load-table", LIVE_LOAD)
-    assert [pane.row_list.item(i).text() for i in range(2)] == ["1. EG · Büro · B", "2. Dach · Unterhalt · H"]
-    dead, emitted = _pane("dead-load-table", DEAD_LOAD)
-    assert [dead.row_list.item(i).text() for i in range(2)] == ["1. OG · Bodenaufbau · 1.5", "2. Dach · Dachaufbau · gk_ak_gew"]
-    assert list(dead.cell_fields) == ["storey", "buildup", "load"], "the hidden zone has no field"
-    dead.cell_fields["load"].text.setPlainText("2,25")
-    dead.flush()
-    assert emitted[-1].cell(0, "load") == 2.25
-
-
 # --- the lists to choose and to tick, the signatures -----------------------------------------------------------------
-
-def test_a_choice_is_ticked_one_at_a_time_with_an_answer_of_its_own_and_options_added_and_moved():
-    from PySide6.QtCore import Qt
-    pane, emitted = _pane("doc-choice", CHOICE)
-    reference = _model(CHOICE)
-    assert pane.label_edit.text() == "Nutzungsdauer"
-    assert [pane.option_list.item(i).checkState() for i in range(2)] == [Qt.CheckState.Checked, Qt.CheckState.Unchecked]
-
-    _check_item(pane.option_list, 1, True)
-    reference.select("b")
-    assert emitted[-1].serialize() == reference.serialize()
-    assert [pane.option_list.item(i).checkState() for i in range(2)] == [Qt.CheckState.Unchecked, Qt.CheckState.Checked], "only one option is ticked"
-
-    pane.other_edit.textEdited.emit("30 Jahre")
-    pane.flush()
-    reference.set_other("30 Jahre")
-    assert emitted[-1].serialize() == reference.serialize()
-    assert all(pane.option_list.item(i).checkState() == Qt.CheckState.Unchecked for i in range(2)), "an answer of one's own replaces the option"
-
-    pane.opt_add.click()
-    reference.add_option("o1", "Option 1")
-    assert emitted[-1].serialize() == reference.serialize() and pane.option_list.currentRow() == 2
-    pane.option_edit.textEdited.emit("Unbefristet")
-    pane.flush()
-    reference.set_option_label("o1", "Unbefristet")
-    assert emitted[-1].serialize() == reference.serialize() and pane.option_list.item(2).text() == "Unbefristet"
-    pane.opt_up.click()
-    reference.move_option("o1", 1)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.only_check.setChecked(True)
-    reference.set_only_selected(True)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.opt_remove.click()
-    reference.remove_option("o1")
-    assert emitted[-1].serialize() == reference.serialize()
-    _assert_no_code(pane)
-
-
-def test_a_checklist_ticks_each_option_and_writes_the_text_under_the_ticked_one():
-    from PySide6.QtCore import Qt
-    pane, emitted = _pane("doc-checklist", CHECKLIST)
-    reference = _model(CHECKLIST)
-    _check_item(pane.option_list, 1, True)
-    reference.set_checked("wind", True)
-    assert emitted[-1].serialize() == reference.serialize()
-    assert [pane.option_list.item(i).checkState() for i in range(2)] == [Qt.CheckState.Checked] * 2, "a checklist ticks several"
-    pane.option_list.setCurrentRow(1)
-    assert pane.text_edit.toPlainText() == "Nach SIA 261."
-    pane.text_edit.setPlainText("Nach SIA 261, Kapitel 6.")
-    pane.flush()
-    reference.set_option_text("wind", "Nach SIA 261, Kapitel 6.")
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.only_check.setChecked(True)
-    reference.set_only_checked(True)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.option_list.setCurrentRow(0)
-    assert pane.text_edit.toPlainText() == ""
-    pane.label_edit.textEdited.emit("Lasten")
-    pane.flush()
-    reference.set_label("Lasten")
-    assert emitted[-1].serialize() == reference.serialize()
-
-
-def test_the_signatures_are_rows_with_five_fields_each_and_a_place_and_date_to_print_or_not():
-    pane, emitted = _pane("doc-signatures", SIGNATURES)
-    reference = _model(SIGNATURES)
-    assert [pane.row_list.item(i).text() for i in range(2)] == ["1. Bauherrschaft — Vertreter — A. Muster", "2. Ingenieur — Projektleiter"]
-    assert pane.field_edits["group"].text() == "Bauherrschaft" and pane.field_edits["place"].text() == ""
-    pane.field_edits["place"].textEdited.emit("Bern")
-    pane.field_edits["name"].textEdited.emit("B. Beispiel")
-    pane.flush()
-    reference.set_field(0, "place", "Bern")
-    reference.set_field(0, "name", "B. Beispiel")
-    assert emitted[-1].serialize() == reference.serialize()
-    assert pane.row_list.item(0).text() == "1. Bauherrschaft — Vertreter — B. Beispiel — Bern"
-    pane.field_edits["place"].textEdited.emit("")
-    pane.flush()
-    reference.set_field(0, "place", None)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.row_add.click()
-    reference.add_row(1)
-    assert emitted[-1].serialize() == reference.serialize() and pane.row_list.currentRow() == 1
-    assert pane.row_list.item(1).text() == "2. (signataire vide)"
-    pane.row_down.click()
-    reference.move_row(1, 2)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.row_remove.click()
-    reference.remove_row(2)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.place_date_check.setChecked(False)
-    reference.set_place_date(False)
-    assert emitted[-1].serialize() == reference.serialize()
-
 
 # --- the norms ------------------------------------------------------------------------------------------------------------
 
@@ -934,66 +435,6 @@ def test_the_norms_catalogue_of_the_project_lists_the_documents_in_the_windows_l
 
 # --- a field, a picture, a plan -----------------------------------------------------------------------------------------------
 
-def test_a_field_takes_its_label_a_number_or_a_variable_and_a_unit():
-    op = _panes()
-    pane, emitted = _pane("doc-field", FIELD)
-    reference = _model(FIELD)
-    assert pane.label_edit.text() == "Tragwerksklasse" and pane.value_field.text.toPlainText() == "2" and pane.unit_edit.text() == "–"
-    pane.value_field.text.setPlainText("3")
-    pane.label_edit.textEdited.emit("Klasse")
-    pane.unit_edit.textEdited.emit("")
-    pane.flush()
-    reference.set_value(3)
-    reference.set_label("Klasse")
-    reference.set_unit(None)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.value_field.text.setPlainText("hoch")
-    pane.flush()
-    assert emitted[-1].get("value").markup == "hoch"
-    context = _context(pick_variable=lambda parent: op.PaneContext._as_variables([VARIABLES[1]])[0])
-    other, got = _pane("doc-field", FIELD, context)
-    other.value_field.pick.click()
-    assert got[-1].get("value") == _objects().variable_cell("N_Ed", None)
-    _assert_no_code(other)
-
-
-def test_a_picture_is_chosen_under_the_project_with_its_caption_and_width_and_refused_outside_it():
-    chosen = []
-    context = _context(choose_image=lambda parent: chosen[0])
-    pane, emitted = _pane("doc-image", IMAGE, context)
-    reference = _model(IMAGE)
-    assert pane.file_label.text() == "Images/profil.png" and pane.width_edit.text() == "60%" and pane.caption_edit.text() == "Profil"
-    chosen.append("Images/schnitt.svg")
-    pane.choose_button.click()
-    reference.set_file("Images/schnitt.svg")
-    assert emitted[-1].serialize() == reference.serialize() and pane.file_label.text() == "Images/schnitt.svg"
-    pane.width_edit.textEdited.emit("8 cm")
-    pane.flush()
-    reference.set_width("8cm")
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.width_edit.textEdited.emit("breit")
-    assert pane.message.isVisibleTo(pane) and "60 %" in pane.message.text(), "a width that is none is said in a sentence"
-    pane.width_edit.textEdited.emit("")
-    pane.flush()
-    reference.set_width("100%")
-    assert emitted[-1].serialize() == reference.serialize() and not pane.message.isVisibleTo(pane)
-    pane.caption_edit.textEdited.emit("")
-    pane.flush()
-    reference.set_caption(None)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.clear_button.click()
-    reference.set_file(None)
-    assert emitted[-1].serialize() == reference.serialize() and pane.file_label.text() == pane.t("op_image_none")
-    count = len(emitted)
-    chosen[0] = ""   # a file the dialog found outside the project's folder
-    pane.choose_button.click()
-    assert pane.message.isVisibleTo(pane) and len(emitted) == count, "a file outside the project is refused and changes nothing"
-    chosen[0] = None
-    pane.message.hide()
-    pane.choose_button.click()
-    assert len(emitted) == count and not pane.message.isVisibleTo(pane), "cancelling the dialog is nothing"
-
-
 def test_the_context_gives_a_picture_as_a_path_from_the_project_and_refuses_one_outside_it():
     op = _panes()
     root = conftest.tmpdir("panes_relative")
@@ -1003,72 +444,6 @@ def test_the_context_gives_a_picture_as_a_path_from_the_project_and_refuses_one_
     context = op.PaneContext(root=root, images_dir=root / "Images")
     assert context.relative(inside) == "Images/a.png"
     assert context.relative(root.parent / "elsewhere.png") is None
-
-
-def test_a_plan_is_chosen_with_its_positions_highlighted_its_detail_zoom_and_caption():
-    pane, emitted = _pane("doc-plan", PLAN)
-    reference = _model(PLAN)
-    from PySide6.QtCore import Qt
-    assert pane.plan_combo.currentData() == "P1" and [pane.plan_combo.itemText(i) for i in range(3)] == ["— choisir —", "P1 — Rez", "P2 — 1er"]
-    assert [pane.position_list.item(i).text() for i in range(3)] == ["S001", "T001", "T002"]
-    assert [pane.position_list.item(i).checkState() for i in range(3)] == [Qt.CheckState.Unchecked, Qt.CheckState.Checked, Qt.CheckState.Unchecked]
-    assert pane.detail_check.isChecked() and pane.zoom_spin.isEnabled() and pane.zoom_spin.value() == 2.0
-
-    _check_item(pane.position_list, 2, True)
-    reference.set_highlight(["T001", "T002"])
-    assert emitted[-1].serialize() == reference.serialize()
-    _check_item(pane.position_list, 1, False)
-    _check_item(pane.position_list, 2, False)
-    reference.set_highlight(None)
-    assert emitted[-1].serialize() == reference.serialize()
-    _check_item(pane.position_list, 0, True)
-    reference.set_highlight("S001")
-    assert emitted[-1].serialize() == reference.serialize()
-
-    pane.zoom_spin.setValue(3.5)
-    pane.flush()
-    reference.set_zoom(3.5)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.detail_check.setChecked(False)
-    reference.set_detail(False)
-    assert emitted[-1].serialize() == reference.serialize() and not pane.zoom_spin.isEnabled()
-    for check, setter in ((pane.axes_check, reference.set_axes), (pane.legend_check, reference.set_legend), (pane.scale_check, reference.set_scale_bar)):
-        check.setChecked(False)
-        setter(False)
-        assert emitted[-1].serialize() == reference.serialize()
-
-    pane.plan_combo.setCurrentIndex(pane.plan_combo.findData("P2"))
-    reference.set_plan("P2")
-    assert emitted[-1].serialize() == reference.serialize()
-    assert [pane.position_list.item(i).text() for i in range(pane.position_list.count())][:1] == ["T003"], "the positions are the new plan's"
-
-    pane.caption_combo.setCurrentIndex(pane.caption_combo.findData("text"))
-    reference.set_caption("Légende")
-    assert emitted[-1].serialize() == reference.serialize() and pane.caption_edit.isEnabled()
-    pane.caption_edit.textEdited.emit("Grundriss")
-    pane.flush()
-    reference.set_caption("Grundriss")
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.caption_combo.setCurrentIndex(pane.caption_combo.findData("none"))
-    reference.set_caption(None)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.caption_combo.setCurrentIndex(pane.caption_combo.findData("auto"))
-    reference.set_caption(_panes().AUTO)
-    assert emitted[-1].serialize() == reference.serialize()
-
-
-def test_a_plan_the_project_has_not_is_kept_and_marked_and_a_project_without_plans_says_so():
-    op = _panes()
-    text = PLAN.replace('"P1"', '"P9"')
-    pane, _ = _pane("doc-plan", text)
-    assert pane.plan_combo.currentData() == "P9" and pane.plan_combo.currentText() == "P9 (?)"
-    assert [pane.position_list.item(i).text() for i in range(pane.position_list.count())] == ["T001 (?)"], "a position the plan does not draw is kept and marked"
-    empty = _context(plans=[])
-    other, _ = _pane("doc-plan", PLAN, empty)
-    assert other.no_plans.isVisibleTo(other)
-    context = op.PaneContext.from_project(conftest.PROJECT, "fr")
-    plans = context.plans()
-    assert {p.id for p in plans} >= {"Pavillon"} and all(p.positions for p in plans)
 
 
 # --- a heading and a paragraph -----------------------------------------------------------------------------------------------
@@ -1222,14 +597,14 @@ def test_the_host_shows_the_pane_of_the_selection_and_a_sentence_where_there_is_
         assert "Choisir un élément" in host.placeholder_note.text()
         seen = []
         host.changed.connect(lambda kind, payload: seen.append((kind, payload)))
-        host.show_object("live-load-table", _model(LIVE_LOAD))
-        assert host.kind == "live-load-table" and host.pane().isVisibleTo(host) and not host.placeholder.isVisibleTo(host)
-        host.pane().row_add.click()
-        assert seen and seen[-1][0] == "live-load-table" and seen[-1][1].row_count == 3
+        host.show_object("show-norm-list", _model(NORMS))
+        assert host.kind == "show-norm-list" and host.pane().isVisibleTo(host) and not host.placeholder.isVisibleTo(host)
+        host.pane().line_add.click()
+        assert seen and seen[-1][0] == "show-norm-list" and len(seen[-1][1].keys) == 3
         host.show_object("heading", "= Titel")
-        assert host.kind == "heading" and not host.panes["live-load-table"].isVisibleTo(host) and host.pane().title_edit.text() == "Titel"
-        host.show_object("live-load-table", _model(LIVE_LOAD))
-        assert host.pane().row_list.count() == 2, "a pane comes back loaded on the new subject"
+        assert host.kind == "heading" and not host.panes["show-norm-list"].isVisibleTo(host) and host.pane().title_edit.text() == "Titel"
+        host.show_object("show-norm-list", _model(NORMS))
+        assert host.pane().line_list.count() == 1, "a pane comes back loaded on the new subject"
         host.show_many(3)
         assert host.pane() is None and host.placeholder.isVisibleTo(host) and "3" in host.placeholder_note.text()
         host.show_object("file", {"title": "T", "printed": True, "untagged": True})
@@ -1246,82 +621,22 @@ def test_a_change_of_language_writes_the_panes_words_again_over_what_they_hold()
     op = _panes()
     context = _context("fr")
     host = op.ObjectPaneHost(context)
-    host.show_object("live-load-table", _model(LIVE_LOAD))
+    host.show_object("show-norm-list", _model(NORMS))
     pane = host.pane()
-    pane.row_list.setCurrentRow(1)
-    assert pane.row_add.text() == "Ajouter"
+    pane.line_list.setCurrentRow(0)
+    assert pane.line_add.text() == "Ajouter"
     host.set_language("de")
-    assert pane.row_add.text() == "Hinzufügen" and pane.current().serialize() == LIVE_LOAD
-    assert pane.cell_fields["category"].itemText(0) == "— wählen —"
+    assert pane.line_add.text() == "Hinzufügen" and pane.current().serialize() == NORMS
     host.set_language("en")
-    assert pane.row_add.text() == "Add" and host.context.lang == "en"
+    assert pane.line_add.text() == "Add" and host.context.lang == "en"
     host.clear()
     assert host.placeholder_note.text() == "Choose an item in the tree to set its options."
-
-
-def test_an_excerpt_is_chosen_among_those_of_the_annexes_with_its_width_and_caption():
-    """`doc-extract` (v0.115): the pane's combo offers the excerpts the export holds, an excerpt the export could not find says so, and every edit is the model's own."""
-    pane, emitted = _pane("doc-extract", EXTRACT, _context(excerpts=EXCERPTS))
-    reference = _model(EXTRACT)
-    assert pane.excerpt_combo.currentData() == "CO1-My" and [pane.excerpt_combo.itemText(i) for i in range(3)] == ["— choisir —", "CO1-My — Biegemomente", "CO1-N — Normalkräfte"]
-    assert not pane.unresolved.isVisibleTo(pane) or True
-    pane.excerpt_combo.setCurrentIndex(pane.excerpt_combo.findData("CO1-N"))
-    reference.set_excerpt("CO1-N")
-    assert emitted[-1].serialize() == reference.serialize()
-    assert pane.unresolved.isVisibleTo(pane), "an excerpt the export could not find stops the report: the pane says so"
-    pane.excerpt_combo.setCurrentIndex(0)
-    reference.set_excerpt(None)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.caption_combo.setCurrentIndex(pane.caption_combo.findData("none"))
-    reference.set_caption(None)
-    assert emitted[-1].serialize() == reference.serialize()
-    empty, _ = _pane("doc-extract", EXTRACT, _context(excerpts=[]))
-    assert empty.no_excerpts.isVisibleTo(empty)
-
-
-def test_a_fire_plan_is_chosen_among_those_of_the_fire_protection_tab_with_its_legend_and_caption():
-    """`doc-fire-plan` (v0.115): the pane's combo offers the fire plans the export holds, a plan the export lost is kept as `(?)`, and every edit is the model's own."""
-    pane, emitted = _pane("doc-fire-plan", FIRE_PLAN, _context(fire_plans=FIRE_PLANS))
-    reference = _model(FIRE_PLAN)
-    assert pane.plan_combo.currentData() == "Treppenhaus"
-    assert [pane.plan_combo.itemText(i) for i in range(3)] == ["— choisir —", "Pavillon-EG — Erdgeschoss", "Treppenhaus — Regelgeschoss"]
-    assert not pane.legend_check.isChecked() and pane.scale_check.isChecked()
-    pane.plan_combo.setCurrentIndex(pane.plan_combo.findData("Pavillon-EG"))
-    reference.set_plan("Pavillon-EG")
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.legend_check.setChecked(True)
-    reference.set_legend(True)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.scale_check.setChecked(False)
-    reference.set_scale_bar(False)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.caption_combo.setCurrentIndex(pane.caption_combo.findData("none"))
-    reference.set_caption(None)
-    assert emitted[-1].serialize() == reference.serialize()
-    lost, _ = _pane("doc-fire-plan", FIRE_PLAN.replace("Treppenhaus", "Gone"), _context(fire_plans=FIRE_PLANS))
-    assert lost.plan_combo.currentData() == "Gone" and lost.plan_combo.currentText() == "Gone (?)"
-    empty, _ = _pane("doc-fire-plan", FIRE_PLAN, _context(fire_plans=[]))
-    assert empty.no_plans.isVisibleTo(empty)
-
-
-def test_the_annexes_object_sets_the_level_of_the_heading_or_none():
-    pane, emitted = _pane("doc-annexes", ANNEXES)
-    reference = _model(ANNEXES)
-    assert pane.heading_check.isChecked() and pane.level_spin.value() == 3
-    pane.level_spin.setValue(2)
-    pane.flush()
-    reference.set_heading(2)
-    assert emitted[-1].serialize() == reference.serialize()
-    pane.heading_check.setChecked(False)
-    reference.set_heading(None)
-    assert emitted[-1].serialize() == reference.serialize() and not pane.level_spin.isEnabled()
 
 
 def test_no_pane_ever_shows_typst_code_whatever_it_holds():
     op = _panes()
     context = _context()
-    samples = {"doc-table": DOC_TABLE, "live-load-table": LIVE_LOAD, "dead-load-table": DEAD_LOAD, "doc-choice": CHOICE, "doc-checklist": CHECKLIST,
-               "doc-signatures": SIGNATURES, "show-norm-list": NORMS, "doc-field": FIELD, "doc-image": IMAGE, "doc-plan": PLAN, "doc-fire-plan": FIRE_PLAN, "doc-extract": EXTRACT, "doc-annexes": ANNEXES}
+    samples = {"show-norm-list": NORMS}
     for kind, text in samples.items():
         pane, _ = _pane(kind, text, context)
         for lang in ("fr", "de", "en"):
@@ -1378,13 +693,12 @@ def test_every_word_of_the_panes_is_named_by_the_code():
     assert not used, f"words the code names and the table lacks: {used}"
 
 
-def test_the_module_states_no_colour_of_its_own_and_writes_the_orange_through_the_theme():
+def test_the_module_states_no_colour_of_its_own():
     source = conftest.module_source(SOURCE)
     offenders = [f"{n}: {line.strip()[:90]}" for n, line in enumerate(source.splitlines(), 1)
                  if "setStyleSheet(" in line and re.search(r"#[0-9a-fA-F]{3,6}\b", line)]
     assert not offenders, offenders
     assert not re.search(r"""["']#[0-9a-fA-F]{3,8}["']""", source), "a hex colour is written in the module"
-    assert 'theme.colour("override")' in source or "theme.colour('override')" in source
 
 
 def test_the_pane_is_a_card_column_and_never_wider_than_its_cards_in_the_host():
@@ -1394,7 +708,7 @@ def test_the_pane_is_a_card_column_and_never_wider_than_its_cards_in_the_host():
     host.resize(420, 700)
     host.show()
     _pump(0.05)
-    for kind, text in (("doc-table", DOC_TABLE), ("live-load-table", LIVE_LOAD), ("doc-plan", PLAN), ("show-norm-list", NORMS)):
+    for kind, text in (("show-norm-list", NORMS),):
         host.show_object(kind, _model(text))
         _pump(0.05)
         bar = host.scroll.horizontalScrollBar()
@@ -1403,11 +717,10 @@ def test_the_pane_is_a_card_column_and_never_wider_than_its_cards_in_the_host():
 
 
 def test_a_pane_is_never_wider_for_the_names_the_project_gives_it_than_for_short_ones():
-    """The categories of Tabelle 8 and the labels of the plans are long, and a drop-down that asked for the width of its longest item would set the column's: the real project's names, in the three languages, ask for no more room than short ones do. (How much room the panes ask for is the fonts': the off-screen platform's default font sets words twice as wide as Segoe UI, so it is compared and not measured.)"""
+    """The names of the norms of the catalogue are long, and a list that asked for the width of its longest item would set the column's: the real project's names, in the three languages, ask for no more room than short ones do. (How much room the panes ask for is the fonts': the off-screen platform's default font sets words twice as wide as Segoe UI, so it is compared and not measured.)"""
     op = _panes()
     here = conftest.PROJECT
-    cases = (("live-load-table", LIVE_LOAD, {"categories": CATEGORIES}), ("doc-plan", PLAN.replace('"P1"', '"Pavillon"'), {"plans": [{"id": "Pavillon", "label": "Rez", "positions": ["S001"]}]}),
-             ("doc-choice", CHOICE, {}), ("show-norm-list", NORMS, {"norm_groups": NORM_GROUPS}))
+    cases = (("show-norm-list", NORMS, {"norm_groups": NORM_GROUPS}),)
     for lang in ("fr", "de", "en"):
         for kind, text, short in cases:
             widths = []
@@ -1423,59 +736,6 @@ def test_a_pane_is_never_wider_for_the_names_the_project_gives_it_than_for_short
 
 
 # --- the fields of a row: one line, and as many as the text takes ------------------------------------------------------------------
-
-def test_the_fields_of_a_row_are_one_line_to_start_with_and_grow_with_their_text():
-    """The engineer: «Zone, Niveau, Utilisation are three-line text boxes». A cell is a single line unless its text takes more -- a line break, or a text too long for the box -- and the box then grows, up to eight lines, from where it scrolls; a column that is `wide` is no taller than another."""
-    op = _panes()
-    pane, emitted = _pane("live-load-table", LIVE_LOAD)
-    pane.resize(380, 900)
-    pane.show()
-    _pump(0.05)
-    fields = [pane.cell_fields[name].text for name in ("storey", "use")]
-    assert fields, "the live loads' table has text fields"
-    one = fields[0].height_for(1)
-    for box in fields:
-        assert box.grow and box.min_lines == 1 and box.height() == one, (box.height(), one)
-    wide = [c for c in pane.model.columns if pane.column_kind(c) == "wide"]
-    assert wide, "the live loads' table has a column of kind wide (its use)"
-    for column in wide:
-        assert pane.cell_fields[column.id].text.height() == one, "a wide column is no taller than another"
-    box = pane.cell_fields["use"].text
-    # a text with line breaks is as many lines as it has
-    box.setPlainText("eins\nzwei\ndrei")
-    assert box.shown_lines == 3 and box.height() == box.height_for(3)
-    # and it shrinks back to one line when the text is short again
-    box.setPlainText("Büro")
-    assert box.shown_lines == 1 and box.height() == one
-    # a text too long for the box wraps, and the box takes the lines it wraps to
-    box.setPlainText("Ein langer Text, der in einer so schmalen Spalte nicht auf eine Zeile passt und deshalb umbricht. " * 2)
-    _pump(0.05)
-    assert box.shown_lines >= 2 and box.height() == box.height_for(box.shown_lines)
-    # up to eight lines: the box stops growing and then scrolls
-    box.setPlainText("\n".join(f"Zeile {i}" for i in range(20)))
-    assert box.shown_lines == 8 and box.height() == box.height_for(8)
-    assert box.verticalScrollBarPolicy() == op.Qt.ScrollBarPolicy.ScrollBarAsNeeded
-    box.setPlainText("Büro")
-    assert box.verticalScrollBarPolicy() == op.Qt.ScrollBarPolicy.ScrollBarAlwaysOff and box.horizontalScrollBarPolicy() == op.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-    # typing in it is still an edit of the cell
-    emitted.clear()
-    box.setPlainText("Wohnen")
-    pane.flush()
-    assert emitted and emitted[-1].serialize().count("Wohnen") == 1
-    # the notes box and the checklist's text keep the height they were given
-    table, _ = _pane("doc-table", DOC_TABLE)
-    assert not table.notes_edit.grow and table.notes_edit.height() == table.notes_edit.height_for(3)
-    pane.close()
-    table.close()
-
-
-def test_a_field_pane_and_a_dead_load_row_are_one_line_too():
-    pane, _ = _pane("doc-field", FIELD)
-    assert pane.value_field.text.grow and pane.value_field.text.min_lines == 1
-    dead, _ = _pane("dead-load-table", DEAD_LOAD)
-    for name in ("storey", "buildup"):
-        assert dead.cell_fields[name].text.height() == dead.cell_fields[name].text.height_for(1)
-
 
 # --- a section's pane: its title, its file and its sharing ----------------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 """The values of SIA 265:2021 this project calculates with, out of the JSON files beside this module in `calc/norms/` (docs/architecture/layout.md §11).
 
-`calc/norms/` is **the one source of every value taken from a norm** for a calculation made in Python: the numbers live in the JSON, once, and the code that needs them reads them through here -- a table's cells, a scalar the norm states under its own symbol, **and the coefficients inside a formula** (the 0.082 of Tabelle 22, the 0.3 and 2.6 of equation (87), the 0.44/1.26/2.52 of Tabellen 45 and 46), which until v0.77 stayed beside their formula in `domains/dowel.py`. The engineer's rule: no norm value twice, and none outside `calc/norms/` (a calculation made in Excel keeps its own). Every number was transcribed by hand from `ExternalFiles/000-Normes/SIA265-2021-DE.pdf`, at a page that can be turned to, and each file's `_source` says which (section 2 rule 13).
+`calc/norms/` is **the one source of every value taken from a norm** for a calculation made in Python: the numbers live in the JSON, once, and the code that needs them reads them through here -- a table's cells, a scalar the norm states under its own symbol, **and the coefficients inside a formula** (the 0.082 of Tabelle 22, the 0.3 and 2.6 of equation (87), the 0.44/1.26/2.52 of Tabellen 45 and 46), which until v0.77 stayed beside their formula in `domains/dowel.py`. The engineer's rule: no norm value twice, and none outside `calc/norms/` (a calculation made in Excel keeps its own). Every number was transcribed by hand from `SIA265-2021-DE.pdf`, at a page that can be turned to, and each file's `_source` says which (section 2 rule 13).
 
 **One file per table or clause, named `<norm>-<year>-<table or clause>-<designation>.json`**, so a value is found by the norm's own number:
 
@@ -52,10 +52,10 @@ The files are hand-written -- the one place in the pipeline where a number is tr
 Two tables of SIA 265 that this project will want are deliberately not here yet, because their editions are not in the reference library: the grades SN EN 14080 gives for GL40h and above, and the CLT classes of SIA 265/1.
 """
 
-import json
 from pathlib import Path
 
 import validation
+from norms import _loader  # how every reader of calc/norms/ opens its files (G3)
 
 HERE = Path(__file__).resolve().parent
 
@@ -177,8 +177,7 @@ KSER_FAMILIES = ("timber-timber", "steel-timber")
 _cache = {}
 
 
-def _fail(name, what):
-    raise validation.ValidationError("calc/norms/%s.json: %s" % (name, what))
+_fail = _loader.fail   # calc/norms/<name>.json: <what> (G3)
 
 
 def _read(name):
@@ -186,15 +185,8 @@ def _read(name):
     if name in _cache:
         return _cache[name]
     path = HERE / (name + ".json")
-    try:
-        with path.open(encoding="utf-8") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        _fail(name, "not found at %s -- the values of SIA 265 live in calc/norms/" % path)
-    except json.JSONDecodeError as exc:
-        _fail(name, "is not valid JSON: %s" % exc)
-    if not data.get("edition"):
-        _fail(name, "no 'edition'")
+    data = _loader.load(path)
+    _loader.edition(name, data)
     key = FILES[name]
     if not isinstance(data.get(key), dict):
         _fail(name, "no '%s' block" % key)
@@ -202,7 +194,7 @@ def _read(name):
     _cache[name] = data
     try:
         _CHECKS[name](name, data[key], data)
-    except Exception:
+    except Exception:  # broad: a table that failed its check is taken out of the cache, then the refusal raised again
         _cache.pop(name, None)
         raise
     return data
@@ -848,8 +840,14 @@ def grade(name):
     if name in known:
         return known[name]
     raise validation.ValidationError(
-        "calc/norms/sia265-*: no strength class %r -- SIA 265 gives %s. GL40h and above belong to SN EN 14080 and the CLT classes to SIA 265/1; neither edition is in ExternalFiles/000-Normes/ yet."
+        "calc/norms/sia265-*: no strength class %r -- SIA 265 gives %s. GL40h and above belong to SN EN 14080 and the CLT classes to SIA 265/1; neither edition is in the reference library yet."
         % (name, ", ".join(known)))
+
+
+def grade_table(name):
+    """The number of the table a strength class is read from -- "8" (Vollholz) or "9" (Brettschichtholz) --, what a design value of the class cites (`#member` prints «Tabelle 8», «Tabelle 9»)."""
+    grade(name)
+    return "9" if name in {g["id"] for g in table_9()["grades"]} else "8"
 
 
 def rho_k(name):

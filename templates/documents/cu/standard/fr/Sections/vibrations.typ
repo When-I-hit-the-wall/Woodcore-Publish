@@ -13,17 +13,17 @@ Les vibrations ne doivent ni limiter l'aptitude au fonctionnement de l'ouvrage n
 Les appareils générateurs de vibrations sont posés de manière flottante, selon les indications du physicien du bâtiment. [Vibrations dues au trafic ferroviaire ou routier : à clarifier par le maître de l'ouvrage.]
 // woodcore:/object p2
 
-// woodcore:object doc-table vibrations-table
-#doc-table(
-  columns: (
-    (id: "use", title: [Utilisation], kind: "wide"),
-    (id: "f", title: [Fréquence propre minimale $f$], unit: "Hz", kind: "number"),
-    (id: "basis", title: [Base]),
-  ),
-  hidden: (),
-  rows: (
-    (use: [Halles de gymnastique et de sport], f: [> 8.0], basis: [SIA 260, Tab. 5]),
-    (use: [Locaux de danse et salles de concert], f: [> 7.0], basis: [SIA 260, Tab. 5]),
+// woodcore:object table vibrations-table
+#figure(
+  table(
+    columns: (1fr, auto, auto),
+    align: (left, right, left),
+    table.hline(stroke: 1pt),
+    table.header([*Utilisation*], [*Fréquence propre minimale $f$*], [*Base*]),
+    table.hline(stroke: 0.5pt),
+    [Halles de gymnastique et de sport], [> 8.0], [SIA 260, Tab. 5],
+    [Locaux de danse et salles de concert], [> 7.0], [SIA 260, Tab. 5],
+    table.hline(stroke: 1pt),
   ),
   caption: [Fréquences propres minimales],
 )

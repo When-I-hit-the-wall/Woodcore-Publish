@@ -1,5 +1,5 @@
 {
-  "schema_version": "4.1",
+  "schema_version": "4.4",
   "connections": {
     "VU-MP-1": {
       "label": "Velo Unterstand: Stabdübel 4x 10mm Durchmesser",
@@ -55,9 +55,9 @@
       },
       "figure": {
         "files": {
-          "de": "connections/VU-MP-1-de.svg",
-          "fr": "connections/VU-MP-1-fr.svg",
-          "en": "connections/VU-MP-1-en.svg"
+          "de": "/Connections/Exports/Figures/VU-MP-1-de.svg",
+          "fr": "/Connections/Exports/Figures/VU-MP-1-fr.svg",
+          "en": "/Connections/Exports/Figures/VU-MP-1-en.svg"
         },
         "points": [
           [
@@ -192,7 +192,6 @@
           "unit": "mm",
           "symbol": "x_c",
           "label": "Drehpunkt, x",
-          "level": 3,
           "source": "python:domains/connection.py",
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
           "norm_ref": "",
@@ -204,7 +203,6 @@
           "unit": "mm",
           "symbol": "z_c",
           "label": "Drehpunkt, z",
-          "level": 3,
           "source": "python:domains/connection.py",
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
           "norm_ref": "",
@@ -215,7 +213,6 @@
           "unit": "°",
           "symbol": "theta_(1,2)",
           "label": "Winkel von Element 1 zu Element 2",
-          "level": 3,
           "source": "python:domains/connection.py",
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
           "norm_ref": "",
@@ -227,7 +224,6 @@
           "unit": "°",
           "symbol": "alpha_N",
           "label": "Richtung der Normalkraft",
-          "level": 3,
           "source": "python:domains/connection.py",
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
           "norm_ref": "",
@@ -239,7 +235,6 @@
           "unit": "°",
           "symbol": "alpha_V",
           "label": "Richtung der Querkraft",
-          "level": 3,
           "source": "python:domains/connection.py",
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
           "norm_ref": "",
@@ -250,7 +245,6 @@
           "unit": "",
           "symbol": "n",
           "label": "Anzahl Verbindungsmittel",
-          "level": 2,
           "source": "python:domains/connection.py",
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
           "norm_ref": ""
@@ -260,7 +254,6 @@
           "unit": "mm²",
           "symbol": "I_(p,x)",
           "label": "Polares Flächenträgheitsmoment, Anteil x",
-          "level": 3,
           "source": "python:domains/connection.py",
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
           "norm_ref": ""
@@ -270,7 +263,6 @@
           "unit": "mm²",
           "symbol": "I_(p,z)",
           "label": "Polares Flächenträgheitsmoment, Anteil z",
-          "level": 3,
           "source": "python:domains/connection.py",
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
           "norm_ref": ""
@@ -280,7 +272,6 @@
           "unit": "mm²",
           "symbol": "I_p",
           "label": "Polares Flächenträgheitsmoment",
-          "level": 2,
           "source": "python:domains/connection.py",
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
           "norm_ref": ""
@@ -289,7 +280,6 @@
       "steps": [
         {
           "name": "Polares Flächenträgheitsmoment, Anteil x",
-          "level": 3,
           "result": "I_px",
           "uses": [],
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
@@ -297,7 +287,6 @@
         },
         {
           "name": "Polares Flächenträgheitsmoment, Anteil z",
-          "level": 3,
           "result": "I_pz",
           "uses": [],
           "norm": "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse",
@@ -305,7 +294,6 @@
         },
         {
           "name": "Polares Flächenträgheitsmoment",
-          "level": 3,
           "result": "I_p",
           "uses": [
             "I_px",

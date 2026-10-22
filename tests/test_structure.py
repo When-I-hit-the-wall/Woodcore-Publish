@@ -262,7 +262,7 @@ def test_the_block_of_a_blank_structure_is_empty_and_the_language_must_be_one():
 
 # --- sync_entry ----------------------------------------------------------------------------------------------
 
-ENTRY_BEFORE = '// My own title page and settings.\n#import "/commands.typ": *\n#set-report-language("fr")\n\n// --- Sections ---\n'
+ENTRY_BEFORE = '// My own title page and settings.\n#import "/000-Typst-Config/commands.typ": *\n#set-report-language("fr")\n\n// --- Sections ---\n'
 ENTRY_AFTER = "\n// the engineer's own trailer\n#pagebreak()\n"
 
 
@@ -358,7 +358,7 @@ def test_sync_entry_refuses_an_entry_it_cannot_lay_out():
     twice = structure.START_TAG + "\n" + structure.END_TAG + "\n" + structure.START_TAG + "\n" + structure.END_TAG + "\n"
     refused(twice, "a structure block is used twice")
     # a tag problem anywhere in the file: it is one Woodcore does not rewrite
-    refused(structure.START_TAG + "\n" + structure.END_TAG + "\n// woodcore:object doc-table loose\n", "never closed")
+    refused(structure.START_TAG + "\n" + structure.END_TAG + "\n// woodcore:object table loose\n", "never closed")
     refused(structure.START_TAG + "\n" + structure.END_TAG + "\n// woodcore:nonsense x\n", "not a kind of tag")
     try:
         structure.sync_entry(_entry("sync_language"), _sample(), "it")
@@ -379,21 +379,21 @@ def test_a_well_formed_file_has_no_tag_problem_and_its_blocks_are_found():
         "= Live loads",
         "// woodcore:shared live-loads",
         "Some text.",
-        "  // woodcore:object live-load-table loads-table",
-        "#live-load-table()",
+        "  // woodcore:object show-norm-list loads-table",
+        "#show-norm-list()",
         "  // woodcore:/object loads-table",
-        "// woodcore:object doc-field site",
-        "#doc-field()",
+        "// woodcore:object text site",
+        "Ein Text.",
         "// woodcore:/object site",
         "// woodcore:/shared live-loads",
-        "// woodcore:object doc-choice class",
+        "// woodcore:object heading class",
         "// woodcore:/object class",
     ]) + "\n"
     blocks, problems = structure.pair_tags(text)
     assert problems == []
     assert [(b.kind, b.id, b.type, b.start, b.end) for b in blocks] == [
-        ("shared", "live-loads", None, 1, 9), ("object", "loads-table", "live-load-table", 3, 5),
-        ("object", "site", "doc-field", 6, 8), ("object", "class", "doc-choice", 10, 11)], blocks
+        ("shared", "live-loads", None, 1, 9), ("object", "loads-table", "show-norm-list", 3, 5),
+        ("object", "site", "text", 6, 8), ("object", "class", "heading", 10, 11)], blocks
 
 
 def test_a_tag_is_a_line_comment_alone_on_its_line_with_the_exact_prefix():
@@ -407,19 +407,19 @@ def test_a_tag_is_a_line_comment_alone_on_its_line_with_the_exact_prefix():
 
 
 def test_an_unclosed_tag_is_said_where_it_opens():
-    text = "a\n// woodcore:object doc-table one\nb\n"
+    text = "a\n// woodcore:object table one\nb\n"
     assert _problems(text) == ["line 2: object one is never closed"]
-    text = "// woodcore:shared s\n// woodcore:object doc-table one\n// woodcore:/object one\n"
+    text = "// woodcore:shared s\n// woodcore:object table one\n// woodcore:/object one\n"
     assert _problems(text) == ["line 1: shared s is never closed"]
 
 
 def test_a_closing_tag_that_does_not_match_is_said_and_one_slip_is_not_a_cascade():
     assert _problems("// woodcore:/object one\n") == ["line 1: closes object one, which is not open"]
-    mismatched = "// woodcore:object doc-table one\n// woodcore:/object two\n"
+    mismatched = "// woodcore:object table one\n// woodcore:/object two\n"
     problems = _problems(mismatched)
     assert len(problems) == 2 and "object one is never closed" in problems[0] and "closes object two, which is not open" in problems[1], problems
     # a closing tag naming a block further out unwinds to it: the block it cuts short is reported once
-    text = "// woodcore:shared s\n// woodcore:object doc-table one\n// woodcore:/shared s\n"
+    text = "// woodcore:shared s\n// woodcore:object table one\n// woodcore:/shared s\n"
     assert _problems(text) == ["line 2: object one is never closed before line 3"]
     # a kind that matches and an id that does not
     assert any(p.startswith("line 2: closes shared b, which is not open") for p in _problems("// woodcore:shared a\n// woodcore:/shared b\n"))
@@ -428,22 +428,22 @@ def test_a_closing_tag_that_does_not_match_is_said_and_one_slip_is_not_a_cascade
 def test_a_block_inside_one_that_may_not_hold_it_is_said():
     assert _problems("// woodcore:shared a\n// woodcore:shared b\n// woodcore:/shared b\n// woodcore:/shared a\n") == [
         "line 2: a shared tag cannot stand inside the shared block opened at line 1"]
-    assert _problems("// woodcore:object doc-table a\n// woodcore:object doc-field b\n// woodcore:/object b\n// woodcore:/object a\n") == [
+    assert _problems("// woodcore:object table a\n// woodcore:object text b\n// woodcore:/object b\n// woodcore:/object a\n") == [
         "line 2: an object tag cannot stand inside the object block opened at line 1"]
     # an object straddling a shared block: its own closing tag finds the shared block innermost
-    straddle = "// woodcore:shared s\n// woodcore:object doc-table o\n// woodcore:/shared s\n// woodcore:/object o\n"
+    straddle = "// woodcore:shared s\n// woodcore:object table o\n// woodcore:/shared s\n// woodcore:/object o\n"
     assert any("never closed" in p for p in _problems(straddle)) and any("closes object o" in p for p in _problems(straddle))
     # the generated structure block holds nothing
     assert _problems(structure.START_TAG + "\n// woodcore:shared s\n// woodcore:/shared s\n" + structure.END_TAG + "\n")[0].startswith("line 2: a shared tag cannot stand inside the structure block")
 
 
 def test_an_id_used_twice_in_one_file_is_said():
-    text = "// woodcore:object doc-table t\n// woodcore:/object t\n// woodcore:object doc-field t\n// woodcore:/object t\n"
+    text = "// woodcore:object table t\n// woodcore:/object t\n// woodcore:object text t\n// woodcore:/object t\n"
     assert _problems(text) == ["line 3: the object id 't' is used twice in one file (first at line 1)"]
     text = "// woodcore:shared s\n// woodcore:/shared s\n// woodcore:shared s\n// woodcore:/shared s\n"
     assert _problems(text) == ["line 3: the shared id 's' is used twice in one file (first at line 1)"]
     # the same id as an object and as a shared block is two different things
-    assert _problems("// woodcore:shared t\n// woodcore:object doc-table t\n// woodcore:/object t\n// woodcore:/shared t\n") == []
+    assert _problems("// woodcore:shared t\n// woodcore:object table t\n// woodcore:/object t\n// woodcore:/shared t\n") == []
 
 
 def test_a_tag_that_cannot_be_read_is_a_problem_and_no_tag():
@@ -463,7 +463,8 @@ def _headings(root, entry):
     """[(level, title)] of the outlined headings of the document `entry`, as Typst itself numbers them (`typst eval` of the document's own `query`)."""
     done = subprocess.run(
         ["typst", "eval", "--root", str(root), "--in", str(entry),
-         "query(heading.where(outlined: true)).map(it => (level: it.level, title: it.body.text))"],
+         # a domain's heading (lib/formula.typ `domain-heading`, labelled <wc-domain-heading>) is printed by the file a section includes, which the structure does not scan: left out
+         "query(heading.where(outlined: true)).filter(it => it.at(\"label\", default: none) != <wc-domain-heading>).map(it => (level: it.level, title: it.body.text))"],
         capture_output=True, text=True, encoding="utf-8")
     assert done.returncode == 0, done.stderr
     return [(h["level"], h["title"]) for h in json.loads(done.stdout)]
@@ -566,13 +567,13 @@ def test_markup_headings_and_heading_calls_are_found_and_nothing_else_is():
 
 def test_a_heading_after_an_import_a_let_a_line_break_and_in_a_content_block_is_found():
     # the start of every section file: an #import, a blank line and the heading -- the lexer is in code mode when the newline comes, and the heading's line starts in markup
-    assert _scan('#import "/commands.typ": *\n\n= Title\n') == [(1, "Title", "markup")]
-    assert _scan('#import "/commands.typ": *\n= Title\n') == [(1, "Title", "markup")]
+    assert _scan('#import "/000-Typst-Config/commands.typ": *\n\n= Title\n') == [(1, "Title", "markup")]
+    assert _scan('#import "/000-Typst-Config/commands.typ": *\n= Title\n') == [(1, "Title", "markup")]
     assert _scan('#let x = 1\n== After a let\n') == [(2, "After a let", "markup")]
     assert _scan('#set page(paper: "a4")\n#show: conf\n= After two statements\n') == [(1, "After two statements", "markup")]
     assert _scan("text \\\n= after a line break\n") == [(1, "after a line break", "markup")]
     # a heading in a content block, which is in the document whenever the condition holds
-    assert _scan("#if connector-ids().len() > 0 [\n  == Conditional\n  text\n]\n= After\n") == [(2, "Conditional", "markup"), (1, "After", "markup")]
+    assert _scan('#if ids("connector").len() > 0 [\n  == Conditional\n  text\n]\n= After\n') == [(2, "Conditional", "markup"), (1, "After", "markup")]
     assert _scan("#[= Block start]\n") == [(1, "Block start", "markup")]
     # no newline at the end of the file, and an empty heading
     assert _scan("= Last") == [(1, "Last", "markup")]
@@ -728,7 +729,7 @@ def _report(root, ending="\n"):
         '#include "Sections/004-d.typ"', "",
     ]), ending)
     sections = here.document_dir("rs") / "Sections"
-    _write(sections / "001-a.typ", '#import "/commands.typ": *\n\n= Alpha\n\ntext\n\n== Alpha one\n\n=== Alpha one one\n\n== Alpha two\n', ending)
+    _write(sections / "001-a.typ", '#import "/000-Typst-Config/commands.typ": *\n\n= Alpha\n\ntext\n\n== Alpha one\n\n=== Alpha one one\n\n== Alpha two\n', ending)
     _write(sections / "002-b.typ", "= Beta\n\n== Beta one\n", ending)
     _write(sections / "003-c.typ", "== Gamma starts at two\n\n=== Gamma deeper\n\n= Gamma second top\n", ending)
     _write(sections / "004-d.typ", "No heading at all.\n", ending)
@@ -872,7 +873,7 @@ def _cu(name, ending="\n", language=None):
     _write(here.document_typ("cu"), "// entry\n#show: conf\n\n" + structure.START_TAG + "\n" + structure.END_TAG + "\n\n// trailer\n", ending)
     structure.sync_entry(here.document_typ("cu"), source, language or "de")
     for leaf, _depth in structure.leaves(source):
-        _write(here.document_dir("cu") / leaf["file"], f'#import "/commands.typ": *\n\n= Title {leaf["id"]}\n\ntext\n\n== Sub {leaf["id"]}\n', ending)
+        _write(here.document_dir("cu") / leaf["file"], f'#import "/000-Typst-Config/commands.typ": *\n\n= Title {leaf["id"]}\n\ntext\n\n== Sub {leaf["id"]}\n', ending)
     return here
 
 
@@ -928,7 +929,7 @@ def test_a_cu_refuses_a_section_it_does_not_have_and_an_entry_it_cannot_lay_out_
 def test_a_leafs_title_is_its_first_heading_rewritten_in_place_and_nothing_else_moves():
     here = _cu("title_leaf", "\r\n")
     leaf = here.document_dir("cu") / "Sections" / "purpose.typ"
-    _write(leaf, '#import "/commands.typ": *\n\n= Old title <intro> // a note\n\ntext = with an equals\n\n== Second\n', "\r\n")
+    _write(leaf, '#import "/000-Typst-Config/commands.typ": *\n\n= Old title <intro> // a note\n\ntext = with an equals\n\n== Second\n', "\r\n")
     before = leaf.read_bytes().decode("utf-8")
     structure_before = here.structure_file("cu").read_bytes()
     entry_before = here.document_typ("cu").read_bytes()
@@ -1204,7 +1205,7 @@ def test_align_on_the_compiled_example_documents_matches_every_node():
 
 # --- objects in the tree -----------------------------------------------------------------------------------------
 
-TAGGED = """#import "/commands.typ": *
+TAGGED = """#import "/000-Typst-Config/commands.typ": *
 
 // woodcore:shared intro
 // woodcore:object heading title
@@ -1219,13 +1220,12 @@ Der *erste* Absatz, der lang genug ist, um im Baum gekürzt zu werden, weil niem
 == Unterabschnitt <unter>
 // woodcore:/object h2
 
-// woodcore:object doc-table liste
-#doc-table(
-  columns: (
-    (id: "a", title: [A]),
-  ),
-  rows: (
-    (a: [x]),
+// woodcore:object table liste
+#figure(
+  table(
+    columns: 1,
+    table.header([*A*]),
+    [x],
   ),
   caption: [Eine *Liste*],
 )
@@ -1259,7 +1259,7 @@ def test_a_file_with_object_tags_has_its_objects_for_children():
     kids = alpha.children
     assert [(c.id, c.kind, c.object_type, c.object_id) for c in kids] == [
         ("alpha/title", "object", "heading", "title"), ("alpha/p1", "object", "text", "p1"), ("alpha/h2", "object", "heading", "h2"),
-        ("alpha/liste", "object", "doc-table", "liste"), ("alpha/p2", "object", "text", "p2"), ("alpha/outside", "object", "text", "outside")], "flat, in the order of the file"
+        ("alpha/liste", "object", "table", "liste"), ("alpha/p2", "object", "text", "p2"), ("alpha/outside", "object", "text", "outside")], "flat, in the order of the file"
     assert all(c.children == [] and c.parent == "alpha" and c.file == "Sections/alpha.typ" and not c.separate_file and c.state == "canonical" and c.problems == () for c in kids)
     # a short label: a heading's title (its label left out), the first words of a paragraph, a table's caption
     assert [c.title for c in kids][2:] == ["Unterabschnitt", "Eine Liste", "Der zweite Absatz.", "Ausserhalb des Blocks."] and kids[0].title == "Einleitung"
@@ -1290,10 +1290,10 @@ def test_the_level_of_an_object_follows_where_the_file_is_included():
 
 
 def test_a_file_that_carries_no_tag_keeps_its_headings_and_a_file_half_tagged_has_both():
-    here = _tagged_project("tree_half", text='#import "/commands.typ": *\n\n= Alpha\n\n== Alpha one\n\nText.\n')
+    here = _tagged_project("tree_half", text='#import "/000-Typst-Config/commands.typ": *\n\n= Alpha\n\n== Alpha one\n\nText.\n')
     (alpha,) = structure.tree(here, "cu")
     assert [(c.kind, c.level, c.title) for c in alpha.children] == [("heading", 2, "Alpha one")] and alpha.children[0].object_type is None
-    text = ('#import "/commands.typ": *\n\n// woodcore:object heading title\n= Alpha\n// woodcore:/object title\n\n== Untagged one\n\n'
+    text = ('#import "/000-Typst-Config/commands.typ": *\n\n// woodcore:object heading title\n= Alpha\n// woodcore:/object title\n\n== Untagged one\n\n'
             '// woodcore:object text p1\nTagged.\n// woodcore:/object p1\n\n=== Untagged two\n')
     here = _tagged_project("tree_half_two", text=text)
     (alpha,) = structure.tree(here, "cu")
@@ -1416,7 +1416,7 @@ def test_tag_section_keeps_crlf_and_a_bom_and_refuses_what_it_must():
     assert structure.tag_section(here, "rs", "001-einleitung") == 2 and path.read_bytes().startswith(b"\xef\xbb\xbf#import"), "the byte order mark stays first"
     # a file whose tags cannot be read is left as it is, and the refusal names the file
     torn = here.document_dir("cu") / "Sections" / "purpose.typ"
-    torn.write_bytes(b'#import "/commands.typ": *\n\n= Zweck\n\n// woodcore:object text p1\nOffen.\n')
+    torn.write_bytes(b'#import "/000-Typst-Config/commands.typ": *\n\n= Zweck\n\n// woodcore:object text p1\nOffen.\n')
     before = torn.read_bytes()
     error = _code("tags_unreadable", structure.tag_section, here, "cu", "purpose")
     assert "Sections/purpose.typ" in str(error) and error.values["file"] == "Sections/purpose.typ" and torn.read_bytes() == before
@@ -1438,8 +1438,8 @@ def _small(here):
         folder = here.document_dir(mode) / "Sections"
         for old in folder.glob("*.typ"):
             old.unlink()
-        _write(folder / "purpose.typ", f'#import "/commands.typ": *\n\n= Zweck\n\n{SMALL[mode]}\n')
-        _write(folder / "journal.typ", '#import "/commands.typ": *\n\n= Änderungsverzeichnis\n\n#show-journal()\n')
+        _write(folder / "purpose.typ", f'#import "/000-Typst-Config/commands.typ": *\n\n= Zweck\n\n{SMALL[mode]}\n')
+        _write(folder / "journal.typ", '#import "/000-Typst-Config/commands.typ": *\n\n= Änderungsverzeichnis\n\nKeine Änderungen.\n')
         source = structure.blank(mode)
         source["sections"] = [_group("general", _leaf("purpose")), _leaf("journal")]
         source["sections"][0]["title"] = {"fr": "Généralités", "de": "Allgemeines", "en": "General"}
@@ -1495,7 +1495,7 @@ def _unchanged(here, mode, before):
 
 
 GROUPS = {"fr": "Charges", "de": "Lasten", "en": "Loads"}
-SKELETON = b'#import "/commands.typ": *\n\n= Nutzlasten\n\n'
+SKELETON = b'#import "/000-Typst-Config/commands.typ": *\n\n= Nutzlasten\n\n'
 
 
 def test_the_codes_are_the_ones_a_refusal_states_and_an_old_error_states_none():
@@ -1549,7 +1549,7 @@ def test_the_same_holds_in_a_base_de_projet():
     before = _files(here, "bp")
     structure.add_section(here, "bp", None, 0, "scope", "Umfang")
     assert [c["id"] for c in structure.read(here.structure_file("bp"))["sections"]] == ["scope", "general", "journal"]
-    assert (here.document_dir("bp") / "Sections" / "scope.typ").read_bytes() == b'#import "/commands.typ": *\n\n= Umfang\n\n'
+    assert (here.document_dir("bp") / "Sections" / "scope.typ").read_bytes() == b'#import "/000-Typst-Config/commands.typ": *\n\n= Umfang\n\n'
     assert structure.find_node(structure.tree(here, "bp"), "scope").level == 1
     structure.remove_section(here, "bp", "scope")
     after = _files(here, "bp")
@@ -1562,7 +1562,7 @@ def test_a_section_is_written_in_the_line_ending_of_the_entry_and_structure_json
     entry.write_bytes(entry.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
     crlf_entry = entry.read_bytes()
     structure.add_section(here, "cu", None, None, "annex", "Anhang")
-    assert (here.document_dir("cu") / "Sections" / "annex.typ").read_bytes() == b'#import "/commands.typ": *\r\n\r\n= Anhang\r\n\r\n'
+    assert (here.document_dir("cu") / "Sections" / "annex.typ").read_bytes() == b'#import "/000-Typst-Config/commands.typ": *\r\n\r\n= Anhang\r\n\r\n'
     data = entry.read_bytes()
     assert data.count(b"\r\n") == data.count(b"\n") and b"\r\r" not in data, "a line of the entry was written with another ending than the file's"
     assert data != crlf_entry and b'include "Sections/annex.typ"' in data
@@ -1905,7 +1905,7 @@ def test_rename_section_moves_the_file_and_changes_the_id_and_nothing_else():
         raise Skip("no typst on the path")
     here = _tall("ops_rename")
     folder = here.document_dir("cu") / "Sections"
-    (folder / "a.typ").write_bytes(b'#import "/commands.typ": *\r\n\r\n= Alpha\r\n\r\nthe engineer\'s own words\r\n')
+    (folder / "a.typ").write_bytes(b'#import "/000-Typst-Config/commands.typ": *\r\n\r\n= Alpha\r\n\r\nthe engineer\'s own words\r\n')
     before = _files(here, "cu")
     edit = structure.rename_section(here, "cu", "a", "alpha")
     assert (edit.op, edit.id, edit.structure, edit.entry, edit.created, edit.archived) == ("rename_section", "alpha", True, True, (), ())
@@ -2011,7 +2011,7 @@ def test_the_report_adds_a_section_by_the_include_lines_rule_and_keeps_the_rest_
         edit = structure.add_section(here, "rs", None, 2, "005-new", "New one")
         new = here.document_dir("rs") / "Sections" / "005-new.typ"
         assert (edit.op, edit.mode, edit.id, edit.structure, edit.entry, edit.created) == ("add_section", "rs", "005-new", False, True, (new,))
-        assert new.read_bytes() == f'#import "/commands.typ": *{ending}{ending}= New one{ending}{ending}'.encode()
+        assert new.read_bytes() == f'#import "/000-Typst-Config/commands.typ": *{ending}{ending}= New one{ending}{ending}'.encode()
         # the include lines stay where they stand and each holds the next section: the commented one stays commented, the indentation stays with its place
         assert _include_text(here) == "\n".join([
             "// entry", '#set page(paper: "a4")', "",

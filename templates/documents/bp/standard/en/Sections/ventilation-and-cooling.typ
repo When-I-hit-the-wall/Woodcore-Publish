@@ -4,18 +4,16 @@
 == Ventilation and summer thermal protection
 // woodcore:/object title
 
-// woodcore:object doc-table ventilation-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Item]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Ventilation], text: [[Type of ventilation, air conditioning.]]),
-    (item: [Summer thermal protection], text: [[Solar shading, thermal mass, night ventilation …]]),
+// woodcore:object table ventilation-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Ventilation], [[Type of ventilation, air conditioning.]],
+    [Summer thermal protection], [[Solar shading, thermal mass, night ventilation …]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Ventilation and summer thermal protection],
-  header: false,
 )
 // woodcore:/object ventilation-table

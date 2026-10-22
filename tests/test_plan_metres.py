@@ -3,6 +3,8 @@
 The engineer, 07.10.2026: «pouvoir tourner les poteaux» -- «un carré comme aujourd'hui, qu'il est possible de tourner (e.g. 30°)» · «on doit pouvoir activer ou désactiver le fait que la longueur des éléments soient indiqués (longueur de chaque mur, chaque T, longueur de chaque côté de dale). En sélectionnant un unique objet, on doit pouvoir activer ou désactiver cet affichage pour un unique élément. Ensuite, dans légende, il doit y avoir en plus, sous le descriptif des symboles, les métrés totaux par type d'objet.» The decimal is a point in the three languages (docs/decisions.md, v0.52).
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 import re
 
@@ -155,8 +157,8 @@ def test_the_report_lists_the_quantities_under_the_symbols_in_its_language():
     source["id"] = "M99"
     types._write(here, source)
     model.export(here.plans_dir, here.root, here.data_dir, model.known_positions(here.data_dir) + ["V001", "V002", "T001", "D001", "S001", "S002"])
-    french = types._run(here, '#show-plan-legend("M99")', "metres_fr", "fr")
+    french = types._run(here, '#image-positions-plan("M99")', "metres_fr", "fr")
     for part in ("Métrés", "6.50 m", "3.00 m", "12.00 m2", "2 pce"):   # «m²», read back through NFKC as «m2»
         assert part in french, (part, french)
-    german = types._run(here, '#show-plan-legend("M99")', "metres_de", "de")
+    german = types._run(here, '#image-positions-plan("M99")', "metres_de", "de")
     assert "Ausmass" in german and "6.50 m" in german and "2 Stk." in german, german

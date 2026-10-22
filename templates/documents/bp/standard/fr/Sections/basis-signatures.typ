@@ -4,15 +4,23 @@
 = Signatures
 // woodcore:/object title
 
-// woodcore:object doc-signatures basis-signatures-block
-#doc-signatures(
-  rows: (
-    (group: [Auteur du projet], role: [Architecte]),
-    (group: [Auteur du projet], role: [Ingénieur·e]),
-    (group: [Spécialistes], role: [Spécialiste protection incendie]),
-    (group: [Spécialistes], role: [Physicien·ne du bâtiment]),
-    (group: [Contrôle], role: [Ingénieur·e contrôleur·euse]),
+// woodcore:object table basis-signatures-block
+#figure(
+  table(
+    columns: (auto, auto, auto, 1fr),
+    align: (left, left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Fonction*], [*Nom*], [*Lieu, date*], [*Signature*]),
+    table.hline(stroke: 0.5pt),
+    [*Auteur du projet*], [], [], [],
+    [Architecte], [], [], [#v(1cm)#line(length: 100%, stroke: 0.5pt)],
+    [Ingénieur·e], [], [], [#v(1cm)#line(length: 100%, stroke: 0.5pt)],
+    [*Spécialistes*], [], [], [],
+    [Spécialiste protection incendie], [], [], [#v(1cm)#line(length: 100%, stroke: 0.5pt)],
+    [Physicien·ne du bâtiment], [], [], [#v(1cm)#line(length: 100%, stroke: 0.5pt)],
+    [*Contrôle*], [], [], [],
+    [Ingénieur·e contrôleur·euse], [], [], [#v(1cm)#line(length: 100%, stroke: 0.5pt)],
+    table.hline(stroke: 1pt),
   ),
-  place-date: true,
 )
 // woodcore:/object basis-signatures-block

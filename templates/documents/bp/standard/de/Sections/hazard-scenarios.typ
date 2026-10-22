@@ -8,36 +8,25 @@
 Mögliche Gefährdungsbilder wurden durchgedacht, und geeignete Massnahmen sind festgelegt, um die Gefährdungen unter Kontrolle zu halten oder auf ein akzeptierbar kleines Mass zu beschränken (SIA 260, Ziffer 2.4.4). Die betrachteten Gefährdungsbilder mit Massnahmen, Weiterbearbeitung und Bemessungsannahmen sind:
 // woodcore:/object p1
 
-// woodcore:object doc-checklist hazard-influences
-#doc-checklist(
-  label: [Einflüsse, die eine Gefährdung darstellen können (SIA 260, Ziffer 2.4.5)],
-  options: (
-    (id: "deviations-actions", label: [Abweichungen von den angenommenen Werten der Einwirkungen], checked: true),
-    (id: "ground-actions", label: [Einwirkungen aus dem Baugrund], checked: false),
-    (id: "natural-hazards", label: [Einwirkung durch gravitative und meteorologische Naturgefahren], checked: false),
-    (id: "physical", label: [Physikalische Einwirkungen, z. B. Feuchtigkeit oder Temperatur], checked: true),
-    (id: "chemical", label: [Chemische Einwirkungen, z. B. infolge Streusalz oder Grundwasser], checked: false),
-    (id: "biological", label: [Biologische Einwirkungen, z. B. durch Insekten oder Pilze], checked: true),
-    (id: "resonance", label: [Resonanzeffekte], checked: false),
-    (id: "resistance-deviations", label: [Abweichungen von geplanten Werten des Trag- oder Baugrundwiderstands], checked: false),
-    (id: "deterioration", label: [Beeinträchtigung des Tragwiderstands durch Korrosion, Versprödung oder Ermüdung], checked: false),
-    (id: "accidental", label: [Beeinträchtigung des Tragwiderstands durch Brand, Explosion, Anprall, Leitungsbruch oder Erdbeben], checked: true),
-  ),
-)
+// woodcore:object text hazard-influences
+*Einflüsse, die eine Gefährdung darstellen können (SIA 260, Ziffer 2.4.5)*:
+- *Abweichungen von den angenommenen Werten der Einwirkungen*
+- *Physikalische Einwirkungen, z. B. Feuchtigkeit oder Temperatur*
+- *Biologische Einwirkungen, z. B. durch Insekten oder Pilze*
+- *Beeinträchtigung des Tragwiderstands durch Brand, Explosion, Anprall, Leitungsbruch oder Erdbeben*
 // woodcore:/object hazard-influences
 
-// woodcore:object doc-table hazard-scenarios-table
-#doc-table(
-  columns: (
-    (id: "scenario", title: [Gefährdungsbild]),
-    (id: "measures", title: [Massnahmen]),
-    (id: "followup", title: [Weiterbearbeitung]),
-    (id: "assumptions", title: [Bemessungsannahmen]),
-  ),
-  hidden: (),
-  rows: (
-    (scenario: [[Brand]], measures: [[Brandabschnitte, Feuerwiderstand, ausreichende Bauteilabmessungen, Brandschutzverkleidung]], followup: [[Brandschutzkonzept; Brandfallplanung]], assumptions: [[R 60]]),
-    (scenario: [[Erdbeben]], measures: [[Bemessung; konstruktive Massnahmen nach SIA 261]], followup: [[Statische Berechnung]], assumptions: [[Zone, Baugrundklasse, Bauwerksklasse, q]]),
+// woodcore:object table hazard-scenarios-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Gefährdungsbild*], [*Massnahmen*], [*Weiterbearbeitung*], [*Bemessungsannahmen*]),
+    table.hline(stroke: 0.5pt),
+    [[Brand]], [[Brandabschnitte, Feuerwiderstand, ausreichende Bauteilabmessungen, Brandschutzverkleidung]], [[Brandschutzkonzept; Brandfallplanung]], [[R 60]],
+    [[Erdbeben]], [[Bemessung; konstruktive Massnahmen nach SIA 261]], [[Statische Berechnung]], [[Zone, Baugrundklasse, Bauwerksklasse, q]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Gefährdungsbilder und Massnahmen],
 )

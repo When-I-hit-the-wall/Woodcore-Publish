@@ -711,3 +711,125 @@ def test_the_view_has_one_width_whether_the_page_is_taller_than_the_pane_or_not(
     finally:
         pane.stop()
         pane.deleteLater()
+
+
+# --- issue #89: every Typst page follows its pane's width and zooms by Ctrl+wheel -------------------------------
+
+
+def _pages(name, count=4, width=595, height=842):
+    """A PDF of `count` A4 pages, blank, in a folder of the test's own."""
+    from pypdf import PdfWriter
+    writer = PdfWriter()
+    for _ in range(count):
+        writer.add_blank_page(width=width, height=height)
+    path = conftest.tmpdir("pdf_pane_zoom") / f"{name}.pdf"
+    with open(path, "wb") as handle:
+        writer.write(handle)
+    return path
+
+
+def _length(view):
+    """How tall the pages stand, one under the other, in pixels: what the vertical bar scrolls through."""
+    bar = view.verticalScrollBar()
+    return bar.maximum() + bar.pageStep()
+
+
+def _wheel(app, view, notches, ctrl):
+    from PySide6.QtCore import QPoint, QPointF, Qt
+    from PySide6.QtGui import QWheelEvent
+    at = QPointF(view.viewport().width() / 2, view.viewport().height() / 3)
+    modifiers = Qt.KeyboardModifier.ControlModifier if ctrl else Qt.KeyboardModifier.NoModifier
+    event = QWheelEvent(at, view.viewport().mapToGlobal(at), QPoint(0, 0), QPoint(0, 120 * notches), Qt.MouseButton.NoButton, modifiers, Qt.ScrollPhase.NoScrollPhase, False)
+    app.sendEvent(view.viewport(), event)
+    app.processEvents()
+
+
+def test_the_page_follows_the_width_of_its_pane():
+    """Halved, the pane halves the page: the pages stand half as tall -- as in VS Code (the engineer, 21.10.2026)."""
+    app = _qt()
+    pane = _pane(app, "pdf_pane_follow")
+    try:
+        assert pane.load(_pages("follow"))
+        pane.resize(800, 500)
+        _pause(app, 0.2)
+        wide = _length(pane.view)
+        pane.resize(400, 500)
+        _pause(app, 0.2)
+        narrow = _length(pane.view)
+        assert 0.4 <= narrow / wide <= 0.6, (wide, narrow)
+    finally:
+        pane.stop()
+        pane.deleteLater()
+
+
+def test_ctrl_wheel_zooms_the_page_the_wheel_alone_scrolls_and_the_button_fits_it_back():
+    app = _qt()
+    from PySide6.QtPdfWidgets import QPdfView
+    pane = _pane(app, "pdf_pane_wheel")
+    view = pane.view
+    try:
+        assert pane.load(_pages("wheel"))
+        pane.resize(600, 500)
+        _pause(app, 0.2)
+        assert view.zoomMode() == QPdfView.ZoomMode.FitToWidth and view.fit_button.isHidden()
+        before = view.scale()
+        _wheel(app, view, 1, ctrl=False)
+        assert view.zoomMode() == QPdfView.ZoomMode.FitToWidth, "the wheel alone zooms"
+        _wheel(app, view, 1, ctrl=True)
+        assert view.zoomMode() == QPdfView.ZoomMode.Custom
+        assert abs(view.zoomFactor() / before - 1.1) < 1e-6, (before, view.zoomFactor())
+        assert view.fit_button.isVisibleTo(view) and view.fit_button.text() == "Ajuster à la largeur"
+        _wheel(app, view, -2, ctrl=True)
+        assert abs(view.zoomFactor() / before - 1.1 / 1.21) < 1e-6
+        # the zoom holds through a new PDF -- a recompilation
+        factor = view.zoomFactor()
+        assert pane.load(_pages("wheel-again"))
+        _pause(app, 0.1)
+        assert view.zoomMode() == QPdfView.ZoomMode.Custom and view.zoomFactor() == factor, "a recompilation lost the zoom"
+        view.fit_button.click()
+        app.processEvents()
+        assert view.zoomMode() == QPdfView.ZoomMode.FitToWidth and view.fit_button.isHidden()
+    finally:
+        pane.stop()
+        pane.deleteLater()
+
+
+def test_the_export_sheets_pages_follow_their_width_and_zoom_alike():
+    """The export documents' pages (bundle_view.BundlePages) were a QPdfView of their own, without the bar always there that keeps a page from showing blank: they are the one page view now."""
+    app = _qt()
+    import bundle_view
+    import pdf_pane
+    from PySide6.QtCore import Qt
+    from PySide6.QtPdfWidgets import QPdfView
+    pages = bundle_view.BundlePages(lambda key, **_: key, lang="de")
+    try:
+        assert isinstance(pages.view, pdf_pane.ZoomablePdfView)
+        assert pages.view.verticalScrollBarPolicy() == Qt.ScrollBarPolicy.ScrollBarAlwaysOn
+        pages.show_pdf(_pages("bundle").read_bytes(), ("b", ()))
+        pages.resize(800, 500)
+        pages.show()
+        _pause(app, 0.2)
+        wide = _length(pages.view)
+        pages.resize(400, 500)
+        _pause(app, 0.2)
+        assert 0.4 <= _length(pages.view) / wide <= 0.6
+        _wheel(app, pages.view, 1, ctrl=True)
+        assert pages.view.zoomMode() == QPdfView.ZoomMode.Custom and pages.view.fit_button.text() == "An Breite anpassen"
+    finally:
+        pages.deleteLater()
+
+
+def test_every_typst_page_of_the_window_is_the_one_zoomable_view():
+    """No QPdfView built anywhere but as the one class (issue #89): the Structure tab's pane, the «Affichage» views and the plans' command builder are PdfPanes, the export sheets' bundles a BundlePages -- each holding a ZoomablePdfView."""
+    found = []
+    for path in sorted(TOOLS.glob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                name = node.func.attr if isinstance(node.func, ast.Attribute) else getattr(node.func, "id", None)
+                if name == "QPdfView":
+                    found.append(f"{path.name}:{node.lineno}")
+    assert not found, f"a page view of its own, which neither follows nor zooms like the others: {found}"
+    hosts = {"structure_tab.py": "pdf_pane.PdfPane(", "display_view.py": "pdf_pane.PdfPane(", "plan_command_builder.py": "pdf_pane.PdfPane(", "drawing_tab_panes.py": "bundle_view.BundlePages("}
+    for name, call in hosts.items():
+        assert call in (TOOLS / name).read_text(encoding="utf-8"), f"{name} no longer builds its page through {call}"

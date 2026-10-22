@@ -5,11 +5,14 @@
 Kept to what QtSvg (SVG Tiny 1.2) and resvg read alike, like every drawing here: no marker, no CSS, no pattern; one SVG for every language, its words being the materials' own names -- the data's, as the table beside it prints them. The fills are the detail schemas' own (`schema_svg`), so a build-up and a detail of one project look like one set. No Qt here.
 """
 
+from domains import svg_draw  # the one writer of an SVG number and text (D6)
+from domains import svg_text  # the one plain text writer (ARCH-004)
 from domains import schema_svg, statics_svg
 
-FONT = statics_svg.FONT
-FILLS = schema_svg.ELEMENT_FILLS + ("#d7dde2", "#c4ccd3", "#e9e4d8")
-INSULATION_FILL = "#f4e7a1"
+FONT = svg_draw.FONT
+FILLS = schema_svg.ELEMENT_FILLS + svg_draw.colours("layers")
+INSULATION_FILL = svg_draw.colour("insulation")
+GROUND = svg_draw.colour("ground")
 STROKE_COLOUR = schema_svg.ELEMENT_STROKE
 TEXT_COLOUR = schema_svg.TEXT_COLOR
 MUTED = schema_svg.MUTED
@@ -28,13 +31,10 @@ THIN = 0.8
 INSULATION_WORDS = ("dämm", "isol", "wolle", "faser", "steinwolle", "glaswolle", "insul")
 
 
-def _f(value):
-    text = ("%.1f" % value).rstrip("0").rstrip(".")
-    return "0" if text in ("", "-0") else text
+_f = svg_draw.number_at(1)   # a coordinate at 1 decimals (svg_draw.py, D6)
 
 
-def _esc(text):
-    return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+_esc = svg_draw.escape   # (svg_draw.py, D6)
 
 
 def _rect(out, x, y, w, h, fill, stroke=STROKE_COLOUR, width=STROKE):
@@ -46,9 +46,7 @@ def _line(out, x1, y1, x2, y2, colour=MUTED, width=THIN):
 
 
 def _text(out, x, y, content, size=TEXT, anchor="middle", colour=TEXT_COLOUR, rotate=False):
-    turn = ' transform="rotate(-90 %s %s)"' % (_f(x), _f(y)) if rotate else ""
-    out.append('<text x="%s" y="%s" font-family="%s" font-size="%s" fill="%s" text-anchor="%s"%s>%s</text>'
-               % (_f(x), _f(y), FONT, _f(size), colour, anchor, turn, _esc(content)))
+    svg_text.plain(out, x, y, content, size, colour, _f, anchor, ' transform="rotate(-90 %s %s)"' % (_f(x), _f(y)) if rotate else "")
 
 
 def _tick(out, x, y, vertical):
@@ -100,7 +98,7 @@ def render(layers):
         for layer in continuous:
             _rect(out, x0, y, width_units, h, fills[id(layer)])
         if spaced and not continuous:
-            _rect(out, x0, y, width_units, h, "#ffffff", MUTED, THIN)     # the gaps, empty
+            _rect(out, x0, y, width_units, h, GROUND, MUTED, THIN)     # the gaps, empty
         for layer in spaced:
             member_h = max(layer["thickness"] * scale, MIN_BAND)
             w, sp = layer["width"] * scale, layer["spacing"] * scale

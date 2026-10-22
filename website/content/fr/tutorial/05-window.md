@@ -29,5 +29,5 @@ Ce qu'on dessine est enregistré dans `Woodcore-Datei/` et exporté aussitôt : 
 Presque chaque ligne de la fenêtre propose l'appel qui l'imprime dans le rapport. Un double-clic le copie, un clic droit les liste tous. Par exemple, pour une position dessinée sur un plan :
 
 ```typ
-#show-plan("Velo-Unterstand", highlight: "T001", detail: true)
+#figure(image-positions-plan("Velo-Unterstand", highlight: "T001", frame: "highlight"), kind: image, caption: [Velo-Unterstand]) <fig-velo>
 ```

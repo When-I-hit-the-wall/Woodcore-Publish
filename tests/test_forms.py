@@ -231,7 +231,7 @@ def test_an_adjustment_written_in_the_new_config_wins_over_the_form():
     assert marker in text
     config.write_text(text.replace(marker, "  set text(size: 14pt)\n  set page(margin: (left: 4cm, top: 3cm))\n  doc\n}"), encoding="utf-8")
     probe = here.typst_root / "probe_forms.typ"
-    probe.write_text('#import "/config.typ": conf\n#show: conf\nAdjusted body text\n', encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/config.typ": conf\n#show: conf\nAdjusted body text\n', encoding="utf-8")
     pdf = here.typst_root / "probe_forms.pdf"
     run = subprocess.run([project.typst_executable(), "compile", "--root", str(here.typst_root), str(probe), str(pdf)], capture_output=True, text=True, encoding="utf-8", errors="replace")
     assert run.returncode == 0, run.stderr[:2000]
@@ -250,12 +250,13 @@ def test_a_form_is_applied_to_a_project_the_old_files_archived_and_its_language_
     done = forms.apply(here, forms.find("bfh"))
     root = here.typst_root
     # the form is in place, stamped with where it came from
-    meta = json.loads((root / "Template" / "form.json").read_text(encoding="utf-8"))
+    meta = json.loads((here.template_dir / "form.json").read_text(encoding="utf-8"))
     assert (meta["id"], meta["place"], meta["format"]) == ("bfh", "builtin", "woodcore-form"), meta
-    assert (root / "Template" / "template.typ").is_file() and (root / "Template" / "logo-bfh.png").is_file()
-    assert not (root / "Template" / "title.typ").exists(), "title.typ belongs at the top of the project"
-    assert here.title_typ.read_bytes() == (forms.place_dir("builtin") / "bfh" / "title.typ").read_bytes()
-    assert 'import "/Template/template.typ"' in here.title_typ.read_text(encoding="utf-8")
+    assert (here.template_dir / "template.typ").is_file() and (here.template_dir / "logo-bfh.png").is_file()
+    assert not (here.template_dir / "title.typ").exists(), "title.typ belongs at the top of the project"
+    import documents   # the form's title page as the project holds it: its paths in 000-Typst-Config/ laid out by folders (issue #64)
+    assert here.title_typ.read_bytes() == documents.relocate_config_text(here, (forms.place_dir("builtin") / "bfh" / "title.typ").read_text(encoding="utf-8")).encode("utf-8")
+    assert f'import "{here.from_root(here.template_dir / "template.typ")}"' in here.title_typ.read_text(encoding="utf-8")
     current = forms.current(here)
     assert current is not None and current.ref == "builtin:bfh" and current.name("de") == "BFH – Akademisch"
     # the config is the new format and keeps the project's language
@@ -281,7 +282,7 @@ def test_a_second_switch_keeps_the_engineers_adjustments_and_archives_the_old_fo
     title_before = here.title_typ.read_bytes()
     here.title_typ.write_text(here.title_typ.read_text(encoding="utf-8") + "\n// my own row\n", encoding="utf-8")
     edited_title = here.title_typ.read_bytes()
-    first_template = _tree(here.typst_root / "Template")
+    first_template = _tree(here.template_dir)
     done = forms.apply(here, "bfh")
     assert config.read_bytes() == config_before, "the engineer's config.typ was touched"
     assert not done.config_written
@@ -295,7 +296,7 @@ def test_a_second_switch_keeps_the_engineers_adjustments_and_archives_the_old_fo
     # a third switch, within the same second, gets an archive of its own
     again = forms.apply(here, "compact")
     assert again.archive != done.archive and again.archive.is_dir() and done.archive.is_dir()
-    assert forms.current(here).id == "compact" and (here.typst_root / "Template" / "logo-bfh.png").exists() is False
+    assert forms.current(here).id == "compact" and (here.template_dir / "logo-bfh.png").exists() is False
 
 
 def test_a_failure_while_applying_puts_everything_back():
@@ -340,7 +341,7 @@ def test_a_project_without_forms_asks_for_none_and_apply_refuses_a_missing_refer
         assert exc.code == "no_such_form"
     else:
         raise AssertionError("applied a form that does not exist")
-    assert not (here.typst_root / "Template").exists()
+    assert not (here.template_dir).exists()
 
 
 # --- compiling ----------------------------------------------------------------------------------

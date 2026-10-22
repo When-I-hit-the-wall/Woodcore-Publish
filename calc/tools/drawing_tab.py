@@ -4,9 +4,9 @@
 
 **The documents since v0.116**: each tab lists the documents it imported (`DOC_OWNER`, plan_documents' `owner`); a page carries several frames, each a plan -- the tick makes the first, of the whole page, the first frame drawn crops it, every further frame is a new plan (`on_doc_crop`); a frame chosen with the view's «Sélection» makes its plan the plan open and shows the plan's own «Plan» module in the document's right pane (`show_frame_module`), written as a field is left; Suppr archives the plans of the frames chosen; and a layer switched is written at once and exported in a thread `LAYER_EXPORT_MS` later (`on_layers_changed`, `finish_layer_export`).
 
-**What a subclass says** is in class attributes and in hook methods, each documented below where it is declared: `KIND`, `VIEW_KEY`, `STYLE_KIND`, `STYLE_PREFIX`, `ID_PREFIX`, `WORDS` and `domain`; and, among the hooks, `sources_dir`, `list_sources`, `sources_on`, `has_drawing`, `source_for_page`, `document_crops`, `other_crops`, `current_page`, `turn_page_drawings`, `selected_entry`, `build_drawing_center`, `build_drawing_properties`, `make_builder`, `builder_records`, `export`, `export_plans`, `save`, `fill`, `on_changed`, `on_selection`, `choose_tool`.
+**What a subclass says** is in class attributes and in hook methods, each documented below where it is declared: `KIND`, `KEY`, `STYLE_KIND`, `STYLE_PREFIX`, `ID_PREFIX`, `WORD_MAP` and `domain`; and, among the hooks, `sources_dir`, `list_sources`, `sources_on`, `has_drawing`, `source_for_page`, `document_crops`, `other_crops`, `current_page`, `turn_page_drawings`, `selected_entry`, `build_drawing_center`, `build_drawing_properties`, `make_builder`, `builder_records`, `export`, `export_listed`, `save`, `fill`, `on_changed`, `on_selection`, `choose_tool`.
 
-**The words**: every key the base says is looked up through `self.w(key, **values)`, which reads `WORDS` first -- `{"plan_list": "fp_list"}` sends a key of the position plan's to one of the subclass's own -- and the window's `t` after. The position plan's tab maps nothing.
+**The words**: every key the base says is looked up through `self.w(key, **values)`, which reads `WORD_MAP` first -- `{"plan_list": "fp_list"}` sends a key of the position plan's to one of the subclass's own -- and the window's `t` after. The position plan's tab maps nothing.
 
 ⚠️ **The read-only guard** of woodcore_gui.py (`WRITERS`) wraps methods by name on the classes it lists, reading each class's own `vars()` and those of the mixins it is composed of (`woodcore_gui.own_classes`, issue #30): a writing method defined here or in DrawingTab's mixins is guarded only because woodcore_gui lists `DrawingTab` beside `PlanTab` (tests/test_plan_tab_rework.py holds it).
 """
@@ -16,9 +16,8 @@ import json
 import threading
 from pathlib import Path
 
-from PySide6.QtCore import QByteArray, QModelIndex, QObject, QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import QModelIndex, QObject, QSize, Qt, QTimer, Signal
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton,
     QScrollArea, QSlider, QSplitter, QStackedWidget, QToolButton, QVBoxLayout, QWidget,
@@ -54,7 +53,10 @@ import notifications  # every error, warning and information, gathered in one pl
 import notices_ui  # what was a message box is a notice since v0.117 (notices_ui.tell)
 from drawing_tab_panes import CurrentStack, KINDS, KIND_VIEW, LIST_MIN_HEIGHT, MODULE_WHEN, NEW_ROW, VIEW_BOXES, VIEW_KIND, plain_label, DrawingPanesMixin  # split out of this module (issue #30): every name it had is still importable from it
 from drawing_tab_documents import Blank, _Background, _export_layers, _run_layer_export, document_text, DrawingDocumentsMixin  # split out of this module (issue #30): every name it had is still importable from it
+from drawing_tab_clip import DrawingClipMixin  # Ctrl+A, Ctrl+C and Ctrl+V between plans (issue #61)
+from canvas_editor import CanvasEditorTab  # «Annuler» and «Rétablir», once for every tab with a canvas
 from drawing_tab_sheets import HISTORY, DrawingSheetsMixin  # split out of this module (issue #30): every name it had is still importable from it
+import svg_icons
 
 
 # A layer switched in the document view is exported this long after the last switch, in a thread of its own (v0.116): an export flattens every page drawn on with the layers taken out (plan_documents.flatten_page), seconds on an architect's plan set, which the window must not stop for -- and a run of switches is one export.
@@ -105,17 +107,11 @@ def next_free_id(taken, prefix="P"):
 
 
 def svg_icon(svg, size=QSize(26, 18)):
-    renderer = QSvgRenderer(QByteArray(svg.encode("utf-8")))
-    pixmap = QPixmap(size * 2)
-    pixmap.fill(QColor(0, 0, 0, 0))
-    painter = QPainter(pixmap)
-    renderer.render(painter)
-    painter.end()
-    pixmap.setDevicePixelRatio(2)
-    return QIcon(pixmap)
+    """A plan tool's icon, `size` logical pixels (svg_icons.svg_icon)."""
+    return svg_icons.svg_icon(svg, size)
 
 
-class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, QWidget):
+class DrawingTab(DrawingClipMixin, DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, CanvasEditorTab, QWidget):
     """A tab of plans drawn on imported documents: the documents, the saved plans, what the subclass lists of the plan open, the export sheets and the command builder on the left; what is chosen there in the middle; its properties on the right.
 
     A subclass builds the drawing's own centre and properties (`build_drawing_center`, which makes `self.canvas`; `build_drawing_properties`, which makes `self.id_edit`, `self.show_outside_box` and `self.revert_button`) and says what its plans are through the hooks below; the rest is here.
@@ -124,14 +120,14 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
     # The kind of plan this tab draws: "position" for the position plans, "fire" for the fire protection plans -- the word a page shared between the two kinds is told apart by.
     KIND = "position"
     # The key the window keeps this tab's view and empty folders under (app.views, app.folder_settings): the tab's own entry of woodcore_gui.TABS.
-    VIEW_KEY = "tab_plan"
+    KEY = "tab_plan"
     # Which row of figure_style.ENTRY_KEYS the selected entry's own factors are read from, and the key prefix of their words (stylefactors.EntryRows).
     STYLE_KIND = "plan"
     STYLE_PREFIX = "plan"
     # What a new plan's id is made of: P01, P02, …
     ID_PREFIX = "P"
     # The base says the position plan's words; a subclass sends a key to one of its own here ({"plan_list": "fp_list"}).
-    WORDS = {}
+    WORD_MAP = {}
     # The domain module of the plans: new_source, check_source, source_paths, SOURCE_SCHEMA_VERSION.
     domain = plan_model
     # Which documents the tab lists and imports (plan_documents.OWNERS, v0.116): each tab its own.
@@ -149,10 +145,10 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
         self.dirty = False
         self.current_id = None  # the saved plan the tab holds; None for one not saved yet
         self.source = self.blank_source(self.free_id([]))
-        self.undo_stack, self.redo_stack = [], []
+        self.init_history()
         self.slider_down = False
         self.entry_style = None      # the rows of the selected entry's own factors, built with the selection panel and gone with it (build_entry_style)
-        self.empty_folders = list(app.folder_settings(self.VIEW_KEY))   # folders holding nothing: a view preference, kept by the window (grouped_list.py, v0.75)
+        self.empty_folders = list(app.folder_settings(self.KEY))   # folders holding nothing: a view preference, kept by the window (grouped_list.py, v0.75)
         self.modules = []  # (card, when) of the right pane's plan page, in the order they stand: shown or hidden by the selection (add_module, update_modules)
         self.init_state()
         self.view_kind = "plan"  # what the left pane has chosen (KINDS)
@@ -193,6 +189,7 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
             shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
             shortcut.activated.connect(lambda slot=slot: slot())
         self.init_shortcuts()
+        self.init_clip_shortcuts()
         self.watch_frame_fields()
         fit = QShortcut(QKeySequence("F"), self.canvas)
         fit.setContext(Qt.ShortcutContext.WidgetShortcut)
@@ -202,7 +199,7 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
         threading.Thread(target=plan_model.preload, daemon=True).start()
         self.reload_documents()
         self.reload_sheets()
-        self.restore(app.views.get(self.VIEW_KEY))
+        self.restore(app.views.get(self.KEY))
         # the builder's command filled from the export at once -- the page it prints is compiled only once the entry is chosen (open_builder)
         self.builder.set_plans(self.builder_records())
         if self.current_id:
@@ -212,7 +209,11 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
 
     def w(self, key, **values):
         """A word of the tab, in the window's language: `key`, or the subclass's own key `WORDS` sends it to."""
-        return self.t(self.WORDS.get(key, key), **values)
+        return self.t(self.WORD_MAP.get(key, key), **values)
+
+    def word(self, suffix, **values):
+        """A word of the list the base names by its suffix (source_editor.WORD_SUFFIXES): the position plan's `plan_<suffix>`, or the key WORD_MAP sends it to."""
+        return self.w(f"plan_{suffix}", **values)
 
     def init_state(self):
         """The subclass's own attributes, set before anything is built."""
@@ -345,7 +346,7 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
 
     def make_builder(self):
         """The «Commande Typst» builder (plan_command_builder.CommandBuilder, its options and its command the subclass's own)."""
-        return plan_command_builder.CommandBuilder(lang=self.app.lang, mono_font=self.app.mono_font, copy=self.app.copy, cache_key=self.VIEW_KEY)
+        return plan_command_builder.CommandBuilder(lang=self.app.lang, mono_font=self.app.mono_font, copy=self.app.copy, cache_key=self.KEY)
 
     def build_entries(self, layout):
         """What the left pane lists of the plan open, between the plans and the export sheets -- added to `layout`."""
@@ -388,9 +389,6 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
         """The plans' part of the export, run here and now. True where it ran."""
         raise NotImplementedError
 
-    def export_plans(self, done_text):
-        """Export the plans without naming one: what a drop needs, which changes a field and no drawing."""
-        return self.export("", done_text)
 
     def save(self, quiet=False):
         """Writes the plan open's source and exports the plans. True when saved."""
@@ -490,66 +488,37 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
 
     # -- the plans --
 
-    def on_folders_changed(self):
-        """A folder made, renamed or removed in the list: what the widget now holds is what the tab keeps. ⚠️ Connecting `foldersChanged` straight to `reload_list` rebuilt the list from the tab's own copy of the empty folders, taken BEFORE the new one was added -- so a folder just made vanished the moment it was made."""
-        self.empty_folders = self.list.empty_folders()
-        self.reload_list(select=self.current_id)
+    def lists_object(self, ident):
+        """Whether the plan `ident` of the graph of dependencies is one this tab draws (issue #71)."""
+        return ident in self.taken_ids()
 
-    def reload_list(self, select=None):
-        """The plans listed again, «P01 – Hauptgebäude – EG» (entry_text), the plan open chosen only while its view is shown -- a document or a sheet chosen leaves no plan highlighted."""
-        if self.view_kind != "plan":
-            select = None
-        self.list.blockSignals(True)
-        try:
-            entries = []
-            listed = self.list_sources()
-            for pid, source, group in listed:
-                entries.append({"id": pid, "text": self.entry_text(pid, source), "group": group})
-            if self.current_id is None:   # the draft nobody has saved yet, at the root where it can be seen
-                entries.append({"id": NEW_ROW,
-                                "text": f"{self.id_edit.text().strip() or '?'} {self.w('plan_new_item')}",
-                                "group": grouped_list.ROOT_GROUP})
-            self.list.set_entries(entries, self.empty_folders, select, archived=source_archive.entries(self.sources_dir(), self.list._t))
-            self.empty_folders = self.list.empty_folders()
-            self.app.save_folder_settings(self.VIEW_KEY, self.empty_folders)
-        finally:
-            self.list.blockSignals(False)
-        self.empty_hint.setVisible(not listed and self.current_id is None and not self.dirty)
-        self.update_list_marker()
+    def open_object(self, ident):
+        """A plan of the graph opened here, as a crop clicked in the document view opens one (`open_plan`)."""
+        self.open_plan(ident)
 
-    def update_list_marker(self):
-        """A dot at the left of the plan being edited while it has unsaved changes, and the tab's own."""
-        for pid in self.list.ids():
-            mine = pid == self.current_id or (self.current_id is None and pid == NEW_ROW)
-            self.list.set_mark(pid, self.app.dirty_mark(mine and self.dirty))
-        self.app.update_tab_marks()
+    def listed(self):
+        """The plans of the kind the tab draws, «P01 – Hauptgebäude – EG» (entry_text), in the folder each names."""
+        return [(pid, self.entry_text(pid, source), group) for pid, source, group in self.list_sources()]
 
-    def on_list_change(self, pid):
-        pid = pid or None
+    def list_selection(self, select):
+        """The plan open is chosen only while its view is shown: a document or a sheet chosen leaves no plan highlighted."""
+        return super().list_selection(select) if self.view_kind == "plan" else None
+
+    def show_empty_hint(self):
+        self.empty_hint.setVisible(not self.ids and self.current_id is None and not self.dirty)
+
+    def on_row_again(self, pid):
+        """The plan open chosen again: the «Typst» view shows its command, any other view shows the plan."""
         if self.view_kind == "command":
-            # the «Typst» view: the list chooses the plan the command shows -- the only choice of it, the builder's own drop-down hidden (review A09)
-            if pid in (None, NEW_ROW) or pid == self.current_id:
-                if pid == self.current_id and pid is not None:
-                    self.builder.set_plan(pid)
-                return
-            if not self.confirm_leave():
-                self.reload_list(select=self.current_id)
-                return
-            self.load(pid)
-            self.builder.set_plan(pid)
+            if pid != NEW_ROW:
+                self.builder.set_plan(pid)
             return
-        if pid == self.current_id or (pid == NEW_ROW and self.current_id is None):
-            self.show_plan_view()
-            return
-        if pid is None:
-            return
-        if not self.confirm_leave():
-            self.reload_list(select=self.current_id)
-            return
-        if pid == NEW_ROW:
-            return
-        self.load(pid)
         self.show_plan_view()
+
+    def after_row_loaded(self, pid):
+        """A plan chosen in the list: the «Typst» view's command is the plan's (load sets it), any other view goes to the drawing."""
+        if self.view_kind != "command":
+            self.show_plan_view()
 
     def open_plan(self, pid):
         """Plan `pid` open and shown -- a crop clicked in the document view (`planActivated`)."""
@@ -561,27 +530,6 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
 
     def leave_plan_for(self, _pid):
         return self.confirm_leave()
-
-    def on_moved(self, ids, group):
-        """A drag wrote a folder: the field goes into each source, the plans are exported, the list is rebuilt from the files."""
-        moved = 0
-        for pid in ids:
-            if pid == NEW_ROW:
-                continue              # a draft has no file to write the field into
-            path = self.sources_dir() / ("%s.json" % pid)
-            try:
-                source = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
-                continue
-            if group:
-                source["group"] = group
-            else:
-                source.pop("group", None)
-            path.write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-            moved += 1
-        if moved:
-            self.export_plans(self.w("plan_moved", count=moved, group=group or "—"))
-        self.reload_list(select=self.current_id)
 
     def text_properties(self, entry):
         """A text's pane (issue #43, UI-004): text_pane's, the four engines' one -- its content, «Insérer une variable», a card per variable. A change is one `edit`, one step of «Annuler»."""
@@ -597,7 +545,7 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
         """Shows `source` -- read from its file, restored, or new -- with an empty undo history."""
         self.source = source
         self.current_id = current_id
-        self.undo_stack, self.redo_stack = [], []
+        self.init_history()
         self.reset_drawing_state()
         # the export's values, which a text placed with the Text tool prints (issue #43): read as the drawing opens, as a linked field's are
         self.values = linkable_spin.current_values()
@@ -688,13 +636,6 @@ class DrawingTab(DrawingSheetsMixin, DrawingDocumentsMixin, DrawingPanesMixin, Q
             self.load(self.current_id)
         else:
             self.load_first()
-
-    def delete(self):
-        """«Supprimer»: what is selected goes to «Archives», its ID removed (source_archive.py, v0.77) -- or, an archived entry selected, is deleted for good. A plan never saved is simply discarded."""
-        if self.archive.delete():
-            return
-        self.dirty = False
-        self.load_first()
 
     # -- saving --
 

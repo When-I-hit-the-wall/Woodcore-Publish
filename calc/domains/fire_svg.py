@@ -11,21 +11,23 @@ The legend is written between two markers, `LEGEND_OPEN` and `LEGEND_CLOSE`, so 
 
 import math
 
+from domains import svg_draw  # the one writer of an SVG number and text (D6)
 from domains import fire, plan, plan_svg, statics_svg
 from i18n import strings
 from norms import vkf
 
-FONT = plan_svg.FONT
+FONT = svg_draw.FONT
 
 LEGEND_OPEN = "<!-- legend -->"
 LEGEND_CLOSE = "<!-- /legend -->"
 
 # A surface nobody has given a kind: a grey no entry of the fire-protection legend uses. The editor's own, never printed.
-ZONE_COLOUR = "#55606e"
+ZONE_COLOUR = svg_draw.colour("ink-soft")
 ZONE_FILL_OPACITY = 0.14
 # The ground a text stands on (schema_svg.LABEL_GROUND_OPACITY's value, for its reason: the text sits ON what it names).
 LABEL_GROUND_OPACITY = 0.85
-INK = "#000000"
+INK = svg_draw.colour("ink")
+GROUND = svg_draw.colour("ground")
 
 # Sizes in the drawing's unit (plan_svg.base_unit: the frame's longer side / 850), a position plan's own scale of things.
 ZONE_STROKE = 1.1
@@ -61,16 +63,14 @@ LEGEND_LENGTH = "... m"
 LEGEND_WIDTH = "1.20 m"
 
 
-def _f(value):
-    return plan_svg._f(value)
+_f = svg_draw.number_at(3)   # the plan's own precision (svg_draw.py, D6)
 
 
 def _pts(points):
     return " ".join(f"{_f(x)},{_f(y)}" for x, y in points)
 
 
-def _escape(text):
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+_escape = svg_draw.escape   # (svg_draw.py, D6)
 
 
 def _op(name, value):
@@ -289,7 +289,7 @@ def _text(out, item, unit):
         out.append(f'<line x1="{_f(hx)}" y1="{_f(hy)}" x2="{_f(cx)}" y2="{_f(cy)}" stroke="{item["colour"]}" stroke-width="{_f(LEADER_STROKE * unit)}"/>')
     hw, hh, size = item["hw"], item["hh"], item["size"]
     turn = f' transform="translate({_f(cx)},{_f(cy)}) rotate({_f(item["angle"])})"'
-    out.append(f'<rect x="{_f(-hw)}" y="{_f(-hh)}" width="{_f(2 * hw)}" height="{_f(2 * hh)}" fill="#ffffff" fill-opacity="{_f(LABEL_GROUND_OPACITY)}"{turn}/>')
+    out.append(f'<rect x="{_f(-hw)}" y="{_f(-hh)}" width="{_f(2 * hw)}" height="{_f(2 * hh)}" fill="{GROUND}" fill-opacity="{_f(LABEL_GROUND_OPACITY)}"{turn}/>')
     out.append(f'<text x="0" y="{_f(0.35 * size)}" font-family="{FONT}" font-size="{_f(size)}" fill="{item["colour"]}" text-anchor="middle"{turn}>{_escape(item["text"])}</text>')
 
 
@@ -448,7 +448,7 @@ def _legend(out, source, frame, lang):
     unit = _legend_unit(source, frame)
     pad = LEGEND_PAD * unit
     out.append(LEGEND_OPEN)
-    out.append(f'<rect x="{_f(x)}" y="{_f(y)}" width="{_f(width)}" height="{_f(height)}" fill="#ffffff" stroke="{INK}" stroke-width="{_f(LEGEND_STROKE * unit)}"/>')
+    out.append(f'<rect x="{_f(x)}" y="{_f(y)}" width="{_f(width)}" height="{_f(height)}" fill="{GROUND}" stroke="{INK}" stroke-width="{_f(LEGEND_STROKE * unit)}"/>')
     size = LEGEND_TITLE * unit
     out.append(f'<text x="{_f(x + pad)}" y="{_f(y + pad + 0.85 * size)}" font-family="{FONT}" font-size="{_f(size)}" fill="{INK}">{_escape(strings.text("fire.legend", lang))}</text>')
     size = LEGEND_TEXT * unit
@@ -475,7 +475,7 @@ def render(source, frame, window=None, editing=False, lang=strings.SOURCE_LANGUA
     if background is not None:
         veil = 1.0 - float(background.get("opacity", plan.DEFAULT_OPACITY))
         if veil > 0:
-            out.append(f'<rect x="{_f(window["x"])}" y="{_f(window["y"])}" width="{_f(window["w"])}" height="{_f(window["h"])}" fill="#ffffff" fill-opacity="{_f(veil)}"/>')
+            out.append(f'<rect x="{_f(window["x"])}" y="{_f(window["y"])}" width="{_f(window["w"])}" height="{_f(window["h"])}" fill="{GROUND}" fill-opacity="{_f(veil)}"/>')
     _zones(out, source, unit, editing)
     _walls(out, source, frame)
     for door in source.get("doors", []):

@@ -8,4 +8,4 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#distance(8, "screw", tab: 38, label: "Anschluss Sparren – Pfette", descr: "Vollgewindeschrauben, nicht vorgebohrt.")
+#distance(8, "screw", table: 38, label: "Anschluss Sparren – Pfette", descr: "Vollgewindeschrauben, nicht vorgebohrt.")

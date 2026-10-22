@@ -4,20 +4,18 @@
 == Fundation, Baugrube und Grundwasser
 // woodcore:/object title
 
-// woodcore:object doc-table foundation-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Element]),
-    (id: "text", title: [Beschreibung], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Fundation], text: [[Flach- (Bodenplatte, Fundamente) oder Tiefgründung (Pfähle); lokale Verstärkungen unter Zonen grosser Beanspruchung.]]),
-    (item: [Baugrube], text: [[Böschung oder Baugrubenabschluss (Rühlwand, Nagelwand, Spundwand), Neigungen, Nachbarschaftsverhältnisse.]]),
-    (item: [Wasserhaltung], text: [[Wasserhaltungskonzept (offene Wasserhaltung, Filterbrunnen), Ableitung des abgepumpten Wassers.]]),
-    (item: [Auftrieb und Hochwasser], text: [[Auftrieb durch Eigengewicht kompensiert oder verankert; Bemessung der Bodenplatte auf den Wasserdruck im Hochwasserfall.]]),
+// woodcore:object table foundation-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Fundation], [[Flach- (Bodenplatte, Fundamente) oder Tiefgründung (Pfähle); lokale Verstärkungen unter Zonen grosser Beanspruchung.]],
+    [Baugrube], [[Böschung oder Baugrubenabschluss (Rühlwand, Nagelwand, Spundwand), Neigungen, Nachbarschaftsverhältnisse.]],
+    [Wasserhaltung], [[Wasserhaltungskonzept (offene Wasserhaltung, Filterbrunnen), Ableitung des abgepumpten Wassers.]],
+    [Auftrieb und Hochwasser], [[Auftrieb durch Eigengewicht kompensiert oder verankert; Bemessung der Bodenplatte auf den Wasserdruck im Hochwasserfall.]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Fundation und Baugrube],
-  header: false,
 )
 // woodcore:/object foundation-table

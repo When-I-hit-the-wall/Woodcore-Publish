@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.2",
   "checks": {
     "ST-01": {
       "id": "ST-01",
@@ -60,19 +60,17 @@
           "unit": "N/mm²",
           "symbol": "f_y",
           "label": "Streckgrenze",
-          "level": 2,
           "source": "norm:SIA 263:2013, Tabelle 1",
           "norm": "SIA 263",
           "norm_ref": "Tabelle 1",
-          "group": "material",
-          "description": "S355, t ≤ 40 mm"
+          "description": "S355, t ≤ 40 mm",
+          "group": "material"
         },
         "gamma_M1": {
           "value": 1.05,
           "unit": "",
           "symbol": "gamma_(M 1)",
           "label": "Widerstandsbeiwert",
-          "level": 3,
           "source": "norm:SIA 263:2013, 4.1.3",
           "norm": "SIA 263",
           "norm_ref": "4.1.3",
@@ -83,10 +81,9 @@
           "unit": "kN",
           "symbol": "N_(E d)",
           "label": "Normalkraft",
-          "level": 1,
           "source": "woodcore:steel/ST-01.json",
-          "norm": "",
-          "norm_ref": "",
+          "norm": "SIA 263",
+          "norm_ref": "5.1.6.4 (48)",
           "group": "input"
         },
         "M_y_Ed": {
@@ -94,10 +91,9 @@
           "unit": "kNm",
           "symbol": "M_(y,E d)",
           "label": "Biegemoment",
-          "level": 1,
           "source": "woodcore:steel/ST-01.json",
-          "norm": "",
-          "norm_ref": "",
+          "norm": "SIA 263",
+          "norm_ref": "5.1.6.4 (48)",
           "group": "input"
         },
         "M_z_Ed": {
@@ -105,10 +101,9 @@
           "unit": "kNm",
           "symbol": "M_(z,E d)",
           "label": "Biegemoment",
-          "level": 1,
           "source": "woodcore:steel/ST-01.json",
-          "norm": "",
-          "norm_ref": "",
+          "norm": "SIA 263",
+          "norm_ref": "5.1.6.4 (48)",
           "group": "input"
         },
         "QK": {
@@ -116,31 +111,28 @@
           "unit": "",
           "symbol": "\"QK\"",
           "label": "Querschnittsklasse",
-          "level": 1,
           "source": "python:domains/steel_section.py",
           "norm": "SIA 263",
           "norm_ref": "Tabelle 5a, 5b",
-          "group": "section",
-          "description": "Steg: c/t = 37.2 (Klasse 1: 40.7, 2: 46.8, 3: 69.4)"
+          "description": "Steg: c/t = 37.2 (Klasse 1: 40.7, 2: 46.8, 3: 69.4)",
+          "group": "section"
         },
         "W_pl_y": {
           "value": 1020000.0,
           "unit": "mm³",
           "symbol": "W_(p l,y)",
           "label": "plastisches Widerstandsmoment",
-          "level": 2,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "pp. 30-31",
-          "group": "section",
-          "description": "IPE 360"
+          "description": "IPE 360",
+          "group": "section"
         },
         "M_y_Rd": {
           "value": 344.8571428571,
           "unit": "kNm",
           "symbol": "M_(y,R d)",
           "label": "Biegewiderstand",
-          "level": 2,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.3 (40)"
@@ -150,19 +142,17 @@
           "unit": "mm³",
           "symbol": "W_(p l,z)",
           "label": "plastisches Widerstandsmoment",
-          "level": 2,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "pp. 30-31",
-          "group": "section",
-          "description": "IPE 360"
+          "description": "IPE 360",
+          "group": "section"
         },
         "M_z_Rd": {
           "value": 64.5761904762,
           "unit": "kNm",
           "symbol": "M_(z,R d)",
           "label": "Biegewiderstand",
-          "level": 2,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.3 (40)"
@@ -172,19 +162,17 @@
           "unit": "mm²",
           "symbol": "A",
           "label": "Querschnittsfläche",
-          "level": 2,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "pp. 30-31",
-          "group": "section",
-          "description": "IPE 360"
+          "description": "IPE 360",
+          "group": "section"
         },
         "N_Rd": {
           "value": 2457.9523809524,
           "unit": "kN",
           "symbol": "N_(R d)",
           "label": "Normalkraftwiderstand",
-          "level": 2,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.2 (38)"
@@ -194,7 +182,6 @@
           "unit": "",
           "symbol": "n",
           "label": "bezogene Normalkraft",
-          "level": 3,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.6.2"
@@ -204,7 +191,6 @@
           "unit": "mm",
           "symbol": "b",
           "label": "Breite",
-          "level": 3,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "pp. 30-31",
@@ -215,7 +201,6 @@
           "unit": "mm",
           "symbol": "t_f",
           "label": "Flanschdicke",
-          "level": 3,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "pp. 30-31",
@@ -226,7 +211,6 @@
           "unit": "",
           "symbol": "a",
           "label": "Hilfswert",
-          "level": 3,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.6.2"
@@ -236,7 +220,6 @@
           "unit": "",
           "symbol": "xi",
           "label": "Hilfswert",
-          "level": 3,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.6.2"
@@ -246,7 +229,6 @@
           "unit": "kNm",
           "symbol": "M_(y,N,R d)",
           "label": "reduzierter Biegewiderstand",
-          "level": 2,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.6.2 (45)"
@@ -256,7 +238,6 @@
           "unit": "kNm",
           "symbol": "M_(z,N,R d)",
           "label": "reduzierter Biegewiderstand",
-          "level": 2,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.6.2 (47)"
@@ -266,7 +247,6 @@
           "unit": "",
           "symbol": "alpha",
           "label": "Exponent",
-          "level": 3,
           "source": "norm:SIA 263:2013, 5.1.6.4",
           "norm": "SIA 263",
           "norm_ref": "5.1.6.4",
@@ -277,7 +257,6 @@
           "unit": "",
           "symbol": "beta",
           "label": "Exponent",
-          "level": 3,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.6.4"
@@ -286,7 +265,6 @@
       "steps": [
         {
           "name": "Biegewiderstand",
-          "level": 2,
           "result": "M_y_Rd",
           "uses": [
             "f_y",
@@ -300,7 +278,6 @@
         },
         {
           "name": "Biegewiderstand",
-          "level": 2,
           "result": "M_z_Rd",
           "uses": [
             "f_y",
@@ -314,7 +291,6 @@
         },
         {
           "name": "Normalkraftwiderstand",
-          "level": 2,
           "result": "N_Rd",
           "uses": [
             "f_y",
@@ -328,7 +304,6 @@
         },
         {
           "name": "bezogene Normalkraft",
-          "level": 3,
           "result": "n",
           "uses": [
             "N_Ed",
@@ -341,7 +316,6 @@
         },
         {
           "name": "Hilfswert",
-          "level": 3,
           "result": "a",
           "uses": [
             "A",
@@ -355,7 +329,6 @@
         },
         {
           "name": "Hilfswert",
-          "level": 3,
           "result": "xi",
           "uses": [
             "a"
@@ -367,7 +340,6 @@
         },
         {
           "name": "reduzierter Biegewiderstand",
-          "level": 2,
           "result": "M_y_N_Rd",
           "uses": [
             "M_y_Rd",
@@ -381,7 +353,6 @@
         },
         {
           "name": "reduzierter Biegewiderstand",
-          "level": 2,
           "result": "M_z_N_Rd",
           "uses": [
             "M_z_Rd",
@@ -395,7 +366,6 @@
         },
         {
           "name": "Exponent",
-          "level": 3,
           "result": "beta_N",
           "uses": [
             "n"
@@ -476,19 +446,17 @@
           "unit": "N/mm²",
           "symbol": "f_y",
           "label": "Streckgrenze",
-          "level": 2,
           "source": "norm:SIA 263:2013, Tabelle 1",
           "norm": "SIA 263",
           "norm_ref": "Tabelle 1",
-          "group": "material",
-          "description": "S355, t ≤ 40 mm"
+          "description": "S355, t ≤ 40 mm",
+          "group": "material"
         },
         "gamma_M1": {
           "value": 1.05,
           "unit": "",
           "symbol": "gamma_(M 1)",
           "label": "Widerstandsbeiwert",
-          "level": 3,
           "source": "norm:SIA 263:2013, 4.1.3",
           "norm": "SIA 263",
           "norm_ref": "4.1.3",
@@ -499,10 +467,9 @@
           "unit": "kN",
           "symbol": "V_(z,E d)",
           "label": "Querkraft",
-          "level": 1,
           "source": "woodcore:steel/ST-02.json",
-          "norm": "",
-          "norm_ref": "",
+          "norm": "SIA 263",
+          "norm_ref": "5.1.4, 5.1.5",
           "group": "input"
         },
         "M_y_Ed": {
@@ -510,10 +477,9 @@
           "unit": "kNm",
           "symbol": "M_(y,E d)",
           "label": "Biegemoment",
-          "level": 1,
           "source": "woodcore:steel/ST-02.json",
-          "norm": "",
-          "norm_ref": "",
+          "norm": "SIA 263",
+          "norm_ref": "5.1.4, 5.1.5",
           "group": "input"
         },
         "QK": {
@@ -521,19 +487,17 @@
           "unit": "",
           "symbol": "\"QK\"",
           "label": "Querschnittsklasse",
-          "level": 1,
           "source": "python:domains/steel_section.py",
           "norm": "SIA 263",
           "norm_ref": "Tabelle 5a, 5b",
-          "group": "section",
-          "description": "Flansch oben links: c/t = 5.0 (Klasse 1: 7.3, 2: 8.1, 3: 11.4)"
+          "description": "Flansch oben links: c/t = 5.0 (Klasse 1: 7.3, 2: 8.1, 3: 11.4)",
+          "group": "section"
         },
         "E": {
           "value": 210000.0,
           "unit": "N/mm²",
           "symbol": "E",
           "label": "Elastizitätsmodul",
-          "level": 3,
           "source": "norm:SIA 263:2013, 3.2.2.3",
           "norm": "SIA 263",
           "norm_ref": "3.2.2.3",
@@ -544,7 +508,6 @@
           "unit": "",
           "symbol": "(h - t_f) / t_w",
           "label": "Stegschlankheit",
-          "level": 3,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.4.2 (42)"
@@ -554,7 +517,6 @@
           "unit": "",
           "symbol": "sqrt(4 E / f_y)",
           "label": "Grenzschlankheit",
-          "level": 3,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.4.2 (42)"
@@ -564,7 +526,6 @@
           "unit": "N/mm²",
           "symbol": "tau_y",
           "label": "Fliessschubspannung",
-          "level": 2,
           "source": "norm:SIA 263:2013, Tabelle 1",
           "norm": "SIA 263",
           "norm_ref": "Tabelle 1",
@@ -575,19 +536,17 @@
           "unit": "mm²",
           "symbol": "A_v",
           "label": "wirksame Schubfläche",
-          "level": 2,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "pp. 30-31",
-          "group": "section",
-          "description": "IPE 360"
+          "description": "IPE 360",
+          "group": "section"
         },
         "V_z_Rd": {
           "value": 686.0666666667,
           "unit": "kN",
           "symbol": "V_(z,R d)",
           "label": "Querkraftwiderstand",
-          "level": 2,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.4 (41)"
@@ -597,7 +556,6 @@
           "unit": "",
           "symbol": "eta_V",
           "label": "Ausnutzung Querkraft",
-          "level": 2,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.4"
@@ -607,19 +565,17 @@
           "unit": "mm³",
           "symbol": "W_(p l,y)",
           "label": "plastisches Widerstandsmoment",
-          "level": 2,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "pp. 30-31",
-          "group": "section",
-          "description": "IPE 360"
+          "description": "IPE 360",
+          "group": "section"
         },
         "M_y_Rd": {
           "value": 344.8571428571,
           "unit": "kNm",
           "symbol": "M_(y,R d)",
           "label": "Biegewiderstand",
-          "level": 2,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.3 (40)"
@@ -629,7 +585,6 @@
           "unit": "mm",
           "symbol": "b",
           "label": "Breite",
-          "level": 3,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "",
@@ -640,7 +595,6 @@
           "unit": "mm",
           "symbol": "h",
           "label": "Höhe",
-          "level": 3,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "",
@@ -651,7 +605,6 @@
           "unit": "mm",
           "symbol": "t_1",
           "label": "Flanschdicke",
-          "level": 3,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "5.1.5.2",
@@ -662,7 +615,6 @@
           "unit": "mm",
           "symbol": "t_2",
           "label": "Stegdicke",
-          "level": 3,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "5.1.5.2",
@@ -673,7 +625,6 @@
           "unit": "mm",
           "symbol": "h_w",
           "label": "Steghöhe",
-          "level": 3,
           "source": "norm:SZS C5:2018, pp. 30-31",
           "norm": "SZS C5:2018",
           "norm_ref": "5.1.5.2",
@@ -684,7 +635,6 @@
           "unit": "kNm",
           "symbol": "M_(V,R d)",
           "label": "reduzierter Biegewiderstand",
-          "level": 2,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.5.2 (43)"
@@ -694,7 +644,6 @@
           "unit": "",
           "symbol": "eta_M",
           "label": "Ausnutzung Biegung",
-          "level": 2,
           "source": "python:domains/steel_resistance.py",
           "norm": "SIA 263",
           "norm_ref": "5.1.5"
@@ -703,7 +652,6 @@
       "steps": [
         {
           "name": "Stegschlankheit",
-          "level": 3,
           "result": "web_slenderness",
           "uses": [],
           "norm": "SIA 263",
@@ -713,7 +661,6 @@
         },
         {
           "name": "Grenzschlankheit",
-          "level": 3,
           "result": "web_limit",
           "uses": [
             "E",
@@ -726,7 +673,6 @@
         },
         {
           "name": "Querkraftwiderstand",
-          "level": 2,
           "result": "V_z_Rd",
           "uses": [
             "tau_y",
@@ -740,7 +686,6 @@
         },
         {
           "name": "Ausnutzung Querkraft",
-          "level": 2,
           "result": "eta_V",
           "uses": [
             "V_z_Ed",
@@ -753,7 +698,6 @@
         },
         {
           "name": "Biegewiderstand",
-          "level": 2,
           "result": "M_y_Rd",
           "uses": [
             "f_y",
@@ -767,7 +711,6 @@
         },
         {
           "name": "reduzierter Biegewiderstand",
-          "level": 2,
           "result": "M_V_Rd",
           "uses": [
             "b",
@@ -787,7 +730,6 @@
         },
         {
           "name": "Ausnutzung Biegung",
-          "level": 2,
           "result": "eta_M",
           "uses": [
             "M_y_Ed",

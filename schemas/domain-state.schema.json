@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "The state of the domains Woodcore writes",
+  "description": "data/domain-state.json -- for each calculation domain Woodcore wrote from its data (a member check unfolded so far, every domain of the spec 2026-10-21-commandes-typst-refonte as its generators come), where its file stands against a new writing of it: the form it was written for and the form its data asks for now, whether the two are one, and the lines Woodcore could not apply -- a line the writing has and the file not, a line changed on both sides (REQ-012, ARCH-007). Computed by Python at each export (calc/domains/unfold.py `domain_state`) and read by Typst: `#domain` prints in red at its head what this says, so that a file Woodcore does not rewrite still says it no longer matches its data, and the summary of the checks knows a check's domain by its `check`. Written whole, sorted, no date; never edited by hand.",
+  "type": "object",
+  "required": ["schema_version", "domains"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0", "description": "1.0 -- a file written at another version is refused rather than read as this one."},
+    "domains": {
+      "type": "object",
+      "description": "One entry per domain Woodcore wrote, keyed by its id.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": ["kind", "matches", "missing", "conflict", "file"],
+          "properties": {
+            "kind": {"type": "string", "description": "What wrote it: `check` for a member check unfolded."},
+            "check": {"type": ["string", "null"], "description": "For a member check, its kind -- `tension` -- which the summary of the checks names it by."},
+            "written": {"type": ["object", "null"], "description": "The form the file was written for: {kind, form, version}, as the base keeps it."},
+            "form": {"type": ["object", "null"], "description": "The form its data asks for now: {kind, form, version}; null where the check is no longer written out."},
+            "matches": {"type": "boolean", "description": "Whether the two forms are one: false prints the domain's red line."},
+            "gone": {"type": "boolean", "description": "True where the domain's check is no longer in the export, or no longer written out."},
+            "missing": {"type": "array", "items": {"type": "string"}, "description": "The lines of a new writing the file does not hold (`var:N_t_d`), not applied."},
+            "conflict": {"type": "array", "items": {"type": "string"}, "description": "The lines changed in the file and in the data alike, not applied."},
+            "file": {"type": ["string", "null"], "description": "Its file from the Typst root."}
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

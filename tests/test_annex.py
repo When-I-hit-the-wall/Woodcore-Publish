@@ -212,7 +212,8 @@ def test_the_export_writes_every_excerpt_and_the_pages_its_source_carries():
         validation.validate_structure(data, "annexes")
         assert data["excerpts"]["My"]["resolved"] and data["excerpts"]["My"]["page"] == 3
         assert data["sources"]["Rapport"]["annex"]["pages"] == [3], "used: the pages an excerpt is taken from, and only those"
-        files = sorted(p.name for p in (here.data_dir / annex.EXPORT_FOLDER).iterdir())
+        excerpts = here.exports_dir("annex")   # Appendix/Exports/, the project being laid out by folders (issue #64, D-19)
+        files = sorted(p.name for p in excerpts.iterdir())
         assert files == ["My.pdf", "N.pdf", "Rapport-annex.pdf"]
         # every page, then none
         for mode, pages in (("all", [1, 2, 3]), ("none", None)):
@@ -222,7 +223,7 @@ def test_the_export_writes_every_excerpt_and_the_pages_its_source_carries():
             data = json.loads((here.data_dir / annex.EXPORT_FILE).read_text(encoding="utf-8"))
             got = data["sources"]["Rapport"]["annex"]
             assert (got["pages"] if got else None) == pages, mode
-        assert "Rapport-annex.pdf" not in [p.name for p in (here.data_dir / annex.EXPORT_FOLDER).iterdir()], "a file no longer needed is swept"
+        assert "Rapport-annex.pdf" not in [p.name for p in excerpts.iterdir()], "a file no longer needed is swept"
 
 
 def test_a_new_version_of_the_source_is_followed_by_the_export():
@@ -240,7 +241,7 @@ def test_an_unchanged_excerpt_is_not_written_again():
     here = _project_with("annex_kept")
     with project.using(here):
         annex.export(here)
-        target = here.data_dir / "annexes" / "My.pdf"
+        target = here.exports_dir("annex") / "My.pdf"
         target.write_bytes(target.read_bytes() + b"%kept\n")   # a byte that proves the file was kept rather than rewritten
         annex.export(here)
         assert target.read_bytes().endswith(b"%kept\n")
@@ -278,7 +279,7 @@ def _compile(name, body, pages=False):
         raise Skip("typst is not on the path")
     folder = conftest.probe_dir(name)
     source = folder / f"{name}.typ"
-    source.write_text('#import "/commands.typ": *\n#set page(paper: "a4")\n' + body, encoding="utf-8")
+    source.write_text('#import "/000-Typst-Config/commands.typ": *\n#report-level.update(2)\n#set page(paper: "a4")\n' + body, encoding="utf-8")
     out = folder / f"{name}.pdf"
     run = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(source), str(out)],
                          capture_output=True, text=True, encoding="utf-8", errors="replace")
@@ -287,11 +288,11 @@ def _compile(name, body, pages=False):
 
 def test_an_excerpt_is_a_figure_linked_to_its_annex_page_and_back():
     from pypdf import PdfReader
-    run, out = _compile("annex_links", '#show-extract("CO1-My")\n#pagebreak()\n= Anhänge\n#show-annexes()\n')
+    run, out = _compile("annex_links", '#figure(image-extract("CO1-My"), kind: image, caption: [Biegemomente unter CO1])\n#pagebreak()\n= Anhänge\n#show-annexes()\n')
     assert run.returncode == 0, run.stderr
     reader = PdfReader(str(out))
     text = reader.pages[0].extract_text()
-    assert "Auszug aus Rapport d'impression EF, S. 3" in text
+    assert "Biegemomente unter CO1" in text, "the figure's caption is the document's own (spec 2026-10-21-commandes-typst-refonte, REQ-014)"
     ids = {p.indirect_reference.idnum: i for i, p in enumerate(reader.pages)}
 
     def targets(page):
@@ -325,21 +326,14 @@ def test_an_excerpt_the_export_could_not_find_stops_the_report_with_its_reason()
         data = json.loads(before)
         data["excerpts"]["CO1-My"].update(resolved=False, reason="its source no longer has the title «CO1»", file="")
         path.write_text(json.dumps(data), encoding="utf-8")
-        run, _out = _compile("annex_refused", '#show-extract("CO1-My")\n')
+        run, _out = _compile("annex_refused", '#image-extract("CO1-My")\n')
         assert run.returncode != 0
         assert "no longer has the title" in (conftest.panic_message(run.stderr) or run.stderr)
     finally:
         path.write_bytes(before)
-    run, _out = _compile("annex_unknown", '#show-extract("Nope")\n')
+    run, _out = _compile("annex_unknown", '#image-extract("Nope")\n')
     # an unknown id is refused by an assert, whose message is on the error line itself and not a panic's
     assert run.returncode != 0 and "valid excerpts: CO1-My" in run.stderr, run.stderr
-
-
-def test_the_caption_follows_the_report_s_language():
-    run, out = _compile("annex_fr", '#set-report-language("fr")\n#show-extract("CO1-My")\n')
-    assert run.returncode == 0, run.stderr
-    from pypdf import PdfReader
-    assert "Extrait de Rapport d'impression EF, p. 3" in PdfReader(str(out)).pages[0].extract_text()
 
 
 # --- the tab -------------------------------------------------------------------------------
@@ -547,3 +541,71 @@ def test_a_project_opened_read_only_refuses_every_way_of_extracting():
     import annex_tab
     for name in ("extract_annex_pages", "extract_annex_rects", "write_extracted"):
         assert woodcore_gui.WRITERS.count(name) == 1 and name in vars(annex_tab.AnnexTab), name
+
+
+# --- Appendix/: the annexes' PDFs under their own names (issue #64, D-11, D-19) ------------------
+
+def test_laid_out_by_folders_a_pdf_added_lies_in_appendix_under_its_own_name_and_its_excerpts_in_its_exports():
+    """REQ-009: the PDF copied into Appendix/ as the engineer named it, the record at 1.1 naming it; the export's excerpts and annex in Appendix/Exports/, named from the Typst root; a 1.0 record is read with its PDF beside it."""
+    here = _project_with("annex_appendix")
+    with project.using(here):
+        assert here.has_folders
+        legacy = annex.pdf_path(here, "Rapport")
+        assert legacy == annex.sources_dir(here) / "Rapport.pdf", "a 1.0 record finds its PDF beside it"
+        chosen = conftest.tmpdir("annex_chosen") / "Rapport EF v1.pdf"
+        shutil.copyfile(legacy, chosen)
+        legacy.unlink()
+        source = annex.copy_pdf(here, annex.read_source(annex.sources_dir(here) / "Rapport.json"), chosen)
+        annex.write_source(here, source)
+        record = json.loads((annex.sources_dir(here) / "Rapport.json").read_text(encoding="utf-8"))
+        assert record["schema_version"] == "1.1" and record["file"] == "Rapport EF v1.pdf" and record["original"] == "Rapport EF v1.pdf"
+        assert annex.pdf_path(here, "Rapport") == here.typst_root / "Appendix" / "Rapport EF v1.pdf"
+        assert annex.export(here) == []
+        data = json.loads((here.data_dir / annex.EXPORT_FILE).read_text(encoding="utf-8"))
+        assert data["schema_version"] == "1.1" and data["excerpts"]["My"]["file"] == "/Appendix/Exports/My.pdf"
+        assert sorted(p.name for p in here.exports_dir("annex").iterdir()) == ["My.pdf", "N.pdf", "Rapport-annex.pdf"]
+        assert not (here.data_dir / annex.EXPORT_FOLDER).exists(), "data/ keeps the JSON alone"
+        # a second source whose file has the same name gets its id's
+        other = annex.copy_pdf(here, annex.new_source("Zweit", "Zweit"), chosen)
+        assert other["file"] == "Zweit.pdf"
+
+
+def test_a_pdf_written_over_in_appendix_is_read_again_and_its_excerpts_followed():
+    """D-11: a new version written over the PDF of the same name from outside Woodcore -- its SHA-256 brought up to date and said, every excerpt looked for in it at the export."""
+    here = _project_with("annex_written_over")
+    with project.using(here):
+        assert [r.name for r, _made in annex.adopt(here)] == ["Rapport.json"], "a source added before is adopted into Appendix/"
+        assert annex.adopt(here) == [], "adopting twice copies nothing"
+        assert annex.refresh_sources(here) == ([], [])
+        annex.export(here)
+        annex_pdf.write(annex.pdf_path(here, "Rapport"), 2)
+        changed, notes = annex.refresh_sources(here)
+        assert changed == ["Rapport"] and [n.code for n in notes] == ["annex_pdf_replaced"]
+        assert annex.read_source(annex.sources_dir(here) / "Rapport.json")["sha256"] == annex.file_hash(annex.pdf_path(here, "Rapport"))
+        annex.export(here)
+        data = json.loads((here.data_dir / annex.EXPORT_FILE).read_text(encoding="utf-8"))
+        assert data["excerpts"]["My"]["page"] == 5 and data["sources"]["Rapport"]["annex"]["pages"] == [4, 5]
+
+
+def test_a_pdf_written_over_in_appendix_is_read_again_as_the_tab_is_shown_and_not_read_only():
+    """Issue #64, D-11: the «Annexes» tab shown reads a PDF written over in Appendix/ again (`write_refresh_sources`, one of WRITERS) -- except in a project open read-only, where showing a tab writes nothing."""
+    copied = _project_with("annex_tab_refresh")
+    with project.using(copied):
+        annex.adopt(copied)
+        app, window, tab = _tab(copied)
+        try:
+            import woodcore_gui
+            assert "write_refresh_sources" in woodcore_gui.WRITERS and "write_refresh_documents" in woodcore_gui.WRITERS
+            record = annex.sources_dir(copied) / "Rapport.json"
+            annex_pdf.write(annex.pdf_path(copied, "Rapport"), 2)
+            fresh = annex.file_hash(annex.pdf_path(copied, "Rapport"))
+            window.read_only = True
+            tab.on_shown()
+            assert annex.read_source(record)["sha256"] != fresh, "read-only: nothing written"
+            window.read_only = False
+            tab.on_shown()
+            assert annex.read_source(record)["sha256"] == fresh
+        finally:
+            window.read_only = False
+            tab.dirty = False
+            conftest.dispose(window)

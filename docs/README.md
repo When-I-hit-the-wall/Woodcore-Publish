@@ -12,9 +12,12 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 |---|---|---|---|
 | [`project/purpose.md`](project/purpose.md) | §1, §1bis | What Woodcore is for, and why Typst + Python + JSON + Excel rather than a web app. | 2 KB |
 | [`conventions/writing.md`](conventions/writing.md) | §1ter | Prose is not hard-wrapped: one paragraph is one line, in every file. | 1 KB |
+| [`conventions/naming.md`](conventions/naming.md) | — | One thing, one name: what the code calls each thing the window and the report show, the names history left beside it and why they stay. | 3 KB |
 | [`conventions/testing.md`](conventions/testing.md) | §11ter | tests/, how to prepare a machine and run them, pinned versions of Python, Typst and packages. | 18 KB |
 | [`conventions/testing-catalogue.md`](conventions/testing-catalogue.md) | §11ter | What each test file guards: the engine, the norms, the documents, the build. | 84 KB |
 | [`conventions/testing-catalogue-window.md`](conventions/testing-catalogue-window.md) | §11ter | What each test file of the window guards, built off-screen. | 41 KB |
+| [`conventions/testing-catalogue-typst.md`](conventions/testing-catalogue-typst.md) | §11ter | What each test file of the report's Typst commands guards: the calculations written by hand and their display, the citations and the bibliography, the summaries, the timber checks, the commands' documentation. | 11 KB |
+| [`conventions/testing-catalogue-guards.md`](conventions/testing-catalogue-guards.md) | §11ter | What each test file that guards the repository as a whole guards: the runner and the CI, the docs, the code's size, duplicates and line endings, the figures held to the byte. | 6 KB |
 | [`conventions/build-and-release.md`](conventions/build-and-release.md) | §12 | woodcore-cli, the engine copy, archives, new projects, migration, installer, publishing, website. | 53 KB |
 | [`conventions/changelog-and-commits.md`](conventions/changelog-and-commits.md) | §15 | Where the journal lives and what every commit must carry. | 2 KB |
 
@@ -40,8 +43,8 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`domain/connections.md`](domain/connections.md) | §3.3quinquies | A connection drawn on a schema; geometry in Python, forces distributed in Typst. | 24 KB |
 | [`domain/detail-schemas.md`](domain/detail-schemas.md) | §3.3decies | The one drawing of a connection detail, modified and consumed by connectors and polar moments. | 25 KB |
 | [`domain/member-checks.md`](domain/member-checks.md) | §3.3undecies, §3.3septdecies, §3.3unvicies | #member and the verify-* commands, and checks saved in Woodcore (the keyword lines of §3.3septdecies were retired in 0.117: archive/formules-dsl/). | 25 KB |
-| [`domain/position-plans.md`](domain/position-plans.md) | §3.3sexies | Plans drawn over the architect's plan: source, export, Typst, types, load symbols, superposition, sheets. | 22 KB |
-| [`domain/fire-plans.md`](domain/fire-plans.md) | §3.3vicies | A second kind of plan on the same documents and engine. | 9 KB |
+| [`domain/position-plans.md`](domain/position-plans.md) | §3.3sexies | Plans drawn over the architect's plan: source, export, Typst, types, load symbols, superposition, sheets, the stiffness centre and the mass centre. | 36 KB |
+| [`domain/fire-plans.md`](domain/fire-plans.md) | §3.3vicies | A second kind of plan on the same documents and engine. | 12 KB |
 | [`domain/static-models.md`](domain/static-models.md) | §3.3octies | Static systems drawn in Woodcore and exported as figures; nothing solved. | 23 KB |
 | [`domain/documents.md`](domain/documents.md) | §3.3octodecies | Structure, tags and objects, sharing and sync, imports, previews, content and layout templates. | 46 KB |
 | [`domain/annexes.md`](domain/annexes.md) | §3.3undevicies | External PDFs, excerpts anchored on bookmarks, and the annexes that close a document. | 10 KB |
@@ -49,13 +52,14 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`domain/scripts.md`](domain/scripts.md) | §3.3sexdecies | Python the engineer writes, run by Woodcore, whose named results the report reads. | 6 KB |
 | [`domain/fire-resistance.md`](domain/fire-resistance.md) | §3.3tervicies | Member checks in the design situation fire (SIA 265 4.5.2), the fire resistance VKF 15-15 requires, and the comparison with the reference workbooks and the AEAI directives. | 10 KB |
 | [`domain/steel.md`](domain/steel.md) | §3.3quatervicies | Steel profiles (SZS C5 tables, free profiles), the section class and the member checks of SIA 263:2013, computed once in Python. | 7 KB |
+| [`domain/dependencies.md`](domain/dependencies.md) | §3.3quinvicies | The graph of dependencies: which object reads which, data/dependencies.json, what a change touches at the export. | 6 KB |
 | [`domain/variable-links.md`](domain/variable-links.md) | §3.3duovicies, §3.3duovicies-bis | A field of the window that follows a variable of the export: its shape, units, resolution, versions and what it may name; a text placed on a drawing and the variables it prints. | 14 KB |
 
 ## Typst report engine
 
 | File | Sections | Covers | Size |
 |---|---|---|---|
-| [`typst/report-engine.md`](typst/report-engine.md) | §4, §5, §6, §6bis, §9 | Global level with local override, the calc-block, the get-* abstraction, input descriptions. | 10 KB |
+| [`typst/report-engine.md`](typst/report-engine.md) | §4, §5, §6, §6bis, §9 | Global level with local override, a position and the calculation that concerns it, the `get` abstraction, input descriptions. | 10 KB |
 | [`typst/formulas.md`](typst/formulas.md) | §10quinquies | The registry, var-domain, val, var-line, units, verify, levels, stacked formulas. | 45 KB |
 | [`typst/language.md`](typst/language.md) | §4bis | Document language vs engine language, the glossary, figures per language. | 18 KB |
 | [`typst/citations.md`](typst/citations.md) | §10 | Systematic norm citations, registration and show-bibliography. | 6 KB |
@@ -69,7 +73,7 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 |---|---|---|---|
 | [`ui/window.md`](ui/window.md) | §10quater | The frame: the start page, the theme, the navigation, folders, panes, saving, the settings — and the index of the tabs below. | 73 KB |
 | [`ui/tab-polar-moments.md`](ui/tab-polar-moments.md) | §10quater | The polar moments tab. | 7 KB |
-| [`ui/tab-plans.md`](ui/tab-plans.md) | §10quater | The plan tabs: the position plan, and what it shares with the fire-protection plan. | 27 KB |
+| [`ui/tab-plans.md`](ui/tab-plans.md) | §10quater | The plan tabs: the position plan, and what it shares with the fire-protection plan. | 33 KB |
 | [`ui/tab-fire-plan.md`](ui/tab-fire-plan.md) | §10quater | The fire-protection plan tab. | 4 KB |
 | [`ui/tab-static-models.md`](ui/tab-static-models.md) | §10quater | The static models tab. | 18 KB |
 | [`ui/tab-schemas.md`](ui/tab-schemas.md) | §10quater | The schemas tab. | 14 KB |
@@ -85,6 +89,9 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`ui/tab-python.md`](ui/tab-python.md) | §10quater | The Python tab. | 2 KB |
 | [`ui/tab-formulas.md`](ui/tab-formulas.md) | §10quater | The «Formules» tab. | 6 KB |
 | [`ui/tab-variables.md`](ui/tab-variables.md) | §10quater | The variables tab. | 14 KB |
+| [`ui/tab-dependencies.md`](ui/tab-dependencies.md) | §10quater | The dependencies tab: the graph of the project's objects, «dépend de» and «utilisé par». | 2 KB |
+| [`ui/tab-project.md`](ui/tab-project.md) | §10quater | The «Projet» tab: the title page, the language, the form, the documents made one by one and their content templates, the preview of the templates. | 8 KB |
+| [`ui/command-palette.md`](ui/command-palette.md) | §10quater | The command palette, Ctrl+K: what it finds, where it reads it, and how it is used with the mouse. | 6 KB |
 
 ## Decisions and open questions
 
@@ -101,6 +108,11 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`history/status-notes.md`](history/status-notes.md) | status line | The per-version status paragraphs that headed CLAUDE.md until v0.117, newest first. The journal of every version is CHANGELOG.md. | 179 KB |
 | [`history/changelog-v0.1-to-v0.100.md`](history/changelog-v0.1-to-v0.100.md) | — | The versions of `CHANGELOG.md` before v0.110, moved verbatim on 2026-10-10. | 484 KB |
 | [`test-report-2026-10-10.md`](test-report-2026-10-10.md) | — | The test suite's report of 10.10.2026 (issue #24): a dated snapshot, not kept up to date. | 17 KB |
+| [`history/2026-10-21-commandes-typst-refonte-journal-lots-0-12.md`](history/2026-10-21-commandes-typst-refonte-journal-lots-0-12.md) | — | The progress journal of lots 0 to 12 of the Typst commands' overhaul (spec 2026-10-21-commandes-typst-refonte, §16), moved verbatim so that the spec stays under 100 KB. | 15 KB |
+| [`history/2026-10-21-commandes-typst-refonte-journal-lots-13-18.md`](history/2026-10-21-commandes-typst-refonte-journal-lots-13-18.md) | — | The progress journal of lots 13 to 18 of the Typst commands' overhaul (spec 2026-10-21-commandes-typst-refonte), moved verbatim on 2026-10-22 to keep the spec under 100 KB. | 11 KB |
+| [`history/typst-retired-commands.md`](history/typst-retired-commands.md) | §10bis | The reference rows of the commands the Typst commands' overhaul retired (spec 2026-10-21-commandes-typst-refonte, lot 19), moved verbatim from `typst/api-conventions.md` on 2026-10-22; what each becomes is `calc/renamed-commands.json`. | 42 KB |
+| [`history/formulas-retired-commands.md`](history/formulas-retired-commands.md) | §10quinquies | The sections of `typst/formulas.md` on `#val`, `#var-line`, `#var-unit`, `#var-domain` and the arguments `note:`, `sep:`, `summary:`, retired by the Typst commands' overhaul (spec 2026-10-21-commandes-typst-refonte, lot 19), moved verbatim on 2026-10-22. | 16 KB |
+| [`history/report-engine-retired-commands.md`](history/report-engine-retired-commands.md) | §5, §9 | The sections of `typst/report-engine.md` on `#calc-block`, `#show-input` and the levels the retired commands printed their lines at, retired by the Typst commands' overhaul (spec 2026-10-21-commandes-typst-refonte, lot 19), moved verbatim on 2026-10-22. | 7 KB |
 | [`history/open-questions-closed.md`](history/open-questions-closed.md) | §14 | The open points that were closed or settled, moved verbatim from `open-questions.md`. | 3 KB |
 
 ## Section → file
@@ -146,6 +158,7 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | §3.3duovicies-bis | [`domain/variable-links.md`](domain/variable-links.md) |
 | §3.3tervicies | [`domain/fire-resistance.md`](domain/fire-resistance.md) |
 | §3.3quatervicies | [`domain/steel.md`](domain/steel.md) |
+| §3.3quinvicies | [`domain/dependencies.md`](domain/dependencies.md) |
 | §4 | [`typst/report-engine.md`](typst/report-engine.md) |
 | §5 | [`typst/report-engine.md`](typst/report-engine.md) |
 | §6 | [`typst/report-engine.md`](typst/report-engine.md) |

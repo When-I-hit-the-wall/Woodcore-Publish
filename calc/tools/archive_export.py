@@ -123,7 +123,7 @@ def _files(folder, skipped=()):
 def members_of_document(here, mode):
     """(file, name in the zip) for everything the archive of document `mode` of a project laid out in three documents holds, the names relative to the project's folder -- **chosen by name, never by walking the Typst root**, which is the whole project folder here and would take the other documents, the workbooks, the architect's plans and the archives themselves along.
 
-    The `.woodcore`; the document's own folder -- its entry file, its structure.json, its Sections/ -- less its PDF, whose copy stands beside the zip, and a Tinymist stray in Sections/; what the three documents share at the top: config.typ, commands.typ, references.bib and title.typ, the form's `Template/`, the export's folder less out/ and stamps/ (GENERATED_LEFT_OUT), the pictures; the sources drawn in the window; and the three journals, each document printing its own. Not the other documents' folders, not the workbooks -- data/project.json records their hashes, as for a report alone --, not `.vscode/`.
+    The `.woodcore`; the document's own folder -- its entry file, its structure.json, its Sections/ -- less its PDF, whose copy stands beside the zip, and a Tinymist stray in Sections/; what the three documents share at the top: config.typ, commands.typ, references.bib and title.typ, the form's `Template/`, the export's folder less out/ and stamps/ (GENERATED_LEFT_OUT), the pictures; laid out by folders, the domains' folders, the drawing tabs' (their imports and their exports) and Appendix/; the sources drawn in the window; and the three journals, each document printing its own. Not the other documents' folders, not the workbooks -- data/project.json records their hashes, as for a report alone --, not `.vscode/`.
     """
     generated = here.generated_dir
     folder = here.document_dir(mode)
@@ -141,12 +141,20 @@ def members_of_document(here, mode):
     for path in (here.config_typ, here.commands_typ, here.references_bib, here.title_typ):
         if path.is_file():
             chosen[path] = here.rel(path)
-    for path in _files(here.typst_root / project.TEMPLATE_FOLDER, skipped=[here.archives_dir]):   # the form the documents are set in (calc/forms.py): template.typ, form.json, its assets
+    for path in _files(here.template_dir, skipped=[here.archives_dir]):   # the form the documents are set in (calc/forms.py): template.typ, form.json, its assets
         chosen[path] = here.rel(path)
-    for path in _files(generated, skipped=[generated / name for name in GENERATED_LEFT_OUT]):
+    # the export, less what lies inside it and is not the export: the sources and the archives of a project laid out by folders, which 000-Woodcore/ holds too -- taken in, every archive would carry every earlier one (spec 2026-10-15 ARCH-RISK-A01)
+    for path in _files(generated, skipped=[generated / name for name in GENERATED_LEFT_OUT] + here.generated_excludes()):
         chosen[path] = here.rel(path)
-    for shared in (here.images_dir, here.formulas_dir):   # the calculation domains of the «Formules» tab, which every document may print (v0.117) -- a domain archived left out, as every archive is (issue #15)
-        for path in _files(shared, skipped=[here.archives_dir, here.formulas_dir / "archives"]):
+    # the domains every document may print: the engineer's own (Domains/, Formules/ before 0.119, v0.117) and, laid out by folders, one folder per kind of domain (issue #64) -- a domain archived left out, as every archive is (issue #15)
+    shared = [here.images_dir, here.formulas_dir] + [here.domain_dir(kind) for kind in project.DOMAIN_FOLDERS if here.has_folders]
+    # laid out by folders, the drawing tabs' folders -- the documents imported to draw on (Imported Plans/) and what the export made of them (Exports/, the figures the documents print) -- and Appendix/, the annexes' PDFs and their excerpts (issue #64, D-09 to D-11, D-19): what the documents read lies there and no more in the export's data/
+    if here.has_folders:
+        shared += [here.drawing_dir(tab) for tab in project.DRAWING_FOLDERS] + [here.typst_root / project.APPENDIX_FOLDER]
+    for folder in shared:
+        for path in _files(folder, skipped=[here.archives_dir]):
+            if project.DOMAIN_ARCHIVES in path.relative_to(folder).parts[:-1]:
+                continue
             chosen[path] = here.rel(path)
     for sub in project.SOURCE_FOLDERS:
         for path in _files(here.sources_dir / sub):
@@ -155,7 +163,7 @@ def members_of_document(here, mode):
         journal = here.journal_file_for(other)
         if journal.is_file():
             chosen[journal] = here.rel(journal)
-    positions = here.sources_dir / POSITIONS_FILE   # the project's positions, which every document's #member reads through the export (v0.114)
+    positions = here.positions_dir / POSITIONS_FILE   # the project's positions, which every document's #member reads through the export (v0.114) -- in Positions/ laid out by folders (D-24)
     if positions.is_file():
         chosen[positions] = here.rel(positions)
     if here.lists_file.is_file():   # the order of the window's lists and the «Formules» tab's folders (calc/list_order.py, issue #15)

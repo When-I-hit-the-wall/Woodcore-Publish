@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import project  # where the project this tab works on is (calc/project.py)
 import theme  # the colours this tab states itself (theme.py)
+import plan_canvas_edit  # Ctrl+C's and Ctrl+V's states (issue #61)
 import drawing_tab  # what every tab of plans drawn on imported documents shares (v0.115)
 from drawing_tab import DrawingTab, number_text, plain_label
 from domains import fire
@@ -315,7 +316,7 @@ class FireTabFormMixin:
     def choose_tool(self, tool):
         if tool in OWN_FRAME_TOOLS and not self.own_frame():
             tool = "select"  # the scale is the position plan's: its button is greyed, a saved state may still ask
-        if tool not in TOOLS + PANE_TOOLS:
+        if tool not in TOOLS + PANE_TOOLS + plan_canvas_edit.CLIP_TOOLS:   # Ctrl+C's and Ctrl+V's states, no button of their own (issue #61)
             tool = "select"
         self.canvas.set_tool(tool)
         self.mark_tool(tool)

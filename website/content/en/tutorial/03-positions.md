@@ -28,8 +28,8 @@ The number starts with the letter of the kind — `T` for a beam (Träger), `S` 
 
 ## In the report
 
-Every position appears in the report's list of materials without writing anything: the section `003-baustoffe.typ` loops over all of them with `#member`, which prints a position's line at level 1 — and, for timber with a rectangular or a round section, writes down on the way what the checks of SIA 265 read (step 7). If a position has no section or no class, `#member` says what it cannot calculate, and you then give the values in the call: `grade:`, `moisture-class:`, `b:`, `h:`.
+Every position appears in the report's list of materials without writing anything: the section `003-baustoffe.typ` loops over all of them with `#position`, which prints a position's line — its id in its type's colour, then the fields asked for (`category-show:`), the section, the strength class, the description.
 
-{{example member-3}}
+{{example position-2}}
 
 A position added or changed in the tab reaches the report at once: the export follows the save.

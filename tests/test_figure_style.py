@@ -8,6 +8,8 @@ What every test here is built on, and what has to hold whatever else changes: **
 ⚠️ The decision table is held here rather than in each tab's tests, and in both directions: a collection the table does not name may state nothing, and a factor an entry is not drawn with is refused **naming the ones it may state**. That is what keeps `point` off a bar: a field nobody can see the effect of is the kind of field that acquires a value nobody checks (the argument that took `plates.thickness` out of a connector's source in v0.70).
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 import json
 import math
@@ -18,6 +20,7 @@ from conftest import ROOT
 from domains import figure_style
 from domains import schema
 from domains import schema_svg
+import project
 
 
 def _source(**overrides):
@@ -172,9 +175,10 @@ def test_a_schema_that_states_no_factor_is_drawn_as_it_was():
 
 
 # The engineer's own detail (tests/projet-exemple), rendered with the lines that carry a label's ground taken out: the report's figure and the editor's. **These two digests are the v0.98 figure's**, taken from it with its halos removed before a line of v0.99 was written, and they are what says that nothing but the ground behind a text moved. Re-freezing one is a decision, like re-freezing an example page: it means a drawing has been allowed to move, and the reason belongs in CLAUDE.md.
+# ⚠️ Taken again at v0.120 for one reason: the palette merged (lib/figure-palette.json, D5) -- with the old colours mapped onto the new, the figure before is this one byte for byte, checked first.
 FROZEN = {
-    False: "cac0e196b6fa42092d6aa3dea530daf9edc2eaadfb5827e749eefa81b9f1babe",
-    True: "4ff54b27d266a7df5321fd932a1f3b034d891a06626472db33bbc5503103ea0b",
+    False: "2f612ac661fe9864f6f583d2deb0c19aafd8e03b6a7480adc552b95748db4949",
+    True: "1fc63c69fa55f2d378ab88392481209fcde5d92a9b4d162ace72a1c1a7f29a1a",
 }
 
 
@@ -184,7 +188,7 @@ def test_the_example_project_s_own_schema_is_drawn_as_it_was_but_for_its_labels_
     That is the whole of what point 3 was allowed to change in an existing drawing -- nothing -- and it is checked on a real source rather than on one written here, because what could have moved is the float arithmetic of the three quantities (the extent over 40, over 480, over 130 with a floor), and a synthetic source with round numbers would hide a last-bit difference that a real one shows.
     """
     import hashlib
-    path = ROOT / "tests" / "projet-exemple" / "Woodcore-Datei" / "details" / "VU-Skizze.json"
+    path = project.Project.load(conftest.SAMPLE).details_dir / "VU-Skizze.json"
     source = schema.upgrade_source(json.loads(path.read_text(encoding="utf-8")))
     ground = f'fill-opacity="{schema_svg.LABEL_GROUND_OPACITY}"'
     for editing, digest in FROZEN.items():

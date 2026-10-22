@@ -3,6 +3,7 @@
 
 import math
 import re
+from domains.dimension import _inside, constrain  # plane geometry written once (D4)
 
 
 # Points per metre on paper, for a PDF plotted at 1:n: 72 pt per inch, 25.4 mm per inch.
@@ -236,16 +237,6 @@ def axis_direction(axis):
     return (math.cos(a), math.sin(a))
 
 
-def axis_orientation(axis):
-    """`vertical` or `horizontal` on the drawing, `oblique` otherwise."""
-    a = math.fmod(abs(float(axis["angle"])), 180.0)
-    if abs(a - 90) < 1e-6:
-        return "vertical"
-    if a < 1e-6 or abs(a - 180) < 1e-6:
-        return "horizontal"
-    return "oblique"
-
-
 def axis_normal(axis):
     """The side an axis is offset to by a positive distance: right for a vertical axis, down for a horizontal one, and for an oblique one the side to the right."""
     dx, dy = axis_direction(axis)
@@ -427,17 +418,6 @@ def _point_segment(p, a, b):
     return math.dist(p, q), q
 
 
-def _inside(p, polygon):
-    """Even-odd point-in-polygon."""
-    inside = False
-    n = len(polygon)
-    for i in range(n):
-        (x1, y1), (x2, y2) = polygon[i], polygon[(i + 1) % n]
-        if (y1 > p[1]) != (y2 > p[1]) and p[0] < (x2 - x1) * (p[1] - y1) / (y2 - y1) + x1:
-            inside = not inside
-    return inside
-
-
 def segments_of(element):
     points = element["points"]
     kind = element_kind(element)
@@ -516,17 +496,6 @@ def nearest_vertex(element, point, tolerance):
         if d <= tolerance and (best is None or d < best[0]):
             best = (d, j)
     return best[1] if best else None
-
-
-def constrain(anchor, point):
-    """`point` brought onto the nearest of the eight directions from `anchor` -- horizontal, vertical or at 45° -- as Shift does while drawing."""
-    dx, dy = point[0] - anchor[0], point[1] - anchor[1]
-    if abs(dx) < 1e-12 and abs(dy) < 1e-12:
-        return tuple(anchor)
-    a = round(math.atan2(dy, dx) / (math.pi / 4)) * (math.pi / 4)
-    ux, uy = math.cos(a), math.sin(a)
-    t = dx * ux + dy * uy
-    return (anchor[0] + t * ux, anchor[1] + t * uy)
 
 
 def _line_cross(p, d, q, e):

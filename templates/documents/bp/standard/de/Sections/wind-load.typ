@@ -16,21 +16,20 @@ $ q_p = c_h dot q_(p 0) $
 wobei der Referenzwert $q_"p0"$ dem Anhang E, die Geländekategorie und der Profilbeiwert $c_h$ der Ziffer 6.2.1 (Tabelle 4) entnommen werden. Die Druck- und Kraftbeiwerte sind jene des Anhangs C.
 // woodcore:/object p3
 
-// woodcore:object doc-table wind-parameters
-#doc-table(
-  columns: (
-    (id: "parameter", title: [Parameter], kind: "wide"),
-    (id: "symbol", title: [Symbol], kind: "math"),
-    (id: "value", title: [Wert], kind: "number"),
-    (id: "unit", title: [Einheit]),
-  ),
-  hidden: (),
-  rows: (
-    (parameter: [Geländekategorie], symbol: [], value: [[…]], unit: []),
-    (parameter: [Bezugshöhe über Boden], symbol: [$z$], value: [[…]], unit: [m]),
-    (parameter: [Profilbeiwert], symbol: [$c_h$], value: [[…]], unit: []),
-    (parameter: [Referenzwert des Staudrucks], symbol: [$q_(p 0)$], value: [[…]], unit: [kN/m²]),
-    (parameter: [Staudruck], symbol: [$q_p$], value: [[…]], unit: [kN/m²]),
+// woodcore:object table wind-parameters
+#figure(
+  table(
+    columns: (1fr, auto, auto, auto),
+    align: (left, center, right, left),
+    table.hline(stroke: 1pt),
+    table.header([*Parameter*], [*Symbol*], [*Wert*], [*Einheit*]),
+    table.hline(stroke: 0.5pt),
+    [Geländekategorie], [], [[…]], [],
+    [Bezugshöhe über Boden], [$z$], [[…]], [m],
+    [Profilbeiwert], [$c_h$], [[…]], [],
+    [Referenzwert des Staudrucks], [$q_(p 0)$], [[…]], [kN/m²],
+    [Staudruck], [$q_p$], [[…]], [kN/m²],
+    table.hline(stroke: 1pt),
   ),
   caption: [Windparameter],
 )

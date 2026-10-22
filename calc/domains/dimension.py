@@ -114,3 +114,150 @@ def text(mode, label, value_text):
     if mode == "value" or not label:
         return value_text
     return f"{label} = {value_text}"
+
+
+# --- plane geometry the drawing engines share (spec 2026-10-19-base-saine-nettoyage, D4): written once here, imported back by the modules that each had a copy
+
+def _cross(a, u, b, v):
+    """Where the line through `a` along `u` meets the one through `b` along `v`, with the two parameters, or None for parallels."""
+    det = u[0] * v[1] - u[1] * v[0]
+    if abs(det) < 1e-12:
+        return None
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    t = (dx * v[1] - dy * v[0]) / det
+    s = (dx * u[1] - dy * u[0]) / det
+    return ((a[0] + t * u[0], a[1] + t * u[1]), t, s)
+
+
+def _inside(p, polygon):
+    """Even-odd point-in-polygon."""
+    inside = False
+    n = len(polygon)
+    for i in range(n):
+        (x1, y1), (x2, y2) = polygon[i], polygon[(i + 1) % n]
+        if (y1 > p[1]) != (y2 > p[1]) and p[0] < (x2 - x1) * (p[1] - y1) / (y2 - y1) + x1:
+            inside = not inside
+    return inside
+
+
+def _local(frame, point):
+    """`point` in the frame of a number's box: from its centre, x along its text, y across it."""
+    a = math.radians(frame["angle"])
+    dx, dy = point[0] - frame["at"][0], point[1] - frame["at"][1]
+    return (dx * math.cos(a) + dy * math.sin(a), -dx * math.sin(a) + dy * math.cos(a))
+
+
+def _point_segment(p, a, b):
+    """The distance from `p` to the segment a-b, and the nearest point on it."""
+    ax, ay = a
+    bx, by = b
+    dx, dy = bx - ax, by - ay
+    length2 = dx * dx + dy * dy
+    if length2 <= 0:
+        return math.dist(p, a), tuple(a)
+    t = max(0.0, min(1.0, ((p[0] - ax) * dx + (p[1] - ay) * dy) / length2))
+    q = (ax + t * dx, ay + t * dy)
+    return math.dist(p, q), q
+
+
+def constrain(anchor, point):
+    """`point` brought onto the nearest of the eight directions from `anchor` -- horizontal, vertical or at 45° -- as Shift does while drawing."""
+    dx, dy = point[0] - anchor[0], point[1] - anchor[1]
+    if abs(dx) < 1e-12 and abs(dy) < 1e-12:
+        return tuple(anchor)
+    a = round(math.atan2(dy, dx) / (math.pi / 4)) * (math.pi / 4)
+    ux, uy = math.cos(a), math.sin(a)
+    t = dx * ux + dy * uy
+    return (anchor[0] + t * ux, anchor[1] + t * uy)
+
+
+def grid_snap(p, step):
+    """`p` pulled onto the nearest crossing of a grid of that step, in mm."""
+    if not step or step <= 0:
+        return tuple(p)
+    return (round(p[0] / step) * step, round(p[1] / step) * step)
+
+
+def index_of(source, collection, eid):
+    for i, entry in enumerate(source.get(collection, [])):
+        if entry.get("id") == eid:
+            return i
+    return None
+
+
+# --- the dimensions and the tracking of the schemas and the static models (spec 2026-10-20-indices-et-niveaux, ARCH-004): written once here, each module keeping a wrapper that hands its own anchor reader and its own tolerance (mm in a schema, m in a static model)
+
+def ends(anchor_of, source, dim):
+    """A linear dimension's two ends, or None where either is unresolvable -- `anchor_of(source, ref)` the module's reader of a point a dimension names."""
+    a = anchor_of(source, dim.get("from"))
+    b = anchor_of(source, dim.get("to"))
+    return None if a is None or b is None else (a, b)
+
+
+def linear_direction(dim, both, same_point):
+    """The direction a linear dimension's line runs in and the one its offset is measured along (`direction`): (1, 0) and (0, 1) for the two axis-aligned kinds whatever the ends do; None where a parallel one's ends (`both`) do not resolve."""
+    kind = dim.get("kind")
+    if kind in ("horizontal", "vertical"):
+        return direction(kind, None, None, same_point)
+    return None if both is None else direction(kind, both[0], both[1], same_point)
+
+
+def linear_line(dim, both, same_point):
+    """Where a linear dimension's line is drawn (`line`): its two ends (`both`) projected onto it, `offset` from their middle; None where they do not resolve."""
+    return None if both is None else line(dim.get("kind"), both[0], both[1], dim.get("offset", 0.0), same_point)
+
+
+def angle_arc(rays, dim):
+    """An angle dimension's arc -- (centre, sweep, start) -- between the two rays the module chose (`rays`: centre, first, second), the reflex where a negative radius asks for it on a dimension carrying its `bearing` (`arc`); None where the rays do not resolve."""
+    if rays is None:
+        return None
+    centre, first, second = rays
+    sweep, start = arc(first, second, dim.get("bearing") is not None and float(dim.get("offset", 0.0)) < 0)
+    return centre, sweep, start
+
+
+def along(anchor, ray, distance):
+    """The point `distance` from `anchor` along `ray`, in the figure's unit."""
+    return (anchor[0] + distance * ray["unit"][0], anchor[1] + distance * ray["unit"][1])
+
+
+def typed_point(anchor, ray, text):
+    """Where a distance typed into Woodcore's field lands along `ray`, or None where it is not a number. A comma is read as a decimal point, the keyboard here having one."""
+    try:
+        distance = float(str(text).strip().replace(",", "."))
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(distance):
+        return None
+    return along(anchor, ray, distance)
+
+
+def nearest_ray(rays, anchor, point, tolerance_deg, same_point):
+    """The ray of smallest angular deviation from `anchor` towards `point`, within `tolerance_deg`, and `point` projected onto it -- or (None, point). A ray is measured in its own sense only, both senses being in the list, so a lock holds on either side."""
+    dx, dy = point[0] - anchor[0], point[1] - anchor[1]
+    if math.hypot(dx, dy) <= same_point:
+        return None, tuple(point)
+    angle = math.degrees(math.atan2(dy, dx))
+    best, best_off = None, tolerance_deg
+    for ray in rays:
+        off = abs(normalize_angle(angle - ray["angle"]))
+        if off <= best_off:
+            best, best_off = ray, off
+    if best is None:
+        return None, tuple(point)
+    along_ray = dx * best["unit"][0] + dy * best["unit"][1]
+    return best, (anchor[0] + along_ray * best["unit"][0], anchor[1] + along_ray * best["unit"][1])
+
+
+def box_corners(frame, margin=0.0):
+    """The four corners of a label's box -- `frame`: its centre `at`, its half sizes `hw`, `hh`, its `angle` --, `margin` beyond its edges, turned with its text: what Woodcore outlines a selected label or position number with (the schemas, the static models, the plans; ARCH-004)."""
+    a = math.radians(frame["angle"])
+    c, s = math.cos(a), math.sin(a)
+    (x, y), hw, hh = frame["at"], frame["hw"] + margin, frame["hh"] + margin
+    return [(x + u * c - v * s, y + u * s + v * c) for u, v in ((-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh))]
+
+
+def unit(a, b):
+    """The unit vector from `a` to `b`, (1, 0) where they are one point (ARCH-004, D-15)."""
+    d = math.dist(a, b)
+    return (1.0, 0.0) if d < 1e-12 else ((b[0] - a[0]) / d, (b[1] - a[1]) / d)

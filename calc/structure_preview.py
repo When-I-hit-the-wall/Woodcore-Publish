@@ -163,7 +163,7 @@ def text_width_cm(here):
     except (OSError, UnicodeDecodeError):
         return None
     # The page is the **form's** (`Template/template.typ`, calc/forms.py), which config.typ calls and then writes its own adjustments over: the form's rules are read first, so that the later ones win as they do in the compile.
-    form = Path(here.config_typ).parent / "Template" / "template.typ"
+    form = Path(here.config_typ).parent / project.TEMPLATE_FOLDER / "template.typ"   # beside config.typ, wherever the project keeps it (000-Typst-Config/ laid out by folders, issue #64)
     if form.is_file():
         try:
             text = _strip_comments(typst_paths.read_text(form)) + chr(10) + text
@@ -237,8 +237,8 @@ def header(here, mode, language=None):
     """The lines every snippet starts with: the project's `conf`, the page, the engine, the document and the language. No state is set that a part of a document has no use for -- no title page, no outline, no revision attachment."""
     language = language or language_of(here, mode)
     return [
-        f'#import "/{project.CONFIG_FILE}": conf',
-        f'#import "/{project.COMMANDS_FILE}": *',
+        f'#import "{here.from_root(here.config_typ)}": conf',   # in 000-Typst-Config/ laid out by folders (issue #64)
+        f'#import "{here.from_root(here.commands_typ)}": *',
         "#show: conf",
         page_line(here),
         "#set heading(numbering: none)",

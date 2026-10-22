@@ -5,6 +5,8 @@ What this file holds is the *seam*, and nothing either side of it already holds:
 ⚠️ The one thing it deliberately does NOT re-check is the arithmetic. `test_connection.py` holds the polar moment against the HB2 method sheet and `test_dowel.py` holds the resistance against `Verbindung.xlsm`, cell by cell; the move changed where the coordinates come from and not what is done with them, and a second copy of those numbers here would be a second place to update when a norm value moves.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 import json
 
@@ -221,9 +223,9 @@ def test_a_source_that_still_carries_its_own_drawing_is_sent_to_the_migration():
     """A 2.1 connection and a 1.1 connector each hold a member form and a coordinate table. Converting one
     means WRITING a second file -- the schema that drawing becomes -- which a reader must not do quietly."""
     old = _connection(schema_version="2.1")
-    assert "migrate_to_schemas" in _raised(connection.check_source, old, "SD_01-V1.json")
+    assert "0.119" in _raised(connection.check_source, old, "SD_01-V1.json")
     old = _connector(schema_version="1.1")
-    assert "migrate_to_schemas" in _raised(connector.check_source, old, "SD_01.json")
+    assert "0.119" in _raised(connector.check_source, old, "SD_01.json")
 
 
 def test_a_marker_named_twice_is_refused_on_both_sides():
@@ -360,7 +362,7 @@ def test_a_schema_or_a_marker_lost_never_stops_the_export_and_the_calculation_sa
 
 
 def test_the_report_refuses_a_polar_moment_the_schema_no_longer_carries():
-    """`show-polar-moment`, `show-calc` and `var-of` on a connection exported `calculated: false` stop the compile with its reason, as `show-connector-resistance` does for a connector -- where until the audit of 260916 they printed n = 3 and an I_p of three fasteners (AUD-7-301)."""
+    """A value of a connection exported `calculated: false`, read by `#var(…, domain: ("connection", id))` (spec 2026-10-21-commandes-typst-refonte, REQ-009; `show-polar-moment`, `show-calc` and `var-of` until then), stops the compile with its reason -- where until the audit of 260916 the report printed n = 3 and an I_p of three fasteners (AUD-7-301)."""
     import shutil
     import subprocess
     import conftest
@@ -382,7 +384,7 @@ def test_the_report_refuses_a_polar_moment_the_schema_no_longer_carries():
     # what show-calc's lookup reads before it reaches a connection: no domain and no position here
     (python / "data" / "calculations.json").write_text(json.dumps({"schema_version": "1.4", "domains": {}}), encoding="utf-8")
     (python / "data" / "positions-index.json").write_text(json.dumps({"schema_version": "1.0", "positions": []}), encoding="utf-8")
-    for call in ('#show-polar-moment("SD_01-V1", V: 10)', '#show-calc("connection", "SD_01-V1")', '#var-of("connection", "SD_01-V1", "I_p")'):
+    for call in ('#var("I_p", domain: ("connection", "SD_01-V1"))',):
         (root / "probe.typ").write_text('#import "/commands.typ": *\n' + call + "\n", encoding="utf-8")
         run = subprocess.run(["typst", "compile", "--root", str(root), str(root / "probe.typ"), str(root / "probe.pdf")],
                              capture_output=True, text=True, encoding="utf-8")

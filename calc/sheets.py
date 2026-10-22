@@ -22,18 +22,22 @@ from datetime import datetime
 from pathlib import Path
 
 import proc
+import documents
 import project as project_module
 import typst_objects as to
 from i18n import strings
 
-FOLDER = "Plans"
+# The sheets' folder in a project laid out before the folders of issue #64: `Plans/` at the top of the Typst root, the sheets of both kinds together. Laid out by folders, a sheet lies in the exports of its kind's plan tab -- `Plans/Position-plan/Exports/`, `Plans/Fire-plan/Exports/` (spec 2026-10-15 D-06, D-17) -- and its id is still one for the whole project (`folder`, `path`).
+FOLDER = project_module.PLANS_FOLDER
+# The plan tab each kind of sheet belongs to (project.DRAWING_FOLDERS).
+KIND_TABS = {"position": "plan", "fire": "fire"}
 # A sheet's id is its file's name: letters, digits and `_ . + -`, as a connector's (the id is the file name).
 ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.+-]*$")
 FORMATS = to.SHEET_FORMATS
 LANGUAGES = ("de", "fr", "en")
 # The id of the page object of every sheet Woodcore writes.
 PAGE_ID = "page"
-IMPORT_LINE = '#import "/commands.typ": *'
+# A sheet's import of the engine is the project's own, from the Typst root (calc/documents.py `root_import_line`): `/000-Typst-Config/commands.typ` in a project laid out by folders (issue #64), `/commands.typ` before.
 
 CODES = ("bad_id", "exists", "no_sheet", "no_page", "bad_format", "bad_object", "no_typst", "typst_failed", "write_failed",
          # v0.116: a sheet's kind, and the PDF bundles
@@ -73,15 +77,33 @@ class SheetError(ValueError):
 
 # --- where the sheets are ----------------------------------------------------------------------
 
-def folder(here):
-    """The folder of the project's sheets: `Plans/` at the top of its Typst root."""
+def folder(here, kind=None):
+    """The folder of the project's sheets of `kind`: `Plans/` at the top of its Typst root in a project laid out before, whatever the kind; laid out by folders, the exports of the kind's plan tab -- `Plans/Position-plan/Exports/` for "position" (the kind where none is named), `Plans/Fire-plan/Exports/` for "fire"."""
+    if not here.has_folders:
+        return Path(here.typst_root) / FOLDER
+    return here.drawing_dir(KIND_TABS[kind or "position"]) / project_module.EXPORTS_FOLDER
+
+
+def folders(here):
+    """Every folder the project's sheets lie in: one, `Plans/`, laid out before; one per kind laid out by folders."""
+    if not here.has_folders:
+        return [folder(here)]
+    return [folder(here, kind) for kind in KINDS]
+
+
+def bundles_folder(here):
+    """Where the PDF bundles' file is kept: `Plans/` -- the sheets' folder before, the parent of the two plan tabs' laid out by folders, the bundles of both kinds in one file as they always were."""
     return Path(here.typst_root) / FOLDER
 
 
-def path(here, sheet_id):
-    """The .typ of sheet `sheet_id`."""
+def path(here, sheet_id, kind=None):
+    """The .typ of sheet `sheet_id`: where it lies -- in the folder of either kind laid out by folders, an id being one for the whole project --, else where a sheet of `kind` is written."""
     _check_id(sheet_id)
-    return folder(here) / f"{sheet_id}.typ"
+    if here.has_folders:
+        for base in folders(here):
+            if (base / f"{sheet_id}.typ").is_file():
+                return base / f"{sheet_id}.typ"
+    return folder(here, kind) / f"{sheet_id}.typ"
 
 
 def pdf(here, sheet_id):
@@ -96,10 +118,7 @@ def _check_id(sheet_id):
 
 def list_sheets(here, kind=None):
     """The ids of the project's sheets, in file-name order (case ignored, as Windows lists them) -- those of `kind` alone where it is given ("position", "fire"), each sheet's kind read by `sheet_kind`."""
-    base = folder(here)
-    if not base.is_dir():
-        return []
-    found = sorted((p.stem for p in base.glob("*.typ") if p.is_file() and ID_PATTERN.match(p.stem)), key=str.lower)
+    found = sorted((p.stem for base in folders(here) if base.is_dir() for p in base.glob("*.typ") if p.is_file() and ID_PATTERN.match(p.stem)), key=str.lower)
     if kind is None:
         return found
     _check_kind(kind)
@@ -186,7 +205,7 @@ def write(here, sheet_id, text):
 
 def language(here):
     """The language the project's documents are written in -- config.typ's `doc-lang` at the Typst root --, German where it says none: the language a new sheet's words and its title block's labels are in."""
-    config = Path(here.typst_root) / "config.typ"
+    config = Path(here.config_typ)
     try:
         found = re.search(r'#let\s+doc-lang\s*=\s*"([a-z]{2})"', config.read_text(encoding="utf-8"))
     except OSError:
@@ -211,6 +230,7 @@ def new_sheet(here, sheet_id=None, format="A3", landscape=True, title="", lang=N
     sheet_id = new_id(here) if sheet_id is None else sheet_id
     _check_id(sheet_id)
     _check_kind(kind)
+    sheet_of = kind   # the sheet's kind, which its folder follows laid out by folders: `kind` is the loop's name below
     if format not in FORMATS:
         raise SheetError("bad_format", f"{format!r} is not a format of a sheet -- expected one of {', '.join(FORMATS)}", format=format)
     if sheet_id.lower() in {s.lower() for s in list_sheets(here)} | _bundle_names(here):
@@ -233,15 +253,15 @@ def new_sheet(here, sheet_id=None, format="A3", landscape=True, title="", lang=N
         ("sheet-titleblock", "titleblock", to.Call("sheet-titleblock", {"plan-number": sheet_id})),
     ]
     lines = [f"// Export sheet {sheet_id}: written by Woodcore (calc/sheets.py), yours to edit here or in Woodcore -- each object stands between its two `// woodcore:` tags.",
-             IMPORT_LINE, "", ""]
+             documents.root_import_line(here), "", ""]
     text = "\n".join(lines)
     for kind, oid, call in calls:
-        text += f"{to.START} {kind} {oid}\n{to.serialize(call)}\n{to.END} {oid}\n"
+        text += f"{to.START} {kind} {oid}\n{to.body_of(call)}\n{to.END} {oid}\n"   # a placed object a raw #place (Q-015), the page its show rule
         if kind == "sheet-page":
             # the engine's words on this sheet -- the title block's labels, the legend's -- in the project's language; after the show rule, which is what sets the page
             text += f'#set-report-language("{lang}")\n'
         text += "\n"
-    target = path(here, sheet_id)
+    target = path(here, sheet_id, sheet_of)
     _write(target, text)
     return target
 
@@ -261,7 +281,7 @@ def archive(here, sheet_id):
     if not source.is_file():
         raise SheetError("no_sheet", f"there is no sheet {sheet_id!r}", id=sheet_id)
     stamp = datetime.now().strftime("%y%m%d-%H%M%S")
-    target = folder(here) / "archives" / f"{stamp}-{sheet_id}.typ"
+    target = source.parent / "archives" / f"{stamp}-{sheet_id}.typ"
     target.parent.mkdir(parents=True, exist_ok=True)
     os.replace(source, target)
     out = pdf(here, sheet_id)
@@ -325,6 +345,13 @@ def add_object(here, sheet_id, kind, call=None, object_id=None, base=None):
     found = to.objects(text)
     if object_id is None:
         object_id = to.free_id(text, _base(base or kind.removeprefix("sheet-")))
+    # a list on a sheet is the project's file of it, included (spec 2026-10-21-commandes-typst-refonte, Q-015): written once where the project has none yet
+    import typst_sheet_place
+    if kind in typst_sheet_place.LIST_FILES:
+        from domains import list_files
+        list_kind = "position-list" if kind == "sheet-position-list" else "quantities"
+        if not list_files.path(here, list_kind).is_file():
+            list_files.write(here, list_kind)
     blocks = [o for o in found if o.type != "sheet-titleblock"]
     after = blocks[-1].end if blocks else len(to._lines(text)) - 1
     new = to.insert_object(text, after, kind, object_id, call)
@@ -416,26 +443,19 @@ def add_fire_legend(here, sheet_id, x, y, width=120, plans=to.AUTO):
     return add_object(here, sheet_id, "sheet-fire-legend", m.to_call(), base="fire-legend")
 
 
-def add_position_list(here, sheet_id, x, y, width=180, plans=to.AUTO, scope="plans", storey=None, title=to.AUTO):
-    """Adds the list of the positions at (x, y) millimetres (v0.116): those of `plans` (AUTO, the plans the sheet's viewports show), every position (`scope="all"`) or one storey's (`scope="storey"`, `storey` its numbering character); gives back the object's id."""
+def add_position_list(here, sheet_id, x, y, width=180):
+    """Adds the list of the positions at (x, y) millimetres, `width` wide (v0.116): the project's list, written once (calc/domains/list_files.py) -- its plans, its scope and its storey have no raw form since the spec 2026-10-21-commandes-typst-refonte (Q-015); gives back the object's id."""
     m = to.PositionListModel(to.Call("sheet-position-list", {}))
     m.move_to(x, y)
     m.set_width(width)
-    m.set_scope(scope)
-    m.set_plans(plans)
-    m.set_storey(storey)
-    m.set_title(title)
     return add_object(here, sheet_id, "sheet-position-list", m.to_call(), base="positions")
 
 
-def add_quantities(here, sheet_id, x, y, width=150, plans=to.AUTO, scope="plans", title=to.AUTO):
-    """Adds the quantities at (x, y) millimetres (issue #9): of `plans` (AUTO, the plans the sheet's viewports show), of every plan (`scope="all"`); gives back the object's id."""
+def add_quantities(here, sheet_id, x, y, width=150):
+    """Adds the quantities at (x, y) millimetres, `width` wide (issue #9): the project's, written once (calc/domains/list_files.py) -- of every position plan, their plans and scope having no raw form (Q-015); gives back the object's id."""
     m = to.QuantitiesModel(to.Call("sheet-quantities", {}))
     m.move_to(x, y)
     m.set_width(width)
-    m.set_scope(scope)
-    m.set_plans(plans)
-    m.set_title(title)
     return add_object(here, sheet_id, "sheet-quantities", m.to_call(), base="quantities")
 
 
@@ -450,12 +470,10 @@ def plans_of_sheet(here, sheet_id):
     return out
 
 
-def new_position_list_sheet(here, plans=None, scope=None, storey=None, sheet_id=None, lang=None):
-    """Writes a new A4 portrait position sheet holding the list of the positions alone -- «Liste des positions» its title -- and gives back its path (v0.116, the button «Créer une liste des positions»). `plans` names the position plans whose positions it lists (the plans of a sheet, or of a bundle: `plans_of_sheet`, `plans_of_bundle`); without them every position is listed, unless `scope` says «storey» and `storey` which."""
+def new_position_list_sheet(here, sheet_id=None, lang=None):
+    """Writes a new A4 portrait position sheet holding the list of the positions alone -- «Liste des positions» its title -- and gives back its path (v0.116, the button «Créer une liste des positions»): the project's list, every position (Q-015)."""
     sheet_id = new_id(here) if sheet_id is None else sheet_id
     lang = language(here) if lang is None else lang
-    if scope is None:
-        scope = "plans" if plans else "all"
     target = new_sheet(here, sheet_id, format="A4", landscape=False, title=_word("list_title", lang), lang=lang, kind="position")
     text = read(here, sheet_id)
     # the list alone: the remark and the title block a new sheet carries are taken off
@@ -463,7 +481,7 @@ def new_position_list_sheet(here, plans=None, scope=None, storey=None, sheet_id=
         if to.find(text, oid) is not None:
             text = to.remove_object(text, oid)
     write(here, sheet_id, text)
-    add_position_list(here, sheet_id, 20, 32, width=170, plans=list(plans) if plans else to.AUTO, scope=scope, storey=storey, title=None)
+    add_position_list(here, sheet_id, 20, 32, width=170)
     return target
 
 def remove(here, sheet_id, object_id):
@@ -529,8 +547,8 @@ def set_page(here, sheet_id, format=None, landscape=None, margin=None):
 # --- the PDF bundles (v0.116) --------------------------------------------------------------------
 
 def bundles_path(here):
-    """Plans/bundles.json: the PDF bundles of the project's sheets."""
-    return folder(here) / BUNDLES_FILE
+    """Plans/bundles.json: the PDF bundles of the project's sheets (`bundles_folder`)."""
+    return bundles_folder(here) / BUNDLES_FILE
 
 
 def _check_bundle(entry, where):
@@ -688,7 +706,7 @@ def bundle_pdf(here, name):
     entry = name if isinstance(name, dict) else next((b for b in _read_bundles(here) if b["name"].lower() == str(name).lower()), None)
     if entry is None:
         return folder(here) / f"{name}.pdf"
-    return folder(here) / f"{bundle_fields(here, entry)['id']}.pdf"
+    return folder(here, entry.get("kind")) / f"{bundle_fields(here, entry)['id']}.pdf"   # beside the sheets of its kind
 
 
 def _checked_sheets(here, entry, sheet_ids):
@@ -747,7 +765,7 @@ def delete_bundle(here, name):
     out = bundle_pdf(here, old)
     _edit_bundle(here, name, lambda data, entry: data.remove(entry))
     if out.is_file():
-        target = folder(here) / "archives" / f"{datetime.now().strftime('%y%m%d-%H%M%S')}-{old['name']}.pdf"
+        target = out.parent / "archives" / f"{datetime.now().strftime('%y%m%d-%H%M%S')}-{old['name']}.pdf"
         target.parent.mkdir(parents=True, exist_ok=True)
         os.replace(out, target)
 

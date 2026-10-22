@@ -3,6 +3,8 @@
 What is held: an element is one row, measured with the plan's own length (plan.element_length_m) -- a beam's volume its length times b·h, a round one's π d²/4, a CLT slab's its area times t; a wall in CLT, a column and a steel profile have no volume; a position with no section is counted and said; openings, concrete and loads are not counted --; the rows of a scope add up by material then section, with a total per material; the report's data file states its version and its totals; and what the report adds up for chosen positions is what `summary` gives.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import subprocess
 
@@ -113,36 +115,11 @@ def _text(here, body, lang):
     import project
     from pypdf import PdfReader
     probe = here.typst_root / f"probe-{lang}.typ"
-    probe.write_text(f'#import "/commands.typ": *\n#set-report-language("{lang}")\n{body}\n', encoding="utf-8")
+    probe.write_text(f'#import "/000-Typst-Config/commands.typ": *\n#report-level.update(2)\n#set-report-language("{lang}")\n{body}\n', encoding="utf-8")
     out = subprocess.run([project.typst_executable(), "compile", "--root", str(here.typst_root), str(probe), str(probe.with_suffix(".pdf"))],
                          capture_output=True, text=True, encoding="utf-8", errors="replace")
     assert out.returncode == 0, out.stderr
     return " ".join(unicodedata.normalize("NFKC", "\n".join(p.extract_text() for p in PdfReader(str(probe.with_suffix(".pdf"))).pages)).split())
-
-
-def test_the_report_prints_the_export_s_summary_and_adds_up_chosen_positions_as_python_does():
-    if not conftest.have_typst():
-        raise Skip("typst is not on the path")
-    here = _project("quantities_report")
-    found, _ = quantities.rows(_plans(), ROWS)
-    groups, totals = quantities.summary(found, "positions", positions=["T101", "T102", "A101"])
-    for lang, words in (("de", ("Ausmass", "Material", "Volumen")), ("fr", ("Métrés", "Matériau", "Volume")), ("en", ("Quantities", "Material", "Volume"))):
-        text = _text(here, '#show-plan-quantities(scope: "positions", positions: ("T101", "T102", "A101"))', lang)
-        assert all(w in text for w in words), (lang, text)
-    # the numbers Python gives, at the summary's decimals: what the report added up itself
-    for g in groups:
-        assert quantities.metres(g["length_m"]) in text and quantities.metres(g["volume_m3"], 3) in text, (g, text)
-    fichte = next(t for t in totals if t["material"] == "Fichte C24")
-    assert quantities.metres(fichte["length_m"]) in text and "Total" in text
-    assert "—" in text, "steel has no volume"
-    # one plan: the export's own summary
-    assert "4.00" in _text(here, '#show-plan-quantities(scope: "plans", plans: "OG", title: none)', "fr")
-    # a plan the export does not know is refused, naming the plans there are
-    import project
-    probe = here.typst_root / "probe-bad.typ"
-    probe.write_text('#import "/commands.typ": *\n#show-plan-quantities(scope: "plans", plans: "Nope")\n', encoding="utf-8")
-    out = subprocess.run([project.typst_executable(), "compile", "--root", str(here.typst_root), str(probe), str(probe.with_suffix(".pdf"))], capture_output=True, text=True, encoding="utf-8", errors="replace")
-    assert out.returncode != 0 and "EG, OG" in conftest.panic_message(out.stderr), out.stderr[:400]
 
 
 def test_a_sheet_carries_the_quantities_of_its_plans():
@@ -152,13 +129,13 @@ def test_a_sheet_carries_the_quantities_of_its_plans():
     import typst_objects as to
     here = _project("quantities_sheet")
     sheets.new_sheet(here)
-    oid = sheets.add_quantities(here, "B01", 20, 30, width=150, plans="EG")
+    oid = sheets.add_quantities(here, "B01", 20, 30, width=150)
     assert oid and sheets.model(here, "B01", oid).get("width") is not None
     ok, message = sheets.compile(here, "B01")
     assert ok, message
     from pypdf import PdfReader
     text = " ".join("\n".join(p.extract_text() for p in PdfReader(str(sheets.pdf(here, "B01"))).pages).split())
-    assert "Ausmass" in text and "BSP" in text and "Fichte C24" in text and "Total" in text, text   # the plan EG's own summary
+    assert "Ausmass" in text and "BSP" in text and "Fichte C24" in text and "Σ" in text, text   # the project's quantities file, its totals Σ (Q-015: the plans of a sheet's list are gone)
     assert isinstance(sheets.model(here, "B01", oid), to.QuantitiesModel)
 
 

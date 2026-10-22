@@ -234,6 +234,36 @@ def _include_lines(text):
     return found
 
 
+def section_files(here, mode):
+    """[(file, printed)] of document `mode`: each section file its structure names -- a CU's or a BP's structure.json, the report's `#include` lines --, from the document's folder, and whether the document prints it (its own `enabled` and its groups'). What `tree` lists of a document's files, without reading a heading of them: the graph of dependencies' (spec 2026-10-21-graphe-dependances, ARCH-RISK-1104), which reads every section at every export. [] where the structure cannot be read."""
+    if mode not in here.modes:
+        return []
+    if mode == "rs":
+        try:
+            text = typst_paths.read_text(here.document_typ("rs"))
+        except (OSError, UnicodeDecodeError):
+            return []
+        return [(f"{SECTIONS_DIR}/{include.name}", include.enabled) for include in _include_lines(text)]
+    try:
+        source = read(here.structure_file(mode))
+    except Exception:   # broad: a structure.json that cannot be read is the Structure tab's to say (StructureError)
+        return []
+    absolute = is_absolute(source)
+    out = []
+
+    def walk(nodes, active):
+        for entry in nodes:
+            printed = active and bool(entry.get("enabled", True))
+            if "children" in entry:
+                if absolute:
+                    out.append((group_file(entry["id"]), printed))
+                walk(entry["children"], printed)
+            elif entry.get("file"):
+                out.append((entry["file"], printed))
+    walk(source["sections"], True)
+    return out
+
+
 def _tree_report(here):
     """The report's tree: one node per `#include` line of the entry file, in order, each with the headings of its file; a heading the entry file carries itself stands among them. No nesting between files: the report keeps no structure beside its include lines, so what the tree shows of the order is the order there."""
     entry = here.document_typ("rs")

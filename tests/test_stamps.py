@@ -39,10 +39,10 @@ def _write(path, text):
 def _modes_project(name):
     """A project in three documents, small enough to compile in a fraction of a second.
 
-    The folders and entry files are `documents.layout_for("de")`'s; config.typ and commands.typ lie at its top; the export has one file, `_woodcore/data/project.json`, which commands.typ reads. Every document includes `Sections/intro.typ` of its own folder, the convention d'utilisation also sets a picture from Images/, so the three read different files.
+    The folders and entry files are those of a project laid out before the folders of issue #64 (`conftest.legacy_modes_layout`), whose names the checks below read as literals -- the layout by folders has a test of its own; config.typ and commands.typ lie at its top; the export has one file, `_woodcore/data/project.json`, which commands.typ reads. Every document includes `Sections/intro.typ` of its own folder, the convention d'utilisation also sets a picture from Images/, so the three read different files.
     """
     root = conftest.tmpdir(name)
-    here = project.write(root / "Synth.woodcore", "Synth", layout=documents.layout_for("de"))
+    here = project.write(root / "Synth.woodcore", "Synth", layout=conftest.legacy_modes_layout("de"))
     _write(here.config_typ, "#let conf(body) = {\n  set page(width: 10cm, height: 6cm, margin: 1cm)\n  body\n}\n")
     _write(here.commands_typ, '#let project-name() = json("/_woodcore/data/project.json").name\n#let hello(who) = [Hello #who]\n')
     _write(here.data_dir / "project.json", '{"name": "Synth"}\n')
@@ -576,3 +576,33 @@ def test_a_report_alone_is_stamped_like_the_three_documents():
     except project.ProjectError:
         return
     raise AssertionError("a report alone has no cu document")
+
+
+def test_a_project_laid_out_by_folders_is_stamped_from_its_folders():
+    """Issue #64: config.typ, commands.typ, references.bib and the form in 000-Typst-Config/, the export in 000-Woodcore/ -- read by every document --, and the sources and the archives in 000-Woodcore/ beside it, read by none: an enumerated stamp takes the first in and leaves the second out, by their paths and not by a folder's name (spec 2026-10-15 ARCH-RISK-A01)."""
+    _need_typst()
+    root = conftest.tmpdir("stamps-folders")
+    here = project.write(root / "Synth.woodcore", "Synth", layout=documents.layout_for("fr"))
+    here.ensure_folders()
+    _write(here.config_typ, "#let conf(body) = {\n  set page(width: 10cm, height: 6cm, margin: 1cm)\n  body\n}\n")
+    data = here.from_root(here.data_dir / "project.json")
+    _write(here.commands_typ, "#let project-name() = json(\"" + data + "\").name\n")
+    _write(here.data_dir / "project.json", '{"name": "Synth"}\n')
+    _write(here.references_bib, "% no entries\n")
+    _write(here.template_dir / "template.typ", "// the form\n")
+    _write(here.sources_dir / "positions.json", "{}\n")
+    _write(here.archives_dir / "old.zip", "zip")
+    _write(here.formulas_dir / "mine.typ", "Mine.\n")
+    head = "#import \"" + here.from_root(here.config_typ) + "\": conf\n#import \"" + here.from_root(here.commands_typ) + "\": *\n#show: conf\n"
+    _write(here.document_typ("cu"), head + "#project-name()\n#include \"" + here.from_root(here.formulas_dir / "mine.typ") + "\"\n")
+    stamp = _stamped(here, "cu", INPUT_LEVEL, deps=False)
+    assert stamp["inputs_from"] == "enumerated"
+    inputs = set(stamp["inputs"])
+    for path in (here.config_typ, here.commands_typ, here.references_bib, here.template_dir / "template.typ", here.data_dir / "project.json", here.formulas_dir / "mine.typ"):
+        assert _key(here, path) in inputs, _key(here, path)
+    assert not any(key.startswith(("000-Woodcore/sources/", "000-Woodcore/archives/")) for key in inputs), inputs
+    _is_unchanged(here, "cu", INPUT_LEVEL)
+    _write(here.archives_dir / "newer.zip", "zip")
+    _is_unchanged(here, "cu", INPUT_LEVEL)   # an archive written is no change of the document
+    with _Edited(here.commands_typ, append="// edited\n"):
+        assert _is_changed(here, "cu", "stamp_input_changed", INPUT_LEVEL).args["file"] == "000-Typst-Config/commands.typ"

@@ -5,19 +5,9 @@
 // woodcore:/object title
 // woodcore:shared sustainability-certification
 
-// woodcore:object doc-checklist certification-choice
-#doc-checklist(
-  label: [Certification or standard sought],
-  options: (
-    (id: "snbs", label: [SNBS Buildings (Swiss Sustainable Building Standard)], checked: false),
-    (id: "minergie", label: [Minergie], checked: false),
-    (id: "minergie-p", label: [Minergie-P], checked: false),
-    (id: "minergie-a", label: [Minergie-A], checked: false),
-    (id: "minergie-eco", label: [Minergie-ECO (supplement)], checked: false),
-    (id: "sia-2040", label: [SIA energy efficiency path (SIA 2040) and embodied energy (SIA 2032)], checked: false),
-    (id: "none", label: [No certification sought], checked: true),
-  ),
-)
+// woodcore:object text certification-choice
+*Certification or standard sought*:
+- *No certification sought*
 // woodcore:/object certification-choice
 
 // woodcore:object text p1

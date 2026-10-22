@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.5",
   "checks": {
     "BI-01": {
       "id": "BI-01",
@@ -43,7 +43,95 @@
       "M_z": {
         "value": 0.3,
         "unit": "kNm"
-      }
+      },
+      "vars": {
+        "b": {
+          "value": 100,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.3.1",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 200,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.3.1",
+          "source": "python:domains/member_check.py"
+        },
+        "M_y_d": {
+          "value": 4.5,
+          "unit": "kNm",
+          "symbol": "M_(y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.3.1",
+          "source": "python:domains/member_check.py"
+        },
+        "M_z_d": {
+          "value": 0.3,
+          "unit": "kNm",
+          "symbol": "M_(z,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.3.1",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 0.8,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_m_y_d": {
+          "value": 11.280000000000001,
+          "unit": "N/mm²",
+          "symbol": "f_(m,y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.3.1",
+          "source": "python:domains/member_check.py"
+        },
+        "f_m_z_d": {
+          "value": 11.280000000000001,
+          "unit": "N/mm²",
+          "symbol": "f_(m,z,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.3.1",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "bending",
+        "form": "(14)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Bending/BI-01.typ"
     },
     "BI-02": {
       "id": "BI-02",
@@ -84,7 +172,95 @@
         "value": 3,
         "unit": "kNm"
       },
-      "M_z": null
+      "M_z": null,
+      "vars": {
+        "b": {
+          "value": 100,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.2",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 200,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.2",
+          "source": "python:domains/member_check.py"
+        },
+        "M_y_d": {
+          "value": 3.0,
+          "unit": "kNm",
+          "symbol": "M_(y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.2",
+          "source": "python:domains/member_check.py"
+        },
+        "N_c_d": {
+          "value": 40.0,
+          "unit": "kN",
+          "symbol": "N_(c,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.2",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 0.8,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_m_y_d": {
+          "value": 11.280000000000001,
+          "unit": "N/mm²",
+          "symbol": "f_(m,y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.2",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_0_d_tab": {
+          "value": 12.4,
+          "unit": "N/mm²",
+          "symbol": "f_(c,0,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 8",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "bending",
+        "form": "(22)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Bending/BI-02.typ"
     },
     "BI-03": {
       "id": "BI-03",
@@ -125,7 +301,135 @@
         "value": 3,
         "unit": "kNm"
       },
-      "M_z": null
+      "M_z": null,
+      "vars": {
+        "b": {
+          "value": 120,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.1",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 280,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.1",
+          "source": "python:domains/member_check.py"
+        },
+        "M_y_d": {
+          "value": 3.0,
+          "unit": "kNm",
+          "symbol": "M_(y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.1",
+          "source": "python:domains/member_check.py"
+        },
+        "alpha": {
+          "value": 10,
+          "unit": "°",
+          "symbol": "alpha",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.1",
+          "source": "python:domains/member_check.py"
+        },
+        "N_t_d": {
+          "value": 25.0,
+          "unit": "kN",
+          "symbol": "N_(t,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.1",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 1",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "k_h_y": {
+          "value": 1.0791935024728683,
+          "unit": "",
+          "symbol": "k_(h,y)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.1",
+          "source": "python:domains/member_check.py"
+        },
+        "f_m_y_d": {
+          "value": 17.267096039565892,
+          "unit": "N/mm²",
+          "symbol": "f_(m,y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.4.1",
+          "source": "python:domains/member_check.py"
+        },
+        "f_t_0_d_tab": {
+          "value": 12.8,
+          "unit": "N/mm²",
+          "symbol": "f_(t,0,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 9",
+          "source": "python:domains/member_check.py"
+        },
+        "f_t_90_d_tab": {
+          "value": 0.15,
+          "unit": "N/mm²",
+          "symbol": "f_(t,90,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 9",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_90_d_tab": {
+          "value": 1.9,
+          "unit": "N/mm²",
+          "symbol": "f_(c,90,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 9",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "bending",
+        "form": "(21), (9), (19), (20)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Bending/BI-03.typ"
     },
     "DR-01": {
       "id": "DR-01",
@@ -161,7 +465,95 @@
       "f_c_90_table": 1.8,
       "calculable": true,
       "reason": "",
-      "warnings": []
+      "warnings": [],
+      "vars": {
+        "b": {
+          "value": 100,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.2.2",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 200,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.2.2",
+          "source": "python:domains/member_check.py"
+        },
+        "l_c": {
+          "value": 120,
+          "unit": "mm",
+          "symbol": "l",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.2.2",
+          "source": "python:domains/member_check.py"
+        },
+        "w_c": {
+          "value": 100,
+          "unit": "mm",
+          "symbol": "w",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.2.2",
+          "source": "python:domains/member_check.py"
+        },
+        "F_c_d": {
+          "value": 16.0,
+          "unit": "kN",
+          "symbol": "F_(c,90,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.2.2",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 0.8,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_90_d_tab": {
+          "value": 1.8,
+          "unit": "N/mm²",
+          "symbol": "f_(c,90,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 8",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "compression",
+        "form": "(11)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Compression/DR-01.typ"
     },
     "DR-02": {
       "id": "DR-02",
@@ -197,7 +589,75 @@
       "f_c_90_table": null,
       "calculable": true,
       "reason": "",
-      "warnings": []
+      "warnings": [],
+      "vars": {
+        "b": {
+          "value": 140,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.2.1",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 140,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.2.1",
+          "source": "python:domains/member_check.py"
+        },
+        "N_c_d": {
+          "value": 60.0,
+          "unit": "kN",
+          "symbol": "N_(c,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.2.1",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 1",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_0_d_tab": {
+          "value": 16.0,
+          "unit": "N/mm²",
+          "symbol": "f_(c,0,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 9",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "compression",
+        "form": "(10)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Compression/DR-02.typ"
     },
     "FE-01": {
       "id": "FE-01",
@@ -254,6 +714,10 @@
           "norm_ref": "3.7.1",
           "exemption": null
         },
+        "required": {
+          "norm": "VKF 15-15",
+          "norm_ref": "Tabelle 2"
+        },
         "sides": [
           "bottom",
           "left",
@@ -265,7 +729,115 @@
         "d_ef": 55.0,
         "b": 30.0,
         "h": 145.0
-      }
+      },
+      "vars": {
+        "b_0": {
+          "value": 140,
+          "unit": "mm",
+          "symbol": "b_0",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.3.1",
+          "source": "python:domains/member_check.py"
+        },
+        "h_0": {
+          "value": 200,
+          "unit": "mm",
+          "symbol": "h_0",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.3.1",
+          "source": "python:domains/member_check.py"
+        },
+        "t_fi": {
+          "value": 60,
+          "unit": "min",
+          "symbol": "t",
+          "label": "R60",
+          "description": null,
+          "norm": "VKF 15-15",
+          "norm_ref": "Tabelle 2",
+          "source": "python:domains/member_check.py"
+        },
+        "beta_n": {
+          "value": 0.8,
+          "unit": "mm/min",
+          "symbol": "beta_n",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 13",
+          "source": "python:domains/member_check.py"
+        },
+        "d_red": {
+          "value": 7,
+          "unit": "mm",
+          "symbol": "d_(red)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.5.2.2",
+          "source": "python:domains/member_check.py"
+        },
+        "k_fi": {
+          "value": 1.8,
+          "unit": "",
+          "symbol": "k_(fi)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.5.2.5",
+          "source": "python:domains/member_check.py"
+        },
+        "M_y_d": {
+          "value": 2.0,
+          "unit": "kNm",
+          "symbol": "M_(y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.3.1",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 1",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_m_y_d": {
+          "value": 25.38,
+          "unit": "N/mm²",
+          "symbol": "f_(m,y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.3.1",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "bending",
+        "form": "(14)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Bending/FE-01.typ"
     },
     "FE-02": {
       "id": "FE-02",
@@ -321,6 +893,7 @@
           "norm_ref": "3.7.1",
           "exemption": null
         },
+        "required": null,
         "sides": [
           "bottom",
           "top",
@@ -333,7 +906,195 @@
         "d_ef": 22.0,
         "b": 96.0,
         "h": 196.0
-      }
+      },
+      "vars": {
+        "b_0": {
+          "value": 140,
+          "unit": "mm",
+          "symbol": "b_0",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "h_0": {
+          "value": 240,
+          "unit": "mm",
+          "symbol": "h_0",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "t_fi": {
+          "value": 30,
+          "unit": "min",
+          "symbol": "t",
+          "label": "R30",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.5.2",
+          "source": "python:domains/member_check.py"
+        },
+        "beta_n": {
+          "value": 0.5,
+          "unit": "mm/min",
+          "symbol": "beta_n",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 13",
+          "source": "python:domains/member_check.py"
+        },
+        "d_red": {
+          "value": 7,
+          "unit": "mm",
+          "symbol": "d_(red)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.5.2.2",
+          "source": "python:domains/member_check.py"
+        },
+        "k_fi": {
+          "value": 1.8,
+          "unit": "",
+          "symbol": "k_(fi)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.5.2.5",
+          "source": "python:domains/member_check.py"
+        },
+        "i_y": {
+          "value": 56.58032638058333,
+          "unit": "mm",
+          "symbol": "i_y",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "i_z": {
+          "value": 27.71281292110204,
+          "unit": "mm",
+          "symbol": "i_z",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w_E": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_(w,E)",
+          "label": "Feuchteklasse 1",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_0_k": {
+          "value": 24,
+          "unit": "N/mm²",
+          "symbol": "f_(c,0,k)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "E_0_05": {
+          "value": 9200.0,
+          "unit": "N/mm²",
+          "symbol": "E_(0,05)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "N_c_d": {
+          "value": 185.0,
+          "unit": "kN",
+          "symbol": "N_(c,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 1",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_0_d_tab": {
+          "value": 14.1,
+          "unit": "N/mm²",
+          "symbol": "f_(c,0,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 8",
+          "source": "python:domains/member_check.py"
+        },
+        "beta_c": {
+          "value": 0.2,
+          "unit": "",
+          "symbol": "beta_c",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "l_k_y": {
+          "value": 2400,
+          "unit": "mm",
+          "symbol": "l_(k,y)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "l_k_z": {
+          "value": 2400,
+          "unit": "mm",
+          "symbol": "l_(k,z)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "buckling",
+        "form": "(10), (29)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Buckling/FE-02.typ"
     },
     "KI-01": {
       "id": "KI-01",
@@ -380,7 +1141,155 @@
       "l_y": null,
       "l_z": null,
       "beta_y": 1,
-      "beta_z": 1
+      "beta_z": 1,
+      "vars": {
+        "b": {
+          "value": 100,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 200,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "M_y_d": {
+          "value": 4.5,
+          "unit": "kNm",
+          "symbol": "M_(y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 0.8,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_m_y_d": {
+          "value": 11.280000000000001,
+          "unit": "N/mm²",
+          "symbol": "f_(m,y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "i_y": {
+          "value": 57.73502691896258,
+          "unit": "mm",
+          "symbol": "i_y",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "i_z": {
+          "value": 28.86751345948129,
+          "unit": "mm",
+          "symbol": "i_z",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w_E": {
+          "value": 0.9,
+          "unit": "",
+          "symbol": "eta_(w,E)",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_0_k": {
+          "value": 21,
+          "unit": "N/mm²",
+          "symbol": "f_(c,0,k)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "E_0_05": {
+          "value": 6660.0,
+          "unit": "N/mm²",
+          "symbol": "E_(0,05)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "a": {
+          "value": 3000,
+          "unit": "mm",
+          "symbol": "a",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "f_m_k": {
+          "value": 24,
+          "unit": "N/mm²",
+          "symbol": "f_(m,k)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        },
+        "k_m": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "k_m",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.9",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "lateral-torsional",
+        "form": "(38)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Lateral-torsional/KI-01.typ"
     },
     "KI-02": {
       "id": "KI-02",
@@ -427,7 +1336,205 @@
       "l_y": 4000,
       "l_z": 2500,
       "beta_y": 1,
-      "beta_z": 1
+      "beta_z": 1,
+      "vars": {
+        "b": {
+          "value": 100,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 200,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "M_y_d": {
+          "value": 3.0,
+          "unit": "kNm",
+          "symbol": "M_(y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "N_c_d": {
+          "value": 12.0,
+          "unit": "kN",
+          "symbol": "N_(c,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 0.8,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_m_y_d": {
+          "value": 11.280000000000001,
+          "unit": "N/mm²",
+          "symbol": "f_(m,y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_0_d_tab": {
+          "value": 12.4,
+          "unit": "N/mm²",
+          "symbol": "f_(c,0,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 8",
+          "source": "python:domains/member_check.py"
+        },
+        "i_y": {
+          "value": 57.73502691896258,
+          "unit": "mm",
+          "symbol": "i_y",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "i_z": {
+          "value": 28.86751345948129,
+          "unit": "mm",
+          "symbol": "i_z",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w_E": {
+          "value": 0.9,
+          "unit": "",
+          "symbol": "eta_(w,E)",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_0_k": {
+          "value": 21,
+          "unit": "N/mm²",
+          "symbol": "f_(c,0,k)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "E_0_05": {
+          "value": 6660.0,
+          "unit": "N/mm²",
+          "symbol": "E_(0,05)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "a": {
+          "value": 2500,
+          "unit": "mm",
+          "symbol": "a",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "f_m_k": {
+          "value": 24,
+          "unit": "N/mm²",
+          "symbol": "f_(m,k)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "k_m": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "k_m",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "beta_c": {
+          "value": 0.2,
+          "unit": "",
+          "symbol": "beta_c",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "l_k_y": {
+          "value": 4000,
+          "unit": "mm",
+          "symbol": "l_(k,y)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        },
+        "l_k_z": {
+          "value": 2500,
+          "unit": "mm",
+          "symbol": "l_(k,z)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8.5",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "lateral-torsional",
+        "form": "(22), (37)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Lateral-torsional/KI-02.typ"
     },
     "KN-01": {
       "id": "KN-01",
@@ -467,7 +1574,155 @@
       "l_y": 3000,
       "l_z": 3000,
       "beta_y": 1,
-      "beta_z": 1
+      "beta_z": 1,
+      "vars": {
+        "b": {
+          "value": 100,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 200,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "i_y": {
+          "value": 57.73502691896258,
+          "unit": "mm",
+          "symbol": "i_y",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "i_z": {
+          "value": 28.86751345948129,
+          "unit": "mm",
+          "symbol": "i_z",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w_E": {
+          "value": 0.9,
+          "unit": "",
+          "symbol": "eta_(w,E)",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_0_k": {
+          "value": 21,
+          "unit": "N/mm²",
+          "symbol": "f_(c,0,k)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "E_0_05": {
+          "value": 6660.0,
+          "unit": "N/mm²",
+          "symbol": "E_(0,05)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "N_c_d": {
+          "value": 40.0,
+          "unit": "kN",
+          "symbol": "N_(c,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 0.8,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_c_0_d_tab": {
+          "value": 12.4,
+          "unit": "N/mm²",
+          "symbol": "f_(c,0,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 8",
+          "source": "python:domains/member_check.py"
+        },
+        "beta_c": {
+          "value": 0.2,
+          "unit": "",
+          "symbol": "beta_c",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "l_k_y": {
+          "value": 3000,
+          "unit": "mm",
+          "symbol": "l_(k,y)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        },
+        "l_k_z": {
+          "value": 3000,
+          "unit": "mm",
+          "symbol": "l_(k,z)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.8",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "buckling",
+        "form": "(10), (29)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Buckling/KN-01.typ"
     },
     "SC-01": {
       "id": "SC-01",
@@ -509,7 +1764,85 @@
         "value": 2,
         "unit": "kN"
       },
-      "pith": false
+      "pith": false,
+      "vars": {
+        "b": {
+          "value": 100,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.5.1",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 200,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.5.1",
+          "source": "python:domains/member_check.py"
+        },
+        "V_z_d": {
+          "value": 12.0,
+          "unit": "kN",
+          "symbol": "V_(z,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.5.1",
+          "source": "python:domains/member_check.py"
+        },
+        "V_y_d": {
+          "value": 2.0,
+          "unit": "kN",
+          "symbol": "V_(y,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.5.1",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 0.8,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_v_d_tab": {
+          "value": 1.5,
+          "unit": "N/mm²",
+          "symbol": "f_(v,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 8",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "shear",
+        "form": "(23)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Shear/SC-01.typ"
     },
     "ZT-01": {
       "id": "ZT-01",
@@ -545,7 +1878,75 @@
       "f_c_90_table": null,
       "calculable": true,
       "reason": "",
-      "warnings": []
+      "warnings": [],
+      "vars": {
+        "b": {
+          "value": 100,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.1.1",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 200,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.1.1",
+          "source": "python:domains/member_check.py"
+        },
+        "N_t_d": {
+          "value": 25.0,
+          "unit": "kN",
+          "symbol": "N_(t,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.1.1",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 0.8,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 2",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_t_0_d_tab": {
+          "value": 8.5,
+          "unit": "N/mm²",
+          "symbol": "f_(t,0,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 8",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "tension",
+        "form": "(6)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Tension/ZT-01.typ"
     },
     "ZT-02": {
       "id": "ZT-02",
@@ -581,7 +1982,95 @@
       "f_c_90_table": null,
       "calculable": true,
       "reason": "",
-      "warnings": []
+      "warnings": [],
+      "vars": {
+        "b": {
+          "value": 120,
+          "unit": "mm",
+          "symbol": "b",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.1.3",
+          "source": "python:domains/member_check.py"
+        },
+        "h": {
+          "value": 240,
+          "unit": "mm",
+          "symbol": "h",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.1.3",
+          "source": "python:domains/member_check.py"
+        },
+        "N_t_d": {
+          "value": 20.0,
+          "unit": "kN",
+          "symbol": "N_(t,d)",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.1.3",
+          "source": "python:domains/member_check.py"
+        },
+        "alpha": {
+          "value": 10,
+          "unit": "°",
+          "symbol": "alpha",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "4.2.1.3",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_w": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_w",
+          "label": "Feuchteklasse 1",
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 4",
+          "source": "python:domains/member_check.py"
+        },
+        "eta_t": {
+          "value": 1.0,
+          "unit": "",
+          "symbol": "eta_t",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "2.2.6",
+          "source": "python:domains/member_check.py"
+        },
+        "f_t_0_d_tab": {
+          "value": 12.8,
+          "unit": "N/mm²",
+          "symbol": "f_(t,0,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 9",
+          "source": "python:domains/member_check.py"
+        },
+        "f_t_90_d_tab": {
+          "value": 0.15,
+          "unit": "N/mm²",
+          "symbol": "f_(t,90,d,\"Tab\")",
+          "label": null,
+          "description": null,
+          "norm": "SIA 265",
+          "norm_ref": "Tabelle 9",
+          "source": "python:domains/member_check.py"
+        }
+      },
+      "gen": {
+        "kind": "tension",
+        "form": "(8)/(9)",
+        "version": 2
+      },
+      "file": "/Timber-checks/Tension/ZT-02.typ"
     }
   }
 }

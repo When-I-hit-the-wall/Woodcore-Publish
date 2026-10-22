@@ -277,3 +277,45 @@ def test_copy_all_joins_the_notices_and_names_the_context_once():
     b = notifications.Notice("typst_error", notifications.CRITICAL, "b")
     text = notifications.copy_all([a, b], "fr", {"Woodcore": "0.117"})
     assert text.count("Woodcore: 0.117") == 1 and text.count("[critical]") == 2, text
+
+
+def test_the_window_tells_each_removal_with_its_file_and_line():
+    """What `commands_migrate.removals` finds when a project is opened becomes one warning each in the window, in its three languages, offering to open the file at its line (spec 2026-10-21-commandes-typst-refonte, REQ-020)."""
+    _qt()
+    import notices_ui
+    here = conftest.project_copy("commands_migrate_notices", data=True)
+    path = here.typst_root / "Kept.typ"
+    store = notifications.Store()
+    original = notifications.STORE
+    try:
+        notifications.STORE = store
+        notices_ui.tell_removed_commands([(path, 4, "#show-plan-legend", "write #show-plan(plan, legend: true)")], here)
+    finally:
+        notifications.STORE = original
+    kept = list(store.items())
+    assert len(kept) == 1, kept
+    notice = kept[0]
+    assert notice.severity == notifications.WARNING and notice.line == 4 and notice.file == str(path) and notice.key == "notice_command_removed", notice
+    for lang in ("fr", "de", "en"):
+        sentence = notices_ui.STRINGS[lang]["notice_command_removed"]
+        assert all("{" + hole + "}" in sentence for hole in ("file", "line", "name", "hint")), (lang, sentence)
+
+
+def test_the_window_tells_each_unit_without_its_scope():
+    """A `#unit` without `scope:` reaches only the next answer since the spec 2026-10-21-commandes-typst-refonte (CON-007): one warning each when the project is opened, in its three languages."""
+    _qt()
+    import notices_ui
+    here = conftest.project_copy("commands_migrate_unit_notices", data=True)
+    path = here.typst_root / "Units.typ"
+    store = notifications.Store()
+    original = notifications.STORE
+    try:
+        notifications.STORE = store
+        notices_ui.tell_unscoped_units([(path, 2)], here)
+    finally:
+        notifications.STORE = original
+    kept = list(store.items())
+    assert len(kept) == 1 and kept[0].line == 2 and kept[0].key == "notice_unit_scope", kept
+    for lang in ("fr", "de", "en"):
+        sentence = notices_ui.STRINGS[lang]["notice_unit_scope"]
+        assert "{file}" in sentence and "{line}" in sentence and "scope:" in sentence, (lang, sentence)

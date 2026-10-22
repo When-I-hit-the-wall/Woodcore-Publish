@@ -1,9 +1,8 @@
 """StaticsTab's building -- the list, the four tables and their columns, the tool bar and its buttons, the canvas, the right pane -- a mixin of methods moved verbatim out of calc/tools/statics_tab.py (issue #30). StaticsTab names it among its bases.
 """
 
-from PySide6.QtCore import QByteArray, QRectF, Qt
-from PySide6.QtGui import QColor, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QButtonGroup, QCheckBox, QComboBox, QDoubleSpinBox, QGridLayout,
     QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPlainTextEdit,
@@ -22,9 +21,10 @@ from domains import statics as model
 from domains import statics_svg
 import flowbar
 from flowbar import (BAR_SPACING, TOOL_ICON_PX, FlowLayout, FlowWidget, ResizableColumns, ToolBarArea,
-                     pixel_ratio, set_tip, size_tool, symbol_px, tool_group)
+                     set_tip, size_tool, symbol_px, tool_group)
 from statics_tab_words import HINTS, STRINGS, TIPS, hint_key, tip_key  # split out of this module (issue #30): every name it had is still importable from it
 from statics_canvas import TOOLS, StaticsCanvas
+import svg_icons
 
 
 # The four words the engineer uses for an articulation, the (dof, spring) each stands for, and the tool that draws it. A translational spring is not here: it is a member of kind 'spring'.
@@ -105,31 +105,7 @@ def svg_icon(tool, size=ICON_PX, ink=None, ground=None):
         svg = MEMBER_ICONS.get(tool) or statics_svg.swatch(tool)
     except KeyError:
         return QIcon()
-    if ink is not None or ground is not None:
-        # through a sentinel, so that an ink written as white is not then painted away by the fill's own substitution
-        svg = svg.replace(SWATCH_INK, "#000001").replace(SWATCH_FILL, "#000002")
-        svg = svg.replace("#000001", ink or SWATCH_INK).replace("#000002", ground or SWATCH_FILL)
-    renderer = QSvgRenderer(QByteArray(svg.encode("utf-8")))
-    box = renderer.viewBoxF()
-    if box.width() <= 0 or box.height() <= 0:
-        return QIcon()
-    scale = min(size / box.width(), size / box.height())
-    w, h = box.width() * scale, box.height() * scale
-    pix = _canvas(size)
-    painter = QPainter(pix)
-    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    renderer.render(painter, QRectF((size - w) / 2, (size - h) / 2, w, h))
-    painter.end()
-    return QIcon(pix)
-
-
-def _canvas(size):
-    """A clear pixmap `size` logical pixels square, at the screen's own pixel ratio (flowbar.pixel_ratio), so a symbol is drawn sharp on a scaled display."""
-    ratio = pixel_ratio()
-    pix = QPixmap(round(size * ratio), round(size * ratio))
-    pix.setDevicePixelRatio(ratio)
-    pix.fill(QColor(0, 0, 0, 0))
-    return pix
+    return svg_icons.svg_icon(svg_icons.recolour(svg, SWATCH_INK, SWATCH_FILL, ink, ground), size, fit=True)
 
 
 def _as_number(text):
@@ -258,31 +234,6 @@ class StaticsBuildMixin:
     def note(self, text):
         """An explanation, muted and wrapping, as a card's note is (cards.note)."""
         return cards.note(text)
-
-    def build_list(self):
-        panel = QWidget()
-        box = QVBoxLayout(panel)
-        box.setContentsMargins(0, 0, 6, 0)
-        self.list = grouped_list.GroupedList(STRINGS.get(self.app.lang, STRINGS["fr"]), lang=self.app.lang)
-        self.archive = source_archive.Actions(self, lambda: project.current().statics_dir, self.export_models, lambda select: self.reload_list(select), self.load_first)
-        self.archive.connect()
-        box.addWidget(grouped_list.title_row(self.heading(self.t("st_list")), self.list))
-        self.list.setIconSize(self.app.mark_size)
-        self.list.currentIdChanged.connect(self.on_list_change)
-        self.list.moved.connect(self.on_moved)
-        self.list.foldersChanged.connect(self.on_folders_changed)
-        self.list.attach_order("tab_statics", self.app.list_store)   # the order the engineer gives the list by drag and drop, kept in Woodcore-Datei/lists.json (calc/list_order.py, issue #15)
-        self.list.reordered.connect(lambda: self.reload_list(select=self.current_id))
-        box.addWidget(self.list, 1)
-        self.empty_hint = self.note(self.t("st_empty"))
-        box.addWidget(self.empty_hint)
-        row = QHBoxLayout()
-        for key, slot in (("st_new", self.new), ("st_duplicate", self.duplicate), ("st_delete", self.delete)):
-            button = QPushButton(self.t(key))
-            button.clicked.connect(slot)
-            row.addWidget(button)
-        box.addLayout(row)
-        return panel
 
     def build_tables(self):
         """The four lists, under the drawing where they are as wide as it is."""

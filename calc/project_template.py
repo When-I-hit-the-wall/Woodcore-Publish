@@ -30,7 +30,7 @@ def file_name(name):
 
 
 def create(folder, name, template=None, document_language=None, report_language=None, report_folder=None,
-           folders=None, document_templates=None, style=None, form=None, **details):
+           folders=None, document_templates=None, style=None, form=None, make=None, **details):
     """Makes `folder` a new project named `name`, laid out in three documents, `details` any of project.DETAILS, from `template` -- a calc/templates.py Template or the reference of one (`user:Holzbau`), Standard where none is given (v0.94) -- its form `form` and its three contents `document_templates`. The folder must be empty or not exist yet. Returns the Project.
 
     **The three folders** are `folders` -- {mode: folder}, or three names in project.MODES' order, a name left out or empty taking what `templates.folders_offered` offers: calc/documents.py's for the project's language (MODE_FOLDERS), or a template's own where it names them. `report_folder` names the report's alone, as «Nouveau projet» and `woodcore-cli new --report-folder` have since v0.100, and must not contradict `folders`. Each is checked, and the three must differ, **before anything is created** (documents.modes_layout), so a refused name leaves nothing behind.
@@ -42,6 +42,8 @@ def create(folder, name, template=None, document_language=None, report_language=
     **When a form is applied.** For Standard always, the default one where none is asked for: the skeleton's own config.typ and title.typ are put aside first, being nothing but a stand-in for the form's. For another template of the engineer's, **only where one is asked for**: its config.typ and its title page are its own look and are left as they are otherwise, a form given explicitly replacing them (put aside before, so that nothing is archived in a project that is not yet there ; a config.typ already in the new format, which holds the engineer's adjustments, is kept, as forms.apply keeps it) -- so a template saved before forms makes the project it always made, and one saved since, carrying its own `Template/`, makes one with that form.
 
     **The contents** are `document_templates`, {mode: DocTemplate or reference}, else each mode's builtin standard one (doc_templates.default_ref). The convention d'utilisation and the base de projet are made from theirs for a report-shaped template (a documents-shaped one carries its own); **the report** (`rs`) is made from `templates/documents/rs/` for Standard, and for another template only where `document_templates` names one -- the template's own entry file and `Sections/` are then left out. A DocTemplate is taken as it is, so one of the office's -- whose place lies in a folder the settings name -- needs no settings file to be found again. Once both documents are there their sharing is settled from the tags (doc_templates.settle_sharing), whichever templates they came from.
+
+    **The documents made now** are `make`, some of project.MODES, all three where none is given (issue #90): a project made with `make=()` -- the skeleton «Nouveau projet» makes since 0.122, `create_skeleton` -- states its three folders and its language, its form and its title page, and holds no document yet; each is made later by `create_document`. The content template each document was made from is written into the project file (`content_templates`, issue #88).
 
     The people are the ones given, the callers filling them from the template (templates.people_for). A creation that fails takes away everything it wrote -- the folder was empty -- and raises a ProjectError.
     """
@@ -73,12 +75,14 @@ def create(folder, name, template=None, document_language=None, report_language=
     # ⚠️ Everything is checked **before** anything is created (templates.check_report_folder, v0.100): refused after the copy, it left a half-copied project behind, and the next attempt then failed on «is not empty» instead of on the name.
     layout = _layout(template, _wanted_folders(template, language, report_folder, folders), language)
     file = folder / file_name(name.strip())
-    project.Project(file, {"schema_version": project.SCHEMA_VERSION, "format": project.FORMAT, "name": name.strip(), "layout": layout})
+    project.Project(file, {"schema_version": project.schema_version_for(layout), "format": project.FORMAT, "name": name.strip(), "layout": layout})
     _check_names(template, layout, file)
     made_from = {} if template.has_modes else {
         mode: _document_template(mode, language, (document_templates or {}).get(mode)) for mode in DOCUMENTS_BESIDE}
     if use_rs:
         made_from["rs"] = _document_template("rs", language, (document_templates or {}).get("rs"))
+    if make is not None:
+        made_from = {mode: found for mode, found in made_from.items() if mode in make}
     made = not folder.exists()
     try:
         folder.mkdir(parents=True, exist_ok=True)
@@ -97,30 +101,81 @@ def create(folder, name, template=None, document_language=None, report_language=
             try:
                 # `siblings`: the documents this project has besides this one, so that a section a template shares with a document the project does not have is not shared
                 doc_templates.instantiate(mode, language, here.document_dir(mode), entry_name=here.document_typ(mode).name, template=doc_template,
-                                          siblings=tuple(other for other in here.modes if other != mode))
+                                          siblings=tuple(other for other in here.modes if other != mode and (make is None or other in make)))
             except doc_templates.DocTemplateError as exc:
                 raise project.ProjectError(str(exc)) from None
         if chosen is not None:
             _drop_look(here)
             forms.apply(here, chosen)   # before the languages are written, so that the language the project has now is written into the config.typ the form leaves
-        if all(mode in here.modes for mode in DOCUMENTS_BESIDE):
+        if all(mode in here.modes and (make is None or mode in make) for mode in DOCUMENTS_BESIDE):
             # Both documents are there: every `shared_with` is written again from the tags the files carry (the tags are the truth), so that a convention d'utilisation of the engineer's combined with a base de projet that lacks a section it shares keeps no flag saying it is shared with nothing (doc_templates.settle_sharing)
             doc_templates.settle_sharing(here)
+        # laid out by folders, what the content templates and the template's own files name at the root -- `/commands.typ`, `/title.typ`, `/Template/…`, `project: "references.bib"` -- named where 000-Typst-Config/ keeps it (issue #64; nothing for a project laid out before)
+        documents.relocate_config_paths(here, [path for path in sorted(folder.rglob("*.typ")) if not project._is_within(path, here.generated_dir)])
         templates.write_project_languages(here.config_typ, [here.document_typ(mode) for mode in here.modes], document_language, engine_language)
         for path in (here.images_dir, here.archives_dir, *(here.sources_dir / sub for sub in project.SOURCE_FOLDERS)):
             path.mkdir(parents=True, exist_ok=True)
+        here.ensure_folders()   # every folder of a project laid out by folders, the domains' and the drawing tabs' among them, empty ones included (REQ-011)
         # the project's positions, none yet: Woodcore's own file, which the Positions tab fills (calc/positions_store.py, v0.114) -- no Positionen.xlsx is made any more
         import positions_store
         if not positions_store.path(here).exists():
             positions_store.write(here, [])
         import export_all
         export_all.seed(here)       # and the export of a project holding nothing yet -- the journals of the three documents among it -- so every document compiles from the moment the project exists and not from its first export, which needs a load workbook (v0.86.1)
+        if made_from:
+            here = project.update(here.file, **{project.CONTENT_TEMPLATES_KEY: {mode: found.ref for mode, found in made_from.items()}})
     except BaseException as exc:
         _undo(folder, made)
         if isinstance(exc, validation.ValidationError) and not isinstance(exc, project.ProjectError):
             raise project.ProjectError(str(exc)) from exc
         raise
     return here
+
+
+def create_skeleton(folder, name, language, form=None, **details):
+    """A new project as «Nouveau projet» makes it since 0.122 (issue #90, the engineer, 21.10.2026: «La fenêtre qui s'ouvre pour créer le nouveau projet doit uniquement demander le nom du projet […] ainsi que l'endroit»): Standard laid out in three documents, in `language` -- chosen once, in the dialog, and never changed --, its form (`form`, else the settings' default), its title page `details` and no document. Each document is made later from the «Projet» tab, `create_document`. Returns the Project."""
+    return create(folder, name, document_language=language, report_language=language, form=form, make=(), **details)
+
+
+def create_document(here, mode, template=None):
+    """Document `mode` of project `here` made from content template `template` (a DocTemplate or its reference; the builtin standard one where none is given), in the project's language, into its folder (issue #90: «lorsqu'un template de fond est choisi et validé, eh bien le document TYPST est créé dans le dossier correspondant et le template de fond ne peut plus être modifié»).
+
+    Made as `create` makes it: the template's language folder copied in, its entry named as the project file says, sharing kept only with the documents already there and settled once both the convention d'utilisation and the base de projet are, the report language of the documents there (else the project's) written into its entry, its own journal and the export's files a document reads seeded, and the template's reference written into the project file (`content_templates`). Refused, with nothing written, for a project laid out as a report alone, a document that is there already, or a template that does not exist in the project's language. A failure after the copy takes away what was written. Returns the Project as it now stands."""
+    import doc_templates
+    import documents
+    import export_all
+    import templates
+    if not here.has_modes:
+        raise project.ProjectError(f"{here.file.name}: a project laid out as a report alone has its one document")
+    here._document(mode)
+    if here.is_created(mode):
+        raise project.ProjectError(f"{here.rel(here.document_typ(mode))} is there already -- a document's content template is chosen once")
+    language = templates.project_language(here, fallback="")
+    if language not in templates.LANGUAGES:
+        raise project.ProjectError(f"{here.file.name}: the project states no language -- its config.typ has no doc-lang")
+    found = _document_template(mode, language, template)
+    created = here.created_modes
+    folder = here.document_dir(mode)
+    was_there = folder.exists() and any(folder.iterdir())
+    if was_there:
+        raise project.ProjectError(f"{here.rel(folder)} holds files already -- a document is made in an empty folder")
+    try:
+        try:
+            entry = doc_templates.instantiate(mode, language, folder, entry_name=here.document_typ(mode).name, template=found,
+                                              siblings=tuple(other for other in created if other != mode))
+        except doc_templates.DocTemplateError as exc:
+            raise project.ProjectError(str(exc)) from None
+        documents.relocate_config_paths(here, sorted(folder.rglob("*.typ")))
+        reports = [templates.read_languages(here.document_typ(other))[1] for other in created]
+        report = next((lang for lang in reports if lang in templates.LANGUAGES), language)
+        templates.write_project_languages(here.config_typ, [entry], None, report)
+        if all(here.is_created(other) for other in DOCUMENTS_BESIDE):
+            doc_templates.settle_sharing(here)
+        export_all.seed(here)   # the new document's own journal file, and data/domain-files.json listing it
+        return project.set_content_template(here, mode, found.ref)
+    except BaseException:
+        remove_tree(folder)
+        raise
 
 
 def standard_title():
@@ -241,6 +296,8 @@ def _layout(template, wanted, language):
     layout = documents.modes_layout(wanted, entries)
     moved = [(PurePosixPath(template.document_folder(mode)), PurePosixPath(layout[project.ENTRY_KEYS[mode]]).parent) for mode in template.modes]
     for key in kept:
+        if not template.has_modes and template.layout.get(key) == project.DEFAULT_LAYOUT.get(key):
+            continue   # a report-shaped template left to the default keeps nothing of its own: the sources and the archives go where a new project keeps them, inside 000-Woodcore/ (issue #64)
         value = PurePosixPath(str(template.layout[key]).replace("\\", "/"))
         for was, now in moved:
             if value == was or was in value.parents:
@@ -257,7 +314,7 @@ def _check_names(template, layout, file):
     away = {PurePosixPath(template.document_folder(mode)) for mode in template.modes}
     away = {path.parts[0].casefold() for path in away if len(path.parts) == 1}
     staying = {p.name.casefold(): p.name for p in template.folder.iterdir() if p.name != templates.FILE and p.name.casefold() not in away}
-    shared = {PurePosixPath(layout[key]).parts[0] for key in ("generated", "images", "sources", "archives")}
+    shared = {PurePosixPath(layout[key]).parts[0] for key in ("generated", "images", "sources", "archives", *project.FOLDER_KEYS) if key in layout}
     shared |= {project.CONFIG_FILE, project.COMMANDS_FILE, project.REFERENCES_FILE, project.TITLE_FILE, project.TEMPLATE_FOLDER, file.name}
     shared = {name.casefold(): name for name in shared}
     for mode in project.MODES:
@@ -270,9 +327,18 @@ def _check_names(template, layout, file):
     if not template.has_modes:
         old = template.folder / template.document_folder("rs")
         for part, key in _shared_parts(template, layout):
-            target = PurePosixPath(layout[key] if key else part).parts[0]
+            target = PurePosixPath(layout[key] if key else _config_part(layout, part)).parts[0]
             if (old / part).exists() and target.casefold() in staying:
                 raise project.ProjectError(f"the template carries {staying[target.casefold()]!r} at its top, where the report's {part} goes in a project of three documents")
+
+
+# What configures the documents, which a project laid out by folders keeps in 000-Typst-Config/ (`layout.config`, issue #64) and every one laid out before at the top of its Typst root.
+CONFIG_PARTS = (project.CONFIG_FILE, project.COMMANDS_FILE, project.REFERENCES_FILE, project.TITLE_FILE, project.TEMPLATE_FOLDER)
+
+
+def _config_part(layout, part):
+    """Where `part` of CONFIG_PARTS lies in a project of `layout`, from its folder: in the configuration's folder laid out by folders, at the top before."""
+    return (PurePosixPath(layout["config"]) / part).as_posix() if "config" in layout else part
 
 
 def _shared_parts(template, layout):
@@ -281,7 +347,8 @@ def _shared_parts(template, layout):
     try:
         generated = PurePosixPath(str(template.layout["generated"]).replace("\\", "/")).relative_to(report).as_posix()
     except ValueError:
-        generated = "_woodcore"
+        import documents
+        generated = documents.LEGACY_GENERATED_FOLDER
     return [(project.CONFIG_FILE, None), (project.COMMANDS_FILE, None), (project.REFERENCES_FILE, None), (project.TITLE_FILE, None),
             (project.TEMPLATE_FOLDER, None), (project.IMAGES_FOLDER, "images"), (generated, "generated")]
 
@@ -299,11 +366,16 @@ def _copy_skeleton(folder, template, layout):
     if template.has_modes:
         for mode in project.MODES:
             placed[source / template.document_folder(mode)] = folder / PurePosixPath(layout[project.ENTRY_KEYS[mode]]).parent
+        if "config" in layout and "config" not in template.layout:
+            # a documents-shaped template saved before the project laid out by folders keeps what configures its documents at its top: into 000-Typst-Config/ (issue #64)
+            for part in CONFIG_PARTS:
+                if (source / part).exists():
+                    placed[source / part] = folder / layout["config"] / part
         root_old = folder
     else:
         old = source / template.document_folder("rs")
         for part, key in _shared_parts(template, layout):
-            placed[old / part] = folder / (layout[key] if key else part)
+            placed[old / part] = folder / (layout[key] if key else _config_part(layout, part))
         placed[old] = folder / PurePosixPath(layout["report"]).parent
         root_old = folder / template.document_folder("rs")
     targets = {os.path.normcase(str(path)): target for path, target in placed.items()}
@@ -362,12 +434,13 @@ def _document_template(mode, language, chosen):
     return found
 
 
-def _undo(folder, made):
-    """What a creation that failed wrote, taken away. The folder was empty, or not there, when it began, so everything in it is its own; the engine's copy is left read-only (project.sync_engine), which Windows will not delete until it is made writable."""
+def remove_tree(folder, keep=True):
+    """Everything inside `folder` taken away -- the folder itself too where `keep` is False --, read-only files included: the engine's copy is left read-only (project.sync_engine), which Windows will not delete until it is made writable. What a creation that failed wrote, and a preview's throw-away project (calc/template_preview.py)."""
     def writable(function, path, _exc):
         os.chmod(path, stat.S_IWRITE)
         function(path)
 
+    folder = Path(folder)
     if not folder.exists():
         return
     for child in folder.iterdir():
@@ -376,11 +449,16 @@ def _undo(folder, made):
         else:
             os.chmod(child, stat.S_IWRITE)
             child.unlink()
-    if made:
+    if not keep:
         try:
             folder.rmdir()
         except OSError:
             pass
+
+
+def _undo(folder, made):
+    """What a creation that failed wrote, taken away. The folder was empty, or not there, when it began, so everything in it is its own."""
+    remove_tree(folder, keep=not made)
 
 
 # --- a folder laid out before Woodcore -------------------------------------------------

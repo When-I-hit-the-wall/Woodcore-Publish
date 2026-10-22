@@ -42,6 +42,7 @@
       "description": "Where the parts of the template's skeleton lie, relative to its folder -- the `layout` of schemas/woodcore-project.schema.json. A **report-shaped** template -- Standard, and one saved from a project laid out as a report alone -- states no `typst_root`: each key it leaves out takes the default, the skeleton's entry file lies where `report` says, and `generated` and `pdf` follow the report's folder where they are left out. A **documents-shaped** template -- saved from a project laid out in three documents -- states `typst_root` and with it every key, as that project's .woodcore did. A project made from either is laid out in three documents (calc/project_template.py), its folders named when it is made.",
       "properties": {
         "typst_root": {"type": "string", "description": "\".\" -- stated by a documents-shaped template alone, with every key below."},
+        "config": {"type": "string", "description": "\"000-Typst-Config\" -- stated by a documents-shaped template saved from a project laid out by folders (issue #64): the folder of its config.typ, commands.typ, title.typ, references.bib and Template/."},
         "report": {"type": "string"},
         "pdf": {"type": "string"},
         "report_cu": {"type": "string", "description": "The convention d'utilisation's entry file, in a folder of its own (a documents-shaped template)."},

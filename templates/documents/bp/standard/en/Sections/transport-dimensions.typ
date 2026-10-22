@@ -9,19 +9,16 @@
 [Envisaged means of transport (lorry, crane, cable car, helicopter …), owner's requirements, size and weight limits for prefabricated elements, storage and transhipment areas. Main means of transport and permitted exceptions.]
 // woodcore:/object p1
 
-// woodcore:object doc-table transport-table
-#doc-table(
-  columns: (
-    (id: "transport", title: [Means of transport]),
-    (id: "length", title: [Max. length], unit: "mm", kind: "number"),
-    (id: "width", title: [Max. width], unit: "mm", kind: "number"),
-    (id: "height", title: [Max. height], unit: "mm", kind: "number"),
-    (id: "hung", title: [Max. suspended load], unit: "kg", kind: "number"),
-    (id: "distributed", title: [Max. distributed load], unit: "kg", kind: "number"),
-  ),
-  hidden: (),
-  rows: (
-    (transport: [[…]], length: [[…]], width: [[…]], height: [[…]], hung: [[…]], distributed: [[…]]),
+// woodcore:object table transport-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto, auto),
+    align: (left, right, right, right, right, right),
+    table.hline(stroke: 1pt),
+    table.header([*Means of transport*], [*Max. length*], [*Max. width*], [*Max. height*], [*Max. suspended load*], [*Max. distributed load*]),
+    table.hline(stroke: 0.5pt),
+    [[…]], [[…]], [[…]], [[…]], [[…]], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Maximum dimensions of the transported elements],
 )

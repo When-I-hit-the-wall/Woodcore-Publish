@@ -16,6 +16,7 @@ import theme  # the ground of a distance that cannot be read (theme.py, v0.90)
 from domains import schema as model
 from domains import schema_svg as drawing_svg
 from schema_canvas_place import ANGLE_STEP, CONNECTOR_TOOLS, TOOLS, _round, SchemaCanvasPlaceMixin  # split out of this module (issue #30): every name it had is still importable from it
+from canvas_items import cosmetic as _cosmetic  # the canvases' pen, written once (D2)
 
 
 # How far the view may be zoomed, in screen pixels to the millimetre. Absolute, so a 60 mm plate and a 3 m beam are held to the same range and the wheel never stops working where the engineer did not expect it to.
@@ -26,14 +27,6 @@ MAX_ZOOM = 50.0
 
 
 SELECT_COLOUR = theme.colour("drawing-select")
-
-
-def _cosmetic(colour, width, dash=None):
-    pen = QPen(QColor(colour), width)
-    pen.setCosmetic(True)
-    if dash:
-        pen.setDashPattern(dash)
-    return pen
 
 
 class SchemaCanvasInputMixin:
@@ -223,13 +216,6 @@ class SchemaCanvasInputMixin:
                 self._over_label = over
                 self.viewport().setCursor(Qt.CursorShape.SizeAllCursor if over else Qt.CursorShape.ArrowCursor)
 
-    def readout(self, result):
-        if result["ray"] is not None:
-            return f"{result['kind']}|{model.fmt_number(result['angle'])}|{model.fmt_number(result['distance'])}"
-        if result["kind"] == "shift":
-            return f"shift||{model.fmt_number(result['distance'])}"
-        return result["kind"] or ""
-
     def mouseReleaseEvent(self, event):
         if self.panning is not None:
             self.panning = None
@@ -245,27 +231,6 @@ class SchemaCanvasInputMixin:
             return
         if drag is not None and drag.get("moved"):
             self.end_change()
-
-    def wheelEvent(self, event):
-        """The wheel always zooms, about the pointer, between two absolute limits -- nowheel.py leaves this canvas alone for exactly this reason (docs/ui/window.md §10quater)."""
-        steps = event.angleDelta().y() / 120.0
-        if steps == 0:
-            return
-        self.zoom_at(event.position(), 1.15 ** steps)
-
-    def zoom_at(self, position, factor):
-        scale = self.scale_px()
-        factor = max(MIN_ZOOM / scale, min(factor, MAX_ZOOM / scale))
-        if abs(factor - 1.0) < 1e-12:
-            return
-        at = position.toPoint()
-        anchor = self.mapToScene(at)
-        self.grow_scene()
-        self.scale(factor, factor)
-        drift = self.mapFromScene(anchor) - at
-        self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + drift.x())
-        self.verticalScrollBar().setValue(self.verticalScrollBar().value() + drift.y())
-        self.update_helpers()
 
     def focusNextPrevChild(self, _next):
         """Tab is the tracking's, not the focus chain's -- statics_canvas's own rule."""
@@ -314,45 +279,9 @@ class SchemaCanvasInputMixin:
             return
         super().keyPressEvent(event)
 
-    def keyReleaseEvent(self, event):
-        if event.key() == Qt.Key.Key_Space and not event.isAutoRepeat():
-            self.space_down = False
-            self.restore_cursor()
-            return
-        super().keyReleaseEvent(event)
-
-    def leaveEvent(self, event):
-        self.cursor = None
-        self.acquire_timer.stop()
-        self.update_helpers()
-        super().leaveEvent(event)
-
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.update_helpers()
-
-    def show_snap(self, point, kind):
-        path = QPainterPath()
-        if kind and kind != "shift":
-            s = 6.0
-            if kind == "point":
-                path.addRect(-s, -s, 2 * s, 2 * s)
-            elif kind == "midpoint":
-                path.moveTo(0, -s)
-                path.lineTo(s, s)
-                path.lineTo(-s, s)
-                path.closeSubpath()
-            elif kind in ("crossing", "ray-crossing"):
-                path.moveTo(-s, -s)
-                path.lineTo(s, s)
-                path.moveTo(-s, s)
-                path.lineTo(s, -s)
-            elif kind == "grid":
-                path.addEllipse(QPointF(0, 0), s * 0.5, s * 0.5)
-            else:
-                path.addEllipse(QPointF(0, 0), s * 0.8, s * 0.8)
-            self.snap_marker.setPos(self.qp(point))
-        self.snap_marker.setPath(path)
 
     def dimension_preview(self):
         """What the dimension being drawn would look like, built from the same geometry the figure is drawn from -- statics_canvas's own preview, so what the pointer promises is what the last click delivers."""
@@ -563,13 +492,3 @@ class SchemaCanvasInputMixin:
         for c in corners[1:]:
             path.lineTo(c)
         path.closeSubpath()
-
-    def add_handle(self, at):
-        handle = QGraphicsRectItem(-4, -4, 8, 8)
-        handle.setPos(at)
-        handle.setBrush(QBrush(theme.qcolor("paper")))
-        handle.setPen(_cosmetic(SELECT_COLOUR, 1.6))
-        handle.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations)
-        handle.setZValue(21)
-        self.scene().addItem(handle)
-        self.handles.append(handle)

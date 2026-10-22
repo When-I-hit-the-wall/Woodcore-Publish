@@ -25,6 +25,7 @@ from pathlib import Path, PurePosixPath
 import documents
 import project
 import validation
+import usersettings  # the engineer's settings and folders (calc/usersettings.py; calc/tools/ until v0.120, G6)
 
 FILE = "template.json"
 FORMAT = "woodcore-template"
@@ -39,7 +40,8 @@ DEFAULT_LANGUAGE = "de"
 # ⚠️ The folder is named **once**, at creation, and the project's own `.woodcore` states where its report lies from then on (project_template.create). `project.DEFAULT_LAYOUT` therefore does **not** move: a project created before v0.100 states no `layout` at all -- the engineer's own Musterprojekt and tests/projet-exemple both state none -- and goes on reading «Statischer Bericht (typst)» from it. Renaming the constant would make the report folder of both unfindable at once, and nothing on disk is renamed in a project that already exists.
 #
 # Since the three documents a new project is laid out in (the engineer's request of 30.09.2026) the report's folder is the third of three, numbered and named in the project's language exactly as calc/documents.py writes them -- `3_Statischer Bericht`, `3_Rapport de statique`, `3_Statical report` -- and this is the report's word of those three (`folders_offered` gives all three), so that a caller still offering the one report folder offers the form the spec names.
-REPORT_FOLDERS = {lang: documents.MODE_FOLDERS[lang]["rs"] for lang in LANGUAGES}
+# Since the project laid out by folders (issue #64) the three folders are the same in every language, `300-Statical report` for the report (calc/documents.py MODE_FOLDERS, D-07, D-14); the table keeps its languages so that every caller naming one goes on working.
+REPORT_FOLDERS = {lang: documents.MODE_FOLDERS["rs"] for lang in LANGUAGES}
 # The names Windows reserves for a device: a folder so named cannot be created whatever is asked for, so it is refused where the name is typed (check_report_folder).
 RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL", *(f"COM{n}" for n in range(1, 10)), *(f"LPT{n}" for n in range(1, 10))}
 PEOPLE = ("company", "author", "checker")
@@ -62,15 +64,6 @@ _SECTION = re.compile(r"^(\d+)-(.*)\.typ$", re.I)
 
 class TemplateError(project.ProjectError):
     """A template that cannot be read, used or written, said by name."""
-
-
-def _usersettings():
-    """usersettings.py, from calc/tools/: imported as the window imports it where calc/tools is on the path, else through calc/'s `tools` folder, as export_all.py imports build_reference."""
-    try:
-        import usersettings
-    except ImportError:
-        from tools import usersettings
-    return usersettings
 
 
 def _read_text(path):
@@ -116,9 +109,9 @@ def place_dir(place, settings=None):
     if place == "builtin":
         return BUILTIN_DIR
     if place == "user":
-        return _usersettings().templates_dir()
+        return usersettings.templates_dir()
     if place == "shared":
-        return shared_folder(settings if settings is not None else _usersettings().read())
+        return shared_folder(settings if settings is not None else usersettings.read())
     raise TemplateError(f"unknown place of templates {place!r} -- expected one of {', '.join(PLACES)}")
 
 
@@ -138,7 +131,7 @@ def layout_of(meta):
         report = PurePosixPath(stated["report"].replace("\\", "/"))
         folder = report.parent.as_posix()
         prefix = "" if folder in ("", ".") else folder + "/"
-        layout["generated"] = prefix + "_woodcore"
+        layout["generated"] = prefix + documents.LEGACY_GENERATED_FOLDER
         layout["pdf"] = prefix + report.stem + ".pdf"
     layout.update(stated)
     return layout
@@ -293,6 +286,9 @@ class Template:
 
     @property
     def config(self):
+        """The template's config.typ: in its configuration's folder for one saved from a project laid out by folders (`layout.config`, issue #64), at its Typst root otherwise."""
+        if self.has_modes and "config" in self.layout:
+            return self.folder / self.layout["config"] / CONFIG
         return self.typst_root / CONFIG
 
     @property
@@ -350,7 +346,7 @@ def check(template):
             raise TemplateError(f"{template.folder / FILE}: {key} is {value!r} -- expected one of {', '.join(LANGUAGES)}")
     try:
         project.Project(template.folder / ("template" + project.EXTENSION),
-                        {"schema_version": project.SCHEMA_VERSION, "format": project.FORMAT, "name": template.name, "layout": template.layout})
+                        {"schema_version": project.schema_version_for(template.layout), "format": project.FORMAT, "name": template.name, "layout": template.layout})
     except project.ProjectError as exc:
         raise TemplateError(f"{template.folder}: {exc}") from None
     if not template.report.is_file():
@@ -393,7 +389,7 @@ def standard():
 
 def list_templates(settings=None):
     """Every template of the three places, builtin first, then the engineer's, then the office's, each place in the order of its folders' names. A folder holding no template.json is not a template and is left out; one whose template.json is wrong is listed, its `error` saying why."""
-    settings = settings if settings is not None else _usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     out = []
     for place in PLACES:
         root = place_dir(place, settings)
@@ -425,7 +421,7 @@ def find(ref, settings=None):
 
 def default_template(settings=None):
     """The template the settings name as the default, else Standard -- and Standard where the one named is gone or cannot be used."""
-    settings = settings if settings is not None else _usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     try:
         return find(default_ref(settings), settings)
     except TemplateError:
@@ -434,14 +430,14 @@ def default_template(settings=None):
 
 def languages_for(template, settings=None):
     """(document language, report language) of a project made from `template`: the template's own, else the settings' default report language, else German -- and the document in the report's language where the template states none for it."""
-    settings = settings if settings is not None else _usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     report = template.report_language or defaults(settings)["report_language"] or DEFAULT_LANGUAGE
     return template.document_language or report, report
 
 
 def people_for(template, settings=None):
     """{company, author, checker} a new project from `template` starts with: the template's own, else the settings' defaults."""
-    settings = settings if settings is not None else _usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     own = defaults(settings)
     return {key: template.person(key) or own[key] for key in PEOPLE}
 
@@ -449,9 +445,9 @@ def people_for(template, settings=None):
 # --- the languages in a report's files -----------------------------------------------------
 
 def config_for(entry):
-    """The config.typ the document whose entry file is `entry` is styled by: beside it for a report alone, which keeps its config.typ in its own folder, and at the top of the project -- the folder above the document's own -- for three documents, which share one. The one beside the entry where neither is there, for the caller to find missing."""
+    """The config.typ the document whose entry file is `entry` is styled by: beside it for a report alone, which keeps its config.typ in its own folder, at the top of the project -- the folder above the document's own -- for three documents, which share one, and in the configuration's folder there for three documents laid out by folders (000-Typst-Config/, issue #64). The one beside the entry where none is there, for the caller to find missing."""
     entry = Path(entry)
-    for folder in (entry.parent, entry.parent.parent):
+    for folder in (entry.parent, entry.parent.parent, entry.parent.parent / project.CONFIG_FOLDER):
         if (folder / CONFIG).is_file():
             return folder / CONFIG
     return entry.parent / CONFIG
@@ -466,10 +462,16 @@ def read_languages(report_typ, config=None):
     return (document.group(2) if document else ""), (report.group(2) if report else "")
 
 
-def write_languages(report_typ, document=None, report=None, config=None):
-    """Writes the document language into the config.typ of the report whose entry file is `report_typ` -- `config`, else the one `config_for` finds -- and the report language into `report_typ` itself: `write_project_languages` for one entry file. Returns the files rewritten."""
-    report_typ = Path(report_typ)
-    return write_project_languages(Path(config) if config is not None else config_for(report_typ), [report_typ], document, report)
+def project_language(here, fallback="de"):
+    """The language project `here`'s documents are written in -- the `doc-lang` of its config.typ, else the report's own language -- or `fallback` where the project states none (v0.116; moved here from positions_store in 0.122, the one reader of it). The language is chosen as the project is created and written into config.typ there and then (issue #90), whether or not a document is there yet."""
+    try:
+        document, report = read_languages(here.report_typ, config=config_for(here.report_typ))
+    except (OSError, ValueError, AttributeError):
+        return fallback
+    for lang in (document, report):
+        if lang in LANGUAGES:
+            return lang
+    return fallback
 
 
 def write_project_languages(config, entries, document=None, report=None):
@@ -702,14 +704,14 @@ def write_meta(folder, meta):
     ordered = {key: meta[key] for key in ("schema_version", "format", "name", "description") if key in meta}
     ordered.update((key, value) for key, value in meta.items() if key not in ordered)
     temporary = folder / (FILE + ".tmp")
-    temporary.write_text(json.dumps(ordered, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.write_text(json.dumps(ordered, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     temporary.replace(folder / FILE)
     return template
 
 
 def duplicate(template, name, place="user", settings=None):
     """A copy of `template` under `name`, in `place` (the engineer's own by default) -- a copy of a builtin one without its description, which describes the builtin one. Returns the new template."""
-    settings = settings if settings is not None else _usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     root = _writable_root(place, settings)
     _check_name(name, settings)
     folder = _new_folder(root, name)
@@ -870,7 +872,7 @@ def import_folder(source, replace=False, settings=None):
     """«Importer un dossier…»: the project template in the folder `source` -- a folder holding a template.json, like each of an office's shared folder -- copied into the engineer's own place (`place_dir("user")`) under its folder's name. Returns the template as it now stands there.
 
     **Checked before anything is written**: `source` must be a folder (`not_a_folder`) holding a template.json (`no_template`) of a project template -- a document template's is refused naming its document (`document_template`), the settings' page importing it under that document -- that `check` finds sound (`invalid`, its reason in `error`), not named as a builtin one (`name_is_builtin`), and not one of the engineer's own already (`already_mine`). A template of that folder's name in his place is refused (`exists`) unless `replace`, which moves the old one into the place's `archives/` -- never deleted -- and puts it back if the copy then fails. The copy is staged beside the place and read back first, so a failure (`write_failed`) leaves nothing half copied."""
-    settings = settings if settings is not None else _usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     source = Path(source)
     if not source.is_dir():
         _refuse_import("not_a_folder", f"{source} is not a folder", folder=str(source))
@@ -931,12 +933,12 @@ def save_project(here, name, place="user", settings=None, description=""):
 
     In both, the languages the files state, the layout where it differs from the default, and the company, author and checker are taken; and what never is: the export and the engine's copy (`generated`), the drawings of Woodcore's window (`sources`), the archives, a PDF, the workbooks, the `.woodcore` and its lock, each document's `sync.json` (what it shares with the others is the project's, not a template's), and a picture of `Images/` no .typ of the template names -- a project's site photographs are not a template's.
     """
-    settings = settings if settings is not None else _usersettings().read()
+    settings = settings if settings is not None else usersettings.read()
     root = _writable_root(place, settings)
     _check_name(name, settings)
     top = here.root.resolve()
     if here.has_modes:
-        parts = [here.config_typ, here.commands_typ, here.references_bib, here.title_typ, here.typst_root / project.TEMPLATE_FOLDER, here.images_dir, *(here.document_dir(mode) for mode in here.modes)]
+        parts = [here.config_typ, here.commands_typ, here.references_bib, here.title_typ, here.template_dir, here.images_dir, *(here.document_dir(mode) for mode in here.modes)]
     else:
         report_dir = here.typst_root.resolve()
         if report_dir == top:

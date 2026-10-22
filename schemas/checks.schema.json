@@ -10,12 +10,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "enum": [
-        "1.0",
-        "1.1",
-        "1.2"
-      ],
-      "description": "-- 1.0, or 1.1 where a record carries `links`, or 1.2 where a record carries `fire` (issue #46): an export written at another version is refused rather than read as this one."
+      "enum": ["1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6"],
+      "description": "-- 1.0, or 1.1 where a record carries `links`, or 1.2 where a record carries `fire` (issue #46): an export written at another version is refused rather than read as this one. 1.3 where a record carries `vars` and `gen`, a check printed unfolded (spec 2026-10-15-calculs-deplies-balises-figures-natives, ARCH-007). 1.4 where such a record carries `file`, the file of its domain (issue #64). 1.5 where a record's `fire` carries `required`, the citation of a duration VKF 15-15 requires (spec 2026-10-20-indices-et-niveaux, REQ-001); 1.5 holds everything 1.4 does. 1.6 where a check is printed unfolded, with its `vars` and its `file` and without `gen`, the form being the regeneration base's alone (spec 2026-10-21-commandes-typst-refonte, ARCH-011); 1.6 holds everything 1.5 does but `gen`."
     },
     "checks": {
       "type": "object",
@@ -370,6 +366,19 @@
               ],
               "description": "A shear: a member cut from the pith takes half of f_v,d (SIA 265 Tabelle 8 note 6). Optional; absent or null is false (issue #38)."
             },
+            "variant": {
+              "type": ["string", "null"],
+              "enum": ["shear", "shear-off", "shear-perp", null],
+              "description": "A shear: what it checks -- `shear` (SIA 265 4.2.5.1), `shear-off` (4.2.6), `shear-perp` (4.2.7.1) (spec 2026-10-21-commandes-typst-refonte, REQ-021). Optional, additive; absent or null is shear."
+            },
+            "F": {
+              "type": ["object", "null"],
+              "description": "A shear-off: the design force sheared off, a {value, unit} block; l and w its sheared length and width in mm, w null following the member's width (4.2.6). Optional, additive."
+            },
+            "sigma_90": {
+              "type": ["number", "null"],
+              "description": "A shear across the grain: the design stress perpendicular to the grain in N/mm², transverse tension positive (4.2.7.1). Optional, additive."
+            },
             "l_y": {
               "type": [
                 "number",
@@ -448,6 +457,18 @@
                     "null"
                   ],
                   "description": "What VKF 15-15 requires for the project's building and this check (calc/norms/vkf.py, required_resistance): {minutes, table, page, row, base, notes, reason, norm, norm_ref}; null where the project states no building."
+                },
+                "required": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "description": "The citation of the duration where VKF 15-15 requires it (`duration_from` «vkf»): {norm, norm_ref} -- «VKF 15-15», «Tabelle 2» --, composed once by the export and copied by #show-check-member into #member's `fire: (required:)`, so that the row t_fi cites it in the window and in the report (spec 2026-10-20-indices-et-niveaux, REQ-001); null or absent where the engineer states the duration, which cites SIA 265 4.5.2.",
+                  "required": ["norm", "norm_ref"],
+                  "properties": {
+                    "norm": {"type": "string"},
+                    "norm_ref": {"type": "string"}
+                  }
                 },
                 "sides": {
                   "type": "array",
@@ -564,6 +585,82 @@
                       "type": "boolean"
                     }
                   }
+                }
+              }
+            },
+            "vars": {
+              "type": "object",
+              "description": "A check printed unfolded (calc/domains/unfold.py): the values its literals are checked against by `#var(key, value, domain: (\"check\", id))` -- the section's sides, the inputs of `member_check.compute` (force, angle, eta_w, eta_t) and the values of SIA 265 Tabelle 8/9 its design values are computed from -- each a var of the export.",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "required": [
+                    "value",
+                    "unit",
+                    "symbol",
+                    "norm",
+                    "norm_ref",
+                    "source"
+                  ],
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "description": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "norm": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "norm_ref": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "file": {
+              "type": ["string", "null"],
+              "description": "A check printed unfolded (1.4, issue #64): the file of its domain from the Typst root, `/Timber-checks/Tension/<id>.typ` -- what #show-check-member includes -- or null where the file is still the stub that prints it folded, or one the engineer wrote in."
+            },
+            "gen": {
+              "type": "object",
+              "description": "A check printed unfolded, from 1.3 to 1.5: the form it is written from -- its kind, the equation of SIA 265 its verdict follows, and the version of the writer. Not written since 1.6: the form is the regeneration base's (calc/domains/unfold.py).",
+              "required": [
+                "kind",
+                "form",
+                "version"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string"
+                },
+                "form": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
                 }
               }
             }

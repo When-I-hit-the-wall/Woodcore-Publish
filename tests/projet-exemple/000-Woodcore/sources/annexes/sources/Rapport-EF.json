@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.1",
+  "id": "Rapport-EF",
+  "name": "Rapport d'impression EF",
+  "label": "Exemple inventé pour les tests : trois pages, des titres numérotés et leurs signets",
+  "mode": "used",
+  "original": "rapport-ef.pdf",
+  "sha256": "e18bbbd21aa670efc86ab052d2c470b2dfccb422edc2c94cefb73ae9db9cc171",
+  "file": "rapport-ef.pdf"
+}

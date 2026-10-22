@@ -9,5 +9,5 @@
 #number-digits.update(3)
 
 #for p in plans-of("S001") {
-  show-plan(p, highlight: "S001", detail: true, width: 40%)
+  figure(image-positions-plan(p, highlight: "S001", frame: "highlight", width: 40%), kind: image, caption: [#p])
 }

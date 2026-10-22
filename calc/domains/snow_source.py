@@ -1,4 +1,4 @@
-"""Snow loads entered in Woodcore (issue #36): one roof per source, its characteristic snow loads computed here from SIA 261:2020 chapter 5 -- the values out of `norms/sia261_snow.py`, never from the Belastungsannahmen workbook, whose `SL-*` sheets stay read beside it (domains/snow.py, docs/domain/loads.md §3.3bis, decision D-04).
+"""Snow loads entered in Woodcore (issue #36): one roof per source, its characteristic snow loads computed here from SIA 261:2020 chapter 5 -- the values out of `norms/sia261_snow.py`. Since v0.120 the one calculation of the snow: an `SL-*` sheet of the Belastungsannahmen workbook is read for its inputs alone and computed here too (domains/snow.py, spec 2026-10-21-restes-issue-69, REQ-001, ARCH-002; docs/domain/loads.md §3.3bis).
 
 **A source** is `Woodcore-Datei/loads/snow/<id>.json` (schemas/snow-source.schema.json, 1.0): the altitude `h_0` and the correction of Anhang D (`correction`, m), the exposure (`exposure`: normal, exposed, sheltered -- 5.2.4) and C_T (`c_t`, 5.2.5), the roof (`roof`) and what it reads -- `length` and `width` (m) of a flat roof, `alpha_1` of a mono-pitch or a curved roof, `alpha_1` and `alpha_2` of a duo-pitch or a shed roof --, and whether the snow can slide off (`sliding`: possible, hindered).
 
@@ -17,11 +17,13 @@ from pathlib import Path
 
 import project
 import validation
+from domains._common import fail as _fail, is_number as _number, plain as _fmt  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import links  # a field that follows a variable of the export (spec 2026-10-11-variables-liees-champs-et-textes)
-from domains import snow, snow_svg
+from domains import snow_svg
 from norms import sia261_snow
 
-DOMAIN = snow.DOMAIN
+# The domain's name, held here: domains/snow.py, the reader of the sheets, takes it from its calculation (ARCH-RISK-806, no import the other way)
+DOMAIN = "snow-load"
 SOURCE_SCHEMA = "snow-source"
 SOURCE_SCHEMA_VERSION = "1.0"
 # 1.1 is 1.0 with `links` (spec 2026-10-11-variables-liees-champs-et-textes, D-17): written only by a source that carries one, so a load following no variable is saved and exported as before
@@ -42,14 +44,6 @@ ROOF_WORDS = {"flat": "Flachdach", "mono": "Pultdach", "duo": "Satteldach", "she
 SLIDING_WORDS = {"possible": "möglich", "hindered": "behindert oder erschwert"}
 # What each roof reads beyond the common fields
 ROOF_FIELDS = {"flat": ("length", "width"), "mono": ("alpha_1",), "duo": ("alpha_1", "alpha_2"), "shed": ("alpha_1", "alpha_2"), "curved": ("alpha_1",)}
-
-
-def _fail(where, message):
-    raise validation.ValidationError("%s: %s" % (where, message))
-
-
-def _number(value):
-    return not isinstance(value, bool) and isinstance(value, (int, float))
 
 
 def folder(here=None):
@@ -79,6 +73,7 @@ def stamp_version(src):
 
 
 def check_source(src, where="loads/snow"):
+    """A source of `loads/snow/` checked: its versions, links and structure, its id, then its fields (`check_fields`)."""
     if not isinstance(src, dict):
         _fail(where, "a snow load is a JSON object")
     if src.get("schema_version") not in SOURCE_SCHEMA_VERSIONS:
@@ -94,28 +89,36 @@ def check_source(src, where="loads/snow"):
         _fail(where, str(exc))
     if not ID_PATTERN.match(src.get("id") or ""):
         _fail(where, "id %r -- letters, digits and _ . + - only, starting with a letter or digit" % src.get("id"))
+    check_fields(src, lambda _field, message: _fail(where, message))
+
+
+def check_fields(src, fail):
+    """The fields the calculation reads, each checked against SIA 261: `fail(field, message)` stops, naming the field -- a source names its file, a sheet of the workbook the cell the field is read from (domains/snow.py, ARCH-RISK-807)."""
     c = sia261_snow.clause()
     if not _number(src.get("h_0")) or src["h_0"] < 0:
-        _fail(where, "h_0 is %r -- the altitude above sea level, m" % (src.get("h_0"),))
+        fail("h_0", "h_0 is %r -- the altitude above sea level, m" % (src.get("h_0"),))
     if src.get("correction") not in c["corrections"]["values"]:
-        _fail(where, "correction is %r -- SIA 261 Anhang D gives %s m" % (src.get("correction"), ", ".join("%+g" % v for v in c["corrections"]["values"])))
+        fail("correction", "correction is %r -- SIA 261 Anhang D gives %s m" % (src.get("correction"), ", ".join("%+g" % v for v in c["corrections"]["values"])))
     # a site above 5.1.4's limit is no defect of the file: it is computed, and `warnings` says so to the tab (spec 2026-10-14-neige-vent-affichage-altitude, REQ-003)
-    sia261_snow.exposure(src.get("exposure"))
+    try:
+        sia261_snow.exposure(src.get("exposure"))
+    except validation.ValidationError as exc:
+        fail("exposure", str(exc))
     if not _number(src.get("c_t")) or not 0 < src["c_t"] <= c["c_t"]["default"]:
-        _fail(where, "c_t is %r -- C_T, above 0 and at most %s (5.2.5)" % (src.get("c_t"), c["c_t"]["default"]))
+        fail("c_t", "c_t is %r -- C_T, above 0 and at most %s (5.2.5)" % (src.get("c_t"), c["c_t"]["default"]))
     if src.get("roof") not in ROOFS:
-        _fail(where, "roof is %r -- %s" % (src.get("roof"), ", ".join(ROOFS)))
+        fail("roof", "roof is %r -- %s" % (src.get("roof"), ", ".join(ROOFS)))
     if "height_step" in src and not isinstance(src["height_step"], bool):
-        _fail(where, "height_step is %r -- true or false" % (src["height_step"],))
+        fail("height_step", "height_step is %r -- true or false" % (src["height_step"],))
     if src.get("sliding") not in SLIDING:
-        _fail(where, "sliding is %r -- %s" % (src.get("sliding"), ", ".join(SLIDING)))
+        fail("sliding", "sliding is %r -- %s" % (src.get("sliding"), ", ".join(SLIDING)))
     for key in ROOF_FIELDS[src["roof"]]:
         value = src.get(key)
         if key.startswith("alpha"):
             if not _number(value) or not 0 <= value <= 90:
-                _fail(where, "%s is %r -- a slope in degrees, 0 to 90" % (key, value))
+                fail(key, "%s is %r -- a slope in degrees, 0 to 90" % (key, value))
         elif not _number(value) or value <= 0:
-            _fail(where, "%s is %r -- a plan dimension in m, above 0" % (key, value))
+            fail(key, "%s is %r -- a plan dimension in m, above 0" % (key, value))
 
 
 def warnings(src):
@@ -124,6 +127,13 @@ def warnings(src):
     if _number(src.get("h_0")) and src["h_0"] > limit["value"]:
         return [("above_limit", {"h_0": src["h_0"], "limit": limit["value"], "ref": limit["norm_ref"]})]
     return []
+
+
+def notes_of(src, where):
+    """`warnings(src)` as the export's warnings (engine.Note), `where` the file or the sheet they are of: a site above 5.1.4's limit is computed, and said (spec 2026-10-21-restes-issue-69, ARCH-RISK-811)."""
+    import engine
+    return [engine.Note("snow_" + code, "%s: h_0 = %g m is above the %g m of SIA 261 %s -- its provisions do not apply there; the load is computed all the same" % (where, p["h_0"], p["limit"], p["ref"]),
+                        where=where, **p) for code, p in warnings(src)]
 
 
 def sketch(src):
@@ -142,11 +152,6 @@ def read_source(path):
     if src["id"] != path.stem:
         _fail(where, "id %r is not its file name %r -- the id is the file name" % (src["id"], path.stem))
     return src
-
-
-def _fmt(value):
-    text = ("%.6f" % value).rstrip("0").rstrip(".")
-    return "0" if text in ("", "-0") else text
 
 
 def coefficients(src):
@@ -175,60 +180,65 @@ def coefficients(src):
     return {"mu_3": (sia261_snow.curve(c["mu_3"]["points"], src["alpha_1"]), "Figur 2")}
 
 
-def build_instance(src, here=None):
-    """One instance of `snow-load`: h_ref, s_k, C_e, C_T, the roof and its coefficients, and the loads of the two models of Figur 3. No drawing: `sketch` is the tab's (D-03)."""
+def build_instance(src, here=None, inputs=None):
+    """One instance of `snow-load`: h_ref, s_k, C_e, C_T, the roof and its coefficients, and the loads of the two models of Figur 3. No drawing: `sketch` is the tab's (D-03). `inputs` says where each field of `src` was read, {field: source} -- a sheet's cells, `excel:<workbook>!<cell>` (domains/snow.py) --, a field it does not name being entered in Woodcore."""
     import engine
     c = sia261_snow.clause()
     calc = engine.Calculation()
     where = "%s/%s.json" % (FOLDER, src["id"])
 
-    def var(name, value, symbol, unit, label, level, norm_ref, **more):
-        calc.add_var(name=name, value=value, unit=unit, symbol=symbol, label=label, level=level,
+    def var(name, value, symbol, unit, label, norm_ref, **more):
+        calc.add_var(name=name, value=value, unit=unit, symbol=symbol, label=label,
                      source=more.pop("source", SOURCE), norm=NORM, norm_ref=norm_ref, **more)
 
-    entered = "entered:%s" % where
+    inputs = inputs or {}
+
+    def entered(field):
+        return inputs.get(field, "entered:%s" % where)
     # --- the site
-    var("h_0", src["h_0"], "h_0", "m", "Höhe ü. NN", 3, "5.2.6", source=entered, description="Höhe des Standorts über Meer.")
-    var("korrektur", src["correction"], "Delta h", "m", "Korrektur Wert", 3, "Anhang D", source=entered,
-        description="Höhenzuschlag auf die Höhe ü. NN nach SIA 261, Anhang D.")
+    var("h_0", src["h_0"], "h_0", "m", "Höhe ü. NN", "5.2.6", source=entered("h_0"), description="Höhe des Standorts über Meer.")
+    # the corrections Anhang D allows, each its height (the workbook's dropdown until v0.120): the choice the report sets beside Δh
+    corrections = [{"value": v, "desc": "± 0 m" if v == 0 else "%+g m" % v} for v in c["corrections"]["values"]]
+    var("korrektur", src["correction"], "Delta h", "m", "Korrektur Wert", "Anhang D", source=entered("correction"),
+        description="Höhenzuschlag auf die Höhe ü. NN nach SIA 261, Anhang D.", choices=corrections)
     h_ref = src["h_0"] + src["correction"]
-    var("h_ref", h_ref, 'h_"ref"', "m", "Bezugshöhe", 2, "5.2.6")
-    calc.add_step(name="Bezugshöhe", level=3, result="h_ref", uses=["h_0", "korrektur"], formula='h_"ref" = h_0 + Delta h', norm=NORM, norm_ref="Anhang D")
+    var("h_ref", h_ref, 'h_"ref"', "m", "Bezugshöhe", "5.2.6")
+    calc.add_step(name="Bezugshöhe", result="h_ref", uses=["h_0", "korrektur"], formula='h_"ref" = h_0 + Delta h', norm=NORM, norm_ref="Anhang D")
     # --- the coefficients
     exposure = sia261_snow.exposure(src["exposure"])
     choices = [{"value": e["value"], "desc": e["label"]} for e in c["exposure"]["choices"]]
-    var("ce", exposure["value"], "C_e", "", "Expositionsbeiwert", 3, c["exposure"]["norm_ref"], source=entered, choices=choices, group="beiwerte")
-    var("ct", src["c_t"], "C_T", "", "Thermischer Beiwert", 3, c["c_t"]["norm_ref"], source=entered, group="beiwerte")
+    var("ce", exposure["value"], "C_e", "", "Expositionsbeiwert", c["exposure"]["norm_ref"], source=entered("exposure"), choices=choices, group="beiwerte")
+    var("ct", src["c_t"], "C_T", "", "Thermischer Beiwert", c["c_t"]["norm_ref"], source=entered("c_t"), group="beiwerte")
     # --- the roof
-    var("dachform", ROOF_WORDS[src["roof"]], '"Dachform"', "", "Dachform / Lastmodell", 3, "Figur 3", source=entered)
+    var("dachform", ROOF_WORDS[src["roof"]], '"Dachform"', "", "Dachform / Lastmodell", "Figur 3", source=entered("roof"))
     if src["roof"] == "flat":
-        var("L", src["length"], "L", "m", "Gebäudelänge", 3, "5.3.5", source=entered, group="geometrie", group_label="Gebäude Geometrie")
-        var("B", src["width"], "B", "m", "Gebäudebreite", 3, "5.3.5", source=entered, group="geometrie")
+        var("L", src["length"], "L", "m", "Gebäudelänge", "5.3.5", source=entered("length"), group="geometrie", group_label="Gebäude Geometrie")
+        var("B", src["width"], "B", "m", "Gebäudebreite", "5.3.5", source=entered("width"), group="geometrie")
     else:
-        var("alpha_1", src["alpha_1"], "alpha_1" if src["roof"] in ("duo", "shed") else "alpha", "°", "Dachneigung 1", 3, "Figur 3", source=entered, group="dachneigung")
+        var("alpha_1", src["alpha_1"], "alpha_1" if src["roof"] in ("duo", "shed") else "alpha", "°", "Dachneigung 1", "Figur 3", source=entered("alpha_1"), group="dachneigung")
         if src["roof"] in ("duo", "shed"):
-            var("alpha_2", src["alpha_2"], "alpha_2", "°", "Dachneigung 2", 3, "Figur 3", source=entered, group="dachneigung")
-    var("abgleiten", SLIDING_WORDS[src["sliding"]], '"Abgleiten des Schnees"', "", "Abgleiten des Schnees", 3, c["hindered"]["norm_ref"], source=entered,
+            var("alpha_2", src["alpha_2"], "alpha_2", "°", "Dachneigung 2", "Figur 3", source=entered("alpha_2"), group="dachneigung")
+    var("abgleiten", SLIDING_WORDS[src["sliding"]], '"Abgleiten des Schnees"', "", "Abgleiten des Schnees", c["hindered"]["norm_ref"], source=entered("sliding"),
         description="Ist das Abgleiten behindert oder erschwert, wird der Dachformbeiwert mu_1 mit 0.8 angesetzt (SIA 261, Ziffer 5.3.4).")
     # 5.3.6 and 5.3.7 are not computed: the report says where they apply (D-04) -- a stepped roof as its source states, a cornice for works above 800 m
     if src.get("height_step"):
         step = c["height_step"]
-        var("hoehensprung", "Zusatzlast nach Figur 5", '"Höhensprung"', "", "Höhensprung", 1, step["norm_ref"], source=entered,
+        var("hoehensprung", "Zusatzlast nach Figur 5", '"Höhensprung"', "", "Höhensprung", step["norm_ref"], source=entered("height_step"),
             description="Bei abgestuften Dächern oder bei einem Dach, das an ein höheres Bauwerk angrenzt, ist auf der unteren Dachfläche eine dreieckförmige Zusatzlast nach Figur 5 anzusetzen (Verdoppelung von mu_1 auf der Seite des Höhensprungs, Einflusslänge l_s = 2 h). Sie ist hier nicht berechnet.")
     cornice = c["cornice"]
     if src["h_0"] > cornice["min_altitude"]:
-        var("schneeueberhang", "zu berücksichtigen", '"Schneeüberhang"', "", "Schneeüberhang", 1, cornice["norm_ref"],
+        var("schneeueberhang", "zu berücksichtigen", '"Schneeüberhang"', "", "Schneeüberhang", cornice["norm_ref"],
             description="Für Bauwerke in dieser Höhenlage ist bei auskragenden Dachteilen ein Schneeüberhang als Linienlast am Dachrand zu berücksichtigen: Höhe und Breite gleich der halben Schneehöhe auf dem Dach (SIA 261, 5.3.7). Er ist hier nicht berechnet.")
     mus = coefficients(src)
     labels = {"mu_1": ("mu_1", "Dachformbeiwert"), "mu_11": ("mu_11", "Dachformbeiwert"), "mu_12": ("mu_12", "Dachformbeiwert 2"),
               "mu_2m": ("mu_(2m)", "Dachformbeiwert der Schneeanhäufung"), "mu_3": ("mu_3", "Dachformbeiwert")}
     for name, (value, why) in mus.items():
-        var(name, value, labels[name][0], "", labels[name][1], 3, why, group="dachformbeiwerte")
+        var(name, value, labels[name][0], "", labels[name][1], why, group="dachformbeiwerte")
     # --- the ground
     s_k, floored = sia261_snow.s_k(h_ref)
     sc = c["s_k"]
-    var("s_k", s_k, "s_k", "kN/m²", "Charakteristischer Wert der Schneelast auf horizontalem Gelände", 2, sc["norm_ref"])
-    calc.add_step(name="Charakteristischer Wert auf horizontalem Gelände", level=3, result="s_k", uses=["h_ref"],
+    var("s_k", s_k, "s_k", "kN/m²", "Charakteristischer Wert der Schneelast auf horizontalem Gelände", sc["norm_ref"])
+    calc.add_step(name="Charakteristischer Wert auf horizontalem Gelände", result="s_k", uses=["h_ref"],
                   formula='s_k = (1 + (h_"ref" / %s)^%s) dot %s >= %s thin "kN/m"^2' % (_fmt(sc["divisor"]), _fmt(sc["exponent"]), _fmt(sc["factor"]), _fmt(sc["min"])),
                   norm=NORM, norm_ref=sc["norm_ref"])
     # --- the loads of the two models
@@ -237,9 +247,9 @@ def build_instance(src, here=None):
 
     def load(name, mu, symbol, mu_symbol, label, uses, half=False):
         value = mu * base / (2 if half else 1)
-        var(name, value, symbol, "kN/m²", label, 1, "5.2.2")
+        var(name, value, symbol, "kN/m²", label, "5.2.2")
         formula = "%s = %s%s dot C_e dot C_T dot s_k" % (symbol, mu_symbol, " / 2" if half else "")
-        calc.add_step(name=label, level=1, result=name, uses=uses + ["ce", "ct", "s_k"], formula=formula, norm=NORM, norm_ref="5.2.2")
+        calc.add_step(name=label, result=name, uses=uses + ["ce", "ct", "s_k"], formula=formula, norm=NORM, norm_ref="5.2.2")
         results.append(name)
 
     lm1, lm2 = "Charakteristische Schneelast", "Charakteristische Schneelast, Lastmodell 2"

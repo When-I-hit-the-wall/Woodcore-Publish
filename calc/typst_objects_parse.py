@@ -8,21 +8,9 @@ from dataclasses import dataclass, field
 import typst_paths
 
 
-# The parameters of the ten commands of lib/document.typ, as their signatures write them: the order is the canonical order of the arguments, and the default is what an argument left out means. tests/test_typst_objects.py holds this table equal to the file's own signatures.
+# The parameters of the one command of lib/document.typ left -- the list of the norms; its parametric objects were written in raw Typst since the spec 2026-10-21-commandes-typst-refonte (REQ-019) -- as its signature writes them: the order is the canonical order of the arguments, and the default is what an argument left out means. tests/test_typst_objects.py holds this table equal to the file's own signatures.
 SIGNATURES = {
-    "doc-table": "columns: (), hidden: (), rows: (), caption: none, notes: none, header: true",
-    "live-load-table": "columns: auto, hidden: (), rows: (), caption: none, notes: none",
-    "dead-load-table": "columns: auto, hidden: (), rows: (), caption: none, notes: none",
-    "doc-field": "label: none, value: none, unit: none",
-    "doc-checklist": "label: none, options: (), only-checked: true",
-    "doc-choice": "label: none, options: (), selected: none, other: none, only-selected: true",
-    "doc-image": "file: none, caption: none, width: 100%, placeholder: none",
-    "doc-plan": "plan: none, highlight: none, detail: false, zoom: 1, axes: true, dimensions: true, lengths: true, legend: true, scale-bar: true, width: 100%, caption: auto",
-    "doc-fire-plan": "plan: none, legend: true, scale-bar: true, width: 100%, caption: auto",
-    "doc-extract": "excerpt: none, width: 100%, caption: auto",
-    "doc-annexes": "heading: 2",
-    "doc-signatures": "rows: (), place-date: true",
-    "show-norm-list": "keys: (), project: none",
+    "show-norm-list": "keys: (), project: none, level: auto",
 }
 
 
@@ -30,15 +18,15 @@ SIGNATURES = {
 SHEET_SIGNATURES = {
     "sheet-page": 'format: "A3", landscape: true, margin: 10mm, kind: "position"',
     "sheet-text": 'x: 0mm, y: 0mm, body: none, size: 10pt, weight: "regular", width: auto',
-    "sheet-viewport": "plan: none, x: 0mm, y: 0mm, scale: none, width: none, highlight: none, axes: true, dimensions: true, lengths: true, scale-bar: false, caption: none, title: auto",
+    "sheet-viewport": "plan: none, x: 0mm, y: 0mm, scale: none, width: none, highlight: none, axes: true, dimensions: true, lengths: auto, centres: auto, scale-bar: false, caption: none, title: auto, level: auto",
     "sheet-section": "plan: none, storey: none, x: 0mm, y: 0mm, scale: none, width: none, title: auto",
-    "sheet-legend": "plans: auto, x: 0mm, y: 0mm, width: 120mm, title: auto",
-    "sheet-fire-viewport": "plan: none, x: 0mm, y: 0mm, scale: none, width: none, legend: true, scale-bar: false, caption: none, title: auto",
-    "sheet-fire-legend": "plans: auto, x: 0mm, y: 0mm, width: 120mm, title: auto",
+    "sheet-legend": "plans: auto, x: 0mm, y: 0mm, width: 120mm, title: auto, level: auto",
+    "sheet-fire-viewport": "plan: none, x: 0mm, y: 0mm, scale: none, width: none, legend: auto, scale-bar: false, caption: none, title: auto, level: auto",
+    "sheet-fire-legend": "plans: auto, x: 0mm, y: 0mm, width: 120mm, title: auto, level: auto",
     # the list of the positions on a sheet (v0.116, lib/sheet.typ's sheet-position-list)
-    "sheet-position-list": 'plans: auto, scope: "plans", storey: none, x: 0mm, y: 0mm, width: 180mm, title: auto',
+    "sheet-position-list": 'plans: auto, scope: "plans", storey: none, x: 0mm, y: 0mm, width: 180mm, title: auto, level: auto',
     # the quantities on a sheet (issue #9, lib/sheet.typ's sheet-quantities)
-    "sheet-quantities": 'plans: auto, scope: "plans", positions: (), x: 0mm, y: 0mm, width: 150mm, title: auto',
+    "sheet-quantities": 'plans: auto, scope: "plans", positions: (), x: 0mm, y: 0mm, width: 150mm, title: auto, level: auto',
     "sheet-titleblock": "x: auto, y: auto, width: auto, logo: auto, object: auto, element: none, client: auto, architect: none, phase: none, project-number: auto, plan-number: none, index: auto, revision-date: auto, revision-author: auto, modification: auto, drawn-by: auto, date: auto, scale: auto, size: auto",
 }
 
@@ -54,7 +42,8 @@ SHOW_RULES = {"sheet-page": "sheet"}
 CALL_TYPES = tuple(k for k in SIGNATURES if k not in SHEET_SIGNATURES)
 
 
-MARKUP_TYPES = ("heading", "text")
+# a table written in raw Typst too (spec 2026-10-21-commandes-typst-refonte, ARCH-004): its body is the `#table(…)` as written, read by calc/typst_raw_table.py and rewritten by span
+MARKUP_TYPES = ("heading", "text", "table")
 
 
 SHEET_TYPES = tuple(SHEET_SIGNATURES)
@@ -247,6 +236,7 @@ class _Parser:
         self.text = text
         self.n = len(text)
         self._lexer = typst_paths._Lexer(text)
+        self.spans = []   # the arguments of the last call read, where they stand (`call`)
 
     def fail(self, reason, at):
         raise ParseError(reason, at, self.text)
@@ -507,6 +497,8 @@ class _Parser:
         if j >= n or text[j] != "(":
             self.fail(f"`#{kind}` is not called: a `(` is expected right after its name", j)
         args, pos, j = {}, [], j + 1
+        # where each argument stands in the text (spec 2026-10-15, ARCH-003): (its index or its name, where the argument starts, where its value starts and ends) -- what lets a domain's file change one argument and keep every other byte
+        self.spans = []
         while True:
             j = self.ws(j)
             if j >= n:
@@ -524,6 +516,7 @@ class _Parser:
                 if args:
                     self.fail("a positional argument comes before the named ones", j)
                 value, end = self.value(j)
+                self.spans.append((len(pos), j, self.ws(j), end))
                 pos.append(value)
                 j = self.ws(end)
                 if j < n and text[j] == ",":
@@ -537,6 +530,7 @@ class _Parser:
             if name in args:
                 self.fail(f"the argument {name!r} is given twice", j)
             value, end = self.value(k + 1)
+            self.spans.append((name, j, self.ws(k + 1), end))
             args[name] = value
             j = self.ws(end)
             if j < n and text[j] == ",":
@@ -733,24 +727,11 @@ def serialize(call):
 
 
 def default_call(kind):
-    """The call Woodcore writes for a new object of `kind`, and in place of one it cannot read: every command's payload empty but for a table's two columns and a text's placeholder, so that it compiles and says what is still to be written."""
+    """The call Woodcore writes for a new object of `kind`, and in place of one it cannot read: every command's payload empty but for a text's placeholder, so that it compiles and says what is still to be written."""
     if kind not in SIGNATURES:
         raise ObjectError("bad_type", f"{kind!r} is not a call of lib/document.typ or lib/sheet.typ -- expected one of {', '.join(CALL_TYPES + SHEET_TYPES)}" + (" (a heading and a paragraph are markup: `default_body`)" if kind in MARKUP_TYPES else ""), type=kind)
     blank = Content(PLACEHOLDER)
     calls = {
-        "doc-table": {"columns": [{"id": "a", "title": blank}, {"id": "b", "title": blank}], "hidden": [],
-                      "rows": [{"a": Content(""), "b": Content("")}]},
-        "live-load-table": {"rows": []},
-        "dead-load-table": {"rows": []},
-        "doc-field": {"label": blank},
-        "doc-checklist": {"label": blank, "options": []},
-        "doc-choice": {"label": blank, "options": []},
-        "doc-image": {},
-        "doc-plan": {},
-        "doc-fire-plan": {},
-        "doc-extract": {},
-        "doc-annexes": {},
-        "doc-signatures": {"rows": []},
         "show-norm-list": {"keys": []},
         # a sheet's objects (lib/sheet.typ): placed in the frame's top-left quarter, where the window then moves them
         "sheet-page": {"format": "A3", "landscape": True, "margin": Length(10, "mm")},

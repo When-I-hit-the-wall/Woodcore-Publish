@@ -15,6 +15,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import validation
+
 # lib/units.json: one file for the two implementations (ARCH-005)
 UNITS_FILE = Path(__file__).resolve().parent.parent / "lib" / "units.json"
 
@@ -46,8 +48,8 @@ _PH_OPEN, _PH_CLOSE = chr(1), chr(2)   # a placeholder for a substituted symbol,
 _NAME_CHAR = re.compile(r"[A-Za-z0-9_]")
 
 
-class FormulaError(ValueError):
-    """What `#eq`, `#verify` or `#var` would stop the compile on -- a sum of two dimensions, the square root of an odd power, a name nobody declared, a unit that cannot be read -- said in the same words, so the tab refuses it before the report does."""
+class FormulaError(validation.ValidationError, ValueError):
+    """What `#eq`, `#verify` or `#var` would stop the compile on -- a sum of two dimensions, the square root of an odd power, a name nobody declared, a unit that cannot be read -- said in the same words, so the tab refuses it before the report does. A ValidationError (v0.120, C7), so an export it stops says so as a defect of the input; still a ValueError for the callers that catch one."""
 
 
 # --- units -------------------------------------------------------------------------------
@@ -149,8 +151,11 @@ def parse_unit(text):
 
 
 def written_unit(unit):
-    """A unit written with a caret, spelt as the report prints it: «N/mm^2» → «N/mm²» (formula.typ's `written-unit`)."""
-    if not isinstance(unit, str) or "^" not in unit:
+    """A unit written with a caret, spelt as the report prints it: «N/mm^2» → «N/mm²», and per mille written «%%» printed «‰» (formula.typ's `written-unit`)."""
+    if not isinstance(unit, str):
+        return unit
+    unit = unit.replace("%%", "‰")
+    if "^" not in unit:
         return unit
     return re.sub(r"\^([0-9]+)", lambda m: "".join(SUPERSCRIPTS[c] for c in m.group(1)), unit)
 
@@ -284,6 +289,7 @@ def pick_unit(dims, table=None):
 def present(fn, symbol, parsed, want=None, table=None):
     """A quantity as the value and unit a report prints: `want` the declared unit, None to let the table choose. Where the declared unit cannot be reached the result is given in the operands' own unit with a `warning` (wanted, natural), never a stop; an unreadable unit is one (formula.typ's `present`)."""
     table = table or DEFAULT_UNITS
+    want = written_unit(want)   # as formula.typ's `present` is handed it: «%%» is per mille, «‰»
 
     def natural():
         nat = natural_unit(parsed.nat)

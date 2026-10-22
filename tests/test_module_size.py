@@ -1,7 +1,9 @@
-"""No Python module of calc/ over 1500 lines unless docs/architecture/layout.md says why (§11, «How long a module may be»; spec docs/requirements/completed/2026-10-10-audit-issues-26-a-33.md, REQ-30-01; issue #30).
+"""No Python module of calc/ and no Typst file of lib/ over 1500 lines unless docs/architecture/layout.md says why (§11, «How long a module may be»; spec docs/requirements/completed/2026-10-10-audit-issues-26-a-33.md, REQ-30-01; issue #30).
 
 The list of exceptions is read from layout.md, between its two markers, so the rule and its exceptions are written once: a module over the ceiling that the list does not name fails here with its length, and a module the list names that is no longer over the ceiling fails too -- an exception that has stopped being one is a copy that ages without saying so.
 """
+
+TIER = "fast"  # tests/run_tests.py --fast
 
 import re
 
@@ -18,7 +20,7 @@ def exceptions():
     assert block, "layout.md has lost its list of the modules allowed over the ceiling"
     found = {}
     for line in block.group(1).splitlines():
-        m = re.match(r"- `(calc/[^`]+\.py)` -- (.+)", line.strip())
+        m = re.match(r"- `((?:calc/[^`]+\.py)|(?:lib/[^`]+\.typ))` -- (.+)", line.strip())
         if m:
             found[m.group(1)] = m.group(2)
         elif line.strip():
@@ -28,7 +30,7 @@ def exceptions():
 
 def lengths():
     return {path.relative_to(ROOT).as_posix(): len(path.read_text(encoding="utf-8").splitlines())
-            for path in (ROOT / "calc").rglob("*.py") if "__pycache__" not in path.parts}
+            for path in [*(ROOT / "calc").rglob("*.py"), *(ROOT / "lib").glob("*.typ")] if "__pycache__" not in path.parts}
 
 
 def test_no_module_of_calc_is_over_the_ceiling_unless_layout_md_says_why():

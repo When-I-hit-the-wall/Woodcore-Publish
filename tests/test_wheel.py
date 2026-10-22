@@ -7,6 +7,8 @@ Qt changes a spin box, a combo box and a slider on a wheel whether or not they h
 ⚠️ Skipped where PySide6 is not installed: a machine that only builds the report is a legitimate machine. Everything here is built off-screen; a test run must never open a window.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import os
 import sys
 
@@ -141,3 +143,61 @@ def test_the_guard_is_installed_by_main():
     source = conftest.module_source(ROOT / "calc" / "tools" / "woodcore_gui.py")   # with the parts split out of it (issue #30)
     assert "import nowheel" in source, "woodcore_gui.py no longer imports nowheel"
     assert "nowheel.install(app)" in source, "main() no longer installs the wheel guard"
+
+
+# --- Ctrl+wheel zooms the interface, or what is under the pointer where it zooms by itself (issue #85) ----------
+
+def _ctrl_wheel(widget, notches=1):
+    from PySide6.QtCore import QPoint, QPointF, Qt
+    from PySide6.QtGui import QWheelEvent
+    from PySide6.QtWidgets import QApplication
+    centre = QPointF(widget.rect().center())
+    event = QWheelEvent(centre, QPointF(widget.mapToGlobal(widget.rect().center())), QPoint(0, 0), QPoint(0, 120 * notches),
+                        Qt.MouseButton.NoButton, Qt.KeyboardModifier.ControlModifier, Qt.ScrollPhase.NoScrollPhase, False)
+    QApplication.sendEvent(widget, event)
+    QApplication.instance().processEvents()
+
+
+def _zoom_back():
+    import theme
+    theme.set_zoom(theme.ZOOM_DEFAULT)
+    if theme._state["timer"] is not None:
+        theme._state["timer"].stop()   # nothing of this file's to build again
+
+
+def test_ctrl_wheel_over_a_form_zooms_the_interface():
+    import theme
+    w = _widgets()
+    try:
+        before = theme.zoom()
+        _ctrl_wheel(w["area"].viewport())   # the wheel reaches the viewport of a scroll area, not the area
+        assert theme.zoom() == before + theme.ZOOM_STEP, theme.zoom()
+        _ctrl_wheel(w["spin"], notches=-2)   # over a field too, which keeps its value
+        assert theme.zoom() == before - theme.ZOOM_STEP and w["spin"].value() == 30.0
+    finally:
+        _zoom_back()
+
+
+def test_ctrl_wheel_over_a_drawing_an_editor_or_a_page_keeps_their_own_zoom():
+    import nowheel
+    import pdf_pane
+    import theme
+    from PySide6.QtWidgets import QGraphicsScene, QGraphicsView, QPlainTextEdit
+    _widgets()
+    views = (QGraphicsView(QGraphicsScene()), QPlainTextEdit("x = 1"), pdf_pane.ZoomablePdfView())
+    try:
+        for view in views:
+            view.resize(200, 150)
+            view.show()
+            assert nowheel.zooms_itself(view.viewport()), type(view).__name__
+            before = theme.zoom()
+            _ctrl_wheel(view.viewport())
+            assert theme.zoom() == before, f"Ctrl+wheel over a {type(view).__name__} zoomed the interface"
+        import canvas_base
+        import document_view_input
+        import sheet_editor_canvas
+        assert canvas_base.CanvasBase.ZOOMS_ITSELF and document_view_input.PageAreaInputMixin.ZOOMS_ITSELF and sheet_editor_canvas._Page.ZOOMS_ITSELF
+    finally:
+        for view in views:
+            view.deleteLater()
+        _zoom_back()

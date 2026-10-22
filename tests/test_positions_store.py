@@ -3,6 +3,8 @@
 What is held here: the file read and written whole and atomically, a row refused only for what makes it no position; an id proposed with no gap ever refilled; a blank position (id and type only) made for the plan tab; a workbook's rows mapped, its gaps said in notes and never refused; the migration moving the workbook into `_Archiv/` and doing nothing the second time; the export writing a position whose section does not read as `section: null` with a warning; and a blank position going through `#member`, `#moisture-class-of`, `calc-block`, a schema and a connector without stopping anything.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import shutil
 import subprocess
@@ -241,8 +243,11 @@ def test_the_export_writes_a_project_with_no_workbook_and_check_migrates_nothing
 def _planted(name, records):
     """A Typst root of the test's own, the example's engine and export, `records` planted as positions."""
     root = conftest.tmpdir(name)
-    for f in ("commands.typ", "config.typ"):
-        shutil.copyfile(conftest.TYPST_ROOT / f, root / f)
+    for f in ("commands.typ", "config.typ"):   # where the project keeps them: 000-Typst-Config/ laid out by folders (issue #64)
+        source = conftest.PROJECT.config_dir / f
+        target = root / source.relative_to(conftest.PROJECT.typst_root)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
     generated = conftest.PROJECT.generated_dir
     relative = generated.relative_to(conftest.TYPST_ROOT)
     shutil.copytree(generated, root / relative, copy_function=shutil.copyfile, ignore=shutil.ignore_patterns("out", "docs"))
@@ -259,7 +264,7 @@ def _compiles(root, body):
     if not conftest.have_typst():
         raise Skip("typst is not on the path")
     probe = root / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n' + body + "\n", encoding="utf-8")
     out = subprocess.run(["typst", "compile", "--root", str(root), str(probe), str(root / "probe.pdf")], capture_output=True, text=True, encoding="utf-8")
     return out.returncode == 0, conftest.panic_message(out.stderr) or out.stderr
 
@@ -270,12 +275,10 @@ def test_a_blank_position_goes_through_the_report_without_a_panic():
     (blank,), _notes = export_all._positions([{"position": "Z001", "type": "Träger"}])
     bare = {"schema_version": "1.4", "position": "Z002", "type": "Stütze", "domains": {}}
     root = _planted("store_typst", [blank, bare])
-    for body in ('#member("Z001", level: 3, description: true)', '#member("Z002", level: 1, description: true)',
-                 '#moisture-class-of("Z002")', '#calc-block("Z002")[Text]', '#for id in position-ids() { member(id, level: 1) }'):
+    every = '("type", "material", "strength-class", "section-type", "dimension", "units", "moisture-class", "length", "descr")'
+    for body in ('#position("Z001", category-show: %s)' % every, '#position("Z002", category-show: %s)' % every, '#for id in ids("position") { position(id) }'):
         ok, message = _compiles(root, body)
         assert ok, (body, message)
-    ok, message = _compiles(root, '#member("Z001", level: 0)\n#verify-shear("Z001", V: 12)')
-    assert not ok and "no section" in message, message
 
 
 def test_a_blank_position_warns_a_schema_and_a_connector_and_stops_neither():
@@ -290,3 +293,25 @@ def test_a_blank_position_warns_a_schema_and_a_connector_and_stops_neither():
     _schemas, _files, schema_warnings = schema.prepare(here.details_dir, records)
     _data, _figures, warnings = connector.prepare(here.connectors_dir, records, details)
     assert schema_warnings or warnings, "a position with no section and no strength class must be said somewhere"
+
+
+def test_a_project_laid_out_by_folders_keeps_its_positions_in_positions_and_a_workbook_beside_them():
+    """Issue #64 (D-24): positions.json, the source, in `Positions/`, and `Positions.xlsx` written beside it at every change -- the sheet and the headers of Positionen.xlsx, so a copy of it imports again -- and never read: a workbook deleted or edited changes nothing of what is read."""
+    import documents
+    import openpyxl
+    here = project.write(conftest.tmpdir("positions_folders") / "P.woodcore", "P", documents.layout_for("fr"))
+    assert store.path(here) == here.root / "Positions" / "positions.json"
+    rows = [{"position": "S101", "type": "Pfette", "material": "Fichte", "strength_class": "C24", "section_type": "rect", "dimension": "120/240", "units": "mm", "moisture_class": 1, "description": "Pfette Achse 1"}]
+    store.write(here, rows)
+    book = store.workbook_path(here)
+    assert book == here.root / "Positions" / "Positions.xlsx" and book.is_file()
+    sheet = openpyxl.load_workbook(book)[store.SHEET]
+    values = [[cell.value for cell in row] for row in sheet.iter_rows()]
+    assert values[0] == [store.HEADERS[key] for key in store.KEYS]
+    assert values[1][:3] == ["S101", "Pfette", "Fichte"] and values[1][7] == 1
+    book.write_bytes(b"not a workbook")
+    assert store.read(here)[0]["position"] == "S101", "the workbook is never read"
+    # a project laid out before writes none
+    alone = project.write(conftest.tmpdir("positions_alone") / "A.woodcore", "A")
+    store.write(alone, rows)
+    assert store.workbook_path(alone) is None and not list(alone.root.rglob("Positions.xlsx"))

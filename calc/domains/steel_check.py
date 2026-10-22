@@ -14,6 +14,7 @@ from pathlib import Path
 import engine
 import project
 import validation
+from domains._common import fail as _fail, is_number as _number  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import links, profile as free_profile, section as position_section, steel_resistance, steel_section
 from norms import sia263
 
@@ -22,7 +23,8 @@ EXPORT_SCHEMA = "steel"
 SOURCE_SCHEMA_VERSION = "1.0"
 LINKED_SCHEMA_VERSION = "1.1"
 SOURCE_SCHEMA_VERSIONS = (SOURCE_SCHEMA_VERSION, LINKED_SCHEMA_VERSION)
-EXPORT_SCHEMA_VERSION = "1.0"
+# 1.1 (v0.120, spec 2026-10-19-base-saine-nettoyage C1, C2): the rows built by engine.Calculation, and a value entered citing the clause it serves -- 1.0 is still read
+EXPORT_SCHEMA_VERSION = "1.2"   # 1.2: no level on a line, lib/line-levels.json saying it (spec 2026-10-20-indices-et-niveaux, UI-002); 1.0 and 1.1 still read
 EXPORT_FILE = "steel.json"
 DOMAIN = "steel"
 
@@ -45,14 +47,6 @@ FIELDS = {
 }
 # The fields a variable of the export may fill, with the unit each is written in -- None where the field's own {value, unit} says it.
 LINKABLE = {"N": None, "M_y": None, "M_z": None, "V_z": None, "V_y": None, "A_net": "mm²"}
-
-
-def _fail(where, message):
-    raise validation.ValidationError("%s: %s" % (where, message))
-
-
-def _number(value):
-    return not isinstance(value, bool) and isinstance(value, (int, float))
 
 
 # --- the source ---------------------------------------------------------------
@@ -81,6 +75,8 @@ def check_source(src, where="steel"):
     version = src.get("schema_version")
     if version not in SOURCE_SCHEMA_VERSIONS:
         _fail(where, "schema_version %r -- expected one of %s" % (version, ", ".join(SOURCE_SCHEMA_VERSIONS)))
+    # the contract first, schemas/steel-source.schema.json, as every other domain reads its own (v0.120, C3); the checks below say in the engineer's words what it leaves out
+    validation.validate_structure(src, "steel-source", where)
     cid = src.get("id")
     if not isinstance(cid, str) or not ID_PATTERN.match(cid):
         _fail(where, "id %r -- letters, digits and _ . + - only" % (cid,))
@@ -361,4 +357,48 @@ def export(here=None):
     import variable_sources
     data = prepare(here, connector.known_positions(here.data_dir), variable_sources.known_values(here.data_dir))
     write(data, here.data_dir)
+    # a steel check is written out when it is first saved, as a member check is (spec 2026-10-21-commandes-typst-refonte, REQ-017), and the index of the domains lists it
+    from domains import formula_domain, unfold
+    if unfold.unfold_domains(here, "steel", data):
+        formula_domain.export(here)
     return data
+
+
+def references(record):
+    """What an exported steel check names, [(kind, id, field)]: its position, and the profile it is computed with (domains/dependency_graph.py, spec 2026-10-21-graphe-dependances, ARCH-RISK-1103)."""
+    out = [("position", record["position"], "position")] if record.get("position") else []
+    if record.get("profile"):
+        out.append(("profile", record["profile"], "profile"))
+    return out
+
+
+# --- written out as a domain of its own (spec 2026-10-21-commandes-typst-refonte, REQ-017, ARCH-011) ----------------------
+
+def is_unfolded(record):
+    """Whether the exported steel check `record` is written out as a domain of its own, `Steel-checks/<Kind>/<id>.typ` (calc/domains/unfold.py): every one the export computed -- one that cannot be computed is said by its reason and printed by nothing."""
+    return bool(record.get("calculable")) and bool(record.get("vars"))
+
+
+def form_of(record):
+    """The form an unfolded steel check is written for, {kind, form, version} -- what the base keeps and `#domain` compares (REQ-012): its kind, and the rows it computes, which a branch of SIA 263 changes (a bending with a normal force, a shear beyond 0.5 V_Rd, the class of the section), named by their digest; None where it is not written out."""
+    import sync
+    from domains import unfold
+    if not is_unfolded(record):
+        return None
+    rows = sync.digest(",".join(record["vars"]))[:6]
+    return {"kind": "steel-" + record["kind"], "form": "%s %s" % (record["kind"], rows), "version": unfold.GENERATOR_VERSION}
+
+
+def unfolded_lines(record):
+    """The vars of an exported steel check as the unfolded file writes them (calc/domains/line_keys.py `calc_lines`): each worked out an `#eq` where its step's formula computes it in the registry's keys, every other a literal checked by `domain: ("steel", id)`."""
+    from domains import line_keys
+    return line_keys.calc_lines(record)
+
+
+def ratio_keys(record):
+    """The utilisation's formula in the registry's keys where it computes the check's η as `#eq` computes it -- the export writes it in keys already (`ratio`) --, else None, and the unfolded file writes η as a literal."""
+    from domains import line_keys
+    values = {line["key"]: (line["value"], line.get("unit") or "") for line in unfolded_lines(record) if isinstance(line["value"], (int, float))}
+    if record.get("eta") is None or not record.get("ratio"):
+        return None
+    return record["ratio"] if line_keys.computes(record["ratio"], values, "eta", record["eta"], "") else None

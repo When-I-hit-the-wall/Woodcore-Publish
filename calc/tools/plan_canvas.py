@@ -87,6 +87,7 @@ from plan_canvas_input import (  # split out of this module (issue #30): every n
     readout_kind,
     PlanCanvasInputMixin,
 )
+from canvas_base import CanvasBase  # what the four canvases share, written once (D1)
 
 SNAP_COLOUR = theme.qcolor("plan-snap")
 # The tracking (v0.116, domains/plan_tracking.py): how long the pointer must rest on a point of the plan before it is acquired as a reference, in milliseconds, and the colour of the dotted lines the cursor locks to.
@@ -96,7 +97,7 @@ SUPERPOSE_Z = 5
 ALIGN_COLOUR = theme.qcolor("plan-align")
 
 
-class PlanCanvas(PlanCanvasInputMixin, PlanCanvasEditMixin, PlanCanvasViewMixin, QGraphicsView):
+class PlanCanvas(PlanCanvasInputMixin, PlanCanvasEditMixin, PlanCanvasViewMixin, CanvasBase, QGraphicsView):
     """The plan being edited, and the tools that edit it. It edits the `source` dictionary it is given in place -- the tab's draft -- and says so: `about_to_change` just before an edit (the tab keeps the state for its undo history), `changed` once it is made. `selection_changed` when another element or axis is selected, `pointer` as the pointer moves (its sheet coordinates and what it snaps to), `calibrated` with the two points of a calibration, `tool_done` when a one-shot tool (the crop, the calibration) has been used, `axes_renamed` with the (old, new) names of the axes a new axis moved up (plan.insert_axis), `refused` with the type of a tool that was used with no position number to give what it would draw -- an element carries a position of Positionen.xlsx, and `propose_label` found none of that type --, and `pages_known` with the page count of the plan's PDF once it is loaded, which may be a moment after the plan is shown (use_pdf).
 
     Since v0.114 a plan is shown as its **crop alone** -- nothing outside the crop is drawn, the background, the symbols and the sheet clipped to it, and the view no larger than the crop and a margin -- unless `set_show_outside(True)` asks for the whole page under a veil, as before; the crop tool shows the whole page while it is used, there being nothing to crop otherwise. Its background may be a document's (`background.document`, calc/domains/plan_documents.py): the window then renders `plan_documents.render_source`, the document with its layers switched off and its pages turned. On a section the two storey tools draw into `storey_lines` and `storey_boxes` with the storey the tab has chosen (`set_storey_choice`), through the same `about_to_change`/`changed` as every other edit, and say so: `storeyLineDrawn` with the line's two points, `storeyBoxDrawn` with the box, `storeyMissing` with the tool when no storey is chosen and nothing was drawn."""
@@ -114,6 +115,7 @@ class PlanCanvas(PlanCanvasInputMixin, PlanCanvasEditMixin, PlanCanvasViewMixin,
     storeyLineDrawn = Signal(list)
     storeyBoxDrawn = Signal(dict)
     storeyMissing = Signal(str)
+    clip_point = Signal(str, float, float)   # Ctrl+C's base point or Ctrl+V's point clicked (issue #61): the tab takes the clip or puts it down
     edit_refused = Signal(str)   # «Déplacer», «Copier» or a parallel aid with nothing to act on (issue #18): the tab says what to do first
     # the superposition (v0.116): shown again as the source now states it -- the module reads `superposition_state` --, and the step «Aligner» is at (1: a point of the superposed plan, 2: the matching point of this one, 0: done)
     superposition_changed = Signal()

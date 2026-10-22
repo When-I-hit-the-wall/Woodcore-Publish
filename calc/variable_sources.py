@@ -23,6 +23,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import line_levels
 import project
 import validation
 import variables as model
@@ -71,13 +72,15 @@ def instance_workbook(domain, instance):
     return instance.get("workbook") or domain.get("workbook", "")
 
 
-def _variable(key, name, v):
+def _variable(key, name, v, table_domain=None):
+    # its level is lib/line-levels.json's for its domain since v0.120 (UI-002), the var's own where the table names it not -- an older export, a «Formule» domain
+    level = line_levels.level(table_domain, key, "var", own=v.get("level")) if table_domain else v.get("level")
     return model.Variable(
         key=key, domain=name, value=v.get("value"), unit=v.get("unit") or "",
         symbol=v.get("symbol") or key, label=v.get("label") or "",
         description=v.get("description") or "", norm=v.get("norm") or "",
         norm_ref=v.get("norm_ref") or "", source=v.get("source") or "",
-        level=v.get("level"), choices=tuple(v.get("choices") or ()),
+        level=level, choices=tuple(v.get("choices") or ()),
     )
 
 
@@ -89,7 +92,7 @@ def _formulas(record):
 def _domain(name, address, record, label="", workbook="", sheet=""):
     return Domain(
         name=name, origin=EXPORT, kind="export", address=address, label=label,
-        variables=[_variable(key, name, v) for key, v in (record.get("vars") or {}).items() if isinstance(v, dict)],
+        variables=[_variable(key, name, v, address[0]) for key, v in (record.get("vars") or {}).items() if isinstance(v, dict)],
         results=tuple(record.get("results") or ()),
         checks=tuple(c["name"] for c in record.get("checks") or () if isinstance(c, dict) and c.get("name")),
         workbook=workbook, sheet=sheet, formulas=_formulas(record),

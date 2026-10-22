@@ -14,20 +14,17 @@ For serviceability, $E_d$ is generally determined with $γ_F$ = $γ_m$ = 1.0 (SI
 - quasi-permanent load cases: all variable actions with ψ₂.
 // woodcore:/object p2
 
-// woodcore:object doc-table sls-load-cases-table
-#doc-table(
-  columns: (
-    (id: "element", title: [Member]),
-    (id: "case", title: [Load case]),
-    (id: "permanent", title: [Self-weight and permanent loads], kind: "number"),
-    (id: "live", title: [Live load [category]], kind: "number"),
-    (id: "snow", title: [Snow], kind: "number"),
-    (id: "wind", title: [Wind], kind: "math"),
-  ),
-  hidden: (),
-  rows: (
-    (element: [[Roof]], case: [CC 1], permanent: 1.0, live: [–], snow: 1.0, wind: [$ψ_0$]),
-    (element: [[Typical floor]], case: [CC 2], permanent: 1.0, live: 1.0, snow: [–], wind: [$ψ_0$]),
+// woodcore:object table sls-load-cases-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto, auto),
+    align: (left, left, right, right, right, center),
+    table.hline(stroke: 1pt),
+    table.header([*Member*], [*Load case*], [*Self-weight and permanent loads*], [*Live load [category]*], [*Snow*], [*Wind*]),
+    table.hline(stroke: 0.5pt),
+    [[Roof]], [CC 1], [1.0], [–], [1.0], [$ψ_0$],
+    [[Typical floor]], [CC 2], [1.0], [1.0], [–], [$ψ_0$],
+    table.hline(stroke: 1pt),
   ),
   caption: [Load cases: serviceability],
 )

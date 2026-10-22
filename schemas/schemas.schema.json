@@ -12,9 +12,8 @@
       "type": "string",
       "enum": [
         "1.1",
-        "1.2"
-      ],
-      "description": "-- 1.1, or 1.2 where a schema carries `texts` (issue #43): an export written at another version is refused rather than read as this one."
+        "1.2", "1.3", "1.4"],
+      "description": "-- 1.1, or 1.2 where a schema carries `texts` (issue #43): an export written at another version is refused rather than read as this one. 1.3 (issue #64): 1.2 with the figures named from the Typst root (`/Details/Exports/Figures/D01-fr.svg`), written by a project laid out by folders. 1.4 (v0.120, D7): each schema carries `size`, written by every export since, with texts or without, laid out by folders or not."
     },
     "schemas": {
       "type": "object",
@@ -37,6 +36,11 @@
             "label": {
               "type": "string",
               "description": "Free text, printed after the schema's id in the figure's caption."
+            },
+            "size": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "1.4 (v0.120, D7): the extent calc/domains/schema_svg.layout sizes the drawing's symbols by -- the longer side of what it draws, in millimetres: a text is size/40 high, a marker's radius size/130. show-schema's halo reads it; until 1.4 the report worked it out again from the geometry."
             },
             "source": {
               "type": "string",

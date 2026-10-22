@@ -13,6 +13,8 @@ What is held, on the «Traction» tab of a copy of the example project:
 ⚠️ Built off-screen; nothing here compiles Typst.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import sys
 
 import conftest
@@ -206,7 +208,7 @@ def test_a_static_model_s_point_and_load_follow_variables_and_are_saved_at_1_2()
         assert saved["point_loads"][0]["magnitude"]["last"] == {"value": 2, "unit": "kN"}
         statics.check_source(saved, "LK1.json")
         exported = json.loads((here.data_dir / "statics.json").read_text(encoding="utf-8"))
-        assert exported["schema_version"] == statics.LINKED_EXPORT_VERSION and exported["models"]["LK1"]["links"][0]["field"] == "x"
+        assert exported["schema_version"] == (statics.ROOTED_EXPORT_VERSION if here.has_folders else statics.LINKED_EXPORT_VERSION) and exported["models"]["LK1"]["links"][0]["field"] == "x"   # laid out by folders, 1.3 contains 1.2 (issue #64)
         tab.dirty = False
 
 
@@ -239,9 +241,9 @@ def test_a_project_opened_read_only_closes_the_button():
 def test_every_number_of_a_static_model_that_may_follow_a_variable_has_its_button():
     """REQ-009 for the static models (D-05): a point's x and z, a spring's stiffness, a rotational release's, the model's b_e and a load's own -- each a button; the label of a load, its colour and its show none."""
     import linkable_spin
+    window, here = _window()   # calc/tools is on the path once the window is built: a tab's module is imported after it
     import statics_tab
     from domains import statics
-    window, here = _window()
     with project.using(here):
         tab = next(t for t in window.tabs if isinstance(t, statics_tab.StaticsTab))
         source = statics.new_source("LK2")
@@ -273,9 +275,9 @@ def test_a_model_saved_before_whose_load_names_a_variable_opens_linked_and_expor
     """UI-005: a 1.1 model whose load names a variable of the export (the three lists' reference) is read, shown with that variable named and «Choisir…», and exported as before -- the magnitude's own `last` is the window's, written only when it saves."""
     import json
     from PySide6.QtWidgets import QLabel, QPushButton
+    window, here = _window()   # calc/tools is on the path once the window is built: a tab's module is imported after it
     import statics_tab
     from domains import statics
-    window, here = _window()
     with project.using(here):
         source = statics.new_source("LK3")
         source.update(points=[{"id": "P1", "x": 0, "z": 0}, {"id": "P2", "x": 3, "z": 0}],
@@ -347,10 +349,10 @@ def test_a_connector_s_numbers_have_their_button_and_its_diameter_follows_a_load
 def test_a_polar_moment_s_trial_forces_are_saved_and_follow_a_script():
     """D-12: the trial forces are data of the calculation, in its draft; N linked to a script's force comes back as its value, at 4.1; a centre not placed by hand takes no variable, its buttons closed."""
     window, here = _window()
-    import woodcore_gui_polar
+    import polar_tab
     from domains import connection
     with project.using(here):
-        tab = next(t for t in window.tabs if isinstance(t, woodcore_gui_polar.PolarTab))
+        tab = next(t for t in window.tabs if isinstance(t, polar_tab.PolarTab))
         _tension, listing = _tabs(window)
         window.tab_widget.setCurrentWidget(tab)
         tab.load("VU-MP-1")
@@ -432,7 +434,7 @@ def test_every_number_of_the_joints_and_loads_tabs_has_its_button_and_no_list_ha
     import connectors_tab
     import linkable_spin
     import load_tab
-    import woodcore_gui_polar
+    import polar_tab
     from PySide6.QtWidgets import QComboBox, QDoubleSpinBox
 
     def wrapper_of(widget):
@@ -458,7 +460,7 @@ def test_every_number_of_the_joints_and_loads_tabs_has_its_button_and_no_list_ha
             check(joints, assembly)
         assert {(0, "t"), (0, "plates.slot"), (0, "plates.ratio"), ("self", "diameter"), ("self", "dowel.f_u_k"), (0, "alpha"), (0, "a_1")} <= set(joints.link_fields)
         joints.dirty = False
-        check(next(t for t in window.tabs if isinstance(t, woodcore_gui_polar.PolarTab)), "polar")
+        check(next(t for t in window.tabs if isinstance(t, polar_tab.PolarTab)), "polar")
         dead = next(t for t in window.tabs if isinstance(t, load_tab.DeadLoadTab))
         dead.new()
         if dead.table.rowCount() == 0:

@@ -85,7 +85,7 @@ EDITORS = {
     "tab_connections": (_edit_identity, lambda here, tab: here.connectors_dir / f"{tab.current_id}.json"),
     "tab_mc_tension": (_edit_identity, lambda here, tab: here.checks_dir / f"{tab.current_id}.json"),
     "tab_polar": (lambda tab, text: tab.label_edit.setText(text), lambda here, tab: here.connections_dir / f"{tab.current_id}.json"),
-    "tab_positions": (lambda tab, text: tab.description_edit.setPlainText(text), lambda here, tab: here.sources_dir / "positions.json"),
+    "tab_positions": (lambda tab, text: tab.description_edit.setPlainText(text), lambda here, tab: here.positions_dir / "positions.json"),
     "tab_journal": (lambda tab, text: tab.label_edit.setText(text), lambda here, tab: tab.file()),
 }
 
@@ -153,14 +153,14 @@ def test_a_new_position_never_touched_is_not_written():
     window, here = _window()
     with project.using(here):
         tab = _show(window, "tab_positions")
-        before = (here.sources_dir / "positions.json").read_bytes()
+        before = (here.positions_dir / "positions.json").read_bytes()
         with _boxes() as shown:
             tab.new_position()
             assert tab.current_id is None and tab.untouched_draft()
             _leave(window)
             tab = _show(window, "tab_positions")
             tab.load_first() if hasattr(tab, "load_first") else None
-        assert (here.sources_dir / "positions.json").read_bytes() == before, "a position nobody asked for was written"
+        assert (here.positions_dir / "positions.json").read_bytes() == before, "a position nobody asked for was written"
         assert "warning" not in shown and "critical" not in shown, shown
         tab.dirty = False
 
@@ -235,7 +235,7 @@ def test_a_plan_a_view_and_another_object_save_without_a_box():
             window.on_view_chosen("display")
         assert not shown and not statics.dirty and "view left" in path.read_text(encoding="utf-8"), "another view saves as another tab does"
         window.on_view_chosen("draw")
-        first, second = statics.current_id, next(i for i in statics.saved_ids if i != statics.current_id)
+        first, second = statics.current_id, next(i for i in statics.ids if i != statics.current_id)
         with _boxes() as shown:
             _edit_identity(statics, "object left")
             statics.on_list_change(second)

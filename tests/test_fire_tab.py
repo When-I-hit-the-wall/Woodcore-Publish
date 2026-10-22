@@ -1708,7 +1708,7 @@ def test_the_command_entry_builds_show_fire_plan():
         tab.set_view("typst")   # the «Commande Typst» row of v0.114 is the «Typst» view since v0.117
         assert tab.view_kind == "command" and tab.view == "typst"
         assert tab.center.currentWidget() is tab.builder.preview and tab.right.currentWidget().isAncestorOf(tab.builder.options)
-        assert tab.builder.command().startswith("#show-fire-plan("), tab.builder.command()
+        assert tab.builder.command().startswith("#figure(image-fire-plan("), tab.builder.command()   # a native figure since the spec 2026-10-21-commandes-typst-refonte (REQ-014)
         tab.builder.stop()
         tab.show_plan_view()
         assert tab.center.currentWidget() is tab.center.widget(0) and tab.view == "draw"
@@ -1778,7 +1778,7 @@ def test_saving_exports_the_plans_a_failing_export_leaves_the_plan_saved_and_say
         shown.clear()
         fire.export = boom
         try:
-            assert tab.export_plans("done") is False
+            assert tab.export_listed("done") is False
         finally:
             fire.export = original
         assert shown == [tab.t("fp_export_failed", id="", error=OSError("disk full"))]

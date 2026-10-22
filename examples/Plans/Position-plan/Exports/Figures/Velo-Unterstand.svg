@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="466.65 355.41 1288.71 497.85" width="1288.71" height="497.85">
+<!-- highlight -->
+<!-- axes -->
+<!-- /axes -->
+<g id="el-2">
+<polyline points="679.08,467.27 679.08,707.47" fill="none" stroke="#2e5faa" stroke-width="3.639" stroke-linejoin="round"/>
+<polygon points="679.08,467.27 685.903,486.98 672.257,486.98" fill="#2e5faa"/>
+<polygon points="679.08,707.47 672.257,687.76 685.903,687.76" fill="#2e5faa"/>
+</g>
+<g id="el-1">
+<rect x="660.615" y="584.045" width="8.369" height="8.369" fill="#2e5faa"/>
+</g>
+<rect x="-11.644" y="-5.003" width="23.288" height="10.006" rx="5.003" ry="5.003" fill="#ffffff" stroke="#2e5faa" stroke-width="0.97" transform="translate(679.44,555.87) rotate(90)"/>
+<text x="0" y="2.377" font-family="Arial" font-size="6.792" text-anchor="middle" font-weight="bold" transform="translate(679.44,555.87) rotate(90)" fill="#2e5faa">T001</text>
+<rect x="651.906" y="595.67" width="23.288" height="10.006" rx="1.819" ry="1.819" fill="#ffffff" stroke="#2e5faa" stroke-width="0.97"/>
+<text x="663.55" y="603.05" font-family="Arial" font-size="6.792" text-anchor="middle" font-weight="bold" fill="#2e5faa">S001</text>
+</svg>

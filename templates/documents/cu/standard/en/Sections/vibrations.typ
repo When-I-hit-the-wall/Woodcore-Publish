@@ -13,17 +13,17 @@ Vibrations must neither restrict the functionality of the building nor impair th
 Equipment that generates vibrations is mounted on a floating base in accordance with the building physicist's instructions. [Vibrations from rail or road traffic: to be clarified by the owner.]
 // woodcore:/object p2
 
-// woodcore:object doc-table vibrations-table
-#doc-table(
-  columns: (
-    (id: "use", title: [Use], kind: "wide"),
-    (id: "f", title: [Minimum eigenfrequency $f$], unit: "Hz", kind: "number"),
-    (id: "basis", title: [Basis]),
-  ),
-  hidden: (),
-  rows: (
-    (use: [Gymnasiums and sports halls], f: [> 8.0], basis: [SIA 260, Tab. 5]),
-    (use: [Dance and concert halls], f: [> 7.0], basis: [SIA 260, Tab. 5]),
+// woodcore:object table vibrations-table
+#figure(
+  table(
+    columns: (1fr, auto, auto),
+    align: (left, right, left),
+    table.hline(stroke: 1pt),
+    table.header([*Use*], [*Minimum eigenfrequency $f$*], [*Basis*]),
+    table.hline(stroke: 0.5pt),
+    [Gymnasiums and sports halls], [> 8.0], [SIA 260, Tab. 5],
+    [Dance and concert halls], [> 7.0], [SIA 260, Tab. 5],
+    table.hline(stroke: 1pt),
   ),
   caption: [Minimum eigenfrequencies],
 )

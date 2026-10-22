@@ -101,12 +101,8 @@ COLOUR_ALLOWED = {
     ("plan_canvas_render.py", "#fff"): "_WHITE (split out of plan_canvas.py) recognises the white tint_svg must not tint -- what connector_svg and connection_svg write, not a colour chosen here",
     ("plan_canvas_render.py", "#ffffff"): "_WHITE again",
     ("statics_tab_build.py", "#ffffff"): "SWATCH_FILL recognises the white statics_svg fills a swatch with, to recolour it on a dark ground",
-    ("statics_tab_build.py", "#000001"): "a sentinel of the swatch's recolouring: written then replaced, never shown (split out of statics_tab.py)",
-    ("statics_tab_build.py", "#000002"): "a sentinel of the swatch's recolouring",
-    ("connectors_tab_form.py", "#000001"): "a sentinel of the swatch's recolouring (svg_icon, split out of connectors_tab.py)",
-    ("connectors_tab_form.py", "#000002"): "a sentinel of the swatch's recolouring",
-    ("schema_tab_build.py", "#000001"): "a sentinel of the swatch's recolouring (split out of schema_tab.py)",
-    ("schema_tab_build.py", "#000002"): "a sentinel of the swatch's recolouring",
+    ("svg_icons.py", "#000001"): "a sentinel of the swatch's recolouring (recolour, written once since v0.120, D3): written then replaced, never shown",
+    ("svg_icons.py", "#000002"): "a sentinel of the swatch's recolouring",
 }
 _HEX = re.compile(r"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})(?![0-9a-zA-Z_])")
 
@@ -285,7 +281,7 @@ else:
 """)
 
 
-def test_the_file_menu_offers_the_three_appearances_in_every_language():
+def test_the_view_menu_offers_the_three_appearances_in_every_language():
     _qt()
     theme = _theme()
     import woodcore_gui
@@ -295,7 +291,7 @@ def test_the_file_menu_offers_the_three_appearances_in_every_language():
     _in_a_process_of_its_own(r"""
 import woodcore_gui
 window = woodcore_gui.MainWindow()
-menu = window.menuBar().actions()[0].menu()
+menu = window.menuBar().actions()[1].menu()   # «Affichage» since issue #85, «Fichier» until then
 sub = next(a.menu() for a in menu.actions() if a.menu() is not None and a.text() == window.t("file_appearance"))
 entries = sub.actions()
 assert [a.data() for a in entries] == list(theme.APPEARANCES)
@@ -318,7 +314,9 @@ for tab in window.tabs:
 
 FONT_PROBE = r"""
 import json, sys
-sys.path.insert(0, sys.argv[1])
+from pathlib import Path
+# calc/tools/ and calc/, as the window has them: theme reads usersettings, in calc/ since v0.120 (G6)
+sys.path[:0] = [sys.argv[1], str(Path(sys.argv[1]).parent)]
 from PySide6.QtGui import QFont, QFontInfo, QRawFont
 from PySide6.QtWidgets import QApplication
 app = QApplication([])
@@ -372,3 +370,98 @@ def test_the_text_font_carries_what_a_calculation_is_written_with():
     for sign, (ours, before) in found["rare"].items():
         if before is not None:
             assert ours == before, f"{sign}: Segoe UI and Segoe UI Variable differ"
+
+
+# --- the interface's zoom (issue #85) -----------------------------------------------------------------------------
+
+def test_the_zoom_goes_by_steps_of_ten_between_seventy_and_two_hundred():
+    theme = _theme()
+    assert (theme.ZOOM_MIN, theme.ZOOM_MAX, theme.ZOOM_STEP, theme.ZOOM_DEFAULT) == (70, 200, 10, 100)
+    assert [theme.clamp_zoom(p) for p in (100, 104, 106, 69, 30, 201, 500, "x", None, float("nan"))] == [100, 100, 110, 70, 70, 200, 200, 100, 100, 100]
+
+
+def test_the_zoom_is_kept_in_the_user_s_settings_survives_a_change_of_scheme_and_builds_the_windows_once():
+    _qt()
+    _in_a_process_of_its_own(r"""
+import time
+import usersettings
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget
+
+class Window(QWidget):
+    rezoomed = 0
+    def rezoom(self):
+        Window.rezoomed += 1
+
+window = Window()
+window.setAttribute(Qt.WidgetAttribute.WA_DontShowOnScreen, True)
+window.show()
+theme.apply(app)
+base = app.font().pointSizeF()
+assert theme.zoom() == 100
+for _ in range(5):   # a burst of Ctrl+ is one rebuild
+    theme.zoom_in(app)
+assert theme.zoom() == 150 and usersettings.read()["ui_zoom"] == 150
+assert abs(app.font().pointSizeF() - base * 1.5) < 0.01, (base, app.font().pointSizeF())
+assert Window.rezoomed == 0, "built again at every step"
+end = time.monotonic() + 2
+while time.monotonic() < end and not Window.rezoomed:
+    app.processEvents()
+    time.sleep(0.02)
+assert Window.rezoomed == 1, Window.rezoomed
+theme.apply(app, "dark")   # a change of scheme keeps the zoom
+assert abs(app.font().pointSizeF() - base * 1.5) < 0.01, app.font().pointSizeF()
+assert abs(theme.brand_font().pointSizeF() - theme.BRAND_POINTS * 1.5) < 0.01
+for _ in range(20):
+    theme.zoom_in(app)
+assert theme.zoom() == 200
+for _ in range(30):
+    theme.zoom_out(app)
+assert theme.zoom() == 70
+theme.zoom_reset(app)
+assert theme.zoom() == 100 and abs(app.font().pointSizeF() - base) < 0.01 and usersettings.read()["ui_zoom"] == 100
+theme._state["zoom"] = None   # read again from the settings, as at the next start
+assert theme.zoom() == 100
+""")
+
+
+def test_the_view_menu_holds_the_zoom_and_the_appearance_and_the_window_takes_the_zoom():
+    _qt()
+    import woodcore_gui
+    for lang in ("fr", "de", "en"):
+        words = [woodcore_gui.STRINGS[lang][key] for key in ("view_menu", "zoom_in", "zoom_out", "zoom_reset", "zoom_status")]
+        assert all(words) and "{percent}" in words[-1], (lang, words)
+    assert woodcore_gui.STRINGS["fr"]["view_menu"].replace("&", "") == "Affichage" and woodcore_gui.STRINGS["de"]["view_menu"].replace("&", "") == "Ansicht" and woodcore_gui.STRINGS["en"]["view_menu"].replace("&", "") == "View"
+    _in_a_process_of_its_own(r"""
+import woodcore_gui
+from PySide6.QtGui import QKeySequence
+window = woodcore_gui.MainWindow()
+menus = [a.menu() for a in window.menuBar().actions()]
+titles = [m.title() for m in menus]
+assert titles[:2] == [window.t("file_menu"), window.t("view_menu")], titles
+file_menu, view = menus[0], menus[1]
+assert not any(a.menu() is not None and a.text() == window.t("file_appearance") for a in file_menu.actions()), "«Apparence» still in «Fichier»"
+assert any(a.menu() is not None and a.text() == window.t("file_appearance") for a in view.actions())
+keys = {a.text(): [k.toString() for k in a.shortcuts()] for a in view.actions() if a.text()}
+assert keys[window.t("zoom_in")] == ["Ctrl++", "Ctrl+="] and keys[window.t("zoom_out")] == ["Ctrl+-"] and keys[window.t("zoom_reset")] == ["Ctrl+0"], keys
+assert window.zoom_status.isHidden(), "«Zoom 100 %» said"
+title = window.title_font.pointSizeF()
+next(a for a in view.actions() if a.text() == window.t("zoom_in")).trigger()
+assert theme.zoom() == 110
+window.rezoom()
+assert abs(window.title_font.pointSizeF() - title * 1.1) < 0.05, (title, window.title_font.pointSizeF())
+assert not window.zoom_status.isHidden() and window.zoom_status.text() == window.t("zoom_status", percent=110), window.zoom_status.text()
+for tab in window.tabs:
+    if hasattr(tab, "dirty"):
+        tab.dirty = False
+""")
+
+
+def test_the_start_page_takes_the_zoom_s_keys_too():
+    _qt()
+    _in_a_process_of_its_own(r"""
+import home_page
+page = home_page.HomeWindow(lambda file: None)
+keys = sorted(k.toString() for a in page.centralWidget().actions() for k in a.shortcuts())
+assert keys == sorted(["Ctrl++", "Ctrl+=", "Ctrl+-", "Ctrl+0"]), keys
+""")

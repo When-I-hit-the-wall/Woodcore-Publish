@@ -15,9 +15,8 @@ import copy
 import json
 from pathlib import Path
 
-from PySide6.QtCore import QByteArray, QRectF, Qt
-from PySide6.QtGui import QColor, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QButtonGroup, QCheckBox, QComboBox, QDoubleSpinBox, QGridLayout,
     QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPlainTextEdit,
@@ -46,7 +45,7 @@ import flowbar
 import notifications  # every error, warning and information, gathered in one place (calc/notifications.py, v0.117)
 import notices_ui  # what was a message box is a notice since v0.117 (notices_ui.tell)
 from flowbar import (BAR_SPACING, TOOL_ICON_PX, FlowLayout, FlowWidget, ResizableColumns, ToolBarArea,
-                     pixel_ratio, set_tip, size_tool, symbol_px, tool_group)
+                     set_tip, size_tool, symbol_px, tool_group)
 from statics_tab_words import HINTS, STRINGS, TIPS, hint_key, tip_key  # split out of this module (issue #30): every name it had is still importable from it
 from statics_tab_build import (  # split out of this module (issue #30): every name it had is still importable from it
     GRID_CHOICES,
@@ -57,7 +56,6 @@ from statics_tab_build import (  # split out of this module (issue #30): every n
     SWATCH_INK,
     TOOL_GROUPS,
     _as_number,
-    _canvas,
     _fix_direction,
     _fix_kind,
     _fix_shape,
@@ -78,13 +76,13 @@ from statics_tab_properties import StaticsPropertiesMixin  # split out of this m
 
 # The row that stands for the draft nobody has saved yet. Not an id anything can be filed under, so it
 # cannot collide with a model's own: ID_PATTERN allows no angle bracket.
-NEW_ROW = "<new>"
+from source_editor import NEW_ROW  # the list's row of the draft, the one constant (spec 2026-10-20-indices-et-niveaux, ARCH-005)
 from statics_canvas import TOOLS, StaticsCanvas
 
 # Every path is the current project's, asked of project.current() when it is needed (v0.81, docs/architecture/layout.md §11): the models' sources -- one file per model, written by this tab and nothing else (section 3.3octies) -- are its `statics_dir`, and the values a load may name are read from its export.
 
 # How many steps «Annuler» can go back.
-HISTORY = 200
+from canvas_editor import CanvasEditorTab  # «Annuler» and «Rétablir», once for every tab with a canvas (spec 2026-10-19-base-saine-nettoyage, ARCH-001)
 
 
 # A cell whose content cannot be read keeps its old value and says so rather than destroying it, on theme.colour("danger-soft") (v0.90).
@@ -121,8 +119,15 @@ def next_free_id(taken):
     return f"S{n:02d}"
 
 
-class StaticsTab(StaticsPropertiesMixin, StaticsBuildMixin, display_view.DisplayTab, QWidget):
+class StaticsTab(StaticsPropertiesMixin, StaticsBuildMixin, CanvasEditorTab, display_view.DisplayTab, QWidget):
     """Draws a static model, saves it as its source, exports it, and copies the call that prints it."""
+    KEY = "tab_statics"
+    GRAPH_KIND = "statics"   # issue #71
+    LIST_KEY = "st_list"
+    EMPTY_KEY = "st_empty"
+    WORDS = "st"
+    UNSAVED_WORDS = ("st_unsaved_title", "st_unsaved")   # the question before the draft is left (SourceEditorTab.confirm_leave)
+    DISCARD_OPENS_FIRST = True
 
     VIEWS = views.DRAW_VIEWS   # «Dessin» and «Affichage» (views.py, v0.117)
 
@@ -134,13 +139,14 @@ class StaticsTab(StaticsPropertiesMixin, StaticsBuildMixin, display_view.Display
         self.dirty = False
         self.current_id = None  # the saved model the tab holds; None for one not saved yet
         self.source = model.new_source("S01")
-        self.undo_stack, self.redo_stack = [], []
+        self.init_history()
         self.values = model.known_values(project.current().data_dir)
         # the variable a load named before it was given a typed value, per load id -- so that changing one's mind twice does not lose it. The window's, not the source's: it is a convenience, not data.
         self.last_reference = {}
         # and the other way round: the value typed before a variable was tried, per load id (periodic audit 260916, AUD-5-9)
         self.last_literal = {}
-        self.empty_folders = list(app.folder_settings("tab_statics"))   # folders holding nothing: a view preference, kept in settings.json by the window (grouped_list.py, v0.75)
+        self.ids = []
+        self.empty_folders = list(app.folder_settings(self.KEY))   # folders holding nothing: a view preference, kept in settings.json by the window (grouped_list.py, v0.75)
         self.slider_down = False
         # the selected entry's own style rows and the factors it may state: built afresh at every selection (`style_properties`), and read back to turn a row orange without rebuilding the panel
         self.style_rows, self.style_may = None, ()
@@ -486,11 +492,6 @@ class StaticsTab(StaticsPropertiesMixin, StaticsBuildMixin, display_view.Display
 
     # -- history ------------------------------------------------------------------
 
-    def push_history(self):
-        self.undo_stack.append(copy.deepcopy(self.source))
-        del self.undo_stack[:-HISTORY]
-        self.redo_stack.clear()
-
     def replace_source(self, state):
         self.source.clear()
         self.source.update(state)
@@ -499,16 +500,6 @@ class StaticsTab(StaticsPropertiesMixin, StaticsBuildMixin, display_view.Display
         self.fill()
         self.on_changed()
         self.on_selection()
-
-    def undo(self):
-        if self.undo_stack:
-            self.redo_stack.append(copy.deepcopy(self.source))
-            self.replace_source(self.undo_stack.pop())
-
-    def redo(self):
-        if self.redo_stack:
-            self.undo_stack.append(copy.deepcopy(self.source))
-            self.replace_source(self.redo_stack.pop())
 
     # -- after every change --------------------------------------------------------
 
@@ -562,81 +553,28 @@ class StaticsTab(StaticsPropertiesMixin, StaticsBuildMixin, display_view.Display
             exported = sid in ref.load_statics(here.data_dir).get("models", {})
             banner = display_view.export_state(self.t, sid, exported, here.statics_dir / f"{sid}.json", here.data_dir / "statics.json")
         return [
-            display_view.Entry("model", "show-static-model", "show-static-model", positional=(sid,), banner=banner,
-                               context={"highlight": sorted(model.all_ids(self.source))},
+            display_view.Entry("model", "image-static-model", "image-static-model", positional=(sid,), banner=banner,
+                               context={"highlight": sorted(model.all_ids(self.source)), "detail-figure": ref.image_vocabulary()["image-static-model"]["detail-figure"]},
+                               # «Copier» copies a figure of the report's own (spec 2026-10-21-commandes-typst-refonte, REQ-014, ARCH-012): the drawing as an image, the model's label its caption
+                               call_fn=lambda values: ref.figure_of_panel("image-static-model", sid, values, self.source.get("label") or sid),
                                preset={"highlight": [entry["id"]] if (entry := self.canvas.selected()[1]) is not None else []}),   # what is selected on the drawing, ticked: the call that lights it, as the card of calls led with until v0.117
-            self.loop_entry("show-static-model", ref.call_static_model_loop()),
+            self.loop_entry("image-static-model", ref.call_figure_loop("image-static-model", "static-model")),
         ]
 
     # -- the models -----------------------------------------------------------------
 
-    def reload_list(self, select=None):
-        self.loading = True
-        self.saved_ids = []
-        entries = []
-        for sid, label, group in list_models():
-            self.saved_ids.append(sid)
-            entries.append({"id": sid, "text": f"{sid} — {label}" if label else sid, "group": group})
-        if self.current_id is None:      # the draft nobody has saved yet, at the root where it can be seen
-            entries.append({"id": NEW_ROW, "text": self.t("st_new_item"), "group": grouped_list.ROOT_GROUP})
-        target = select if select is not None else self.current_id
-        if target not in self.saved_ids:
-            target = NEW_ROW if self.current_id is None else None
-        self.list.set_entries(entries, self.empty_folders, target, archived=source_archive.entries(project.current().statics_dir, self.list._t))
-        self.empty_folders = self.list.empty_folders()
-        self.app.save_folder_settings("tab_statics", self.empty_folders)
-        self.empty_hint.setVisible(not self.saved_ids)
-        self.loading = False
-        self.update_list_marker()
+    def sources_dir(self):
+        return project.current().statics_dir
 
-    def on_folders_changed(self):
-        """A folder made, renamed or removed in the list: what the widget now holds is what the tab keeps. ⚠️ Connecting `foldersChanged` straight to `reload_list` rebuilt the list from the tab's own copy of the empty folders, taken BEFORE the new one was added -- so a folder just made vanished the moment it was made."""
-        self.empty_folders = self.list.empty_folders()
-        self.reload_list(select=self.current_id)
-
-    def on_moved(self, ids, group):
-        """A drag wrote a folder: the field goes into each source, the models are exported, the list is rebuilt from the files."""
-        moved = 0
-        for sid in ids:
-            if sid == NEW_ROW:
-                continue                  # a draft has no file to write the field into
-            path = project.current().statics_dir / ("%s.json" % sid)
-            try:
-                source = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
-                continue
-            if group:
-                source["group"] = group
-            else:
-                source.pop("group", None)
-            path.write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-            moved += 1
-        if moved:
-            self.export_models(self.t("st_moved", count=moved, group=group or "—"))
-        self.reload_list(self.current_id)
-
-    def update_list_marker(self):
-        """A dot at the left of the model being edited while it has unsaved changes, and the tab's own. Every row carries a mark, dot or blank, so none of them moves sideways as the model is drawn on."""
-        for sid in self.list.ids():
-            mine = sid == self.current_id or (self.current_id is None and sid == NEW_ROW)
-            self.list.set_mark(sid, self.app.dirty_mark(mine and self.dirty))
-        self.app.update_tab_marks()
-
-    def on_list_change(self, sid):
-        if self.loading or not sid or sid not in self.saved_ids:
-            return
-        if sid == self.current_id:
-            return
-        if not self.confirm_leave():
-            self.reload_list(select=self.current_id)
-            return
-        self.load(sid)
+    def listed(self):
+        """The models, «id — label», in the folder each names (list_models)."""
+        return [(sid, f"{sid} — {label}" if label else sid, group) for sid, label, group in list_models()]
 
     def open_source(self, source, current_id, dirty):
         self.source = source
         self.current_id = current_id
         self.dirty = dirty
-        self.undo_stack, self.redo_stack = [], []
+        self.init_history()
         self.canvas.set_source(self.source, self.values)
         self.fill()
         self.loading = True
@@ -672,10 +610,6 @@ class StaticsTab(StaticsPropertiesMixin, StaticsBuildMixin, display_view.Display
             self.open_source(model.new_source(next_free_id([])), None, False)
             self.reload_list()
 
-    def confirm_leave(self):
-        """True when the model may be replaced: nothing unsaved, or the engineer saved or discarded it."""
-        return autosave.confirm(self.app, self, self.t("st_unsaved_title"), self.t("st_unsaved", id=self.id_edit.text().strip() or "?"), discard=lambda: (setattr(self, "dirty", False), self.current_id is None and self.load_first()))   # saved without a question where it can be, else the one question (autosave.py, v0.117)
-
     def taken_ids(self):
         # (id, label, folder) since v0.69: unpacked as two, «Nouveau» and «Dupliquer» raised a ValueError, silent under pythonw until v0.77 showed it
         return [sid for sid, _label, _group in list_models()]
@@ -700,13 +634,6 @@ class StaticsTab(StaticsPropertiesMixin, StaticsBuildMixin, display_view.Display
             self.load_first()
         else:
             self.load(self.current_id)
-
-    def delete(self):
-        """«Supprimer»: what is selected goes to «Archives», its ID removed (source_archive.py, v0.77) -- or, an archived entry selected, is deleted for good. A model never saved is simply discarded."""
-        if self.archive.delete():
-            return
-        self.dirty = False
-        self.load_first()
 
     # -- saving ----------------------------------------------------------------------
 
@@ -737,9 +664,7 @@ class StaticsTab(StaticsPropertiesMixin, StaticsBuildMixin, display_view.Display
             project.current().statics_dir.mkdir(parents=True, exist_ok=True)
             if renaming:
                 (project.current().statics_dir / f"{old}.json").unlink(missing_ok=True)
-            (project.current().statics_dir / f"{sid}.json").write_text(
-                json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-            )
+            engine.write_json(project.current().statics_dir / f"{sid}.json", source)
         except OSError as exc:
             return self.fail(str(exc))
         self.current_id = sid
@@ -748,14 +673,14 @@ class StaticsTab(StaticsPropertiesMixin, StaticsBuildMixin, display_view.Display
         self.reload_list(select=sid)
         return True
 
-    def export_models(self, done_text):
-        """Export the models without naming one: what a drop needs, which changes a field and no drawing."""
+    def export_listed(self, text):
+        """The models exported without naming one -- what a drop into a folder or an archive needs, which changes a field and no drawing; a failure said in the status bar."""
         try:
             model.export(project.current().statics_dir, project.current().data_dir, self.values)
         except Exception as exc:  # broad: the exporter's own message is what helps
             self.app.set_status(self.t("st_move_failed", error=str(exc)))
             return
-        self.app.set_status(done_text)
+        self.app.set_status(text)
 
     def export(self, sid, done_text):
         """The models' part of the export, run here and now: data/statics.json and data/statics/, from every saved source. A failure leaves data/ as it was and says why."""

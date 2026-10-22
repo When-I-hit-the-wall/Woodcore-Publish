@@ -3,6 +3,8 @@
 The engineer, 07.10.2026: «tous les titres de tableaux doivent suivre le format suivant: Tableau 1 --- Les documents de référence» · «le caption des figures doit apparaître ainsi: Figure 1 --- Système statique». Compiled as a document of the project is, through its config.typ and woodcore-document, in the three languages; the words of the kinds are the glossary's (figure.supplement_table, figure.supplement_image).
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import subprocess
 import unicodedata
 
@@ -22,7 +24,7 @@ def _compile(here, lang, name):
     folder = here.typst_root / ".probe" / name
     folder.mkdir(parents=True, exist_ok=True)
     probe = folder / "probe.typ"
-    probe.write_text('#import "/config.typ": conf\n#import "/commands.typ": *\n#show: conf\n#show: woodcore-document\n'
+    probe.write_text('#import "/000-Typst-Config/config.typ": conf\n#import "/000-Typst-Config/commands.typ": *\n#show: conf\n#show: woodcore-document\n'
                      f'#set-report-language("{lang}")\n' + BODY, encoding="utf-8")
     out = folder / "probe.pdf"
     run = subprocess.run([project.typst_executable(), "compile", "--root", str(here.typst_root), str(probe), str(out)],

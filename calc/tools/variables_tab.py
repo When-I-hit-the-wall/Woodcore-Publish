@@ -51,7 +51,6 @@ import display_view  # the «Affichage» view: the command, its options, the cal
 import views  # the views the top bar's switch chooses between (views.py, v0.117)
 import documents              # what each of the three documents is called (calc/documents.py)
 import project
-import shown_variables
 import richtext               # a symbol as mathematics, a call coloured as the site's code (richtext.py, v0.92)
 import theme
 import variable_sources as sources   # the export's variables and where each comes from (calc/variable_sources.py, v0.117)
@@ -396,7 +395,7 @@ class VariablesTab(display_view.DisplayTab, QWidget):
         layout.addWidget(self.splitter, 1)
 
         here = project.current()
-        for mode in here.modes:
+        for mode in here.created_modes:
             found = model.cached(here, mode)
             if found is not None:
                 self.readings[mode] = found
@@ -410,7 +409,7 @@ class VariablesTab(display_view.DisplayTab, QWidget):
         here = project.current()
         current = getattr(self.app, "current_document", None)
         first = current() if callable(current) else "rs"
-        return sorted(here.modes, key=lambda mode: (mode != first, here.modes.index(mode)))
+        return sorted(here.created_modes, key=lambda mode: (mode != first, here.created_modes.index(mode)))
 
     def all_domains(self):
         """[Domain]: every document's read, the one shown first, and the export's last."""
@@ -427,7 +426,7 @@ class VariablesTab(display_view.DisplayTab, QWidget):
     def stale(self):
         """The documents whose reading no longer answers for them as they stand."""
         here = project.current()
-        return [mode for mode, found in self.readings.items() if mode in here.modes and not model.is_current(found, here, mode)]
+        return [mode for mode, found in self.readings.items() if mode in here.created_modes and not model.is_current(found, here, mode)]
 
     def provenance_code(self, var, domain):
         """What the provenance filter compares: EXCEL, WOODCORE, UNKNOWN, or `typst:<mode>`."""
@@ -609,7 +608,7 @@ class VariablesTab(display_view.DisplayTab, QWidget):
         """The documents whose reading does not answer for them -- none kept, or one kept that something has moved under since -- and, `free_only`, only those whose own PDF is current, so that reading them costs the half-second of opening it rather than a compile (variables.pdf_is_current, v0.110)."""
         here = project.current()
         out = []
-        for mode in here.modes:
+        for mode in here.created_modes:
             if model.is_current(self.readings.get(mode), here, mode):
                 continue
             if free_only and not model.pdf_is_current(here, mode):
@@ -643,7 +642,7 @@ class VariablesTab(display_view.DisplayTab, QWidget):
         elif self.app.busy():
             return
         here = project.current()
-        modes = [mode for mode in (modes or self.modes()) if mode in here.modes]
+        modes = [mode for mode in (modes or self.modes()) if mode in here.created_modes]
         for mode in modes:
             self.errors.pop(mode, None)
         self.set_reading(True)
@@ -1086,14 +1085,14 @@ class VariablesTab(display_view.DisplayTab, QWidget):
     def display_entries(self):
         """What prints what is chosen, one command or the other with its own options (the engineer: «une commande val, une commande var … afficher l'une ou l'autre des commandes et ainsi voir les options»).
 
-        A value of the export: `val` and `var` -- named by its calculation and its instance, the pair they read --,
-        its input line `show-input`, and `var-of` and `value-of`, which print nothing: what the loads tab offered for
-        a variable (D-006). A domain of the export: `show-calc`, `show-live-load` for a category of Tabelle 8, one
-        `show-check` per check, the loop over every case of its calculation (D-013) and, for a load, the two summary
-        tables. A value of a document: `val` and `#var(key, domain: …)` for a **named** domain only -- `#var("R_d")`
-        alone can never work, `build_reference.call_var_registry` refusing it by name --, and `find`; a snippet holds
-        no document's registry, so those say the PDF shows them (display_options.NOTES). A domain of a document:
-        `find`. `eq` is put off (the engineer's answer of 07.10.2026).
+        A value of the export: `#var(key, domain: (calculation, instance))`, read live (spec 2026-10-21-commandes-typst-refonte,
+        REQ-009: `val`, `show-input`, `var-of` and `value-of` merged into it). A domain of the export Woodcore writes out:
+        its file included, `#include domain-file(kind, id)`, and the loop over every case of its calculation (REQ-017, UI-002);
+        for a load, the two tables of every load in one unit, `#var-table` (Q-009). A value of a document:
+        `#var(key, domain: …)` for a **named** domain only -- `#var("R_d")` alone can never work,
+        `build_reference.call_var_registry` refusing it by name --, and `find`; a snippet holds no document's registry,
+        so those say the PDF shows them (display_options.NOTES). A domain of a document: `find`. `eq` is put off
+        (the engineer's answer of 07.10.2026).
         """
         var, key = self.chosen
         domain = self.domain_of(key)
@@ -1103,32 +1102,23 @@ class VariablesTab(display_view.DisplayTab, QWidget):
         if domain.origin == EXPORT:
             calc, instance = domain.address
             if var is not None:
-                entries += [
-                    display_view.Entry("val", "val", "val", call_fn=lambda o, k=var.key, d=calc, s=instance: ref.call_val(k, d, s, type_=o.pop("type", None), **o)),
-                    display_view.Entry("var", "var", "var", call_fn=lambda o, k=var.key, d=calc, s=instance, sym=var.symbol: ref.call_var(d, s, k, sym, **o)),
-                    display_view.Entry("input", "show-input", "show-input", positional=(calc, instance, var.key)),
-                    display_view.Entry("var-of", "var-of", call=ref.call_var_of(calc, instance, var.key), note="ds_note_prints_nothing"),
-                ]
-                if var.is_number:
-                    entries.append(display_view.Entry("value-of", "value-of", call=ref.call_value_of(calc, instance, var.key), note="ds_note_prints_nothing"))
+                # one value of the export, read live by `#var` (spec 2026-10-21-commandes-typst-refonte, REQ-009: `#val`, `#show-input`, `#var-of` and `#value-of` merged into it)
+                entries.append(display_view.Entry("var", "var", "var", call_fn=lambda o, k=var.key, d=calc, s=instance: ref.call_var_domain(d, s, k, **o)))
             else:
-                if calc == ref.LIVE_LOAD_DOMAIN and domain.variable("q_k") is not None:
-                    entries.append(display_view.Entry("live", "show-live-load", "show-live-load", positional=(instance,)))
-                entries.append(display_view.Entry("calc", "show-calc", "show-calc", positional=(calc, instance),
-                                                  context={"shown": shown_variables.export_choices(project.current().data_dir, calc, instance)}))   # -1 offered wherever show-calc is, loads included (spec D-16)
-                entries += [display_view.Entry(f"check:{name}", f"show-check — {name}", "show-check", positional=(calc, instance, name))
-                            for name in domain.checks]
-                entries.append(self.loop_entry("show-calc", ref.call_instance_loop(calc)))
+                from domains import unfold
+                if calc in unfold.DOMAIN_KINDS:
+                    # the calculation written out by the export, its file included where a section prints it, and every case of its domain (REQ-017, UI-002)
+                    entries.append(display_view.Entry("file", "domain-file", call=ref.call_include_domain(calc, instance)))
+                    entries.append(self.loop_entry("domain-file", ref.call_domain_loop(calc)))
                 if domain.file == sources.CALCULATIONS_FILE:
+                    # the loads of every domain in one unit (Q-009: `#var-table` in place of `#show-load-summary`), which a section's own preview cannot gather
                     entries += [
-                        display_view.Entry("summary", "show-load-summary", "show-load-summary", note=display_options.NOTES["show-load-summary"]),
-                        display_view.Entry("line-summary", "show-line-load-summary", "show-line-load-summary", note=display_options.NOTES["show-line-load-summary"]),
+                        display_view.Entry("summary", "var-table", call='#var-table(role: "data", domain: "all", unit: "kN/m²")', note="ds_note_whole_document"),
+                        display_view.Entry("line-summary", "var-table — kN/m", call='#var-table(role: "data", domain: "all", unit: "kN/m")', note="ds_note_whole_document"),
                     ]
             return entries
         where = domain.name or None
         if var is not None:
-            entries.append(display_view.Entry("val", "val", "val", note="ds_note_document_variable",
-                                              call_fn=lambda o, k=var.key, d=where: ref.call_val(k, d, type_=o.pop("type", None), **o)))
             if where:
                 entries.append(display_view.Entry("var", "var", "var", note="ds_note_document_variable",
                                                   call_fn=lambda o, k=var.key, d=where: ref.call_var_registry(k, d, **o)))

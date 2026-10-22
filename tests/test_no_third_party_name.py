@@ -3,6 +3,8 @@
 The names are held as SHA-256 digests of their lowercase spelling, so this file does not name them either. Every word of every file, its accents taken off, the repository holds -- its path, its text, and the member names and text of a zip archive (an .xlsx, a .docx) -- is hashed and compared. A new name is added by its digest: `hashlib.sha256(b"name").hexdigest()`.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import hashlib
 import re
 import subprocess

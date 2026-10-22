@@ -8,6 +8,8 @@ The engineer's rules, and what is held of each:
 * **one reader**: what the export writes into `data/positions/<id>.json` is what the window's summaries, a schema element's b and h and the report read -- a record exported before v0.94, with no `section`, is read by the same reader's deduction.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import validation
 from domains import section
 from norms import szs_c5

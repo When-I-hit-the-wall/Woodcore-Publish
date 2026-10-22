@@ -4,18 +4,16 @@
 === Forces sur garde-corps
 // woodcore:/object title
 
-// woodcore:object doc-table guardrail-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Élément]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Type d'ouvrage et utilisation], text: [[…]]),
-    (item: [Force linéique caractéristique, appliquée à 1.0 m de hauteur], text: [$q_k$ = […] kN/m (SIA 261, ch. 13.2)]),
+// woodcore:object table guardrail-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Type d'ouvrage et utilisation], [[…]],
+    [Force linéique caractéristique, appliquée à 1.0 m de hauteur], [$q_k$ = […] kN/m (SIA 261, ch. 13.2)],
+    table.hline(stroke: 1pt),
   ),
   caption: [Garde-corps],
-  header: false,
 )
 // woodcore:/object guardrail-table

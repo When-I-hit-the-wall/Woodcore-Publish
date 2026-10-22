@@ -3,7 +3,10 @@
 
 import math
 import re
+import number_text  # the one trimming of a number (ARCH-004)
 from domains import dimension  # a dimension's geometry, shared with the schemas and the plans (issue #9)
+from domains.dimension import _cross, _point_segment, constrain, grid_snap, index_of  # plane geometry written once (D4)
+from domains.dimension import normalize_angle  # plane geometry written once (D4)
 
 
 # What a load writes beside itself: nothing, the name it was given, its value and unit, or both. A dimension takes the same four, its name being its `label` (`dimension_show`).
@@ -48,28 +51,13 @@ ANGLE_DIGITS = 1
 
 def fmt_number(value, digits=DIGITS):
     """A number as the figure writes it: at most `digits` decimals, trailing zeros dropped (4.9788 -> 4.979, 3.50 -> 3.5, 20 -> 20)."""
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        return str(value)
-    text = f"{value:.{digits}f}"
-    if "." in text:
-        text = text.rstrip("0").rstrip(".")
-    return "0" if text in ("-0", "") else text
+    return number_text.plain(value, digits)
 
 
 def figure_number(value, digits=DIGITS):
     """A number as a figure *prints* it: `fmt_number`, its sign the real minus U+2212 and never a hyphen, which is the width of a letter's stroke and reads as a dash beside a number. For text set on a figure only -- a coordinate, a cell Woodcore reads back and anything else a program parses keeps `fmt_number`'s hyphen."""
     text = fmt_number(value, digits)
     return "−" + text[1:] if text.startswith("-") else text
-
-
-def normalize_angle(degrees):
-    """An angle in degrees, brought into (-180, 180]."""
-    a = math.fmod(degrees, 360.0)
-    if a <= -180:
-        a += 360
-    elif a > 180:
-        a -= 360
-    return a
 
 
 def parse_along(text, length=None):
@@ -85,13 +73,6 @@ def parse_along(text, length=None):
     if not m.group(2):
         return value
     return value if length is None else value * length
-
-
-def index_of(source, collection, eid):
-    for i, entry in enumerate(source.get(collection, [])):
-        if entry.get("id") == eid:
-            return i
-    return None
 
 
 def entry_of(source, collection, eid):
@@ -210,9 +191,7 @@ def dimension_anchor(source, anchor):
 
 def dimension_ends(source, dim):
     """A linear dimension's two ends, in metres, or None where either is unresolvable."""
-    a = dimension_anchor(source, dim.get("from"))
-    b = dimension_anchor(source, dim.get("to"))
-    return None if a is None or b is None else (a, b)
+    return dimension.ends(dimension_anchor, source, dim)
 
 
 def _axis(source, mid):
@@ -232,26 +211,17 @@ def dimension_corner(source, dim):
     return dimension.crossing(a, u, b, v, PARALLEL_TOLERANCE)
 
 
-def _midpoint(a, b):
-    return ((a[0] + b[0]) / 2.0, (a[1] + b[1]) / 2.0)
+_midpoint = dimension.midpoint   # written once (ARCH-004)
 
 
 def dimension_direction(source, dim):
     """The direction a linear dimension's line runs in, and the direction its offset is measured along -- the one at right angles to it, pointing the way a positive offset goes. (1, 0) and (0, 1) for the two axis-aligned kinds, whatever the two ends do."""
-    kind = dim.get("kind")
-    if kind in ("horizontal", "vertical"):
-        return dimension.direction(kind, None, None, SAME_POINT)
-    ends = dimension_ends(source, dim)
-    return None if ends is None else dimension.direction(kind, ends[0], ends[1], SAME_POINT)
+    return dimension.linear_direction(dim, dimension_ends(source, dim), SAME_POINT)
 
 
 def dimension_line(source, dim):
     """Where a linear dimension's line is drawn, in metres: the two ends projected onto it. The offset is measured from the **middle** of the two ends, so the line follows them when a point is moved."""
-    ends = dimension_ends(source, dim)
-    if ends is None:
-        return None
-    # the line sits `offset` from the middle; each end is carried onto it, so the two witness lines are parallel (domains/dimension.py)
-    return dimension.line(dim.get("kind"), ends[0], ends[1], dim.get("offset", 0.0), SAME_POINT)
+    return dimension.linear_line(dim, dimension_ends(source, dim), SAME_POINT)
 
 
 def dimension_value(source, dim):
@@ -307,12 +277,7 @@ def dimension_angle(source, dim):
 
     On a dimension written **before** `bearing` existed the sign is ignored. There it did not mean a reflex: it was the only way the engineer had of asking for the other side, the two sectors he wanted being unreachable -- so reapplying it would hold the very angle this repairs at 270 degrees. The radius is its magnitude either way.
     """
-    rays = angle_rays(source, dim)
-    if rays is None:
-        return None
-    centre, first, second = rays
-    sweep, start = dimension.arc(first, second, dim.get("bearing") is not None and float(dim.get("offset", 0.0)) < 0)
-    return centre, sweep, start
+    return dimension.angle_arc(angle_rays(source, dim), dim)
 
 
 def dimension_show(dim):
@@ -338,30 +303,6 @@ def dimension_text(source, dim):
     """What a dimension writes on the figure, by its `show` (`dimension_show`): nothing, its name, what it measured, or `name = value`. A name asked for and not given writes nothing, and `name+value` without a name writes the value alone -- a load's own rule (`load_lines`), so the two say the same thing about the same choice."""
     mode = dimension_show(dim)
     return dimension.text(mode, dim.get("label"), dimension_value_text(source, dim) if mode not in ("none", "name") else "")
-
-
-def _point_segment(p, a, b):
-    """The distance from `p` to the segment a-b, and the nearest point on it."""
-    ax, ay = a
-    bx, by = b
-    dx, dy = bx - ax, by - ay
-    length2 = dx * dx + dy * dy
-    if length2 <= 0:
-        return math.dist(p, a), tuple(a)
-    t = max(0.0, min(1.0, ((p[0] - ax) * dx + (p[1] - ay) * dy) / length2))
-    q = (ax + t * dx, ay + t * dy)
-    return math.dist(p, q), q
-
-
-def constrain(anchor, point):
-    """`point` brought onto the nearest of the eight directions from `anchor` -- horizontal, vertical or at 45 degrees -- as Shift does while drawing. plan.constrain, unchanged: it reads plain tuples and knows nothing of either module's shapes."""
-    dx, dy = point[0] - anchor[0], point[1] - anchor[1]
-    if abs(dx) < 1e-12 and abs(dy) < 1e-12:
-        return tuple(anchor)
-    a = round(math.atan2(dy, dx) / (math.pi / 4)) * (math.pi / 4)
-    ux, uy = math.cos(a), math.sin(a)
-    t = dx * ux + dy * uy
-    return (anchor[0] + t * ux, anchor[1] + t * uy)
 
 
 def hit_point(source, p, tolerance):
@@ -401,13 +342,6 @@ def hit_label(source, p, tolerance, frames=None):
     return statics_svg.hit_label(source, p, tolerance, frames)
 
 
-def grid_snap(p, step):
-    """`p` pulled onto the nearest crossing of a grid of that step, in metres."""
-    if not step or step <= 0:
-        return tuple(p)
-    return (round(p[0] / step) * step, round(p[1] / step) * step)
-
-
 def _segments(source, exclude=None):
     """Every member as (id, a, b), skipping the one being dragged."""
     out = []
@@ -418,17 +352,6 @@ def _segments(source, exclude=None):
         if ends is not None:
             out.append((member["id"], ends[0], ends[1]))
     return out
-
-
-def _cross(a, u, b, v):
-    """Where the line through `a` along `u` meets the one through `b` along `v`, with the two parameters, or None for parallels."""
-    det = u[0] * v[1] - u[1] * v[0]
-    if abs(det) < 1e-12:
-        return None
-    dx, dy = b[0] - a[0], b[1] - a[1]
-    t = (dx * v[1] - dy * v[0]) / det
-    s = (dx * u[1] - dy * u[0]) / det
-    return ((a[0] + t * u[0], a[1] + t * u[1]), t, s)
 
 
 def snap_targets(source, exclude=None):
@@ -513,36 +436,17 @@ def extension_lines(source, exclude=None):
 
 def nearest_ray(rays, anchor, point, tolerance_deg=TRACK_TOLERANCE_DEG):
     """The ray of smallest angular deviation from `anchor` towards `point`, within the tolerance, and `point` projected onto it -- or (None, point). A ray is measured in its own sense only, and both senses are in the list, so a lock holds on either side."""
-    dx, dy = point[0] - anchor[0], point[1] - anchor[1]
-    length = math.hypot(dx, dy)
-    if length <= SAME_POINT:
-        return None, tuple(point)
-    angle = math.degrees(math.atan2(dy, dx))
-    best, best_off = None, tolerance_deg
-    for ray in rays:
-        off = abs(normalize_angle(angle - ray["angle"]))
-        if off <= best_off:
-            best, best_off = ray, off
-    if best is None:
-        return None, tuple(point)
-    along_ray = dx * best["unit"][0] + dy * best["unit"][1]
-    return best, (anchor[0] + along_ray * best["unit"][0], anchor[1] + along_ray * best["unit"][1])
+    return dimension.nearest_ray(rays, anchor, point, tolerance_deg, SAME_POINT)
 
 
 def along(anchor, ray, distance):
     """The point `distance` metres from `anchor` along `ray`."""
-    return (anchor[0] + distance * ray["unit"][0], anchor[1] + distance * ray["unit"][1])
+    return dimension.along(anchor, ray, distance)
 
 
 def typed_point(anchor, ray, text):
     """Where a distance typed into Woodcore's field lands, or None where it is not a number. A comma is read as a decimal point, the keyboard here having one."""
-    try:
-        distance = float(str(text).strip().replace(",", "."))
-    except (TypeError, ValueError):
-        return None
-    if not math.isfinite(distance):
-        return None
-    return along(anchor, ray, distance)
+    return dimension.typed_point(anchor, ray, text)
 
 
 def track(source, anchor, point, tolerance, step=None, tolerance_deg=TRACK_TOLERANCE_DEG, exclude=None):
@@ -586,3 +490,12 @@ def track(source, anchor, point, tolerance, step=None, tolerance_deg=TRACK_TOLER
         "distance": math.dist(anchor, best),
         "angle": ray["angle"],
     }
+
+
+def angle_reach(centre, point):
+    """Where a third click at `point` puts an angle dimension whose corner is `centre`: (its radius, its `bearing` in degrees -- the direction of the click from the corner, which names the sector the engineer pointed at, `angle_rays`), or None where the click is on the corner. Computed here, in the domain, and not in the canvas that asks for it (spec 2026-10-19-base-saine-nettoyage, D8: the window does not invent geometry)."""
+    reach = (point[0] - centre[0], point[1] - centre[1])
+    radius = math.hypot(reach[0], reach[1])
+    if radius <= SAME_POINT:
+        return None
+    return radius, math.degrees(math.atan2(reach[1], reach[0]))

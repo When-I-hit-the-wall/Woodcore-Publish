@@ -174,19 +174,19 @@ def test_a_project_made_from_a_template_takes_its_languages_layout_and_skeleton(
         document, report = templates.languages_for(template, {})
         here = project_template.create(base / "Halle", "Halle", template=template, document_language=document, report_language=report, author="L. Exempel")
         data = json.loads(here.file.read_text(encoding="utf-8"))
-        # laid out in three documents: the report in the folder the template names -- it means it --, the two others in the project's language, the template's own sources kept
+        # laid out by folders (issue #64): the report in the folder the template names -- it means it --, the two others in their fixed folders, the template's own sources kept, the archives where a new project keeps them
         assert data["layout"] == {
-            "typst_root": ".", "report": "Bericht/Rapport.typ", "pdf": "Bericht/Rapport.pdf",
-            "report_cu": "1_Convention d'utilisation/Convention d'utilisation.typ", "pdf_cu": "1_Convention d'utilisation/Convention d'utilisation.pdf",
-            "report_bp": "2_Base de projet/Base de projet.typ", "pdf_bp": "2_Base de projet/Base de projet.pdf",
-            "generated": "_woodcore", "images": "Images", "sources": "Daten", "archives": "_Archiv"}, data
+            "typst_root": ".", "config": "000-Typst-Config", "report": "Bericht/Rapport.typ", "pdf": "Bericht/Rapport.pdf",
+            "report_cu": "100-Service criteria agreement/Convention d'utilisation.typ", "pdf_cu": "100-Service criteria agreement/Convention d'utilisation.pdf",
+            "report_bp": "200-Basis of design/Base de projet.typ", "pdf_bp": "200-Basis of design/Base de projet.pdf",
+            "generated": "000-Woodcore", "images": "Images", "sources": "Daten", "archives": "000-Woodcore/archives"}, data
         assert here.report_typ == (base / "Halle" / "Bericht" / "Rapport.typ").resolve() and here.report_typ.is_file()
         for mode in project.MODES:
             assert templates.read_languages(here.document_typ(mode)) == ("fr", "fr"), mode
         assert not (here.root / templates.FILE).exists(), "template.json was copied into the project"
         for sub in project.SOURCE_FOLDERS:
             assert (here.root / "Daten" / sub).is_dir(), sub
-        assert (here.root / "_Archiv").is_dir() and (here.root / "Images").is_dir() and here.config_typ.is_file()
+        assert here.archives_dir.is_dir() and (here.root / "Images").is_dir() and here.config_typ.is_file()
         assert project.engine_state(here)[0] == "current" and (here.data_dir / "project.json").is_file(), "the engine and the seed follow the template's layout"
         assert here.detail("author") == "L. Exempel"
 
@@ -199,20 +199,20 @@ def test_standard_is_the_neutral_form_and_the_standard_contents_and_a_language_i
         here = project_template.create(base / "Eins", "Eins", template=templates.STANDARD, document_language="de", report_language="de")
         assert here.layout == documents.layout_for("de") and json.loads(here.file.read_text(encoding="utf-8"))["layout"] == here.layout
         assert forms.current(here).ref == "builtin:neutral" and forms.is_form_config(here.config_typ)
-        assert here.config_typ.read_text(encoding="utf-8") == forms.config_text("de", "CH"), "config.typ is not the form's, written for the language"
-        assert here.title_typ.read_bytes() == forms.default().title_typ.read_bytes()
+        assert here.config_typ.read_text(encoding="utf-8") == documents.relocate_config_text(here, forms.config_text("de", "CH")), "config.typ is not the form's, written for the language"
+        assert here.title_typ.read_bytes() == documents.relocate_config_text(here, forms.default().title_typ.read_text(encoding="utf-8")).encode("utf-8")
         content = doc_templates.find("builtin:rs/standard").language_dir("de")
-        assert here.report_typ.read_bytes() == (content / here.report_typ.name).read_bytes(), "the report's entry is not the content template's"
+        assert here.report_typ.read_text(encoding="utf-8") == documents.relocate_config_text(here, (content / here.report_typ.name).read_text(encoding="utf-8")), "the report's entry is not the content template's"
         assert sorted(p.name for p in (here.report_typ.parent / "Sections").glob("*.typ")) == sorted(p.name for p in (content / "Sections").glob("*.typ"))
         assert not list(here.archives_dir.glob("*-forme")), "a new project has no old form to keep"
         french = project_template.create(base / "Deux", "Deux", document_language="fr", report_language="en")
         for mode in project.MODES:
             assert templates.read_languages(french.document_typ(mode)) == ("fr", "en"), mode
-        assert french.config_typ.read_text(encoding="utf-8") == forms.config_text("fr", "CH"), "config.typ changed beyond its language"
+        assert french.config_typ.read_text(encoding="utf-8") == documents.relocate_config_text(french, forms.config_text("fr", "CH")), "config.typ changed beyond its language"
         # one language given, the other the template's own: the two documents beside the report print the engine's words in the report's
         mixed = project_template.create(base / "Drei", "Drei", document_language="fr")
         assert [templates.read_languages(mixed.document_typ(mode)) for mode in project.MODES] == [("fr", "de")] * 3
-        assert [mixed.document_dir(mode).name for mode in project.MODES] == list(documents.MODE_FOLDERS["fr"].values())
+        assert [mixed.document_dir(mode).name for mode in project.MODES] == list(documents.MODE_FOLDERS.values())
 
 
 def test_a_skeleton_s_pictures_move_up_and_the_paths_that_name_them_follow():
@@ -286,12 +286,13 @@ def test_a_project_saved_as_a_template_leaves_out_its_export_drawings_archives_a
         assert not saved.error, saved.error
         assert saved.has_modes and saved.layout == here.layout and saved.meta["layout"] == here.layout, saved.meta.get("layout")
         kept = {p.relative_to(saved.folder).as_posix() for p in saved.folder.rglob("*") if p.is_file()}
-        names = documents.MODE_FOLDERS["de"]
-        for wanted in ("config.typ", "commands.typ", "references.bib", "title.typ", "Template/template.typ", "Template/form.json", "Images/logo.png", f"{names['rs']}/Statischer Rapport.typ",
+        names = documents.MODE_FOLDERS
+        config = project.CONFIG_FOLDER
+        for wanted in (f"{config}/config.typ", f"{config}/commands.typ", f"{config}/references.bib", f"{config}/title.typ", f"{config}/Template/template.typ", f"{config}/Template/form.json", "Images/logo.png", f"{names['rs']}/Statischer Rapport.typ",
                        f"{names['rs']}/Sections/001-einleitung.typ", f"{names['cu']}/Nutzungsvereinbarung.typ", f"{names['cu']}/structure.json",
                        f"{names['bp']}/Sections/purpose-of-basis-of-design.typ", ".vscode/settings.json", templates.FILE):
             assert wanted in kept, (wanted, sorted(kept))
-        for refused in ("_woodcore", "Woodcore-Datei", "_Archiv", ".pdf", ".xlsx", ".woodcore", "Baustelle.jpg", "01_Pläne", "RFEM-Export"):
+        for refused in ("_woodcore", "Woodcore-Datei", "_Archiv", "000-Woodcore", ".pdf", ".xlsx", ".woodcore", "Baustelle.jpg", "01_Pläne", "RFEM-Export"):
             assert not any(refused in path for path in kept), (refused, sorted(kept))
         assert saved.person("company") == "Büro Muster" and saved.person("author") == "F. L." and "number" not in saved.meta and "client" not in saved.meta
         assert saved.document_language == "de" and saved.report_language == "de"
@@ -464,9 +465,9 @@ def test_woodcore_cli_new_takes_a_form_and_a_content_template_for_each_document(
         run = new(base / "Bfh", "--form", "bfh", "--content-rs", "builtin:rs/standard", "--content-cu", "builtin:cu/standard", "--content-bp", "builtin:bp/standard", "--language", "fr")
         assert run.returncode == 0, run.stdout + run.stderr
         here = project.Project.load(base / "Bfh" / "Bfh.woodcore")
-        assert forms.current(here).ref == "builtin:bfh" and (here.typst_root / "Template" / "logo-bfh.png").is_file()
+        assert forms.current(here).ref == "builtin:bfh" and (here.template_dir / "logo-bfh.png").is_file()
         assert templates.read_languages(here.report_typ) == ("fr", "fr")
-        assert here.title_typ.read_bytes() == forms.find("bfh").title_typ.read_bytes()
+        assert here.title_typ.read_text(encoding="utf-8") == documents.relocate_config_text(here, forms.find("bfh").title_typ.read_text(encoding="utf-8"))
         # nothing asked: the settings' default form
         run = new(base / "Standardform")
         assert run.returncode == 0, run.stdout + run.stderr
@@ -522,10 +523,10 @@ def test_a_template_that_names_its_report_folder_keeps_it():
     """
     standard = templates.standard()
     assert not templates.template_layout(standard.layout).get("report"), "Standard states no report folder"
-    assert templates.report_folder_offered(standard, "fr") == "3_Rapport de statique"
+    assert templates.report_folder_offered(standard, "fr") == "300-Statical report", "the same in every language since issue #64"
     own = templates.Template("user", standard.folder, {"layout": {"report": "Tragwerk/Bericht.typ"}})
     assert templates.report_folder_offered(own, "fr") == "Tragwerk"
-    assert templates.folders_offered(own, "fr") == {"cu": "1_Convention d'utilisation", "bp": "2_Base de projet", "rs": "Tragwerk"}
+    assert templates.folders_offered(own, "fr") == {"cu": "100-Service criteria agreement", "bp": "200-Basis of design", "rs": "Tragwerk"}
 
 
 def test_a_documents_shaped_layout_is_stated_whole_and_only_known_keys_are_read():

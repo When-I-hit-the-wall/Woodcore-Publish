@@ -67,14 +67,14 @@ class FormulaBlocksMixin:
         """The command a block's fields say -- a key made from the shown variable where none is typed (REQ-008), a formula's symbols written as their keys and its units quoted (D-17) -- and the options of the right pane: its own while it is chosen, those it was left with where another block was chosen since (ARCH-RISK-103). Raises fd.DomainError."""
         old = block.command
         kind = old.kind
-        taken = {c.defines for b in self.blocks if b is not block for c in [b.command] if c.defines and c.kind != "var-unit"}
+        taken = {c.defines for b in self.blocks if b is not block for c in [b.command] if c.defines}
         variables = self.variables_before(block)
         options, out_unit = dict(old.options), old.unit
         if self.panel is not None and self.chosen_block is block:
             options, out_unit = self.panel_options(block)
         elif getattr(block, "pending", None) is not None:
             options, out_unit = block.pending
-        command = fd.Command(kind, options=options, source=old.source)
+        command = fd.Command(kind, options=options, source=old.source, glued_before=old.glued_before, glued_after=old.glued_after)   # a command written inside a line stays there (spec 2026-10-14-commandes-en-ligne-domaine, D-02)
         if kind in ("var", "eq"):
             symbol = block.text("symbol")
             if kind == "var":
@@ -104,13 +104,6 @@ class FormulaBlocksMixin:
             command.unit = out_unit
         elif kind == "verify":
             command.formula = fd.typst_formula(block.text("formula"), variables)
-        elif kind == "val":
-            typed = block.text("key")
-            command.key = dict((s or k, k) for k, s in variables).get(typed, typed)
-        elif kind == "var-unit":
-            typed = block.text("key")
-            command.key = dict((s or k, k) for k, s in variables).get(typed, typed)
-            command.unit = units.written_unit(block.text("unit"))
         # what the report would refuse is refused here, before the file is written (Python never laxer than Typst)
         trial = fd.Domain(id=self.domain.id, name=self.domain.name,
                           commands=[command if b is block else b.command for b in self.blocks if not b.removed])
@@ -184,8 +177,7 @@ class FormulaBlocksMixin:
     @staticmethod
     def same(a, b):
         """Two lists of items the same, as the file would write them."""
-        key = lambda c: (c.kind, c.raw if c.is_text else fd.to_call(c))   # noqa: E731
-        return [key(c) for c in a] == [key(c) for c in b]
+        return [fd.item_key(c) for c in a] == [fd.item_key(c) for c in b]
 
     def write_text(self):
         """The text written into the file once the typing pauses, or the text is left (REQ-006 of issue #15): what the file would not read back -- a computing command, a tag line, a bracket too many -- refused with its reason, nothing written. A pill deleted with the text around it is a command taken away (issue #40): the others computed again."""
@@ -343,8 +335,8 @@ class FormulaBlocksMixin:
         taken = {c.defines for c in self.domain.commands if c.defines}
         key = var.key if var.key not in taken else fd.key_from_symbol(var.key, taken)
         if address is not None:
-            call = "var-of(" + ", ".join(ref.typst_str(x) for x in (address[0], address[1], var.key)) + ")"
-            command = fd.Command("var", key=key, symbol="" if key == var.key else var.key, source=("var-of", call))
+            # read live from the export, `#var(key, domain: (calculation, instance))` (spec 2026-10-21-commandes-typst-refonte, REQ-009: `var-of` merged into it)
+            command = fd.Command("var", key=key, source=("domain", (address[0], address[1])))
         elif domain_name:
             command = fd.Command("var", key=key, source=("domain", domain_name))
         else:

@@ -3,6 +3,8 @@
 The engineer, 07.10.2026: «il y a une sauvegarde d'affichage pour l'écran externe lorsqu'il est utilisé et une sauvegarde pour mon pc portable lorsqu'il est utilisé sans l'écran externe» · «"Projet" qui contient Plan de position, Plan de protection incendie, Positions, Journal, etc... doit pouvoir être réduit ou maximisé» · «La largeur du volet tout à gauche doit pouvoir être modifiée».
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import os
 import sys
 

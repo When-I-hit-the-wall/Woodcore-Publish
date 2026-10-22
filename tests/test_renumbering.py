@@ -14,6 +14,7 @@ from conftest import ROOT
 
 import positions_store as store
 import project
+import sheets
 import renumbering
 import sharing
 
@@ -257,7 +258,7 @@ def test_the_engine_s_copy_the_export_and_the_archives_are_never_read():
     kept = here.archives_dir / "old.typ"
     kept.parent.mkdir(parents=True, exist_ok=True)
     kept.write_text('#member("S111")\n', encoding="utf-8")
-    sheet = here.typst_root / "Plans" / "B09.typ"
+    sheet = sheets.folder(here) / "B09.typ"   # Plans/ before, the position plan's exports laid out by folders (issue #64)
     sheet.parent.mkdir(parents=True, exist_ok=True)
     sheet.write_text('#sheet-viewport(plan: "P", highlight: "S111")\n', encoding="utf-8")
     files = renumbering.typst_files(here)
@@ -284,7 +285,7 @@ def test_an_old_position_is_exported_apart_and_the_report_prints_its_values_sayi
     rows = store.read(here)
     rows[2].update({"material": "Fichte", "strength_class": "C24", "moisture_class": 1})    # S110
     store.write(here, rows)
-    _section(here, '#member("S110", level: 1)\n')
+    _section(here, '#position("S110")\n')
     renumbering.apply(here, renumbering.preview(here, ["S110"], keep_values=True))
     project.sync_engine(here)
     with project.using(here):
@@ -295,7 +296,7 @@ def test_an_old_position_is_exported_apart_and_the_report_prints_its_values_sayi
     assert record["archived"] == {"was": "S110", "deleted": record["archived"]["deleted"]} and record["strength_class"] == "C24"
     for lang, words in (("de", "Berechnung mit den Werten der früheren Position S110"), ("fr", "Calcul sur les valeurs de l’ancienne position S110"), ("en", "Calculated on the values of the former position S110")):
         probe = here.typst_root / f"probe-{lang}.typ"
-        probe.write_text(f'#import "/commands.typ": *\n#set-report-language("{lang}")\n#member("S110-old", level: 1)\n\nLIST: #position-ids().join(",") END\n', encoding="utf-8")
+        probe.write_text(f'#import "/000-Typst-Config/commands.typ": *\n#set-report-language("{lang}")\n#position("S110-old")\n\nLIST: #ids("position").join(",") END\n', encoding="utf-8")
         out = subprocess.run([project.typst_executable(), "compile", "--root", str(here.typst_root), str(probe), str(probe.with_suffix(".pdf"))],
                              capture_output=True, text=True, encoding="utf-8", errors="replace")
         assert out.returncode == 0, out.stderr

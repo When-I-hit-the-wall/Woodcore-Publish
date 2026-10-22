@@ -95,3 +95,37 @@ def build(path, sheet="EL+AL-Test", layers=(), library=(), chosen=None):
 
     wb.save(path)
     return {"path": path, "sheet": sheet, "computed": total_load, "chosen": chosen}
+
+
+# --- the snow and wind sheets (spec 2026-10-21-restes-issue-69, D-09) -----------------------------------------
+# The workbook's own Dropdowns, as the engineer's template carries them: the labels the SL-*/WL-* sheets pick from, and the numbers each stands for (held to SIA 261 by the readers).
+DROPDOWNS = {
+    "B24:C26": [("normale Windexposition", 1), ("dem Wind stark ausgesetzte Lage", 0.8), ("vor Wind geschützte Lage", 1.2)],
+    "B30:C34": [(-200, -200), ("± 0", 0), ("+200", 200), ("+400", 400), ("+500", 500)],
+    "I44:I48": [("Flachdach",), ("GiebeldachLM1",), ("GiebeldachLM2",), ("SheddachLM1",), ("SheddachLM2",)],
+    "B91:D94": [("II Seeufer", 300, 0.16), ("IIa grosse Ebene", 380, 0.19), ("III Ortschaften, freies Feld", 450, 0.23), ("IV grossflächige Stadtgebiete", 526, 0.3)],
+}
+
+
+def _cells(rng):
+    from openpyxl.utils import range_boundaries
+    c0, r0, c1, r1 = range_boundaries(rng)
+    return c0, r0, c1, r1
+
+
+def build_loads(path, snow=(), wind=(), dropdowns=None):
+    """Writes a load workbook at `path` with a `Dropdowns` sheet and the given SL-*/WL-* sheets, each {"sheet", "inputs": {cell: value}, "excel": {cell: value}} -- the cells the engineer enters, and those Excel computed (written as values: openpyxl writes no formula cache). tests/fixtures/load-sheets-reference.json holds such sheets, read from the engineer's workbooks."""
+    wb = Workbook()
+    drop = wb.active
+    drop.title = "Dropdowns"
+    for rng, rows in (dropdowns or DROPDOWNS).items():
+        c0, r0, _c1, _r1 = _cells(rng)
+        for i, row in enumerate(rows):
+            for j, value in enumerate(row):
+                drop.cell(row=r0 + i, column=c0 + j, value=value)
+    for item in list(snow) + list(wind):
+        ws = wb.create_sheet(item["sheet"])
+        for cell, value in {**item.get("excel", {}), **item.get("inputs", {})}.items():
+            ws[cell] = value
+    wb.save(path)
+    return path

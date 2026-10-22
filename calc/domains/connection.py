@@ -8,7 +8,7 @@ A connection is not read from a workbook. Its definition -- which detail schema 
 
 What is calculated here is the geometry, and only the geometry: the rotation centre (the fasteners' centroid, a point the engineer fixed, or a centre drawn in the schema), the distances to it, and I_p,x = Σ Δx_i², I_p,z = Σ Δz_i², I_p = I_p,x + I_p,z -- in mm², the discrete counterpart of a polar moment of inertia, every fastener counting as one unit point. The connection enters data/connections.json as the ordinary {vars, steps, checks, tables, results} record (section 2, rule 2), so `show-calc("connection", id)` and `var-of("connection", id, "I_p")` read it like any other calculation.
 
-The forces in the fasteners are *not* calculated here. N, V and M are written in the report, `show-polar-moment(id, N:, V:, M:)`, until load combinations export them, so lib/calc-engine.typ distributes them (section 13). `fastener_forces()` below is the same formula once more, for Woodcore's preview only -- nothing it returns is saved -- and the two are checked against each other.
+The forces in the fasteners are *not* calculated here. N, V and M are written in the report -- in the file Woodcore writes for the connection, `Connections/<id>.typ` -- until load combinations export them, so the report distributes them: by the file's `#eq`, and for the arrows of its figure by `#image-polar-moment` (lib/calc-engine-connections.typ, `polar-distribution`; section 13). `fastener_forces()` below is the same formula once more, for Woodcore's preview only -- nothing it returns is saved -- and the two are checked against each other.
 
 Conventions, all stated in section 3.3quinquies. Coordinates in mm, **the schema's own**: the origin where the schema puts it, x to the right, z down. Angles -- of N, of V, of a member's grain -- are counted from x towards z, clockwise on the drawing. M is positive the other way, turning z towards x (M_y of a right-handed frame), which is anticlockwise on the drawing.
 """
@@ -22,9 +22,12 @@ from pathlib import Path
 
 import engine
 import validation
+from domains._common import check_number as _number, fail as _fail  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import schema as schema_model  # a connection is drawn on one: its ids, its geometry and its accessors
 from domains import links  # a field that follows a variable of the export (spec 2026-10-11-variables-liees-champs-et-textes)
 from i18n import strings
+from domains.dimension import normalize_angle  # plane geometry written once (D4)
+from domains._common import source_paths  # one copy (G4)
 
 DOMAIN = "connection"
 LABEL = "Verbindungen"
@@ -39,6 +42,10 @@ UPGRADED_SOURCE_VERSIONS = ("3.0", "3.1")
 LINKED_SCHEMA_VERSION = "4.1"
 EXPORT_SCHEMA_VERSION = "4.1"
 LINKED_EXPORT_VERSION = "4.2"
+# 4.3 is 4.2 with a connection's figures named from the Typst root (`/Connections/Exports/Figures/V01-fr.svg`): written by a project laid out by folders, where they lie in Connections/Exports/Figures/ (issue #64, D-10)
+ROOTED_EXPORT_VERSION = "4.3"
+# 4.4 is 4.3 with no level on a line, lib/line-levels.json saying it (spec 2026-10-20-indices-et-niveaux, UI-002): written by every export from v0.120, links and rooted figures admitted
+LEVELS_EXPORT_VERSION = "4.4"
 
 # The fields a variable of the export may fill (REQ-009, issue #42): a rotation centre placed by hand, the two directions, and the trial forces the «Calcul» view starts from -- data of the calculation since that issue (D-12), `trial` being optional and additive.
 LINKABLE = {links.SELF: {"center.x": "mm", "center.z": "mm", "directions.N": "°", "directions.V": "°",
@@ -47,7 +54,7 @@ TRIAL_KEYS = ("N", "V", "M")
 # The file data/connections.json is written to -- named once, for this module and the Variables tab's reader (calc/variable_sources.py).
 EXPORT_FILE = "connections.json"
 
-# What calc/tools/migrate_to_schemas.py converts, and this module deliberately does not: a source at one of these carries its own drawing, and turning that drawing into a schema means writing a second file, which a reader has no business doing silently.
+# What Woodcore 0.119 and earlier converted (calc/tools/migrate_to_schemas.py, retired in v0.120, D-21), and this module deliberately does not: a source at one of these carries its own drawing, and turning that drawing into a schema means writing a second file, which a reader has no business doing silently.
 LEGACY_SOURCE_VERSIONS = ("1.0", "2.0", "2.1")
 
 # What a new connection cites until the engineer says otherwise: a document rather than a norm clause, so it has no clause and is printed without one.
@@ -69,18 +76,6 @@ SAME_POINT = 1e-6
 TIE_TOLERANCE = 1e-9
 
 
-def _fail(where, message):
-    raise validation.ValidationError(f"{where}: {message}")
-
-
-def _number(value, where, what, positive=False):
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
-        _fail(where, f"{what} must be a number, got {value!r}")
-    if positive and value <= 0:
-        _fail(where, f"{what} must be greater than 0, got {value!r}")
-    return value
-
-
 def _index(value, count, where, what):
     """A member's number, 1-based, as the form and the file give it."""
     if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= count:
@@ -92,16 +87,6 @@ def _clean(value):
     """A converted number as it is saved: -0 is 0, a whole float an int."""
     value = round(float(value), 6) + 0.0
     return int(value) if value.is_integer() else value
-
-
-def normalize_angle(degrees):
-    """An angle in degrees, brought into (-180, 180]."""
-    a = math.fmod(degrees, 360.0)
-    if a <= -180:
-        a += 360
-    elif a > 180:
-        a -= 360
-    return a
 
 
 # --- The source file ------------------------------------------------------------
@@ -173,7 +158,7 @@ def check_source(source, where):
     """
     version = source.get("schema_version") if isinstance(source, dict) else None
     if version in LEGACY_SOURCE_VERSIONS:
-        _fail(where, f"schema_version is {version!r} -- it carries its own drawing; run `python calc/tools/migrate_to_schemas.py --write` once, which writes that drawing out as a schema under details/ and leaves this file naming it")
+        _fail(where, f"schema_version is {version!r} -- it carries its own drawing; a file of before v0.74, which this Woodcore no longer reads (spec 2026-10-19-base-saine-nettoyage, D-21): open the project once in Woodcore 0.119 or earlier, whose calc/tools/migrate_to_schemas.py writes that drawing out as a schema under details/")
     if version in UPGRADED_SOURCE_VERSIONS:
         _fail(where, f"schema_version is {version!r} -- read it through connection.upgrade_source(), which makes it {SOURCE_SCHEMA_VERSION}")
     if version not in (None, SOURCE_SCHEMA_VERSION, LINKED_SCHEMA_VERSION):
@@ -394,7 +379,7 @@ def analyse(source, detail=None):
 
 
 def fastener_forces(geometry, directions, N, V, M):
-    """The force in every fastener, for Woodcore's preview -- the same distribution lib/calc-engine.typ's show-polar-moment prints, and checked against it (docs/domain/connections.md §3.3quinquies): N and V shared equally, M in proportion to the distance to the rotation centre and at right angles to it.
+    """The force in every fastener, for Woodcore's preview -- the same distribution the file of a polar moment computes by `#eq` and `#image-polar-moment` draws, and checked against both by tests/test_arrows.py (docs/domain/connections.md §3.3quinquies): N and V shared equally, M in proportion to the distance to the rotation centre and at right angles to it.
 
     N, V in kN along the angles `directions` gives them (degrees from x towards z), M in kNm about the rotation centre, positive turning z towards x. Returns ([{nr, dx, dz, fx, fz, f}, ...], governing), `governing` being the 0-based indices of every fastener carrying the largest resultant, smallest first -- the calculation is shown for the first. A moment on a group with no lever arm at all (I_p = 0) cannot be taken and raises ValueError.
     """
@@ -482,7 +467,7 @@ def _table(geometry):
 
 
 def _member_record(member, index, geometry, detail):
-    """One member as the report reads it. Its *section* is gone from the record with the member form: the pieces are the schema's, so `show-polar-moment` names a member and does not restate its b/h.
+    """One member as the report reads it. Its *section* is gone from the record with the member form: the pieces are the schema's, so the file Woodcore writes for the connection names a member and does not restate its b/h.
 
     Two angles, and they are not the same thing: `local` is the grain from the reference member's, which is what theta_(r,j) prints, and `axis` the grain from the schema's x, which is what a force-grain angle is measured against. Until v0.73 the two were one number by construction, the reference member's grain BEING x; a detail drawn at an angle parts them.
     """
@@ -510,7 +495,7 @@ def member_label(member, index, detail=None):
 def build_record(source, detail=None, figure=None, positions=None):
     """One connection as it enters data/connections.json: the schema it is drawn on, its members and fasteners as the report draws and distributes forces with them, the figure's placement data, and the {vars, steps, checks, tables, results} record of its polar moment. `source` must have passed check_source(); `detail` is the schema source; `figure` is connection_svg.meta() of its layout, computed here when not given.
 
-    Which values the report prints at which level, and in which order, is show-polar-moment's layout; the vars' levels serve show-calc("connection", id), which prints the record on its own.
+    Which values the report prints, and in which order, is the layout of the file the export writes (unfold._generate_connection); the vars' levels are each line's level there.
     """
     cid = source["id"]
     geometry = analyse(source, detail)
@@ -526,28 +511,28 @@ def build_record(source, detail=None, figure=None, positions=None):
 
     calc = engine.Calculation()
 
-    def add(name, value, unit, symbol, label, level, **extra):
-        calc.add_var(name=name, value=value, unit=unit, symbol=symbol, label=label, level=level, source=SOURCE, norm=norm, norm_ref=norm_ref, **extra)
+    def add(name, value, unit, symbol, label, **extra):
+        calc.add_var(name=name, value=value, unit=unit, symbol=symbol, label=label, source=SOURCE, norm=norm, norm_ref=norm_ref, **extra)
 
     center_label = "Drehpunkt (festgelegt)" if manual else "Drehpunkt (Schwerpunkt der Verbindungsmittel)"
-    add("x_c", xc, "mm", "x_c", "Drehpunkt, x", 3, group="center", group_label=center_label)
-    add("z_c", zc, "mm", "z_c", "Drehpunkt, z", 3, group="center")
+    add("x_c", xc, "mm", "x_c", "Drehpunkt, x", group="center", group_label=center_label)
+    add("z_c", zc, "mm", "z_c", "Drehpunkt, z", group="center")
     for j, member in enumerate(source["members"]):
         if j != r:
             add(f"theta_{j + 1}", _clean(geometry["local"][j]), "°", f"theta_({r + 1},{j + 1})",
-                f"Winkel von Element {r + 1} zu Element {j + 1}", 3, group="angles", group_label="Winkel zwischen den Elementen")
-    add("alpha_N", source["directions"]["N"], "°", "alpha_N", "Richtung der Normalkraft", 3, group="directions", group_label="Kraftrichtungen")
-    add("alpha_V", source["directions"]["V"], "°", "alpha_V", "Richtung der Querkraft", 3, group="directions")
-    add("n", geometry["n"], "", "n", "Anzahl Verbindungsmittel", 2)
+                f"Winkel von Element {r + 1} zu Element {j + 1}", group="angles", group_label="Winkel zwischen den Elementen")
+    add("alpha_N", source["directions"]["N"], "°", "alpha_N", "Richtung der Normalkraft", group="directions", group_label="Kraftrichtungen")
+    add("alpha_V", source["directions"]["V"], "°", "alpha_V", "Richtung der Querkraft", group="directions")
+    add("n", geometry["n"], "", "n", "Anzahl Verbindungsmittel")
 
     # The two sums are the table's totals row; their steps carry no formula and record only that they are calculated, like the dead load's g_k and a_k.
-    add("I_px", geometry["I_px"], "mm²", "I_(p,x)", "Polares Flächenträgheitsmoment, Anteil x", 3)
-    calc.add_step(name="Polares Flächenträgheitsmoment, Anteil x", level=3, result="I_px", uses=[], norm=norm, norm_ref=norm_ref)
-    add("I_pz", geometry["I_pz"], "mm²", "I_(p,z)", "Polares Flächenträgheitsmoment, Anteil z", 3)
-    calc.add_step(name="Polares Flächenträgheitsmoment, Anteil z", level=3, result="I_pz", uses=[], norm=norm, norm_ref=norm_ref)
-    add("I_p", geometry["I_p"], "mm²", "I_p", "Polares Flächenträgheitsmoment", 2)
+    add("I_px", geometry["I_px"], "mm²", "I_(p,x)", "Polares Flächenträgheitsmoment, Anteil x")
+    calc.add_step(name="Polares Flächenträgheitsmoment, Anteil x", result="I_px", uses=[], norm=norm, norm_ref=norm_ref)
+    add("I_pz", geometry["I_pz"], "mm²", "I_(p,z)", "Polares Flächenträgheitsmoment, Anteil z")
+    calc.add_step(name="Polares Flächenträgheitsmoment, Anteil z", result="I_pz", uses=[], norm=norm, norm_ref=norm_ref)
+    add("I_p", geometry["I_p"], "mm²", "I_p", "Polares Flächenträgheitsmoment")
     calc.add_step(
-        name="Polares Flächenträgheitsmoment", level=3, result="I_p", uses=["I_px", "I_pz"],
+        name="Polares Flächenträgheitsmoment", result="I_p", uses=["I_px", "I_pz"],
         formula="I_p = I_(p,x) + I_(p,z)", norm=norm, norm_ref=norm_ref,
         description="Σ (Δx² + Δz²) über alle Verbindungsmittel, jedes als Einheitspunkt gezählt — daher in mm² und nicht in mm⁴.",
     )
@@ -599,14 +584,6 @@ def calculation_state(source, detail, geometry=None):
 
 # --- Export -----------------------------------------------------------------------
 
-def source_paths(source_dir):
-    """Every connection source, in file-name order -- the order they are listed in, and exported in."""
-    source_dir = Path(source_dir)
-    if not source_dir.is_dir():
-        return []
-    return sorted(source_dir.glob("*.json"), key=lambda p: p.name.lower())
-
-
 def schema_warnings(source, detail, schemas, where):
     """What the schema a source names does not carry, as warnings -- never as a stop (docs/decisions.md §13, the v0.33 rule): the report refuses to print such a connection, and Woodcore must still be able to open it and point it at another schema.
 
@@ -645,11 +622,12 @@ def stamp_version(source):
     return source
 
 
-def prepare(source_dir, schemas=None, positions=None, values=None):
+def prepare(source_dir, schemas=None, positions=None, values=None, place=None):
     """(data, figures, warnings): data/connections.json as it will be written and each connection's SVG, built and validated from every source file, nothing written yet -- so export_all.py can check the connections along with everything else before it writes anything -- and a warning for everything the schema a calculation is drawn on no longer carries. `schemas` is {id: source} of the detail schemas, which is where the geometry comes from since v0.74. `positions` are the position records the schema's elements take their section and label from (v0.75), so the figure's pieces are the ones the schema's own figure draws. No source folder is a project without connections, not an error. Since v0.76 no connector is asked for: a connection names none."""
     from domains import connection_svg  # the figure module draws what this module computes
 
     schemas = schemas if schemas is not None else {}
+    place = place or engine.Figures(None, "connection")   # where the figures lie and how the record names them (engine.Figures)
     connections, figures, warnings = {}, {}, []
     for path in source_paths(source_dir):
         source = read_source(path)
@@ -662,37 +640,23 @@ def prepare(source_dir, schemas=None, positions=None, values=None):
         geometry = analyse(source, detail)
         drawing = connection_svg.layout(source, geometry, detail, positions)
         connections[source["id"]] = build_record(source, detail, connection_svg.meta(drawing), positions)
+        connections[source["id"]]["figure"]["files"] = {lang: place.name(f"{source['id']}-{lang}.svg") for lang in strings.LANGUAGES}
         if provenance:
             connections[source["id"]]["links"] = provenance
         figures[source["id"]] = {lang: connection_svg.render(drawing, lang=lang) for lang in strings.LANGUAGES}
         warnings += schema_warnings(source, detail, schemas, f"connections/{path.name}")
-    linked = any("links" in record for record in connections.values())
-    data = {"schema_version": LINKED_EXPORT_VERSION if linked else EXPORT_SCHEMA_VERSION, "connections": connections}
+    data = {"schema_version": LEVELS_EXPORT_VERSION, "connections": connections}   # 4.4 holds what 4.2 (links) and 4.3 (rooted figures) hold
     validation.validate_structure(data, "connections")
     validation.validate_connections_business(data)
     return data, figures, warnings
 
 
 def write(data, figures, data_dir):
-    """Writes data/connections.json and data/connections/<id>.svg, and removes the figure of a connection that no longer exists -- that folder is generated, like the rest of data/."""
+    """Writes data/connections.json and each connection's figures under the names its record gives them -- the tab's Exports/Figures/ in a project laid out by folders, data/connections/ otherwise (engine.Figures) --, and removes those of a connection that no longer exists: only what the last export wrote, never a file of the engineer's."""
     data_dir = Path(data_dir)
+    files = {data["connections"][cid]["figure"]["files"][lang]: svg for cid, per_language in figures.items() for lang, svg in per_language.items()}
+    engine.figures(data_dir, "connection").write(files, engine.previous_json(data_dir / EXPORT_FILE))
     engine.write_json(data_dir / EXPORT_FILE, data)
-    figure_dir = data_dir / "connections"
-    figure_dir.mkdir(parents=True, exist_ok=True)
-    wanted = set()
-    for cid, per_language in figures.items():
-        for lang, svg in per_language.items():
-            name = f"{cid}-{lang}.svg"
-            wanted.add(name)
-            target = figure_dir / name
-            payload = svg.encode("utf-8")
-            # A figure whose content has not changed is left alone, so Git sees a change only where there is one.
-            if target.is_file() and target.read_bytes() == payload:
-                continue
-            target.write_bytes(payload)
-    for stale in figure_dir.glob("*.svg"):
-        if stale.name not in wanted:
-            stale.unlink()
 
 
 def export(source_dir, data_dir, schema_dir=None, schemas=None, values=None):
@@ -703,6 +667,25 @@ def export(source_dir, data_dir, schema_dir=None, schemas=None, values=None):
     if values is None:
         import variable_sources   # the reader of data/'s variables, which imports this module: imported here
         values = variable_sources.known_values(Path(data_dir))
-    data, figures, warnings = prepare(source_dir, schemas, connector.known_positions(data_dir), values)
+    data, figures, warnings = prepare(source_dir, schemas, connector.known_positions(data_dir), values, place=engine.figures(data_dir, "connection"))
     write(data, figures, data_dir)
+    # a polar moment of the project open is written out when it is first saved, as a check is (spec 2026-10-21-commandes-typst-refonte, REQ-017)
+    import project
+    try:
+        here = project.current()
+    except project.ProjectError:
+        here = None
+    if here is not None and Path(data_dir) == here.data_dir:
+        from domains import formula_domain, unfold
+        if unfold.unfold_domains(here, "connection", data):
+            formula_domain.export(here)
     return data, warnings
+
+
+def references(record):
+    """What an exported polar moment names, [(kind, id, field)]: its schema and the positions of its members (domains/dependency_graph.py, spec 2026-10-21-graphe-dependances, ARCH-RISK-1103)."""
+    out = [("schema", record["schema"], "schema")] if record.get("schema") else []
+    for i, member in enumerate(record.get("members") or ()):
+        if member.get("position"):
+            out.append(("position", member["position"], "members[%d].position" % i))
+    return out

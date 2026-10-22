@@ -19,6 +19,7 @@ from pathlib import Path
 
 import engine
 import validation
+from domains._common import check_number as _number, fail as _fail  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import connector, figure_style, section as position_section
 from domains import dimension  # a dimension's geometry, shared with the static models and the plans (issue #9)
 from domains import figure_text  # a text placed with the Text tool, the four engines' one (issue #43, ARCH-003)
@@ -135,6 +136,7 @@ from domains.schema_edit import (  # split out of this module (issue #30): every
     translation,
     used_by,
 )
+from domains._common import source_paths  # one copy (G4)
 
 # Of a source file (details/<id>.json) and of the export (data/schemas.json). 1.1 (v0.75): an element states its section as `b` and `h`, each following its position unless written over, and `width` is gone; a 1.0 source is read as it stands, its `width` becoming the side its view shows (`upgrade_source`). A schema may also carry a `crop`.
 SOURCE_SCHEMA_VERSION = "1.1"
@@ -144,6 +146,10 @@ SOURCE_SCHEMA_VERSIONS = ("1.0", SOURCE_SCHEMA_VERSION, TEXT_SCHEMA_VERSION)
 EXPORT_SCHEMA_VERSION = "1.1"
 # 1.2 is 1.1 with a schema's `texts`, what each printed: written only where one holds a text
 TEXT_EXPORT_VERSION = "1.2"
+# 1.3 is 1.2 with its figures named from the Typst root (`/Details/Exports/Figures/D01-fr.svg`): written by a project laid out by folders, where they lie in the tab's Exports/Figures/ (issue #64, D-10)
+ROOTED_EXPORT_VERSION = "1.3"
+# 1.4 (v0.120, spec 2026-10-19-base-saine-nettoyage, D7) is 1.3 with each schema's `size`, the extent schema_svg.layout sizes its symbols by, which the report's halo reads rather than working it out again from the geometry. Written by every export since -- with texts or without, laid out by folders or not, which the record itself says (`texts`, a figure named from the root).
+SIZE_EXPORT_VERSION = "1.4"
 
 # A schema's id is the file name of its source and the string the report addresses it by -- the connections', the plans' and the static models' own rule.
 ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.+-]*$")
@@ -175,18 +181,6 @@ DIMENSION_LINEAR = dimension.LINEAR
 # The grid steps in millimetres the editor snaps to, coarsest first, each with the interval its heavier lines are drawn at. "auto" takes the finest step still far enough apart on screen -- statics.py's mechanism, in mm rather than m.
 GRID_STEPS = ((1000.0, 5000.0), (100.0, 500.0), (10.0, 50.0), (1.0, 5.0))
 GRID_SNAPS = tuple(step for step, _heavy in GRID_STEPS)
-
-
-def _fail(where, message):
-    raise validation.ValidationError(f"{where}: {message}")
-
-
-def _number(value, where, what, positive=False):
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
-        _fail(where, f"{what} must be a number, got {value!r}")
-    if positive and value <= 0:
-        _fail(where, f"{what} must be greater than 0, got {value!r}")
-    return value
 
 
 def _string(value, where, what, blank=False):
@@ -463,14 +457,6 @@ def new_source(sid):
     }
 
 
-def source_paths(source_dir):
-    """Every source in the folder, in file-name order; none where the folder does not exist yet."""
-    source_dir = Path(source_dir)
-    if not source_dir.is_dir():
-        return []
-    return sorted(source_dir.glob("*.json"), key=lambda p: p.name.lower())
-
-
 def readable_sources(source_dir):
     """({id: source}, [(path, error)]): every schema of the folder that reads, and each one that does not with the ValidationError that says why (v0.117, issue #28) -- what a tab offers while another tab may be editing a schema. The export reads the folder with `read_sources`, which stops on the first that does not read; a tab goes on with the others and says which it left out (notices_ui.tell_unreadable_schemas), where it once left it out without a word."""
     sources, problems = {}, []
@@ -672,6 +658,8 @@ def build_record(source, positions=None, drawings=None):
         "dimensions": meta["dimensions"],
         "labels": all_ids(source),
         "unresolved": unresolved_positions(source, positions),
+        # the extent its symbols are sized by (font = size/40, a marker's radius size/130): the report's halo reads it (D7)
+        "size": drawings[strings.SOURCE_LANGUAGE]["size"],
     }
     return record
 
@@ -692,11 +680,12 @@ def text_records(source, values, where, notes):
 # --- Export --------------------------------------------------------------------------
 
 
-def prepare(source_dir, positions=None, values=None):
-    """Every schema, checked and built: (data, files, warnings). Nothing is written here, so an export that fails leaves data/ as it was. `positions` are the position records ({id: record}) every element's section and label are resolved against -- afresh at every export, so «Import données» is all it takes for a section changed in the workbook to reach the drawing; a list of ids is accepted and resolves no section."""
+def prepare(source_dir, positions=None, values=None, place=None):
+    """Every schema, checked and built: (data, files, warnings), `files` keyed by the figure's name in the JSON that `place` (an engine.Figures) gives. Nothing is written here, so an export that fails leaves data/ as it was. `positions` are the position records ({id: record}) every element's section and label are resolved against -- afresh at every export, so «Import données» is all it takes for a section changed in the workbook to reach the drawing; a list of ids is accepted and resolves no section."""
     from domains import schema_svg
 
     values = values or {}
+    place = place or engine.Figures(None, "details")
     schemas, files, notes = {}, {}, []
     for path in source_paths(source_dir):
         source = read_source(path)
@@ -707,33 +696,30 @@ def prepare(source_dir, positions=None, values=None):
         if texts:
             schemas[source["id"]]["texts"] = texts
         for lang, drawing in drawings.items():
-            files[f"schemas/{source['id']}-{lang}.svg"] = schema_svg.render(drawing)
-    data = {"schema_version": TEXT_EXPORT_VERSION if any("texts" in r for r in schemas.values()) else EXPORT_SCHEMA_VERSION, "schemas": schemas}
+            name = place.name(f"{source['id']}-{lang}.svg")
+            schemas[source["id"]]["figures"][lang]["file"] = name
+            files[name] = schema_svg.render(drawing)
+    data = {"schema_version": SIZE_EXPORT_VERSION, "schemas": schemas}
     validation.validate_structure(data, "schemas")
     validation.validate_schemas_business(data)
     return data, files, notes
 
 
 def write(data, files, data_dir):
-    """The only writer: data/schemas.json and data/schemas/, the figures of schemas that no longer exist swept out."""
+    """The only writer: data/schemas.json and the schemas' figures -- into the tab's Exports/Figures/ in a project laid out by folders, data/schemas/ otherwise (engine.Figures) --, those of schemas that no longer exist removed: only what the last export wrote, never a file of the engineer's."""
     data_dir = Path(data_dir)
+    engine.figures(data_dir, "details").write(files, engine.previous_json(data_dir / "schemas.json"))
     engine.write_json(data_dir / "schemas.json", data)
-    folder = data_dir / "schemas"
-    folder.mkdir(parents=True, exist_ok=True)
-    for name, content in files.items():
-        target = data_dir / name
-        payload = content.encode("utf-8") if isinstance(content, str) else content
-        if target.is_file() and target.read_bytes() == payload:
-            continue
-        target.write_bytes(payload)
-    wanted = {Path(name).name for name in files}
-    for stale in folder.iterdir():
-        if stale.is_file() and stale.name not in wanted:
-            stale.unlink()
 
 
 def export(source_dir, data_dir, positions=None, values=None):
     """prepare + write, and the warnings -- what Woodcore's window runs when a schema is saved. `values` are the export's, which a text's variables print (issue #43)."""
-    data, files, notes = prepare(source_dir, positions, values)
+    data, files, notes = prepare(source_dir, positions, values, place=engine.figures(data_dir, "details"))
     write(data, files, data_dir)
     return notes
+
+
+def references(record):
+    """What an exported schema names, [(kind, id, field)]: the position of each element (domains/dependency_graph.py, spec 2026-10-21-graphe-dependances, ARCH-RISK-1103)."""
+    return [("position", element["position"], "elements[%s].position" % element.get("id", i))
+            for i, element in enumerate(record.get("elements") or ()) if element.get("position")]

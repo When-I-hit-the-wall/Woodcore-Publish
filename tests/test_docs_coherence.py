@@ -3,6 +3,8 @@
 What was moved verbatim -- `docs/history/`, the specs done or refused (`docs/requirements/completed/`, `rejected/`) and `archive/` -- is read as it was written, and not held to today's files: its links and its § were right on their day.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import re
 
 from conftest import ROOT
@@ -73,8 +75,8 @@ def test_no_file_of_the_docs_grows_past_the_threshold():
 
 def test_every_test_file_has_its_row_in_the_catalogue():
     rows = set()
-    for name in ("testing-catalogue.md", "testing-catalogue-window.md"):
-        rows |= set(re.findall(r"^\| `(test_\w+\.py)`", (DOCS / "conventions" / name).read_text(encoding="utf-8"), re.M))
+    for path in sorted((DOCS / "conventions").glob("testing-catalogue*.md")):   # one file per subject: the engine, the window, the guards, the Typst engine (2026-10-21)
+        rows |= set(re.findall(r"^\| `(test_\w+\.py)`", path.read_text(encoding="utf-8"), re.M))
     files = {p.name for p in (ROOT / "tests").glob("test_*.py")}
     assert not files - rows, f"a test file the catalogue does not name (docs/conventions/testing-catalogue*.md): {sorted(files - rows)}"
     assert not rows - files, f"a row for a test file that is not there: {sorted(rows - files)}"

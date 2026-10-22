@@ -155,7 +155,7 @@ def test_a_call_written_outside_the_tags_does_not_shift_the_boxes():
     _qt()
     import sheet_editor
     text = "\n".join([
-        '#import "/commands.typ": *',
+        '#import "/000-Typst-Config/commands.typ": *',
         "// woodcore:object sheet-text a", "#sheet-text(", "  x: 10mm,", "  y: 20mm,", ")", "// woodcore:/object a",
         "// woodcore:object sheet-text b", "#sheet-text(", "  x: 50mm,", "  y: 60mm,", ")", "// woodcore:/object b", ""])
     raw = [{"kind": "sheet-text", "x": 1, "y": 2, "w": 3, "h": 4}, {"kind": "sheet-text", "x": 10, "y": 20, "w": 5, "h": 5},
@@ -328,7 +328,9 @@ def test_an_object_written_by_hand_is_rewritten_only_once_asked():
     here = _project("sheet-editor-hand")
     sheets.new_sheet(here)
     text = sheets.read(here, "B01")
-    hand = text.replace("  x: 20mm,\n  y: 17mm,", "  y: 17mm, x: 20mm,  // by hand")
+    # a comment of the engineer's in the object's #place (spec 2026-10-21-commandes-typst-refonte, Q-015): no part of Woodcore's form
+    assert "#place(top + left, dx: 20mm, dy: 17mm," in text, text
+    hand = text.replace("#place(top + left, dx: 20mm, dy: 17mm,", "#place(top + left, dx: 20mm, dy: 17mm,  // by hand")
     sheets.write(here, "B01", hand)
     asked = []
     editor = _editor(here, ask=lambda q: asked.append(q) or False)
@@ -336,7 +338,7 @@ def test_an_object_written_by_hand_is_rewritten_only_once_asked():
     assert asked and "title" in asked[0] and sheets.read(here, "B01") == hand
     editor.ask = lambda q: True
     assert editor.move("title", 30, 30)
-    assert "x: 30mm" in sheets.read(here, "B01")
+    assert "dx: 30mm, dy: 30mm" in sheets.read(here, "B01")
 
 
 # --- the file watched ----------------------------------------------------------------------------------
@@ -599,14 +601,11 @@ def test_the_position_list_is_added_from_the_options_and_its_module_says_which_p
     _pump(app, 0.05)
     o = editor.options
     assert o.object_card.title() == "Liste des positions"
-    scope = o.object_widgets["scope"]
-    assert [scope.itemData(i) for i in range(scope.count())] == ["plans", "all", "storey"]
-    assert [o.object_widgets["storey"].itemData(i) for i in range(o.object_widgets["storey"].count())] == ["0"]
-    editor.set_list_scope(new, "storey", "0")
-    model = sheets.model(here, "B01", new)
-    assert model.get("scope") == "storey" and model.get("storey") == "0"
-    editor.set_list_scope(new, "all")
-    assert sheets.model(here, "B01", new).get("storey") is None
+    # the list is the project's file, included (spec 2026-10-21-commandes-typst-refonte, Q-015): no scope to choose on the sheet, its file written once where it was missing
+    assert "scope" not in o.object_widgets and "storey" not in o.object_widgets
+    from domains import list_files
+    assert list_files.path(here, "position-list").is_file()
+    assert '#include "/Positions/position-list.typ"' in sheets.read(here, "B01")
     estimated = {b.id: b for b in __import__("sheet_editor").estimate_boxes(here, sheets.read(here, "B01"))}
     assert estimated[new].h > 20 and estimated[new].estimated
     editor.wait()

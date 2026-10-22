@@ -3,6 +3,8 @@
 Every drawing here is built by ezdxf in the test, so the file runs on a clone with no drawing of the engineer's: two layers in the model space -- walls (W) and dimensions (B) --, a paper-space layout with a viewport, and an empty layout. A DWG cannot be written without the converter, so its path is held with the converter mocked; the one real run needs an ODA File Converter on the machine and is skipped where there is none.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import os
 import re
 from pathlib import Path

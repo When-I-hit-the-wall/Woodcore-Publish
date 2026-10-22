@@ -1,0 +1,28 @@
+{
+  "domains": {
+    "dreigelenk": {
+      "check": "dreigelenk",
+      "gen": {
+        "form": "010b6d",
+        "kind": "script",
+        "version": 2
+      },
+      "lines": {
+        "label:dreigelenk-presets": [
+          "43e43d1ead656e6e",
+          "43e43d1ead656e6e"
+        ],
+        "var:H_d": [
+          "69d1ab5a179e09c6",
+          "69d1ab5a179e09c6"
+        ],
+        "var:V_d": [
+          "bdc25ab6ebaa127a",
+          "bdc25ab6ebaa127a"
+        ]
+      }
+    }
+  },
+  "format": "woodcore-unfold",
+  "schema_version": "1.0"
+}

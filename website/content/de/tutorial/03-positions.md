@@ -28,8 +28,8 @@ Die Nummer beginnt mit dem Buchstaben der Art — `T` für einen Träger, `S` f�
 
 ## Im Bericht
 
-Jede Position erscheint in der Baustoffliste des Berichts, ohne dass etwas zu schreiben ist: der Abschnitt `003-baustoffe.typ` durchläuft alle Positionen mit `#member`, das auf Stufe 1 die Zeile einer Position druckt — und für Holz mit Rechteck- oder Rundquerschnitt nebenbei festhält, was die Nachweise der SIA 265 lesen (Schritt 7). Hat eine Position keinen Querschnitt oder keine Klasse, sagt `#member`, was es nicht berechnen kann, und die Werte werden dann im Aufruf angegeben: `grade:`, `moisture-class:`, `b:`, `h:`.
+Jede Position erscheint in der Baustoffliste des Berichts, ohne dass etwas zu schreiben ist: der Abschnitt `003-baustoffe.typ` durchläuft alle Positionen mit `#position`, das die Zeile einer Position druckt — ihre ID in der Farbe ihres Typs, dann die verlangten Felder (`category-show:`), Querschnitt, Festigkeitsklasse, Beschreibung.
 
-{{example member-3}}
+{{example position-2}}
 
 Eine im Register hinzugefügte oder geänderte Position erreicht den Bericht sofort: Der Export folgt dem Speichern.

@@ -10,4 +10,4 @@
 
 #var("F_Ed", 12, "kN", level: 0)
 #var("R_d", 24, "kN", level: 0)
-#verify(`F_Ed / R_d <= 1`, level: 3)
+#verify(`F_Ed / R_d <= 1`, display: "variable-value-unit")

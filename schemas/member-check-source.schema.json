@@ -270,6 +270,19 @@
       ],
       "description": "A shear: a member cut from the pith takes half of f_v,d (SIA 265 Tabelle 8 note 6). Optional; absent or null is false (issue #38)."
     },
+    "variant": {
+      "type": ["string", "null"],
+      "enum": ["shear", "shear-off", "shear-perp", null],
+      "description": "A shear check: what it checks -- `shear` (SIA 265 4.2.5.1, the default), `shear-off` (4.2.6, F on l and w), `shear-perp` (4.2.7.1, V_z with sigma_90) -- chosen in the «Effort tranchant» tab's list (spec 2026-10-21-commandes-typst-refonte, REQ-021). Optional; absent or null is shear."
+    },
+    "F": {
+      "type": ["object", "null"],
+      "description": "A shear-off: the design force sheared off, a {value, unit} block (4.2.6). l and w are its sheared length and width, w null following the member's width."
+    },
+    "sigma_90": {
+      "type": ["number", "null"],
+      "description": "A shear with a stress perpendicular to the grain: that design stress in N/mm², transverse tension positive (4.2.7.1)."
+    },
     "l_y": {
       "type": [
         "number",

@@ -3,6 +3,8 @@
 The engineer, 07.10.2026: «Il ne doit plus y avoir de : MessageBox / Erreur ! / Exception... qui interrompent brutalement l'utilisateur. Toutes les erreurs doivent être centralisées dans le système global de notifications d'erreurs de Woodcore». A module says what went wrong with `notices_ui.tell` (or calc/notifications.py), a dialog says it in its own band (`notices_ui.inline_error`). What stays a box is a **decision** that waits for its answer -- `QMessageBox.question`, or a box built with its buttons -- and such a box says so on its line: `# dialog-ok: <why>`. Read in the source, as tests/test_no_console.py reads the processes: a box added tomorrow fails here, naming its file and line.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import ast
 
 from conftest import ROOT

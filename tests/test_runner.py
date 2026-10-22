@@ -3,6 +3,8 @@
 A CI job reads nothing but the runner's exit code, so the code is the contract: 1 for a failure, 1 for a full run that skipped more than MAX_SKIPPED -- a run that checked less than it seems --, 0 otherwise.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import conftest
 from conftest import ROOT
 
@@ -41,3 +43,17 @@ def test_the_tests_of_time_are_left_out_unless_asked_for():
     assert not run_tests.is_perf(folder / "test_x.py"), "a mention of the marker is not the marker"
     (folder / "test_y.py").write_text("PERF = True  # a test of time\n", encoding="utf-8")
     assert run_tests.is_perf(folder / "test_y.py")
+
+
+def test_the_fast_tier_is_the_files_that_say_so_and_holds_the_engine_the_norms_and_the_export():
+    """REQ-005 (spec 2026-10-19-base-saine-nettoyage): `--fast` runs the files that set `TIER = "fast"`, read off their text as `PERF` is. It must keep what a commit most needs checked -- the engine's contracts, the norms, the export -- and stay out of the tests of time."""
+    tests = ROOT / "tests"
+    fast = {p.stem for p in tests.glob("test_*.py") if run_tests.is_fast(p)}
+    for stem in ("test_norms", "test_export", "test_schema", "test_units", "test_dowel", "test_steel_check", "test_snow_source", "test_wind_source", "test_dead_load", "test_runner"):
+        assert stem in fast, f"{stem} belongs to the fast tier"
+    assert not fast & {p.stem for p in tests.glob("test_*.py") if run_tests.is_perf(p)}, "a test of time is never fast"
+    folder = conftest.tmpdir("runner-fast")
+    (folder / "test_x.py").write_text('"""Mentions TIER = "fast" in its text only."""\nX = \'TIER = "fast"\'\n', encoding="utf-8")
+    assert not run_tests.is_fast(folder / "test_x.py"), "a mention of the marker is not the marker"
+    (folder / "test_y.py").write_text('TIER = "fast"  # tests/run_tests.py --fast\n', encoding="utf-8")
+    assert run_tests.is_fast(folder / "test_y.py")

@@ -14,6 +14,7 @@ from conftest import ROOT, Skip
 from fixtures import layered_pdf as fx
 
 import project
+import sheets
 
 _STATE = {}
 
@@ -504,7 +505,7 @@ def test_the_command_entry_shows_the_builder():
         tab.set_view("typst")   # the «Commande Typst» row of v0.114 is the «Typst» view since v0.117
         assert tab.view_kind == "command" and tab.view == "typst"
         assert tab.center.currentWidget() is tab.builder.preview and tab.right.currentWidget().isAncestorOf(tab.builder.options)
-        assert tab.builder.command().startswith("#show-plan(")
+        assert tab.builder.command().startswith("#figure(image-positions-plan(")   # a native figure since the spec 2026-10-21-commandes-typst-refonte (REQ-013)
         tab.builder.stop()
         tab.show_plan_view()
         assert tab.center.currentWidget() is tab.center.widget(0) and tab.view == "draw"
@@ -516,7 +517,7 @@ def test_a_sheet_made_from_the_left_pane_is_listed_and_opened_in_the_editor():
         with _boxes() as shown:
             sid = tab.new_sheet()
         assert sid and not [k for k, _t in shown if k in ("warning", "critical")], shown
-        assert (here.typst_root / "Plans" / f"{sid}.typ").is_file()
+        assert sheets.path(here, sid).is_file() and sheets.path(here, sid).parent == sheets.folder(here, "position")   # the position plan's exports laid out by folders (issue #64)
         assert tab.sheet_list.ids().count(sid) == 1
         assert tab.view_kind == "sheet"
         assert tab.center.currentWidget() is tab.sheet_editor.canvas and tab.right.currentWidget().isAncestorOf(tab.sheet_editor.options)
@@ -574,3 +575,35 @@ def test_the_end_puts_the_caches_back():
         _release(tab)
         from domains import plan_documents
         plan_documents.CACHE_ROOT = _STATE["cache"]
+
+
+def test_a_document_of_the_same_name_is_replaced_on_a_yes_and_one_written_over_is_read_again_as_the_tab_is_shown():
+    """Issue #64, D-09, D-18: laid out by folders, «Importer…» copies the file into Imported Plans/; the same name with other bytes asks first -- «Non» changes nothing, «Oui» writes the copy over and reads the same document again --; a copy written over from outside Woodcore is read again as the tab is shown, and not in a project open read-only."""
+    tab, here = _tab()
+    from domains import plan_documents
+    from PySide6.QtWidgets import QMessageBox
+    with project.using(here), _boxes():
+        assert here.has_folders
+        docid, _shown = _import(tab, here, name="Ersatz.pdf", pages=1)
+        copy = plan_documents.file_path(here, plan_documents.read(here, docid))
+        assert copy.parent == plan_documents.imported_dir(here, "plan"), copy
+        other = fx.write(conftest.tmpdir("ptr_replace") / "Ersatz.pdf", pages=3)
+        with _boxes(answer=QMessageBox.StandardButton.No, file=other) as shown:
+            assert not tab.import_document()
+        assert any(kind == "question" and "Ersatz.pdf" in text for kind, text in shown), shown
+        assert len(plan_documents.read(here, docid)["pages"]) == 1, "«Non»: nothing written over"
+        with _boxes(file=other) as shown:
+            assert tab.import_document()
+        assert tab.doc_id == docid and len(plan_documents.read(here, docid)["pages"]) == 3, "«Oui»: the same document, read again"
+        _done(tab)
+        fx.write(copy, pages=2)
+        window = _STATE["window"]
+        window.read_only = True
+        try:
+            tab.on_shown()
+            assert len(plan_documents.read(here, docid)["pages"]) == 3, "a project open read-only writes nothing as the tab is shown"
+        finally:
+            window.read_only = False
+        tab.on_shown()
+        assert len(plan_documents.read(here, docid)["pages"]) == 2, "a copy written over is read again as the tab is shown"
+        _done(tab)

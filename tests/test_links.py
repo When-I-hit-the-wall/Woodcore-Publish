@@ -11,6 +11,8 @@ What is held:
 * **the window's side** (D-14): `refresh` writes the value a variable gives now into the source, and leaves a field whose variable is gone as it is.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 import json
 
@@ -162,6 +164,12 @@ def test_a_check_without_links_stays_as_it_was_and_links_need_1_1():
     _refused(lambda: member_check.check_source(wrong, "checks/ZT-L.json"), "moisture_class")
 
 
+def _check_version(data, below):
+    """The version a checks export is written at: 1.6 wherever a check is printed unfolded -- the example's are (spec 2026-10-15, ARCH-007; every kind computed since the spec 2026-10-21-commandes-typst-refonte, which took `gen` out of it) --, `below` otherwise."""
+    records = data["checks"].values()
+    return member_check.UNFOLDED_BASE_EXPORT_VERSION if any(member_check.is_unfolded(r) for r in records) else below
+
+
 def test_the_check_export_with_a_link_is_1_1_and_follows_the_variable():
     here = conftest.project_copy("links_checks")
     _without_fire(here)
@@ -169,7 +177,7 @@ def test_the_check_export_with_a_link_is_1_1_and_follows_the_variable():
         src = _linked_check()
         (here.checks_dir / "ZT-L.json").write_text(json.dumps(src, indent=2), encoding="utf-8")
         data = member_check.prepare(here, POSITIONS, VALUES)
-        assert data["schema_version"] == member_check.LINKED_EXPORT_VERSION
+        assert data["schema_version"] == _check_version(data, member_check.LINKED_EXPORT_VERSION)
         validation.validate_structure(data, "checks")
         assert data["checks"]["ZT-L"]["N"]["value"] == 18.75
         # the variable changes: the next export follows it (REQ-002)
@@ -179,7 +187,9 @@ def test_the_check_export_with_a_link_is_1_1_and_follows_the_variable():
         assert again["checks"]["ZT-L"]["N"]["value"] == 30
         # no link anywhere: the export is the 1.0 it always was
         (here.checks_dir / "ZT-L.json").unlink()
-        assert member_check.prepare(here, POSITIONS, VALUES)["schema_version"] == member_check.EXPORT_SCHEMA_VERSION
+        plain = member_check.prepare(here, POSITIONS, VALUES)
+        assert plain["schema_version"] == _check_version(plain, member_check.EXPORT_SCHEMA_VERSION)
+        assert not any("links" in r for r in plain["checks"].values())
 
 
 # --- the static models ------------------------------------------------------------------
@@ -271,7 +281,10 @@ def _export_copy(name):
     import shutil
     here = conftest.project_copy(name)
     real = project.current()
-    shutil.copytree(real.typst_root / "Formules", here.typst_root / "Formules")
+    # the domains' files: the engineer's own (Domains/, Formules/ before) and, laid out by folders, the specialised tabs' (issue #64)
+    for folder in [real.formulas_dir] + ([real.domain_dir(kind) for kind in project.DOMAIN_FOLDERS] if real.has_folders else []):
+        if folder.is_dir():
+            shutil.copytree(folder, here.root / folder.relative_to(real.root), dirs_exist_ok=True)
     # the plans' backgrounds, which the export reads and project_copy leaves out (a plan on a missing document stops the export)
     for folder in real.root.iterdir():
         if folder.is_dir() and folder.name.startswith("01_"):
@@ -288,7 +301,7 @@ def test_a_project_without_a_link_exports_its_checks_and_models_as_before():
         export_all.run()
     assert (here.data_dir / "checks.json").read_bytes() == before, "checks.json changed although nothing follows a variable"
     models = json.loads((here.data_dir / "statics.json").read_text(encoding="utf-8"))
-    assert models["schema_version"] == statics.EXPORT_SCHEMA_VERSION
+    assert models["schema_version"] == (statics.ROOTED_EXPORT_VERSION if here.has_folders else statics.EXPORT_SCHEMA_VERSION), "laid out by folders, the figures are named from the root (issue #64)"
     assert not any("links" in record for record in models["models"].values())
 
 
@@ -319,7 +332,7 @@ def test_the_whole_export_resolves_a_check_from_a_script_and_a_model_from_a_form
     with project.using(here):
         export_all.run()
     checks = json.loads((here.data_dir / "checks.json").read_text(encoding="utf-8"))
-    assert checks["schema_version"] == member_check.LINKED_EXPORT_VERSION
+    assert checks["schema_version"] == _check_version(checks, member_check.LINKED_EXPORT_VERSION)
     record = checks["checks"]["ZT-01"]
     assert abs(record["N"]["value"] - 19.2) < 1e-9 and record["N"]["unit"] == "kN", record["N"]
     assert record["links"]["N"]["variable"]["domain"] == "script" and not record["links"]["N"]["stale"]
@@ -328,7 +341,7 @@ def test_the_whole_export_resolves_a_check_from_a_script_and_a_model_from_a_form
     assert kept["N"]["value"] == gone["N"]["value"] and kept["links"]["N"]["stale"]
     assert any("N keeps its last value" in w and "dreigelenk/gone" in w for w in kept["warnings"]), kept["warnings"]
     models = json.loads((here.data_dir / "statics.json").read_text(encoding="utf-8"))
-    assert models["schema_version"] == statics.LINKED_EXPORT_VERSION
+    assert models["schema_version"] == (statics.ROOTED_EXPORT_VERSION if here.has_folders else statics.LINKED_EXPORT_VERSION), "laid out by folders, 1.3 contains 1.2 (issue #64)"
     found = {(p["entry"], p["field"]): p for p in models["models"]["Bankli-Fall1"]["links"]}
     assert found[("P3", "x")]["base_value"] == 5 and found[("P3", "x")]["base_unit"] == "m" and not found[("P3", "x")]["stale"]
     assert found[("P1", "z")]["base_unit"] == "mm" and not found[("P1", "z")]["stale"]
@@ -372,7 +385,9 @@ def test_a_load_follows_another_load_and_a_formula_domain_in_the_order_its_links
     with project.using(here):
         data = registry.build_calculations([], here, {}, notes)
         graph = registry.load_graph(here)
-    assert data["schema_version"] == registry.LINKED_SCHEMA_VERSION
+    # a project laid out by folders names a build-up's drawing from the Typst root: 1.7, which contains 1.6 (issue #64)
+    drawn = any(f["file"].startswith("/") for d in data["domains"].values() for i in d["instances"].values() for f in i.get("figures") or ())
+    assert data["schema_version"] == registry.LEVELS_SCHEMA_VERSION   # 1.8 since v0.120 holds 1.6's links and 1.7's rooted drawings (UI-002)
     validation.validate_structure(data, "calculations")
     wind = data["domains"]["wind-load"]["instances"]["WI-01"]
     snow = data["domains"]["snow-load"]["instances"]["SN-01"]
@@ -450,14 +465,24 @@ def test_a_connector_and_a_polar_moment_follow_a_formula_domain_and_a_script_but
     with project.using(here):
         export_all.run()
     data = json.loads((here.data_dir / "connectors.json").read_text(encoding="utf-8"))
-    assert data["schema_version"] == connector.LINKED_EXPORT_VERSION
+    assert data["schema_version"] == connector.LEVELS_EXPORT_VERSION, "3.3 since v0.120 holds 3.1's links and 3.2's rooted figures (issue #64, UI-002)"
     record = data["connectors"][source["id"]]
     found = {(p["entry"], p["field"]): p for p in record["links"]}
     assert found[("self", "diameter")]["base_value"] == 5 and not found[("self", "diameter")]["stale"]
     assert record["diameter"]["value"] == 10, record["diameter"]
     joints = json.loads((here.data_dir / "connections.json").read_text(encoding="utf-8"))
-    assert joints["schema_version"] == connection.LINKED_EXPORT_VERSION
+    assert joints["schema_version"] == connection.LEVELS_EXPORT_VERSION, "4.4 since v0.120 holds 4.2's links and 4.3's rooted figures (issue #64, UI-002)"
     assert abs(joints["connections"]["VU-MP-1"]["links"][0]["base_value"] - 19.2) < 1e-9
     # a trial that is no {N, V, M} is refused, naming it
     calc["trial"] = {"N": 5, "T": 1}
     _refused(lambda: connection.check_source(calc, cpath.name), "trial")
+
+
+def test_find_cycles_gives_every_circle_once_from_its_smallest_node():
+    """ARCH-002 (issue #71): every strongly connected component, a node naming itself included, walked from its smallest node -- the same graph always the same chains; a chain with no circle none."""
+    graph = {"b": ["c"], "c": ["a"], "a": ["b"], "d": ["d"], "e": ["a"], "f": []}
+    assert links.find_cycles(graph) == [["a", "b", "c", "a"], ["d", "d"]]
+    assert links.find_cycles({"x": ["y"], "y": []}) == []
+    long_chain = {i: [i + 1] for i in range(3000)}
+    long_chain[3000] = [0]
+    assert len(links.find_cycles(long_chain)[0]) == 3002, "a long chain does not reach Python's recursion limit"

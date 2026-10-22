@@ -27,8 +27,9 @@ from dataclasses import dataclass, field
 #   text    a line of text; empty is the default
 #   ids     the ids the tab hands over (`context[name]`), ticked: none ticked is the default
 #   columns the columns of a table (`choices`, by name), each ticked or not and given a width -- mm or % --: it writes the argument itself (the ticked ones, left out where all are) and, in `also`, the one that holds the widths
+#   switch  a part of a figure the level decides -- auto (by the level, the default, not written) · yes · no -- for an argument whose default is `auto` (spec 2026-10-20-indices-et-niveaux, UI-003, ARCH-RISK-609)
 #   detail  the level of a command that takes `shown:` (issue #20): auto, 1, 2, 3 -- or the subset `choices` names -- and -1, under which a box and a level for every variable the tab hands over (`context["shown"]`); it writes `level` and, at -1, `also`'s `shown`
-KINDS = ("bool", "width", "level", "title", "caption", "choice", "number", "text", "ids", "columns", "detail")
+KINDS = ("bool", "width", "level", "title", "caption", "choice", "number", "text", "ids", "columns", "detail", "switch")
 
 
 @dataclass(frozen=True)
@@ -90,110 +91,65 @@ CAPTION = Option("caption", "caption", "ds_opt_caption")
 PRINT_LEVEL = Option("level", "level", "ds_opt_level", view="display")
 LABEL = Option("label", "text", "ds_opt_label", view="calc")
 DESCR = Option("descr", "text", "ds_opt_descr", view="calc")
-NOTE = Option("note", "choice", "ds_opt_note", choices=("footnote", "line"), view="display")
 STYLE = Option("style", "choice", "ds_opt_style", choices=("", "bold", "underline", "double"), view="display")
-# the separator printed after a value set inline -- `;`, `,` -- (spec 2026-10-11-argument-sep-var), what `#var(...) ;` was typed for
-SEP = Option("sep", "text", "ds_opt_sep", view="display")
-SUMMARY = Option("summary", "bool", "ds_opt_summary", view="display")
 NORM = Option("norm", "text", "ds_opt_norm", view="calc")
 NORM_REF = Option("norm-ref", "text", "ds_opt_norm_ref", view="calc")
 
 SPECS = {
-    "show-static-model": Spec("show-static-model", (
+    # the drawings a native figure holds (spec 2026-10-21-commandes-typst-refonte, REQ-013, UI-002): what the figure shows, words of `detail-figure` -- none ticked, the command's own --, its width, the parts lit; no caption, the figure's being the engineer's
+    "image-static-model": Spec("image-static-model", (
         WIDTH,
-        Option("loads", "bool", "ds_opt_loads"),
-        Option("dimensions", "bool", "ds_opt_dimensions"),
+        Option("detail-figure", "ids", "ds_opt_detail_figure"),
         Option("highlight", "ids", "ds_opt_highlight_model"),
-        CAPTION,
-    ), cards=(("ds_card_figure", ("width", "caption")), ("ds_card_shown", ("loads", "dimensions")), ("ds_card_highlight", ("highlight",))),
+    ), cards=(("ds_card_figure", ("width",)), ("ds_card_shown", ("detail-figure",)), ("ds_card_highlight", ("highlight",))),
         positional=("model",)),
-    "show-schema": Spec("show-schema", (
+    "image-schema": Spec("image-schema", (
         WIDTH,
-        Option("aids", "bool", "ds_opt_aids"),
+        Option("detail-figure", "ids", "ds_opt_detail_figure"),
         Option("highlight", "ids", "ds_opt_highlight_schema"),
-        CAPTION,
-    ), cards=(("ds_card_figure", ("width", "caption")), ("ds_card_shown", ("aids",)), ("ds_card_highlight", ("highlight",))),
+    ), cards=(("ds_card_figure", ("width",)), ("ds_card_shown", ("detail-figure",)), ("ds_card_highlight", ("highlight",))),
         positional=("schema",)),
-    "show-connector": Spec("show-connector", (
-        Option("description", "bool", "ds_opt_description"),
-    ), positional=("connector",)),
-    "show-connector-resistance": Spec("show-connector-resistance", (
-        DETAIL, TITLE(), WIDTH,
-    ), positional=("connector",)),
-    "show-polar-moment": Spec("show-polar-moment", (
-        Option("N", "number", "ds_opt_N", choices=(-100000, 100000, 0.5)),
-        Option("V", "number", "ds_opt_V", choices=(-100000, 100000, 0.5)),
-        Option("M", "number", "ds_opt_M", choices=(-100000, 100000, 0.1)),
-        DETAIL, TITLE(), WIDTH,
-    ), cards=(("ds_card_forces", ("N", "V", "M")), ("ds_card_print", ("level", "title", "width"))),
-        positional=("connection",)),
-    "show-calc": Spec("show-calc", (DETAIL, TITLE()), positional=("domain", "instance")),
-    "show-input": Spec("show-input", (LEVEL_SHOWN,), positional=("domain", "instance", "name")),
-    "show-check": Spec("show-check", (), positional=("domain", "instance", "check-name")),
-    "show-live-load": Spec("show-live-load", (LEVEL_SHOWN, TITLE()), positional=("category",)),
-    "show-load-summary": Spec("show-load-summary", (TITLE(),)),
-    "show-line-load-summary": Spec("show-line-load-summary", (TITLE(),)),
-    "show-journal": Spec("show-journal", (
-        Option("form", "choice", "ds_opt_form", choices=("table", "list", "grid")),
-        Option("level", "level", "ds_opt_level", choices=("auto", "1", "2", "3")),
-        TITLE(),
-    )),
     "journal-entries": Spec("journal-entries", (
         Option("document", "choice", "ds_opt_document", choices=("rs", "cu", "bp")),
     )),
-    "show-position-list": Spec("show-position-list", (
-        Option("scope", "choice", "ds_opt_scope", choices=("all", "plans", "storey")),
-        Option("plans", "ids", "ds_opt_plans", needs="scope=plans", needs_tip="ds_needs_scope_plans"),
-        Option("storey", "text", "ds_opt_storey", needs="scope=storey", needs_tip="ds_needs_scope_storey"),
-        TITLE(),
-        Option("legend", "text", "ds_opt_legend"),
-        Option("columns", "columns", "ds_opt_columns", choices=POSITION_LIST_COLUMNS, also=("widths",)),
-    ), cards=(("ds_card_list", ("scope", "plans", "storey")), ("ds_card_table", ("title", "legend")), ("ds_card_columns", ("columns",)))),
-    "val": Spec("val", (
-        Option("type", "choice", "ds_opt_type", choices=("val+unit", "val", "unit", "expression"), view="display"),
-        Option("unit", "text", "ds_opt_unit", view="display"),
-        PRINT_LEVEL,
-        LABEL, DESCR, NOTE, STYLE, NORM, NORM_REF,
-    ), cards=(("ds_card_value", ("type", "unit", "style")), ("ds_card_print", ("level", "note")), ("ds_card_texts", ("label", "descr")), ("ds_card_citation", ("norm", "norm-ref"))),
-        positional=("what",)),
     "var": Spec("var", (
-        PRINT_LEVEL, LABEL, DESCR, NOTE, SEP, STYLE, SUMMARY, NORM, NORM_REF,
-    ), cards=(("ds_card_print", ("level", "note", "sep", "style")), ("ds_card_texts", ("label", "descr")), ("ds_card_summary", ("summary",)), ("ds_card_citation", ("norm", "norm-ref"))),
+        PRINT_LEVEL, LABEL, DESCR, STYLE, NORM, NORM_REF,
+    ), cards=(("ds_card_print", ("level", "style")), ("ds_card_texts", ("label", "descr")), ("ds_card_citation", ("norm", "norm-ref"))),
         positional=("key",)),
     "find": Spec("find", (
         Option("type", "choice", "ds_opt_type_find", choices=("val+unit", "name", "val", "unit", "expression")),
     )),
     # The «Formule» tab's commands (v0.117, calc/tools/formula_tab.py): what a block being written offers on the right, its middle filling the rest
     "eq": Spec("eq", (
-        PRINT_LEVEL, LABEL, DESCR, NOTE, SEP, STYLE, SUMMARY, NORM, NORM_REF,
-    ), cards=(("ds_card_print", ("level", "note", "sep", "style")), ("ds_card_texts", ("label", "descr")), ("ds_card_summary", ("summary",)), ("ds_card_citation", ("norm", "norm-ref"))),
+        PRINT_LEVEL, LABEL, DESCR, STYLE, NORM, NORM_REF,
+    ), cards=(("ds_card_print", ("level", "style")), ("ds_card_texts", ("label", "descr")), ("ds_card_citation", ("norm", "norm-ref"))),
         positional=("key",)),
     "verify": Spec("verify", (PRINT_LEVEL,), positional=("relation",)),
-    "var-unit": Spec("var-unit", (
-        PRINT_LEVEL, LABEL, DESCR, NOTE, SEP, STYLE, NORM, NORM_REF,
-    ), cards=(("ds_card_print", ("level", "note", "sep", "style")), ("ds_card_texts", ("label", "descr")), ("ds_card_citation", ("norm", "norm-ref"))),
-        positional=("key", "unit")),
 }
 
 # The commands whose panel is a widget of their own rather than a declaration (display_view.Entry.panel), and why: what they offer depends on what a declaration cannot know.
 OWN_PANELS = {
-    "show-plan": "plan_command_builder.CommandOptions: the positions it offers are those the plan's export record carries, the scale bar greyed where it has no scale (v0.114)",
-    "show-fire-plan": "plan_command_builder.FireCommandOptions: the position plan's, less what a fire plan has none of (v0.115)",
-    "show-check-member": "member_check_tab.MemberCheckTab: its options also set the unit of the verdict in «Calcul» and the options of the draft the page compiles",
+    "image-positions-plan": "plan_command_builder.CommandOptions: the positions it offers are those the plan's export record carries, the scale bar greyed where it has no scale (v0.114) -- each switch a word of `detail-figure` or `detail-legend` (command_text, spec 2026-10-21-commandes-typst-refonte, ARCH-012)",
+    "image-fire-plan": "plan_command_builder.FireCommandOptions: the position plan's, less what a fire plan has none of (v0.115) -- its legend and scale bar words of `detail-legend` (fire_command_text)",
 }
 
 # The named arguments a panel does not offer, and why -- every one of a command's signature is either here or in its Spec (tests/test_display_view.py).
+# The fine display arguments (spec 2026-10-21-commandes-typst-refonte, REQ-001), the same reason for each.
+FINE = "the fine display arguments of the spec 2026-10-21-commandes-typst-refonte (REQ-001): written in the line's file, the copy panel offering the level that presets them until lot 19 (UI-002) gives it their controls"
+
 DISMISSED = {
-    "show-polar-moment": {},
-    "show-connector": {"level": "accepted and unused by the command: a connector's line reads the same at every level"},
-    "show-check": {"level": "unused by the command's body: every check renders the same way at every level"},
-    "show-journal": {},
-    "show-position-list": {},
-    "val": {
-        "domain": "the place the value is read is the variable's own, chosen in the list on the left",
-        "symbol": "a variable brings its own symbol: the argument is for a bare number written in the call",
-    },
     "var": {
+        "name-calc": FINE,
+        "name-visible": FINE,
+        "value": FINE,
+        "unit": FINE,
+        "display": FINE,
+        "role": FINE,
+        "label-position": FINE,
+        "descr-position": FINE,
+        "norm-section": FINE,
+        "norm-position": FINE,
+        "id": FINE,
         "domain": "the place the value is read is the variable's own, chosen in the list on the left",
     },
     "find": {
@@ -201,18 +157,40 @@ DISMISSED = {
         "domain": "the domain chosen in the list on the left",
     },
     "eq": {
+        "name-calc": FINE,
+        "name-visible": FINE,
+        "equation": FINE,
+        "as-unit": FINE,
+        "display-formula": FINE,
+        "display-equation": FINE,
+        "role": FINE,
+        "label-position": FINE,
+        "descr-position": FINE,
+        "norm-section": FINE,
+        "norm-position": FINE,
+        "id": FINE,
         "unit": "the output unit, chosen in the «Formules» tab's own list among the units of the result's dimension (lib/units.json's `offered`)",
         "value": "an answer stated for a formula that is displayed and not evaluated: the «Formules» tab computes every formula it writes, and such a line is written by hand in VS Code",
     },
-    "verify": {},
-    "var-unit": {},
+    "verify": {
+        "name-calc": FINE,
+        "name-visible": FINE,
+        "display": FINE,
+        "role": FINE,
+        "label": FINE,
+        "label-position": FINE,
+        "descr": FINE,
+        "descr-position": FINE,
+        "norm": FINE,
+        "norm-section": FINE,
+        "norm-position": FINE,
+        "id": "the relation's name, written by Woodcore when it unfolds a check and kept as the file has it, never an option of the display",
+    },
 }
 
 # What the preview says instead of compiling (review B05): the key of the words, by command.
 NOTES = {
     "journal-entries": "ds_note_prints_nothing",
-    "show-load-summary": "ds_note_whole_document",
-    "show-line-load-summary": "ds_note_whole_document",
 }
 
 STRINGS = {
@@ -243,7 +221,6 @@ STRINGS = {
         "ds_card_value": "Valeur",
         "ds_card_texts": "Textes",
         "ds_card_citation": "Citation",
-        "ds_card_summary": "Tableau récapitulatif",
         "ds_opt_width": "Largeur",
         "ds_opt_width_tip": "Un pourcentage de la largeur du texte (60%) ou une longueur (12cm).",
         "ds_opt_caption": "Légende de la figure",
@@ -254,10 +231,14 @@ STRINGS = {
         "ds_opt_title": "Titre",
         "ds_opt_level": "Niveau de détail",
         "ds_level_auto": "Celui du rapport",
+        "ds_switch_auto": "Selon le niveau",
+        "ds_switch_true": "Oui",
+        "ds_switch_false": "Non",
         "ds_opt_loads": "Charges",
         "ds_opt_dimensions": "Cotes",
         "ds_opt_highlight_model": "Parties mises en évidence",
         "ds_opt_highlight_schema": "Parties mises en évidence",
+        "ds_opt_detail_figure": "Ce que la figure montre (rien de coché : ce que la commande montre d'elle-même)",
         "ds_opt_aids": "Aides de construction cochées « visibles »",
         "ds_opt_description": "Avec la description",
         "ds_opt_N": "N",
@@ -267,6 +248,8 @@ STRINGS = {
         "ds_choice_table": "Tableau",
         "ds_choice_list": "Liste",
         "ds_choice_grid": "Cartes",
+        "ds_choice_kN/m²": "kN/m² (charges surfaciques)",
+        "ds_choice_kN/m": "kN/m (charges linéiques)",
         "ds_opt_document": "Journal du document",
         "ds_choice_rs": "Rapport de statique",
         "ds_choice_cu": "Convention d'utilisation",
@@ -306,10 +289,6 @@ STRINGS = {
         "ds_opt_unit": "Unité d'impression",
         "ds_opt_label": "Libellé",
         "ds_opt_descr": "Description",
-        "ds_opt_note": "Type d'affichage",
-        "ds_opt_sep": "Séparateur (en ligne)",
-        "ds_choice_footnote": "En note de bas de page",
-        "ds_choice_line": "Sur la ligne",
         "ds_opt_style": "Style",
         "ds_choice_": "Normal",
         "ds_choice_bold": "Gras",
@@ -317,7 +296,6 @@ STRINGS = {
         "ds_choice_double": "Double trait",
         "ds_opt_norm": "Norme",
         "ds_opt_norm_ref": "Article",
-        "ds_opt_summary": "Lister dans le tableau récapitulatif des charges",
         "ds_choice_none": "Aucune",
         "ds_level_manual": "Sélection manuelle",
         "ds_shown": "Variables imprimées",
@@ -359,7 +337,6 @@ STRINGS = {
         "ds_card_value": "Wert",
         "ds_card_texts": "Texte",
         "ds_card_citation": "Zitat",
-        "ds_card_summary": "Zusammenstellung",
         "ds_opt_width": "Breite",
         "ds_opt_width_tip": "Ein Prozentsatz der Textbreite (60%) oder eine Länge (12cm).",
         "ds_opt_caption": "Bildunterschrift",
@@ -370,10 +347,14 @@ STRINGS = {
         "ds_opt_title": "Titel",
         "ds_opt_level": "Detailstufe",
         "ds_level_auto": "Die des Berichts",
+        "ds_switch_auto": "Nach Stufe",
+        "ds_switch_true": "Ja",
+        "ds_switch_false": "Nein",
         "ds_opt_loads": "Lasten",
         "ds_opt_dimensions": "Bemassung",
         "ds_opt_highlight_model": "Hervorgehobene Teile",
         "ds_opt_highlight_schema": "Hervorgehobene Teile",
+        "ds_opt_detail_figure": "Was die Abbildung zeigt (nichts angekreuzt: was der Befehl von sich aus zeigt)",
         "ds_opt_aids": "Als «sichtbar» markierte Hilfslinien",
         "ds_opt_description": "Mit Beschreibung",
         "ds_opt_N": "N",
@@ -383,6 +364,8 @@ STRINGS = {
         "ds_choice_table": "Tabelle",
         "ds_choice_list": "Liste",
         "ds_choice_grid": "Karten",
+        "ds_choice_kN/m²": "kN/m² (Flächenlasten)",
+        "ds_choice_kN/m": "kN/m (Linienlasten)",
         "ds_opt_document": "Journal des Dokuments",
         "ds_choice_rs": "Statischer Bericht",
         "ds_choice_cu": "Nutzungsvereinbarung",
@@ -422,10 +405,6 @@ STRINGS = {
         "ds_opt_unit": "Druckeinheit",
         "ds_opt_label": "Bezeichnung",
         "ds_opt_descr": "Beschreibung",
-        "ds_opt_note": "Darstellungsart",
-        "ds_opt_sep": "Trennzeichen (in der Zeile)",
-        "ds_choice_footnote": "Als Fussnote",
-        "ds_choice_line": "Auf der Zeile",
         "ds_opt_style": "Stil",
         "ds_choice_": "Normal",
         "ds_choice_bold": "Fett",
@@ -433,7 +412,6 @@ STRINGS = {
         "ds_choice_double": "Doppelt unterstrichen",
         "ds_opt_norm": "Norm",
         "ds_opt_norm_ref": "Ziffer",
-        "ds_opt_summary": "In der Lastzusammenstellung aufführen",
         "ds_choice_none": "Keine",
         "ds_level_manual": "Manuelle Auswahl",
         "ds_shown": "Ausgegebene Variablen",
@@ -475,7 +453,6 @@ STRINGS = {
         "ds_card_value": "Value",
         "ds_card_texts": "Texts",
         "ds_card_citation": "Citation",
-        "ds_card_summary": "Summary table",
         "ds_opt_width": "Width",
         "ds_opt_width_tip": "A percentage of the text's width (60%) or a length (12cm).",
         "ds_opt_caption": "Figure caption",
@@ -486,10 +463,14 @@ STRINGS = {
         "ds_opt_title": "Title",
         "ds_opt_level": "Level of detail",
         "ds_level_auto": "The report's",
+        "ds_switch_auto": "By the level",
+        "ds_switch_true": "Yes",
+        "ds_switch_false": "No",
         "ds_opt_loads": "Loads",
         "ds_opt_dimensions": "Dimensions",
         "ds_opt_highlight_model": "Parts highlighted",
         "ds_opt_highlight_schema": "Parts highlighted",
+        "ds_opt_detail_figure": "What the figure shows (none ticked: what the command shows of its own)",
         "ds_opt_aids": "Construction aids ticked «visible»",
         "ds_opt_description": "With the description",
         "ds_opt_N": "N",
@@ -499,6 +480,8 @@ STRINGS = {
         "ds_choice_table": "Table",
         "ds_choice_list": "List",
         "ds_choice_grid": "Cards",
+        "ds_choice_kN/m²": "kN/m² (area loads)",
+        "ds_choice_kN/m": "kN/m (line loads)",
         "ds_opt_document": "Journal of the document",
         "ds_choice_rs": "Statical report",
         "ds_choice_cu": "Use agreement",
@@ -538,10 +521,6 @@ STRINGS = {
         "ds_opt_unit": "Unit printed in",
         "ds_opt_label": "Label",
         "ds_opt_descr": "Description",
-        "ds_opt_note": "Display type",
-        "ds_opt_sep": "Separator (inline)",
-        "ds_choice_footnote": "In a footnote",
-        "ds_choice_line": "On the line",
         "ds_opt_style": "Style",
         "ds_choice_": "Plain",
         "ds_choice_bold": "Bold",
@@ -549,7 +528,6 @@ STRINGS = {
         "ds_choice_double": "Double rule",
         "ds_opt_norm": "Norm",
         "ds_opt_norm_ref": "Clause",
-        "ds_opt_summary": "List in the summary table of the loads",
         "ds_choice_none": "None",
         "ds_level_manual": "Manual selection",
         "ds_shown": "Variables printed",
@@ -592,6 +570,8 @@ def initial(option, default):
     kind = option.kind
     if kind == "bool":
         return text == "true"
+    if kind == "switch":
+        return text if text in ("true", "false") else "auto"
     if kind == "number":
         try:
             return float(text)

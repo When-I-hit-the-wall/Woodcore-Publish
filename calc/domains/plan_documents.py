@@ -5,7 +5,7 @@
     {"schema_version": "1.0", "id": "D01", "name": "", "file": "01_Pläne/03_Pavillon.pdf", "kind": "pdf",
      "sha256": "…", "pages": [{"page": 1, "rotation": 0}], "layers_off": ["100 Bemassung Ausführung"]}
 
-`kind` is `pdf`, `image` (PNG, JPEG), `svg` or `cad` (DXF, DWG). `pages` lists every page with the rotation the engineer gave it, in degrees clockwise, on top of a PDF's own /Rotate; a CAD drawing's pages are its layouts -- page 1 the model space, then the paper-space layouts in their tab order, each `layout` naming its own. `layers_off` names the layers switched off -- a PDF's optional-content groups or a drawing's layers -- one list for the whole document, initialised from the file's own default state when it is imported. Nothing is copied: the file stays where the engineer keeps it, inside the project, and a plan names the document (`background.document`) with its page.
+`kind` is `pdf`, `image` (PNG, JPEG), `svg` or `cad` (DXF, DWG). `pages` lists every page with the rotation the engineer gave it, in degrees clockwise, on top of a PDF's own /Rotate; a CAD drawing's pages are its layouts -- page 1 the model space, then the paper-space layouts in their tab order, each `layout` naming its own. `layers_off` names the layers switched off -- a PDF's optional-content groups or a drawing's layers -- one list for the whole document, initialised from the file's own default state when it is imported. In a project laid out by folders (issue #64) the file is copied, at its import, into its tab's `Imported Plans/` under its own name, and the document names the copy -- a file written over there by one of the same name is read again as the tab is shown and at the export (`refresh_all`, D-09); in a project laid out before nothing is copied: the file stays where the engineer keeps it, inside the project. A plan names the document (`background.document`) with its page.
 
 **What the window shows** is `render_source`: for a PDF a copy of the whole document with the switched-off groups stated as its default (`/OCProperties /D /OFF`, which QtPdf's PDFium honours) and each page turned by the engineer's rotation (`/Rotate`), the pages keeping their numbers; for a CAD drawing an SVG of the layout without its switched-off layers (calc/domains/cad.py); an image or an SVG as it is, or wrapped in an SVG that turns it. Each is cached outside the project (`%LOCALAPPDATA%\\Woodcore\\layers`), keyed by the file's SHA-256, the rotations and the layers switched off.
 
@@ -24,9 +24,11 @@ import threading
 from collections import namedtuple
 from pathlib import Path
 
+import engine
 import validation
 from domains import cad
 from domains import plan as model
+import usersettings  # the engineer's settings and folders (calc/usersettings.py; calc/tools/ until v0.120, G6)
 
 SCHEMA_VERSION = "1.1"
 SCHEMA_VERSIONS = ("1.0", SCHEMA_VERSION)
@@ -54,7 +56,7 @@ Place = namedtuple("Place", "root plans_dir")
 
 
 class DocumentError(validation.ValidationError):
-    """A document that cannot be imported, read or drawn: `code` names the window's sentence (`doc_outside`, `doc_kind`, `doc_missing`, `doc_unreadable`, `doc_page`, `doc_rotation`, `doc_id`, `doc_taken`, and calc/domains/cad.py's own), `values` fill its holes, and the exception's text is the English sentence."""
+    """A document that cannot be imported, read or drawn: `code` names the window's sentence (`doc_outside`, `doc_kind`, `doc_missing`, `doc_unreadable`, `doc_page`, `doc_rotation`, `doc_id`, `doc_taken`, `doc_replace`, and calc/domains/cad.py's own), `values` fill its holes, and the exception's text is the English sentence."""
 
     def __init__(self, code, message, **values):
         super().__init__(message)
@@ -73,18 +75,26 @@ def _place(here):
     return Place(Path(here.root), Path(here.plans_dir))
 
 
-def _usersettings():
-    """usersettings.py, from calc/tools/ -- imported as calc/templates.py imports it."""
-    try:
-        import usersettings
-    except ImportError:
-        from tools import usersettings
-    return usersettings
+def _project(here):
+    """The Project `here` is -- the current one for None --, or None for a bare Place (a test's folder), which is laid out as before."""
+    if here is None:
+        import project
+        return project.current()
+    return here if hasattr(here, "has_folders") else None
+
+
+def imported_dir(here, owner="plan"):
+    """The folder a document imported in tab `owner` is copied into in a project laid out by folders -- `Plans/Position-plan/Imported Plans/` for the position plans, `Plans/Fire-plan/Imported Plans/` for the fire plans (issue #64, D-09) --, or None in one laid out before, where a document stays where the engineer keeps it."""
+    import project
+    here = _project(here)
+    if here is None or not here.has_folders:
+        return None
+    return here.drawing_dir(owner) / project.IMPORTED_FOLDER
 
 
 def cache_dir(name=CACHE_NAME):
     """A folder of this module's caches: `layers` for what is rendered, `cad` for a DWG converted to DXF. Outside the project, which NextCloud syncs; deleting it costs a render."""
-    folder = Path(CACHE_ROOT) / name if CACHE_ROOT is not None else _usersettings().cache_dir(name)
+    folder = Path(CACHE_ROOT) / name if CACHE_ROOT is not None else usersettings.cache_dir(name)
     folder.mkdir(parents=True, exist_ok=True)
     return folder
 
@@ -178,8 +188,7 @@ def write(here, doc):
     if "owner" in doc and doc.get("schema_version") != SCHEMA_VERSION:
         doc = dict(doc, schema_version=SCHEMA_VERSION)
     check(doc, f"documents/{doc.get('id')}.json")
-    text = json.dumps(doc, indent=2, ensure_ascii=False) + "\n"
-    return _write_atomic(source_dir(here) / f"{doc['id']}.json", text)
+    return _write_atomic(source_dir(here) / f"{doc['id']}.json", engine.source_bytes(doc))
 
 
 def new_id(here=None):
@@ -205,8 +214,10 @@ def file_path(here, doc):
     return path
 
 
-def import_file(here, path, name="", docid=None, owner="plan"):
-    """Imports the file at `path` -- which must lie inside the project, nothing is copied -- as a new document, written and returned: its kind, its SHA-256, every page at no rotation, the layers the file itself does not show, and the tab it belongs to (`owner`, OWNERS: the tab that imports it, v0.116). A DWG is converted to DXF for reading (`cad_source`), which needs the ODA File Converter."""
+def import_file(here, path, name="", docid=None, owner="plan", replace=False):
+    """Imports the file at `path` as a new document, written and returned: its kind, its SHA-256, every page at no rotation, the layers the file itself does not show, and the tab it belongs to (`owner`, OWNERS: the tab that imports it, v0.116). A DWG is converted to DXF for reading (`cad_source`), which needs the ODA File Converter.
+
+    **Where the file lies.** In a project laid out by folders the file is copied into its tab's `Imported Plans/` under its own name (issue #64, D-09) -- from anywhere, inside the project or not -- and the document names the copy; the original is never touched. A file of that name already there with the same bytes is the copy, and none is made. One with other bytes is `doc_replace` unless `replace` (the engineer confirmed, D-18): it is then written over, and the documents that name it are read again (`refresh`) and written -- the plans drawn on them follow, being drawn on the document by its id -- and the first of them is returned rather than a new document made. In a project laid out before nothing is copied: the file must lie inside the project, where it stays."""
     if owner not in OWNERS:
         raise ValueError(f"owner {owner!r} -- expected one of {', '.join(OWNERS)}")
     place = _place(here)
@@ -214,11 +225,19 @@ def import_file(here, path, name="", docid=None, owner="plan"):
     kind = kind_of(path)
     if kind is None:
         _fail("doc_kind", f"{path.name} -- a plan is drawn on a PDF, a PNG, a JPEG, an SVG, a DXF or a DWG", file=path.name)
+    if not path.is_file():
+        _fail("doc_missing", f"{path.name} does not exist", file=path.name, id="")
+    folder = imported_dir(here, owner)
+    if folder is not None:
+        path, replaced = _copy_in(path, folder, replace)
+        if replaced:
+            relative = model.relative_background(place.root, path)
+            followed = [refresh_document(here, doc)[0] for doc in list_documents(here) if doc["file"] == relative]
+            if followed:
+                return followed[0]
     relative = model.relative_background(place.root, path)
     if relative is None:
         _fail("doc_outside", f"{path.name} lies outside the project folder -- copy it into the folder first", file=path.name)
-    if not path.is_file():
-        _fail("doc_missing", f"{path.name} does not exist", file=path.name, id="")
     docid = docid or new_id(here)
     if (source_dir(here) / f"{docid}.json").exists():
         _fail("doc_taken", f"document {docid} exists already", id=docid)
@@ -227,6 +246,88 @@ def import_file(here, path, name="", docid=None, owner="plan"):
     doc["pages"], doc["layers_off"] = _pages_and_layers(here, doc)
     write(here, doc)
     return doc
+
+
+def _copy_in(path, folder, replace):
+    """(the copy of `path` in `folder` under its own name, whether a file of that name with other bytes was written over). The copy is `path` itself where it already lies there; a file of that name with the same bytes is taken as the copy; one with other bytes is `doc_replace` unless `replace`."""
+    target = folder / path.name
+    if target.resolve() == path.resolve():
+        return target, False
+    payload = path.read_bytes()
+    if target.is_file():
+        if target.read_bytes() == payload:
+            return target, False
+        if not replace:
+            _fail("doc_replace", f"{target.name} lies in {folder.name}/ already, with another content -- replace it?", file=target.name, folder=folder.name)
+        _write_atomic(target, payload)
+        return target, True
+    _write_atomic(target, payload)
+    return target, False
+
+
+def refresh_document(here, doc):
+    """(doc, notes): `refresh`, and the document written where its file changed -- what a document replaced by a file of the same name needs to be read again."""
+    fresh, notes = refresh(here, doc)
+    if fresh is not doc:
+        write(here, fresh)
+    return fresh, notes
+
+
+def refresh_all(here=None):
+    """(the ids of the documents read again, the notes): every document of a project laid out by folders read against its file, and written where the file was replaced by one of the same name since (D-09) -- its pages, its layers and its SHA-256 brought up to date, the rotations of the pages it still has kept. What the window runs as a tab of plans is shown, unless the project is open read-only, and the export before it reads the plans. A document whose file is gone or cannot be read is a note, never a stop: the export says it again where a plan is drawn on it. Nothing in a project laid out before, whose documents lie where the engineer keeps them and are read as they always were."""
+    here = _project(here)
+    if here is None or not here.has_folders:
+        return [], []
+    changed, notes = [], []
+    folder = source_dir(here)
+    for path in sorted(folder.glob("*.json"), key=lambda p: p.name.lower()) if folder.is_dir() else ():
+        try:
+            doc = _read_path(path)
+            fresh, said = refresh_document(here, doc)
+        except validation.ValidationError as exc:
+            notes.append(f"document {path.stem}: {exc}")
+            continue
+        if fresh is not doc:
+            changed.append(doc["id"])
+            notes += said
+    return changed, notes
+
+
+def adoptable(here):
+    """The document sources `adopt` may rewrite: every one of the project's, whose path a migration backs up before it moves them."""
+    folder = source_dir(here)
+    return sorted(folder.glob("*.json"), key=lambda p: p.name.lower()) if folder.is_dir() else []
+
+
+def adopt(here):
+    """In a project laid out by folders, every document whose file lies elsewhere than its tab's Imported Plans/ -- one imported before the layout by folders, from where the engineer keeps his plans (01_Pläne/…) -- given a copy there under its own name, and its source written to name the copy (issue #64, D-09): what the migration does, and every export after it, so that a project migrated before Woodcore copied its documents has them copied too. **The original is never touched**, and copying twice copies nothing: a file of that name already there with the same bytes is the copy. Where one with other bytes is there, the copy is named `<name>-<id>`; where that is taken too, the document is left as it is. A document that cannot be read, or whose file is gone, is left as it is: the export says it where a plan is drawn on it. Returns [(the source rewritten, the copy made or None)]."""
+    if imported_dir(here) is None:
+        return []
+    place = _place(here)
+    done = []
+    for path in adoptable(here):
+        try:
+            doc = _read_path(path)
+            original = file_path(here, doc)
+        except validation.ValidationError:
+            continue
+        folder = imported_dir(here, doc.get("owner", "plan"))
+        if folder.resolve() in original.resolve().parents:
+            continue
+        payload = original.read_bytes()
+        made = None
+        for target in (folder / original.name, folder / f"{original.stem}-{doc['id']}{original.suffix}"):
+            if not target.exists():
+                _write_atomic(target, payload)
+                made = target
+                break
+            if target.is_file() and target.read_bytes() == payload:
+                break
+        else:
+            continue
+        write(here, dict(doc, file=model.relative_background(place.root, target)))
+        done.append((path, made))
+    return done
 
 
 def _pages_and_layers(here, doc):

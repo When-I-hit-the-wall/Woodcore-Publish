@@ -3,6 +3,8 @@
 The arithmetic is checked first, on plain tuples in the sheet's frame -- x to the right, y DOWN, so the ray at 90 degrees points down the page --, and then the canvases, off-screen, with a source dictionary of their own: nothing here needs a window or the example project.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import math
 import os
 import sys

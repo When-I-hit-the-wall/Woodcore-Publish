@@ -4,18 +4,16 @@
 === Kräfte auf Abschrankungen
 // woodcore:/object title
 
-// woodcore:object doc-table guardrail-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Element]),
-    (id: "text", title: [Beschreibung], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Art des Bauwerks und Nutzung], text: [[…]]),
-    (item: [Charakteristische Streckenlast, in 1.0 m Höhe wirkend], text: [$q_k$ = […] kN/m (SIA 261, Ziffer 13.2)]),
+// woodcore:object table guardrail-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Art des Bauwerks und Nutzung], [[…]],
+    [Charakteristische Streckenlast, in 1.0 m Höhe wirkend], [$q_k$ = […] kN/m (SIA 261, Ziffer 13.2)],
+    table.hline(stroke: 1pt),
   ),
   caption: [Abschrankungen],
-  header: false,
 )
 // woodcore:/object guardrail-table

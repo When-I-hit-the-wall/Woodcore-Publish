@@ -4,18 +4,16 @@
 === Forces on guardrails
 // woodcore:/object title
 
-// woodcore:object doc-table guardrail-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Item]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Type of building and use], text: [[…]]),
-    (item: [Characteristic line load, acting at a height of 1.0 m], text: [$q_k$ = […] kN/m (SIA 261, 13.2)]),
+// woodcore:object table guardrail-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Type of building and use], [[…]],
+    [Characteristic line load, acting at a height of 1.0 m], [$q_k$ = […] kN/m (SIA 261, 13.2)],
+    table.hline(stroke: 1pt),
   ),
   caption: [Guardrails],
-  header: false,
 )
 // woodcore:/object guardrail-table

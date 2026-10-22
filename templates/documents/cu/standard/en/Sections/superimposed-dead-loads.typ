@@ -9,18 +9,17 @@
 The superimposed dead loads comprise floor build-ups, non-loadbearing walls and suspended ceilings [and services and facade]. The following values are characteristic values and govern the design.
 // woodcore:/object p1
 
-// woodcore:object dead-load-table superimposed-table
-#dead-load-table(
-  columns: (
-    (id: "zone"),
-    (id: "storey"),
-    (id: "buildup"),
-    (id: "load"),
-  ),
-  hidden: (),
-  rows: (
-    (zone: [[…]], storey: [[…]], buildup: [[Floor build-up, non-loadbearing walls, suspended ceilings]], load: [[…]]),
-    (zone: [[…]], storey: [[Roof]], buildup: [[Roof build-up, green roof, photovoltaic system]], load: [[…]]),
+// woodcore:object table superimposed-table
+#figure(
+  table(
+    columns: (auto, auto, 1fr, auto),
+    align: (left, left, left, right),
+    table.hline(stroke: 1pt),
+    table.header([*Part of building*], [*Storey*], [*Use / build-up*], [*Non-structural self-weight*]),
+    table.hline(stroke: 0.5pt),
+    [[…]], [[…]], [[Floor build-up, non-loadbearing walls, suspended ceilings]], [[…]],
+    [[…]], [[Roof]], [[Roof build-up, green roof, photovoltaic system]], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Superimposed dead loads by part of building and storey],
 )

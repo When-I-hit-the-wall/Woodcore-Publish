@@ -170,7 +170,7 @@ def _commit(writes):
         for path, new, old in writes:
             _put(path, new)
             done.append((path, old))
-    except Exception as exc:
+    except Exception as exc:  # broad: whatever stopped a write, what was written is put back first, then raised again
         for path, old in reversed(done):
             try:
                 _put(path, old)

@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Steel checks (export)",
-  "description": "data/steel.json -- every steel check of the project, resolved and computed by calc/domains/steel_check.py (issues #50-#52, spec 2026-10-12-section-acier D-09, D-17). A calculable check carries its calculation in the shape show-calc prints (vars, steps, tables, results), its utilisation and verdict; `#show-check-steel` (lib/steel.typ) prints it and computes nothing. Forces in kN, moments in kNm.",
+  "description": "data/steel.json (1.1 since v0.120: the rows built by engine.Calculation, a value entered citing the clause of SIA 263 it serves; 1.0 still read) -- every steel check of the project, resolved and computed by calc/domains/steel_check.py (issues #50-#52, spec 2026-10-12-section-acier D-09, D-17). A calculable check carries its calculation in the shape show-calc prints (vars, steps, tables, results), its utilisation and verdict; `#show-check-steel` (lib/steel.typ) prints it and computes nothing. Forces in kN, moments in kNm.",
   "type": "object",
   "required": ["schema_version", "checks"],
   "properties": {
-    "schema_version": {"type": "string", "enum": ["1.0"]},
+    "schema_version": {"type": "string", "enum": ["1.0", "1.1", "1.2"], "description": "1.2 (v0.120, spec 2026-10-20-indices-et-niveaux, UI-002): a line carries no level, lib/line-levels.json says it; 1.0 and 1.1 are still read."},
     "checks": {
       "type": "object",
       "additionalProperties": {

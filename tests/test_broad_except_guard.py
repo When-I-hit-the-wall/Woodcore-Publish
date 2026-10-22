@@ -5,6 +5,8 @@ The rule of the project: a missing input warns, a malformed file stops the expor
 Read with `ast`, not a regex: a handler spread over lines, a comment as its first line, a body that returns `False` or `{}` rather than None -- all are seen.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import ast
 import re
 

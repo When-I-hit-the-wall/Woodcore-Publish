@@ -4,22 +4,21 @@
 == Acier d'armature
 // woodcore:/object title
 
-// woodcore:object doc-table reinforcing-steel-table
-#doc-table(
-  columns: (
-    (id: "designation", title: [Désignation]),
-    (id: "fsk", title: [Limite d'élasticité caractéristique $f_"sk"$], unit: "N/mm²", kind: "number"),
-    (id: "fsd", title: [Limite d'élasticité de calcul $f_"sd"$], unit: "N/mm²", kind: "number"),
-    (id: "Es", title: [Module d'élasticité $E_s$], unit: "N/mm²", kind: "number"),
-    (id: "gamma", title: [Poids volumique $gamma$], unit: "kN/m³", kind: "number"),
-  ),
-  hidden: (),
-  rows: (
-    (designation: [B500B], fsk: 500, fsd: [[…]], Es: [[…]], gamma: 78.5),
+// woodcore:object table reinforcing-steel-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto),
+    align: (left, right, right, right, right),
+    table.hline(stroke: 1pt),
+    table.header([*Désignation*], [*Limite d'élasticité caractéristique $f_"sk"$*], [*Limite d'élasticité de calcul $f_"sd"$*], [*Module d'élasticité $E_s$*], [*Poids volumique $gamma$*]),
+    table.hline(stroke: 0.5pt),
+    [B500B], [500], [[…]], [[…]], [78.5],
+    table.hline(stroke: 1pt),
   ),
   caption: [Acier d'armature (SIA 262)],
-  notes: (
-    [Valeurs de calcul selon la norme SIA 262:2025.],
-  ),
 )
 // woodcore:/object reinforcing-steel-table
+
+// woodcore:object text reinforcing-steel-table-notes
+Valeurs de calcul selon la norme SIA 262:2025.
+// woodcore:/object reinforcing-steel-table-notes

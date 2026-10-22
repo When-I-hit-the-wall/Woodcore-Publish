@@ -9,6 +9,8 @@ What is held:
 * **the drawing**: the lines are set by svg_text, one <text> per run, subscripts smaller.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 
 import conftest
@@ -16,6 +18,7 @@ import conftest
 import typst_math
 import validation
 from domains import figure_style, figure_text, links
+import project
 
 VALUES = links.index({"domains": {
     "snow-load": {"instances": {"SL": {"vars": {"F": {"value": 12500, "unit": "N", "symbol": "F_(d,\"max\")"},
@@ -109,7 +112,7 @@ def test_a_symbol_reads_the_same_in_the_window_and_on_a_figure():
     assert typst_math.to_figure('q_(k,"max")') == "q_(k,max)"
     assert typst_math.to_figure("f_(h,alpha,k)") == "f_(h,α,k)"
     assert typst_math.to_html("f_(h,alpha,k)") == "f<sub>h,α,k</sub>"
-    data = json.loads((conftest.SAMPLE.parent / "_woodcore" / "data" / "calculations.json").read_text(encoding="utf-8"))
+    data = json.loads((project.Project.load(conftest.SAMPLE).data_dir / "calculations.json").read_text(encoding="utf-8"))
     symbols = {var.get("symbol") for d in data["domains"].values() for i in d["instances"].values() if isinstance(i, dict)
                for var in (i.get("vars") or {}).values() if isinstance(var, dict) and var.get("symbol")}
     assert len(symbols) > 20

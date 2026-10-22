@@ -10,7 +10,10 @@ from domains import plan as model
 from domains import plan_svg
 from domains import plan_tracking as tracking
 import plan_canvas_edit  # «Déplacer», «Copier» and «Ligne d'aide» (issue #18)
+import plan_canvas_outline  # the building's outline: its tool, and how it is taken and reshaped (issue #54)
 from domains import lines  # a parallel aid's line, through an element's side (issue #18)
+import plan_clipboard  # the one clip of the process, Ctrl+C's and Ctrl+V's (issue #61)
+from domains import plan_clip
 from plan_canvas_view import (  # split out of this module (issue #30): every name it had is still importable from it
     BASE_RENDER_PX,
     CROP_MARGIN,
@@ -86,21 +89,13 @@ class PlanCanvasEditMixin:
         """The storey a section's tools draw from now on -- the tab's choice; blank, they draw nothing and say so (storeyMissing)."""
         self.storey_choice = str(storey or "").strip()
 
-    def restore_cursor(self):
-        """The pointer's shape for the current tool -- after a pan, which borrowed the hand."""
-        self._over_label = False
-        if self.tool == "pan" or self.space_down:
-            self.viewport().setCursor(Qt.CursorShape.OpenHandCursor)
-        elif self.tool == "select":
-            self.viewport().setCursor(Qt.CursorShape.ArrowCursor)
-        else:
-            self.viewport().setCursor(Qt.CursorShape.CrossCursor)
-
     def tool_kind(self):
         """What the current tool draws: `point`, `line`, `poly`, `axis`, or None for the others."""
         tool = self.tool
         if tool in AXIS_TOOLS:
             return "axis"
+        if tool == plan_canvas_outline.TOOL:
+            return "poly"   # the building's outline is drawn as every area is (issue #54), and ends as its own (finish_drawing)
         if tool not in model.TYPES:
             return None
         if tool in POINT_TOOLS or (tool == "L" and self.subtypes.get("L") == "punkt"):
@@ -115,7 +110,8 @@ class PlanCanvasEditMixin:
         key = (exclude, exclude_storey, self.snap_axes, self.snap_elements, self._sup_snap_off)
         if self._snap_index is None or self._snap_index[0] != key:
             # since v0.116 also a section's load transfer levels' ends and the superposed plan's points, both behind «Accrocher aux éléments»
-            extra = (self.load_level_points(exclude_storey) + self.superposition_snap_points()) if self.snap_elements else []
+            # ... and the corners of the building's outline (issue #54), none of them while one of its own is dragged
+            extra = (self.load_level_points(exclude_storey) + self.superposition_snap_points() + plan_canvas_outline.snap_points(self, exclude_storey)) if self.snap_elements else []
             index = tracking.PlanSnapIndex(self.source, model.crop_of(self.frame_source()), axes=self.snap_axes, elements=self.snap_elements, exclude=exclude, exclude_storey=exclude_storey, extra_points=extra)
             self._snap_index = (key, index)
         return self._snap_index[1]
@@ -260,11 +256,63 @@ class PlanCanvasEditMixin:
         self.invalidate()
         self.changed.emit()
 
-    def select(self, selection):
-        if selection != self.selection:
+    # -- the selection (issue #61): the object in focus -- `selection`, (kind, index) or None, which the handles, the right pane and every reader of one object take -- and `extra`, the others Ctrl+click or Ctrl+A added, in the order added. Setting `selection` lets go of `extra`, so an object drawn or a plan opened leaves one object selected (ARCH-004, the schemas' SchemaCanvas.select(add=True)).
+
+    @property
+    def selection(self):
+        return self.__dict__.get("_focus")
+
+    @selection.setter
+    def selection(self, value):
+        self.__dict__["_focus"] = value
+        self.__dict__["extra"] = []
+
+    @property
+    def extra(self):
+        return self.__dict__.setdefault("extra", [])
+
+    def select(self, selection, add=False):
+        """Selects `selection` alone; with `add` (Ctrl+click) toggles it in the selection instead -- added and focused, or taken out, the last one added then in focus."""
+        if add and selection is not None:
+            entries = self.selected_entries()
+            if selection in entries:
+                entries.remove(selection)
+            else:
+                entries.append(selection)
+            self.set_selected(entries)
+            return
+        if selection != self.selection or self.extra:
             self.selection = selection
             self.update_helpers()
             self.selection_changed.emit()
+
+    def set_selected(self, entries):
+        """Selects `entries` [(kind, index)], the last one in focus; says so when that is not what was selected."""
+        entries = list(dict.fromkeys(tuple(entry) for entry in entries))
+        if entries == self.selected_entries():
+            return
+        self.selection = entries[-1] if entries else None
+        self.__dict__["extra"] = entries[:-1]
+        self.update_helpers()
+        self.selection_changed.emit()
+
+    def selected_entries(self):
+        """Every object selected, [(kind, index)], the one in focus last -- those the plan still has."""
+        out = []
+        for entry in self.extra + ([self.selection] if self.selection else []):
+            kind, index = entry
+            if kind in SELECTION_LISTS and index < len(self.source.get(SELECTION_LISTS[kind]) or []) and entry not in out:
+                out.append(entry)
+        return out
+
+    def selection_count(self):
+        """How many objects are selected."""
+        return len(self.selected_entries())
+
+    def select_all(self):
+        """Ctrl+A (issue #61): everything the plan holds, but the building's outline -- taken by hand only (T7)."""
+        entries = [(kind, i) for kind, key in SELECTION_LISTS.items() if kind not in model.SINGLE_ENTRIES for i in range(len(self.source.get(key) or []))]
+        self.set_selected(entries)
 
     def selected_element(self):
         if self.selection and self.selection[0] == "element" and self.selection[1] < len(self.source["elements"]):
@@ -308,14 +356,16 @@ class PlanCanvasEditMixin:
         return frames
 
     def delete_selection(self):
-        if self.selection is None:
-            return
-        kind, index = self.selection
-        entries = self.source.get(SELECTION_LISTS[kind]) or []
-        if index >= len(entries):
+        """Everything selected removed, in one step of «Annuler» (issue #61)."""
+        chosen = self.selected_entries()
+        if not chosen:
             return
         self.begin_change()
-        del entries[index]
+        for kind, index in sorted(chosen, key=lambda entry: -entry[1]):
+            entries = self.source.get(SELECTION_LISTS[kind]) or []
+            del entries[index]
+            if kind in model.SINGLE_ENTRIES and not entries:
+                self.source.pop(SELECTION_LISTS[kind], None)   # the building's outline deleted: the plan is the file it was before one was drawn, not one with an empty list (issue #54)
         self.selection = None
         self.end_change()
         self.selection_changed.emit()
@@ -323,44 +373,80 @@ class PlanCanvasEditMixin:
     # -- the selection moved, copied, duplicated (issue #18, plan_canvas_edit.py) --
 
     def has_selection(self):
-        return self.selection is not None and self.selection[1] < len(self.source.get(SELECTION_LISTS[self.selection[0]]) or [])
+        return bool(self.selected_entries())
+
+    def single_selected(self):
+        """The kind of the object selected where a plan has one of it, which is therefore moved and never copied -- the building's outline (plan.SINGLE_ENTRIES, issue #54) --, or None. Only when it is all that is selected: with other objects, «Copier» copies them and leaves the outline (issue #61). None on a canvas whose selection is not this one's (the fire-protection plan's, which selects ids)."""
+        kinds = {kind for kind, _index in self.selected_entries()}
+        return next(iter(kinds)) if len(kinds) == 1 and kinds <= set(model.SINGLE_ENTRIES) else None
 
     def translate_selection(self, dx, dy):
-        """The object selected moved by (dx, dy) -- inside a change the caller opened (plan.translate_entry)."""
-        kind, index = self.selection
-        model.translate_entry(self.source, kind, index, dx, dy)
+        """Every object selected moved by (dx, dy) -- inside a change the caller opened (plan.translate_entry)."""
+        for kind, index in self.selected_entries():
+            model.translate_entry(self.source, kind, index, dx, dy)
 
     def copy_selection(self, dx, dy):
-        """A copy of the object selected, moved by (dx, dy) -- inside a change the caller opened; the original stays selected, so the next copy is made of it again (D-014). Returns the copy's (kind, index)."""
-        kind, index = self.selection
-        entries = self.source[SELECTION_LISTS[kind]]
-        original = entries[index]
-        new, renames = model.copy_entry(self.source, kind, index, dx, dy, model.crop_of(self.frame_source()))
-        # an axis copied is placed among the others, which may move the original's index: found again by identity
-        self.selection = (kind, next(i for i, entry in enumerate(entries) if entry is original))
-        if renames:
-            self.axes_renamed.emit(renames)
-        return kind, new
+        """A copy of every object selected, moved by (dx, dy) -- inside a change the caller opened; the originals stay selected, so the next copy is made of them again (D-014). The building's outline is not copied: a plan has one, and it is moved (issue #54). Returns the copies' [(kind, index)]."""
+        chosen = self.selected_entries()
+        if chosen and all(kind in model.SINGLE_ENTRIES for kind, _index in chosen):
+            self.edit_refused.emit(chosen[0][0])
+            return []
+        objects = [(kind, self.source[SELECTION_LISTS[kind]][index]) for kind, index in chosen]
+        made, renamed = [], []
+        for kind, original in objects:
+            if kind in model.SINGLE_ENTRIES:
+                continue
+            entries = self.source[SELECTION_LISTS[kind]]
+            index = next(i for i, entry in enumerate(entries) if entry is original)
+            new, renames = model.copy_entry(self.source, kind, index, dx, dy, model.crop_of(self.frame_source()))
+            made.append((kind, entries[new]))
+            renamed += renames
+        # an axis copied is placed among the others, which may move an index: every object found again by identity
+        def where(kind, entry):
+            return (kind, next(i for i, other in enumerate(self.source[SELECTION_LISTS[kind]]) if other is entry))
+        focus = objects[-1]
+        self.__dict__["_focus"] = where(*focus)
+        self.__dict__["extra"] = [where(*item) for item in objects[:-1]]
+        if renamed:
+            self.axes_renamed.emit(renamed)
+        return [where(*item) for item in made]
 
     def duplicate_selection(self):
         """«Dupliquer» under «Objet sélectionné» (issue #18, D-016): a copy of the object selected beside it, one step of «Annuler», and the copy selected."""
         if not self.has_selection():
             return False
+        if self.single_selected():
+            self.edit_refused.emit(self.single_selected())
+            return False
         dx, dy = plan_canvas_edit.duplicate_offset(self)
         self.begin_change()
-        kind, new = self.copy_selection(dx, dy)
-        self.selection = (kind, new)
+        made = self.copy_selection(dx, dy)
+        self.selection = made[-1] if made else None
+        self.__dict__["extra"] = made[:-1]
         self.end_change()
         self.selection_changed.emit()
         return True
 
     def selection_outline(self, dx, dy):
-        """The object selected drawn where (dx, dy) would put it: its points joined, or a line across the frame for an axis or an aid."""
+        """Every object selected drawn where (dx, dy) would put it."""
         path = QPainterPath()
-        if not self.has_selection():
+        for kind, index in self.selected_entries():
+            path.addPath(self.entry_outline(kind, self.source[SELECTION_LISTS[kind]][index], dx, dy))
+        return path
+
+    def clip_outline(self, point):
+        """The clip held drawn as Ctrl+V would put it down at `point` (plan_clip.placed, the paste's own placing)."""
+        path = QPainterPath()
+        clip = plan_clipboard.current()
+        if clip is None or clip.kind != plan_clip.POSITION:
             return path
-        kind, index = self.selection
-        entry = self.source[SELECTION_LISTS[kind]][index]
+        for kind, entry in plan_clip.placed(clip, point, self.per_m()):
+            path.addPath(self.entry_outline(kind, entry))
+        return path
+
+    def entry_outline(self, kind, entry, dx=0.0, dy=0.0):
+        """One object of the plan drawn where (dx, dy) would put it: its points joined, or a line across the frame for an axis or an aid -- what «Déplacer», «Copier» and Ctrl+V show, and what marks an object selected beside the one in focus (issue #61)."""
+        path = QPainterPath()
         if kind in ("axis", "aid"):
             moved = {"point": [entry["point"][0] + dx, entry["point"][1] + dy], "angle": entry["angle"]}
             segment = model.axis_segment(moved, model.crop_of(self.frame_source()))
@@ -379,7 +465,7 @@ class PlanCanvasEditMixin:
             path.moveTo(points[0])
             for q in points[1:]:
                 path.lineTo(q)
-            if kind == "element" and model.element_kind(entry) == "poly":
+            if kind == plan_canvas_outline.KIND or (kind == "element" and model.element_kind(entry) == "poly"):
                 path.closeSubpath()
         return path
 
@@ -445,7 +531,9 @@ class PlanCanvasEditMixin:
         self.drawing = []
         self.cursor = None
         enough = len(points) >= (3 if kind == "poly" else 2) or (self.tool == "M" and len(points) == 1)
-        if enough:
+        if enough and self.tool == plan_canvas_outline.TOOL:
+            plan_canvas_outline.add(self, points)   # the building's outline is no element: it takes the place of the one the plan had (issue #54)
+        elif enough:
             self.add_element(self.tool, points)
         self.update_helpers()
 

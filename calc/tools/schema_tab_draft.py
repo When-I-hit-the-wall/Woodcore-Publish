@@ -21,7 +21,7 @@ from domains import schema as model
 
 
 # The row that stands for the draft nobody has saved yet -- statics_tab's own sentinel, and for the same reason: ID_PATTERN allows no angle bracket, so it can collide with no id.
-NEW_ROW = "<new>"
+from source_editor import NEW_ROW  # the list's row of the draft, the one constant (spec 2026-10-20-indices-et-niveaux, ARCH-005)
 
 
 def list_schemas():
@@ -66,7 +66,7 @@ class SchemaDraftMixin:
         self.source = source
         self.current_id = current_id
         self.dirty = dirty
-        self.undo_stack, self.redo_stack = [], []
+        self.init_history()
         self.canvas.set_source(self.source)
         self.fill_form()
         self.fill_tables()
@@ -269,13 +269,6 @@ class SchemaDraftMixin:
     def mark_dirty(self):
         self.dirty = True
         self.update_list_marker()
-
-    def update_list_marker(self):
-        """A dot at the left of the schema being edited while it has unsaved changes, and the tab's own. Every row carries a mark, dot or blank, so none of them moves sideways as the detail is drawn on -- the convention every editor tab here follows, and which `tests/test_window.py` walks each of them for."""
-        for sid in self.list.ids():
-            mine = sid == self.current_id or (self.current_id is None and sid == NEW_ROW)
-            self.list.set_mark(sid, self.app.dirty_mark(mine and self.dirty))
-        self.app.update_tab_marks()
 
     def rows_of(self, which):
         source = self.source

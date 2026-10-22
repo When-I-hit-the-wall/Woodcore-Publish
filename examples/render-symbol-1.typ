@@ -8,4 +8,4 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#render-symbol(var-of("snow-load", "SL", "q_k11"))
+#render-symbol((symbol: "q_(k,1)"))

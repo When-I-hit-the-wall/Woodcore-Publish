@@ -1,9 +1,157 @@
 {
   "schema_version": "2.0",
   "domains": {
+    "A1": {
+      "title": "Nutzlasten – A1",
+      "file": "Variable-loads/Live/A1.typ"
+    },
+    "A2": {
+      "title": "Nutzlasten – A2",
+      "file": "Variable-loads/Live/A2.typ"
+    },
+    "A3": {
+      "title": "Nutzlasten – A3",
+      "file": "Variable-loads/Live/A3.typ"
+    },
+    "B": {
+      "title": "Nutzlasten – B",
+      "file": "Variable-loads/Live/B.typ"
+    },
+    "BI-01": {
+      "title": "Biegung – BI-01",
+      "file": "Timber-checks/Bending/BI-01.typ"
+    },
+    "BI-02": {
+      "title": "Biegung – BI-02",
+      "file": "Timber-checks/Bending/BI-02.typ"
+    },
+    "BI-03": {
+      "title": "Biegung – BI-03",
+      "file": "Timber-checks/Bending/BI-03.typ"
+    },
+    "C1": {
+      "title": "Nutzlasten – C1",
+      "file": "Variable-loads/Live/C1.typ"
+    },
+    "C2": {
+      "title": "Nutzlasten – C2",
+      "file": "Variable-loads/Live/C2.typ"
+    },
+    "C3": {
+      "title": "Nutzlasten – C3",
+      "file": "Variable-loads/Live/C3.typ"
+    },
+    "D": {
+      "title": "Nutzlasten – D",
+      "file": "Variable-loads/Live/D.typ"
+    },
+    "DR-01": {
+      "title": "Druck rechtwinklig zur Faserrichtung – DR-01",
+      "file": "Timber-checks/Compression/DR-01.typ"
+    },
+    "DR-02": {
+      "title": "Druck parallel zur Faserrichtung – DR-02",
+      "file": "Timber-checks/Compression/DR-02.typ"
+    },
+    "E": {
+      "title": "Nutzlasten – E",
+      "file": "Variable-loads/Live/E.typ"
+    },
+    "EL+AL-Dach mit Wasser": {
+      "title": "Eigen- und Auflasten – EL+AL-Dach mit Wasser",
+      "file": "Permanent-loads/EL+AL-Dach mit Wasser.typ"
+    },
+    "EL+AL-Dach ohne Wasser": {
+      "title": "Eigen- und Auflasten – EL+AL-Dach ohne Wasser",
+      "file": "Permanent-loads/EL+AL-Dach ohne Wasser.typ"
+    },
+    "EL+AL-DachRand": {
+      "title": "Eigen- und Auflasten – EL+AL-DachRand",
+      "file": "Permanent-loads/EL+AL-DachRand.typ"
+    },
+    "EL+AL-Wand": {
+      "title": "Eigen- und Auflasten – EL+AL-Wand",
+      "file": "Permanent-loads/EL+AL-Wand.typ"
+    },
+    "F": {
+      "title": "Nutzlasten – F",
+      "file": "Variable-loads/Live/F.typ"
+    },
+    "FE-01": {
+      "title": "Biegung – FE-01",
+      "file": "Timber-checks/Bending/FE-01.typ"
+    },
+    "FE-02": {
+      "title": "Stabilität – FE-02",
+      "file": "Timber-checks/Buckling/FE-02.typ"
+    },
+    "G": {
+      "title": "Nutzlasten – G",
+      "file": "Variable-loads/Live/G.typ"
+    },
+    "H": {
+      "title": "Nutzlasten – H",
+      "file": "Variable-loads/Live/H.typ"
+    },
+    "KI-01": {
+      "title": "Kippen – KI-01",
+      "file": "Timber-checks/Lateral-torsional/KI-01.typ"
+    },
+    "KI-02": {
+      "title": "Kippen – KI-02",
+      "file": "Timber-checks/Lateral-torsional/KI-02.typ"
+    },
+    "KN-01": {
+      "title": "Stabilität – KN-01",
+      "file": "Timber-checks/Buckling/KN-01.typ"
+    },
+    "SC-01": {
+      "title": "Schub – SC-01",
+      "file": "Timber-checks/Shear/SC-01.typ"
+    },
+    "SD-10": {
+      "title": "Stabdübel – SD-10",
+      "file": "Connectors/SD-10.typ"
+    },
+    "SL": {
+      "title": "Schneelast – SL",
+      "file": "Variable-loads/Snow/SL.typ"
+    },
+    "ST-01": {
+      "title": "Stahl: Biegung – ST-01",
+      "file": "Steel-checks/Bending/ST-01.typ"
+    },
+    "ST-02": {
+      "title": "Stahl: Querkraft – ST-02",
+      "file": "Steel-checks/Shear/ST-02.typ"
+    },
+    "VU-MP-1": {
+      "title": "Anschluss VU-MP-1: Velo Unterstand: Stabdübel 4x 10mm Durchmesser",
+      "file": "Connections/VU-MP-1.typ"
+    },
+    "WL-Fluchttreppe+Geräte": {
+      "title": "Windlast – WL-Fluchttreppe+Geräte",
+      "file": "Variable-loads/Wind/WL-Fluchttreppe+Geräte.typ"
+    },
+    "WL-Pavillon": {
+      "title": "Windlast – WL-Pavillon",
+      "file": "Variable-loads/Wind/WL-Pavillon.typ"
+    },
+    "WL-Velo": {
+      "title": "Windlast – WL-Velo",
+      "file": "Variable-loads/Wind/WL-Velo.typ"
+    },
+    "ZT-01": {
+      "title": "Zug parallel zur Faserrichtung – ZT-01",
+      "file": "Timber-checks/Tension/ZT-01.typ"
+    },
+    "ZT-02": {
+      "title": "Zug unter einem Winkel zur Faserrichtung – ZT-02",
+      "file": "Timber-checks/Tension/ZT-02.typ"
+    },
     "poutre-p1": {
       "title": "Poutre P1",
-      "file": "Formules/poutre-p1.typ"
+      "file": "Domains/poutre-p1.typ"
     }
   }
 }

@@ -9,6 +9,6 @@ Modèles statiques et efforts intérieurs.
 // woodcore:/object p1
 
 // Every static model drawn in Woodcore's «Modèles statiques» tab (docs/domain/static-models.md §3.3octies).
-#for id in static-model-ids() {
-  show-static-model(id)
+#for id in ids("static-model") {
+  figure(image-static-model(id), kind: image, caption: [#id])
 }

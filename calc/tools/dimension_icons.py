@@ -3,11 +3,9 @@
 The four kinds the static models had are drawn as statics_tab draws them -- the very symbol its figure draws (statics_svg.swatch) -- and the plan's fifth, the chain, which only the plan has, is drawn here in the same ink, as three dimensions end to end.
 """
 
-from PySide6.QtCore import QByteArray, QRectF, Qt
-from PySide6.QtGui import QIcon, QPainter, QPixmap
-from PySide6.QtSvg import QSvgRenderer
 
 import statics_tab
+import svg_icons
 
 # The plan's own: a chain of three lengths on one line, with the swatches' ink.
 CHAIN_SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 18">'
@@ -19,18 +17,7 @@ TOOLS = ("dimension-horizontal", "dimension-vertical", "dimension-parallel", "di
 
 
 def icon(tool, size, ink=None, ground=None):
-    """The symbol of a dimension tool at `size` pixels: statics_tab.svg_icon's for its four kinds, the chain's own for the fifth."""
+    """The symbol of a dimension tool at `size` pixels: statics_tab.svg_icon's for its four kinds, the chain's own for the fifth, in its own proportions."""
     if tool != "dimension-chain":
         return statics_tab.svg_icon(tool, size, ink, ground)
-    svg = CHAIN_SVG.format(ink=ink or statics_tab.SWATCH_INK)
-    renderer = QSvgRenderer(QByteArray(svg.encode("utf-8")))
-    box = renderer.viewBoxF()
-    pix = QPixmap(size, size)
-    pix.fill(Qt.GlobalColor.transparent)
-    scale = min(size / box.width(), size / box.height())
-    w, h = box.width() * scale, box.height() * scale
-    painter = QPainter(pix)
-    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-    renderer.render(painter, QRectF((size - w) / 2, (size - h) / 2, w, h))
-    painter.end()
-    return QIcon(pix)
+    return svg_icons.svg_icon(CHAIN_SVG.format(ink=ink or statics_tab.SWATCH_INK), size, fit=True)

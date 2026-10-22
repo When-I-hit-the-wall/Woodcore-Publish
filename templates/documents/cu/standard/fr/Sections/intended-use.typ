@@ -4,19 +4,17 @@
 == Utilisation prévue
 // woodcore:/object title
 
-// woodcore:object doc-table intended-use-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Élément]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Utilisation], text: [[Affectations prévues (logement, bureau, enseignement, commerce, restaurant, salle polyvalente …).]]),
-    (item: [Charges utiles], text: [Les charges utiles sont fixées par catégorie d'utilisation selon la norme SIA 261 (voir la section « Charges utiles »).]),
-    (item: [Gabarits d'espace libre], text: [[Selon les plans d'avant-projet et la maquette 3D de l'architecte.]]),
+// woodcore:object table intended-use-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Utilisation], [[Affectations prévues (logement, bureau, enseignement, commerce, restaurant, salle polyvalente …).]],
+    [Charges utiles], [Les charges utiles sont fixées par catégorie d'utilisation selon la norme SIA 261 (voir la section « Charges utiles »).],
+    [Gabarits d'espace libre], [[Selon les plans d'avant-projet et la maquette 3D de l'architecte.]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Utilisation prévue],
-  header: false,
 )
 // woodcore:/object intended-use-table

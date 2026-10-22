@@ -33,10 +33,12 @@ from pathlib import Path
 
 import engine
 import validation
+from domains._common import fail as _fail  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import figure_style, plan
 from domains import figure_text  # a text placed with the Text tool (issue #43): its last values, refreshed as a plan is saved
 from i18n import strings
 from norms import vkf
+from domains._common import source_paths  # one copy (G4)
 
 # 2.0 (v0.115, the engineer's decision of 06.10.2026): the frame of a plan that carries one of its own may be drawn on a page of an imported document (`background.document`, plan-source 1.2's own field), whose rotation and layers are then the document's. A 1.0 source -- Gian's, whose background is a file only -- is read as it is and upgraded on reading (`upgrade`): nothing is written until the plan is saved.
 SOURCE_SCHEMA_VERSION = "2.0"
@@ -47,6 +49,8 @@ SOURCE_SCHEMA_VERSIONS = ("1.0", SOURCE_SCHEMA_VERSION, TEXT_SCHEMA_VERSION)
 EXPORT_SCHEMA_VERSION = "2.0"
 # 2.1 is 2.0 with a plan's `texts`, what each printed: written only where one holds a text
 TEXT_EXPORT_VERSION = "2.1"
+# 2.2 is 2.1 with its figures and backgrounds named from the Typst root (`/Plans/Fire-plan/Exports/Figures/F01-fr.svg`): written by a project laid out by folders, where they lie in the tab's Exports/Figures/ (issue #64, D-10)
+ROOTED_EXPORT_VERSION = "2.2"
 
 
 def version_of(source):
@@ -105,10 +109,6 @@ FRAME_KEYS = ("background", "sheet", "crop", "scale")
 DECIMALS = 2
 
 SAME_POINT = plan.SAME_POINT
-
-
-def _fail(where, message):
-    raise validation.ValidationError(f"{where}: {message}")
 
 
 def _ring(ring, where, what):
@@ -290,14 +290,6 @@ def new_source(fid, plan_id=None):
     else:
         source["sheet"] = dict(plan.BLANK_SHEET)
     return source
-
-
-def source_paths(source_dir):
-    """Every plan source, in file-name order -- the order they are listed in."""
-    source_dir = Path(source_dir)
-    if not source_dir.is_dir():
-        return []
-    return sorted(source_dir.glob("*.json"), key=lambda p: p.name.lower())
 
 
 # --- The frame --------------------------------------------------------------------
@@ -869,8 +861,8 @@ def _followed_background(shown):
     return background
 
 
-def prepare(source_dir, plans_dir, project_root, data_dir, plans=None, values=None):
-    """(data, files, warnings): data/fire.json as it will be written, every file under data/fire/ it refers to (path relative to data/ -> bytes or text), and the warnings to print -- built and validated from every source file, nothing written yet, so export_all.py can check the fire-protection plans along with everything else before it writes anything.
+def prepare(source_dir, plans_dir, project_root, data_dir, plans=None, values=None, place=None):
+    """(data, files, warnings): data/fire.json as it will be written, every figure it refers to (its name in the JSON -> bytes or text, `place` an engine.Figures: the tab's Exports/Figures/ in a project laid out by folders, data/fire/ otherwise), and the warnings to print -- built and validated from every source file, nothing written yet, so export_all.py can check the fire-protection plans along with everything else before it writes anything.
 
     A plan with a frame of its own is drawn on its file, or on a page of an imported document -- the page flattened with the layers the engineer switched off taken out, turned as he turned it (plan.document_background, the position plans' own step) -- and its background is written under data/fire/ (`fire/<id>-plan.<format>`). `plans_dir` is where the documents live under (plans/documents/).
 
@@ -879,6 +871,7 @@ def prepare(source_dir, plans_dir, project_root, data_dir, plans=None, values=No
     from domains import fire_svg  # the drawing module draws what this module describes
 
     data_dir = Path(data_dir)
+    place = place or engine.figures(data_dir, "fire")
     previous = _read_export(data_dir / EXPORT_FILE, "plans")
     exported = plans if plans is not None else _read_export(data_dir / "plans.json", "plans")
     frames = plan_frames(plans_dir)
@@ -907,45 +900,36 @@ def prepare(source_dir, plans_dir, project_root, data_dir, plans=None, values=No
             spec = frame["background"]
             old = previous.get(fid, {}).get("background", {})
             what = f"fire-protection plan {fid}"
-            document = plan.document_background(spec, project_root, plans_dir, data_dir, f"fire/{fid}-plan", old, where, what, files, notes, plan=fid) if spec.get("document") else None
+            document = plan.document_background(spec, project_root, plans_dir, place, place.name(f"{fid}-plan"), old, where, what, files, notes, plan=fid) if spec.get("document") else None
             if document is not None:
                 background, actual = document
                 if abs(actual[0] - sheet[0]) > 0.5 or abs(actual[1] - sheet[1]) > 0.5:
                     notes.append(engine.Note("fire_sheet_moved", f"{what}: page {spec['page']} of document {spec['document']} is now {actual[0]:.0f} × {actual[1]:.0f} and not {sheet[0]:.0f} × {sheet[1]:.0f} as when it was drawn on -- open the plan in Woodcore and check its symbols", fire=fid, document=spec["document"], page=spec["page"]))
                     sheet = actual
             else:
-                background, sheet, more = plan.file_background(spec, sheet, project_root, data_dir, f"fire/{fid}-plan", old, where, what, files)
+                background, sheet, more = plan.file_background(spec, sheet, project_root, place, place.name(f"{fid}-plan"), old, where, what, files)
                 notes += more
         drawn = {**frame, "sheet": {"width": sheet[0], "height": sheet[1]}}
         record = build_record(source, drawn, background)
+        record["figures"] = {lang: place.name(f"{fid}-{lang}.svg") for lang in strings.LANGUAGES}
         texts = plan.text_records(source, values, f"fire-protection plan {fid}", notes)
         if texts:
             record["texts"] = texts
         for lang in strings.LANGUAGES:
             files[record["figures"][lang]] = fire_svg.render(source, drawn, editing=False, lang=lang, values=values)
         records[fid] = record
-    data = {"schema_version": TEXT_EXPORT_VERSION if any("texts" in r for r in records.values()) else EXPORT_SCHEMA_VERSION, "plans": records}
+    version = TEXT_EXPORT_VERSION if any("texts" in r for r in records.values()) else EXPORT_SCHEMA_VERSION
+    data = {"schema_version": ROOTED_EXPORT_VERSION if place.here is not None else version, "plans": records}
     validation.validate_structure(data, "fire")
     validation.validate_fire_business(data)
     return data, files, notes
 
 
 def write(data, files, data_dir):
-    """Writes data/fire.json and data/fire/, and removes the files of a plan that no longer exists -- that folder is generated, like the rest of data/. A file whose content has not changed is left alone."""
+    """Writes data/fire.json and the plans' figures and backgrounds -- into the tab's Exports/Figures/ in a project laid out by folders, data/fire/ otherwise (engine.Figures) --, and removes those of a plan that no longer exists: only what the last export wrote, never a file of the engineer's. A file whose content has not changed is left alone."""
     data_dir = Path(data_dir)
+    engine.figures(data_dir, "fire").write(files, engine.previous_json(data_dir / EXPORT_FILE))
     engine.write_json(data_dir / EXPORT_FILE, data)
-    folder = data_dir / "fire"
-    folder.mkdir(parents=True, exist_ok=True)
-    for name, content in files.items():
-        target = data_dir / name
-        payload = content.encode("utf-8") if isinstance(content, str) else content
-        if target.is_file() and target.read_bytes() == payload:
-            continue
-        target.write_bytes(payload)
-    wanted = {Path(name).name for name in files}
-    for stale in folder.iterdir():
-        if stale.is_file() and stale.name not in wanted:
-            stale.unlink()
 
 
 def export(source_dir, plans_dir, project_root, data_dir, values=None):
@@ -978,3 +962,8 @@ def warnings(source, frames, where=None):
         if x1 < crop["x"] or y1 < crop["y"] or x0 > crop["x"] + crop["w"] or y0 > crop["y"] + crop["h"]:
             out.append(engine.Note("fire_zone_outside", f"{where}: surface {zone['id']} lies outside the plan's frame", fire=fid, zone=zone["id"]))
     return out
+
+
+def references(record):
+    """What an exported fire plan names, [(kind, id, field)]: the position plan it follows (domains/dependency_graph.py, spec 2026-10-21-graphe-dependances, ARCH-RISK-1103)."""
+    return [("plan", record["plan"], "plan")] if record.get("plan") else []

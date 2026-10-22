@@ -56,32 +56,20 @@ from typst_objects_parse import (  # split out of this module (issue #30): every
     variable_cell,
 )
 from typst_objects_models import (  # split out of this module (issue #30): every name it had is still importable from it
-    AnnexesModel,
     CHECK_OPTION_KEYS,
     CHOICE_OPTION_KEYS,
     COLUMN_KEYS,
     COLUMN_KINDS,
-    ChecklistModel,
-    ChoiceModel,
     Column,
     DEFAULTS,
-    ExtractModel,
-    FieldModel,
-    FirePlanModel,
-    ImageModel,
     KNOWN_COLUMNS,
     LIVE_LOAD_FILLED,
-    LiveLoadTableModel,
     Model,
     ModelError,
     NormListModel,
-    PlanModel,
     SIGNATURE_KEYS,
-    SignaturesModel,
-    TableModel,
     _COLUMN_ID,
     _KEEP,
-    _Options,
     _bool_value,
     _drop,
     _id_value,
@@ -90,7 +78,6 @@ from typst_objects_models import (  # split out of this module (issue #30): ever
     _number_value,
     _put,
     _text_value,
-    _width_value,
 )
 
 
@@ -248,6 +235,10 @@ class ViewportModel(_Drawing):
         """The lengths beside the plan's elements printed on the sheet, or left out (issue #9)."""
         self._set("lengths", _bool_value(shown, "lengths:"))
 
+    def set_centres(self, shown=True):
+        """The stiffness centre, the mass centre and the building's outline printed on the sheet where the plan prints them, or left out (issue #54)."""
+        self._set("centres", _bool_value(shown, "centres:"))
+
     def set_scale_bar(self, shown=True):
         self._set("scale-bar", _bool_value(shown, "scale-bar:"))
 
@@ -391,9 +382,6 @@ class TitleBlockModel(Model):
         self._set("x", AUTO if x is AUTO else _mm(x, "x:"))
         self._set("y", AUTO if y is AUTO else _mm(y, "y:"))
 
-    def set_logo(self, logo):
-        """AUTO the BFH's logo, None no logo, else markup standing in its place."""
-        self._set("logo", logo if logo is AUTO or logo is None else _text_value(logo, "logo"))
 
 
 # `= Titel`, `== Titel`: the markup form of a heading, the one Woodcore writes.
@@ -428,7 +416,8 @@ class _Checked(typst_paths._Lexer):
 
 def _balanced(markup):
     """Whether `markup` closes everything it opens -- a call, a content block, a formula, a raw block, a comment -- so that the tag line after it is a tag line and not the inside of something."""
-    lexer = _Checked(markup)
+    # read as the file holds it, the line ending after it: a paragraph that ends with a call -- `#show-annexes()` -- has closed it there, where the lexer would otherwise wait for what may follow a call
+    lexer = _Checked(markup + "\n")
     lexer.run()
     return len(lexer.stack) == 1 and not lexer.unclosed
 

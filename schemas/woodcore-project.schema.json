@@ -11,8 +11,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.0",
-      "description": "-- pinned: a project file written at another version is refused rather than read as this one."
+      "enum": ["1.0", "1.1"],
+      "description": "-- pinned: a project file written at another version is refused rather than read as this one. 1.1 (Woodcore 0.119, issue #64) is a project laid out by folders, which states `layout.config`; 1.0 is every project laid out before, still read as it was."
     },
     "format": {
       "type": "string",
@@ -51,6 +51,16 @@
       "type": "string",
       "description": "The Woodcore version this project asks to be opened with, as a prefix -- `0.83` opens it with the newest 0.83.x installed. Read by the launcher a double-click on this file starts (packaging/launcher.py, v0.83). Optional: absent, the newest version installed opens it."
     },
+    "content_templates": {
+      "type": "object",
+      "description": "The content template each document was made from, by document (`cu`, `bp`, `rs`): its reference, `builtin:cu/standard`, `user:rs/holzbau` (issue #88, #90, Woodcore 0.122). Written by Woodcore as a document is created -- at a new project's creation, or later from the «Projet» tab -- and shown there; a document's content template is chosen once and never changed. Additive: absent in a project made before 0.122, whose documents the «Projet» tab then says «inconnu», and a Woodcore older than 0.122 reads the file all the same.",
+      "properties": {
+        "cu": {"type": "string"},
+        "bp": {"type": "string"},
+        "rs": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
     "gui": {
       "type": "object",
       "description": "What the window keeps with the project rather than with the user (v0.83; named `katalog` until v0.96). Written by Woodcore.",
@@ -82,6 +92,10 @@
         "typst_root": {
           "type": "string",
           "description": "The folder the documents are compiled from, and read nothing outside of: \".\", the project's own folder, and nothing else. Stated, the project is laid out in three documents, and every one of `images`, `report_cu`, `pdf_cu`, `report_bp` and `pdf_bp` is stated with it. Absent, the Typst root is the report's folder, as it has always been."
+        },
+        "config": {
+          "type": "string",
+          "description": "The folder holding config.typ, commands.typ, title.typ, references.bib and the form's Template/: `000-Typst-Config`, one folder at the top of the project, read as `/000-Typst-Config/commands.typ`. Stated with `typst_root` only, in a project laid out by folders (schema_version 1.1, issue #64), whose other folders -- 000-Woodcore/, Domains/, the domains' and the drawing tabs' -- are fixed by Woodcore and stated nowhere (calc/project.py DOMAIN_FOLDERS). Absent, those files lie at the top of the Typst root."
         },
         "report": {
           "type": "string",

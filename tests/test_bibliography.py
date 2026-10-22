@@ -187,7 +187,7 @@ def _pages(body, name):
         raise Skip("typst is not on the path")
     d = conftest.probe_dir(name)
     probe = d / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n#report-level.update(2)\n' + body + "\n", encoding="utf-8")
     out = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(probe), str(d / "probe.pdf")],
                          capture_output=True, text=True, encoding="utf-8")
     assert out.returncode == 0, out.stderr
@@ -201,8 +201,8 @@ def test_registering_a_citation_prints_nothing():
 
     ⚠️ This is what makes the 276 frozen example pages safe: every command that gained a registration gained exactly this and nothing else.
     """
-    plain = "Ein Satz mit #val(7, unit: \"kN\") darin, und noch einer.\n"
-    noted = ("Ein Satz mit #val(7, unit: \"kN\", norm: \"SIA 265\") darin, "
+    plain = "Ein Satz mit #var(\"F\", 7, \"kN\") darin, und noch einer.\n"
+    noted = ("Ein Satz mit #var(\"F\", 7, \"kN\", norm: \"SIA 265\") darin, "
              "#bib-note(\"SIA 260\")#bib-note(\"STE Compact 02\") und noch einer.\n")
     # the same sentence, once with three registrations in it and once without: `norm:` prints no citation at
     # level 1, so the two bodies differ only in what they register
@@ -305,7 +305,7 @@ def test_cite_norm_prints_in_the_prose_and_registers():
     ok, text = _compile('Die Baustoffe sind nach #cite-norm(norm: "VKF 14-15", norm-ref: "2.5.3") zu verwenden.\n\n'
                         '#show-bibliography(data: false)', "bibliography_cite")
     assert ok, text
-    assert "VKF 14-15 §2.5.3" in text, text
+    assert "VKF 14-15 2.5.3" in text and "VKF 14-15 §" not in text, text
     # the directive gained its German title (v0.111): a German report prints it, and the French one is in the French report (below)
     assert "Verwendung von Baustoffen" in text, text
     # a table and an annex take the report's own word and no §, as norm-text sets them
@@ -329,13 +329,13 @@ def test_what_cite_norm_refuses_it_names():
 def test_a_norm_written_at_a_call_is_registered_from_outside_its_context():
     """⚠️ The panne of v0.85 (docs/domain/connections.md §3.3quinquies), held from the outside: a state written inside a command's own context is not read back the same way, so every command that takes a `norm:` emits its registration before its context. A regression shows up here as a document missing from the list.
 
-    `var` at level 0 prints nothing at all, and its norm is registered all the same: whether the clause is printed is a matter of level, whether the document is a source is not.
+    `var` at level 0 prints nothing at all, and its norm is registered all the same: whether the clause is printed is a matter of level, whether the document is a source is not. The four commands that take a `norm:` since the spec 2026-10-21-commandes-typst-refonte: `var`, `eq`, `verify` and `domain`.
     """
-    body = ('#var("R_k", 7, "kN", norm: "SIA 265", norm-ref: "6.2.1.1", level: 0)\n'
-            '#var-unit("R_k", "N", norm: "SIA 263", level: 0)\n'
+    body = ('#var("R_k", 7, "kN", norm: "SIA 265", norm-section: "6.2.1.1", level: 0)\n'
             '#eq("R_d", `R_k / 2`, norm: "SIA 260", level: 0)\n'
-            '#val(3, unit: "mm", norm: "SIA 261/1", level: 0)\n'
-            '#var-line(norm: "SZS C5", level: 0)[#var("b", 100, "mm")]\n'
+            '#var("a", 3, "mm", norm: "SIA 261/1", level: 0)\n'
+            '#verify(`R_d <= R_k`, norm: "SIA 263", level: 0)\n'
+            '#domain("trag", norm: "SZS C5", level: 0)[#var("b", 100, "mm")]\n'
             '#show-bibliography(data: false)')
     ok, text = _compile(body, "bibliography_registered")
     assert ok, text
@@ -344,21 +344,12 @@ def test_a_norm_written_at_a_call_is_registered_from_outside_its_context():
 
 
 def test_distance_registers_the_norm_its_tables_come_out_of():
-    ok, text = _compile('#distance(12, "dowel", tab: 24, norm: none, title: none)\n'
+    ok, text = _compile('#distance(12, "dowel", table: 24, norm: none, label: none)\n'
                         '#show-bibliography(data: false)', "bibliography_distance")
     assert ok, text
     # printed with no citation beside the table, and the document behind it is still named
     assert "SIA 265 Tabelle 24" not in text, text
     assert "SIA 265:2021" in text and "Holzbau" in text, text
-
-
-def test_a_member_check_needs_no_registration_of_its_own():
-    """Every check of lib/timber.typ cites through `var(..., norm: "SIA 265")` and `eq(..., norm: "SIA 265")`, which register: nothing was added to timber.typ, and that is what this holds."""
-    assert "bib-note" not in (ROOT / "lib" / "timber.typ").read_text(encoding="utf-8")
-    ok, text = _compile('#member("S001")\n#verify-compression("S001", N: -40, l-k-y: 3000, l-k-z: 3000)\n'
-                        '#show-bibliography(data: false)', "bibliography_timber")
-    assert ok, text
-    assert "SIA 265:2021" in text, text
 
 
 # --- the project's own references.bib -----------------------------------------
@@ -405,7 +396,7 @@ def _with_bib(body, name, text=SOUND_BIB):
 
 def _compile_in(folder, body):
     probe = folder / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n#report-level.update(2)\n' + body + "\n", encoding="utf-8")
     out = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(probe), str(folder / "probe.pdf")],
                          capture_output=True, text=True, encoding="utf-8")
     if out.returncode != 0:
@@ -596,10 +587,10 @@ def test_every_source_names_a_page_to_turn_to_and_one_outside_the_library_says_w
     for entry in norms.references():
         source = entry["_source"]
         assert ".pdf" in source or "ExternalFiles/" in source or "http" in source,             "%s: the _source names neither a file of the library nor an address" % entry["key"]
-        if "Not in ExternalFiles/000-Normes/" in source:
+        if "Not in the reference library" in source:
             assert "http" in source, "%s is not in the library and its _source gives no address to read it from" % entry["key"]
     # what is outside the library is named as such, so that nothing passes for a page that can be turned to in the office's own copy
-    outside = [e["key"] for e in norms.references() if "Not in ExternalFiles/000-Normes/" in e["_source"]]
+    outside = [e["key"] for e in norms.references() if "Not in the reference library" in e["_source"]]
     assert "SIA 118" in outside and "VKF 1-15" in outside, outside
 
 

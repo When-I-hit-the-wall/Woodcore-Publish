@@ -13,7 +13,6 @@ import math
 from pathlib import Path
 
 from PySide6.QtCore import QByteArray, QEvent, Qt, QTimer
-from PySide6.QtGui import QCursor, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
@@ -38,6 +37,7 @@ import autosave  # saving without a question, and what is never saved without th
 import validation
 import notices_ui  # what a tab says without a message box: a schema left out because it does not read (notices_ui.py)
 from shiboken6 import isValid
+import engine
 from domains import connector, connector_svg, dowel
 from domains import schema as schema_model
 from i18n import strings
@@ -48,7 +48,7 @@ from connectors_tab_draft import _escape_html, _math_html, _prose_html, Connecto
 
 # Every path is the current project's, asked of project.current() when it is needed (v0.81, docs/architecture/layout.md §11): the connectors' sources are its `connectors_dir`, and the detail schemas a connector is drawn on (section 3.3decies) its `details_dir` -- read from the sources, as the export reads them, so that a schema saved in the «Schémas» tab is there the moment this tab is looked at again.
 # the row of a connector nobody has saved yet, as every other editor tab lists its draft (periodic audit 260916, AUD-5-8)
-NEW_ROW = "<new>"
+from source_editor import NEW_ROW, SourceEditorTab, next_free_id as _next_id  # the left pane every editor tab shares (spec 2026-10-19-base-saine-nettoyage, ARCH-001)
 
 
 # The box under the pointer, and the results it produces, are lit together (the engineer's request).
@@ -65,18 +65,42 @@ slug_id = identity.slug_id
 
 
 def next_free_id(taken, symbol="SD"):
-    """The first free <symbol>_<nn>, as the engineer numbers them in Excel."""
-    lower = {t.lower() for t in taken}
-    index = 1
-    while True:
-        candidate = "%s_%02d" % (symbol, index)
-        if candidate.lower() not in lower:
-            return candidate
-        index += 1
+    """The first free id of a connector: its fastener's symbol, then two digits (SD_01)."""
+    return _next_id(taken, symbol + "_")
 
 
-class ConnectorsTab(ConnectorsDraftMixin, ConnectorsFormMixin, display_view.DisplayTab, QWidget):
+class ConnectorsTab(ConnectorsDraftMixin, ConnectorsFormMixin, SourceEditorTab, display_view.DisplayTab, QWidget):
+    GRAPH_KIND = "connector"   # issue #71
+    SYNC_DOMAIN = True   # its sources are domains with a file of their own: every writer is followed by domain_file.sync (tab_guard.py, spec 2026-10-19-base-saine-nettoyage)
     VIEWS = views.CALC_VIEWS   # «Calcul» and «Affichage» (views.py, v0.117)
+    KEY = "tab_connections"
+    LIST_KEY, EMPTY_KEY, WORDS = "cn_list", "cn_empty", "cn"
+    DOMAIN = connector
+
+    def sources_dir(self):
+        return project.current().connectors_dir
+
+    def saved_ids(self):
+        return self._taken()
+
+    DUPLICATE_FORGETS = ()   # a copy keeps its name: a connector is told apart by its id
+
+    def make_source(self):
+        """A new connector, **drawn on the first schema there is** and carrying all of its markers. v0.70's rule -- «Nouveau» must open on something that calculates rather than on a refusal --: with no schema named and no marker ticked, a fresh connector has no pattern. Where the project has no schema at all it still opens empty, which is honest: the detail is drawn first, in the «Schémas» tab, and then calculated."""
+        return connector.new_source(next_free_id(self._taken()), schema=self.first_schema())
+
+    def after_new(self):
+        self.adopt_schema()
+        self.expand_types()
+
+    def duplicate_id(self, source):
+        return next_free_id(self._taken(), connector.TYPES.get(source.get("type"), "SD"))
+
+    def fail_title(self):
+        return self.t("cn_save")
+
+    def export_sources(self):
+        connector.export(project.current().connectors_dir, project.current().data_dir)
 
     def __init__(self, app):
         super().__init__()
@@ -87,7 +111,7 @@ class ConnectorsTab(ConnectorsDraftMixin, ConnectorsFormMixin, display_view.Disp
         self.current_id = None
         self.source = connector.new_source(next_free_id(self._taken()))
         self.collapsed = False
-        self.empty_folders = list(app.folder_settings("tab_connections"))   # folders holding nothing: a view preference, kept in settings.json by the window (grouped_list.py, v0.75)
+        self.empty_folders = list(app.folder_settings(self.KEY))   # folders holding nothing: a view preference, kept in settings.json by the window (grouped_list.py, v0.75)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(6, 6, 6, 6)
@@ -96,7 +120,7 @@ class ConnectorsTab(ConnectorsDraftMixin, ConnectorsFormMixin, display_view.Disp
         self.splitter.addWidget(self.build_list())
         self.splitter.addWidget(self.build_form())
         self.splitter.addWidget(self.build_preview())
-        self.install_display("tab_connections")   # «Affichage»: the connector's commands, their options, the call and the page (v0.117)
+        self.install_display(self.KEY)   # «Affichage»: the connector's commands, their options, the call and the page (v0.117)
         for index, stretch in enumerate((2, 5, 4)):
             self.splitter.setStretchFactor(index, stretch)
         layout.addWidget(self.splitter, 1)
@@ -106,15 +130,10 @@ class ConnectorsTab(ConnectorsDraftMixin, ConnectorsFormMixin, display_view.Disp
         self.refresh_timer.setInterval(120)
         self.refresh_timer.timeout.connect(self.refresh)
 
-        QShortcut(QKeySequence.StandardKey.Save, self, activated=self.save)
-        self.restore(app.views.get("tab_connections"))
+        self.install_save_shortcut()
+        self.restore(app.views.get(self.KEY))
 
     # --- small helpers ---------------------------------------------------------
-
-    def heading(self, text):
-        label = QLabel(text)
-        label.setFont(self.app.bold_font)
-        return label
 
     def note(self, text):
         label = QLabel(text)
@@ -143,118 +162,6 @@ class ConnectorsTab(ConnectorsDraftMixin, ConnectorsFormMixin, display_view.Disp
         return [p.stem for p in connector.source_paths(project.current().connectors_dir)]
 
     # --- left: the connectors --------------------------------------------------
-
-    def build_list(self):
-        box = QWidget()
-        column = QVBoxLayout(box)
-        self.list = grouped_list.GroupedList(STRINGS.get(self.app.lang, STRINGS["fr"]), lang=self.app.lang)
-        self.archive = source_archive.Actions(self, lambda: project.current().connectors_dir, self.export, lambda select: self.reload_list(select), self._after_archive)
-        self.archive.connect()
-        column.addWidget(grouped_list.title_row(self.heading(self.t("cn_list")), self.list))
-        self.list.setIconSize(self.app.mark_size)
-        self.list.currentIdChanged.connect(self.on_list_change)
-        self.list.moved.connect(self.on_moved)
-        self.list.foldersChanged.connect(self.on_folders_changed)
-        self.list.attach_order("tab_connections", self.app.list_store)   # the order the engineer gives the list by drag and drop, kept in Woodcore-Datei/lists.json (calc/list_order.py, issue #15)
-        self.list.reordered.connect(lambda: self.reload_list(self.current_id))
-        column.addWidget(self.list, 1)
-        self.empty_hint = self.note(self.t("cn_empty"))
-        column.addWidget(self.empty_hint)
-        row = QHBoxLayout()
-        for key, slot in (("cn_new", self.new), ("cn_duplicate", self.duplicate), ("cn_delete", self.delete)):
-            button = QPushButton(self.t(key))
-            button.clicked.connect(slot)
-            row.addWidget(button)
-        column.addLayout(row)
-        self.reload_list()
-        return box
-
-    def _group_of(self, cid):
-        """The folder a connector is filed in, read off its own source -- the field, never a directory (grouped_list.py)."""
-        try:
-            source = json.loads((project.current().connectors_dir / ("%s.json" % cid)).read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return grouped_list.ROOT_GROUP
-        return grouped_list.group_of(source)
-
-    def reload_list(self, select=None):
-        self.loading = True
-        self.ids = self._taken()
-        entries = [{"id": cid, "text": cid, "group": self._group_of(cid)} for cid in self.ids]
-        if self.current_id is None:      # the draft nobody has saved yet, at the root where it can be seen
-            draft = (self.source or {}).get("id") or "?"
-            entries.append({"id": NEW_ROW, "text": f"{draft} {self.t('cn_new_item')}", "group": grouped_list.ROOT_GROUP})
-        target = select if select in self.ids else (NEW_ROW if self.current_id is None else None)
-        self.list.set_entries(entries, self.empty_folders, target,
-                              archived=source_archive.entries(project.current().connectors_dir, self.list._t))
-        self.empty_folders = self.list.empty_folders()
-        self.app.save_folder_settings("tab_connections", self.empty_folders)
-        self.empty_hint.setVisible(not self.ids)
-        self.loading = False
-        self.update_list_marker()
-
-    def on_folders_changed(self):
-        """A folder made, renamed or removed in the list: what the widget now holds is what the tab keeps. ⚠️ Connecting `foldersChanged` straight to `reload_list` rebuilt the list from the tab's own copy of the empty folders, taken BEFORE the new one was added -- so a folder just made vanished the moment it was made."""
-        self.empty_folders = self.list.empty_folders()
-        self.reload_list(select=self.current_id)
-
-    def update_list_marker(self):
-        """A dot beside the connector being edited while it has unsaved changes. Every row carries a mark, dot or blank, so none of them moves sideways as the form is typed into."""
-        for cid in self.list.ids():
-            mine = cid == self.current_id or (self.current_id is None and cid == NEW_ROW)
-            self.list.set_mark(cid, self.app.dirty_mark(mine and self.dirty))
-        self.app.update_tab_marks()
-
-    def on_list_change(self, cid):
-        if self.loading or not cid or cid not in self.ids:
-            return
-        if not self.confirm_leave():
-            self.loading = True
-            self.list.select(self.current_id) if self.current_id in self.ids else None
-            self.loading = False
-            return
-        self.load(cid)
-        if NEW_ROW in self.list.ids():
-            self.reload_list(cid)         # the draft given up leaves the list
-
-    def on_moved(self, ids, group):
-        """A drag wrote a folder: the field goes into each source, the connectors are exported, the list is rebuilt from the files."""
-        if not self.confirm_leave():
-            self.reload_list(self.current_id)
-            return
-        for cid in ids:
-            if cid == NEW_ROW:
-                continue                  # a draft has no file to write the field into
-            path = project.current().connectors_dir / ("%s.json" % cid)
-            try:
-                source = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
-                continue
-            if group:
-                source["group"] = group
-            else:
-                source.pop("group", None)
-            path.write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-            if cid == self.current_id:
-                # the draft takes the folder too, or its next save would put the connector back where it was
-                if group:
-                    self.source["group"] = group
-                else:
-                    self.source.pop("group", None)
-        self.export(self.t("cn_moved", count=len(ids), group=group or "—"))
-        self.reload_list(self.current_id)
-
-    def load(self, cid):
-        try:
-            source = connector.read_source(project.current().connectors_dir / ("%s.json" % cid))
-        except validation.ValidationError:
-            # a source the checks refuse is still opened, so it can be repaired here
-            source = json.loads((project.current().connectors_dir / ("%s.json" % cid)).read_text(encoding="utf-8"))
-        self.source = source
-        self.current_id = cid
-        self.dirty = False
-        self.fill_form()
-        self.refresh()
 
     # --- middle: the type bar and the form -------------------------------------
 
@@ -422,7 +329,17 @@ class ConnectorsTab(ConnectorsDraftMixin, ConnectorsFormMixin, display_view.Disp
         is **read-only while it follows** -- a field one may type into and that is then ignored is worse
         than a field one may not. «Écraser le compte du dessin» is what frees it, which is the one way
         the two ever differ.
+
+        ⚠️ Nothing to set while «Broches» does not stand yet. `fill_form` fills the markers **before**
+        `fill_members` builds that box -- the elements and the markers are read off the schema first --
+        and `fill_markers` ends here. A tab just built had the box only by accident: loading a connector
+        whose assembly is not the one the list opens on changes the list, which runs `on_assembly`, which
+        builds it. One carrying that very assembly -- «Holz-Holz einschnittig», the first -- changed
+        nothing, and Woodcore did not start (Gian's project, 2026-10-06). `fill_members` syncs again at
+        its own end, so the count is set as soon as there is a field to set it in.
         """
+        if not hasattr(self, "n_tot_override"):
+            return
         override = self.n_tot_override.isChecked()
         self.n_tot_box.setReadOnly(not override)
         self.n_tot_box.setButtonSymbols(
@@ -519,63 +436,6 @@ class ConnectorsTab(ConnectorsDraftMixin, ConnectorsFormMixin, display_view.Disp
             self.dirty = dirty
             self.refresh()
 
-    def new(self):
-        """A new connector, **drawn on the first schema there is** and carrying all of its markers.
-
-        v0.70's rule -- «Nouveau» must open on something that calculates rather than on a refusal -- is what
-        makes this more than a convenience: with no schema named and no marker ticked, a fresh connector has
-        no pattern, and the form would open saying so. Where the project has no schema at all it still does,
-        which is honest: the detail is drawn first now, in the «Schémas» tab, and then calculated.
-        """
-        if not self.confirm_leave():
-            return
-        self.source = connector.new_source(next_free_id(self._taken()), schema=self.first_schema())
-        self.adopt_schema()
-        self.current_id = None
-        self.dirty = True
-        self.expand_types()
-        self.fill_form()
-        self.refresh()
-        self.reload_list()
-
-    def duplicate(self):
-        if not self.confirm_leave():
-            return
-        source = self.draft()
-        source["id"] = next_free_id(self._taken(), connector.TYPES.get(source.get("type"), "SD"))
-        self.source = source
-        self.current_id = None
-        self.dirty = True
-        self.fill_form()
-        self.refresh()
-        self.reload_list()
-
-    def revert(self):
-        if self.current_id:
-            self.load(self.current_id)
-        else:
-            self.new()
-
-    def delete(self):
-        """«Supprimer»: what is selected goes to «Archives», its ID removed (source_archive.py, v0.77) -- or, an archived entry selected, is deleted for good. A connector never saved is simply discarded, as in the other editor tabs (periodic audit 260916)."""
-        if self.archive.delete():
-            return
-        self.dirty = False
-        self.reload_list()
-        if self.ids:
-            self.load(self.ids[0])
-            self.reload_list(self.ids[0])
-        else:
-            self.new()
-
-    def _after_archive(self):
-        """The connector the form showed was archived: a new one opens, as deleting always did here."""
-        self.reload_list()
-        self.new()
-
-    def fail(self, message):
-        return autosave.refuse(self, self.t("cn_save"), message)
-
     def save(self):
         source = self.draft()
         cid = source["id"]
@@ -595,25 +455,13 @@ class ConnectorsTab(ConnectorsDraftMixin, ConnectorsFormMixin, display_view.Disp
         project.current().connectors_dir.mkdir(parents=True, exist_ok=True)
         if self.current_id and self.current_id != cid:
             (project.current().connectors_dir / ("%s.json" % self.current_id)).unlink(missing_ok=True)
-        (project.current().connectors_dir / ("%s.json" % cid)).write_text(
-            json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        engine.write_json(project.current().connectors_dir / ("%s.json" % cid), source)
         self.source = source
         self.current_id = cid
         self.dirty = False
         self.export(self.t("cn_saved", id=cid))
         self.reload_list(select=cid)
         return True
-
-    def export(self, done):
-        try:
-            connector.export(project.current().connectors_dir, project.current().data_dir)
-        except Exception as exc:  # broad: the exporter's own message is what helps
-            self.app.set_status(self.t("cn_export_failed", error=str(exc)))
-            return
-        self.app.set_status(done)
-
-    def confirm_leave(self):
-        return autosave.confirm(self.app, self, self.t("cn_unsaved_title"), self.t("cn_unsaved", id=self.id_edit.text().strip() or "?"))   # saved without a question where it can be, else the one question (autosave.py, v0.117)
 
     # --- state across a rebuild -------------------------------------------------------
 

@@ -12,6 +12,7 @@ Every refusal is a PositionsError -- a ValidationError, so the command line prin
 import json
 import os
 import re
+import sys
 import time
 from pathlib import Path
 
@@ -32,7 +33,6 @@ ID_PATTERN = re.compile(r"^[^\W_][\w.+-]*$")
 # The workbook a project carried until v0.114, at the top of its folder, and the sheet its positions were on (`Positions` until v0.33).
 WORKBOOK = "Positionen.xlsx"
 SHEET = "Positions Element"
-OLD_SHEET = "Positions"
 
 # A column of that sheet, by its header, and the key of a row it fills. The moisture class under its older header too.
 COLUMNS = {
@@ -57,8 +57,8 @@ class PositionsError(validation.ValidationError):
 # --- where -------------------------------------------------------------------------------
 
 def path(here=None):
-    """The project's positions.json: in its `sources` folder, beside what Woodcore draws (`Woodcore-Datei/positions.json`)."""
-    return (here or project.current()).sources_dir / FILE
+    """The project's positions.json: in `Positions/` in a project laid out by folders, beside the Positions.xlsx written from it (issue #64, D-24); in its `sources` folder before, beside what Woodcore draws (`Woodcore-Datei/positions.json`)."""
+    return (here or project.current()).positions_dir / FILE
 
 
 def workbook(here=None):
@@ -166,13 +166,51 @@ def write(here, rows):
     temporary = file.with_name(file.name + ".tmp")
     temporary.write_bytes(encode(checked))
     _replace(temporary, file)
+    write_workbook(here, checked)
     return checked
+
+
+# The workbook a project laid out by folders carries beside its positions.json (issue #64, D-24): the positions as a table, written at every change and **never read** -- positions.json is the source, the workbook what the engineer opens in Excel or hands on. Its sheet and its headers are the ones Positionen.xlsx had, so a copy of it imports again (`import_workbook`).
+WORKBOOK_EXPORT = "Positions.xlsx"
+HEADERS = {key: header for header, key in reversed(list(COLUMNS.items())) if header != "Wood moisture class"}
+
+
+def workbook_path(here=None):
+    """`Positions/Positions.xlsx` in a project laid out by folders; None before, which writes none."""
+    here = here or project.current()
+    return here.positions_dir / WORKBOOK_EXPORT if here.has_folders else None
+
+
+def write_workbook(here=None, rows=None):
+    """Writes `rows` -- the project's positions where none are given -- into `Positions/Positions.xlsx`, sheet «Positions Element», one row per position under the headers of Positionen.xlsx (D-24). Nothing in a project laid out before. A workbook Excel holds open cannot be written: said, never a stop -- positions.json is written and is what counts. Returns the path written, or None."""
+    here = here or project.current()
+    target = workbook_path(here)
+    if target is None:
+        return None
+    rows = read(here) if rows is None else rows
+    import openpyxl
+    book = openpyxl.Workbook()
+    sheet = book.active
+    sheet.title = SHEET
+    sheet.append([HEADERS[key] for key in KEYS])
+    for row in rows:
+        sheet.append([row.get(key) if row.get(key) not in (None, "") else None for key in KEYS])
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = target.with_name("~" + target.name)
+    try:
+        book.save(temporary)
+        _replace(temporary, target)
+    except OSError as exc:
+        temporary.unlink(missing_ok=True)
+        print(f"positions_store: {here.rel(target)} could not be written ({exc}) -- positions.json is", file=sys.stderr)
+        return None
+    return target
 
 
 def encode(rows):
     """The bytes positions.json holds for `rows` -- the one form the file is ever written in, by `write` and by a renumbering that writes it with the other files it changes (calc/renumbering.py, issue #9)."""
     data = {"schema_version": SCHEMA_VERSION, "format": FORMAT, "positions": [compact(row) for row in rows]}
-    return (json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+    return engine.source_bytes(data)
 
 
 def _replace(source, target, attempts=10):
@@ -260,6 +298,11 @@ def section_of(row):
     return cells if any(cells.values()) else None
 
 
+def section_types(rows):
+    """{position id: its section type} of the positions that state one -- what a position plan's warnings hold a bracing wall's construction mode against (issue #54, domains/plan_centres.py): a position whose section is `clt` drawn in another mode."""
+    return {row["position"]: _text(row.get("section_type")) for row in rows if _text(row.get("section_type"))}
+
+
 def last_section_of_type(rows, type_):
     """The section of the last position of type `type_` that states one -- the section a new element of that type is proposed (issue #9: «par défaut, la section proposée est celle du dernier objet du même type dessiné») --, None where no position of the type states one. `rows` in their order, the positions of the project first and those drawn and not yet saved after them."""
     type_ = _text(type_)
@@ -285,15 +328,7 @@ def types():
 def project_language(here=None, fallback="de"):
     """The language the project's documents are written in -- the `doc-lang` of its config.typ, else the report's own language -- or `fallback` where the project states none (v0.116). What the Positions tab shows a position's type in; the report prints it in the language it is compiled in."""
     import templates
-    here = here or project.current()
-    try:
-        document, report = templates.read_languages(here.report_typ, config=templates.config_for(here.report_typ))
-    except (OSError, ValueError, AttributeError):
-        return fallback
-    for lang in (document, report):
-        if lang in ("de", "fr", "en"):
-            return lang
-    return fallback
+    return templates.project_language(here or project.current(), fallback)
 
 
 def type_label(type_, lang="de"):

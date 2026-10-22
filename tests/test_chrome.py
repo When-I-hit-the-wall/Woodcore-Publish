@@ -218,3 +218,22 @@ def test_the_start_page_s_cards_do_what_its_buttons_did():
     finally:
         for name, method in saved.items():
             setattr(home_page.HomeWindow, name, method)
+
+
+def test_the_frame_follows_the_zoom_and_the_width_kept_stays_at_one_hundred():
+    """Issue #85: the navigation's rows, its width and the mode button grow with the interface's zoom; the width the engineer dragged is kept at 100 % (layout_store), whatever the zoom it was dragged at."""
+    window = _window()
+    import chrome
+    import theme
+    nav = window.nav
+    kept = theme._state["zoom"]
+    try:
+        theme._state["zoom"] = 150   # the state alone: set_zoom would build every window of the suite again
+        entry = next(i for i in range(nav.list.count()) if nav.list.item(i).data(chrome.KIND) == "entry")
+        assert nav.delegate.sizeHint(None, nav.list.model().index(entry, 0)).height() == 48
+        nav._apply_width()
+        assert nav.width() == round(nav.expanded_width * 1.5) or nav.maximumWidth() == round(nav.expanded_width * 1.5)
+        assert nav.expanded_width == chrome.EXPANDED_WIDTH or chrome.MIN_EXPANDED_WIDTH <= nav.expanded_width <= chrome.MAX_EXPANDED_WIDTH
+    finally:
+        theme._state["zoom"] = kept
+        nav._apply_width()

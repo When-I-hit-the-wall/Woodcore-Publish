@@ -12,18 +12,17 @@ Le bois est une matière première naturelle : des nœuds, des poches de rési
 Avec le temps, la surface du bois change : les éléments exposés aux intempéries grisonnent, ce qui ne constitue pas un défaut mais une modification optique ; en intérieur, le bois fonce sous l'effet des UV. Sous l'effet des variations d'humidité de l'air, le bois gonfle et se rétracte, ce qui peut provoquer des fissures isolées dans les éléments linéaires (poteaux, poutres).
 // woodcore:/object p2
 
-// woodcore:object doc-table appearance-classes-table
-#doc-table(
-  columns: (
-    (id: "member", title: [Élément]),
-    (id: "product", title: [Produit]),
-    (id: "class", title: [Classe d'aspect]),
-    (id: "remark", title: [Remarque]),
-  ),
-  hidden: ("remark",),
-  rows: (
-    (member: [[Poteaux et poutres apparents]], product: [Bois massif et lamellé-collé], class: [N : qualité normale (bois de construction)], remark: []),
-    (member: [[Éléments non visibles]], product: [Bois massif et lamellé-collé], class: [I : qualité industrielle, sans exigence d'aspect], remark: []),
+// woodcore:object table appearance-classes-table
+#figure(
+  table(
+    columns: (auto, auto, auto),
+    align: (left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Élément*], [*Produit*], [*Classe d'aspect*]),  // woodcore:hidden 4=[Remarque]
+    table.hline(stroke: 0.5pt),
+    [[Poteaux et poutres apparents]], [Bois massif et lamellé-collé], [N : qualité normale (bois de construction)],  // woodcore:hidden 4=[]
+    [[Éléments non visibles]], [Bois massif et lamellé-collé], [I : qualité industrielle, sans exigence d'aspect],  // woodcore:hidden 4=[]
+    table.hline(stroke: 1pt),
   ),
   caption: [Classes d'aspect par élément],
 )

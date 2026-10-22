@@ -4,26 +4,22 @@
 == Beton
 // woodcore:/object title
 
-// woodcore:object doc-table concrete-table
-#doc-table(
-  columns: (
-    (id: "member", title: [Bauteil]),
-    (id: "class", title: [Festigkeitsklasse]),
-    (id: "fck", title: [Charakteristische Festigkeit $f_"ck"$], unit: "N/mm²", kind: "number"),
-    (id: "fcd", title: [Bemessungswert der Festigkeit $f_"cd"$], unit: "N/mm²", kind: "number"),
-    (id: "taucd", title: [Bemessungswert der Schubspannung $tau_"cd"$], unit: "N/mm²", kind: "number"),
-    (id: "Ecm", title: [Mittlerer Elastizitätsmodul $E_"cm"$], unit: "N/mm²", kind: "number"),
-    (id: "gamma", title: [Raumlast $gamma$], unit: "kN/m³", kind: "number"),
-  ),
-  hidden: ("Ecm",),
-  rows: (
-    (member: [[Bauteil]], class: [C25/30], fck: 25, fcd: [[…]], taucd: [[…]], Ecm: [[…]], gamma: 25),
-    (member: [[Bauteil]], class: [C30/37], fck: 30, fcd: [[…]], taucd: [[…]], Ecm: [[…]], gamma: 25),
+// woodcore:object table concrete-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto, auto),
+    align: (left, left, right, right, right, right),
+    table.hline(stroke: 1pt),
+    table.header([*Bauteil*], [*Festigkeitsklasse*], [*Charakteristische Festigkeit $f_"ck"$*], [*Bemessungswert der Festigkeit $f_"cd"$*], [*Bemessungswert der Schubspannung $tau_"cd"$*], [*Raumlast $gamma$*]),  // woodcore:hidden 6=[Mittlerer Elastizitätsmodul $E_"cm"$]
+    table.hline(stroke: 0.5pt),
+    [[Bauteil]], [C25/30], [25], [[…]], [[…]], [25],  // woodcore:hidden 6=[[…]]
+    [[Bauteil]], [C30/37], [30], [[…]], [[…]], [25],  // woodcore:hidden 6=[[…]]
+    table.hline(stroke: 1pt),
   ),
   caption: [Stahlbeton (SIA 262)],
-  notes: (
-    [Bemessungswerte nach der Norm SIA 262:2025.],
-    [Die Anforderungen an die Dauerhaftigkeit (Expositionsklassen) sind im Abschnitt «Dauerhaftigkeit» festgehalten.],
-  ),
 )
 // woodcore:/object concrete-table
+
+// woodcore:object text concrete-table-notes
+Bemessungswerte nach der Norm SIA 262:2025. Die Anforderungen an die Dauerhaftigkeit (Expositionsklassen) sind im Abschnitt «Dauerhaftigkeit» festgehalten.
+// woodcore:/object concrete-table-notes

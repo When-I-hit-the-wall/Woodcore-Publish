@@ -10,21 +10,41 @@ Qt turns the wheel into a value change on a spin box, a combo box and a slider, 
 ⚠️ **A `QScrollBar` is a `QAbstractSlider`** and must not be caught: it is the scroll bar itself, and eating its wheel would stop the very scrolling this exists to protect. It is the one exclusion, and `tests/test_wheel.py` holds it.
 
 👉 The canvases are untouched: `plan_canvas` and `statics_canvas` handle the wheel themselves, to zoom about the pointer, and neither is a guarded type.
+
+**Ctrl+wheel zooms the interface** (issue #85), and only where nothing under the pointer zooms by itself: over a form, a list or the navigation it is theme's zoom; over a drawing (a QGraphicsView), a code editor (Qt zooms a text edit's font), a Typst page (QPdfView) or any widget whose class says `ZOOMS_ITSELF` -- the document view, the export sheets' page -- it is that widget's own, as before. The widget under the pointer is looked at with its parents, since the wheel reaches the viewport of a scroll area and not the area. A touchpad's fractions of a notch are summed until one is whole.
 """
 
-from PySide6.QtCore import QEvent, QObject, QPointF
+from PySide6.QtCore import QEvent, QObject, QPointF, Qt
 from PySide6.QtGui import QWheelEvent
+from PySide6.QtPdfWidgets import QPdfView
 from PySide6.QtWidgets import (
     QAbstractScrollArea,
     QAbstractSlider,
     QAbstractSpinBox,
     QApplication,
     QComboBox,
+    QGraphicsView,
+    QPlainTextEdit,
     QScrollBar,
+    QTextEdit,
+    QWidget,
 )
 
 # What Qt lets the wheel retype. A QScrollBar is a QAbstractSlider and is excluded below.
 GUARDED = (QAbstractSpinBox, QComboBox, QAbstractSlider)
+
+
+# What zooms by itself under Ctrl+wheel, and keeps it (issue #85): beside these, any class stating ZOOMS_ITSELF = True.
+OWN_ZOOM = (QGraphicsView, QPlainTextEdit, QTextEdit, QPdfView)
+
+
+def zooms_itself(widget):
+    """True where `widget`, or one of its parents, zooms by itself under Ctrl+wheel."""
+    while widget is not None:
+        if isinstance(widget, OWN_ZOOM) or getattr(type(widget), "ZOOMS_ITSELF", False):
+            return True
+        widget = widget.parentWidget()
+    return False
 
 
 def guarded(widget):
@@ -61,13 +81,30 @@ def _forward(event, area):
 class WheelGuard(QObject):
     """Installed on the application: every wheel over a spin box, a combo box or a slider is scrolling, never typing."""
 
+    notches = 0   # a touchpad's fractions of a notch, summed (issue #85)
+
     def eventFilter(self, obj, event):
-        if event.type() != QEvent.Type.Wheel or not guarded(obj):
+        if event.type() != QEvent.Type.Wheel:
+            return False
+        if event.modifiers() & Qt.KeyboardModifier.ControlModifier and isinstance(obj, QWidget) and not zooms_itself(obj):
+            return self._zoom(event)
+        if not guarded(obj):
             return False
         area = scrolling_ancestor(obj)
         if area is not None:
             _forward(event, area)
         return True      # eaten either way: a field with nothing to scroll behind it still must not change
+
+
+    def _zoom(self, event):
+        """Ctrl+wheel over a form, a list or the navigation: the interface zoomed a step a notch (theme.zoom_in / zoom_out). Eaten, so that the widgets under it do not take it as well."""
+        import theme
+        self.notches += event.angleDelta().y()
+        steps = int(self.notches / 120)
+        if steps:
+            self.notches -= steps * 120
+            theme.set_zoom(theme.zoom() + steps * theme.ZOOM_STEP)
+        return True
 
 
 def install(app):

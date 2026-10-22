@@ -66,9 +66,9 @@ def test_order_and_defaults_are_lib_documents_own_signatures():
 
 
 def test_order_and_defaults_of_the_sheet_objects_are_lib_sheets_own_signatures():
-    """The six objects of an export sheet (v0.114) as lib/sheet.typ declares them -- `sheet-page` being the show rule `sheet`, its document left out."""
+    """The page of an export sheet as lib/sheet.typ declares it -- the show rule `sheet`, its document left out. The objects placed on it are written in raw Typst, `#place(…) <sheet-…>`, since the spec 2026-10-21-commandes-typst-refonte (Q-015): their calls are the sheet editor's own (calc/typst_sheet_place.py), no command of lib/sheet.typ."""
     found = to.signatures_in(SHEET_TYP.read_text(encoding="utf-8"))
-    assert set(found) == set(to.SHEET_TYPES), f"lib/sheet.typ defines {sorted(found)}"
+    assert set(found) == {"sheet-page"}, f"lib/sheet.typ defines {sorted(found)}"
     for kind, params in found.items():
         assert tuple(params) == to.ORDER[kind], f"{kind}: lib/sheet.typ's order is {tuple(params)}, ORDER says {to.ORDER[kind]}"
         for name, default in params.items():
@@ -77,21 +77,6 @@ def test_order_and_defaults_of_the_sheet_objects_are_lib_sheets_own_signatures()
 
 def test_the_object_types_are_the_tag_readers_own():
     assert to.OBJECT_TYPES == structure.OBJECT_TYPES
-
-
-def test_the_known_columns_are_lib_documents_own():
-    text = DOCUMENT_TYP.read_text(encoding="utf-8")
-    for kind, name in (("live-load-table", "live-load-columns"), ("dead-load-table", "dead-load-columns")):
-        found = re.search(rf"#let {name} = \(([^)]*)\)", text)
-        assert found, f"lib/document.typ has no {name}"
-        ids = tuple(re.findall(r'"([^"]+)"', found.group(1)))
-        assert ids == to.KNOWN_COLUMNS[kind], f"{name} is {ids}, KNOWN_COLUMNS says {to.KNOWN_COLUMNS[kind]}"
-    for column, unit in to.KNOWN_UNITS.items():
-        assert re.search(rf"\b{column}: \([^)]*unit: \"{unit}\"", text), f"lib/document.typ gives {column} another unit than {unit}"
-    filled = re.search(r'#let live-load-filled = \(([^)]*)\)', text)
-    assert filled and tuple(re.findall(r'"([^"]+)"', filled.group(1))) == to.LIVE_LOAD_FILLED == ("q_k", "Q_k")
-    assert "psi" not in text.split("#let live-load-known")[1].split("/// **The live loads")[0] and "live-load-psi" not in text, "lib/document.typ knows a ψ column of the live loads"
-    assert not hasattr(to, "PSI_COLUMNS") and not hasattr(to.LiveLoadTableModel, "psi_shown") and not hasattr(to.LiveLoadTableModel, "set_psi_shown")
 
 
 # --- the literals -----------------------------------------------------------------------------------
@@ -146,7 +131,7 @@ def test_every_literal_reads_and_writes_back():
 
 
 CONTENT = [
-    "#doc-value(\"g_k\", domain: (\"dead-load\", \"D1\"))",
+    "#var(\"g_k\", domain: (\"dead-load\", \"D1\"))",
     "$q_k$ [kN/m²]",
     "Fassade [außen [Nord]]",
     "a " + BS + "] b",
@@ -154,7 +139,7 @@ CONTENT = [
     "```typ #f(]```",
     "#\"]\"",
     "$[0, 1)$",
-    "#val(\"q_k\", domain: (\"live-load\", \"A1\"), type: \"val\", level: 1)",
+    "#var(\"q_k\", domain: (\"live-load\", \"A1\"), level: 1)",
     "see https://www.sia.ch/[x] now",
     "Zeile 1\nZeile 2",
     "/* ] */ x",
@@ -171,7 +156,7 @@ def test_content_is_read_to_its_own_closing_bracket():
             assert cell == Content(markup), f"{written!r} read as {cell!r}"
             if isinstance(found, dict):
                 assert found["b"] == 1
-        call = Call("doc-field", {"label": Content(markup), "value": 3})
+        call = Call("sheet-text", {"body": Content(markup), "size": Length(12, "pt")})
         _roundtrip(call)
 
 
@@ -214,103 +199,6 @@ def test_same_tells_what_the_canonical_form_tells_apart():
 # --- the canonical form of every command -------------------------------------------------------------
 
 CANONICAL = {
-    "doc-table": """#doc-table(
-  columns: (
-    (id: "part", title: [Bauteil]),
-    (id: "years", title: [Nutzungsdauer], unit: "Jahre", kind: "number"),
-    (id: "remark", title: [Bemerkung], kind: "wide"),
-  ),
-  hidden: ("remark",),
-  rows: (
-    (part: [Tragwerk], years: 50, remark: [SIA 260, Ziffer 2.3.2]),
-    (part: [Fassade [außen]], years: 25.5),
-  ),
-  caption: [Geplante Nutzungsdauer],
-  notes: (
-    [Erste Zeile.],
-    [Zweite Zeile.],
-  ),
-  header: false,
-)""",
-    "live-load-table": """#live-load-table(
-  columns: (
-    (id: "area", title: [Teilbereich]),
-    (id: "use", title: [Nutzung]),
-    (id: "category", title: [Kategorie]),
-    (id: "q_k", title: [$q_k$ [kN/m²]]),
-    (id: "Q_k", title: [$Q_k$ [kN]]),
-  ),
-  hidden: ("area",),
-  rows: (
-    (area: [], use: [Büro], category: "B", q_k: auto, Q_k: auto),
-    (area: [], use: [Archiv], category: "E", q_k: 7.5, Q_k: 7),
-  ),
-)""",
-    "dead-load-table": """#dead-load-table(
-  hidden: ("zone",),
-  rows: (
-    (storey: [EG], buildup: [Unterlagsboden 80 mm], load: 1.6),
-    (storey: [Dach], buildup: [Begrünung], load: [#doc-value("gk_ak_gew", domain: ("dead-load", "EL+AL-Dach mit Wasser"))]),
-  ),
-  caption: [Auflasten],
-  notes: [Ohne das Eigengewicht der tragenden Decke.],
-)""",
-    "doc-field": """#doc-field(
-  label: [Nutzungsdauer],
-  value: 50,
-  unit: "Jahre",
-)""",
-    "doc-checklist": """#doc-checklist(
-  label: [Akzeptierte Risiken],
-  options: (
-    (id: "ground", label: [Baugrundrisiko], checked: true, text: [Die Kostenfolgen gelten als akzeptiertes Risiko.]),
-    (id: "vandalism", label: [Vandalismus], checked: false),
-  ),
-  only-checked: true,
-)""",
-    "doc-choice": """#doc-choice(
-  label: [Nutzungsdauer des Tragwerks (SIA 260, Ziffer 2.3.2)],
-  options: (
-    (id: "replaceable", label: [Austauschbares Bauteil: bis 25 Jahre]),
-    (id: "normal", label: [Gebäude von normaler Bedeutung: 50 Jahre]),
-  ),
-  selected: "normal",
-)""",
-    "doc-image": """#doc-image(
-  file: "Images/profil.png",
-  caption: [Geologisches Profil],
-  width: 40%,
-  placeholder: [Auszug aus dem geotechnischen Bericht],
-)""",
-    "doc-plan": """#doc-plan(
-  plan: "Pavillon",
-  highlight: ("T001", "S001"),
-  detail: true,
-  zoom: 1.5,
-  width: 60%,
-  caption: none,
-)""",
-    "doc-fire-plan": """#doc-fire-plan(
-  plan: "Treppenhaus",
-  legend: false,
-  width: 70%,
-  caption: [Brandschutzplan Regelgeschoss],
-)""",
-    "doc-extract": """#doc-extract(
-  excerpt: "CO1-My",
-  width: 70%,
-  caption: [Biegemomente unter CO1],
-)""",
-    "doc-annexes": """#doc-annexes(
-  heading: 3,
-)""",
-    "doc-signatures": """#doc-signatures(
-  rows: (
-    (group: [Bauherrschaft], role: [Bauherrschaft]),
-    (group: [Projektverfassende], role: [Ingenieur:in], name: [[…]], place: [Bern]),
-  ),
-  place-date: false,
-)""",
     "show-norm-list": """#show-norm-list(
   keys: (
     "SIA 260",
@@ -322,8 +210,16 @@ CANONICAL = {
 )""",
 }
 
+# The parameters of a list of norms as an object of a document writes them -- the objects the tests below take for theirs since the parametric commands of lib/document.typ were written in raw Typst (spec 2026-10-21-commandes-typst-refonte, REQ-019).
+NORMS = """#show-norm-list(
+  keys: (
+    "SIA 260",
+  ),
+  project: "references.bib",
+)"""
+
 # The width rule: an array of plain values that is none of the lists of entries is inline while its line fits, one element per line once it does not.
-LONG_HIGHLIGHT = """#doc-plan(
+LONG_HIGHLIGHT = """#sheet-viewport(
   plan: "Pavillon",
   highlight: (
     "T001",
@@ -344,7 +240,7 @@ LONG_HIGHLIGHT = """#doc-plan(
 
 def test_every_command_has_a_canonical_form_read_back_to_the_byte():
     assert set(CANONICAL) == set(to.CALL_TYPES)
-    for kind, text in list(CANONICAL.items()) + [("doc-plan", LONG_HIGHLIGHT)]:
+    for kind, text in list(CANONICAL.items()) + [("show-norm-list", NORMS), ("sheet-viewport", LONG_HIGHLIGHT)]:
         call = to.parse_call(text)
         assert call.type == kind
         assert to.serialize(call) == text, f"{kind}: written back as\n{to.serialize(call)}"
@@ -353,67 +249,66 @@ def test_every_command_has_a_canonical_form_read_back_to_the_byte():
 
 
 def test_a_call_with_no_argument_and_the_defaults_of_every_type():
-    assert to.serialize(Call("doc-image", {})) == "#doc-image()"
-    assert to.parse_call("#doc-image()").args == {}
+    assert to.serialize(Call("show-norm-list", {})) == "#show-norm-list()"
+    assert to.parse_call("#show-norm-list()").args == {}
     # a list of entries is one per line however short, a list of ids inline while it fits, an empty one always inline
     assert to.serialize(Call("show-norm-list", {"keys": ["SIA 260"]})) == '#show-norm-list(\n  keys: (\n    "SIA 260",\n  ),\n)'
-    assert to.serialize(Call("doc-table", {"hidden": ["a"], "notes": []})) == '#doc-table(\n  hidden: ("a",),\n  notes: (),\n)'
+    assert to.serialize(Call("sheet-viewport", {"highlight": ["a"]})) == '#sheet-viewport(\n  highlight: ("a",),\n)'
+    assert to.serialize(Call("show-norm-list", {"keys": []})) == '#show-norm-list(\n  keys: (),\n)'
     for kind in to.CALL_TYPES:
         _roundtrip(to.default_call(kind))
         _model_roundtrip(to.model_for(to.default_call(kind)))
 
 
 def test_an_argument_the_command_does_not_take_is_left_out():
-    call = to.parse_call('#doc-field(label: [X], colour: "red")')
+    call = to.parse_call('#show-norm-list(project: "x.bib", colour: "red")')
     assert call.unknown() == ["colour"]
     assert "colour" not in to.serialize(call)
-    assert to.serialize(to.model_for(call).to_call()) == "#doc-field(\n  label: [X],\n)"
+    assert to.serialize(to.model_for(call).to_call()) == '#show-norm-list(\n  project: "x.bib",\n)'
 
 
 # --- the three states ----------------------------------------------------------------------------------
 
 HAND_EDITED = [
     # a comment
-    '#doc-field(\n  label: [Nutzungsdauer], // SIA 260\n  value: 50,\n  unit: "Jahre",\n)',
+    '#show-norm-list(\n  keys: (\n    "SIA 260", // the base\n  ),\n  project: "references.bib",\n)',
     # the arguments out of order
-    '#doc-field(\n  value: 50,\n  label: [Nutzungsdauer],\n  unit: "Jahre",\n)',
+    '#show-norm-list(\n  project: "references.bib",\n  keys: (\n    "SIA 260",\n  ),\n)',
     # on one line
-    '#doc-field(label: [Nutzungsdauer], value: 50, unit: "Jahre")',
+    '#show-norm-list(keys: ("SIA 260",), project: "references.bib")',
     # no trailing comma
-    '#doc-field(\n  label: [Nutzungsdauer],\n  value: 50,\n  unit: "Jahre"\n)',
+    '#show-norm-list(\n  keys: (\n    "SIA 260",\n  ),\n  project: "references.bib"\n)',
     # a blank line before the call
-    '\n#doc-field(\n  label: [Nutzungsdauer],\n  value: 50,\n  unit: "Jahre",\n)',
+    '\n#show-norm-list(\n  keys: (\n    "SIA 260",\n  ),\n  project: "references.bib",\n)',
     # a number written otherwise
-    '#doc-field(\n  label: [Nutzungsdauer],\n  value: 5e1,\n  unit: "Jahre",\n)',
-    # a row broken over two lines
-    '#doc-signatures(\n  rows: (\n    (group: [Bauherrschaft],\n     role: [Bauherrschaft]),\n  ),\n)',
-    # an array of dictionaries inline
-    '#doc-choice(\n  options: ((id: "i", label: [BWK I]), (id: "ii", label: [BWK II])),\n  selected: "ii",\n)',
+    '#show-norm-list(\n  level: 2e0,\n)',
+    # a list of entries inline
+    '#show-norm-list(\n  keys: ("SIA 260", "SIA 261"),\n)',
     # an argument the command does not take
-    '#doc-field(\n  label: [X],\n  colour: "red",\n)',
+    '#show-norm-list(\n  keys: (),\n  colour: "red",\n)',
     # a value in parentheses
-    '#doc-plan(\n  zoom: (2),\n)',
+    '#show-norm-list(\n  level: (2),\n)',
 ]
 
 UNREADABLE = [
-    "",                                                       # no call
-    "Nur Text.",                                              # no call either
-    '#doc-field(label: [X]',                                  # never closed
-    '#doc-field([X])',                                        # a positional argument
-    '#doc-field(label: [X])[Y]',                              # a content block after the call
-    '#doc-field(label: [X])\n#doc-field(label: [Y])',         # two calls
-    '#doc-field(label: [X], label: [Y])',                     # an argument twice
-    '#doc-choice(label: [X])',                                # another command than the tag names
-    '#doc-field (label: [X])',                                # a call is no call with a space before its parenthesis
-    '#doc-field(label: [X // ])',                             # a comment eats the closing bracket
-    '#doc-field(..args)',                                     # a spread
+    "",                                                           # no call
+    "Nur Text.",                                                  # no call either
+    '#show-norm-list(keys: ()',                                   # never closed
+    '#show-norm-list(())',                                        # a positional argument
+    '#show-norm-list(keys: ())[Y]',                               # a content block after the call
+    '#show-norm-list(keys: ())\n#show-norm-list(keys: ())',       # two calls
+    '#show-norm-list(keys: (), keys: ())',                        # an argument twice
+    '#sheet-page(format: "A4")',                                  # another command than the tag names
+    '#show-norm-list (keys: ())',                                 # a call is no call with a space before its parenthesis
+    '#show-norm-list(project: "x.bib" // )',                      # a comment eats the closing parenthesis
+    '#show-norm-list(..args)',                                    # a spread
 ]
 
 
 def test_the_three_states():
-    text = _file(("doc-field", "canonical", CANONICAL["doc-field"]))
+    text = _file(("show-norm-list", "canonical", NORMS))
     (found,) = to.objects(text)
-    assert (found.type, found.id, found.state, found.diff()) == ("doc-field", "canonical", "canonical", "")
+    assert (found.type, found.id, found.state, found.diff()) == ("show-norm-list", "canonical", "canonical", "")
     for body in HAND_EDITED:
         (found,) = to.objects(_file((to.parse_call(body).type, "edited", body)))
         assert found.state == "hand_edited", f"{body!r} is {found.state}"
@@ -422,22 +317,22 @@ def test_the_three_states():
         assert diff.startswith("--- as written\n+++ as Woodcore writes it"), diff
         assert found.canonical == to.serialize(found.call)
     for body in UNREADABLE:
-        (found,) = to.objects(_file(("doc-field", "broken", body)))
+        (found,) = to.objects(_file(("show-norm-list", "broken", body)))
         assert found.state == "unreadable", f"{body!r} is {found.state}"
         assert found.call is None and found.error, found
-        assert found.canonical == to.serialize(to.default_call("doc-field"))
+        assert found.canonical == to.serialize(to.default_call("show-norm-list"))
         assert found.diff()
 
 
 def test_a_parse_error_says_where():
     try:
-        to.parse_call('#doc-table(\n  rows: (\n    (a: [x],\n  ),\n')
+        to.parse_call('#show-norm-list(\n  keys: (\n    "SIA 260",\n  ),\n')
     except to.ParseError as exc:
         assert exc.line >= 1 and exc.column >= 1 and "never closed" in exc.reason, exc
     else:
         raise AssertionError("an unclosed call was read")
     try:
-        to.parse_call("#doc-field(\n  label: [X],\n  [Y],\n)")
+        to.parse_call("#show-norm-list(\n  keys: (),\n  [Y],\n)")
     except to.ParseError as exc:
         assert (exc.line, exc.column) == (3, 3) and "named arguments only" in exc.reason, exc
     else:
@@ -445,7 +340,8 @@ def test_a_parse_error_says_where():
 
 
 def test_objects_are_found_in_order_with_where_they_are():
-    text = _file(("doc-field", "one", CANONICAL["doc-field"]), ("doc-choice", "two", CANONICAL["doc-choice"]))
+    bodies = {"one": NORMS, "two": CANONICAL["show-norm-list"]}
+    text = _file(("show-norm-list", "one", bodies["one"]), ("show-norm-list", "two", bodies["two"]))
     one, two = to.objects(text)
     assert (one.id, two.id) == ("one", "two")
     for found in (one, two):
@@ -453,22 +349,22 @@ def test_objects_are_found_in_order_with_where_they_are():
         assert lines[found.start].startswith(f"// woodcore:object {found.type} {found.id}")
         assert lines[found.end].startswith(f"// woodcore:/object {found.id}")
         begin, finish = found.body_span
-        assert text[begin:finish] == found.body == CANONICAL[found.type]
+        assert text[begin:finish] == found.body == bodies[found.id]
     assert to.find(text, "two") == two and to.find(text, "three") is None
 
 
 def test_an_object_inside_a_shared_block_names_it():
-    text = "Text.\n// woodcore:shared live-loads\n" + _file(("doc-field", "f", CANONICAL["doc-field"]), before="", after="") + "// woodcore:/shared live-loads\n"
+    text = "Text.\n// woodcore:shared live-loads\n" + _file(("show-norm-list", "f", NORMS), before="", after="") + "// woodcore:/shared live-loads\n"
     (found,) = to.objects(text)
     assert found.shared == "live-loads" and found.state == "canonical"
 
 
 def test_a_file_whose_tags_cannot_be_read_is_read_and_not_rewritten():
-    text = _file(("doc-field", "f", CANONICAL["doc-field"])) + "// woodcore:object doc-field g\n#doc-field()\n"
+    text = _file(("show-norm-list", "f", NORMS)) + "// woodcore:object show-norm-list g\n#show-norm-list()\n"
     found, problems = to.scan(text)
     assert [o.id for o in found] == ["f"] and problems
-    for write in (lambda: to.write_object(text, "f", to.default_call("doc-field")),
-                  lambda: to.insert_object(text, 0, "doc-field", "h"),
+    for write in (lambda: to.write_object(text, "f", to.default_call("show-norm-list")),
+                  lambda: to.insert_object(text, 0, "show-norm-list", "h"),
                   lambda: to.remove_object(text, "f")):
         try:
             write()
@@ -486,26 +382,26 @@ def _split_around(text, found):
 
 
 def test_write_object_changes_the_body_and_nothing_else():
-    text = _file(("doc-field", "a", CANONICAL["doc-field"]), ("doc-choice", "b", CANONICAL["doc-choice"]))
+    text = _file(("show-norm-list", "a", NORMS), ("show-norm-list", "b", CANONICAL["show-norm-list"]))
     target = to.find(text, "b")
     model = to.model_for(target.call)
-    model.select("replaceable")
+    model.add_key("SIA 262")
     new = to.write_object(text, "b", model.to_call())
     after = to.find(new, "b")
-    assert after.state == "canonical" and after.call.args["selected"] == "replaceable"
+    assert after.state == "canonical" and "SIA 262" in after.call.args["keys"]
     assert _split_around(new, after) == _split_around(text, target)
     assert to.write_object(new, "b", model.to_call()) == new     # a second write writes the same text
-    assert to.find(new, "a").body == CANONICAL["doc-field"]
+    assert to.find(new, "a").body == NORMS
 
 
 def test_write_object_keeps_a_crlf_file_crlf():
-    lf = _file(("doc-table", "t", CANONICAL["doc-table"]), ("doc-field", "f", CANONICAL["doc-field"]))
+    lf = _file(("show-norm-list", "t", CANONICAL["show-norm-list"]), ("show-norm-list", "f", NORMS))
     crlf = lf.replace("\n", "\r\n")
     found = to.find(crlf, "t")
     assert found.state == "canonical" and "\r\n" in found.body
     model = to.model_for(found.call)
-    model.add_row(values={"part": "Dach", "years": 30})
-    model.hide_column("years")
+    model.add_key("SIA 262")
+    model.add_text("Eigene Grundlage")
     new = to.write_object(crlf, "t", model.to_call())
     assert "\n" not in new.replace("\r\n", ""), "a line ending other than CRLF was written"
     assert _split_around(new, to.find(new, "t")) == _split_around(crlf, found)
@@ -514,29 +410,29 @@ def test_write_object_keeps_a_crlf_file_crlf():
 
 
 def test_a_file_with_mixed_line_endings_keeps_each_one():
-    text = "Kopf\r\n" + _file(("doc-field", "f", CANONICAL["doc-field"]), before="", after="Fuss\n")
-    new = to.write_object(text, "f", Call("doc-field", {"label": Content("Neu")}))
-    assert new.startswith("Kopf\r\n// woodcore:object doc-field f\n#doc-field(\n  label: [Neu],\n)\n// woodcore:/object f\nFuss\n")
+    text = "Kopf\r\n" + _file(("show-norm-list", "f", NORMS), before="", after="Fuss\n")
+    new = to.write_object(text, "f", Call("show-norm-list", {"project": "neu.bib"}))
+    assert new.startswith('Kopf\r\n// woodcore:object show-norm-list f\n#show-norm-list(\n  project: "neu.bib",\n)\n// woodcore:/object f\nFuss\n')
 
 
 def test_an_object_with_no_body_is_given_one():
-    text = "A\n// woodcore:object doc-image pic\n// woodcore:/object pic\nB\n"
+    text = "A\n// woodcore:object show-norm-list pic\n// woodcore:/object pic\nB\n"
     (found,) = to.objects(text)
     assert found.body == "" and found.state == "unreadable"
-    new = to.write_object(text, "pic", to.default_call("doc-image"), force=True)
-    assert new == "A\n// woodcore:object doc-image pic\n#doc-image()\n// woodcore:/object pic\nB\n"
+    new = to.write_object(text, "pic", to.default_call("show-norm-list"), force=True)
+    assert new == "A\n// woodcore:object show-norm-list pic\n#show-norm-list(\n  keys: (),\n)\n// woodcore:/object pic\nB\n"
 
 
 def test_write_object_refuses_what_it_must():
-    text = _file(("doc-field", "hand", HAND_EDITED[0]), ("doc-field", "broken", UNREADABLE[2]), ("doc-field", "fine", CANONICAL["doc-field"]))
-    good = Call("doc-field", {"label": Content("X")})
+    text = _file(("show-norm-list", "hand", HAND_EDITED[0]), ("show-norm-list", "broken", UNREADABLE[2]), ("show-norm-list", "fine", NORMS))
+    good = Call("show-norm-list", {"project": "x.bib"})
     refusals = [
         ("hand_edited", lambda: to.write_object(text, "hand", good)),
         ("unreadable", lambda: to.write_object(text, "broken", good)),
         ("no_such_object", lambda: to.write_object(text, "nothing", good)),
-        ("type_mismatch", lambda: to.write_object(text, "fine", Call("doc-choice", {}))),
-        ("changed", lambda: to.write_object(text, "fine", good, expected="#doc-field()")),
-        ("tag_in_body", lambda: to.write_object(text, "fine", Call("doc-field", {"label": Content("x\n// woodcore:/object fine\ny")}))),
+        ("type_mismatch", lambda: to.write_object(text, "fine", Call("sheet-page", {}))),
+        ("changed", lambda: to.write_object(text, "fine", good, expected="#show-norm-list()")),
+        ("tag_in_body", lambda: to.write_object(text, "fine", Call("show-norm-list", {"keys": [Content("x\n// woodcore:/object fine\ny")]}))),
         ("not_written", lambda: to.write_object(text, "fine", {"label": "x"})),
     ]
     for code, write in refusals:
@@ -550,42 +446,42 @@ def test_write_object_refuses_what_it_must():
             raise AssertionError(f"{code}: written")
     # the warning said, the engineer's version is overwritten -- a hand-edited one in Woodcore's form, an unreadable one by the defaults
     forced = to.write_object(text, "hand", to.find(text, "hand").call, force=True)
-    assert to.find(forced, "hand").body == CANONICAL["doc-field"]
+    assert to.find(forced, "hand").body == NORMS
     forced = to.write_object(text, "broken", to.find(text, "broken").replacement(), force=True)
-    assert to.find(forced, "broken").body == to.serialize(to.default_call("doc-field"))
-    assert to.write_object(text, "fine", good, expected=CANONICAL["doc-field"].replace("\n", "\r\n"))
+    assert to.find(forced, "broken").body == to.serialize(to.default_call("show-norm-list"))
+    assert to.write_object(text, "fine", good, expected=NORMS.replace("\n", "\r\n"))
 
 
 # --- inserting and removing -----------------------------------------------------------------------------
 
 def test_insert_object_puts_its_three_parts_where_it_is_told():
     text = "#import \"/commands.typ\": *\n\n= Titel\n\nText."       # no line ending at the end
-    new = to.insert_object(text, 4, "doc-field", "f", Call("doc-field", {"label": Content("A")}))
-    assert new == text + "\n// woodcore:object doc-field f\n#doc-field(\n  label: [A],\n)\n// woodcore:/object f\n"
+    new = to.insert_object(text, 4, "show-norm-list", "f", Call("show-norm-list", {"project": "a.bib"}))
+    assert new == text + '\n// woodcore:object show-norm-list f\n#show-norm-list(\n  project: "a.bib",\n)\n// woodcore:/object f\n'
     first = to.insert_object(new, -1, "show-norm-list", "norms")
     assert first.startswith("// woodcore:object show-norm-list norms\n#show-norm-list(\n  keys: (),\n)\n// woodcore:/object norms\n#import")
-    middle = to.insert_object(first, 7, "doc-table", "t")
+    middle = to.insert_object(first, 7, "show-norm-list", "t")
     assert [(o.id, o.state) for o in to.objects(middle)] == [("norms", "canonical"), ("t", "canonical"), ("f", "canonical")]
-    crlf = to.insert_object(text.replace("\n", "\r\n"), 2, "doc-image", "pic")
-    assert "\r\n// woodcore:object doc-image pic\r\n#doc-image()\r\n// woodcore:/object pic\r\n" in crlf
+    crlf = to.insert_object(text.replace("\n", "\r\n"), 2, "show-norm-list", "pic")
+    assert "\r\n// woodcore:object show-norm-list pic\r\n#show-norm-list(\r\n  keys: (),\r\n)\r\n// woodcore:/object pic\r\n" in crlf
     # and taken out again, the file is what it was
     assert to.remove_object(to.remove_object(middle, "t"), "norms") == new
     assert to.remove_object(crlf, "pic") == text.replace("\n", "\r\n")
 
 
 def test_insert_object_refuses_what_it_must():
-    text = _file(("doc-field", "f", CANONICAL["doc-field"])) + "// woodcore:structure -- x\n#include \"a.typ\"\n// woodcore:/structure\n"
+    text = _file(("show-norm-list", "f", NORMS)) + "// woodcore:structure -- x\n#include \"a.typ\"\n// woodcore:/structure\n"
     start = to.find(text, "f").start
     refusals = [
-        ("id_exists", lambda: to.insert_object(text, 0, "doc-field", "f")),
-        ("bad_id", lambda: to.insert_object(text, 0, "doc-field", "Bad_Id")),
+        ("id_exists", lambda: to.insert_object(text, 0, "show-norm-list", "f")),
+        ("bad_id", lambda: to.insert_object(text, 0, "show-norm-list", "Bad_Id")),
         ("bad_type", lambda: to.insert_object(text, 0, "doc-thing", "x")),
-        ("type_mismatch", lambda: to.insert_object(text, 0, "doc-field", "x", Call("doc-choice", {}))),
-        ("inside_block", lambda: to.insert_object(text, start, "doc-field", "x")),
-        ("inside_block", lambda: to.insert_object(text, start + 3, "doc-field", "x")),
-        ("inside_block", lambda: to.insert_object(text, len(text.splitlines()) - 2, "doc-field", "x")),
-        ("bad_line", lambda: to.insert_object(text, 999, "doc-field", "x")),
-        ("bad_line", lambda: to.insert_object(text, -2, "doc-field", "x")),
+        ("type_mismatch", lambda: to.insert_object(text, 0, "show-norm-list", "x", Call("sheet-page", {}))),
+        ("inside_block", lambda: to.insert_object(text, start, "show-norm-list", "x")),
+        ("inside_block", lambda: to.insert_object(text, start + 3, "show-norm-list", "x")),
+        ("inside_block", lambda: to.insert_object(text, len(text.splitlines()) - 2, "show-norm-list", "x")),
+        ("bad_line", lambda: to.insert_object(text, 999, "show-norm-list", "x")),
+        ("bad_line", lambda: to.insert_object(text, -2, "show-norm-list", "x")),
     ]
     for code, write in refusals:
         try:
@@ -595,283 +491,24 @@ def test_insert_object_refuses_what_it_must():
         else:
             raise AssertionError(f"{code}: inserted")
     end = to.find(text, "f").end
-    assert to.find(to.insert_object(text, end, "doc-field", "g"), "g").state == "canonical"   # right after an object's closing tag is outside it
+    assert to.find(to.insert_object(text, end, "show-norm-list", "g"), "g").state == "canonical"   # right after an object's closing tag is outside it
 
 
 def test_free_id():
-    text = _file(("doc-table", "table", CANONICAL["doc-table"]), ("doc-table", "table-2", CANONICAL["doc-table"]))
+    text = _file(("show-norm-list", "table", NORMS), ("show-norm-list", "table-2", NORMS))
     assert to.free_id(text, "table") == "table-3"
     assert to.free_id(text, "live-loads") == "live-loads"
 
 
 # --- the editors' models --------------------------------------------------------------------------
 
-def test_a_table_model_edits_rows_columns_and_cells():
-    model = to.model_for(to.parse_call(CANONICAL["doc-table"]))
-    assert [c.id for c in model.columns] == ["part", "years", "remark"]
-    assert model.hidden == ["remark"] and model.row_count == 2
-    steps = [
-        lambda: model.add_row(values={"part": "Keller", "years": 80}),
-        lambda: model.add_row(0, {"remark": "Oben *fett*"}),
-        lambda: model.move_row(0, -1),
-        lambda: model.remove_row(1),
-        lambda: model.add_column("material", title="Material", index=1),
-        lambda: model.set_cell(0, "material", "Holz [BSH]"),
-        lambda: model.set_cell(1, "material", Content("$f_(m,k)$")),
-        lambda: model.set_cell(2, "years", 12.5),
-        lambda: model.set_cell(2, "remark", None),
-        lambda: model.clear_cell(2, "remark"),
-        lambda: model.move_column("material", 0),
-        lambda: model.set_column("years", unit="a", kind="text"),
-        lambda: model.set_column("years", unit=None),
-        lambda: model.hide_column("material"),
-        lambda: model.show_column("remark"),
-        lambda: model.remove_column("years"),
-        lambda: model.set_caption("Neu"),
-        lambda: model.set_notes(["Eins", "Zwei"]),
-        lambda: model.set_header(True),
-    ]
-    for step in steps:
-        step()
-        _model_roundtrip(model)
-    assert [c.id for c in model.columns] == ["material", "part", "remark"]
-    assert model.hidden == ["material"]
-    rows = model.rows
-    assert rows[0] == {"material": Content("Holz [BSH]"), "part": Content("Tragwerk"), "remark": Content("SIA 260, Ziffer 2.3.2")}
-    assert all("years" not in r for r in rows)
-    assert model.cell(1, "part") == Content("Keller") and model.cell(2, "remark") is None
-    text = model.serialize()
-    assert '(part: [Tragwerk], material: [Holz [BSH]], remark: [SIA 260, Ziffer 2.3.2]),' in text   # a new cell took its column's place when it was set, and keeps it
-    assert "header: true," in text        # present in the call, kept although it is the default now
-
-
-def test_a_table_model_refuses_what_the_command_would():
-    model = to.model_for(to.parse_call(CANONICAL["doc-table"]))
-    refusals = [
-        ("id_exists", lambda: model.add_column("part", title="X")),
-        ("bad_id", lambda: model.add_column("1x", title="X")),
-        ("bad_id", lambda: model.add_column("none", title="X")),
-        ("no_title", lambda: model.add_column("zone")),
-        ("no_column", lambda: model.set_cell(0, "nothing", "x")),
-        ("no_auto", lambda: model.set_cell(0, "part", AUTO)),
-        ("bad_value", lambda: model.set_cell(0, "part", "unbalanced ]")),
-        ("bad_value", lambda: model.set_cell(0, "part", True)),
-        ("bad_index", lambda: model.remove_row(7)),
-        ("bad_value", lambda: model.set_column("part", kind="huge")),
-    ]
-    for code, step in refusals:
-        try:
-            step()
-        except to.ModelError as exc:
-            assert exc.code == code, f"{code}: refused as {exc.code}: {exc}"
-        else:
-            raise AssertionError(f"{code}: done")
-    assert model.serialize() == CANONICAL["doc-table"], "a refused operation changed the model"
-
-
-def test_the_live_load_table_model():
-    model = to.model_for(to.default_call("live-load-table"))
-    assert isinstance(model, to.LiveLoadTableModel)
-    assert [c.id for c in model.columns] == list(to.KNOWN_COLUMNS["live-load-table"]) and all(c.known for c in model.columns)
-    assert model.hidden == [], "nothing is hidden by default: there is no ψ column to hide"
-    # the engineer's own example: the first column hidden, a use written, a category picked -- q_k and Q_k then follow it
-    model.hide_column("zone")
-    model.add_row()
-    model.set_cell(0, "use", "Büro")
-    model.set_category(0, "B")
-    assert model.cell(0, "q_k") is AUTO and not model.is_override(0, "q_k")
-    text = _model_roundtrip(model)
-    assert text == """#live-load-table(
-  hidden: ("zone",),
-  rows: (
-    (use: [Büro], category: "B"),
-  ),
-)""", text
-    model.override(0, "q_k", 5)
-    assert model.is_override(0, "q_k") and '(use: [Büro], category: "B", q_k: 5),' in _model_roundtrip(model)
-    model.clear_override(0, "q_k")
-    assert model.cell(0, "q_k") is AUTO and "q_k: auto" in _model_roundtrip(model)
-    assert model.hidden == ["zone"] and "columns" not in model.to_call().args     # auto columns kept
-    model.set_category(0, None)
-    assert "category" not in model.rows[0]
-    for code, step in (("not_filled", lambda: model.override(0, "use", 3)), ("bad_value", lambda: model.override(0, "q_k", "3")),
-                       ("bad_value", lambda: model.set_cell(0, "category", Content("B")))):
-        try:
-            step()
-        except to.ModelError as exc:
-            assert exc.code == code, exc
-        else:
-            raise AssertionError(code)
-
-
-def test_a_live_load_table_has_no_psi_column_to_add_and_its_own_columns_move_freely():
-    model = to.model_for(to.parse_call("""#live-load-table(
-  columns: (
-    (id: "use", title: [Nutzung]),
-    (id: "category"),
-    (id: "q_k"),
-    (id: "Q_k"),
-  ),
-  hidden: (),
-  rows: (
-    (use: [Wohnen], category: "A1", q_k: auto, Q_k: auto),
-  ),
-)"""))
-    for column in ("psi_0", "psi_1", "psi_2"):
-        try:
-            model.add_column(column)
-        except to.ModelError as exc:
-            assert exc.code == "no_title", exc
-        else:
-            raise AssertionError(f"{column} is a known column")
-        try:
-            model.override(0, column, 0.7)
-        except to.ModelError as exc:
-            assert exc.code == "not_filled", exc
-        else:
-            raise AssertionError(f"{column} is filled from the category")
-    model.add_column("psi_0", title="$psi_0$", kind="math")     # a column of the engineer's own, with a title of its own, is his to add
-    model.remove_column("psi_0")
-    model.move_column("use", 3)
-    model.add_column("storey", index=0)
-    assert [c.id for c in model.columns] == ["storey", "category", "q_k", "Q_k", "use"]
-    _model_roundtrip(model)
-
-
-def test_the_plan_example_of_the_live_loads_round_trips():
-    model = to.model_for(to.parse_call(CANONICAL["live-load-table"]))
-    assert model.is_override(1, "q_k") and model.cell(1, "Q_k") == 7 and model.cell(0, "q_k") is AUTO
-    assert model.serialize() == CANONICAL["live-load-table"]
-
-
-def test_a_dead_load_cell_takes_a_value_of_the_variables_tab():
-    model = to.model_for(to.default_call("dead-load-table"))
-    model.add_row(values={"storey": "EG", "load": 1.6})
-    model.add_row(values={"storey": "Dach", "load": to.variable_cell("gk_ak_gew", ("dead-load", "EL+AL-Dach mit Wasser"))})
-    model.add_row(values={"storey": "OG", "load": to.variable_cell("g_k")})
-    text = _model_roundtrip(model)
-    assert '(storey: [Dach], load: [#doc-value("gk_ak_gew", domain: ("dead-load", "EL+AL-Dach mit Wasser"))]),' in text
-    assert '(storey: [OG], load: [#doc-value("g_k")]),' in text
-    assert to.variable_cell("F", "Ende") == Content('#doc-value("F", domain: "Ende")')
-    try:
-        model.set_cell(0, "load", AUTO)
-    except to.ModelError as exc:
-        assert exc.code == "no_auto"
-    else:
-        raise AssertionError("auto was written into a dead-load cell")
-
-
-def test_the_choice_and_checklist_models():
-    choice = to.model_for(to.parse_call(CANONICAL["doc-choice"]))
-    for step in (lambda: choice.add_option("major", "Übergeordnet: 100 Jahre"), lambda: choice.select("major"),
-                 lambda: choice.move_option("major", 0), lambda: choice.set_option_label("normal", "Normal"),
-                 lambda: choice.set_other("Eigene *Antwort*"), lambda: choice.set_only_selected(True),
-                 lambda: choice.select("replaceable"), lambda: choice.remove_option("replaceable"), lambda: choice.set_label(None)):
-        step()
-        _model_roundtrip(choice)
-    assert choice.option_ids() == ["major", "normal"] and choice.selected is None and choice.other is None
-    assert choice.to_call().args["label"] is None and choice.only_selected is True     # present in the call, kept as none
-    for code, step in (("no_option", lambda: choice.select("gone")), ("id_exists", lambda: choice.add_option("major", "X"))):
-        try:
-            step()
-        except to.ModelError as exc:
-            assert exc.code == code
-        else:
-            raise AssertionError(code)
-    checklist = to.model_for(to.parse_call(CANONICAL["doc-checklist"]))
-    for step in (lambda: checklist.add_option("fire", "Brand", checked=True, text="Nach VKF."), lambda: checklist.set_checked("vandalism"),
-                 lambda: checklist.set_option_text("vandalism", "Nicht bemessen."), lambda: checklist.set_option_text("ground", None),
-                 lambda: checklist.move_option("fire", 0), lambda: checklist.remove_option("ground"), lambda: checklist.set_only_checked(False)):
-        step()
-        _model_roundtrip(checklist)
-    assert checklist.option_ids() == ["fire", "vandalism"] and checklist.is_checked("vandalism")
-    assert checklist.options[1] == {"id": "vandalism", "label": Content("Vandalismus"), "checked": True, "text": Content("Nicht bemessen.")}
-
-
-def test_the_signatures_norm_list_field_image_and_plan_models():
-    signatures = to.model_for(to.parse_call(CANONICAL["doc-signatures"]))
-    for step in (lambda: signatures.add_row(role="Architekt:in", group="Projektverfassende"), lambda: signatures.set_field(0, "name", "M. Muster"),
-                 lambda: signatures.set_field(1, "place", None), lambda: signatures.move_row(2, 1), lambda: signatures.remove_row(0),
-                 lambda: signatures.set_place_date(True)):
-        step()
-        _model_roundtrip(signatures)
-    assert signatures.rows == [{"group": Content("Projektverfassende"), "role": Content("Architekt:in")},
-                               {"group": Content("Projektverfassende"), "role": Content("Ingenieur:in"), "name": Content(to.PLACEHOLDER)}]
-    norms = to.model_for(to.parse_call(CANONICAL["show-norm-list"]))
-    for step in (lambda: norms.select("SIA 263"), lambda: norms.select("SIA 261", False), lambda: norms.add_text("Eigene Zeile", 0),
-                 lambda: norms.move(0, -1), lambda: norms.add_key("VKF 14-15", 1), lambda: norms.remove(0), lambda: norms.set_project(None)):
-        step()
-        _model_roundtrip(norms)
-    assert norms.keys == ["VKF 14-15", "SIA 265", Content("Lärmschutz-Verordnung (LSV)"), "SIA 263", Content("Eigene Zeile")]
-    assert "project" in norms.to_call().args      # present in the call, kept at its default
-    field = to.model_for(to.parse_call(CANONICAL["doc-field"]))
-    for step in (lambda: field.set_value("[…] offen"), lambda: field.set_value(-2.5), lambda: field.set_unit(None), lambda: field.set_label("Wert")):
-        step()
-        _model_roundtrip(field)
-    image = to.model_for(to.default_call("doc-image"))
-    for step in (lambda: image.set_file("Images/a.png"), lambda: image.set_width("60%"), lambda: image.set_caption("Bild"),
-                 lambda: image.set_placeholder(None), lambda: image.set_width(Expr("50% + 1cm")), lambda: image.set_width("100%")):
-        step()
-        _model_roundtrip(image)
-    assert image.serialize() == '#doc-image(\n  file: "Images/a.png",\n  caption: [Bild],\n)'     # back to the default, not written
-    plan = to.model_for(to.parse_call(CANONICAL["doc-plan"]))
-    for step in (lambda: plan.set_plan("Fluchttreppe"), lambda: plan.set_highlight("T001"), lambda: plan.set_zoom(2),
-                 lambda: plan.set_axes(False), lambda: plan.set_legend(False), lambda: plan.set_scale_bar(False),
-                 lambda: plan.set_caption(AUTO), lambda: plan.set_detail(False), lambda: plan.set_highlight(["T001", "T002"])):
-        step()
-        _model_roundtrip(plan)
-    assert plan.serialize().splitlines()[1:] == ['  plan: "Fluchttreppe",', '  highlight: ("T001", "T002"),', "  detail: false,", "  zoom: 2,",
-                                                 "  axes: false,", "  legend: false,", "  scale-bar: false,", "  width: 60%,", "  caption: auto,", ")"]
-
-
-def test_the_fire_plan_object_and_the_two_fire_objects_of_a_sheet_have_their_models():
-    """`doc-fire-plan`, `sheet-fire-viewport` and `sheet-fire-legend` (v0.115): the models of a document's fire plan and of a sheet's fire viewport and legend, each written back to the call it was read from, a viewport with one size at a time."""
-    fire = to.model_for(to.parse_call(CANONICAL["doc-fire-plan"]))
-    for step in (lambda: fire.set_plan("Pavillon-EG"), lambda: fire.set_legend(True), lambda: fire.set_scale_bar(False),
-                 lambda: fire.set_caption(AUTO), lambda: fire.set_width("100%")):
-        step()
-        _model_roundtrip(fire)
-    # an argument the call had stays written, even set back to its default (the model's rule)
-    assert fire.serialize() == '#doc-fire-plan(\n  plan: "Pavillon-EG",\n  legend: true,\n  scale-bar: false,\n  width: 100%,\n  caption: auto,\n)'
-    assert to.model_for(to.default_call("doc-fire-plan")).serialize() == "#doc-fire-plan()"
-    viewport = to.model_for(to.default_call("sheet-fire-viewport"))
-    viewport.set_plan("Treppenhaus")
-    viewport.set_scale(100)
-    viewport.set_legend(False)
-    _model_roundtrip(viewport)
-    viewport.set_width(120)
-    assert viewport.get("scale") is None and viewport.get("width") == to.Length(120, "mm"), "a drawing has one size"
-    assert viewport.serialize().splitlines()[1:] == ['  plan: "Treppenhaus",', "  x: 20mm,", "  y: 40mm,", "  width: 120mm,", "  legend: false,", ")"]
-    legend = to.model_for(to.default_call("sheet-fire-legend"))
-    legend.set_width(90)
-    legend.set_plans("Treppenhaus")
-    legend.move_to(250, 30)
-    _model_roundtrip(legend)
-    assert legend.serialize().splitlines()[1:] == ['  plans: "Treppenhaus",', "  x: 250mm,", "  y: 30mm,", "  width: 90mm,", ")"]
-    for kind in ("sheet-fire-viewport", "sheet-fire-legend", "doc-fire-plan"):
-        assert kind in to.OBJECT_TYPES and kind in structure.OBJECT_TYPES
-
-
-def test_a_model_keeps_an_expression_it_does_not_edit_and_refuses_one_it_would():
-    model = to.model_for(to.parse_call('#doc-image(\n  file: "a.png",\n  width: 50% + 1cm,\n)'))
-    model.set_caption("Bild")
-    assert "  width: 50% + 1cm," in _model_roundtrip(model)
-    for body in ("#doc-table(\n  rows: my-rows,\n)", '#doc-checklist(\n  options: (my-option,),\n)', "#show-norm-list(\n  keys: my-keys,\n)"):
-        try:
-            to.model_for(to.parse_call(body))
-        except to.ModelError as exc:
-            assert exc.code == "not_editable", exc
-        else:
-            raise AssertionError(f"{body!r} was taken for editable")
-
-
 def test_a_model_of_the_wrong_type_is_refused():
     try:
-        to.TableModel(to.default_call("doc-field"))
+        to.ViewportModel(to.default_call("show-norm-list"))
     except to.ModelError as exc:
         assert exc.code == "wrong_type"
     else:
-        raise AssertionError("a field was edited as a table")
+        raise AssertionError("a list of norms was edited as a viewport")
 
 
 # --- a heading and a paragraph are objects too -------------------------------------------------------------
@@ -887,10 +524,11 @@ def _one(kind, body):
 
 
 def test_a_heading_and_a_paragraph_are_objects_the_tag_reader_knows():
-    assert to.MARKUP_TYPES == ("heading", "text") and to.DOCUMENT_TYPES == to.CALL_TYPES + to.MARKUP_TYPES
+    # a table written in raw Typst is a markup object too since the spec 2026-10-21-commandes-typst-refonte (ARCH-004)
+    assert to.MARKUP_TYPES == ("heading", "text", "table") and to.DOCUMENT_TYPES == to.CALL_TYPES + to.MARKUP_TYPES
     # a document's objects, then an export sheet's (lib/sheet.typ, v0.114), which a section does not hold
     assert to.OBJECT_TYPES == to.DOCUMENT_TYPES + to.SHEET_TYPES
-    assert structure.OBJECT_TYPES[len(to.CALL_TYPES):len(to.DOCUMENT_TYPES)] == ("heading", "text")
+    assert structure.OBJECT_TYPES[len(to.CALL_TYPES):len(to.DOCUMENT_TYPES)] == ("heading", "text", "table")
     text = "// woodcore:object heading title\n= Titel\n// woodcore:/object title\n\n// woodcore:object text p1\nEin Absatz.\n// woodcore:/object p1\n"
     blocks, problems = structure.pair_tags(text)
     assert not problems and [(b.type, b.id) for b in blocks] == [("heading", "title"), ("text", "p1")]
@@ -903,7 +541,7 @@ def test_a_heading_and_a_paragraph_are_objects_the_tag_reader_knows():
             raise AssertionError(f"{kind} has a call")
     assert to.default_body("heading") == "= " + to.PLACEHOLDER and to.default_body("text") == to.PLACEHOLDER
     try:
-        to.default_body("doc-field")
+        to.default_body("show-norm-list")
     except to.ObjectError as exc:
         assert exc.code == "bad_type", exc
     else:
@@ -1006,14 +644,14 @@ def test_write_object_writes_a_heading_and_a_paragraph_from_a_string_or_a_model(
     assert to.find(new, "p1").written == "Zeile eins\nZeile zwei" and to.find(new, "title").body == "= Alt"
     assert new.endswith("\nSchluss.\n") and new.startswith(text[:to.find(text, "p1").body_span[0]])
     # a body that is not what the tag names is refused, and says so
-    for call, code in ((to.default_call("doc-field"), "type_mismatch"), ("", "bad_body"), ("kein Titel", "bad_body"), (5, "not_written"), (to.TextModel("x"), "type_mismatch")):
+    for call, code in ((to.default_call("show-norm-list"), "type_mismatch"), ("", "bad_body"), ("kein Titel", "bad_body"), (5, "not_written"), (to.TextModel("x"), "type_mismatch")):
         try:
             to.write_object(text, "title", call)
         except to.ObjectError as exc:
             assert exc.code == code, (call, exc.code, str(exc))
         else:
             raise AssertionError(f"{call!r} was written as a heading")
-    for call, code in (("Eins.\n\nZwei.", "bad_body"), (to.HeadingModel(1, "x"), "type_mismatch"), (to.default_call("doc-field"), "type_mismatch")):
+    for call, code in (("Eins.\n\nZwei.", "bad_body"), (to.HeadingModel(1, "x"), "type_mismatch"), (to.default_call("show-norm-list"), "type_mismatch")):
         try:
             to.write_object(text, "p1", call)
         except to.ObjectError as exc:
@@ -1057,7 +695,7 @@ def test_a_heading_and_a_paragraph_are_inserted_and_removed_like_any_object():
     first = to.insert_object(text, -1, "text", "p9", to.TextModel("Zuerst."))
     assert first.startswith("// woodcore:object text p9\nZuerst.\n// woodcore:/object p9\n#import")
     assert to.remove_object(with_text, "p1") == with_heading and to.remove_object(with_heading, "h2") == text
-    for args, code in (((3, "text", "p1", to.default_call("doc-field")), "type_mismatch"), ((3, "heading", "h2", "Kein Titel"), "bad_body"),
+    for args, code in (((3, "text", "p1", to.default_call("show-norm-list")), "type_mismatch"), ((3, "heading", "h2", "Kein Titel"), "bad_body"),
                        ((3, "text", "t", "Eins.\n\nZwei."), "bad_body"), ((3, "banner", "b"), "bad_type")):
         try:
             to.insert_object(text, *args)
@@ -1072,18 +710,16 @@ def test_an_objects_short_label():
     text = ("// woodcore:object heading title\n== Die *Bemessung* der Träger <bem> // Notiz\n// woodcore:/object title\n"
             "// woodcore:object text p1\nLes charges utiles admissibles dépendent de #cite-norm(norm: \"SIA 261\") et de l'affectation prévue sur le sol de l'étage concerné.\n// woodcore:/object p1\n"
             "// woodcore:object text p2\n#cite-norm(norm: \"SIA 260\")\n// woodcore:/object p2\n"
-            "// woodcore:object doc-table t1\n#doc-table(\n  caption: [Les *documents* de référence],\n)\n// woodcore:/object t1\n"
-            "// woodcore:object doc-field f1\n#doc-field(\n  label: [Nutzungsdauer],\n)\n// woodcore:/object f1\n"
-            "// woodcore:object doc-image i1\n#doc-image(\n  file: \"Images/Profil.png\",\n)\n// woodcore:/object i1\n"
-            "// woodcore:object doc-signatures s1\n#doc-signatures()\n// woodcore:/object s1\n"
+            "// woodcore:object table t1\n#figure(\n  table(columns: 1, [a]),\n  caption: [Les *documents* de référence],\n)\n// woodcore:/object t1\n"
+            "// woodcore:object show-norm-list s1\n#show-norm-list()\n// woodcore:/object s1\n"
             "// woodcore:object text bad\nEins.\n\nZwei.\n// woodcore:/object bad\n")
     found = to.objects(text)
     labels = {o.id: to.object_title(o) for o in found}
     assert labels["title"] == "Die Bemessung der Träger", labels["title"]
     assert labels["p1"].startswith("Les charges utiles admissibles dépendent de et") and labels["p1"].endswith(ELLIPSIS) and len(labels["p1"]) <= 61, labels["p1"]
     assert labels["p2"] == "p2", "a paragraph that is only a call says nothing readable: its id"
-    assert labels["t1"] == "Les documents de référence" and labels["f1"] == "Nutzungsdauer" and labels["i1"] == "Images/Profil.png"
-    assert labels["s1"] == "doc-signatures" and labels["bad"] == "Eins. Zwei."
+    assert labels["t1"] == "Les documents de référence", "a raw table is named by its caption"
+    assert labels["s1"] == "show-norm-list" and labels["bad"] == "Eins. Zwei."
     assert to.object_title(found[1], limit=12) == "Les charges" + ELLIPSIS
 
 
@@ -1213,11 +849,11 @@ def test_tag_file_keeps_the_line_endings_and_a_last_line_with_none():
 
 def test_tag_file_leaves_what_is_tagged_alone_and_tags_the_rest_around_it():
     text = ("#import \"/commands.typ\": *\n\n// woodcore:shared live-loads\n= Charges\n\nAvant.\n\n"
-            "// woodcore:object doc-field f\n#doc-field(\n  label: [Nutzungsdauer],\n)\n// woodcore:/object f\n\n"
+            "// woodcore:object show-norm-list f\n#show-norm-list(\n  project: \"references.bib\",\n)\n// woodcore:/object f\n\n"
             "// woodcore:object text mine\nDéjà balisé.\n// woodcore:/object mine\n\nAprès.\n// woodcore:/shared live-loads\n")
     new = to.tag_file(text)
     found = to.objects(new)
-    assert [(o.type, o.id) for o in found] == [("heading", "charges"), ("text", "avant"), ("doc-field", "f"), ("text", "mine"), ("text", "apres")]
+    assert [(o.type, o.id) for o in found] == [("heading", "charges"), ("text", "avant"), ("show-norm-list", "f"), ("text", "mine"), ("text", "apres")]
     assert all(o.shared == "live-loads" for o in found), "an object tagged inside a shared block is inside it"
     assert not structure.check_tags(new), structure.check_tags(new)
     added = ("// woodcore:object heading charges\n", "// woodcore:/object charges\n", "// woodcore:object text avant\n", "// woodcore:/object avant\n",
@@ -1235,7 +871,7 @@ def test_suggest_id_makes_an_id_of_the_words_and_never_gives_one_twice():
     assert to.suggest_id(text, "text", "Die Bemessung der Träger erfolgt nach SIA 265.") == "die-bemessung-der-trager"
     assert to.suggest_id(text, "text", "Die Bemessung erfolgt.") == "die-bemessung-erfolgt" and to.suggest_id(text, "text", "Die Bemessung") == "die-bemessung-2"
     assert to.suggest_id(text, "heading") == "heading" and to.suggest_id(text, "text") == "text" and to.suggest_id(text, "text", "$x$") == "x"
-    assert to.suggest_id(text, "doc-table") == "doc-table" and to.suggest_id(text + "// woodcore:object doc-table doc-table\n#doc-table()\n// woodcore:/object doc-table\n", "doc-table") == "doc-table-2"
+    assert to.suggest_id(text, "show-norm-list") == "show-norm-list" and to.suggest_id(text + "// woodcore:object show-norm-list show-norm-list\n#show-norm-list()\n// woodcore:/object show-norm-list\n", "show-norm-list") == "show-norm-list-2"
     assert to.suggest_id(text, "heading", "= 2026") == "heading-2026"
     try:
         to.suggest_id(text, "banner")
@@ -1372,26 +1008,13 @@ def test_a_document_compiles_after_its_objects_are_written():
     import project_template
     here = project_template.create(conftest.tmpdir("objects_compile") / "Halle", "Halle")
     section = here.document_dir("cu") / "Sections" / "objects-probe.typ"
-    text = '#import "/commands.typ": *\r\n\r\n= Objekte\r\n\r\nText.\r\n'     # CRLF, as a file saved on Windows
+    import documents
+    text = documents.import_line(here) + '\r\n\r\n= Objekte\r\n\r\nText.\r\n'     # CRLF, as a file saved on Windows -- the project's own import, 000-Typst-Config/ laid out by folders (issue #64)
     for kind in to.CALL_TYPES:
         text = to.insert_object(text, len(to._lines(text)) - 1, kind, to.free_id(text, kind))
     # every object edited through its model and written back
     edits = {
-        "doc-table": lambda m: (m.set_caption("Nutzungsdauer"), m.add_row(values={"a": "Tragwerk", "b": 50})),
-        "live-load-table": lambda m: (m.hide_column("zone"), m.add_row(values={"storey": "EG", "use": "Büro"}), m.set_category(0, "B"),
-                                      m.add_row(values={"use": "Archiv"}), m.set_category(1, "E"), m.override(1, "q_k", 7.5), m.override(1, "Q_k", 7)),
-        "dead-load-table": lambda m: (m.add_row(values={"storey": "OG", "buildup": "Unterlagsboden", "load": 1.6}),
-                                      m.add_row(values={"storey": "Dach", "load": Content('#val("q_k", domain: ("live-load", "A1"), type: "val", level: 1)')})),
-        "doc-field": lambda m: (m.set_label("Nutzungsdauer"), m.set_value(50), m.set_unit("Jahre")),
-        "doc-checklist": lambda m: (m.set_label("Risiken"), m.add_option("ground", "Baugrund", checked=True, text="Akzeptiert.")),
-        "doc-choice": lambda m: (m.add_option("i", "BWK I"), m.add_option("ii", "BWK II"), m.select("ii")),
-        "doc-image": lambda m: (m.set_caption("Profil"), m.set_width("50%")),
-        "doc-plan": lambda m: m.set_caption("Belastungsplan"),
-        "doc-fire-plan": lambda m: (m.set_caption("Brandschutzplan"), m.set_legend(True), m.set_scale_bar(False)),
-        "doc-extract": lambda m: (m.set_caption("Auszug aus dem Rapport"), m.set_width("50%")),
-        "doc-annexes": lambda m: m.set_heading(None),
-        "doc-signatures": lambda m: (m.add_row(group="Bauherrschaft", role="Bauherrschaft"), m.add_row(role="Ingenieur:in")),
-        "show-norm-list": lambda m: (m.select("SIA 260"), m.select("SIA 261"), m.add_text("Eigene Grundlage")),
+        "show-norm-list": lambda m: (m.add_key("SIA 260"), m.add_key("SIA 261"), m.add_text("Eigene Grundlage")),
     }
     for obj in to.objects(text):
         model = to.model_for(obj.call)
@@ -1406,7 +1029,7 @@ def test_a_document_compiles_after_its_objects_are_written():
     assert "\n" not in text.replace("\r\n", "")
     section.write_bytes(text.encode("utf-8"))
     entry = here.typst_root / "objects-probe.typ"
-    entry.write_text('#import "/config.typ": conf\n#import "/commands.typ": *\n#show: conf\n#set-report-language("de")\n'
+    entry.write_text('#import "/000-Typst-Config/config.typ": conf\n#import "/000-Typst-Config/commands.typ": *\n#show: conf\n#set-report-language("de")\n'
                      f'#include "/{section.relative_to(here.typst_root).as_posix()}"\n', encoding="utf-8")
     out = entry.with_suffix(".pdf")
     run = subprocess.run([project.typst_executable(), "compile", "--root", str(here.typst_root), str(entry), str(out)],
@@ -1414,5 +1037,5 @@ def test_a_document_compiles_after_its_objects_are_written():
     assert run.returncode == 0, run.stderr
     from pypdf import PdfReader
     printed = "\n".join(p.extract_text() for p in PdfReader(str(out)).pages)
-    for word in ("Tragwerk", "Büro", "Archiv", "7.5", "Unterlagsboden", "BWK II", "Baugrund", "Profil", "Belastungsplan", "Ingenieur:in", "Eigene Grundlage", "Nutzungsdauer"):
+    for word in ("Eigene Grundlage",):
         assert word in printed, f"{word!r} is not on the page"

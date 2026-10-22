@@ -29,5 +29,5 @@ Was gezeichnet wird, wird in `Woodcore-Datei/` gespeichert und sofort exportiert
 Fast jede Zeile des Fensters bietet den Aufruf an, der sie im Bericht druckt. Ein Doppelklick kopiert ihn, ein Rechtsklick listet alle. Zum Beispiel für eine auf einem Plan gezeichnete Position:
 
 ```typ
-#show-plan("Velo-Unterstand", highlight: "T001", detail: true)
+#figure(image-positions-plan("Velo-Unterstand", highlight: "T001", frame: "highlight"), kind: image, caption: [Velo-Unterstand]) <fig-velo>
 ```

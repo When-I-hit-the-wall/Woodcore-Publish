@@ -4,16 +4,16 @@
 == Tragkonzeptpläne
 // woodcore:/object title
 
-// woodcore:object doc-table concept-drawings-table
-#doc-table(
-  columns: (
-    (id: "no", title: [Plan-Nr.]),
-    (id: "title", title: [Titel]),
-    (id: "status", title: [Stand (Index, Datum)]),
-  ),
-  hidden: (),
-  rows: (
-    (no: [[…]], title: [[Statische Angaben, Untergeschoss]], status: [[…]]),
+// woodcore:object table concept-drawings-table
+#figure(
+  table(
+    columns: (auto, auto, auto),
+    align: (left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Plan-Nr.*], [*Titel*], [*Stand (Index, Datum)*]),
+    table.hline(stroke: 0.5pt),
+    [[…]], [[Statische Angaben, Untergeschoss]], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Tragkonzeptpläne],
 )

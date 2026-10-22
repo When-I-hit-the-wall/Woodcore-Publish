@@ -9,4 +9,4 @@
 #number-digits.update(3)
 
 #uniform-level.update(1)
-#show-calc("snow-load", "SL", level: 3)
+#var("s_k", domain: ("snow-load", "SL"), level: 3)

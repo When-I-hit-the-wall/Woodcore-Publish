@@ -3,6 +3,8 @@
 What it must never do is install a Typst whose archive is not the one recorded: the SHA-256 lives in typst-sha256.json, beside the version in typst-version.txt, and an archive that does not hash to it is refused before anything is written. And what it must do on a machine already prepared is nothing.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import contextlib
 import hashlib
 import io

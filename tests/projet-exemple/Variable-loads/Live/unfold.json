@@ -1,0 +1,550 @@
+{
+  "domains": {
+    "A1": {
+      "check": "A1",
+      "gen": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:A1-presets": [
+          "2083cb8a67413c29",
+          "2083cb8a67413c29"
+        ],
+        "label:A1-table-1": [
+          "0ff6a7b52730e948",
+          "0ff6a7b52730e948"
+        ],
+        "label:A1-table-1-note": [
+          "9a2e79d627999ac6",
+          "9a2e79d627999ac6"
+        ],
+        "label:A1-table-1-title": [
+          "6a29190c104615db",
+          "6a29190c104615db"
+        ],
+        "var:Q_k": [
+          "d575575b03c1c1f4",
+          "d575575b03c1c1f4"
+        ],
+        "var:beispiel": [
+          "0a2d7193b987689b",
+          "0a2d7193b987689b"
+        ],
+        "var:kategorie": [
+          "dfef841e35cb5d91",
+          "dfef841e35cb5d91"
+        ],
+        "var:nutzflaeche": [
+          "52044024e5f866fe",
+          "52044024e5f866fe"
+        ],
+        "var:q_k": [
+          "6a7e411d2afeefe9",
+          "6a7e411d2afeefe9"
+        ]
+      }
+    },
+    "A2": {
+      "check": "A2",
+      "gen": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:A2-presets": [
+          "9a281f36f81e90a5",
+          "9a281f36f81e90a5"
+        ],
+        "label:A2-table-1": [
+          "811aae914807bb42",
+          "811aae914807bb42"
+        ],
+        "label:A2-table-1-note": [
+          "cee0e10f2edfeb56",
+          "cee0e10f2edfeb56"
+        ],
+        "label:A2-table-1-title": [
+          "96f0cd0951ed81cd",
+          "96f0cd0951ed81cd"
+        ],
+        "var:Q_k": [
+          "fc5198b8633df4ad",
+          "fc5198b8633df4ad"
+        ],
+        "var:beispiel": [
+          "93fcb51844fe5218",
+          "93fcb51844fe5218"
+        ],
+        "var:kategorie": [
+          "d55446217d363ab1",
+          "d55446217d363ab1"
+        ],
+        "var:nutzflaeche": [
+          "7978af3cc477f6d9",
+          "7978af3cc477f6d9"
+        ],
+        "var:q_k": [
+          "341af59607dea40d",
+          "341af59607dea40d"
+        ]
+      }
+    },
+    "A3": {
+      "check": "A3",
+      "gen": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:A3-presets": [
+          "3ee9b3d5b364d6d2",
+          "3ee9b3d5b364d6d2"
+        ],
+        "label:A3-table-1": [
+          "6b480fc61e7e781c",
+          "6b480fc61e7e781c"
+        ],
+        "label:A3-table-1-note": [
+          "0a6bd8c8288db464",
+          "0a6bd8c8288db464"
+        ],
+        "label:A3-table-1-title": [
+          "4ad5fbcf58c63812",
+          "4ad5fbcf58c63812"
+        ],
+        "var:Q_k": [
+          "88613398e7b56a59",
+          "88613398e7b56a59"
+        ],
+        "var:beispiel": [
+          "42b25c332102ffce",
+          "42b25c332102ffce"
+        ],
+        "var:kategorie": [
+          "6051c50558683843",
+          "6051c50558683843"
+        ],
+        "var:nutzflaeche": [
+          "391a2aa2b841ccac",
+          "391a2aa2b841ccac"
+        ],
+        "var:q_k": [
+          "1af8b84fb4726776",
+          "1af8b84fb4726776"
+        ]
+      }
+    },
+    "B": {
+      "check": "B",
+      "gen": {
+        "form": "fe9da6",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:B-presets": [
+          "3e7111db8964e10f",
+          "3e7111db8964e10f"
+        ],
+        "label:B-table-1": [
+          "6612df5da0bb7b80",
+          "6612df5da0bb7b80"
+        ],
+        "label:B-table-1-note": [
+          "5e9ad6c08d76e602",
+          "5e9ad6c08d76e602"
+        ],
+        "label:B-table-1-title": [
+          "0304fa722d71cf99",
+          "0304fa722d71cf99"
+        ],
+        "var:Q_k": [
+          "e7be1e30115e5af0",
+          "e7be1e30115e5af0"
+        ],
+        "var:kategorie": [
+          "21c644a2d61f4fe0",
+          "21c644a2d61f4fe0"
+        ],
+        "var:nutzflaeche": [
+          "591dc2f0eb23c7a4",
+          "591dc2f0eb23c7a4"
+        ],
+        "var:q_k": [
+          "d7ccff9c30a38e7d",
+          "d7ccff9c30a38e7d"
+        ]
+      }
+    },
+    "C1": {
+      "check": "C1",
+      "gen": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:C1-presets": [
+          "deb433d60d6c8346",
+          "deb433d60d6c8346"
+        ],
+        "label:C1-table-1": [
+          "d28f768fe40cc0b6",
+          "d28f768fe40cc0b6"
+        ],
+        "label:C1-table-1-note": [
+          "62c8827dc1b04c02",
+          "62c8827dc1b04c02"
+        ],
+        "label:C1-table-1-title": [
+          "8878d9c3f325f28a",
+          "8878d9c3f325f28a"
+        ],
+        "var:Q_k": [
+          "d204690a049828df",
+          "d204690a049828df"
+        ],
+        "var:beispiel": [
+          "fc22536ad91a9c17",
+          "fc22536ad91a9c17"
+        ],
+        "var:kategorie": [
+          "555af1422e34fe56",
+          "555af1422e34fe56"
+        ],
+        "var:nutzflaeche": [
+          "32688600424313b2",
+          "32688600424313b2"
+        ],
+        "var:q_k": [
+          "32e91b1f662a853f",
+          "32e91b1f662a853f"
+        ]
+      }
+    },
+    "C2": {
+      "check": "C2",
+      "gen": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:C2-presets": [
+          "a4ecd5f894e6b682",
+          "a4ecd5f894e6b682"
+        ],
+        "label:C2-table-1": [
+          "38f6919f80429073",
+          "38f6919f80429073"
+        ],
+        "label:C2-table-1-note": [
+          "73e1d2a6e6fd9138",
+          "73e1d2a6e6fd9138"
+        ],
+        "label:C2-table-1-title": [
+          "ac9a4122d465dc05",
+          "ac9a4122d465dc05"
+        ],
+        "var:Q_k": [
+          "874d589069ee4441",
+          "874d589069ee4441"
+        ],
+        "var:beispiel": [
+          "8eb0abe5d546fc80",
+          "8eb0abe5d546fc80"
+        ],
+        "var:kategorie": [
+          "c1e363f6ce48b6f5",
+          "c1e363f6ce48b6f5"
+        ],
+        "var:nutzflaeche": [
+          "99ebd25f688c6816",
+          "99ebd25f688c6816"
+        ],
+        "var:q_k": [
+          "e1d00e1cc0db2fe5",
+          "e1d00e1cc0db2fe5"
+        ]
+      }
+    },
+    "C3": {
+      "check": "C3",
+      "gen": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:C3-presets": [
+          "a368175b10774dfa",
+          "a368175b10774dfa"
+        ],
+        "label:C3-table-1": [
+          "f7bd9acee68834c7",
+          "f7bd9acee68834c7"
+        ],
+        "label:C3-table-1-note": [
+          "c963f5020511fb0f",
+          "c963f5020511fb0f"
+        ],
+        "label:C3-table-1-title": [
+          "283b98e546f258a2",
+          "283b98e546f258a2"
+        ],
+        "var:Q_k": [
+          "ed628bbc75fbe8a2",
+          "ed628bbc75fbe8a2"
+        ],
+        "var:beispiel": [
+          "13bb4095e0edcac3",
+          "13bb4095e0edcac3"
+        ],
+        "var:kategorie": [
+          "94ac5fdd82e9c7e3",
+          "94ac5fdd82e9c7e3"
+        ],
+        "var:nutzflaeche": [
+          "0cbb2f9b63d102ae",
+          "0cbb2f9b63d102ae"
+        ],
+        "var:q_k": [
+          "1b9734bdc6dad9e3",
+          "1b9734bdc6dad9e3"
+        ]
+      }
+    },
+    "D": {
+      "check": "D",
+      "gen": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:D-presets": [
+          "ebf3c5b8626facf0",
+          "ebf3c5b8626facf0"
+        ],
+        "label:D-table-1": [
+          "c0471cd9dccba9f3",
+          "c0471cd9dccba9f3"
+        ],
+        "label:D-table-1-note": [
+          "ba81f6af312841cc",
+          "ba81f6af312841cc"
+        ],
+        "label:D-table-1-title": [
+          "be953bf81ce609af",
+          "be953bf81ce609af"
+        ],
+        "var:Q_k": [
+          "e646015f231802d3",
+          "e646015f231802d3"
+        ],
+        "var:beispiel": [
+          "dd186a539d3fecf1",
+          "dd186a539d3fecf1"
+        ],
+        "var:kategorie": [
+          "11e44e97a15968ce",
+          "11e44e97a15968ce"
+        ],
+        "var:nutzflaeche": [
+          "0aa9edb31e9fccda",
+          "0aa9edb31e9fccda"
+        ],
+        "var:q_k": [
+          "d9ae1ffebd37030b",
+          "d9ae1ffebd37030b"
+        ]
+      }
+    },
+    "E": {
+      "check": "E",
+      "gen": {
+        "form": "57f3bc",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:E-presets": [
+          "c35a860d194efeeb",
+          "c35a860d194efeeb"
+        ],
+        "label:E-table-1": [
+          "694df224c68af7f0",
+          "694df224c68af7f0"
+        ],
+        "label:E-table-1-note": [
+          "56741092864f4a37",
+          "56741092864f4a37"
+        ],
+        "label:E-table-1-title": [
+          "50d43173e20cf1d1",
+          "50d43173e20cf1d1"
+        ],
+        "var:beispiel": [
+          "fa26783925cc9aa9",
+          "fa26783925cc9aa9"
+        ],
+        "var:hinweis": [
+          "7fe75331386c2c1a",
+          "7fe75331386c2c1a"
+        ],
+        "var:kategorie": [
+          "c8c5d660bf4eb6c7",
+          "c8c5d660bf4eb6c7"
+        ],
+        "var:nutzflaeche": [
+          "18bb7903dbe550e3",
+          "18bb7903dbe550e3"
+        ]
+      }
+    },
+    "F": {
+      "check": "F",
+      "gen": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:F-presets": [
+          "65f153b1cfe7c288",
+          "65f153b1cfe7c288"
+        ],
+        "label:F-table-1": [
+          "724070e6991abd7f",
+          "724070e6991abd7f"
+        ],
+        "label:F-table-1-note": [
+          "2ef55ea5e4dfe25f",
+          "2ef55ea5e4dfe25f"
+        ],
+        "label:F-table-1-title": [
+          "09aa929b6fff2bff",
+          "09aa929b6fff2bff"
+        ],
+        "var:Q_k": [
+          "816d6aab4f8a2f51",
+          "816d6aab4f8a2f51"
+        ],
+        "var:beispiel": [
+          "2fa8dcdda35a880e",
+          "2fa8dcdda35a880e"
+        ],
+        "var:kategorie": [
+          "cd1d7513a28790c7",
+          "cd1d7513a28790c7"
+        ],
+        "var:nutzflaeche": [
+          "a90bf5547d6bbd10",
+          "a90bf5547d6bbd10"
+        ],
+        "var:q_k": [
+          "b02a0bdc4a3f3dfe",
+          "b02a0bdc4a3f3dfe"
+        ]
+      }
+    },
+    "G": {
+      "check": "G",
+      "gen": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:G-presets": [
+          "62092b63709837fa",
+          "62092b63709837fa"
+        ],
+        "label:G-table-1": [
+          "a20cb2f79399f23a",
+          "a20cb2f79399f23a"
+        ],
+        "label:G-table-1-note": [
+          "3baf263c80265fb7",
+          "3baf263c80265fb7"
+        ],
+        "label:G-table-1-title": [
+          "f1b6d06d0719d08e",
+          "f1b6d06d0719d08e"
+        ],
+        "var:Q_k": [
+          "a83f3977ba68488c",
+          "a83f3977ba68488c"
+        ],
+        "var:beispiel": [
+          "acb31eff40aea160",
+          "acb31eff40aea160"
+        ],
+        "var:kategorie": [
+          "d5f7a5cf8225a89b",
+          "d5f7a5cf8225a89b"
+        ],
+        "var:nutzflaeche": [
+          "82a11f31ae74f9de",
+          "82a11f31ae74f9de"
+        ],
+        "var:q_k": [
+          "791aafd40c599713",
+          "791aafd40c599713"
+        ]
+      }
+    },
+    "H": {
+      "check": "H",
+      "gen": {
+        "form": "c61e99",
+        "kind": "live-load",
+        "version": 2
+      },
+      "lines": {
+        "label:H-presets": [
+          "a99c2e63a96348c7",
+          "a99c2e63a96348c7"
+        ],
+        "label:H-table-1": [
+          "417d528304b79695",
+          "417d528304b79695"
+        ],
+        "label:H-table-1-note": [
+          "2204d9f3855173ca",
+          "2204d9f3855173ca"
+        ],
+        "label:H-table-1-title": [
+          "5e79f6f12d4da017",
+          "5e79f6f12d4da017"
+        ],
+        "var:Q_k": [
+          "e6364dec7c76dd6b",
+          "e6364dec7c76dd6b"
+        ],
+        "var:beispiel": [
+          "d84b5468f7fc345b",
+          "d84b5468f7fc345b"
+        ],
+        "var:kategorie": [
+          "bcfd6ccb1b72fccd",
+          "bcfd6ccb1b72fccd"
+        ],
+        "var:nutzflaeche": [
+          "d3159ba4be6aef38",
+          "d3159ba4be6aef38"
+        ],
+        "var:q_k": [
+          "804bb8220f21902a",
+          "804bb8220f21902a"
+        ]
+      }
+    }
+  },
+  "format": "woodcore-unfold",
+  "schema_version": "1.0"
+}

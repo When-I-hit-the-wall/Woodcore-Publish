@@ -9,20 +9,19 @@
 Deflections are limited to the standard values of SIA 260, Appendix A, Table 3; they are determined in accordance with SIA 262 to 266. Different limit values may be agreed in line with the service requirements, in particular for secondary members; they are then specified in the basis of design. [The owner makes no more stringent requirements than the standard: yes / no.]
 // woodcore:/object p1
 
-// woodcore:object doc-table deformation-table
-#doc-table(
-  columns: (
-    (id: "element", title: [Member]),
-    (id: "criterion", title: [Criterion]),
-    (id: "limit", title: [Limit], kind: "math"),
-    (id: "load_case", title: [Load case (SIA 260, Table 3)]),
-  ),
-  hidden: (),
-  rows: (
-    (element: [Floors and beams], criterion: [Fittings with brittle behaviour], limit: [$w <= l \/ 500$], load_case: [occasional (20)]),
-    (element: [Floors and beams], criterion: [Fittings with ductile behaviour], limit: [$w <= l \/ 350$], load_case: [frequent (21)]),
-    (element: [Floors and beams], criterion: [Use, operation and comfort (deflection due to variable actions)], limit: [$w <= l \/ 350$], load_case: [frequent (21)]),
-    (element: [Floors and beams], criterion: [Appearance (after deduction of any camber)], limit: [$w <= l \/ 300$], load_case: [quasi-permanent (22)]),
+// woodcore:object table deformation-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, center, left),
+    table.hline(stroke: 1pt),
+    table.header([*Member*], [*Criterion*], [*Limit*], [*Load case (SIA 260, Table 3)*]),
+    table.hline(stroke: 0.5pt),
+    [Floors and beams], [Fittings with brittle behaviour], [$w <= l \/ 500$], [occasional (20)],
+    [Floors and beams], [Fittings with ductile behaviour], [$w <= l \/ 350$], [frequent (21)],
+    [Floors and beams], [Use, operation and comfort (deflection due to variable actions)], [$w <= l \/ 350$], [frequent (21)],
+    [Floors and beams], [Appearance (after deduction of any camber)], [$w <= l \/ 300$], [quasi-permanent (22)],
+    table.hline(stroke: 1pt),
   ),
   caption: [Permissible deflections],
 )

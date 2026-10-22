@@ -2,12 +2,12 @@
 
 A project is laid out as a report alone -- every project until the three documents, and every project whose .woodcore states no `layout.typst_root` -- or in three documents: the **convention d'utilisation** (Nutzungsvereinbarung, SIA 260's service criteria agreement), the **base de projet** (Projektbasis, basis of design) and the **rapport de statique**, which is the report every project has had and keeps every name it had, being simply the third. Where each lies is calc/project.py's (`Project.document_typ`, `document_pdf`, `document_dir`); what each is called, and what a new project's folders are named, is this module's.
 
-Three folders at the top of the project, numbered in that order and named in the project's language, exactly as MODE_FOLDERS writes them: `1_Nutzungsvereinbarung`, `2_Projektbasis`, `3_Statischer Bericht` in German, `1_Convention d'utilisation`, `2_Base de projet`, `3_Rapport de statique` in French, `1_Service criteria agreement`, `2_Basis of design`, `3_Statical report` in English. Offered when a project is created, and editable there: what a project's .woodcore states is what it reads from then on, so a name chosen once is never recomputed from this table.
+Three folders at the top of the project, numbered in that order and named the same in every language, exactly as MODE_FOLDERS writes them: `100-Service criteria agreement`, `200-Basis of design`, `300-Statical report` (issue #64, spec 2026-10-15-structure-projet-dossiers D-07). Until 0.119 they were named in the project's language -- `1_Nutzungsvereinbarung`, `1_Convention d'utilisation`, `1_Service criteria agreement`… -- and a project laid out so keeps them until it is migrated: what a project's .woodcore states is what it reads from then on, so a name is never recomputed from this table.
 
 Qt-free, and it reads no project of its own: a function that needs one is handed it, which is what lets the command line, the window, a preview and the migration all build their command lines here.
 """
 
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 import project
 
@@ -22,14 +22,10 @@ MODE_NAMES = {
     "fr": {"cu": "Convention d'utilisation", "bp": "Base de projet", "rs": "Rapport de statique"},
     "en": {"cu": "Service criteria agreement", "bp": "Basis of design", "rs": "Statical report"},
 }
-# Each document's number, which its folder begins with and which the navigation shows where it is folded to its icons.
-MODE_NUMBERS = {"cu": 1, "bp": 2, "rs": 3}
-# The folder each document of a new project lies in, at the top of the project, in the project's language -- written out rather than composed from MODE_NUMBERS and MODE_NAMES, these being the engineer's exact forms (tests/test_documents.py holds the two agreeing all the same).
-MODE_FOLDERS = {
-    "de": {"cu": "1_Nutzungsvereinbarung", "bp": "2_Projektbasis", "rs": "3_Statischer Bericht"},
-    "fr": {"cu": "1_Convention d'utilisation", "bp": "2_Base de projet", "rs": "3_Rapport de statique"},
-    "en": {"cu": "1_Service criteria agreement", "bp": "2_Basis of design", "rs": "3_Statical report"},
-}
+# Each document's number, which its folder begins with and which the navigation shows where it is folded to its icons: 100, 200, 300 since the project laid out by folders (issue #64), the hundreds leaving room for what may come between.
+MODE_NUMBERS = {"cu": 100, "bp": 200, "rs": 300}
+# The folder each document of a new project lies in, at the top of the project -- the same in every language, English and fixed (spec 2026-10-15-structure-projet-dossiers D-07, D-14): the documents' English names behind their number. Written out rather than composed from MODE_NUMBERS and MODE_NAMES, these being the engineer's exact forms (tests/test_documents.py holds the two agreeing all the same). A project laid out before 0.119 keeps the folders its .woodcore states -- `1_Nutzungsvereinbarung`, `1_Convention d'utilisation`, … in its language -- until it is migrated.
+MODE_FOLDERS = {"cu": "100-Service criteria agreement", "bp": "200-Basis of design", "rs": "300-Statical report"}
 # The report's entry file, which keeps the name it has always had in every language: nothing of the report is renamed by its becoming the third document (the engineer's decision), and every route that names its PDF names it after this file (docs/conventions/build-and-release.md §12).
 RS_ENTRY = "Statischer Rapport.typ"
 # Each document's entry file in a new project: the convention d'utilisation and the base de projet named after the document in the project's language, the report after its own.
@@ -39,9 +35,10 @@ ENTRY_NAMES = {
 }
 # Each document's revision journal in the sources, one per document: calc/project.py's (`Project.journal_file_for`).
 JOURNAL_FILES = project.JOURNAL_FILES
-# The export's folder in a project of three documents, at its top and shared by the three: the engine copied into the project, the data it reads, and the stamps that say whether a document changed since its PDF.
-GENERATED_FOLDER = "_woodcore"
-# How a document's section imports the engine: from the Typst root in three documents, the one spelling valid in every document's folder and at every depth -- which is what lets one section be copied into another document -- and from the folder above in a report alone, whose sections lie in `Sections/` beside the entry file (docs/typst/api-conventions.md §10bis).
+# The export's folder in a project of three documents, at its top and shared by the three: the engine copied into the project, the data it reads, and the stamps that say whether a document changed since its PDF -- 000-Woodcore/, which holds the sources and the archives too, since the project laid out by folders (issue #64). A project laid out before keeps the `_woodcore` its .woodcore states (LEGACY_GENERATED_FOLDER) until it is migrated.
+GENERATED_FOLDER = project.WOODCORE_FOLDER
+LEGACY_GENERATED_FOLDER = "_woodcore"
+# How a document's section imports the engine: from the Typst root in three documents, the one spelling valid in every document's folder and at every depth -- which is what lets one section be copied into another document -- `Project.from_root(commands_typ)`, `/000-Typst-Config/commands.typ` laid out by folders (`commands_import`); and from the folder above in a report alone, whose sections lie in `Sections/` beside the entry file (docs/typst/api-conventions.md §10bis). COMMANDS_FROM_ROOT is the spelling of a project laid out before 0.119, which its sections still carry until it is migrated.
 COMMANDS_FROM_ROOT = "/" + project.COMMANDS_FILE
 COMMANDS_FROM_SECTIONS = "../" + project.COMMANDS_FILE
 
@@ -62,9 +59,9 @@ def mode_choices(lang):
     return [(mode, names[mode]) for mode in MODES]
 
 
-def folders_for(lang):
-    """The folders a new project written in `lang` is offered, as {mode: folder} -- a copy, for a dialog to edit."""
-    return dict(MODE_FOLDERS[language_of(lang)])
+def folders_for(lang=None):
+    """The folders a new project is offered, as {mode: folder} -- a copy, for a dialog to show: the same in every language (MODE_FOLDERS), `lang` taken and not read so that every caller that names one goes on working."""
+    return dict(MODE_FOLDERS)
 
 
 def _folder(mode, name):
@@ -90,7 +87,7 @@ def _entry(mode, name):
 def modes_layout(folders, entries, rs_entry=None):
     """The layout of a project in three documents, in full, as its .woodcore is written with it (`project.write`, `project.full_layout`).
 
-    `folders` names each document's folder: {mode: folder}, or a sequence of three in MODES' order -- the command line's `--names CU BP RS`. `entries` names the entry files of the convention d'utilisation and of the base de projet, {mode: file}, and the report's where it carries "rs"; `rs_entry` names the report's all the same, which is what a project created from a template or migrated passes, its report's entry file being the one its skeleton has. Each PDF is named after its entry file and lies beside it, as the report's has since v0.87. What the three share lies at the top of the project: the export (GENERATED_FOLDER), the pictures, and the sources and the archives where DEFAULT_LAYOUT keeps them.
+    `folders` names each document's folder: {mode: folder}, or a sequence of three in MODES' order -- the command line's `--names CU BP RS`. `entries` names the entry files of the convention d'utilisation and of the base de projet, {mode: file}, and the report's where it carries "rs"; `rs_entry` names the report's all the same, which is what a project created from a template or migrated passes, its report's entry file being the one its skeleton has. Each PDF is named after its entry file and lies beside it, as the report's has since v0.87. What the three share lies at the top of the project, laid out by folders (schema 1.1): the configuration (project.CONFIG_FOLDER), Woodcore's folder (GENERATED_FOLDER) with the sources and the archives inside it, and the pictures.
 
     Each folder is checked as the report's folder is when it is typed (templates.check_report_folder) and the three must differ, compared as Windows compares names; a ProjectError says which is wrong before anything is created.
     """
@@ -125,18 +122,35 @@ def modes_layout(folders, entries, rs_entry=None):
         layout[project.ENTRY_KEYS[mode]] = entry.as_posix()
         layout[project.PDF_KEYS[mode]] = entry.with_suffix(".pdf").as_posix()
     layout.update({
+        "config": project.CONFIG_FOLDER,
         "generated": GENERATED_FOLDER,
         "images": project.IMAGES_FOLDER,
-        "sources": project.DEFAULT_LAYOUT["sources"],
-        "archives": project.DEFAULT_LAYOUT["archives"],
+        "sources": project.SOURCES_IN_WOODCORE,
+        "archives": project.ARCHIVES_IN_WOODCORE,
     })
     return project.full_layout(layout)
 
 
+# The folders a project in three documents was given from 0.111 to 0.118, in its language, numbered `1_` to `3_`: what a project laid out then states until it is migrated, and what the migration of a report alone into three documents still lays one out as, the second step of the migration taking it on into the layout by folders (calc/project_migrate_folders.py).
+LEGACY_MODE_FOLDERS = {
+    "de": {"cu": "1_Nutzungsvereinbarung", "bp": "2_Projektbasis", "rs": "3_Statischer Bericht"},
+    "fr": {"cu": "1_Convention d'utilisation", "bp": "2_Base de projet", "rs": "3_Rapport de statique"},
+    "en": {"cu": "1_Service criteria agreement", "bp": "2_Basis of design", "rs": "3_Statical report"},
+}
+
+
+def legacy_modes_layout(folders, entries, rs_entry=None, sources=None, archives=None):
+    """The layout of a project in three documents as Woodcore wrote one from 0.111 to 0.118 -- `modes_layout`'s, without `layout.config`, the export in `_woodcore/`, the sources and the archives where the project keeps them (`sources`, `archives`, else DEFAULT_LAYOUT's) -- in full: what the migration of a report alone writes before the layout by folders is reached by the second step."""
+    layout = {key: value for key, value in modes_layout(folders, entries, rs_entry).items() if key != "config"}
+    layout.update(generated=LEGACY_GENERATED_FOLDER, sources=sources or project.DEFAULT_LAYOUT["sources"],
+                  archives=archives or project.DEFAULT_LAYOUT["archives"])
+    return project.full_layout(layout)
+
+
 def layout_for(lang, folders=None):
-    """The layout of a new project in three documents written in `lang`: its folders MODE_FOLDERS' for the language unless `folders` names others ({mode: folder}, a dialog's), its entry files ENTRY_NAMES'."""
+    """The layout of a new project in three documents written in `lang`, laid out by folders: its folders MODE_FOLDERS' unless `folders` names others ({mode: folder}), its entry files ENTRY_NAMES' for the language."""
     lang = language_of(lang)
-    return modes_layout({**MODE_FOLDERS[lang], **(folders or {})}, ENTRY_NAMES[lang])
+    return modes_layout({**MODE_FOLDERS, **(folders or {})}, ENTRY_NAMES[lang])
 
 
 def compile_args(here, mode, flags=(), target=None, deps=None):
@@ -151,8 +165,54 @@ def compile_args(here, mode, flags=(), target=None, deps=None):
 
 
 def commands_import(here=None):
-    """The path a section imports the engine from: `/commands.typ` in a project of three documents, `../commands.typ` in a report alone -- and where no project is named, which is what every section has written until the three documents."""
-    return COMMANDS_FROM_ROOT if here is not None and here.has_modes else COMMANDS_FROM_SECTIONS
+    """The path a section imports the engine from: from the Typst root in a project of three documents -- `/000-Typst-Config/commands.typ` laid out by folders, `/commands.typ` before --, `../commands.typ` in a report alone and where no project is named, which is what every section has written until the three documents."""
+    if here is None or not here.has_modes:
+        return COMMANDS_FROM_SECTIONS
+    return here.from_root(here.commands_typ)
+
+
+def relocate_config_text(here, text):
+    """`text` -- a .typ's -- with every path it writes from the root to what configures the documents named where project `here` keeps it: `"/commands.typ"` → `"/000-Typst-Config/commands.typ"`, `"/Template/…"`, `project: "references.bib"` likewise (config.typ, commands.typ, title.typ, references.bib, Template/), every other byte kept. Textual, by calc/typst_paths.py's literals, and asking nothing of the disk -- what a form's title page staged before it is put in place, or a template's section compared with a document's, needs. The text as it is for a project laid out before."""
+    import typst_paths
+    if not here.has_folders:
+        return text
+    names = {project.CONFIG_FILE, project.COMMANDS_FILE, project.TITLE_FILE, project.REFERENCES_FILE, project.TEMPLATE_FOLDER}
+    prefix = here.from_root(here.config_dir).lstrip("/")
+    edits = []
+    for literal in typst_paths.literals(text):
+        value = literal.value
+        if not (value.startswith("/") or literal.root_relative):
+            continue
+        if value.lstrip("/").split("/", 1)[0] not in names:
+            continue
+        new = ("/" if value.startswith("/") else "") + prefix + "/" + value.lstrip("/")
+        edits.append((literal.start, literal.end, typst_paths._escape(new)))
+    for start, end, new in reversed(edits):
+        text = text[:start] + new + text[end:]
+    return text
+
+
+def relocate_config_paths(here, paths):
+    """Every path a .typ of `paths` writes to what configures the documents, rewritten where project `here` keeps it, in 000-Typst-Config/ (`relocate_config_text`): `#import "/commands.typ": *` becomes `#import "/000-Typst-Config/commands.typ": *` and nothing else of the file moves (calc/typst_paths.py). What a content template, a form's title page or a section copied from a project laid out before writes is read so. Returns the files rewritten; nothing is done for a project laid out before."""
+    import typst_paths
+    written = []
+    if not here.has_folders:
+        return written
+    for path in paths:
+        path = Path(path)
+        if path.suffix.lower() == ".typ" and path.is_file():
+            text = typst_paths.read_text(path)
+            new = relocate_config_text(here, text)
+            if new != text:
+                typst_paths.write_text(path, new)
+                written.append(path)
+    return written
+
+
+def root_import_line(here=None):
+    """The line a file Woodcore writes at the top of the Typst root starts with -- a domain's `<id>.typ`, an export sheet, an unfolded check: the engine imported from the root, `#import "/000-Typst-Config/commands.typ": *` laid out by folders and `#import "/commands.typ": *` in every project laid out before, a report alone's included, whose Typst root holds its commands.typ. Where no project is named, the second."""
+    path = here.from_root(here.commands_typ) if here is not None else COMMANDS_FROM_ROOT
+    return f'#import "{path}": *'
 
 
 def import_line(here=None):

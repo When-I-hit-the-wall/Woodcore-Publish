@@ -179,14 +179,6 @@ def file_args(source, png):
     return ["compile", "--root", str(EXAMPLES), "--format", "png", "--ppi", str(PPI), str(source), str(png)]
 
 
-def staging_png(key):
-    """Where Typst is told to write, before the page is moved into the cache.
-
-    Compiling straight into the cache would let two processes rendering the same example write one path at once. Each stages under a name of its own -- the process id in it, and not ending in `.png`, so prune() never takes a page being written -- and the move is atomic, so a reader of the cache sees a whole page or no page.
-    """
-    return CACHE_DIR / f"{key}-{os.getpid()}.staging"
-
-
 def store(staged, key):
     """Moves a freshly rendered page into the cache and gives its path there.
 

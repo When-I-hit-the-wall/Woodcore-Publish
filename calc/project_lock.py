@@ -95,7 +95,7 @@ def acquire(here, force=False, me=None):
     if other is not None and not force:
         return other
     try:
-        lock_path(here).write_text(json.dumps(me, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        lock_path(here).write_text(json.dumps(me, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     except OSError:
         pass   # a folder that cannot be written to is one nobody else can save into either
     return None

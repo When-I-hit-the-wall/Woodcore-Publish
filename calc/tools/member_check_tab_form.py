@@ -7,7 +7,6 @@ from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QDoubleSpinBox, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton,
     QSplitter, QVBoxLayout, QWidget,
 )
-import build_reference as ref
 import cards  # the form and what is read off it in cards, after the website (cards.py)
 import display_view  # the «Affichage» view: the options, the call and the compiled page (display_view.py, v0.117)
 import identity  # Nom · Description · ID (identity.py)
@@ -94,6 +93,12 @@ class MemberCheckFormMixin:
         save = QPushButton(self.t("mc_save"))
         save.setDefault(True)
         save.clicked.connect(self.save)
+        # a kind printed unfolded (spec 2026-10-15, UI-003): its domain in the «Formules» tab, one click away
+        self.formulas_button = QPushButton(self.t("mc_open_formulas"))
+        self.formulas_button.setToolTip(self.t("mc_open_formulas_tip"))
+        self.formulas_button.clicked.connect(self.open_in_formulas)
+        self.formulas_button.setVisible(self.UNFOLDED)
+        actions.addWidget(self.formulas_button)
         actions.addStretch(1)
         actions.addWidget(revert)
         actions.addWidget(save)
@@ -216,42 +221,7 @@ class MemberCheckFormMixin:
         return scroll
 
     def build_display(self):
-        """The «Affichage» view: the check's own options -- they also say the unit of the verdict in «Calcul», and the options of the draft the page compiles, which no declaration can (display_view.OwnPanel) -- the call to copy, and the page of the draft, saved or not."""
-        body = QWidget()
-        form = cards.form(body)
-        form.setContentsMargins(0, 0, 0, 0)
-        self.options_form = form   # a tab whose command takes fewer options hides their rows (steel_tab.py)
-        # the level, and -1 «Sélection manuelle» with a box and a level for every variable the check prints (issue #20): the control every panel of a declaration draws (display_view.LevelControl, rule 16), its variables the check's own (member_check.shown_keys)
-        self.level_box = display_view.LevelControl(("auto", "0", "1", "2", "3", display_options.SELECTION), self.t)
-        form.addRow(self.t("mc_opt_level"), self.level_box)
-        self.member_box = QComboBox()
-        self.member_box.addItem(self.t("mc_member_none"), "none")
-        for level in (0, 1, 2, 3):
-            self.member_box.addItem(str(level), level)
-        form.addRow(self.t("mc_opt_member"), self.member_box)
-        self.member_box.setCurrentIndex(self.member_box.findData(1))     # the line `#member` prints at level 1, the command's own default
-        self.description_box = QCheckBox(self.t("mc_opt_description"))
-        form.addRow("", self.description_box)
-        self.title_box = QComboBox()
-        self.title_box.addItem(self.t("mc_title_auto"), "auto")
-        self.title_box.addItem(self.t("mc_title_none"), "none")
-        self.title_box.addItem(self.t("mc_title_text"), "text")
-        form.addRow(self.t("mc_opt_title"), self.title_box)
-        self.title_text = QLineEdit()
-        self.title_text.setEnabled(False)
-        form.addRow("", self.title_text)
-        self.unit_box = QComboBox()
-        self.unit_box.addItem(self.t("mc_unit_ratio"), None)
-        self.unit_box.addItem(self.t("mc_unit_percent"), "%")
-        form.addRow(self.t("mc_opt_unit"), self.unit_box)
-        for widget in (self.member_box, self.title_box, self.unit_box):
-            widget.currentIndexChanged.connect(self.on_option)
-        self.level_box.changed.connect(self.on_option)
-        self.description_box.toggled.connect(self.on_option)
-        self.title_text.textChanged.connect(self.on_option)
-        card = cards.card(self.t("mc_options"))
-        QVBoxLayout(card).addWidget(body)
-        self.options_panel = display_view.OwnPanel(card)
+        """The «Affichage» view: the `#include` of the check's domain to copy, and the page of its domain as the export would write it, saved or not (spec 2026-10-21-commandes-typst-refonte, UI-002) -- what the domain prints is its file's, each line at its own level, so the view offers no option of its own."""
         self.display = display_view.DisplayView(self.t, mono_font=self.app.mono_font, copy=self.app.copy, cache_key=self.KEY, lang=self.app.lang,
                                                 import_fn=lambda: self.app.reexport(), import_text=self.t("reexport"), parent=self)
         self.command_field = self.display.field
@@ -263,24 +233,12 @@ class MemberCheckFormMixin:
         return self.display.pane
 
     def display_entries(self):
-        """What «Affichage» offers for the check chosen: its own `#show-check-member`, compiled from the draft -- saved or not --, and the loop over every check, which the PDF shows."""
+        """What «Affichage» offers for the check chosen: its domain as the export writes it, compiled from the draft -- saved or not --, and the `#include` that prints it."""
         unsaved = self.current_id is None or self.dirty
         reason = "" if self.record is not None and self.record.get("calculable") else (self.reason or self.t("mc_preview_none"))
-        return [
-            display_view.Entry("member", "show-check-member", panel=self.options_panel, call_fn=lambda _v: self.command_text(),
-                               snippet_fn=lambda _v: self.preview_source(), note_text=reason,
-                               banner=self.t("mc_save_first") if unsaved else ""),
-            display_view.Entry("loop", self.t("ds_loop", command="show-check-member"), call=ref.call_check_member_loop(), note="ds_note_loop"),
-        ]
-
-    def set_view(self, key, enter=True):
-        """«Calcul» or «Affichage» (views.py): the list stays, the centre and the right pane change. The page is compiled only in «Affichage», and only once the tab is shown."""
-        if key not in self.VIEWS:
-            return
-        self.view = key
-        self.panes.show(key == "display", enter and self.live)
-        if key == "display":
-            self.fill_command()
+        # the check's domain is its page, an #include of its file its call (spec 2026-10-15, D-15: each line has its level in the file; spec 2026-10-21-commandes-typst-refonte, UI-002)
+        return [display_view.Entry("member", "domain-file", call_fn=lambda _v: self.command_text(), snippet_fn=lambda _v: self.preview_source(),
+                                   note_text=reason, banner=self.t("mc_save_first") if unsaved else "")]
 
     def muted_html(self, text):
         return "<span style='color:%s'>%s</span>" % (theme.colour("muted"), richtext.prose_html(text))
@@ -322,13 +280,9 @@ class MemberCheckFormMixin:
         if eta is not None:
             ok = bool(result.get("ok"))
             colour = theme.colour("ok" if ok else "danger")
-            percent = self.unit_box.currentData() == "%"
-            # the ratio of the action to the resistance, as the report's verdict prints it (lib/timber.typ timber-verdict, issue #12): `σ/f = 0.41 ⩽ 1 ✔`, in percent `σ/f = 41 % ✔` without «⩽ 100 %» -- never η, which stays the value underneath
+            # the ratio of the action to the resistance, as the report's verdict prints it (issue #12): `σ/f = 0.41 ⩽ 1 ✔` -- never η, which stays the value underneath
             ratio = (richtext.math_html(result["ratio"]) + " = ") if result.get("ratio") else ""   # a result without its ratio's formula shows the value alone, never η
-            if percent:
-                shown = "%s%s %%" % (ratio, richtext.escape(_n(eta * 100)))
-            else:
-                shown = "%s%s %s 1" % (ratio, richtext.escape(_n(eta)), "⩽" if ok else ">")   # the sign that holds, as #verify prints it
+            shown = "%s%s %s 1" % (ratio, richtext.escape(_n(eta)), "⩽" if ok else ">")   # the sign that holds, as #verify prints it
             self.verdict_label.setText("<span style='color:%s;font-weight:600'>%s &nbsp;%s</span>" % (colour, shown, "✔" if ok else "✘"))
             self.verdict_label.setVisible(True)
 

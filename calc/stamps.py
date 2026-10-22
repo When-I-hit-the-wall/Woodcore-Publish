@@ -182,7 +182,7 @@ def _walk(folder, skipped=()):
 
 
 def enumerated(here, mode):
-    """The files document `mode` of project `here` is taken to read where Typst's own list is not there: the .typ files of its folder, config.typ, commands.typ, references.bib and title.typ at the Typst root, the form's `Template/`, everything under the export's lib/, calc/ and data/, and the pictures. More than the document reads, never less -- which is the side to err on, a stamp saying «changed» costing a compile and one saying «unchanged» a stale PDF."""
+    """The files document `mode` of project `here` is taken to read where Typst's own list is not there: the .typ files of its folder, config.typ, commands.typ, references.bib and title.typ (in 000-Typst-Config/ laid out by folders), the form's `Template/`, the .typ of every domain, everything under the export's lib/, calc/ and data/ -- never its sources nor its archives, which 000-Woodcore/ holds too --, laid out by folders every file of each tab's Exports/ (the figures) and of Appendix/Exports/, and the pictures. More than the document reads, never less -- which is the side to err on, a stamp saying «changed» costing a compile and one saying «unchanged» a stale PDF."""
     found = {}
 
     def add(path):
@@ -192,17 +192,27 @@ def enumerated(here, mode):
     for path in _walk(here.document_dir(mode), skipped=(generated,)):
         if path.suffix.lower() == ".typ":
             add(path)
-    for name in (project.CONFIG_FILE, project.COMMANDS_FILE, project.REFERENCES_FILE, project.TITLE_FILE):
-        path = here.typst_root / name
+    for path in (here.config_typ, here.commands_typ, here.references_bib, here.title_typ):   # in 000-Typst-Config/ laid out by folders, at the Typst root before
         if path.is_file():
             add(path)
-    form = here.typst_root / project.TEMPLATE_FOLDER   # the form the documents are set in: template.typ, its assets
+    form = here.template_dir   # the form the documents are set in: template.typ, its assets
     if form.is_dir():
         for path in _walk(form):
             add(path)
+    # the domains a document may include: the engineer's own, and laid out by folders one folder per kind of domain (issue #64) -- their archives left out by SKIPPED_FOLDERS
+    for folder in [here.formulas_dir] + [here.domain_dir(kind) for kind in project.DOMAIN_FOLDERS if here.has_folders]:
+        if folder.is_dir():
+            for path in _walk(folder):
+                if path.suffix.lower() == ".typ":
+                    add(path)
     for folder in GENERATED_READS:
         if (generated / folder).is_dir():
             for path in _walk(generated / folder):
+                add(path)
+    # laid out by folders, the figures the export writes lie in each tab's Exports/ -- Exports/Figures/, the sheets beside them, the annexes' excerpts in Appendix/Exports/ -- and not in data/ (issue #64, D-10): every file of them
+    for folder in [here.exports_dir(kind) for kind in project.FIGURE_KINDS] if here.has_folders else ():
+        if folder.is_dir():
+            for path in _walk(folder):
                 add(path)
     if here.images_dir.is_dir():
         for path in _walk(here.images_dir):

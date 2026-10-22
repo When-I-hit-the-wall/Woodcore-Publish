@@ -8,4 +8,5 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#context render-prose(tl-str(get-description(var-of("snow-load", "SL", "ce"))))
+#var("ce", domain: ("snow-load", "SL"), level: 0)
+#context render-prose(tl-str(get("ce", "description")))

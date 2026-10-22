@@ -5,6 +5,8 @@ Held against a planted stall -- a function that sleeps, named so its frame can b
 ⚠️ **The two planted scenarios run in a process of their own.** Under the full suite the stall test failed and alone it passed: its log found the main thread in `loop.exec()` rather than in the planted frame. The cause, found on 17.09.2026 in a sandbox by bisecting the files that run before it: the windows the earlier tests build and rebuild leave a backlog of posted events -- deferred deletions of the widgets a rebuild replaces -- which Qt only processes when an event loop next runs, and that is this test's `loop.exec()`. Draining them took 1.56 s after the 22 files up to `test_pdf_button.py`, longer than STALL_S, so the watch fired on the backlog, and the planted stall that followed it without a beat in between was never dumped. With the backlog drained first the test passed in that same process. A watch whose subject is a pause of the event loop is measured where nothing else has left the loop work to do.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import os
 import sys
 import time

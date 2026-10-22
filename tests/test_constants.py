@@ -7,6 +7,9 @@ These are the three lines that close that: the copies are compared, and a differ
 The real fix is a small module both import. Until then this test is the fix.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
+import conftest
 from domains import plan, statics
 import validation
 
@@ -195,7 +198,7 @@ def test_the_orange_of_a_value_written_over_is_one_colour():
     import re
     from conftest import ROOT
     import theme
-    typ = (ROOT / "lib" / "calc-engine.typ").read_text(encoding="utf-8")
+    typ = conftest.engine_source()
     found = re.search(r'#let override-colour = rgb\("(#[0-9a-fA-F]{6})"\)', typ)
     assert found, "lib/calc-engine.typ no longer declares override-colour"
     ours = theme.tokens("light")["override"]

@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.4",
+  "schema_version": "1.8",
   "domains": {
     "dead-load": {
       "label": "Eigen- und Auflasten",
@@ -132,7 +132,6 @@
               "unit": "kN/m²",
               "symbol": "g_k",
               "label": "Eigengewicht (Flächenlast)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -142,7 +141,6 @@
               "unit": "kN/m²",
               "symbol": "a_k",
               "label": "Auflast (Flächenlast)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -152,7 +150,6 @@
               "unit": "kN/m²",
               "symbol": "g_k + a_k",
               "label": "Summe (berechnet)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -162,7 +159,6 @@
               "unit": "kN/m²",
               "symbol": "(g_k + a_k)_\"gew\"",
               "label": "Ständige Lasten, gewählt",
-              "level": 1,
               "source": "excel:Belastungsannahmen.xlsm!EL+AL-Dach mit Wasser!J31",
               "norm": "SIA 261",
               "norm_ref": "2.1",
@@ -172,7 +168,6 @@
           "steps": [
             {
               "name": "Eigengewicht",
-              "level": 2,
               "result": "gk",
               "uses": [],
               "norm": "SIA 261",
@@ -180,7 +175,6 @@
             },
             {
               "name": "Auflast",
-              "level": 2,
               "result": "ak",
               "uses": [],
               "norm": "SIA 261",
@@ -188,7 +182,6 @@
             },
             {
               "name": "Summe",
-              "level": 2,
               "result": "gk_ak",
               "uses": [
                 "gk",
@@ -199,7 +192,6 @@
             },
             {
               "name": "Ständige Lasten",
-              "level": 1,
               "result": "gk_ak_gew",
               "uses": [
                 "gk_ak"
@@ -335,7 +327,6 @@
               "unit": "kN/m²",
               "symbol": "g_k",
               "label": "Eigengewicht (Flächenlast)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -345,7 +336,6 @@
               "unit": "kN/m²",
               "symbol": "a_k",
               "label": "Auflast (Flächenlast)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -355,7 +345,6 @@
               "unit": "kN/m²",
               "symbol": "g_k + a_k",
               "label": "Summe (berechnet)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -365,7 +354,6 @@
               "unit": "kN/m²",
               "symbol": "(g_k + a_k)_\"gew\"",
               "label": "Ständige Lasten, gewählt",
-              "level": 1,
               "source": "excel:Belastungsannahmen.xlsm!EL+AL-Dach ohne Wasser!J31",
               "norm": "SIA 261",
               "norm_ref": "2.1",
@@ -375,7 +363,6 @@
           "steps": [
             {
               "name": "Eigengewicht",
-              "level": 2,
               "result": "gk",
               "uses": [],
               "norm": "SIA 261",
@@ -383,7 +370,6 @@
             },
             {
               "name": "Auflast",
-              "level": 2,
               "result": "ak",
               "uses": [],
               "norm": "SIA 261",
@@ -391,7 +377,6 @@
             },
             {
               "name": "Summe",
-              "level": 2,
               "result": "gk_ak",
               "uses": [
                 "gk",
@@ -402,7 +387,6 @@
             },
             {
               "name": "Ständige Lasten",
-              "level": 1,
               "result": "gk_ak_gew",
               "uses": [
                 "gk_ak"
@@ -528,7 +512,6 @@
               "unit": "kN/m²",
               "symbol": "g_k",
               "label": "Eigengewicht (Flächenlast)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -538,7 +521,6 @@
               "unit": "kN/m²",
               "symbol": "a_k",
               "label": "Auflast (Flächenlast)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -548,7 +530,6 @@
               "unit": "kN/m²",
               "symbol": "g_k + a_k",
               "label": "Summe (berechnet)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -558,7 +539,6 @@
               "unit": "kN/m²",
               "symbol": "(g_k + a_k)_\"gew\"",
               "label": "Ständige Lasten, gewählt",
-              "level": 1,
               "source": "excel:Belastungsannahmen.xlsm!EL+AL-DachRand!J31",
               "norm": "SIA 261",
               "norm_ref": "2.1",
@@ -568,7 +548,6 @@
           "steps": [
             {
               "name": "Eigengewicht",
-              "level": 2,
               "result": "gk",
               "uses": [],
               "norm": "SIA 261",
@@ -576,7 +555,6 @@
             },
             {
               "name": "Auflast",
-              "level": 2,
               "result": "ak",
               "uses": [],
               "norm": "SIA 261",
@@ -584,7 +562,6 @@
             },
             {
               "name": "Summe",
-              "level": 2,
               "result": "gk_ak",
               "uses": [
                 "gk",
@@ -595,7 +572,6 @@
             },
             {
               "name": "Ständige Lasten",
-              "level": 1,
               "result": "gk_ak_gew",
               "uses": [
                 "gk_ak"
@@ -701,7 +677,6 @@
               "unit": "kN/m²",
               "symbol": "g_k",
               "label": "Eigengewicht (Flächenlast)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -711,7 +686,6 @@
               "unit": "kN/m²",
               "symbol": "a_k",
               "label": "Auflast (Flächenlast)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -721,7 +695,6 @@
               "unit": "kN/m²",
               "symbol": "g_k + a_k",
               "label": "Summe (berechnet)",
-              "level": 2,
               "source": "python:domains/dead_load.py",
               "norm": "SIA 261",
               "norm_ref": "Anhang A"
@@ -731,7 +704,6 @@
               "unit": "kN/m²",
               "symbol": "(g_k + a_k)_\"gew\"",
               "label": "Ständige Lasten, gewählt",
-              "level": 1,
               "source": "excel:Belastungsannahmen.xlsm!EL+AL-Wand!J27",
               "norm": "SIA 261",
               "norm_ref": "2.1",
@@ -741,7 +713,6 @@
           "steps": [
             {
               "name": "Eigengewicht",
-              "level": 2,
               "result": "gk",
               "uses": [],
               "norm": "SIA 261",
@@ -749,7 +720,6 @@
             },
             {
               "name": "Auflast",
-              "level": 2,
               "result": "ak",
               "uses": [],
               "norm": "SIA 261",
@@ -757,7 +727,6 @@
             },
             {
               "name": "Summe",
-              "level": 2,
               "result": "gk_ak",
               "uses": [
                 "gk",
@@ -768,7 +737,6 @@
             },
             {
               "name": "Ständige Lasten",
-              "level": 1,
               "result": "gk_ak_gew",
               "uses": [
                 "gk_ak"
@@ -784,14 +752,14 @@
     "snow-load": {
       "label": "Schneelast",
       "action": "variable",
-      "engine": "excel",
+      "engine": "python",
       "sheet_prefix": "SL",
       "instances": {
         "SL": {
           "workbook": "Belastungsannahmen.xlsm",
           "sheet": "SL",
           "results": [
-            "q_k11"
+            "q_k1"
           ],
           "vars": {
             "h_0": {
@@ -799,18 +767,16 @@
               "unit": "m",
               "symbol": "h_0",
               "label": "Höhe ü. NN",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!SL!H10",
               "norm": "SIA 261",
               "norm_ref": "5.2.6",
               "description": "Höhe des Standorts über Meer."
             },
             "korrektur": {
-              "value": "± 0",
+              "value": 0,
               "unit": "m",
               "symbol": "Delta h",
               "label": "Korrektur Wert",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!SL!H11",
               "norm": "SIA 261",
               "norm_ref": "Anhang D",
@@ -821,19 +787,19 @@
                   "desc": "-200 m"
                 },
                 {
-                  "value": "± 0",
+                  "value": 0,
                   "desc": "± 0 m"
                 },
                 {
-                  "value": "+200",
+                  "value": 200,
                   "desc": "+200 m"
                 },
                 {
-                  "value": "+400",
+                  "value": 400,
                   "desc": "+400 m"
                 },
                 {
-                  "value": "+500",
+                  "value": 500,
                   "desc": "+500 m"
                 }
               ]
@@ -843,33 +809,30 @@
               "unit": "m",
               "symbol": "h_\"ref\"",
               "label": "Bezugshöhe",
-              "level": 2,
-              "source": "excel:Belastungsannahmen.xlsm!SL!H12",
+              "source": "python:domains/snow_source.py",
               "norm": "SIA 261",
               "norm_ref": "5.2.6"
             },
             "ce": {
-              "value": 1,
+              "value": 1.0,
               "unit": "",
               "symbol": "C_e",
               "label": "Expositionsbeiwert",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!SL!H14",
+              "source": "excel:Belastungsannahmen.xlsm!SL!E14",
               "norm": "SIA 261",
-              "norm_ref": "5.2.2",
-              "description": "Gewählte Windexposition: normale Windexposition.",
+              "norm_ref": "5.2.4",
               "choices": [
                 {
-                  "value": 1,
-                  "desc": "normale Windexposition"
+                  "value": 1.0,
+                  "desc": "Windexposition normal"
                 },
                 {
                   "value": 0.8,
-                  "desc": "dem Wind stark ausgesetzte Lage"
+                  "desc": "stark windexponiert"
                 },
                 {
                   "value": 1.2,
-                  "desc": "vor Wind geschützte Lage"
+                  "desc": "windgeschützt"
                 }
               ],
               "group": "beiwerte"
@@ -879,22 +842,28 @@
               "unit": "",
               "symbol": "C_T",
               "label": "Thermischer Beiwert",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!SL!H15",
               "norm": "SIA 261",
-              "norm_ref": "5.2.2",
-              "description": "Thermischer Beiwert nach SIA 261, Ziffer 5.2.",
+              "norm_ref": "5.2.5",
               "group": "beiwerte"
+            },
+            "dachform": {
+              "value": "Flachdach",
+              "unit": "",
+              "symbol": "\"Dachform\"",
+              "label": "Dachform / Lastmodell",
+              "source": "excel:Belastungsannahmen.xlsm!SL!F21",
+              "norm": "SIA 261",
+              "norm_ref": "Figur 3"
             },
             "L": {
               "value": 17.5,
               "unit": "m",
               "symbol": "L",
               "label": "Gebäudelänge",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!SL!H23",
               "norm": "SIA 261",
-              "norm_ref": "5.3",
+              "norm_ref": "5.3.5",
               "group": "geometrie",
               "group_label": "Gebäude Geometrie"
             },
@@ -903,54 +872,29 @@
               "unit": "m",
               "symbol": "B",
               "label": "Gebäudebreite",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!SL!H24",
               "norm": "SIA 261",
-              "norm_ref": "5.3",
-              "group": "geometrie"
-            },
-            "hoehenspruenge": {
-              "value": "Nein",
-              "unit": "",
-              "symbol": "\"Grosse Höhensprünge\"",
-              "label": "Grosse Höhensprünge",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!SL!F19",
-              "norm": "SIA 261",
               "norm_ref": "5.3.5",
-              "description": "Bei 'Ja' ist die Schneeanhäufung nach SIA 261, Figur 5 zusätzlich zu berücksichtigen."
+              "group": "geometrie"
             },
             "abgleiten": {
               "value": "behindert oder erschwert",
               "unit": "",
               "symbol": "\"Abgleiten des Schnees\"",
               "label": "Abgleiten des Schnees",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!SL!F29",
               "norm": "SIA 261",
-              "norm_ref": "5.3.6",
-              "description": "Ist das Abgleiten behindert oder erschwert, wird der Dachformbeiwert mit mindestens 0.8 angesetzt (SIA 261, Ziffer 5.3.6)."
+              "norm_ref": "5.3.4",
+              "description": "Ist das Abgleiten behindert oder erschwert, wird der Dachformbeiwert mu_1 mit 0.8 angesetzt (SIA 261, Ziffer 5.3.4)."
             },
-            "lastmodell": {
-              "value": "Flachdach",
-              "unit": "",
-              "symbol": "\"Lastmodell\"",
-              "label": "Dachform / Lastmodell",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!SL!F21",
-              "norm": "SIA 261",
-              "norm_ref": "5.3",
-              "description": "Im Blatt SL wählbare Lastmodelle: Flachdach, GiebeldachLM1, GiebeldachLM2, SheddachLM1, SheddachLM2."
-            },
-            "mu_11": {
+            "mu_1": {
               "value": 0.8,
               "unit": "",
-              "symbol": "mu_11",
+              "symbol": "mu_1",
               "label": "Dachformbeiwert",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!SL!H26",
+              "source": "python:domains/snow_source.py",
               "norm": "SIA 261",
-              "norm_ref": "5.3",
+              "norm_ref": "Figur 2",
               "group": "dachformbeiwerte"
             },
             "s_k": {
@@ -958,18 +902,16 @@
               "unit": "kN/m²",
               "symbol": "s_k",
               "label": "Charakteristischer Wert der Schneelast auf horizontalem Gelände",
-              "level": 2,
-              "source": "excel:Belastungsannahmen.xlsm!SL!H17",
+              "source": "python:domains/snow_source.py",
               "norm": "SIA 261",
               "norm_ref": "5.2.6"
             },
-            "q_k11": {
+            "q_k1": {
               "value": 1.115292380464864,
               "unit": "kN/m²",
-              "symbol": "q_(k,11)",
+              "symbol": "q_k",
               "label": "Charakteristische Schneelast",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!SL!I37",
+              "source": "python:domains/snow_source.py",
               "norm": "SIA 261",
               "norm_ref": "5.2.2"
             }
@@ -977,7 +919,6 @@
           "steps": [
             {
               "name": "Bezugshöhe",
-              "level": 3,
               "result": "h_ref",
               "uses": [
                 "h_0",
@@ -989,7 +930,6 @@
             },
             {
               "name": "Charakteristischer Wert auf horizontalem Gelände",
-              "level": 3,
               "result": "s_k",
               "uses": [
                 "h_ref"
@@ -1000,18 +940,16 @@
             },
             {
               "name": "Charakteristische Schneelast",
-              "level": 1,
-              "result": "q_k11",
+              "result": "q_k1",
               "uses": [
-                "mu_11",
+                "mu_1",
                 "ce",
                 "ct",
-                "s_k",
-                "abgleiten"
+                "s_k"
               ],
               "norm": "SIA 261",
               "norm_ref": "5.2.2",
-              "formula": "q_(k,11) = max(mu_11, 0.8) dot C_e dot C_T dot s_k"
+              "formula": "q_k = mu_1 dot C_e dot C_T dot s_k"
             }
           ],
           "checks": []
@@ -1021,19 +959,19 @@
     "wind-load": {
       "label": "Windlast",
       "action": "variable",
-      "engine": "excel",
+      "engine": "python",
       "sheet_prefix": "WL",
       "instances": {
         "WL-Velo": {
           "workbook": "Belastungsannahmen.xlsm",
           "sheet": "WL-Velo",
           "results": [
-            "qk_max_bh",
-            "qk_min_bh",
-            "qk_max_dh",
-            "qk_min_dh",
-            "qk_max_db",
-            "qk_min_db"
+            "qk_max_cf1",
+            "qk_min_cf1",
+            "qk_max_cf2",
+            "qk_min_cf2",
+            "qk_max_cf3",
+            "qk_min_cf3"
           ],
           "tables": [
             {
@@ -1042,8 +980,9 @@
               "place": "below",
               "formula": "q_k = c_\"red\" dot c_d dot c_f dot q_p",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
-              "note": "Bezugsflächen aus den Gebäudeabmessungen: b·h und d·h sind die Fassadenflächen quer bzw. längs zur Windrichtung, d·b die Dachfläche. $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über alle Windrichtungen (Blatt WL-Velo, Tabelle «Globale Kraftbeiwerte»); $c_\"red\"$ ist der Reduktionsfaktor der jeweiligen Bezugsfläche. Negative Werte sind Sog.",
+              "norm_ref": "6.2.3.2",
+              "source": "python:domains/wind_source.py",
+              "note": "SIA 261, Anhang C, Tabelle 31: $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über die Windrichtungen; $c_\"red\"$ nach Figur 9 für b·h und d·h in den Windrichtungen 0°, 90° und 180°, der grössere der beiden in jeder anderen Windrichtung (6.3.3), 1.0 für jede andere Bezugsfläche (6.3.2). Negative Werte sind Sog.",
               "columns": [
                 {
                   "label": "Globale Windkraft",
@@ -1074,16 +1013,16 @@
                 [
                   "maximale globale Windkraft",
                   "q_k =",
-                  "qk_max_bh",
-                  "qk_max_dh",
-                  "qk_max_db"
+                  "qk_max_cf1",
+                  "qk_max_cf2",
+                  "qk_max_cf3"
                 ],
                 [
                   "minimale globale Windkraft",
                   "q_k =",
-                  "qk_min_bh",
-                  "qk_min_dh",
-                  "qk_min_db"
+                  "qk_min_cf1",
+                  "qk_min_cf2",
+                  "qk_min_cf3"
                 ]
               ]
             },
@@ -1093,14 +1032,24 @@
               "place": "below",
               "formula": "q_k = q_p dot (c_\"pe\" - c_\"pi\")",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
-              "source": "python:domains/wind.py",
-              "note": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen 0°, 15°, 45°, 90°, mit den Aussen- und Innendruckbeiwerten $c_\"pe\"$ und $c_\"pi\"$ des Blatts WL-Velo (Druckbeiwerte 31). gleichmässig: gleichmässig verteilte Öffnungen, beide Innendruckbeiwerte des Blatts (glm. (+) und glm. (-)) berücksichtigt; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D. Negative Werte sind Sog.",
+              "norm_ref": "6.2.2.1",
+              "source": "python:domains/wind_source.py",
+              "note": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen der Tabelle 31; aussen: $c_\"pe\" dot q_p$ allein; gleichmässig: gleichmässig verteilte Öffnungen; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D; netto: mit dem Innendruckbeiwert derselben Fläche. Negative Werte sind Sog.",
               "columns": [
                 {
                   "label": "Lokale Windkraft",
                   "kind": "wide",
                   "unit": "kN/m²"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "aussen"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "aussen"
                 },
                 {
                   "label": "max",
@@ -1155,7 +1104,9 @@
               ],
               "rows": [
                 [
-                  "Wand A",
+                  "A",
+                  0.465526389275286,
+                  -0.232763194637643,
                   0.6051843060578718,
                   -0.33251884948234717,
                   0.0,
@@ -1168,7 +1119,9 @@
                   -0.06650376989646942
                 ],
                 [
-                  "Wand B",
+                  "B",
+                  -0.16625942474117358,
+                  -0.2660150795858777,
                   -0.02660150795858778,
                   -0.33251884948234717,
                   0.0,
@@ -1181,7 +1134,9 @@
                   -0.06650376989646942
                 ],
                 [
-                  "Wand C",
+                  "C",
+                  0.465526389275286,
+                  -0.232763194637643,
                   0.5652820441199902,
                   -0.33251884948234717,
                   0.698289583912929,
@@ -1194,7 +1149,9 @@
                   0.0
                 ],
                 [
-                  "Wand D",
+                  "D",
+                  -0.16625942474117358,
+                  -0.2660150795858777,
                   -0.06650376989646943,
                   -0.33251884948234717,
                   0.06650376989646942,
@@ -1207,7 +1164,9 @@
                   0.0
                 ],
                 [
-                  "Dach E",
+                  "E",
+                  -0.29926696453411245,
+                  -0.33251884948234717,
                   -0.19286093269976137,
                   -0.43227450432705133,
                   -0.09975565484470417,
@@ -1220,7 +1179,9 @@
                   -0.16625942474117358
                 ],
                 [
-                  "Dach F",
+                  "F",
+                  -0.16625942474117358,
+                  -0.3657707344305819,
                   -0.06650376989646943,
                   -0.46552638927528606,
                   0.06650376989646942,
@@ -1233,7 +1194,9 @@
                   -0.13300753979293892
                 ],
                 [
-                  "Dach G",
+                  "G",
+                  -0.16625942474117358,
+                  -0.33251884948234717,
                   -0.02660150795858778,
                   -0.43227450432705133,
                   -0.09975565484470417,
@@ -1246,7 +1209,9 @@
                   -0.16625942474117358
                 ],
                 [
-                  "Dach H",
+                  "H",
+                  -0.16625942474117358,
+                  -0.1995113096894083,
                   -0.02660150795858778,
                   -0.29926696453411245,
                   0.06650376989646942,
@@ -1257,6 +1222,51 @@
                   -0.6317858140164596,
                   0.09975565484470417,
                   0.0
+                ],
+                [
+                  "m (lokal)",
+                  -0.29926696453411245,
+                  -0.5652820441199902,
+                  -0.19951130968940833,
+                  -0.6650376989646943,
+                  -0.06650376989646946,
+                  -1.030808433395276,
+                  -0.06650376989646946,
+                  -0.3990226193788166,
+                  -0.33251884948234717,
+                  -0.831297123705868,
+                  -0.13300753979293886,
+                  -0.33251884948234717
+                ],
+                [
+                  "n (lokal)",
+                  -0.29926696453411245,
+                  -0.5652820441199902,
+                  -0.15960904775152665,
+                  -0.6650376989646943,
+                  -0.33251884948234717,
+                  -0.831297123705868,
+                  -0.13300753979293886,
+                  -0.33251884948234717,
+                  -0.06650376989646946,
+                  -1.030808433395276,
+                  -0.06650376989646946,
+                  -0.3990226193788166
+                ],
+                [
+                  "o (lokal)",
+                  0.29926696453411245,
+                  -0.6650376989646943,
+                  0.3990226193788166,
+                  -0.7647933538093984,
+                  0.5320301591717554,
+                  -1.0308084333952763,
+                  0.5320301591717554,
+                  -0.4987782742235207,
+                  -0.16625942474117356,
+                  -0.5652820441199903,
+                  0.465526389275286,
+                  -0.43227450432705133
                 ]
               ]
             }
@@ -1267,7 +1277,6 @@
               "unit": "kN/m²",
               "symbol": "q_(p 0)",
               "label": "Referenzwert des Staudrucks",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J6",
               "norm": "SIA 261",
               "norm_ref": "Anhang E",
@@ -1278,7 +1287,6 @@
               "unit": "m",
               "symbol": "b",
               "label": "Gebäudelänge",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J7",
               "norm": "SIA 261",
               "norm_ref": "6.3",
@@ -1290,7 +1298,6 @@
               "unit": "m",
               "symbol": "d",
               "label": "Gebäudebreite",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J8",
               "norm": "SIA 261",
               "norm_ref": "6.3",
@@ -1301,37 +1308,35 @@
               "unit": "m",
               "symbol": "h",
               "label": "Gebäudehöhe",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J9",
               "norm": "SIA 261",
               "norm_ref": "6.3",
               "group": "geometrie"
             },
             "gelaendekategorie": {
-              "value": "IV grossflächige Stadtgebiete",
+              "value": "IV",
               "unit": "",
               "symbol": "\"Geländekategorie\"",
               "label": "Geländekategorie",
-              "level": 1,
               "source": "excel:Belastungsannahmen.xlsm!WL-Velo!I11",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "Tableau 4",
               "description": "Die Geländekategorie bestimmt die Gradientenhöhe und die Bodenrauigkeit des Windprofils.",
               "choices": [
                 {
-                  "value": "II Seeufer",
+                  "value": "II",
                   "desc": "$z_g$ = 300 m, $alpha_r$ = 0.16"
                 },
                 {
-                  "value": "IIa grosse Ebene",
+                  "value": "IIa",
                   "desc": "$z_g$ = 380 m, $alpha_r$ = 0.19"
                 },
                 {
-                  "value": "III Ortschaften, freies Feld",
+                  "value": "III",
                   "desc": "$z_g$ = 450 m, $alpha_r$ = 0.23"
                 },
                 {
-                  "value": "IV grossflächige Stadtgebiete",
+                  "value": "IV",
                   "desc": "$z_g$ = 526 m, $alpha_r$ = 0.3"
                 }
               ]
@@ -1341,10 +1346,9 @@
               "unit": "m",
               "symbol": "z_g",
               "label": "Gradientenhöhe",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J12",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "Tableau 4",
               "group_label": "Gradientenhöhe"
             },
             "alpha_r": {
@@ -1352,10 +1356,9 @@
               "unit": "",
               "symbol": "alpha_r",
               "label": "Bodenrauigkeit",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J13",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "Tableau 4",
               "group_label": "Bodenrauigkeit"
             },
             "z": {
@@ -1363,10 +1366,9 @@
               "unit": "m",
               "symbol": "z",
               "label": "Höhe über Boden",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J14",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "6.2.1.2",
               "description": "Höhe über Boden, für die der Staudruck bestimmt wird; die Norm setzt sie mindestens zu 5 m an (10 m in Geländekategorie IV).",
               "group_label": "Höhe über Boden"
             },
@@ -1375,45 +1377,52 @@
               "unit": "",
               "symbol": "c_h",
               "label": "Windprofilbeiwert",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J15",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2 (11)",
+              "norm_ref": "6.2.1.2",
               "group_label": "Windprofilbeiwert"
             },
             "cred_bh": {
-              "value": 0.85,
+              "value": 0.8039684021070969,
               "unit": "",
               "symbol": "c_(\"red\", \"b/h\")",
               "label": "Reduktionsfaktor b",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J19",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
+              "norm_ref": "Figur 9",
               "description": "Reduktionsfaktor für die Bezugsfläche b·h, aus dem Verhältnis Länge (b) zu Höhe (h).",
               "group_label": "Reduktionsfaktor b"
             },
             "cred_dh": {
-              "value": 0.95,
+              "value": 0.9000905718496207,
               "unit": "",
               "symbol": "c_(\"red\", \"d/h\")",
               "label": "Reduktionsfaktor d",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J20",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
+              "norm_ref": "Figur 9",
               "description": "Reduktionsfaktor für die Bezugsfläche d·h, aus dem Verhältnis Breite (d) zu Höhe (h).",
               "group_label": "Reduktionsfaktor d"
+            },
+            "cred_max": {
+              "value": 0.9000905718496207,
+              "unit": "",
+              "symbol": "c_(\"red\", \"max\")",
+              "label": "Reduktionsfaktor schräge Windrichtung",
+              "source": "python:domains/wind_source.py",
+              "norm": "SIA 261",
+              "norm_ref": "6.3.3",
+              "description": "Für eine Windrichtung, die um 15° oder mehr von den Bezugsrichtungen abweicht, gilt der ungünstigere (grössere) der beiden Reduktionsfaktoren.",
+              "group_label": "Reduktionsfaktor schräg"
             },
             "cd": {
               "value": 1,
               "unit": "",
               "symbol": "c_d",
               "label": "Dynamischer Faktor",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J60",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
+              "norm_ref": "6.3.5",
               "group_label": "dynamischer Faktor"
             },
             "qp": {
@@ -1421,83 +1430,97 @@
               "unit": "kN/m²",
               "symbol": "q_p",
               "label": "Staudruck",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J17",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2 (12)"
+              "norm_ref": "6.2 (11)"
             },
-            "qk_max_bh": {
-              "value": 0.5370179419139907,
+            "tabelle": {
+              "value": "31",
+              "unit": "",
+              "symbol": "\"Tabelle\"",
+              "label": "Tabelle der Druckbeiwerte",
+              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!F40",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang C",
+              "description": "SIA 261, Anhang C, Tabelle 31, h : b : d = 0,3 : 1 : 1 – 0,05 : 1 : 1."
+            },
+            "qk_max_cf1": {
+              "value": 0.5079358313687444,
               "unit": "kN/m²",
               "symbol": "q_(k,\"max\",\"b·h\")",
               "label": "Maximale globale Windkraft, Bezugsfläche b·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J69",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_min_bh": {
-              "value": 0,
+            "qk_min_cf1": {
+              "value": 0.0,
               "unit": "kN/m²",
               "symbol": "q_(k,\"min\",\"b·h\")",
               "label": "Minimale globale Windkraft, Bezugsfläche b·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!J70",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_max_dh": {
-              "value": 0.6001965233156366,
+            "qk_max_cf2": {
+              "value": 0.5686644546245533,
               "unit": "kN/m²",
               "symbol": "q_(k,\"max\",\"d·h\")",
               "label": "Maximale globale Windkraft, Bezugsfläche d·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!K69",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_min_dh": {
-              "value": 0,
+            "qk_min_cf2": {
+              "value": 0.0,
               "unit": "kN/m²",
               "symbol": "q_(k,\"min\",\"d·h\")",
               "label": "Minimale globale Windkraft, Bezugsfläche d·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!K70",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_max_db": {
+            "qk_max_cf3": {
               "value": -0.25271432560658386,
               "unit": "kN/m²",
               "symbol": "q_(k,\"max\",\"d·b\")",
               "label": "Maximale globale Windkraft, Bezugsfläche d·b",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!L69",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_min_db": {
+            "qk_min_cf3": {
               "value": -0.2660150795858777,
               "unit": "kN/m²",
               "symbol": "q_(k,\"min\",\"d·b\")",
               "label": "Minimale globale Windkraft, Bezugsfläche d·b",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Velo!L70",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             }
           },
           "steps": [
             {
+              "name": "Windprofilbeiwert",
+              "result": "ch",
+              "uses": [
+                "z",
+                "zg",
+                "alpha_r"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "6.2.1.2 (12)",
+              "formula": "c_h = 1.6 dot ((z / z_g)^alpha_r + 0.375)^2"
+            },
+            {
               "name": "Staudruck",
-              "level": 3,
               "result": "qp",
               "uses": [
                 "ch",
                 "qp0"
               ],
               "norm": "SIA 261",
-              "norm_ref": "6.2 (12)",
+              "norm_ref": "6.2 (11)",
               "formula": "q_p = c_h dot q_(p 0)",
               "bold": true
             }
@@ -1508,12 +1531,12 @@
           "workbook": "Belastungsannahmen.xlsm",
           "sheet": "WL-Fluchttreppe+Geräte",
           "results": [
-            "qk_max_bh",
-            "qk_min_bh",
-            "qk_max_dh",
-            "qk_min_dh",
-            "qk_max_db",
-            "qk_min_db"
+            "qk_max_cf1",
+            "qk_min_cf1",
+            "qk_max_cf2",
+            "qk_min_cf2",
+            "qk_max_cf3",
+            "qk_min_cf3"
           ],
           "tables": [
             {
@@ -1522,8 +1545,9 @@
               "place": "below",
               "formula": "q_k = c_\"red\" dot c_d dot c_f dot q_p",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
-              "note": "Bezugsflächen aus den Gebäudeabmessungen: b·h und d·h sind die Fassadenflächen quer bzw. längs zur Windrichtung, d·b die Dachfläche. $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über alle Windrichtungen (Blatt WL-Fluchttreppe+Geräte, Tabelle «Globale Kraftbeiwerte»); $c_\"red\"$ ist der Reduktionsfaktor der jeweiligen Bezugsfläche. Negative Werte sind Sog.",
+              "norm_ref": "6.2.3.2",
+              "source": "python:domains/wind_source.py",
+              "note": "SIA 261, Anhang C, Tabelle 59a: $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über die Windrichtungen; $c_\"red\"$ nach Figur 9 für b·h und d·h in den Windrichtungen 0°, 90° und 180°, der grössere der beiden in jeder anderen Windrichtung (6.3.3), 1.0 für jede andere Bezugsfläche (6.3.2). Negative Werte sind Sog.",
               "columns": [
                 {
                   "label": "Globale Windkraft",
@@ -1554,16 +1578,16 @@
                 [
                   "maximale globale Windkraft",
                   "q_k =",
-                  "qk_max_bh",
-                  "qk_max_dh",
-                  "qk_max_db"
+                  "qk_max_cf1",
+                  "qk_max_cf2",
+                  "qk_max_cf3"
                 ],
                 [
                   "minimale globale Windkraft",
                   "q_k =",
-                  "qk_min_bh",
-                  "qk_min_dh",
-                  "qk_min_db"
+                  "qk_min_cf1",
+                  "qk_min_cf2",
+                  "qk_min_cf3"
                 ]
               ]
             },
@@ -1573,14 +1597,24 @@
               "place": "below",
               "formula": "q_k = q_p dot (c_\"pe\" - c_\"pi\")",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
-              "source": "python:domains/wind.py",
-              "note": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen 0°, 15°, 45°, 90°, mit den Aussen- und Innendruckbeiwerten $c_\"pe\"$ und $c_\"pi\"$ des Blatts WL-Fluchttreppe+Geräte (Druckbeiwerte 59a). gleichmässig: gleichmässig verteilte Öffnungen, beide Innendruckbeiwerte des Blatts (glm. (+) und glm. (-)) berücksichtigt; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D. Negative Werte sind Sog.",
+              "norm_ref": "6.2.2.1",
+              "source": "python:domains/wind_source.py",
+              "note": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen der Tabelle 59a; aussen: $c_\"pe\" dot q_p$ allein; gleichmässig: gleichmässig verteilte Öffnungen; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D; netto: mit dem Innendruckbeiwert derselben Fläche. Negative Werte sind Sog.",
               "columns": [
                 {
                   "label": "Lokale Windkraft",
                   "kind": "wide",
                   "unit": "kN/m²"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "aussen"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "aussen"
                 },
                 {
                   "label": "max",
@@ -1635,7 +1669,9 @@
               ],
               "rows": [
                 [
-                  "Wand A",
+                  "A",
+                  0.3990226193788166,
+                  -0.232763194637643,
                   0.465526389275286,
                   -0.29926696453411245,
                   0.0,
@@ -1648,7 +1684,9 @@
                   -0.06650376989646942
                 ],
                 [
-                  "Wand B",
+                  "B",
+                  -0.1995113096894083,
+                  -0.232763194637643,
                   -0.13300753979293886,
                   -0.29926696453411245,
                   0.0,
@@ -1661,7 +1699,9 @@
                   -0.06650376989646942
                 ],
                 [
-                  "Wand C",
+                  "C",
+                  0.465526389275286,
+                  -0.2660150795858777,
                   0.5320301591717554,
                   -0.33251884948234717,
                   0.698289583912929,
@@ -1674,7 +1714,9 @@
                   0.0
                 ],
                 [
-                  "Wand D",
+                  "D",
+                  -0.16625942474117358,
+                  -0.2660150795858777,
                   -0.09975565484470415,
                   -0.33251884948234717,
                   0.06650376989646942,
@@ -1687,7 +1729,9 @@
                   0.0
                 ],
                 [
-                  "Dach E",
+                  "E",
+                  -0.232763194637643,
+                  -0.3990226193788166,
                   -0.16625942474117356,
                   -0.465526389275286,
                   -0.03325188494823474,
@@ -1700,7 +1744,9 @@
                   -0.13300753979293883
                 ],
                 [
-                  "Dach F",
+                  "F",
+                  -0.16625942474117358,
+                  -0.3990226193788166,
                   -0.09975565484470415,
                   -0.465526389275286,
                   0.06650376989646942,
@@ -1713,7 +1759,9 @@
                   -0.13300753979293883
                 ],
                 [
-                  "Dach G",
+                  "G",
+                  -0.1995113096894083,
+                  -0.29926696453411245,
                   -0.13300753979293886,
                   -0.3657707344305819,
                   -0.03325188494823474,
@@ -1726,7 +1774,9 @@
                   -0.09975565484470417
                 ],
                 [
-                  "Dach H",
+                  "H",
+                  -0.16625942474117358,
+                  -0.232763194637643,
                   -0.09975565484470415,
                   -0.29926696453411245,
                   0.06650376989646942,
@@ -1737,6 +1787,51 @@
                   -0.6317858140164596,
                   0.06650376989646946,
                   0.0
+                ],
+                [
+                  "m (lokal)",
+                  -0.29926696453411245,
+                  -0.5652820441199902,
+                  -0.232763194637643,
+                  -0.6317858140164596,
+                  -0.06650376989646946,
+                  -0.9643046634988067,
+                  -0.06650376989646946,
+                  -0.3657707344305819,
+                  -0.29926696453411245,
+                  -0.831297123705868,
+                  -0.13300753979293886,
+                  -0.29926696453411245
+                ],
+                [
+                  "n (lokal)",
+                  -0.29926696453411245,
+                  -0.5652820441199902,
+                  -0.232763194637643,
+                  -0.6317858140164596,
+                  -0.33251884948234717,
+                  -0.7980452387576332,
+                  -0.09975565484470417,
+                  -0.3657707344305819,
+                  -0.03325188494823471,
+                  -1.030808433395276,
+                  -0.03325188494823471,
+                  -0.3990226193788166
+                ],
+                [
+                  "o (lokal)",
+                  -0.29926696453411245,
+                  -0.6650376989646943,
+                  -0.232763194637643,
+                  -0.7315414688611638,
+                  -0.06650376989646946,
+                  -0.9975565484470414,
+                  -0.06650376989646946,
+                  -0.465526389275286,
+                  -0.2660150795858777,
+                  -0.7647933538093984,
+                  -0.03325188494823471,
+                  -0.3990226193788166
                 ]
               ]
             }
@@ -1747,7 +1842,6 @@
               "unit": "kN/m²",
               "symbol": "q_(p 0)",
               "label": "Referenzwert des Staudrucks",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J6",
               "norm": "SIA 261",
               "norm_ref": "Anhang E",
@@ -1758,7 +1852,6 @@
               "unit": "m",
               "symbol": "b",
               "label": "Gebäudelänge",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J7",
               "norm": "SIA 261",
               "norm_ref": "6.3",
@@ -1770,7 +1863,6 @@
               "unit": "m",
               "symbol": "d",
               "label": "Gebäudebreite",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J8",
               "norm": "SIA 261",
               "norm_ref": "6.3",
@@ -1781,37 +1873,35 @@
               "unit": "m",
               "symbol": "h",
               "label": "Gebäudehöhe",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J9",
               "norm": "SIA 261",
               "norm_ref": "6.3",
               "group": "geometrie"
             },
             "gelaendekategorie": {
-              "value": "IV grossflächige Stadtgebiete",
+              "value": "IV",
               "unit": "",
               "symbol": "\"Geländekategorie\"",
               "label": "Geländekategorie",
-              "level": 1,
               "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!I11",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "Tableau 4",
               "description": "Die Geländekategorie bestimmt die Gradientenhöhe und die Bodenrauigkeit des Windprofils.",
               "choices": [
                 {
-                  "value": "II Seeufer",
+                  "value": "II",
                   "desc": "$z_g$ = 300 m, $alpha_r$ = 0.16"
                 },
                 {
-                  "value": "IIa grosse Ebene",
+                  "value": "IIa",
                   "desc": "$z_g$ = 380 m, $alpha_r$ = 0.19"
                 },
                 {
-                  "value": "III Ortschaften, freies Feld",
+                  "value": "III",
                   "desc": "$z_g$ = 450 m, $alpha_r$ = 0.23"
                 },
                 {
-                  "value": "IV grossflächige Stadtgebiete",
+                  "value": "IV",
                   "desc": "$z_g$ = 526 m, $alpha_r$ = 0.3"
                 }
               ]
@@ -1821,10 +1911,9 @@
               "unit": "m",
               "symbol": "z_g",
               "label": "Gradientenhöhe",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J12",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "Tableau 4",
               "group_label": "Gradientenhöhe"
             },
             "alpha_r": {
@@ -1832,10 +1921,9 @@
               "unit": "",
               "symbol": "alpha_r",
               "label": "Bodenrauigkeit",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J13",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "Tableau 4",
               "group_label": "Bodenrauigkeit"
             },
             "z": {
@@ -1843,10 +1931,9 @@
               "unit": "m",
               "symbol": "z",
               "label": "Höhe über Boden",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J14",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "6.2.1.2",
               "description": "Höhe über Boden, für die der Staudruck bestimmt wird; die Norm setzt sie mindestens zu 5 m an (10 m in Geländekategorie IV).",
               "group_label": "Höhe über Boden"
             },
@@ -1855,45 +1942,52 @@
               "unit": "",
               "symbol": "c_h",
               "label": "Windprofilbeiwert",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J15",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2 (11)",
+              "norm_ref": "6.2.1.2",
               "group_label": "Windprofilbeiwert"
             },
             "cred_bh": {
-              "value": 0.86,
+              "value": 0.8564599684326958,
               "unit": "",
               "symbol": "c_(\"red\", \"b/h\")",
               "label": "Reduktionsfaktor b",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J19",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
+              "norm_ref": "Figur 9",
               "description": "Reduktionsfaktor für die Bezugsfläche b·h, aus dem Verhältnis Länge (b) zu Höhe (h).",
               "group_label": "Reduktionsfaktor b"
             },
             "cred_dh": {
-              "value": 0.88,
+              "value": 0.8784092708646868,
               "unit": "",
               "symbol": "c_(\"red\", \"d/h\")",
               "label": "Reduktionsfaktor d",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J20",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
+              "norm_ref": "Figur 9",
               "description": "Reduktionsfaktor für die Bezugsfläche d·h, aus dem Verhältnis Breite (d) zu Höhe (h).",
               "group_label": "Reduktionsfaktor d"
+            },
+            "cred_max": {
+              "value": 0.8784092708646868,
+              "unit": "",
+              "symbol": "c_(\"red\", \"max\")",
+              "label": "Reduktionsfaktor schräge Windrichtung",
+              "source": "python:domains/wind_source.py",
+              "norm": "SIA 261",
+              "norm_ref": "6.3.3",
+              "description": "Für eine Windrichtung, die um 15° oder mehr von den Bezugsrichtungen abweicht, gilt der ungünstigere (grössere) der beiden Reduktionsfaktoren.",
+              "group_label": "Reduktionsfaktor schräg"
             },
             "cd": {
               "value": 1,
               "unit": "",
               "symbol": "c_d",
               "label": "Dynamischer Faktor",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J60",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
+              "norm_ref": "6.3.5",
               "group_label": "dynamischer Faktor"
             },
             "qp": {
@@ -1901,83 +1995,97 @@
               "unit": "kN/m²",
               "symbol": "q_p",
               "label": "Staudruck",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J17",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2 (12)"
+              "norm_ref": "6.2 (11)"
             },
-            "qk_max_bh": {
-              "value": 0.5147391789986735,
+            "tabelle": {
+              "value": "59a",
+              "unit": "",
+              "symbol": "\"Tabelle\"",
+              "label": "Tabelle der Druckbeiwerte",
+              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!F40",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang C",
+              "description": "SIA 261, Anhang C, Tabelle 59a, h : b : d = 1 : 2 : 5, h ≈ 8 m."
+            },
+            "qk_max_cf1": {
+              "value": 0.5126203499956693,
               "unit": "kN/m²",
               "symbol": "q_(k,\"max\",\"b·h\")",
               "label": "Maximale globale Windkraft, Bezugsfläche b·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J69",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_min_bh": {
-              "value": 0,
+            "qk_min_cf1": {
+              "value": 0.0,
               "unit": "kN/m²",
               "symbol": "q_(k,\"min\",\"b·h\")",
               "label": "Minimale globale Windkraft, Bezugsfläche b·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!J70",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_max_dh": {
-              "value": 0.5559715163344845,
+            "qk_max_cf2": {
+              "value": 0.5549665162328509,
               "unit": "kN/m²",
               "symbol": "q_(k,\"max\",\"d·h\")",
               "label": "Maximale globale Windkraft, Bezugsfläche d·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!K69",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_min_dh": {
-              "value": 0,
+            "qk_min_cf2": {
+              "value": 0.0,
               "unit": "kN/m²",
               "symbol": "q_(k,\"min\",\"d·h\")",
               "label": "Minimale globale Windkraft, Bezugsfläche d·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!K70",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_max_db": {
+            "qk_max_cf3": {
               "value": -0.21946244065834913,
               "unit": "kN/m²",
               "symbol": "q_(k,\"max\",\"d·b\")",
               "label": "Maximale globale Windkraft, Bezugsfläche d·b",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!L69",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_min_db": {
+            "qk_min_cf3": {
               "value": -0.30591734152375943,
               "unit": "kN/m²",
               "symbol": "q_(k,\"min\",\"d·b\")",
               "label": "Minimale globale Windkraft, Bezugsfläche d·b",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Fluchttreppe+Geräte!L70",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             }
           },
           "steps": [
             {
+              "name": "Windprofilbeiwert",
+              "result": "ch",
+              "uses": [
+                "z",
+                "zg",
+                "alpha_r"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "6.2.1.2 (12)",
+              "formula": "c_h = 1.6 dot ((z / z_g)^alpha_r + 0.375)^2"
+            },
+            {
               "name": "Staudruck",
-              "level": 3,
               "result": "qp",
               "uses": [
                 "ch",
                 "qp0"
               ],
               "norm": "SIA 261",
-              "norm_ref": "6.2 (12)",
+              "norm_ref": "6.2 (11)",
               "formula": "q_p = c_h dot q_(p 0)",
               "bold": true
             }
@@ -1988,12 +2096,12 @@
           "workbook": "Belastungsannahmen.xlsm",
           "sheet": "WL-Pavillon",
           "results": [
-            "qk_max_bh",
-            "qk_min_bh",
-            "qk_max_dh",
-            "qk_min_dh",
-            "qk_max_db",
-            "qk_min_db"
+            "qk_max_cf1",
+            "qk_min_cf1",
+            "qk_max_cf2",
+            "qk_min_cf2",
+            "qk_max_cf3",
+            "qk_min_cf3"
           ],
           "tables": [
             {
@@ -2002,8 +2110,9 @@
               "place": "below",
               "formula": "q_k = c_\"red\" dot c_d dot c_f dot q_p",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
-              "note": "Bezugsflächen aus den Gebäudeabmessungen: b·h und d·h sind die Fassadenflächen quer bzw. längs zur Windrichtung, d·b die Dachfläche. $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über alle Windrichtungen (Blatt WL-Pavillon, Tabelle «Globale Kraftbeiwerte»); $c_\"red\"$ ist der Reduktionsfaktor der jeweiligen Bezugsfläche. Negative Werte sind Sog.",
+              "norm_ref": "6.2.3.2",
+              "source": "python:domains/wind_source.py",
+              "note": "SIA 261, Anhang C, Tabelle 31: $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über die Windrichtungen; $c_\"red\"$ nach Figur 9 für b·h und d·h in den Windrichtungen 0°, 90° und 180°, der grössere der beiden in jeder anderen Windrichtung (6.3.3), 1.0 für jede andere Bezugsfläche (6.3.2). Negative Werte sind Sog.",
               "columns": [
                 {
                   "label": "Globale Windkraft",
@@ -2034,16 +2143,16 @@
                 [
                   "maximale globale Windkraft",
                   "q_k =",
-                  "qk_max_bh",
-                  "qk_max_dh",
-                  "qk_max_db"
+                  "qk_max_cf1",
+                  "qk_max_cf2",
+                  "qk_max_cf3"
                 ],
                 [
                   "minimale globale Windkraft",
                   "q_k =",
-                  "qk_min_bh",
-                  "qk_min_dh",
-                  "qk_min_db"
+                  "qk_min_cf1",
+                  "qk_min_cf2",
+                  "qk_min_cf3"
                 ]
               ]
             },
@@ -2053,14 +2162,24 @@
               "place": "below",
               "formula": "q_k = q_p dot (c_\"pe\" - c_\"pi\")",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
-              "source": "python:domains/wind.py",
-              "note": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen 0°, 15°, 45°, 90°, mit den Aussen- und Innendruckbeiwerten $c_\"pe\"$ und $c_\"pi\"$ des Blatts WL-Pavillon (Druckbeiwerte 31). gleichmässig: gleichmässig verteilte Öffnungen, beide Innendruckbeiwerte des Blatts (glm. (+) und glm. (-)) berücksichtigt; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D. Negative Werte sind Sog.",
+              "norm_ref": "6.2.2.1",
+              "source": "python:domains/wind_source.py",
+              "note": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen der Tabelle 31; aussen: $c_\"pe\" dot q_p$ allein; gleichmässig: gleichmässig verteilte Öffnungen; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D; netto: mit dem Innendruckbeiwert derselben Fläche. Negative Werte sind Sog.",
               "columns": [
                 {
                   "label": "Lokale Windkraft",
                   "kind": "wide",
                   "unit": "kN/m²"
+                },
+                {
+                  "label": "max",
+                  "kind": "number",
+                  "group": "aussen"
+                },
+                {
+                  "label": "min",
+                  "kind": "number",
+                  "group": "aussen"
                 },
                 {
                   "label": "max",
@@ -2115,7 +2234,9 @@
               ],
               "rows": [
                 [
-                  "Wand A",
+                  "A",
+                  0.465526389275286,
+                  -0.232763194637643,
                   0.6051843060578718,
                   -0.33251884948234717,
                   0.0,
@@ -2128,7 +2249,9 @@
                   -0.06650376989646942
                 ],
                 [
-                  "Wand B",
+                  "B",
+                  -0.16625942474117358,
+                  -0.2660150795858777,
                   -0.02660150795858778,
                   -0.33251884948234717,
                   0.0,
@@ -2141,7 +2264,9 @@
                   -0.06650376989646942
                 ],
                 [
-                  "Wand C",
+                  "C",
+                  0.465526389275286,
+                  -0.232763194637643,
                   0.5652820441199902,
                   -0.33251884948234717,
                   0.698289583912929,
@@ -2154,7 +2279,9 @@
                   0.0
                 ],
                 [
-                  "Wand D",
+                  "D",
+                  -0.16625942474117358,
+                  -0.2660150795858777,
                   -0.06650376989646943,
                   -0.33251884948234717,
                   0.06650376989646942,
@@ -2167,7 +2294,9 @@
                   0.0
                 ],
                 [
-                  "Dach E",
+                  "E",
+                  -0.29926696453411245,
+                  -0.33251884948234717,
                   -0.19286093269976137,
                   -0.43227450432705133,
                   -0.09975565484470417,
@@ -2180,7 +2309,9 @@
                   -0.16625942474117358
                 ],
                 [
-                  "Dach F",
+                  "F",
+                  -0.16625942474117358,
+                  -0.3657707344305819,
                   -0.06650376989646943,
                   -0.46552638927528606,
                   0.06650376989646942,
@@ -2193,7 +2324,9 @@
                   -0.13300753979293892
                 ],
                 [
-                  "Dach G",
+                  "G",
+                  -0.16625942474117358,
+                  -0.33251884948234717,
                   -0.02660150795858778,
                   -0.43227450432705133,
                   -0.09975565484470417,
@@ -2206,7 +2339,9 @@
                   -0.16625942474117358
                 ],
                 [
-                  "Dach H",
+                  "H",
+                  -0.16625942474117358,
+                  -0.1995113096894083,
                   -0.02660150795858778,
                   -0.29926696453411245,
                   0.06650376989646942,
@@ -2217,6 +2352,51 @@
                   -0.6317858140164596,
                   0.09975565484470417,
                   0.0
+                ],
+                [
+                  "m (lokal)",
+                  -0.29926696453411245,
+                  -0.5652820441199902,
+                  -0.19951130968940833,
+                  -0.6650376989646943,
+                  -0.06650376989646946,
+                  -1.030808433395276,
+                  -0.06650376989646946,
+                  -0.3990226193788166,
+                  -0.33251884948234717,
+                  -0.831297123705868,
+                  -0.13300753979293886,
+                  -0.33251884948234717
+                ],
+                [
+                  "n (lokal)",
+                  -0.29926696453411245,
+                  -0.5652820441199902,
+                  -0.15960904775152665,
+                  -0.6650376989646943,
+                  -0.33251884948234717,
+                  -0.831297123705868,
+                  -0.13300753979293886,
+                  -0.33251884948234717,
+                  -0.06650376989646946,
+                  -1.030808433395276,
+                  -0.06650376989646946,
+                  -0.3990226193788166
+                ],
+                [
+                  "o (lokal)",
+                  0.29926696453411245,
+                  -0.6650376989646943,
+                  0.3990226193788166,
+                  -0.7647933538093984,
+                  0.5320301591717554,
+                  -1.0308084333952763,
+                  0.5320301591717554,
+                  -0.4987782742235207,
+                  -0.16625942474117356,
+                  -0.5652820441199903,
+                  0.465526389275286,
+                  -0.43227450432705133
                 ]
               ]
             }
@@ -2227,7 +2407,6 @@
               "unit": "kN/m²",
               "symbol": "q_(p 0)",
               "label": "Referenzwert des Staudrucks",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J6",
               "norm": "SIA 261",
               "norm_ref": "Anhang E",
@@ -2238,7 +2417,6 @@
               "unit": "m",
               "symbol": "b",
               "label": "Gebäudelänge",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J7",
               "norm": "SIA 261",
               "norm_ref": "6.3",
@@ -2250,7 +2428,6 @@
               "unit": "m",
               "symbol": "d",
               "label": "Gebäudebreite",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J8",
               "norm": "SIA 261",
               "norm_ref": "6.3",
@@ -2261,37 +2438,35 @@
               "unit": "m",
               "symbol": "h",
               "label": "Gebäudehöhe",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J9",
               "norm": "SIA 261",
               "norm_ref": "6.3",
               "group": "geometrie"
             },
             "gelaendekategorie": {
-              "value": "IV grossflächige Stadtgebiete",
+              "value": "IV",
               "unit": "",
               "symbol": "\"Geländekategorie\"",
               "label": "Geländekategorie",
-              "level": 1,
               "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!I11",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "Tableau 4",
               "description": "Die Geländekategorie bestimmt die Gradientenhöhe und die Bodenrauigkeit des Windprofils.",
               "choices": [
                 {
-                  "value": "II Seeufer",
+                  "value": "II",
                   "desc": "$z_g$ = 300 m, $alpha_r$ = 0.16"
                 },
                 {
-                  "value": "IIa grosse Ebene",
+                  "value": "IIa",
                   "desc": "$z_g$ = 380 m, $alpha_r$ = 0.19"
                 },
                 {
-                  "value": "III Ortschaften, freies Feld",
+                  "value": "III",
                   "desc": "$z_g$ = 450 m, $alpha_r$ = 0.23"
                 },
                 {
-                  "value": "IV grossflächige Stadtgebiete",
+                  "value": "IV",
                   "desc": "$z_g$ = 526 m, $alpha_r$ = 0.3"
                 }
               ]
@@ -2301,10 +2476,9 @@
               "unit": "m",
               "symbol": "z_g",
               "label": "Gradientenhöhe",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J12",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "Tableau 4",
               "group_label": "Gradientenhöhe"
             },
             "alpha_r": {
@@ -2312,10 +2486,9 @@
               "unit": "",
               "symbol": "alpha_r",
               "label": "Bodenrauigkeit",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J13",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "Tableau 4",
               "group_label": "Bodenrauigkeit"
             },
             "z": {
@@ -2323,10 +2496,9 @@
               "unit": "m",
               "symbol": "z",
               "label": "Höhe über Boden",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J14",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2",
+              "norm_ref": "6.2.1.2",
               "description": "Höhe über Boden, für die der Staudruck bestimmt wird; die Norm setzt sie mindestens zu 5 m an (10 m in Geländekategorie IV).",
               "group_label": "Höhe über Boden"
             },
@@ -2335,45 +2507,52 @@
               "unit": "",
               "symbol": "c_h",
               "label": "Windprofilbeiwert",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J15",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2 (11)",
+              "norm_ref": "6.2.1.2",
               "group_label": "Windprofilbeiwert"
             },
             "cred_bh": {
-              "value": 0.85,
+              "value": 0.8039684021070969,
               "unit": "",
               "symbol": "c_(\"red\", \"b/h\")",
               "label": "Reduktionsfaktor b",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J19",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
+              "norm_ref": "Figur 9",
               "description": "Reduktionsfaktor für die Bezugsfläche b·h, aus dem Verhältnis Länge (b) zu Höhe (h).",
               "group_label": "Reduktionsfaktor b"
             },
             "cred_dh": {
-              "value": 0.95,
+              "value": 0.9000905718496207,
               "unit": "",
               "symbol": "c_(\"red\", \"d/h\")",
               "label": "Reduktionsfaktor d",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J20",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
+              "norm_ref": "Figur 9",
               "description": "Reduktionsfaktor für die Bezugsfläche d·h, aus dem Verhältnis Breite (d) zu Höhe (h).",
               "group_label": "Reduktionsfaktor d"
+            },
+            "cred_max": {
+              "value": 0.9000905718496207,
+              "unit": "",
+              "symbol": "c_(\"red\", \"max\")",
+              "label": "Reduktionsfaktor schräge Windrichtung",
+              "source": "python:domains/wind_source.py",
+              "norm": "SIA 261",
+              "norm_ref": "6.3.3",
+              "description": "Für eine Windrichtung, die um 15° oder mehr von den Bezugsrichtungen abweicht, gilt der ungünstigere (grössere) der beiden Reduktionsfaktoren.",
+              "group_label": "Reduktionsfaktor schräg"
             },
             "cd": {
               "value": 1,
               "unit": "",
               "symbol": "c_d",
               "label": "Dynamischer Faktor",
-              "level": 3,
               "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J60",
               "norm": "SIA 261",
-              "norm_ref": "6.3",
+              "norm_ref": "6.3.5",
               "group_label": "dynamischer Faktor"
             },
             "qp": {
@@ -2381,83 +2560,97 @@
               "unit": "kN/m²",
               "symbol": "q_p",
               "label": "Staudruck",
-              "level": 3,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J17",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.2 (12)"
+              "norm_ref": "6.2 (11)"
             },
-            "qk_max_bh": {
-              "value": 0.5370179419139907,
+            "tabelle": {
+              "value": "31",
+              "unit": "",
+              "symbol": "\"Tabelle\"",
+              "label": "Tabelle der Druckbeiwerte",
+              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!F40",
+              "norm": "SIA 261",
+              "norm_ref": "Anhang C",
+              "description": "SIA 261, Anhang C, Tabelle 31, h : b : d = 0,3 : 1 : 1 – 0,05 : 1 : 1."
+            },
+            "qk_max_cf1": {
+              "value": 0.5079358313687444,
               "unit": "kN/m²",
               "symbol": "q_(k,\"max\",\"b·h\")",
               "label": "Maximale globale Windkraft, Bezugsfläche b·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J69",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_min_bh": {
-              "value": 0,
+            "qk_min_cf1": {
+              "value": 0.0,
               "unit": "kN/m²",
               "symbol": "q_(k,\"min\",\"b·h\")",
               "label": "Minimale globale Windkraft, Bezugsfläche b·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!J70",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_max_dh": {
-              "value": 0.6001965233156366,
+            "qk_max_cf2": {
+              "value": 0.5686644546245533,
               "unit": "kN/m²",
               "symbol": "q_(k,\"max\",\"d·h\")",
               "label": "Maximale globale Windkraft, Bezugsfläche d·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!K69",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_min_dh": {
-              "value": 0,
+            "qk_min_cf2": {
+              "value": 0.0,
               "unit": "kN/m²",
               "symbol": "q_(k,\"min\",\"d·h\")",
               "label": "Minimale globale Windkraft, Bezugsfläche d·h",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!K70",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_max_db": {
+            "qk_max_cf3": {
               "value": -0.25271432560658386,
               "unit": "kN/m²",
               "symbol": "q_(k,\"max\",\"d·b\")",
               "label": "Maximale globale Windkraft, Bezugsfläche d·b",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!L69",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             },
-            "qk_min_db": {
+            "qk_min_cf3": {
               "value": -0.2660150795858777,
               "unit": "kN/m²",
               "symbol": "q_(k,\"min\",\"d·b\")",
               "label": "Minimale globale Windkraft, Bezugsfläche d·b",
-              "level": 1,
-              "source": "excel:Belastungsannahmen.xlsm!WL-Pavillon!L70",
+              "source": "python:domains/wind_source.py",
               "norm": "SIA 261",
-              "norm_ref": "6.3"
+              "norm_ref": "6.2.3.2"
             }
           },
           "steps": [
             {
+              "name": "Windprofilbeiwert",
+              "result": "ch",
+              "uses": [
+                "z",
+                "zg",
+                "alpha_r"
+              ],
+              "norm": "SIA 261",
+              "norm_ref": "6.2.1.2 (12)",
+              "formula": "c_h = 1.6 dot ((z / z_g)^alpha_r + 0.375)^2"
+            },
+            {
               "name": "Staudruck",
-              "level": 3,
               "result": "qp",
               "uses": [
                 "ch",
                 "qp0"
               ],
               "norm": "SIA 261",
-              "norm_ref": "6.2 (12)",
+              "norm_ref": "6.2 (11)",
               "formula": "q_p = c_h dot q_(p 0)",
               "bold": true
             }
@@ -2607,7 +2800,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -2618,7 +2810,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -2629,7 +2820,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -2640,7 +2830,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -2651,7 +2840,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -2797,7 +2985,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -2808,7 +2995,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -2819,7 +3005,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -2830,7 +3015,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -2841,7 +3025,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -2987,7 +3170,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -2998,7 +3180,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3009,7 +3190,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3020,7 +3200,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3031,7 +3210,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3177,7 +3355,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3188,7 +3365,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3199,7 +3375,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3210,7 +3385,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3356,7 +3530,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3367,7 +3540,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3378,7 +3550,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3389,7 +3560,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3400,7 +3570,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3546,7 +3715,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3557,7 +3725,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3568,7 +3735,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3579,7 +3745,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3590,7 +3755,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3736,7 +3900,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3747,7 +3910,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3758,7 +3920,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3769,7 +3930,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3780,7 +3940,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3926,7 +4085,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3937,7 +4095,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3948,7 +4105,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -3959,7 +4115,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -3970,7 +4125,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -4115,7 +4269,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4126,7 +4279,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4137,7 +4289,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4148,7 +4299,6 @@
               "unit": "",
               "symbol": "\"Nutzlast\"",
               "label": "Nutzlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.2",
@@ -4293,7 +4443,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4304,7 +4453,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4315,7 +4463,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4326,7 +4473,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -4338,7 +4484,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -4484,7 +4629,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4495,7 +4639,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4506,7 +4649,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4517,7 +4659,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -4529,7 +4670,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -4675,7 +4815,6 @@
               "unit": "",
               "symbol": "\"Kategorie\"",
               "label": "Nutzungskategorie",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4687,7 +4826,6 @@
               "unit": "",
               "symbol": "\"Nutzfläche\"",
               "label": "Art der Nutzfläche",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4698,7 +4836,6 @@
               "unit": "",
               "symbol": "\"Beispiel\"",
               "label": "Beispiel",
-              "level": 2,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.1.2",
@@ -4709,7 +4846,6 @@
               "unit": "kN/m²",
               "symbol": "q_k",
               "label": "Flächenlast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",
@@ -4720,7 +4856,6 @@
               "unit": "kN",
               "symbol": "Q_k",
               "label": "Einzellast",
-              "level": 1,
               "source": "norm:SIA 261:2020, Tabelle 8",
               "norm": "SIA 261",
               "norm_ref": "8.2.1",

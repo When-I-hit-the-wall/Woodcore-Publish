@@ -108,33 +108,33 @@ def _instance(row, index):
     source = _source()
     calc = engine.Calculation()
 
-    def add(name, value, symbol, unit, label, level, norm_ref, description=None,
+    def add(name, value, symbol, unit, label, norm_ref, description=None,
             source=source, norm=NORM, group=GROUP, group_label=None):
         calc.add_var(
             name=name, value=value, unit=unit, symbol=symbol, label=label,
-            level=level, source=source, norm=norm, norm_ref=norm_ref,
+            source=source, norm=norm, norm_ref=norm_ref,
             description=description, group=group, group_label=group_label,
         )
 
     # The order is the order the report prints them (docs/typst/api-conventions.md §10bis), and the levels are the split: the category and its two values from level 1, what the category *is* from level 2.
-    add("kategorie", row["id"], "\"Kategorie\"", "", "Nutzungskategorie", 1,
+    add("kategorie", row["id"], "\"Kategorie\"", "", "Nutzungskategorie",
         NORM_REF_CATEGORY, description=_notes(row["notes_category"]))
     add("nutzflaeche", row["nutzflaeche"], "\"Nutzfläche\"", "",
-        "Art der Nutzfläche", 2, NORM_REF_CATEGORY)
+        "Art der Nutzfläche", NORM_REF_CATEGORY)
     # Not every category has an example in the norm (Büroflächen has none): a var with nothing in it would print an empty value rather than say nothing.
     if row["beispiel"]:
-        add("beispiel", row["beispiel"], "\"Beispiel\"", "", "Beispiel", 2,
+        add("beispiel", row["beispiel"], "\"Beispiel\"", "", "Beispiel",
             NORM_REF_CATEGORY)
 
     if row["q_k"] is None:
         # Category E: the norm gives no value, so this instance carries none either. What it carries instead is the sentence saying so, which is what the report refuses with.
         add("hinweis", _notes([table["project_specific_note"]]), "\"Nutzlast\"",
-            "", "Nutzlast", 1, NORM_REF_PROJECT)
+            "", "Nutzlast", NORM_REF_PROJECT)
         results = ["hinweis"]
     else:
-        add("q_k", row["q_k"], "q_k", table["units"]["q_k"], "Flächenlast", 1,
+        add("q_k", row["q_k"], "q_k", table["units"]["q_k"], "Flächenlast",
             NORM_REF_VALUES, description=_notes(row["notes_q"]))
-        add("Q_k", row["Q_k"], "Q_k", table["units"]["Q_k"], "Einzellast", 1,
+        add("Q_k", row["Q_k"], "Q_k", table["units"]["Q_k"], "Einzellast",
             NORM_REF_VALUES, description=_notes(row["notes_Q"]))
         results = ["q_k", "Q_k"]
 

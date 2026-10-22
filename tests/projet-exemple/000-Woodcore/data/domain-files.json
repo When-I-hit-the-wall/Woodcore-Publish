@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "files": {
+    "check": {
+      "BI-01": "/Timber-checks/Bending/BI-01.typ",
+      "BI-02": "/Timber-checks/Bending/BI-02.typ",
+      "BI-03": "/Timber-checks/Bending/BI-03.typ",
+      "DR-01": "/Timber-checks/Compression/DR-01.typ",
+      "DR-02": "/Timber-checks/Compression/DR-02.typ",
+      "FE-01": "/Timber-checks/Bending/FE-01.typ",
+      "FE-02": "/Timber-checks/Buckling/FE-02.typ",
+      "KI-01": "/Timber-checks/Lateral-torsional/KI-01.typ",
+      "KI-02": "/Timber-checks/Lateral-torsional/KI-02.typ",
+      "KN-01": "/Timber-checks/Buckling/KN-01.typ",
+      "SC-01": "/Timber-checks/Shear/SC-01.typ",
+      "ZT-01": "/Timber-checks/Tension/ZT-01.typ",
+      "ZT-02": "/Timber-checks/Tension/ZT-02.typ"
+    },
+    "steel": {
+      "ST-01": "/Steel-checks/Bending/ST-01.typ",
+      "ST-02": "/Steel-checks/Shear/ST-02.typ"
+    },
+    "dead-load": {
+      "EL+AL-Dach mit Wasser": "/Permanent-loads/EL+AL-Dach mit Wasser.typ",
+      "EL+AL-Dach ohne Wasser": "/Permanent-loads/EL+AL-Dach ohne Wasser.typ",
+      "EL+AL-DachRand": "/Permanent-loads/EL+AL-DachRand.typ",
+      "EL+AL-Wand": "/Permanent-loads/EL+AL-Wand.typ"
+    },
+    "snow-load": {
+      "SL": "/Variable-loads/Snow/SL.typ"
+    },
+    "wind-load": {
+      "WL-Fluchttreppe+Geräte": "/Variable-loads/Wind/WL-Fluchttreppe+Geräte.typ",
+      "WL-Pavillon": "/Variable-loads/Wind/WL-Pavillon.typ",
+      "WL-Velo": "/Variable-loads/Wind/WL-Velo.typ"
+    },
+    "live-load": {
+      "A1": "/Variable-loads/Live/A1.typ",
+      "A2": "/Variable-loads/Live/A2.typ",
+      "A3": "/Variable-loads/Live/A3.typ",
+      "B": "/Variable-loads/Live/B.typ",
+      "C1": "/Variable-loads/Live/C1.typ",
+      "C2": "/Variable-loads/Live/C2.typ",
+      "C3": "/Variable-loads/Live/C3.typ",
+      "D": "/Variable-loads/Live/D.typ",
+      "E": "/Variable-loads/Live/E.typ",
+      "F": "/Variable-loads/Live/F.typ",
+      "G": "/Variable-loads/Live/G.typ",
+      "H": "/Variable-loads/Live/H.typ"
+    },
+    "connector": {
+      "SD-10": "/Connectors/SD-10.typ"
+    },
+    "connection": {
+      "VU-MP-1": "/Connections/VU-MP-1.typ"
+    },
+    "script": {
+      "dreigelenk": "/Scripts/dreigelenk.typ"
+    },
+    "journal": {
+      "cu": "/100-Service criteria agreement/journal.typ",
+      "bp": "/200-Basis of design/journal.typ",
+      "rs": "/300-Statical report/journal.typ"
+    }
+  }
+}

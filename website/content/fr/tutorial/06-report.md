@@ -13,23 +13,23 @@ Chaque section commence par la même ligne, qui rend toutes les commandes de Woo
 
 Die Schneelast wird nach SIA 261 ermittelt.
 
-#show-calc("snow-load", "SL")
+#include domain-file("snow-load", "SL")
 ```
 
-Le texte est le vôtre, dans la langue du rapport ; les commandes impriment ce que l'export a calculé. La [référence](~/docs/) les liste toutes, avec leurs exemples.
+Le texte est le vôtre, dans la langue du rapport ; les commandes impriment ce que l'export a calculé : un calcul de Woodcore est écrit en entier dans un fichier à lui, que la section inclut. La [référence](~/docs/) les liste toutes, avec leurs exemples.
 
 ## Rattacher les calculs à une position
 
-`#calc-block` groupe les calculs qui concernent une ou plusieurs positions, et imprime en tête la ligne que `#member` imprime de chacune au niveau 1 :
+`#position` nomme une position sur une ligne, son id dans la couleur de son type, et le calcul qui la concerne suit dans un `#domain` à lui -- ou le fichier que Woodcore a écrit pour une vérification, `#include domain-file("check", "ZT-01")` :
 
-{{example calc-block-1}}
+{{example domain-1}}
 
 ## Trois niveaux de détail
 
 Chaque commande imprime plus ou moins selon le **niveau** : 1 le résultat, pour le maître d'ouvrage ; 2 le calcul important, pour l'ingénieur ; 3 tout le détail, pour le vérificateur. Le niveau du rapport se choisit à l'export (étape 8), et un appel peut imposer le sien :
 
 ```typ
-#show-calc("snow-load", "SL", level: 3)
+#var("s_k", domain: ("snow-load", "SL"), level: 3)
 ```
 
 > [!tip]

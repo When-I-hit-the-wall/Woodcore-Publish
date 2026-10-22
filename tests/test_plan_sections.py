@@ -3,6 +3,8 @@
 The engineer's answers of 06.10.2026: a plan's storey is a free designation of any length (`storey`) beside the one character of its positions' numbers (`floor`), which is proposed from it; a section plan carries storey lines -- drawn with the storey's designation in a bubble at both ends -- and storey boxes, which a sheet highlights; and a page turned in its document turns everything drawn on it, so the drawing stays on the architecture. Every field is additive: a 1.0 or 1.1 source is read as it is, and a plan without them is drawn byte for byte as before (tests/test_plan_style.py's frozen hashes).
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 import json
 import math
@@ -194,6 +196,6 @@ def test_the_opening_is_a_rectangle_and_a_wedge_in_its_top_right_corner():
     assert math.isclose(thin[3][1], 0.18 * 20)
     out = []
     plan_svg._opening(out, points, sz)
-    assert len(out) == 2 and 'fill="#111111"' in out[1] and 'stroke="#111111"' in out[0]
+    assert len(out) == 2 and f'fill="{plan_svg.INK}"' in out[1] and f'stroke="{plan_svg.INK}"' in out[0]
     swatch = plan_svg.legend_swatch("Ö")
-    assert swatch.count("<polygon") == 2 and 'fill="#111111"' in swatch, "the legend follows the symbol"
+    assert swatch.count("<polygon") == 2 and f'fill="{plan_svg.INK}"' in swatch, "the legend follows the symbol"

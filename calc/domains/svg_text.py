@@ -5,11 +5,12 @@ The static models' own, moved here unchanged (statics_svg_layout and statics_svg
 Kept to what QtSvg (SVG Tiny 1.2) and resvg read alike: a subscript is a second `<text>` set smaller and lower, Tiny having neither baseline-shift nor a <tspan> both renderers read alike; `font-family` names one bare family. No Qt.
 """
 
+from domains import svg_draw  # the one writer of an SVG number and text (D6)
 import re
 from xml.sax.saxutils import escape
 
 # One family, not a list: QtSvg takes the whole font-family string as a single name (statics_svg.py's own finding, v0.87).
-FONT = "Arial"
+FONT = svg_draw.FONT
 
 # Arial's own advance for each character, as a fraction of the font size, measured once from the font and grouped by width. It is `FONT`'s first family, and the metric-compatible substitute a machine without it falls back to (Liberation Sans) has the same advances -- so QtSvg in Woodcore and resvg in the report set these texts alike. A character not listed takes ARIAL_DEFAULT, the width of a digit and of most lowercase letters.
 #
@@ -95,13 +96,10 @@ def text_width(text, size):
     return sum(advance(chunk, size * (SUB_SCALE if sub else 1.0)) for chunk, sub in text_runs(text))
 
 
-def _f(value):
-    """A coordinate as short SVG text: three decimals at most, trailing zeros dropped."""
-    text = f"{value:.3f}".rstrip("0").rstrip(".")
-    return "0" if text in ("-0", "") else text
+_f = svg_draw.number_at(3)   # a coordinate at 3 decimals (svg_draw.py, D6)
 
 
-def draw(out, point, content, size, colour, anchor="middle", bold=False, rotate=None, halo=None, halo_colour="#ffffff", raw=False):
+def draw(out, point, content, size, colour, anchor="middle", bold=False, rotate=None, halo=None, halo_colour=svg_draw.colour("ground"), raw=False):
     """A text, its subscripts set smaller and lower, centred on `point` vertically as well -- SVG Tiny has no dominant-baseline, so it is lowered by a third of its size, and no baseline-shift, so a subscript is a <text> of its own. `rotate` turns it about `point`, in degrees; `halo` draws it first in `halo_colour`, `halo` wide, so it reads over whatever is behind it; `raw` sets it as it is written, no subscript cut."""
     weight = ' font-weight="bold"' if bold else ""
     x, y = point
@@ -136,3 +134,9 @@ def draw(out, point, content, size, colour, anchor="middle", bold=False, rotate=
                 )
             else:
                 out.append(f'<text {common} fill="{colour}">{escape(chunk)}</text>')
+
+
+def plain(out, x, y, content, size, colour, number, anchor="middle", extra=""):
+    """A text written as it is -- no subscript cut, set on its baseline, its anchor an attribute -- as the connectors', the dead loads' and the snow's drawings write theirs: the one writer of the three, each handing its own number format (`number`, its precision) and what it adds after the anchor (`extra`: a weight, a turn) (spec 2026-10-20-indices-et-niveaux, ARCH-004). Their bytes are those they wrote; the snow's text is escaped now, as the other two always were."""
+    out.append('<text x="%s" y="%s" font-family="%s" font-size="%s" fill="%s" text-anchor="%s"%s>%s</text>'
+               % (number(x), number(y), FONT, number(size), colour, anchor, extra, svg_draw.escape(content)))

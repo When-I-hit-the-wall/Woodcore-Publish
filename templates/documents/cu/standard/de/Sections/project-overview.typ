@@ -4,20 +4,18 @@
 == Projekt und Umfeld
 // woodcore:/object title
 
-// woodcore:object doc-table project-overview-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Element]),
-    (id: "text", title: [Beschreibung], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Umfeld], text: [[Lage, Höhe über Meer, Topographie, Art des Baugrunds, Nachbarbauten, Schutzzonen …]]),
-    (item: [Architektonisches Konzept], text: [[Organisation nach Geschossen (Untergeschosse, Erdgeschoss, Obergeschosse), Bauweise (Holz, Beton, Verbund), Bestand oder Neubau, Einpassung in die Umgebung, grosse Öffnungen, Innenausbau, Dach (flach, Photovoltaik …), Zielgruppe, Baustoffe mit geringen CO₂-Emissionen …]]),
-    (item: [Projektpläne], text: [[Massgebende Pläne und 3D-Modell der Architektur mit Stand (Index, Datum).]]),
-    (item: [Besonderheiten], text: [[Zufahrts- und Transportbeschränkungen, während der Bauarbeiten aufrechtzuerhaltender Betrieb, Umweltauflagen …]]),
+// woodcore:object table project-overview-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Umfeld], [[Lage, Höhe über Meer, Topographie, Art des Baugrunds, Nachbarbauten, Schutzzonen …]],
+    [Architektonisches Konzept], [[Organisation nach Geschossen (Untergeschosse, Erdgeschoss, Obergeschosse), Bauweise (Holz, Beton, Verbund), Bestand oder Neubau, Einpassung in die Umgebung, grosse Öffnungen, Innenausbau, Dach (flach, Photovoltaik …), Zielgruppe, Baustoffe mit geringen CO₂-Emissionen …]],
+    [Projektpläne], [[Massgebende Pläne und 3D-Modell der Architektur mit Stand (Index, Datum).]],
+    [Besonderheiten], [[Zufahrts- und Transportbeschränkungen, während der Bauarbeiten aufrechtzuerhaltender Betrieb, Umweltauflagen …]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Allgemeine Beschreibung],
-  header: false,
 )
 // woodcore:/object project-overview-table

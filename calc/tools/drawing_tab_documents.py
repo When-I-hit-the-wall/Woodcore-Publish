@@ -128,7 +128,15 @@ class DrawingDocumentsMixin:
         if not name:
             return False
         try:
-            doc = plan_documents.import_file(here, name, owner=self.DOC_OWNER)
+            try:
+                doc = plan_documents.import_file(here, name, owner=self.DOC_OWNER)
+            except plan_documents.DocumentError as exc:
+                # a file of that name lies in Imported Plans/ already, with other bytes (issue #64, D-18): replaced only where the engineer says so, the plans drawn on it following
+                if exc.code != "doc_replace":
+                    raise
+                if not self.ask_replace_document(exc.values.get("file", Path(name).name)):
+                    return False
+                doc = plan_documents.import_file(here, name, owner=self.DOC_OWNER, replace=True)
         except validation.ValidationError as exc:
             notices_ui.tell(self.document_error_text(exc), notifications.CRITICAL, exc=exc, source="drawing_tab")
             return False
@@ -138,6 +146,21 @@ class DrawingDocumentsMixin:
         self.open_document(doc["id"])
         self.app.set_status(self.w("plan_doc_imported", file=Path(doc["file"]).name, id=doc["id"]))
         return True
+
+    def ask_replace_document(self, file):
+        """Whether the engineer replaces the document of the same name in Imported Plans/ by the file he chose -- a method of its own, which a test answers."""
+        return QMessageBox.question(self, "Woodcore", self.w("plan_doc_replace_ask", file=file)) == QMessageBox.StandardButton.Yes
+
+    def write_refresh_documents(self):
+        """The documents of the project read again against their files (plan_documents.refresh_all): one written over in Imported Plans/ by a file of the same name has its pages, its layers and its SHA-256 brought up to date as the tab is shown (issue #64, D-09). A writer, guarded as the others (woodcore_gui.WRITERS); `on_shown` does not call it on a project open read-only, so that showing the tab says nothing there. Returns the ids read again."""
+        try:
+            changed, notes = plan_documents.refresh_all(project.current())
+        except (OSError, project.ProjectError) as exc:
+            notices_ui.tell(self.w("plan_doc_err_other", error=exc), notifications.WARNING, exc=exc, source="drawing_tab")
+            return []
+        for note in notes:
+            notices_ui.tell(note, notifications.WARNING, source="drawing_tab")
+        return changed
 
     def open_document(self, docid):
         """The document `docid` in the middle, every page of it, and its card on the right."""
@@ -292,7 +315,7 @@ class DrawingDocumentsMixin:
         target = self.sources_dir() / f"{source['id']}.json"
         self.domain.check_source(source, target.name)
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(json.dumps(source, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        engine.write_json(target, source)
         return target
 
     def modify_plans(self, pids, change, done_text):

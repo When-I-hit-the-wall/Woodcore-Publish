@@ -4,12 +4,14 @@
 
 These files are the one place in the pipeline where a number is transcribed by hand rather than read (docs/architecture/layout.md §11), so two things have to hold and neither is self-evident.
 
-**The values are the norm's.** Spot values below were read off `ExternalFiles/000-Normes/SIA265-2021-DE.pdf` pages 25, 27 and 66, as images -- the two-column tables do not extract as text. `test_grades_match_the_workbook` is the stronger check: the engineer's `Verbindung.xlsm` carries an independent transcription of the same two tables, and 89 of its 90 values agree with these to the digit. The one that does not is D30's bracketed `f_c,90,d`, which the norm does not give and the workbook fills with the unbracketed value -- so the disagreement is expected and is asserted, rather than left to be rediscovered.
+**The values are the norm's.** Spot values below were read off `SIA265-2021-DE.pdf` pages 25, 27 and 66, as images -- the two-column tables do not extract as text. `test_grades_match_the_workbook` is the stronger check: the engineer's `Verbindung.xlsm` carries an independent transcription of the same two tables, and 89 of its 90 values agree with these to the digit. The one that does not is D30's bracketed `f_c,90,d`, which the norm does not give and the workbook fills with the unbracketed value -- so the disagreement is expected and is asserted, rather than left to be rediscovered.
 
 **The checks fire.** Every guard is exercised against a planted defect. A guard that has never fired is a guard nobody has tested, and these ones only ever run on files that are already correct.
 
 Since v0.70 the same two questions are asked of **SIA 263**, the steel tables. Both of its tables are graphics in the PDF and were read off a render of pages 18 and 19, which is the one case where «read from the norm» means read with the eyes -- so the checks that do not need eyes matter more, not less: a bolt class is named after its own two numbers, and a thick section of a steel is never stronger than a thin one.
 """
+
+TIER = "fast"  # tests/run_tests.py --fast
 
 import copy
 import io

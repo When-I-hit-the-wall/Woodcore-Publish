@@ -26,7 +26,7 @@ import validation
 
 DOMAIN = "script"
 SOURCES = "scripts"          # the folder of the project's sources this domain reads (project.SOURCE_FOLDERS)
-SCHEMA_VERSION = "1.0"
+EXPORT_SCHEMA_VERSION = "1.1"   # 1.1 a result carries the line of its call, which cites it where it names no norm (spec 2026-10-20-indices-et-niveaux, REQ-002); 1.0 is still read   # data/scripts.json; named as every other domain names its export's (v0.120, C5: SCHEMA_VERSION until then)
 EXPORT_FILE = "scripts.json"   # the file of data/ this domain is exported to, named once (write() and calc/variable_sources.py)
 SUFFIX = ".py"
 # How long a script may run before it is given up on, in seconds. A script of this project solves a system of a few dozen equations, which is milliseconds; a minute is room for a bad loop to be caught rather than waited out.
@@ -42,14 +42,15 @@ class ScriptError(validation.ValidationError):
     """A script source that cannot be read: its name, or its identity. A defect in the data, reported like any other -- the export prints it and exits 1."""
 
 
-def sources_dir():
-    """The folder of the project's scripts, whether or not it exists yet."""
-    return project.current().sources_dir / SOURCES
+def sources_dir(here=None):
+    """The folder of the project's scripts, whether or not it exists yet: `Scripts/` at the top of a project laid out by folders, beside the `.typ` that prints each (issue #64, D-12), its sources' `scripts/` before."""
+    here = here or project.current()
+    return here.domain_dir(DOMAIN) if here.has_folders else here.sources_dir / SOURCES
 
 
-def source_paths():
+def source_paths(here=None):
     """Every script of the project, in file-name order. `archives/` is not reached, as no other source's glob reaches it (source_archive.py)."""
-    folder = sources_dir()
+    folder = sources_dir(here)
     return sorted((p for p in folder.glob("*" + SUFFIX) if p.is_file()), key=lambda p: p.name.lower()) if folder.is_dir() else []
 
 
@@ -78,7 +79,7 @@ def check_source(source, path=None):
 
 # --- running one ---------------------------------------------------------------------
 
-def run(path, timeout=TIMEOUT, results_only=False):
+def run(path, timeout=TIMEOUT, results_only=False, calculations=None):
     """Runs the script at `path` in a process of its own and gives back what it did:
 
         {"ok": bool, "reason": str, "seconds": float, "results": [...], "variables": [...], "output": str}
@@ -95,6 +96,11 @@ def run(path, timeout=TIMEOUT, results_only=False):
         arguments += ["--report", str(report_file)]
         if results_only:
             arguments.append("--results-only")
+        if calculations is not None:
+            # the calculations of the export being made, which a script's value() reads in place of the last ones on the disk (ARCH-RISK-804)
+            held = Path(tmp) / "calculations.json"
+            engine.write_json(held, calculations)
+            arguments += ["--calculations", str(held)]
         started = time.monotonic()
         try:
             done = proc.run([program, *arguments], capture_output=True, text=True, encoding="utf-8",
@@ -140,12 +146,14 @@ def record(source, report, path=None):
             "unit": item.get("unit", ""),
             "symbol": item.get("symbol") or name,
             "label": item.get("label") or "",
-            "level": 1,
-            "source": f"python:{where}",
+            "source": f"python:{where}",   # no level: a result is printed from lib/line-levels.json's `*` of the script, 1 (spec 2026-10-20-indices-et-niveaux, UI-002)
         }
         # `norm` and `norm_ref` are always written, "" where the script cites nothing: `get-norm(v)` is a plain field access in Typst, and an empty citation prints nothing (norm-text).
         vars_out[name]["norm"] = item.get("norm", "") or ""
         vars_out[name]["norm_ref"] = item.get("norm_ref", "") or ""
+        # where it names none, the line of its result() call cites it -- «script <id>.py, l. 12» in the right-hand column (REQ-002, Q-005): never written into `norm`, which `_check_citation` and the bibliography read as a document
+        if item.get("line") is not None and not vars_out[name]["norm"]:
+            vars_out[name]["line"] = item["line"]
         if item.get("descr"):
             vars_out[name]["description"] = item["descr"]
         results.append(name)
@@ -163,14 +171,16 @@ def record(source, report, path=None):
     }
 
 
-def prepare(timeout=TIMEOUT):
-    """Reads and runs every script of the project. Returns (records, notes) -- the notes being engine.Note, the window writing each in its own language (section 4bis)."""
+def prepare(timeout=TIMEOUT, calculations=None, reads=None):
+    """Reads and runs every script of the project. Returns (records, notes) -- the notes being engine.Note, the window writing each in its own language (section 4bis). `calculations`, the export's own being made, is what a script's value() reads (`run`); `reads`, a dict, is given what each script read, {id: [[domain, instance, name]]} -- the graph of dependencies' (spec 2026-10-21-graphe-dependances, ARCH-RISK-1105), never written into data/scripts.json."""
     records, notes = {}, []
     for path in source_paths():
         source = check_source(read_source(path), path)
         if source["id"] in records:
             raise ScriptError(f"two scripts are called {source['id']!r} -- a script's name is its id")
-        report = run(path, timeout=timeout, results_only=True)
+        report = run(path, timeout=timeout, results_only=True, calculations=calculations)
+        if reads is not None:
+            reads[source["id"]] = report.get("reads") or []
         entry = record(source, report, path)
         records[source["id"]] = entry
         if not entry["calculated"]:
@@ -181,7 +191,7 @@ def prepare(timeout=TIMEOUT):
 
 def document(records):
     """The whole of `data/scripts.json`, for a caller that validates it without writing it -- `woodcore-cli check`, which reads, builds and validates everything and writes nothing."""
-    return {"schema_version": SCHEMA_VERSION, "scripts": records}
+    return {"schema_version": EXPORT_SCHEMA_VERSION, "scripts": records}
 
 
 def write(records):
@@ -191,7 +201,7 @@ def write(records):
     validation.validate_scripts_business(data)
     out = project.current().data_dir / EXPORT_FILE
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    engine.write_json(out, data)
     return out
 
 

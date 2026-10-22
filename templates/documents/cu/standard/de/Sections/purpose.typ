@@ -21,20 +21,18 @@ Nach der Norm SIA 260 (2013), Ziffern 2.1.2 und 2.2, werden die Nutzungsanforder
 Sie enthält damit die übergeordneten, bauwerksspezifischen Entscheide und dient als Grundlage für das Vorprojekt. Die Schutzziele und der Schutzgrad werden aufgrund einer Risikobewertung festgelegt (Ziffer 2.2.3).
 // woodcore:/object p3
 
-// woodcore:object doc-table document-family
-#doc-table(
-  columns: (
-    (id: "item", title: [Element]),
-    (id: "text", title: [Beschreibung], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Nutzungsvereinbarung], text: [Übergeordnete, bauwerksspezifische Entscheide, gemeinsam mit der Bauherrschaft erarbeitet; Grundlage für das Vorprojekt.]),
-    (item: [Projektbasis], text: [Setzt die Nutzungsvereinbarung in die Fachsprache der Ingenieure, Fachleute und Unternehmungen um: Einwirkungen, Baustoff- und Baugrundeigenschaften, geometrische Grössen und daraus folgende Auswirkungen.]),
-    (item: [Überwachungsplan und Unterhaltsplan], text: [Von der Betreiberin bzw. dem Betreiber des Bauwerks erstellt: Sie regeln Art der Überwachung und Kontrolle sowie allfällig zu treffende Massnahmen.]),
+// woodcore:object table document-family
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Nutzungsvereinbarung], [Übergeordnete, bauwerksspezifische Entscheide, gemeinsam mit der Bauherrschaft erarbeitet; Grundlage für das Vorprojekt.],
+    [Projektbasis], [Setzt die Nutzungsvereinbarung in die Fachsprache der Ingenieure, Fachleute und Unternehmungen um: Einwirkungen, Baustoff- und Baugrundeigenschaften, geometrische Grössen und daraus folgende Auswirkungen.],
+    [Überwachungsplan und Unterhaltsplan], [Von der Betreiberin bzw. dem Betreiber des Bauwerks erstellt: Sie regeln Art der Überwachung und Kontrolle sowie allfällig zu treffende Massnahmen.],
+    table.hline(stroke: 1pt),
   ),
   caption: [Die Dokumente des Bauwerks],
-  header: false,
 )
 // woodcore:/object document-family
 

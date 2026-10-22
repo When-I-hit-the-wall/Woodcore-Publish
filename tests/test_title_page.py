@@ -99,13 +99,13 @@ def _need_typst():
 
 def test_a_new_project_carries_title_typ_at_its_root_and_its_three_documents_set_it():
     here = _project("de")
-    assert here.title_typ == here.root / project.TITLE_FILE and here.title_typ.is_file()
+    assert here.title_typ == here.config_dir / project.TITLE_FILE and here.title_typ.is_file(), "in 000-Typst-Config/ laid out by folders (issue #64)"
     import forms
-    assert here.title_typ.read_bytes() == forms.default().title_typ.read_bytes(), "a new project's title.typ is the default form's (neutral)"
+    assert here.title_typ.read_bytes() == documents.relocate_config_text(here, forms.default().title_typ.read_text(encoding="utf-8")).encode("utf-8"), "a new project's title.typ is the default form's (neutral)"
     for mode in project.MODES:
         assert not (here.document_dir(mode) / project.TITLE_FILE).exists(), f"{mode}: a second title.typ in the document's folder"
         entry = here.document_typ(mode).read_text(encoding="utf-8")
-        assert '#import "/title.typ": title-page' in entry and f'#title-page(document: "{mode}")' in entry, mode
+        assert '#import "/000-Typst-Config/title.typ": title-page' in entry and f'#title-page(document: "{mode}")' in entry, mode
         assert "project-info()" not in entry, f"{mode}: the entry still writes a title page of its own"
 
 
@@ -199,7 +199,7 @@ def test_a_template_without_title_typ_gets_standards_and_its_documents_compile()
     template = templates.read(folder, "user")
     assert not template.error, template.error
     here = project_template.create(conftest.tmpdir("title_template_project") / "P", "P", template=template, document_language="de")
-    assert here.title_typ.read_bytes() == project_template.standard_title().read_bytes()
+    assert here.title_typ.read_bytes() == documents.relocate_config_text(here, project_template.standard_title().read_text(encoding="utf-8")).encode("utf-8")
     if conftest.have_typst():
         for mode in ("cu", "bp"):
             assert _page(_compile(here, mode))[0] == documents.MODE_NAMES["de"][mode], mode
@@ -211,7 +211,7 @@ def test_the_archive_and_the_stamps_fallback_take_title_typ():
     for mode in project.MODES:
         assert here.title_typ in stamps.enumerated(here, mode), mode
         names = [name for _path, name in archive_export.members_of_document(here, mode)]
-        assert project.TITLE_FILE in names, (mode, names[:20])
+        assert here.rel(here.title_typ) in names, (mode, names[:20])
 
 
 def test_a_project_saved_as_a_template_carries_title_typ():
@@ -221,7 +221,7 @@ def test_a_project_saved_as_a_template_carries_title_typ():
     saved = None
     try:
         saved = templates.save_project(here, "Mit Titel", "user", {})
-        assert (saved.folder / project.TITLE_FILE).read_text(encoding="utf-8") == marked
+        assert (saved.folder / here.rel(here.title_typ)).read_text(encoding="utf-8") == marked
     finally:
         if saved is not None:
             shutil.rmtree(saved.folder, ignore_errors=True)
@@ -255,7 +255,7 @@ def test_the_bfh_form_prints_its_title_page_in_the_three_documents_in_the_projec
     for lang in LANGS:
         here = _project(lang, form="bfh", key=("bfh-form", lang))
         assert forms.current(here).ref == "builtin:bfh"
-        assert here.title_typ.read_bytes() == (conftest.ROOT / "templates" / "forms" / "bfh" / project.TITLE_FILE).read_bytes(), "the BFH form's title.typ"
+        assert here.title_typ.read_bytes() == documents.relocate_config_text(here, (conftest.ROOT / "templates" / "forms" / "bfh" / project.TITLE_FILE).read_text(encoding="utf-8")).encode("utf-8"), "the BFH form's title.typ"
         _bfh_checks(here, lang, "bfh form")
 
 

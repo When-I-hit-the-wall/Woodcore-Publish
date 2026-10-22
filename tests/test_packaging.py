@@ -93,7 +93,7 @@ def test_the_launcher_starts_the_version_or_the_sources_the_settings_choose():
 def test_the_launcher_starts_a_checkout_by_the_window_s_file_of_its_time():
     """The window is calc/tools/woodcore_gui.py since v0.96 and was catalog_gui.py until then: a checkout of either age is started by the file it has, the newer name first (launcher.GUI_SCRIPTS) -- and where it has neither, the launcher says the sources are not to be found rather than starting nothing."""
     assert launcher.GUI_SCRIPTS == ("woodcore_gui.py", "catalog_gui.py")
-    assert all((ROOT / "calc" / "tools" / name).is_file() for name in launcher.GUI_SCRIPTS), "this checkout lacks the window's file or its shim"
+    assert (ROOT / "calc" / "tools" / launcher.GUI_SCRIPTS[0]).is_file(), "this checkout lacks the window's file"   # the shim catalog_gui.py left the checkout in v0.120 (spec 2026-10-19-base-saine-nettoyage, REQ-001); the launcher still starts an older checkout by it
     old = conftest.tmpdir("launch_old_checkout")
     (old / "calc" / "tools").mkdir(parents=True)
     (old / "calc" / "tools" / "catalog_gui.py").write_text("", encoding="utf-8")
@@ -103,28 +103,6 @@ def test_the_launcher_starts_a_checkout_by_the_window_s_file_of_its_time():
     gone = launcher.dev_checkout({"launcher": {"dev_checkout": str(old / "nowhere")}})
     assert gone.name == "woodcore_gui.py" and not gone.is_file()
     assert launcher.dev_checkout({}) is None
-
-
-def test_the_window_s_old_file_name_is_a_shim_that_nothing_imports():
-    """calc/tools/catalog_gui.py was the window until v0.96. It stays for one caller -- the launcher installed with Woodcore 0.83 to 0.90, which starts the engineer's sources by that path -- and does one thing: it runs woodcore_gui.py as the program. It holds none of the window's names, so a module importing it would get no window at all: the window is imported as woodcore_gui, from the sources as from Woodcore.exe."""
-    import ast
-    tools = ROOT / "calc" / "tools"
-    shim = (tools / "catalog_gui.py").read_text(encoding="utf-8")
-    assert not [n for n in ast.walk(ast.parse(shim)) if isinstance(n, (ast.FunctionDef, ast.ClassDef, ast.Assign))], "the shim holds names of its own"
-    assert 'with_name("woodcore_gui.py")' in shim and 'run_name="__main__"' in shim and 'if __name__ == "__main__":' in shim
-    old = re.compile(r"^\s*(?:import|from)\s+" + "catalog" + r"_gui\b|__import__\(\s*[\"']" + "catalog" + "_gui", re.M)
-    offenders = []
-    for folder in ("calc", "packaging", "tests"):
-        for path in sorted((ROOT / folder).rglob("*.py")):
-            if any(part.startswith(".") for part in path.relative_to(ROOT).parts):
-                continue
-            offenders += [f"{path.relative_to(ROOT).as_posix()}:{text.count(chr(10), 0, found.start()) + 1}"
-                          for text in [path.read_text(encoding="utf-8")] for found in old.finditer(text)]
-    assert not offenders, "the window's old name imported where woodcore_gui is meant:\n  " + "\n  ".join(offenders)
-    # since v0.117 Woodcore.exe starts the start screen, which imports the window itself and hands over to its main()
-    assert "import woodcore_start" in (PACKAGING / "entry_gui.py").read_text(encoding="utf-8"), "Woodcore.exe does not start the window"
-    assert '"woodcore_gui")' in (tools / "woodcore_start.py").read_text(encoding="utf-8"), "the start screen does not import the window"
-    assert r"calc\tools\woodcore_gui.py" in (ROOT / "Woodcore.bat").read_text(encoding="utf-8"), "Woodcore.bat does not start the window"
 
 
 def test_the_launcher_runs_dry_on_a_profile_of_its_own():

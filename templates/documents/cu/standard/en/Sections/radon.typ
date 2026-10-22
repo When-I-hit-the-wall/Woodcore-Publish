@@ -4,16 +4,11 @@
 == Radon exposure
 // woodcore:/object title
 
-// woodcore:object doc-choice radon-risk
-#doc-choice(
-  label: [Radon risk (radon map of Switzerland, FOPH)],
-  options: (
-    (id: "low", label: [Low risk: no shell construction measures]),
-    (id: "medium", label: [Medium risk: measures in accordance with FOPH recommendations (e.g. sealed pipe penetrations)]),
-    (id: "high", label: [High risk: measures in accordance with FOPH recommendations (e.g. sealed penetrations, base slab of sealing class 1)]),
-  ),
-  selected: none,
-)
+// woodcore:object text radon-risk
+*Radon risk (radon map of Switzerland, FOPH)*:
+- Low risk: no shell construction measures
+- Medium risk: measures in accordance with FOPH recommendations (e.g. sealed pipe penetrations)
+- High risk: measures in accordance with FOPH recommendations (e.g. sealed penetrations, base slab of sealing class 1)
 // woodcore:/object radon-risk
 
 // woodcore:object text p1

@@ -2,22 +2,22 @@
 
 = Einwirkungen
 
-// Every case of the load workbooks, one sheet each (docs/domain/calculation-domains.md §3.3). Name the cases by hand instead -- #show-calc("snow-load", "SL", level: 1) -- to choose each one's level and leave some out. The live loads are SIA 261's Tabelle 8, one category per call: #show-live-load("A1").
+// Every case of the load workbooks, one sheet each (docs/domain/calculation-domains.md §3.3). Name the cases by hand instead -- #include domain-file("snow-load", "SL") -- to leave some out. The live loads are SIA 261's Tabelle 8, one category a file: #include domain-file("live-load", "A1").
 
 == Eigengewicht
 
-#for sheet in instance-ids("dead-load") {
-  show-calc("dead-load", sheet)
+#for sheet in ids("dead-load") {
+  include domain-file("dead-load", sheet)
 }
 
 == Schneelast
 
-#for sheet in instance-ids("snow-load") {
-  show-calc("snow-load", sheet)
+#for sheet in ids("snow-load") {
+  include domain-file("snow-load", sheet)
 }
 
 == Windlast
 
-#for sheet in instance-ids("wind-load") {
-  show-calc("wind-load", sheet)
+#for sheet in ids("wind-load") {
+  include domain-file("wind-load", sheet)
 }

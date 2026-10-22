@@ -6,7 +6,7 @@
 
 **The document is saved as a content template** («template de fond», the engineer's word of 06.10.2026, against the *layout* template, «template de forme», which the project's properties switch) with «Enregistrer comme template de fond…» -- in the three documents, the report included since 06.10.2026: a small dialog asks the name, the description and the place -- the engineer's own templates or the office's shared folder --, and calc/doc_templates.py's `save_from_document` writes it, a refusal said in the window's words (settings_dialog.doc_error_text), an existing template asked about before it is written over (`overwrite`, the old version going to archives/) and what is worth knowing about the template (`notes`: a file it names and does not carry, a file whose tags Woodcore cannot read) said in a box. It writes nothing into the project, so it is open to a project held read-only.
 
-**The document switches its content template** with «Changer de template de fond…» (calc/tools/content_switch_dialog.py over calc/content_switch.py): the document and the template compared section by section in a tree, each section kept, taken or dropped, what is replaced or dropped archived -- never deleted. Rare, since a content template is chosen when the project is made, and possible in each of the three documents of a project laid out in three; refused, with its reason, to a project written as one report and to one held read-only.
+**A document's content template is chosen once**, as the document is made in the «Projet» tab (project_tab.py, issue #90); «Changer de template de fond…», which compared a document with another content template section by section, was retired in 0.122 with calc/content_switch.py.
 
 **Every write goes through the modules that own it**: a section's state, title and place through calc/structure.py (`set_enabled`, `set_title`, `add_section`, `add_group`, `remove_section`, `rename_section`, `move_node`, `tag_section`), an object's body through calc/typst_objects.py (`write_object`, `insert_object`, `remove_object`: **only the bytes between the object's two tags change**), an object's place and what is imported through calc/doc_import.py (`move_object`, `import_items`), and what is shared with the other documents through calc/sync.py. The tab asks, says a refusal in the window's own words -- one `st_why_<code>` for each code of the five modules -- in a banner over the tree and never in a modal, and reads the tree again from what was written. An object **written by hand** in a form Woodcore does not write asks first, naming what will change, and then rewrites it; a file changed under a pane since the pane loaded refuses the write (`changed`) and reads it again.
 
@@ -173,7 +173,7 @@ class StructureTab(StructureTabShareMixin, StructureTabWriteMixin, StructureTabV
         box.addWidget(self.bar([
             ("add_section", self.on_add_section), ("add_group", self.on_add_group), ("add_object", self.on_add_object),
             ("remove", self.on_remove), ("rename", self.on_rename), ("import", self.on_import), ("tag", self.on_tag),
-            ("save_template", self.on_save_template), ("switch_template", self.on_switch_template),
+            ("save_template", self.on_save_template),
         ]))
         # The «+ Objet» button opens the menu of the kinds an object can be.
         self.object_menu = QMenu(self)
@@ -296,6 +296,9 @@ class StructureTab(StructureTabShareMixin, StructureTabWriteMixin, StructureTabV
             self.compile_button.setToolTip(self.t("st_compile_tip", document=self.document_name()))
         self.sync_status = None
         self.stop_watching()
+        if not self.isVisible():
+            # a tab not shown compiles nothing: a change of document made from the «Projet» tab compiled the whole document of a Structure seen once (issue #87) -- its page is given its document again as it is shown (showEvent, load_pane)
+            self.pane_loaded = False
         self.reload(reset=True)
         if self.pane_loaded:
             self.load_pane(auto=self.isVisible())
@@ -347,8 +350,8 @@ class StructureTab(StructureTabShareMixin, StructureTabWriteMixin, StructureTabV
         """What says the project's layout template was switched: the size and the time written of its `Template/form.json`, `Template/template.typ` and `title.typ` -- None for each that is not there."""
         try:
             here = project.current()
-            root = Path(here.typst_root)
-            paths = (root / "Template" / "form.json", root / "Template" / "template.typ", Path(here.title_typ))
+            form = Path(here.template_dir)   # in 000-Typst-Config/ laid out by folders (issue #64)
+            paths = (form / "form.json", form / "template.typ", Path(here.title_typ))
         except (project.ProjectError, AttributeError):
             return None
         out = []
@@ -441,7 +444,6 @@ class StructureTab(StructureTabShareMixin, StructureTabWriteMixin, StructureTabV
             tag_ok = self.has_untagged(self.read_text(node))
         self.set_button("tag", not read_only and tag_ok, self.t("st_read_only") if read_only else (none if node is None else self.t("st_off_tag")))
         self.set_button("save_template", True)     # it writes nothing into the project: open to a project held read-only
-        self.set_button("switch_template", not read_only and self.switchable(), self.t("st_read_only") if read_only else self.t("st_off_switch_single"))
         status = self.sync_status
         shared = status is not None and bool(status.blocks)
         self.sync_box.setVisible(shared)

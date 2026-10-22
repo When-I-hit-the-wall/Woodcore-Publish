@@ -503,25 +503,24 @@ def plan(here, language=None, names=None, *, strict=False):
     if lang is None:
         return p
     p.language = lang
+    # The three documents laid out as 0.111 to 0.118 laid them out -- `1_…`, `2_…`, `3_…` in the project's language, what they share at the top of the project (documents.legacy_modes_layout): the second step (calc/project_migrate_folders.py) takes them on into the layout by folders, each step proved and undone on its own.
     if names is None:
-        folders = documents.folders_for(lang)
+        folders = dict(documents.LEGACY_MODE_FOLDERS[lang])
     elif isinstance(names, dict):
-        folders = {**documents.folders_for(lang), **names}
+        folders = {**documents.LEGACY_MODE_FOLDERS[lang], **names}
     else:
         folders = list(names)
     entries = {mode: documents.ENTRY_NAMES[lang][mode] for mode in ("cu", "bp")}
     try:
-        layout = documents.modes_layout(folders, entries, rs_entry=here.report_typ.name)
+        layout = documents.legacy_modes_layout(folders, entries, rs_entry=here.report_typ.name,
+                                               sources=here.layout["sources"], archives=here.layout["archives"])
     except project.ProjectError as exc:
         refuse(_note("bad_names", str(exc), names=str(folders)))
         return p
-    layout["sources"] = here.layout["sources"]
-    layout["archives"] = here.layout["archives"]
-    layout = project.full_layout(layout)
     p.layout = layout
     p.folders = {mode: PurePosixPath(layout[project.ENTRY_KEYS[mode]]).parent.as_posix() for mode in project.MODES}
     p.entries = {mode: PurePosixPath(layout[project.ENTRY_KEYS[mode]]).name for mode in project.MODES}
-    shared = {documents.GENERATED_FOLDER, project.IMAGES_FOLDER, project.TEMPLATE_FOLDER, project.FORMULAS_FOLDER, *SHARED_FILES, here.file.name,
+    shared = {documents.LEGACY_GENERATED_FOLDER, project.IMAGES_FOLDER, project.TEMPLATE_FOLDER, project.FORMULAS_FOLDER, *SHARED_FILES, here.file.name,
               PurePosixPath(here.layout["sources"]).parts[0], PurePosixPath(here.layout["archives"]).parts[0]}
     shared = {s.casefold() for s in shared}
     for mode, folder in p.folders.items():
@@ -533,10 +532,14 @@ def plan(here, language=None, names=None, *, strict=False):
     # The renames, in their order: what the three share first, the report's folder last.
     new = top / p.folders["rs"]
     p.new_report_dir = new
-    moves = [Move(generated, top / documents.GENERATED_FOLDER, "the export and the engine")]
+    moves = [Move(generated, top / documents.LEGACY_GENERATED_FOLDER, "the export and the engine")]
     for folder, what in ((project.IMAGES_FOLDER, "the pictures"), (project.TEMPLATE_FOLDER, "the form (Template/)"), (project.FORMULAS_FOLDER, "the calculation domains (Formules/)")):
         if (old / folder).is_dir():
             moves.append(Move(old / folder, top / folder, what))
+    # the domains the export wrote out (spec 2026-10-21-commandes-typst-refonte, REQ-017), named from the root by data/domain-files.json: up to the top, the root of the three
+    for folder in sorted({path.split("/")[0] for path in project.DOMAIN_FOLDERS.values()}):
+        if (old / folder).is_dir():
+            moves.append(Move(old / folder, top / folder, f"the domains written out ({folder}/)"))
     for file in SHARED_FILES:
         if (old / file).is_file():
             moves.append(Move(old / file, top / file, file))
@@ -921,7 +924,7 @@ def _run(here, p, *, skip_data, update_engine, log, archive):
             raise MigrationError("failed", f"the report does not compile as it is written -- the migration compares against it, so it needs one that does:\n{error}")
         reference = read_pdf(ref / "reference.pdf")
         _write_json(ref / "reference.json", reference)
-        (ref / "reference.txt").write_text("\n\f\n".join(reference["pages"]), encoding="utf-8")
+        (ref / "reference.txt").write_text("\n\f\n".join(reference["pages"]), encoding="utf-8", newline="\n")
 
         # The plan made again, strictly, now that the engine and the export are there: a path the first plan let pass because the reference was to write its target must reach it now, and nothing may have moved since.
         again = plan(here, language=p.language, names=p.folders, strict=True)
@@ -1004,7 +1007,7 @@ def _run(here, p, *, skip_data, update_engine, log, archive):
             _say(log, f"made {_rel(root, create.folder)}/{create.entry} from {create.template}")
         migrated = project.Project.load(here.file)
         import export_all
-        seeded = export_all.seed(migrated)
+        seeded = export_all.seed(migrated)   # the journals listed in data/domain-files.json where their documents lie now, among it
         record["seeded"] = [_rel(root, migrated.data_dir / name) for name in seeded]
         book.state("verifying")
 
@@ -1369,12 +1372,23 @@ def command(argv=None):
     except SystemExit as exc:
         return int(exc.code or 0)
     try:
+        import project_migrate_folders as folders
         if args.rollback:
-            rollback(args.rollback, lock_owner=args.lock_owner)
+            log_file = Path(args.rollback) / LOG_FILE
+            kind = json.loads(log_file.read_text(encoding="utf-8")).get("kind") if log_file.is_file() else None
+            (folders.rollback if kind == folders.KIND else rollback)(args.rollback, lock_owner=args.lock_owner)
             return 0
         here = project.Project.load(args.project) if args.project else project.current()
-        outcome = run(here, language=args.language, names=args.names, skip_data=args.skip_data,
-                      update_engine=args.update_engine, dry_run=args.dry_run, lock_owner=args.lock_owner)
+        # Two steps, each proved and undone on its own (issue #64, spec 2026-10-15 ARCH-RISK-A06): a report alone into three documents (this module), then three documents into the layout by folders (project_migrate_folders); a project in three documents takes the second alone.
+        if here.has_modes:
+            outcome = folders.run(here, skip_data=args.skip_data, update_engine=args.update_engine, dry_run=args.dry_run, lock_owner=args.lock_owner)
+        else:
+            outcome = run(here, language=args.language, names=args.names, skip_data=args.skip_data,
+                          update_engine=args.update_engine, dry_run=args.dry_run, lock_owner=args.lock_owner)
+            if args.dry_run:
+                print("migrate: then, once in three documents, the second step moves the project into the layout by folders (000-Typst-Config/, 000-Woodcore/, 100-, 200-, 300-, Domains/ …)")
+            else:
+                folders.run(project.Project.load(here.file), skip_data=args.skip_data, lock_owner=args.lock_owner)
     except MigrationError as exc:
         print(f"migrate: {exc}", file=sys.stderr)
         for diff in exc.diffs:

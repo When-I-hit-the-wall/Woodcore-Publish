@@ -47,7 +47,7 @@ class Entry:
     context: dict = field(default_factory=dict)   # what an `ids` option offers, by option name
     always: tuple = ()               # options written even at their default (show-polar-moment's N, V, M)
     preset: dict = field(default_factory=dict)    # options set when the entry is first shown (the forces a polar moment was saved with)
-    call_fn: object = None           # values -> the call, where call_command is not enough (the member check's own call_show_check_member)
+    call_fn: object = None           # values -> the call, where call_command is not enough (a figure of a drawing, a domain's #include)
     snippet_fn: object = None        # values -> the Typst the preview compiles in place of the header and the call (a member check's draft)
     panel: object = None             # a panel of the entry's own (the plans' CommandOptions), in place of the SpecPanel
     view: str = ""                    # the view of the command's declaration the panel offers (display_options.Spec.for_view): "display" for a command the «Formules» tab writes, "" for all of it
@@ -274,6 +274,14 @@ class SpecPanel(QWidget):
             combo.currentTextChanged.connect(self._edited)
             self.controls[option.name] = (option, combo)
             return (label, combo)
+        if kind == "switch":
+            # a part of a figure the level decides (UI-003): by the level, the default and not written -- yes -- no
+            combo = QComboBox()
+            for value in ("auto", "true", "false"):
+                combo.addItem(t(f"ds_switch_{value}"), value)
+            combo.currentIndexChanged.connect(self._edited)
+            self.controls[option.name] = (option, combo)
+            return (label, combo)
         if kind in ("level", "choice"):
             combo = QComboBox()
             for value in (option.choices or opts.LEVELS):
@@ -349,7 +357,7 @@ class SpecPanel(QWidget):
             control.setChecked(bool(value))
         elif kind == "width":
             control.setCurrentText(str(value))
-        elif kind in ("level", "choice"):
+        elif kind in ("level", "choice", "switch"):
             index = control.findData(str(value))
             control.setCurrentIndex(max(index, 0))
         elif kind in ("title", "caption"):
@@ -438,6 +446,10 @@ class SpecPanel(QWidget):
                 value = control.currentData()
                 if value:
                     out[name] = value
+            elif kind == "switch":
+                value = control.currentData()
+                if value != "auto":
+                    out[name] = value == "true"
             elif kind in ("title", "caption"):
                 combo, line = control
                 state = combo.currentData()
@@ -480,7 +492,7 @@ class SpecPanel(QWidget):
                 out[name] = control.isChecked()
             elif kind == "width":
                 out[name] = control.currentText()
-            elif kind in ("level", "choice"):
+            elif kind in ("level", "choice", "switch"):
                 out[name] = control.currentData()
             elif kind in ("title", "caption"):
                 combo, line = control
@@ -883,14 +895,18 @@ class DisplayTab:
         self.view = self.VIEWS[0]
 
     def set_view(self, key, enter=True):
-        """The view `key` (views.py): the list stays, the other panes change. The page is compiled only in «Affichage», and only once the tab is shown (review A10)."""
+        """The view `key` (views.py): the list stays, the other panes change. The page is compiled only in «Affichage», and only once the tab has been shown (`live`, review A10) -- the one `set_view` of every tab with «Affichage» since v0.120 (spec 2026-10-19-base-saine-nettoyage, ARCH-RISK-104), where four were written."""
         if key not in self.VIEWS or not hasattr(self, "panes"):
             return
         self.view = key
         on = key == "display"
         if on:
-            self.update_display(force=True)
-        self.panes.show(on, enter and self.isVisible())
+            self.prepare_display()
+        self.panes.show(on, enter and getattr(self, "live", False))
+
+    def prepare_display(self):
+        """What the display is told before «Affichage» is opened: by default the entries of what the tab has chosen (`update_display`); a tab that builds its call itself (the loads, the member checks: `fill_command`) says so here."""
+        self.update_display(force=True)
 
     def update_display(self, force=False):
         """The display told what the tab has chosen: nothing is done outside «Affichage», where nothing is seen."""
@@ -903,8 +919,10 @@ class DisplayTab:
         return []
 
     def showEvent(self, event):
+        """The tab shown for the first time is `live`: until then nothing is compiled -- the window builds every tab when it opens (test_views)."""
         super().showEvent(event)
-        if getattr(self, "view", None) == "display":
+        self.live = True
+        if getattr(self, "view", None) == "display" and hasattr(self, "panes"):
             self.panes.show(True)
 
     def loop_entry(self, command, call):

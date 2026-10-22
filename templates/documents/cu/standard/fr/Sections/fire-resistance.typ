@@ -8,17 +8,8 @@
 Les exigences de protection incendie sont fixées selon les prescriptions suisses de protection incendie (AEAI), la documentation Lignum Protection incendie et le concept de protection incendie [constructif / technique]. L'incendie est traité comme une action accidentelle selon la norme SIA 261, ch. 15. Les exigences relatives aux éléments porteurs sont les suivantes :
 // woodcore:/object p1
 
-// woodcore:object doc-choice structure-fire-resistance
-#doc-choice(
-  label: [Résistance au feu de la structure porteuse (général)],
-  options: (
-    (id: "r30", label: [R 30]),
-    (id: "r60", label: [R 60]),
-    (id: "r90", label: [R 90]),
-    (id: "none", label: [Aucune exigence]),
-  ),
-  selected: "r60",
-)
+// woodcore:object text structure-fire-resistance
+*Résistance au feu de la structure porteuse (général)* : R 60
 // woodcore:/object structure-fire-resistance
 
 // woodcore:object text p2

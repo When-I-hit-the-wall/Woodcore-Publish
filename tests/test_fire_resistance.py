@@ -10,6 +10,8 @@ What is held here:
 ⚠️ The Typst part is skipped where `typst` is not on the path.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import math
 import re
@@ -19,9 +21,7 @@ from conftest import ROOT, Skip
 
 from norms import sia265, vkf
 
-import test_timber
 
-TIMBER_TYP = ROOT / "lib" / "timber.typ"
 
 
 def close(a, b, rel=1e-9):
@@ -52,11 +52,6 @@ def test_a_hardwood_names_its_wood():
 
 
 def test_the_woods_and_the_faces_are_written_once():
-    typ = TIMBER_TYP.read_text(encoding="utf-8")
-    woods = re.search(r"#let timber-fire-woods = \(([^)]*)\)", typ).group(1)
-    sides = re.search(r"#let timber-fire-sides = \(([^)]*)\)", typ).group(1)
-    assert tuple(re.findall(r'"([^"]+)"', woods)) == sia265.FIRE_WOODS
-    assert tuple(re.findall(r'"([^"]+)"', sides)) == sia265.FIRE_SIDES
     schema = json.loads((ROOT / "schemas" / "member-check-source.schema.json").read_text(encoding="utf-8"))
     fire = schema["properties"]["fire"]["properties"]
     assert tuple(w for w in fire["wood"]["enum"] if w is not None) == sia265.FIRE_WOODS[1:]
@@ -71,16 +66,13 @@ def test_the_fire_s_domain_imports_no_qt():
 
 
 def test_no_value_of_the_fire_clauses_is_written_in_the_code():
-    """ARCH-002: β_n, d_red, 90 minutes, 80/140 mm, 1.8 and VKF 15-15's minutes are read from calc/norms/ -- never written in the arithmetic that uses them, in Python or in Typst."""
+    """ARCH-002: β_n, d_red, 90 minutes, 80/140 mm, 1.8 and VKF 15-15's minutes are read from calc/norms/ -- never written in the arithmetic that uses them."""
     import inspect
     literals = re.compile(r"(?<![\w.])(0\.8|0\.7|0\.5|0\.9|1\.8|7|90|80|140|30|60|120)(?![\w.])")
     sources = {name: inspect.getsource(getattr(member_check, name)) for name in ("_fire_block", "fire_duration", "_compute")}
     sources["vkf.required_resistance"] = inspect.getsource(vkf.required_resistance)
-    typ = TIMBER_TYP.read_text(encoding="utf-8")
-    start = typ.index("#let timber-fire-of(")
-    sources["timber-fire-of"] = typ[start:typ.index("\n}\n", start)]
     for name, text in sources.items():
-        code = "\n".join(line.split("#", 1)[0] if name != "timber-fire-of" else line.split("//", 1)[0] for line in text.splitlines())
+        code = "\n".join(line.split("#", 1)[0] for line in text.splitlines())
         code = re.sub(r"\"[^\"]*\"|'[^']*'", "\"\"", code)        # the words of a reason, not a value
         found = literals.findall(code)
         assert not found, f"{name} writes {found} -- a value of SIA 265 4.5 or VKF 15-15 belongs in calc/norms/"
@@ -126,30 +118,24 @@ def test_a_building_s_data_is_checked_field_by_field():
         raise AssertionError("an unknown use was accepted")
 
 
-# --- #member(fire:) ----------------------------------------------------------------------
+# --- a member in the fire situation, computed by the export (calc/domains/member_check.py) ------------------------
+# Held against lib/timber.typ's #member(fire:) until the spec 2026-10-21-commandes-typst-refonte retired it (lot 19): the computation is member_check's alone, and the workbooks are held against it here.
 
-BIEGUNG = '#member("FB", b: 140, h: 200, grade: "C24", moisture-class: 1, fire: (duration: 60, sides: ("bottom", "left", "right")), level: 0)'
-
-
-def test_the_biegung_workbook_is_reproduced():
-    """«fire, bending» template, as filled in: C24 140/200, R60 on three faces, q_d,fi 1.9375 kN/m over 5 m."""
-    m_d = 1.9375 * 5 ** 2 / 8                       # kNm, 6.0547 as the workbook's H75
-    got = test_timber._stored(BIEGUNG + '\n#verify-bending("FB", M-y: "%r kNm", stability: false, level: 0)' % m_d,
-                              "FB-verify-bending", ("b", "h", "W_y", "f_m_y_d", "sigma_m_y_d", "eta", "d_ef", "k_h_y"))
-    assert close(got["b"], 30) and close(got["h"], 145) and close(got["d_ef"], 55)
-    assert close(got["W_y"], 105125)
-    assert close(got["f_m_y_d"], 1.8 * 14.1)                   # the workbook's fm,d,fi = 25.38
-    assert close(got["sigma_m_y_d"], 57.59512485136742, 1e-9)
-    assert close(got["eta"], 2.2693114598647526, 1e-9)
-    assert got["k_h_y"] == 1
+def _computed(kind, grade, section, moisture_class, fire=None, **fields):
+    """{key: value} of the rows member_check computes for a check written here, `fire` the fire situation's source fields or None."""
+    src = member_check.new_source("FX-99", kind, fire=fire is not None)
+    src.update(position=None, grade=grade, section=section, moisture_class=moisture_class, **fields)
+    if fire is not None:
+        src["fire"].update(fire)
+    rec = member_check.resolve(member_check.stamp_version(src), {})
+    assert rec["calculable"], rec["reason"]
+    return {row["key"]: row["value"] for row in member_check.compute(rec)["rows"]}
 
 
 def test_the_knicken_workbook_s_geometry_and_k_c_are_reproduced():
     """«fire, buckling» template, «4 seitiger Abbrand»: D30 (Eiche) 140/240, l 2.4 m, R30, N_d,fi 185 kN. Its resistance is k_fi · f_k (EN 1995-1-2); Woodcore's is 1.8 · k_c · f_c,0,d (SIA 265 (51), D-04)."""
-    body = ('#member("FS", b: 140, h: 240, grade: "D30", moisture-class: 1, fire: (duration: 30, sides: ("bottom", "top", "left", "right"), wood: "oak"), level: 0)\n'
-            '#verify-compression("FS", N: "-185 kN", l: 2400, level: 0)')
-    got = test_timber._stored(body, "FS-verify-compression", ("b", "h", "lambda_z", "lambda_rel_z", "k_c_z", "sigma_c_0_d", "f_c_0_d", "f_c_0_k", "E_0_05", "eta"))
-    assert close(got["b"], 96) and close(got["h"], 196)
+    got = _computed("buckling", "D30", {"type": "rec", "b": 140, "h": 240}, 1, N={"value": 185, "unit": "kN"}, l_y=2400, l_z=2400,
+                    fire={"duration": 30, "wood": "oak", "sides": {"bottom": True, "top": True, "left": True, "right": True}})
     assert close(got["lambda_z"], 86.60254037844386)
     assert close(got["lambda_rel_z"], 1.4079669684714229, 1e-9)
     assert close(got["k_c_z"], 0.42262472792804556, 1e-9)
@@ -161,28 +147,17 @@ def test_the_knicken_workbook_s_geometry_and_k_c_are_reproduced():
 
 
 def test_glulam_takes_no_k_h_and_eta_w_stays_in_the_fire():
-    body = '#member("FG", b: 160, h: 320, grade: "GL24h", moisture-class: 2, fire: (duration: 30, sides: ("bottom",)), level: 0)'
-    got = test_timber._stored(body, "FG", ("k_h_y", "f_m_y_d", "eta_w", "h", "b", "beta_n"))
-    assert got["beta_n"] == 0.7 and got["k_h_y"] == 1
-    assert close(got["b"], 160) and close(got["h"], 320 - (0.7 * 30 + 7))
+    got = _computed("bending", "GL24h", {"type": "rec", "b": 160, "h": 320}, 2, M_y={"value": 10, "unit": "kNm"},
+                    fire={"duration": 30, "sides": {"bottom": True, "top": False, "left": False, "right": False}})
+    assert "k_h_y" not in got
     assert close(got["f_m_y_d"], 1.8 * sia265.eta_w(2) * 16.0)
 
 
 def test_a_member_without_fire_is_what_it_was():
-    got = test_timber._stored('#member("NB", b: 160, h: 320, grade: "GL24h", moisture-class: 1, level: 0)', "NB", ("k_h_y", "f_m_y_d", "b"))
-    assert got["b"] == 160 and got["k_h_y"] > 1
-    assert close(got["f_m_y_d"], got["k_h_y"] * 16.0)
-
-
-def test_the_fire_situation_refuses_what_the_norm_does_not_give():
-    def refused(fire, section='b: 120, h: 200', grade='"C24"'):
-        return test_timber._error('#member("X", %s, grade: %s, moisture-class: 1, fire: %s, level: 0)' % (section, grade, fire))
-    assert "4.5.2.4" in refused('(duration: 60, sides: ("bottom", "left", "right"))')
-    assert "90 minutes" in refused('(duration: 120, sides: ("bottom",))')
-    assert "beech" in refused('(duration: 30, sides: ("bottom",))', grade='"D30"')
-    assert "round section" in refused('(duration: 30, sides: ("bottom",))', section="d: 200")
-    assert "no section" in refused('(duration: 90, sides: ("left", "right"))', section="b: 140, h: 200")
-    assert "sides" in refused('(duration: 30, sides: ())')
+    got = _computed("bending", "GL24h", {"type": "rec", "b": 160, "h": 320}, 1, M_y={"value": 10, "unit": "kNm"})
+    rule = sia265.k_h()
+    k_h = min((rule["reference_height"] / 320) ** rule["exponent"], rule["maximum"])   # SIA 265 (5), read off the norm file
+    assert k_h > 1 and close(got["f_m_y_d"], k_h * 16.0), (k_h, got["f_m_y_d"])
 
 
 # --- a check in the fire situation, saved in Woodcore (calc/domains/member_check.py) ---------------
@@ -282,19 +257,11 @@ def test_the_window_s_result_is_the_biegung_workbook():
     assert "k_h_y" not in rows
 
 
-def test_the_draft_hands_member_its_fire():
-    rec = member_check.resolve(_fire_src(position="E001", kind="buckling", N={"value": 185, "unit": "kN"}, l_y=2400, l_z=2400,
-                                         fire={"duration": 30, "wood": "oak", "sides": {"bottom": True, "top": True, "left": True, "right": True}}), POSITIONS)
-    draft = member_check.draft_typst(rec)
-    assert 'fire: (duration: 30, sides: ("bottom", "top", "left", "right"), wood: "oak")' in draft
-    one = member_check.resolve(_fire_src(fire={"duration": 30, "sides": {"bottom": True, "top": False, "left": False, "right": False}}), POSITIONS)
-    assert 'sides: ("bottom",), wood: none' in member_check.draft_typst(one)
-
-
 def test_the_building_file_is_checked_and_written(tmp=None):
     class Here:
         pass
     here = Here()
+    here.rel = lambda path: path.name   # what a message names the file by, as Project.rel does
     d = conftest.probe_dir("fire_building")
     here.building_file = d / "building.json"
     assert member_check.read_building(here) is None

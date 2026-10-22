@@ -37,6 +37,7 @@ import notifications  # noqa: E402  -- every error, warning and information, gat
 import notices_ui  # noqa: E402  -- the red octagon and the orange triangle at the top right, and their panel (v0.117)
 import list_order  # noqa: E402  -- the order of the window's lists and the «Formules» tab's folders, Woodcore-Datei/lists.json (issue #15)
 import variable_sources  # every variable of a project and where it comes from; instance_workbook (calc/variable_sources.py, v0.117)
+import chrome  # noqa: E402  -- the zoom's three actions, the same in the menu and on the start page (issue #85)
 import theme  # the website's look: one palette, one style sheet, light or dark (theme.py, v0.90)
 import legal  # *Fichier → À propos de Woodcore…*: the copyright, the licence and the third-party notices
 
@@ -215,6 +216,32 @@ class WindowMenusMixin:
         self.muted = theme.colour("muted")
         self.marks = (mark_icon(None), mark_icon(QColor(theme.colour("ink"))))
 
+    def take_fonts(self):
+        """The fonts the window states itself, taken from the application's -- whose size is the zoom's (theme.set_zoom) -- when the window is built and again after a zoom: the bold, the titles' a quarter larger, the code's, and the room of a tab's mark (issue #85)."""
+        base = QApplication.font()
+        self.bold_font = QFont(base)
+        self.bold_font.setBold(True)
+        self.title_font = QFont(self.bold_font)
+        self.title_size = "large"
+        if base.pointSizeF() > 0:
+            self.title_font.setPointSizeF(base.pointSizeF() * 1.25)
+            self.title_size = f"{self.title_font.pointSizeF():g}pt"
+        # The site's code font, Cascadia Mono on Windows (theme.py, v0.90) -- Consolas until then, where Qt's own fixed font, Courier New, was thin beside the text around it
+        self.mono_font = theme.mono_font(base.pointSizeF())
+        self.mark_size = QSize(theme.scaled(MARK_PX), theme.scaled(MARK_PX))
+
+    def show_zoom(self):
+        """«Zoom 120 %» in the status bar while the interface is not at its size, nothing at 100 %."""
+        percent = theme.zoom()
+        self.zoom_status.setText(self.t("zoom_status", percent=percent) if percent != theme.ZOOM_DEFAULT else "")
+        self.zoom_status.setVisible(percent != theme.ZOOM_DEFAULT)
+
+    def rezoom(self):
+        """The interface's zoom changed (theme.set_zoom): the fonts the window copied taken again and the window built again, as a change of scheme builds it -- the application's font, which most widgets inherit, has already changed."""
+        self.take_fonts()
+        self.show_zoom()
+        self.rebuild()
+
     def retheme(self):
         """The scheme changed (*Fichier → Apparence*, or Windows while the appearance follows it): the palette and the style sheet are the application's and changed with it, but a widget that stated a colour of its own when it was built -- the orange of a value written over -- is built again, the way a language switch builds the window again."""
         self.take_colours()
@@ -324,7 +351,7 @@ class WindowMenusMixin:
         menu.addAction(self.t("file_open_window"), self.open_in_new_window)
         menu.addAction(self.t("file_close"), self.close_project)
         menu.addSeparator()
-        menu.addAction(self.t("file_properties"), self.edit_properties).setEnabled(not self.read_only)
+        menu.addAction(self.t("file_properties"), self.edit_properties)
         menu.addAction(self.t("file_show_folder"), lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(project.current().root))))
         menu.addAction(self.t("file_open_pdf"), self.open_pdf)
         menu.addAction(self.t("file_open_vscode"), self.open_vscode)
@@ -338,11 +365,16 @@ class WindowMenusMixin:
         menu.addSeparator()
         action = menu.addAction(settings_dialog.menu_text(self.lang), self.open_settings)
         action.setShortcut(QKeySequence(settings_dialog.SHORTCUT))
-        self.add_appearance_menu(menu)
         legal.add_about_action(menu, self, self.lang)   # © 2026 Florian Lamprecht, the licence and the third-party notices (legal.py)
         menu.addSeparator()
         action = menu.addAction(self.t("file_quit"), self.close)
         action.setShortcut(QKeySequence(QKeySequence.StandardKey.Quit))
+        # «Affichage» (issue #85): the interface's zoom and its keys, and «Apparence», which stood in «Fichier» until 0.121
+        view = bar.addMenu(self.t("view_menu"))
+        for action in chrome.zoom_actions(view, self.t):
+            view.addAction(action)
+        view.addSeparator()
+        self.add_appearance_menu(view)
 
     def add_appearance_menu(self, menu):
         """*Apparence*: Comme Windows, Clair, Sombre -- one exclusive group of checks, the engineer's per user (theme.py, v0.90). Read-only or not, it writes only the user's own settings."""
@@ -385,19 +417,9 @@ class WindowMenusMixin:
         self.switch_to(["--home"])
 
     def edit_properties(self):
-        if self.read_only:
-            self.refuse_read_only()
-            return
-        here = project.current()
-        before = config_stamp(here)
-        if home_page.edit_properties(self, self.lang, here) is not None:
-            self.update_title()
-            # The project's config.typ replaced by another style's (the dialog's «Style»): the tabs that show a compiled page are told, so that what they show is compiled again with it.
-            changed = config_stamp(here) != before
-            for tab in self.tabs:
-                hook = getattr(tab, "on_properties_changed", None)
-                if hook is not None:
-                    hook(changed)
+        """*Fichier → Propriétés du projet*: the «Projet» tab brought forward, where the title page, the form, the documents and the version pinned are (issue #87) -- what every tab holds unsaved saved first. A project opened read-only shows it too, nothing in it writable."""
+        self.autosave_all("tab")
+        self.tab_widget.setCurrentIndex(self.project_index())
 
     def open_settings(self):
         """*Fichier → Paramètres…* (Ctrl+,): the settings and the templates a new project is made from (settings_dialog.py, v0.94), «Enregistrer ce projet comme modèle» taking this project's report. It writes the user's settings and templates, never the project, so a project opened read-only offers it too."""
@@ -418,7 +440,9 @@ class WindowMenusMixin:
             notices_ui.tell(self.t("file_no_vscode"), notifications.INFO, key="file_no_vscode", source="woodcore_gui")
             return
         here = project.current()
-        proc.start_detached(code, [str(here.root), str(here.document_typ(self.current_document()))], str(here.root))
+        entry = here.document_typ(self.current_document())
+        # a document not made yet (issue #90) is no file to open: the project's folder alone
+        proc.start_detached(code, [str(here.root)] + ([str(entry)] if entry.is_file() else []), str(here.root))
 
     def ask_migration(self):
         """The banner's «Migrer…»: this window closed -- asking for what is unsaved, as closing always does -- and the project opened again in a process of its own, which asks its migration first (`--migrate`, migrate_dialog.offer). A project is never migrated under a window that has it open: its folders are renamed, and a file this window holds would stop the rename half-way."""

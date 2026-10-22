@@ -38,10 +38,6 @@ NOT_LOADS = ("connection", "connector", "script")
 NOT_JOINTS = ("connection", "connector")
 
 
-def is_link(value):
-    return isinstance(value, dict) and all(isinstance(value.get(key), str) and value.get(key) for key in LINK_KEYS)
-
-
 def links_of(entry):
     """The links an entry carries, {field: link} -- empty where it carries none."""
     found = entry.get(LINKS) if isinstance(entry, dict) else None
@@ -379,3 +375,94 @@ def find_cycle(graph, start):
 
     return visit(start)
 
+
+def find_cycles(graph):
+    """Every circle of `graph` ({node: iterable of nodes}), once each: [[a, b, …, a]] -- one per strongly connected component that holds more than one node or a node naming itself, walked from its smallest node, so the same graph always says the same chains (spec 2026-10-21-graphe-dependances, ARCH-002, ARCH-RISK-1107). `find_cycle` asks for one, from a node."""
+    index, low, stack, on_stack, components = {}, {}, [], set(), []
+    counter = [0]
+    nodes = sorted(set(graph) | {t for targets in graph.values() for t in targets}, key=repr)
+
+    def connect(start):
+        # Tarjan's algorithm, iterative: a deep chain of loads must not reach Python's recursion limit
+        work = [(start, iter(sorted(graph.get(start, ()), key=repr)))]
+        index[start] = low[start] = counter[0]
+        counter[0] += 1
+        stack.append(start)
+        on_stack.add(start)
+        while work:
+            node, targets = work[-1]
+            advanced = False
+            for target in targets:
+                if target not in index:
+                    index[target] = low[target] = counter[0]
+                    counter[0] += 1
+                    stack.append(target)
+                    on_stack.add(target)
+                    work.append((target, iter(sorted(graph.get(target, ()), key=repr))))
+                    advanced = True
+                    break
+                if target in on_stack:
+                    low[node] = min(low[node], index[target])
+            if advanced:
+                continue
+            work.pop()
+            if work:
+                low[work[-1][0]] = min(low[work[-1][0]], low[node])
+            if low[node] == index[node]:
+                component = []
+                while True:
+                    top = stack.pop()
+                    on_stack.discard(top)
+                    component.append(top)
+                    if top == node:
+                        break
+                components.append(component)
+
+    for node in nodes:
+        if node not in index:
+            connect(node)
+    out = []
+    for component in components:
+        members = set(component)
+        if len(component) == 1 and component[0] not in set(graph.get(component[0], ())):
+            continue
+        out.append(_shortest_cycle(graph, members, min(component, key=repr)))
+    return sorted(out, key=repr)
+
+
+def _shortest_cycle(graph, members, start):
+    """The shortest chain from `start` back to itself inside `members`, its nodes' successors taken in order -- breadth first, so a component of thousands of nodes needs no recursion."""
+    from collections import deque
+    parent, queue = {}, deque()
+    for target in sorted(graph.get(start, ()), key=repr):
+        if target in members and target not in parent:
+            parent[target] = start
+            queue.append(target)
+    while queue:
+        node = queue.popleft()
+        if node == start:
+            break
+        for target in sorted(graph.get(node, ()), key=repr):
+            if target in members and target not in parent:
+                parent[target] = node
+                queue.append(target)
+    chain, node = [start], parent[start]
+    while node != start:
+        chain.append(node)
+        node = parent[node]
+    chain.append(start)
+    return chain[::-1]
+
+
+def references(source, path=""):
+    """Every variable a source names, wherever it stands -- a field's link, a static model's magnitude, a figure's text's `vars` --, as [(field, {domain, instance, var, origin?})]: the one walk the graph of dependencies reads a source's variables by (spec 2026-10-21-graphe-dependances, ARCH-RISK-1103; loads_migrate walks the same shape to rename)."""
+    out = []
+    if isinstance(source, dict):
+        if all(isinstance(source.get(key), str) for key in LINK_KEYS):
+            out.append((path or "/", {key: source[key] for key in LINK_KEYS + ("origin",) if key in source}))
+        for key, value in source.items():
+            out += references(value, "%s/%s" % (path, key))
+    elif isinstance(source, list):
+        for i, value in enumerate(source):
+            out += references(value, "%s/%d" % (path, i))
+    return out

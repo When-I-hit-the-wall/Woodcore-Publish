@@ -44,7 +44,7 @@ from sheet_editor_render import (  # split out of this module (issue #30): every
 )
 
 
-# How far apart the pixels of the zoom steps are, and its bounds, in pixels per millimetre.
+# How far apart the pixels of the zoom steps are, and its bounds, in pixels per millimetre. 1.25 and not the Typst pages' 1.1 (pdf_pane.ZOOM_STEP, issue #89): a sheet is a drawing edited object by object, gone through from the whole sheet to one label in a few notches, where a page is read at about its own size.
 ZOOM_STEP = 1.25
 
 
@@ -61,6 +61,8 @@ HANDLE = 9
 
 class _Page(QWidget):
     """The paper, drawn at the canvas's zoom: the compiled page, and over it a frame round every object -- the one chosen in the accent with its resize handle."""
+
+    ZOOMS_ITSELF = True   # Ctrl+wheel zooms the sheet, never the interface (nowheel.py, issue #85)
 
     def __init__(self, canvas):
         super().__init__()

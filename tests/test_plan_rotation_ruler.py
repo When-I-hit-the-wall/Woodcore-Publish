@@ -5,6 +5,8 @@ The engineer, 08.10.2026: «Permettre de tourner les poteaux avec le cercle qui 
 What is held: a selected column shows a circle, which stands at a distance on the screen whatever the zoom; dragging it turns the column -- clockwise on the drawing, 0° above it, Shift by steps of 15° --, in one step of «Annuler» and only where the angle changed, the angle field told as it goes; an Auflager drawn with two points shows none. The ruler shows the distance between two clicks, in metres on a plan with a scale and in the sheet's units on one without, and writes nothing -- no change, no history; Escape takes it away, on the position plan and on the fire-protection plan alike.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 import math
 

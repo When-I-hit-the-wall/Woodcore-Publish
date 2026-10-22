@@ -9,4 +9,4 @@
 #number-digits.update(3)
 
 #set-report-language("fr")
-#show-calc("snow-load", "SL", level: 1)
+#var("s_k", domain: ("snow-load", "SL"), level: 2)

@@ -21,20 +21,18 @@ Selon la norme SIA 260 (2013), ch. 2.1.2 et 2.2, les exigences d'utilisation qui
 Elle contient ainsi les décisions de niveau supérieur propres à l'ouvrage et sert de base à l'avant-projet. Les objectifs et le degré de protection sont fixés sur la base d'une évaluation du risque (ch. 2.2.3).
 // woodcore:/object p3
 
-// woodcore:object doc-table document-family
-#doc-table(
-  columns: (
-    (id: "item", title: [Élément]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Convention d'utilisation], text: [Décisions de niveau supérieur propres à l'ouvrage, établies avec le maître de l'ouvrage ; base de l'avant-projet.]),
-    (item: [Base de projet], text: [Traduit la convention d'utilisation dans le langage technique des ingénieurs, des spécialistes et des entreprises : actions, propriétés des matériaux et du terrain de fondation, grandeurs géométriques et effets qui en résultent.]),
-    (item: [Plan de surveillance et plan d'entretien], text: [Établis par l'exploitant de l'ouvrage : ils règlent le type de surveillance et de contrôle ainsi que les mesures éventuelles à prendre.]),
+// woodcore:object table document-family
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Convention d'utilisation], [Décisions de niveau supérieur propres à l'ouvrage, établies avec le maître de l'ouvrage ; base de l'avant-projet.],
+    [Base de projet], [Traduit la convention d'utilisation dans le langage technique des ingénieurs, des spécialistes et des entreprises : actions, propriétés des matériaux et du terrain de fondation, grandeurs géométriques et effets qui en résultent.],
+    [Plan de surveillance et plan d'entretien], [Établis par l'exploitant de l'ouvrage : ils règlent le type de surveillance et de contrôle ainsi que les mesures éventuelles à prendre.],
+    table.hline(stroke: 1pt),
   ),
   caption: [Les documents de référence de l'ouvrage],
-  header: false,
 )
 // woodcore:/object document-family
 

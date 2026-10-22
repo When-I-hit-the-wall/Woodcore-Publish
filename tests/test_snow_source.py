@@ -8,9 +8,12 @@ What is held, each value worked out here by hand from SIA 261:2020 (pp. 26-29, 1
 * the sketch of the disposition, the tab's alone (`sketch`, D-03) -- the export carries no drawing of the snow (D-02) --, and the export beside a workbook's sheets.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 
 import conftest
+import line_levels
 import registry
 import validation
 from domains import snow_source
@@ -142,7 +145,7 @@ def test_a_height_step_and_a_cornice_are_said_not_computed():
     assert sia261_snow.clause()["cornice"]["min_altitude"] == 800
     values, instance = _loads(_src(h_0=900, height_step=True, schema_version="1.2"))
     step, cornice = instance["vars"]["hoehensprung"], instance["vars"]["schneeueberhang"]
-    assert step["norm_ref"] == "5.3.6" and "Figur 5" in step["description"] and step["level"] == 1
+    assert step["norm_ref"] == "5.3.6" and "Figur 5" in step["description"] and line_levels.level("snow-load", "hoehensprung") == 1 and "level" not in step
     assert cornice["norm_ref"] == "5.3.7" and "nicht berechnet" in cornice["description"]
     assert instance["results"] == _loads(_src(h_0=900))[1]["results"], "nothing more is computed"
 
@@ -174,8 +177,8 @@ def test_the_export_carries_a_snow_source_and_no_drawing():
     validation.validate_calculations_business(data)
 
 
-def test_show_calc_prints_no_drawing_of_the_snow_and_takes_the_manual_selection():
-    """Issues #56, #57 (spec 2026-10-14-neige-vent-affichage-altitude, REQ-001, REQ-002, REQ-004): `show-calc("snow-load", id)` prints no drawing at any level, and `figure-1` is no key of it; `level: -1, shown:` picks the snow's and the wind's vars -- the call «Affichage» writes; a site above 2000 m compiles with no word of the limit."""
+def test_the_written_out_snow_prints_no_drawing_and_compiles_above_2000_m():
+    """Issues #56, #57 (spec 2026-10-14-neige-vent-affichage-altitude, REQ-001, REQ-004), on the domains Woodcore writes out (spec 2026-10-21-commandes-typst-refonte, REQ-017; `#show-calc` until then): the snow's carries no drawing, and a site above 2000 m compiles with no word of the limit; the wind's compiles too."""
     import subprocess
     from domains import wind_source
     if not conftest.have_typst():
@@ -185,11 +188,17 @@ def test_show_calc_prints_no_drawing_of_the_snow_and_takes_the_manual_selection(
     wind = here.sources_dir / wind_source.FOLDER / "WI-77.json"
     kept = (here.data_dir / "calculations.json").read_bytes()
 
-    def compile_(body, name):
+    def compile_(kind, rid, name):
+        import project
+        from domains import unfold
+        data = json.loads((here.data_dir / "calculations.json").read_text(encoding="utf-8"))
+        with project.using(here):
+            text = unfold.generate(unfold._module(kind).records(data)[rid], "de", kind)
         d = conftest.probe_dir(name)
-        (d / "probe.typ").write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
-        return subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(d / "probe.typ"), str(d / "probe.svg")],
-                              capture_output=True, text=True, encoding="utf-8"), d / "probe.svg"
+        (d / "domain.typ").write_text(text, encoding="utf-8")
+        (d / "probe.typ").write_text('#import "/000-Typst-Config/commands.typ": *\n#include "domain.typ"\n', encoding="utf-8")
+        return subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(d / "probe.typ"), str(d / "probe.pdf")],
+                              capture_output=True, text=True, encoding="utf-8"), text
 
     try:
         for path in (snow, wind):
@@ -201,17 +210,29 @@ def test_show_calc_prints_no_drawing_of_the_snow_and_takes_the_manual_selection(
         w.update(table="45", h=9)
         wind.write_text(json.dumps(w, ensure_ascii=False), encoding="utf-8")
         registry.export(here)
-        for level in (1, 2, 3):
-            out, svg = compile_('#show-calc("snow-load", "SN-77", level: %d)' % level, "sn_show_%d" % level)
-            assert out.returncode == 0, out.stderr
-            assert "<image" not in svg.read_text(encoding="utf-8"), "no drawing of the snow at level %d" % level
-        out, _svg = compile_('#show-calc("snow-load", "SN-77", level: -1, shown: (s_k: 1, q_k11: 2))', "sn_show_m1")
+        out, text = compile_("snow-load", "SN-77", "sn_written_out")
         assert out.returncode == 0, out.stderr
-        out, _svg = compile_('#show-calc("snow-load", "SN-77", level: -1, shown: (figure-1: 2))', "sn_show_fig")
-        assert out.returncode != 0 and "figure-1" in out.stderr, "the snow has no drawing to name"
-        out, _svg = compile_('#show-calc("wind-load", "WI-77", level: -1, shown: (qp: 1))', "wi_show_m1")
+        assert "#figure(" not in text and "image(" not in text, "no drawing of the snow"
+        out, _text = compile_("wind-load", "WI-77", "wi_written_out")
         assert out.returncode == 0, out.stderr
     finally:
         snow.unlink(missing_ok=True)
         wind.unlink(missing_ok=True)
         (here.data_dir / "calculations.json").write_bytes(kept)
+
+
+def test_the_workbook_path_takes_c_e_and_the_corrections_from_the_norm_and_stops_on_a_table_that_disagrees():
+    """REQ-003 (spec 2026-10-19-base-saine-nettoyage, lot 8): snow.py keeps the workbook's own labels and prints SIA 261's numbers, read from calc/norms/; a workbook table that says another number stops the import, naming the table."""
+    import validation
+    from domains import snow
+    from norms import sia261_snow
+    norm = sia261_snow.clause()
+    pairs = [("normale Windexposition", 1), ("dem Wind stark ausgesetzte Lage", 0.8), ("vor Wind geschützte Lage", 1.2)]
+    held = snow._held(pairs, [c["value"] for c in norm["exposure"]["choices"]], snow.EXPOSURE_TABLE, "5.2.4")
+    assert [label for label, _ in held] == [label for label, _ in pairs] and [v for _, v in held] == [1.0, 0.8, 1.2]
+    try:
+        snow._held([("+300", 300)], norm["corrections"]["values"], snow.CORRECTION_TABLE, "Anhang D")
+    except validation.ValidationError as exc:
+        assert str(exc).startswith("Dropdowns!B30:C34: '+300' gives 300") and "Anhang D" in str(exc), exc
+    else:
+        raise AssertionError("a correction SIA 261 Anhang D does not give was read")

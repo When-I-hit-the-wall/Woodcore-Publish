@@ -275,19 +275,6 @@ def test_woodcore_opens_a_project_and_quits_when_it_is_only_checked():
     assert run.returncode == 1, run.stdout + run.stderr
 
 
-def test_the_window_s_old_file_name_still_starts_it():
-    """The launcher installed with Woodcore 0.83 to 0.90 starts the engineer's sources by calc/tools/catalog_gui.py, the window's file until v0.96 (packaging/launcher.py): that name is a shim now, which runs woodcore_gui.py as the program -- the same arguments, the same answer to `--self-test`."""
-    _qt()
-    env = dict(os.environ, QT_QPA_PLATFORM="offscreen", PYTHONUTF8="1")
-    run = subprocess.run([sys.executable, str(TOOLS / "catalog_gui.py"), "--project", str(project.current().file), "--self-test"],
-                         capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, timeout=180)
-    assert run.returncode == 0, run.stdout + run.stderr
-    missing = conftest.tmpdir("self_test_shim") / "Nichts.woodcore"
-    run = subprocess.run([sys.executable, str(TOOLS / "catalog_gui.py"), "--project", str(missing), "--self-test"],
-                         capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, timeout=180)
-    assert run.returncode == 1, "the shim did not hand back the window's own answer: " + run.stdout + run.stderr
-
-
 def test_every_writer_an_editor_tab_reaches_is_guarded_wherever_it_is_defined():
     """The read-only guard wraps by name the writers of each editor tab (woodcore_gui.WRITERS). Cut into mixins (issue #30), a tab defines many of them in a mixin: `vars(tab)` alone would have left `write_title`, `rename_id`, `delete_document` and a member check's `save` unguarded, a project held read-only then written. Every writer a tab reaches outside Qt is the guarded one."""
     _qt()

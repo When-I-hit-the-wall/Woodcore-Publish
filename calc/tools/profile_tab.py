@@ -6,12 +6,13 @@ The engineer: «profilé défini par l'utilisateur: dessiné par lui de manière
 A profile is a file of Woodcore-Datei/profiles/ (`Project.profiles_dir`), checked by `profile.check_source` before it is written. **A profile a position names (type USR) can be neither renamed nor deleted** (D-16): the refusal names the positions. Nothing is computed here: `profile.properties` is.
 """
 
+import source_editor  # Ctrl+S bound the one way (source_editor.save_shortcut)
 import copy
 import json
 import time
 
 from PySide6.QtCore import QPointF, QRectF, Qt, Signal
-from PySide6.QtGui import QBrush, QColor, QKeySequence, QPainter, QPen, QShortcut
+from PySide6.QtGui import QBrush, QColor, QPainter, QPen
 from PySide6.QtWidgets import (
     QComboBox, QDoubleSpinBox, QHBoxLayout, QHeaderView, QLabel, QListWidget, QListWidgetItem, QPushButton, QSplitter,
     QStyledItemDelegate, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
@@ -23,6 +24,7 @@ import identity
 import project
 import richtext
 import theme
+import engine
 from domains import connector, profile
 from norms import szs_c5
 from steel_tab_words import STRINGS  # noqa: F401  -- merged into the window's STRINGS by woodcore_gui_words
@@ -142,8 +144,10 @@ class ProfileCanvas(QWidget):
             self.drawn.emit(min(y0, y1), min(z0, z1), abs(y1 - y0), abs(z1 - z0))
 
 
-class ProfileTab(QWidget):
+class ProfileTab(source_editor.SourceEditorTab, QWidget):
     """The «Profilés» tab -- see the module's docstring."""
+    WORDS = "pr"   # the prefix of its words for the question about unsaved changes (source_editor.SourceEditorTab)
+
 
     KEY = "tab_st_profiles"
 
@@ -165,9 +169,7 @@ class ProfileTab(QWidget):
         for index, stretch in enumerate((2, 5, 5)):
             self.splitter.setStretchFactor(index, stretch)
         layout.addWidget(self.splitter, 1)
-        shortcut = QShortcut(QKeySequence(QKeySequence.StandardKey.Save), self)
-        shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        shortcut.activated.connect(self.save)
+        source_editor.save_shortcut(self)   # Ctrl+S
         self.reload_list()
         ids = self.ids()
         if ids:
@@ -575,7 +577,7 @@ class ProfileTab(QWidget):
         folder.mkdir(parents=True, exist_ok=True)
         if self.current_id and self.current_id != pid:
             (folder / ("%s.json" % self.current_id)).unlink(missing_ok=True)
-        (folder / ("%s.json" % pid)).write_text(json.dumps(s, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        engine.write_json(folder / ("%s.json" % pid), s)
         self.source, self.current_id, self.dirty = s, pid, False
         self.app.set_status(self.t("pr_saved", id=pid))
         self.reload_list(pid)
@@ -603,9 +605,6 @@ class ProfileTab(QWidget):
         else:
             self.new()
         return True
-
-    def confirm_leave(self):
-        return autosave.confirm(self.app, self, self.t("pr_unsaved_title"), self.t("pr_unsaved", id=self.identity.id.text().strip() or "?"))
 
     # --- the window's bookkeeping ----------------------------------------------------------
 

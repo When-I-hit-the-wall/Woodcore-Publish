@@ -14,20 +14,17 @@ Pour l'aptitude au service, les effets $E_d$ sont en général déterminés avec
 - cas de charge quasi permanents : toutes les actions variables avec ψ₂.
 // woodcore:/object p2
 
-// woodcore:object doc-table sls-load-cases-table
-#doc-table(
-  columns: (
-    (id: "element", title: [Élément]),
-    (id: "case", title: [Cas]),
-    (id: "permanent", title: [Poids propre et charges permanentes], kind: "number"),
-    (id: "live", title: [Charge utile [catégorie]], kind: "number"),
-    (id: "snow", title: [Neige], kind: "number"),
-    (id: "wind", title: [Vent], kind: "math"),
-  ),
-  hidden: (),
-  rows: (
-    (element: [[Toiture]], case: [CC 1], permanent: 1.0, live: [–], snow: 1.0, wind: [$ψ_0$]),
-    (element: [[Étage type]], case: [CC 2], permanent: 1.0, live: 1.0, snow: [–], wind: [$ψ_0$]),
+// woodcore:object table sls-load-cases-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto, auto),
+    align: (left, left, right, right, right, center),
+    table.hline(stroke: 1pt),
+    table.header([*Élément*], [*Cas*], [*Poids propre et charges permanentes*], [*Charge utile [catégorie]*], [*Neige*], [*Vent*]),
+    table.hline(stroke: 0.5pt),
+    [[Toiture]], [CC 1], [1.0], [–], [1.0], [$ψ_0$],
+    [[Étage type]], [CC 2], [1.0], [1.0], [–], [$ψ_0$],
+    table.hline(stroke: 1pt),
   ),
   caption: [Cas de charge : aptitude au service],
 )

@@ -9,9 +9,11 @@ Its words are plan_tab.py's own STRINGS, which woodcore_gui already reads.
 
 from PySide6.QtWidgets import QCheckBox, QComboBox, QDoubleSpinBox, QLabel, QLineEdit
 
+import plan_centres_card  # a bracing wall's «Mode de construction» (issue #54)
 import positions_store
 import section_fields
 from domains import plan as model
+from domains import plan_centres
 from domains import section
 
 
@@ -83,7 +85,7 @@ def section_rows(tab, form, current, on_change, exclude=""):
 
 
 def tool_rows(tab, form, tool):
-    """The rows of a drawing tool, as an element of its type has them -- what the next element drawn with it takes (REQ-015): its type, the number it will get, its section, its variant, its angle, its length shown, a slab's span and diagonal. A field that only an element has -- its number moved, a warning, «Supprimer» -- is not here."""
+    """The rows of a drawing tool, as an element of its type has them -- what the next element drawn with it takes (REQ-015): its type, the number it will get, its section, its variant, its angle, its length shown, a bracing wall's construction mode, a slab's span and diagonal. A field that only an element has -- its number moved, a warning, «Supprimer» -- is not here."""
     defaults = tab.canvas.tool_defaults.setdefault(tool, {})
     form.addRow(tab.t("plan_type"), QLabel(tab.t(f"plan_type_{tool}")))
     form.addRow(tab.note(tab.t("plan_tool_defaults_note")))
@@ -121,6 +123,10 @@ def tool_rows(tab, form, tool):
         length.setCurrentIndex(max(0, length.findData(defaults.get("show_length"))))
         length.activated.connect(lambda _i, length=length: defaults.__setitem__("show_length", length.currentData()) if length.currentData() is not None else defaults.pop("show_length", None))
         form.addRow(tab.t("plan_element_length"), length)
+    if tool in plan_centres.WALL_TYPES:
+        # the mode the next bracing wall takes (issue #54): «non défini» until one is chosen -- no default --, kept for the walls after it while the session lasts
+        form.addRow(tab.t("plan_construction"), plan_centres_card.construction_combo(
+            tab, defaults.get("construction"), lambda mode: defaults.__setitem__("construction", mode) if mode is not None else defaults.pop("construction", None)))
     if tool == "D":
         diagonal = QCheckBox(tab.t("plan_diagonal"))
         diagonal.setChecked(bool(defaults.get("diagonal", 0)))

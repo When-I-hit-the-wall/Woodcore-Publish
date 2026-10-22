@@ -9,12 +9,16 @@ from PySide6.QtWidgets import (
 import positions_store  # the project's positions, Woodcore's own file (calc/positions_store.py, v0.114)
 import plan_properties  # the pane of a drawing tool, and the *Section* of a position (issue #9)
 import plan_canvas_tools  # the dimension tools (issue #9)
+import plan_canvas_outline  # the building's outline (issue #54)
+import plan_centres_card  # the stiffness and mass centres' card, and a bracing wall's «Mode de construction» (issue #54)
 import project  # where the project this tab works on is (calc/project.py)
 import theme  # the colours this tab states itself (theme.py, v0.90)
 import cards  # the properties in cards, after the website (cards.py)
 import validation
 from domains import connector  # position_dimension: a position's dimension and unit, or nothing where it states none
 from domains import plan as model
+from domains import plan_clip  # Ctrl+C and Ctrl+V between plans (issue #61)
+from domains import plan_centres  # which walls brace, and whether a plan has a stiffness centre at all (issue #54)
 from domains import plan_svg
 from drawing_tab import (  # noqa: F401 -- names the tab's own code uses, and names other modules and the tests read here
     Blank, CurrentStack, DrawingTab, HISTORY, KINDS, NEW_ROW, document_text, next_free_id, number_text, plain_label, plan_text, svg_icon,
@@ -65,6 +69,8 @@ class PlanSelectionMixin:
             hint = {"dimension-chain": "plan_hint_dimension_chain", "dimension-angle": "plan_hint_dimension_angle"}.get(tool, "plan_hint_dimension")
         elif plan_canvas_edit.handles(tool):
             hint = "plan_hint_" + tool.replace("-", "_")
+        elif tool == plan_canvas_outline.TOOL:
+            hint = "plan_hint_outline"   # an area as every other, and one a plan (issue #54)
         text = self.t(hint) if hint else ""
         self.hint.setText(text)
         if hasattr(self, "selection_layout"):
@@ -72,8 +78,8 @@ class PlanSelectionMixin:
         self.canvas.setFocus()
 
     def on_edit_refused(self, tool):
-        """«Déplacer» or «Copier» with nothing selected, or a parallel aid clicked off any line: said where the tool's hint is."""
-        self.hint.setText(self.t("plan_aid_no_line" if tool == "aid-par" else "plan_edit_nothing"))
+        """«Déplacer» or «Copier» with nothing selected, a parallel aid clicked off any line, or the building's outline asked to be copied -- a plan has one (issue #54): said where the tool's hint is."""
+        self.hint.setText(self.t({"aid-par": "plan_aid_no_line", plan_canvas_outline.KIND: "plan_outline_single"}.get(tool, "plan_edit_nothing")))
 
     def ask_aid_distance(self):
         """A parallel aid's distance, asked in metres where the plan has a scale and in the sheet's units otherwise: in sheet units, or None where the question is cancelled."""
@@ -149,13 +155,15 @@ class PlanSelectionMixin:
         self.refresh_elements()
         self.refresh_messages()
         self.refresh_selection()
+        self.centres_card.refresh()   # S and M follow the drawing: what they stand on, or why one is not there (issue #54)
         self.revert_button.setEnabled(self.dirty)
         self.update_list_marker()
 
     def refresh_messages(self):
         messages = []
         try:
-            model.check_source(self.source, f"{self.source.get('id') or '?'}.json")
+            # checked at the version «Enregistrer» will write it at (plan.version_of), not at the one it was read at: a text, an outline or a wall's mode put on a plan read as 1.6 is no defect of the draft
+            model.check_source({**self.source, "schema_version": model.version_of(self.source)}, f"{self.source.get('id') or '?'}.json")
         except validation.ValidationError as exc:
             messages.append(str(exc))
         background = self.source.get("background")
@@ -166,7 +174,8 @@ class PlanSelectionMixin:
         problem = getattr(self.canvas, "background_problem", None)
         if problem is not None:
             messages.append(self.document_error_text(problem))
-        messages += [self.app.note_text(n) for n in model.warnings(self.source, self.position_ids)]
+        # with the positions' section types, and those chosen in the pane and not saved yet over them: a bracing wall's mode is held against its position's section (issue #54)
+        messages += [self.app.note_text(n) for n in model.warnings(self.source, self.position_ids, sections=self.section_types())]
         text = "\n".join(messages)
         if text != self.message.toPlainText():
             self.message.setPlainText(text)
@@ -174,6 +183,10 @@ class PlanSelectionMixin:
         self.missing.setText(self.t("plan_missing", labels=", ".join(missing)) if missing else "")
         self.missing.setVisible(bool(missing))
         self.missing_button.setVisible(bool(missing))
+
+    def section_types(self):
+        """{position: section type} as the plan's warnings and its export read it (positions_store.section_types): the project's positions, and over them the sections chosen in the pane for this plan's and not saved yet (pending_positions)."""
+        return positions_store.section_types(list(self.positions) + self.pending_rows())
 
     def add_missing_positions(self):
         """«Ajouter aux positions»: every number the plan shows that the project has no position of, written as a blank position of its element's type (positions_store.create_blank) -- a position renamed or taken away since it was drawn, brought back to be completed in the Positions tab."""
@@ -294,6 +307,14 @@ class PlanSelectionMixin:
             self.selection_layout.addWidget(delete)
             self.update_modules()
             return
+        if self.canvas._selected_of(plan_canvas_outline.KIND) is not None:
+            # the building's outline (issue #54): what it is and how it is reshaped -- it has no property to set, its place being its points
+            self.selection_layout.addWidget(self.note(self.t("plan_outline_selected")))
+            delete = QPushButton(self.t("plan_delete_selection"))
+            delete.clicked.connect(self.canvas.delete_selection)
+            self.selection_layout.addWidget(delete)
+            self.update_modules()
+            return
         if aid_selected is not None:
             self.selection_layout.addWidget(self.note(self.t("plan_aid_selected", kind=self.t("plan_aid_kind_" + aid_selected.get("kind", "two-points")))))
             delete = QPushButton(self.t("plan_delete_selection"))
@@ -337,7 +358,14 @@ class PlanSelectionMixin:
         canvas = self.canvas
         if self.drawing_tool():
             return True
-        return any(found is not None for found in (canvas.selected_element(), canvas.selected_axis(), canvas.selected_storey_line(), canvas.selected_storey_box(), canvas.selected_load_level(), canvas._selected_of("dimension"), canvas._selected_of("aid"), canvas._selected_of("text")))
+        return any(found is not None for found in (canvas.selected_element(), canvas.selected_axis(), canvas.selected_storey_line(), canvas.selected_storey_box(), canvas.selected_load_level(), canvas._selected_of("dimension"), canvas._selected_of("aid"), canvas._selected_of("text"), canvas._selected_of(plan_canvas_outline.KIND)))
+
+    def update_modules(self):
+        """The right pane's cards for what is selected (drawing_tab) -- and the card of the stiffness and mass centres never on an elevation section, which has neither (issue #54)."""
+        super().update_modules()
+        card = getattr(self, "centres_group", None)
+        if card is not None and not plan_centres.applies(self.source):
+            card.hide()
 
     def drawing_tool(self):
         """Whether the tool chosen draws an element -- a position's symbol or a load --, whose options the pane then shows."""
@@ -467,6 +495,9 @@ class PlanSelectionMixin:
             length.setToolTip(self.t("plan_lengths_tip"))
             length.activated.connect(lambda _i, length=length: self.set_show_length(length.currentData()))
             form.addRow(self.t("plan_element_length"), length)
+        if type_ in plan_centres.WALL_TYPES:
+            # how a bracing wall is built (issue #54): what its stiffness for the stiffness centre is taken from -- «non défini» until the engineer says, there being no default
+            form.addRow(self.t("plan_construction"), plan_centres_card.construction_combo(self, element.get("construction"), self.set_construction))
         if type_ == "D":
             row = QHBoxLayout()
             span = QDoubleSpinBox()
@@ -564,6 +595,47 @@ class PlanSelectionMixin:
         if renames:
             self.on_axes_renamed(renames)
 
+    # -- Ctrl+C and Ctrl+V (issue #61, drawing_tab_clip.py): what is the position plan's own --
+
+    def make_clip(self, point):
+        """The objects selected, taken at `point`, with the type and section of every position they show -- read now, from the project's positions or the ones this plan drew and has not saved yet, which are gone once it is (REQ-006)."""
+        chosen = self.canvas.selected_entries()
+        rows = {row["position"]: row for row in self.positions}
+        pending = self.pending_positions()
+        sections = {}
+        for kind, index in chosen:
+            label = self.source["elements"][index].get("label") if kind == "element" else None
+            row = rows.get(label) or (pending.get(label) and {"position": label, **pending[label]})
+            if label and row:
+                sections[label] = {"type": row.get("type", ""), **(positions_store.section_of(row) or {})}
+        return plan_clip.clip_plan(self.source, chosen, point, self.canvas.per_m(), sections, self.clip_root())
+
+    def paste_clip(self, clip, point):
+        """The clip put down at `point`, inside the change the caller opened: every element numbered on this plan's storey (`propose_label`), the positions it makes kept among the pending ones as one drawn is (`on_new_element`). Returns (the objects pasted, what is said)."""
+        result = plan_clip.paste_plan(self.source, clip, point, self.canvas.per_m(), model.crop_of(self.canvas.frame_source()), self.propose_label)
+        pending = self.source.setdefault(PENDING, {})
+        made = plan_clip.new_positions(clip, result["relabelled"])
+        for kind, index in result["added"]:
+            label = self.source["elements"][index].get("label") if kind == "element" else None
+            if label and label not in self.position_ids and label not in pending and not model.is_load(self.source["elements"][index]["type"]):
+                pending[label] = made.get(label) or {"type": positions_store.type_for(self.source["elements"][index]["type"])}
+        if not pending:
+            self.source.pop(PENDING, None)
+        said = [self.t("plan_paste_done", n=len(result["added"]))]
+        left = sum(result["left_out"].values())
+        if left:
+            said.append(self.t("plan_paste_left_out", n=left))
+        if result["outline_replaced"]:
+            said.append(self.t("plan_paste_outline_replaced"))
+        if not plan_clip.ratio(clip, self.canvas.per_m()) == 1.0:
+            said.append(self.t("plan_paste_scaled"))
+        if result["axes_renamed"]:
+            self.on_axes_renamed(result["axes_renamed"])
+        return result["added"], said
+
+    def select_pasted(self, selection):
+        self.canvas.set_selected(selection)
+
     def on_axes_renamed(self, renames):
         """Says which axes a new one moved up -- a name the engineer may have quoted in a calc-block's axes."""
         axis = self.canvas.selected_axis()
@@ -659,6 +731,19 @@ class PlanSelectionMixin:
                 element.pop("show_length", None)
             else:
                 element["show_length"] = bool(value)
+        self.edit(apply)
+
+    def set_construction(self, mode):
+        """The selected bracing wall's construction mode, or none (the field taken out): one step of «Annuler». The tool's own mode, the next wall's, is set in the tool's pane and is not touched (D-021)."""
+        element = self.canvas.selected_element()
+        if element is None or element.get("construction") == mode:
+            return
+
+        def apply():
+            if mode is None:
+                element.pop("construction", None)
+            else:
+                element["construction"] = mode
         self.edit(apply)
 
     def set_element_field(self, key, value):

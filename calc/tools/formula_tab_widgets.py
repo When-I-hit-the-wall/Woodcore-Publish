@@ -21,8 +21,6 @@ FIELDS = {
     "var": (("symbol", "fm_f_symbol", "fm_f_symbol_tip"), ("key", "fm_f_key", "fm_f_key_tip"), ("value", "fm_f_value", ""), ("unit", "fm_f_unit", "")),
     "eq": (("symbol", "fm_f_symbol", "fm_f_symbol_tip"), ("formula", "fm_f_formula", "fm_f_formula_tip")),
     "verify": (("formula", "fm_f_relation", "fm_f_relation_tip"),),
-    "val": (("key", "fm_f_what", ""),),
-    "var-unit": (("key", "fm_f_what", ""), ("unit", "fm_f_unit", "")),
 }
 
 
@@ -113,11 +111,14 @@ class Block(QFrame):
         if r.error:
             head = math(c.shown_symbol) + " = " if c.defines else ""
             return f"{head}<span style='color:{theme.colour('danger')}'>{html.escape(r.error[:80])}</span>"
-        if c.kind in ("var", "var-unit", "val", "eq"):
+        if c.kind in ("var", "eq"):
             line = f"{math(c.shown_symbol)} = {html.escape(units.shown(r.value, r.unit))}"
             if c.kind == "var" and c.source:
                 line += f" <span style='color:{muted}'>· {html.escape(self.t('fm_imported', source=fd.describe_source(c)))}</span>"
-            if c.kind == "eq" and r.warning:
+            if c.kind == "eq" and r.warning and r.warning.get("as_unit"):
+                # a unit given without conversion (as-unit:, REQ-003): said here, never in the report (Q-004)
+                line += f" <span style='color:{theme.colour('warning')}'>({html.escape(self.t('fm_as_unit', natural=r.warning['natural'], wanted=r.warning['wanted']))})</span>"
+            elif c.kind == "eq" and r.warning:
                 line += f" <span style='color:{theme.colour('danger')}'>({html.escape(r.warning['wanted'])} → {html.escape(r.warning['natural'])})</span>"
             return line
         if r.value is None:     # not computed yet
@@ -154,8 +155,6 @@ class Block(QFrame):
             "value": "" if c.value is None else units.fmt_decimals(c.value, 9) if isinstance(c.value, (int, float)) else str(c.value),
             "formula": fd.display_formula(c.formula, self.tab.variables_before(self)) if c.formula else "",
         }
-        if c.kind == "val" and c.key:
-            values["key"] = dict(self.tab.variables_before(self)).get(c.key) or c.key
         title = QLabel(f"<b>{html.escape(c.kind)}</b>")
         grid.addWidget(title, 0, 0)
         column = 1
@@ -209,7 +208,7 @@ class Block(QFrame):
 
     def made_key(self, symbol):
         """The key the shown variable makes (formula_domain.key_from_symbol), unique against the domain's other keys -- what `command_from` makes of an empty key."""
-        taken = {b.command.defines for b in self.tab.blocks if b is not self and b.command.defines and b.command.kind != "var-unit"}
+        taken = {b.command.defines for b in self.tab.blocks if b is not self and b.command.defines}
         return fd.key_from_symbol(symbol, taken) if symbol.strip() else ""
 
     def symbol_typed(self, text):
@@ -252,6 +251,10 @@ OBJECT = "\ufffc"
 PILL_MIME = "application/x-woodcore-formula-pill"
 
 
+# the colour of a pill's outline by the state of its line, an unfolded check's (formula_tab_unfold.py, which shows it)
+PILL_STATE_COLOURS = {"own": "override", "local": "warning", "data": "danger", "conflict": "danger"}
+
+
 class PillPainter(QPyTextObject):
     """Draws a command validated as a pill (issue #40, UI-001): its block's line (`Block.view_html`) set as rich text in a rectangle with rounded corners, the ground and the line the scheme's (`accent-soft`, `line-strong`; `danger-soft`, `danger` for a command refused), the line `accent` where it is the block chosen. Python keeps the handler alive: the text holds it (`FormulaText.painter`)."""
 
@@ -281,10 +284,13 @@ class PillPainter(QPyTextObject):
             return
         refused = bool((block.result or fd.Result()).error)
         chosen = block is self.text.tab.chosen_block
+        # the state of an unfolded check's line (spec 2026-10-15, UI-002): its outline in the colour of that state -- orange the engineer's own, the warning's changed outside Woodcore, red a conflict or a value the export no longer holds
+        state = self.text.tab.pill_state(block) if hasattr(self.text.tab, "pill_state") else None
+        outline = "accent" if chosen else "danger" if refused else PILL_STATE_COLOURS[state] if state else "line-strong"
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QColor(theme.colour("danger-soft" if refused else "accent-soft")))
-        painter.setPen(QPen(QColor(theme.colour("accent" if chosen else "danger" if refused else "line-strong")), 2 if chosen else 1))
+        painter.setPen(QPen(QColor(theme.colour(outline)), 2 if chosen or state else 1))
         painter.drawRoundedRect(QRectF(rect).adjusted(0.5, 0.5, -0.5, -0.5), self.RADIUS, self.RADIUS)
         doc = self.document_of(block)
         painter.translate(rect.x() + self.PAD_X, rect.y() + (rect.height() - doc.size().height()) / 2)

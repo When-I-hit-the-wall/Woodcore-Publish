@@ -16,6 +16,8 @@ Kept to what QtSvg (SVG Tiny 1.2) and resvg read alike, like every other drawing
 
 import math
 
+from domains import svg_draw  # the one writer of an SVG number and text (D6)
+from domains import svg_text  # the one plain text writer (ARCH-004)
 from domains import schema_svg, statics_svg
 from i18n import strings
 
@@ -26,13 +28,14 @@ from i18n import strings
 TIMBER_FILL = schema_svg.ELEMENT_FILLS[0]
 TIMBER_FILL_ALT = schema_svg.ELEMENT_FILLS[1]
 TIMBER_STROKE = schema_svg.ELEMENT_STROKE
-STEEL_FILL = "#9aa3ab"
-STEEL_STROKE = "#5b646c"
+STEEL_FILL = svg_draw.colour("aid")
+STEEL_STROKE = svg_draw.colour("ink-soft")
 FASTENER_FILL = schema_svg.CONNECTOR_FILL
 TEXT_COLOR = schema_svg.TEXT_COLOR
 MUTED = schema_svg.MUTED
 
-FONT = statics_svg.FONT
+FONT = svg_draw.FONT
+GROUND = svg_draw.colour("ground")
 
 # The drawing's own units: the joint is normalised to this width, so a 60 mm joint and a 600 mm one come out the same figure (statics_svg's rule).
 WIDTH = 1000.0
@@ -70,9 +73,7 @@ PLACEHOLDER = 1.0
 PLATE_MIN = 26.0
 
 
-def _f(value):
-    text = "%.2f" % value
-    return text.rstrip("0").rstrip(".") if "." in text else text
+_f = svg_draw.number_at(2)   # a coordinate at 2 decimals (svg_draw.py, D6)
 
 
 def _rect(out, x, y, w, h, fill, stroke, width=STROKE):
@@ -86,14 +87,11 @@ def _line(out, x1, y1, x2, y2, colour=TEXT_COLOR, width=THIN, dash=None):
                % (_f(x1), _f(y1), _f(x2), _f(y2), colour, _f(width), extra))
 
 
-def _escape(text):
-    return (text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+_escape = svg_draw.escape   # (svg_draw.py, D6)
 
 
 def _text(out, x, y, content, size=TEXT_SIZE, colour=TEXT_COLOR, anchor="middle", bold=False):
-    weight = ' font-weight="bold"' if bold else ""
-    out.append('<text x="%s" y="%s" font-family="%s" font-size="%s" fill="%s" text-anchor="%s"%s>%s</text>'
-               % (_f(x), _f(y), FONT, _f(size), colour, anchor, weight, _escape(content)))
+    svg_text.plain(out, x, y, content, size, colour, _f, anchor, ' font-weight="bold"' if bold else "")
 
 
 def _labelled(out, x, y, base, sub, size=TEXT_SIZE, colour=TEXT_COLOR, bold=False):
@@ -327,8 +325,8 @@ def _section(assembly, thicknesses, plates=None, diameter=None, title=None, note
     mm_h = PAPER_MM * height / WIDTH
     return ('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 %s %s" '
             'width="%smm" height="%smm">'
-            '<rect x="0" y="0" width="%s" height="%s" fill="#ffffff"/>%s</svg>'
-            % (_f(WIDTH), _f(height), _f(mm_w), _f(mm_h), _f(WIDTH), _f(height), body)), state
+            '<rect x="0" y="0" width="%s" height="%s" fill="%s"/>%s</svg>'
+            % (_f(WIDTH), _f(height), _f(mm_w), _f(mm_h), _f(WIDTH), _f(height), GROUND, body)), state
 
 
 def section_of(source, thicknesses=None, note=None, highlight=None):
@@ -413,7 +411,7 @@ CURVE_HEIGHT = 700.0
 CURVE_TEXT = 34.0
 CURVE_PAPER_MM = 80.0
 # The thickness the calculation reads and the k_beta it reads there, in an accent of their own: they are the one point of the line the calculation uses.
-CURVE_ACCENT = "#1f5fa8"
+CURVE_ACCENT = svg_draw.colour("blue")
 
 
 def _number(value, decimals):
@@ -492,8 +490,8 @@ def k_beta_curve(curve):
         _f(right + 62), _f(bottom), _f(right + 36), _f(bottom - 11), _f(right + 36), _f(bottom + 11), TEXT_COLOR))
     out.append('<polygon points="%s,%s %s,%s %s,%s" fill="%s"/>' % (
         _f(left), _f(top - 62), _f(left - 11), _f(top - 36), _f(left + 11), _f(top - 36), TEXT_COLOR))
-    statics_svg._text(out, (right + 64, bottom - 36), "t_%d" % i, size, TEXT_COLOR, anchor="end")
-    statics_svg._text(out, (left + 22, top - 56), "k_(β%d)" % i, size, TEXT_COLOR, anchor="start")
+    svg_text.draw(out, (right + 64, bottom - 36), "t_%d" % i, size, TEXT_COLOR, anchor="end")
+    svg_text.draw(out, (left + 22, top - 56), "k_(β%d)" % i, size, TEXT_COLOR, anchor="start")
 
     # the guides from the axes to the corners, dotted
     corners = [(t_2, k_2)] if middle else [(t_1, k_1), (t_2, k_2)]
@@ -515,8 +513,8 @@ def k_beta_curve(curve):
     # the thickness the calculation reads, and the k_beta it reads there
     _line(out, px(t), bottom, px(t), py(k_beta), CURVE_ACCENT, THIN, dash="12 8")
     _line(out, left, py(k_beta), px(t), py(k_beta), CURVE_ACCENT, THIN, dash="12 8")
-    out.append('<circle cx="%s" cy="%s" r="11" fill="%s" stroke="#ffffff" stroke-width="3"/>' % (
-        _f(px(t)), _f(py(k_beta)), CURVE_ACCENT))
+    out.append('<circle cx="%s" cy="%s" r="11" fill="%s" stroke="%s" stroke-width="3"/>' % (
+        _f(px(t)), _f(py(k_beta)), CURVE_ACCENT, GROUND))
 
     # the x labels in their rows, a leader back to the tick where a label had to drop a row or move aside -- every tick and leader first, every text after them, so that no leader crosses a label
     texts = []
@@ -537,12 +535,12 @@ def k_beta_curve(curve):
         texts.append(((left - 30, y), label, colour, "end"))
     texts.append(((left - 14, bottom + 0.95 * size), "0", MUTED, "end"))
     for point, label, colour, anchor in texts:
-        statics_svg._text(out, point, label, size, colour, anchor=anchor, halo=6)
+        svg_text.draw(out, point, label, size, colour, anchor=anchor, halo=6)
 
     return ('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 %s %s" width="%smm" height="%smm">'
-            '<rect x="0" y="0" width="%s" height="%s" fill="#ffffff"/>%s</svg>'
+            '<rect x="0" y="0" width="%s" height="%s" fill="%s"/>%s</svg>'
             % (_f(CURVE_WIDTH), _f(CURVE_HEIGHT), _f(CURVE_PAPER_MM), _f(CURVE_PAPER_MM * CURVE_HEIGHT / CURVE_WIDTH),
-               _f(CURVE_WIDTH), _f(CURVE_HEIGHT), "".join(out)))
+               _f(CURVE_WIDTH), _f(CURVE_HEIGHT), GROUND, "".join(out)))
 
 
 # --- the tool bar's swatches (docs/ui/window.md §10quater) ---------------------
@@ -550,8 +548,8 @@ def k_beta_curve(curve):
 # statics_svg.SWATCHES has for the static models' tools. Each is drawn in its own proportions inside a
 # 100 x 100 box, in the sentinel ink and fill the tab substitutes for the palette's, so that a symbol
 # drawn in the figure's own black is still legible on Windows' dark theme.
-SWATCH_INK = "#1f1f1f"
-SWATCH_FILL = "#ffffff"
+SWATCH_INK = svg_draw.colour("ink")
+SWATCH_FILL = svg_draw.colour("ground")
 
 _S = 'stroke="%s" stroke-width="6" fill="none"' % SWATCH_INK
 _SF = 'stroke="%s" stroke-width="5" fill="%s"' % (SWATCH_INK, SWATCH_FILL)

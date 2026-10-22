@@ -10,8 +10,11 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.0",
-      "description": "-- pinned: a record written at another version is refused rather than read as this one."
+      "enum": [
+        "1.0",
+        "1.1"
+      ],
+      "description": "-- 1.0, or 1.1 where a result may carry `line`, the line of its result() call that cites it where it names no norm (spec 2026-10-20-indices-et-niveaux, REQ-002): a record written at another version is refused rather than read as this one. A result carries no level from 1.1 either: lib/line-levels.json's `*` of the script says it (UI-002)."
     },
     "scripts": {
       "type": "object",
@@ -67,7 +70,6 @@
                     "unit",
                     "symbol",
                     "label",
-                    "level",
                     "source",
                     "norm",
                     "norm_ref"
@@ -97,6 +99,11 @@
                     },
                     "norm_ref": {
                       "type": "string"
+                    },
+                    "line": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "description": "The line of the script's result() call, where the result names no norm: the report cites it, «script <id>.py, l. 12» (REQ-002)."
                     },
                     "description": {
                       "type": "string"

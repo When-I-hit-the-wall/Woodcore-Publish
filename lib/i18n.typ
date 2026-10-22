@@ -13,7 +13,7 @@
 //                                             a context block anyway, and every string written into
 //                                             an SVG or into math source.
 //   `t(key)` / `tl(text)`                     content, wrapped in `context`, for markup:
-//                                             `#t("governing")`, `#tl(get-label(v))`.
+//                                             `#t("governing")`, `#tl(get(v, "label"))`.
 //
 // ⚠️ A section file calls neither (docs/typst/language.md §4bis, v0.54). Its headings, and the document's
 // title, are the engineer's own words, written by hand in the language the report is written in, and
@@ -57,12 +57,12 @@
 ///
 /// ```typ
 /// #set-report-language("fr")
-/// #show-calc("snow-load", "SL", level: 1)
+/// #var("s_k", domain: ("snow-load", "SL"), level: 2)
 /// ```
 ///
 /// ```typ
 /// #set-report-language("en")
-/// #show-live-load("A1")
+/// #include domain-file("live-load", "A1")
 /// ```
 ///
 /// - lang (str): "de", "fr" or "en".

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """The objects taken out of a document, kept where they stood and put back (calc/removed_objects.py, the engineer's request of 06.10.2026): the register written and read; an object put back right after the closing tag of the object that stood before it, whatever was written between the two meanwhile; before the next one where that one is gone; at the end where both are; under a free id where its own was taken; with its body as written; CRLF kept; and refused where its file or its copy is gone."""
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import sys
 
 import conftest

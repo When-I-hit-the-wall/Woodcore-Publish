@@ -82,12 +82,14 @@ def test_the_plan_of_the_example_reads_and_writes_nothing():
     assert [(m.source, m.target) for m in p.moves] == [
         (old / "_woodcore", top / "_woodcore"),
         (old / "Images", top / "Images"),
+        # the domains the export wrote out, up to the root of the three (spec 2026-10-21-commandes-typst-refonte, REQ-017)
+        *[(old / folder, top / folder) for folder in sorted({path.split("/")[0] for path in project.DOMAIN_FOLDERS.values()}) if (old / folder).is_dir()],
         (old / "config.typ", top / "config.typ"),
         (old / "commands.typ", top / "commands.typ"),
         (old, top / "3_Statischer Bericht"),
     ], "the moves are not the shared things first, in their order, and the report's folder last"
-    assert p.language == "de" and p.folders == documents.MODE_FOLDERS["de"]
-    assert p.layout == documents.layout_for("de"), "the layout is not the full layout of a new German project"
+    assert p.language == "de" and p.folders == documents.LEGACY_MODE_FOLDERS["de"]
+    assert p.layout == conftest.legacy_modes_layout("de"), "the layout is not the full layout of a German project in three documents as 0.111 laid them out -- the first step; the layout by folders is the second's (project_migrate_folders)"
     assert [c.mode for c in p.creates] == ["cu", "bp"] and all(not c.folder.exists() for c in p.creates)
     changes = {(r.file_new.relative_to(top).as_posix(), c.old, c.new) for r in p.rewrites for c in r.changes}
     assert ("3_Statischer Bericht/Sections/001-einleitung.typ", "../commands.typ", "/commands.typ") in changes
@@ -176,7 +178,7 @@ def test_a_project_already_migrated_or_with_its_report_at_the_top_is_refused():
     d = conftest.tmpdir("mgt")
     modes = d / "modes"
     modes.mkdir()
-    project.write(modes / "M.woodcore", "M", layout=documents.layout_for("fr"))
+    project.write(modes / "M.woodcore", "M", layout=conftest.legacy_modes_layout("fr"))
     assert _codes(pm.plan(modes / "M.woodcore").refusals) == {"already_modes"}
     top = d / "top"
     top.mkdir()
@@ -193,7 +195,7 @@ def test_a_project_already_migrated_or_with_its_report_at_the_top_is_refused():
 
 # --- the pieces --------------------------------------------------------------------------------
 
-LAYOUT = documents.layout_for("de")
+LAYOUT = conftest.legacy_modes_layout("de")
 
 
 def test_a_project_file_in_woodcores_form_is_written_again_in_it_keeping_its_line_endings():
@@ -352,7 +354,7 @@ def test_a_migration_goes_through_and_is_undone_on_request():
     assert outcome["ok"] and outcome["created"] == [project.TITLE_FILE, "1_Nutzungsvereinbarung", "2_Projektbasis"]
     migrated = project.Project.load(here.file)
     assert migrated.has_modes and migrated.modes == project.MODES
-    assert migrated.layout == documents.layout_for("de")
+    assert migrated.layout == conftest.legacy_modes_layout("de")
     for mode in project.MODES:
         assert migrated.document_typ(mode).is_file() and migrated.document_pdf(mode).is_file(), f"{mode}: no entry or no PDF"
     assert not old_rs.exists() and (top / "_woodcore" / "data").is_dir() and (top / "config.typ").is_file()

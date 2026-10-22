@@ -5,6 +5,8 @@ The engineer, 08.10.2026: «Ajouter des outils de cotation pour pouvoir coter le
 What is held: each kind measures what it says, in metres from the plan's scale or in degrees, computed from its points and never typed; the drawing writes it between markers it writes only where there is one, so a plan without any is drawn byte for byte as before (tests/test_plan_style.py's hashes); the export carries the values, additive; a plan with no scale draws no length and says why, an angle needing none; a malformed dimension stops the export naming the file and the dimension; the static models and the schemas measure with the same core.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 
 import validation

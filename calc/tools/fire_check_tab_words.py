@@ -1,6 +1,6 @@
 """The words of the «Résistance au feu» tab (issue #46) in the window's three languages, prefixed `mc_fire_`, `mc_building_` and `mc_aeai_` -- merged into woodcore_gui.STRINGS beside the member checks' (`mc_`), whose base tab it is built on.
 
-The AEAI's own terms -- the height categories, the uses, the concepts of table 1 to 3 of directive 15-15 -- are the French directive's (ExternalFiles/000-Normes/VKF-AEAI-15-15-…pdf); the German ones are written here from the directive's subject, the German edition not being in the library (issue #34): to be checked against it.
+The AEAI's own terms -- the height categories, the uses, the concepts of table 1 to 3 of directive 15-15 -- are the French directive's (VKF-AEAI-15-15-…pdf); the German ones are written here from the directive's subject, the German edition not being in the library (issue #34): to be checked against it.
 """
 
 
@@ -47,7 +47,7 @@ STRINGS = {
         "mc_building_storeys": "Niveaux",
         "mc_building_none": "—",
         "mc_building_save": "Enregistrer le bâtiment",
-        "mc_building_saved": "Bâtiment enregistré dans Woodcore-Datei/building.json",
+        "mc_building_saved": "Bâtiment enregistré dans les sources du projet (building.json)",
         "mc_building_incomplete": "Le bâtiment n’est pas complet : choisissez la catégorie de hauteur, l’affectation, le concept et les niveaux.",
         "mc_building_requirement": "Système porteur : R {minutes} — AEAI 15-15, tableau {table}, ligne {row}",
         "mc_building_hint": "Les notes [2], [3], [4], [6] et [7] (parois coupe-feu, parkings ouverts, détection, bâtiments de deux niveaux de plus de 11 m) restent à appliquer par l’ingénieur.",
@@ -117,7 +117,7 @@ STRINGS = {
         "mc_building_storeys": "Geschosse",
         "mc_building_none": "—",
         "mc_building_save": "Gebäude speichern",
-        "mc_building_saved": "Gebäude in Woodcore-Datei/building.json gespeichert",
+        "mc_building_saved": "Gebäude in den Quellen des Projekts gespeichert (building.json)",
         "mc_building_incomplete": "Das Gebäude ist unvollständig: Höhenkategorie, Nutzung, Konzept und Geschosse wählen.",
         "mc_building_requirement": "Tragwerk: R {minutes} — VKF 15-15, Tabelle {table}, Zeile {row}",
         "mc_building_hint": "Die Fussnoten [2], [3], [4], [6] und [7] (brandabschnittsbildende Wände, offene Parkings, Brandmeldeanlage, zweigeschossige Gebäude über 11 m) wendet der Ingenieur selbst an.",
@@ -187,7 +187,7 @@ STRINGS = {
         "mc_building_storeys": "Storeys",
         "mc_building_none": "—",
         "mc_building_save": "Save the building",
-        "mc_building_saved": "Building saved in Woodcore-Datei/building.json",
+        "mc_building_saved": "Building saved in the project's sources (building.json)",
         "mc_building_incomplete": "The building is incomplete: choose the height category, the use, the concept and the storeys.",
         "mc_building_requirement": "Load-bearing structure: R {minutes} — VKF 15-15, table {table}, row {row}",
         "mc_building_hint": "Notes [2], [3], [4], [6] and [7] (compartment walls, open car parks, fire detection, two-storey buildings over 11 m) are the engineer's to apply.",

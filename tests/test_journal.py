@@ -152,7 +152,7 @@ def _probe(name, body, lang="de"):
     folder = conftest.probe_dir(name)
     source = folder / f"{name}.typ"
     source.write_text(
-        '#import "/commands.typ": *\n'
+        '#import "/000-Typst-Config/commands.typ": *\n'
         '#set page(width: 18cm, height: auto, margin: 1cm)\n'
         '#number-digits.update(3)\n'
         f'#set-report-language("{lang}")\n' + body,
@@ -176,7 +176,7 @@ def _pdf_text(name, body, lang="de"):
     folder = conftest.probe_dir(name)
     source = folder / f"{name}.typ"
     source.write_text(
-        '#import "/commands.typ": *\n'
+        '#import "/000-Typst-Config/commands.typ": *\n'
         '#set page(width: 18cm, height: auto, margin: 1cm)\n'
         '#number-digits.update(3)\n'
         f'#set-report-language("{lang}")\n' + body,
@@ -207,77 +207,6 @@ def _exported(entries):
             path.write_bytes(before)
 
 
-def test_the_three_forms_print_and_the_levels_govern_the_texts():
-    """A table, a list and a grid, at the three levels: the identity of a revision is printed at every level, and the texts are what the level governs (the engineer's decision 6.5)."""
-    with _exported(ENTRIES):
-        text, error = _pdf_text("journal_forms", "\n".join(
-            f'== {form} {level}\n#show-journal(form: "{form}", level: {level})\n'
-            for form in ("table", "list", "grid") for level in (1, 2, 3)))
-        assert text is not None, error
-        parts = {}
-        for form in ("table", "list", "grid"):
-            for level in (1, 2, 3):
-                head = f"{form} {level}"
-                start = text.index(head) + len(head)
-                rest = text[start:]
-                nxt = min((rest.index(k) for k in [f"{f} {l}" for f in ("table", "list", "grid") for l in (1, 2, 3)] if k in rest), default=len(rest))
-                parts[head] = rest[:nxt]
-        for form in ("table", "list", "grid"):
-            at = lambda level: " ".join(parts[f"{form} {level}"].split())
-            assert "Erstausgabe" in at(1) and "25.09.2026" in at(1), f"{form} 1: {at(1)}"
-            assert "Erste Ausgabe des Berichts." not in at(1), f"{form} 1 prints the short description: {at(1)}"
-            assert "Erste Ausgabe des Berichts." in at(2), f"{form} 2: {at(2)}"
-            assert "Bezugshöhe war 200 m" not in at(2), f"{form} 2 prints the long description: {at(2)}"
-            assert "Bezugshöhe war 200 m" in at(3), f"{form} 3: {at(3)}"
-            # newest first, at every level and in every form
-            assert at(2).index("Prüfung") < at(2).index("Erstausgabe"), f"{form} 2 is oldest first: {at(2)}"
-
-
-def test_an_empty_journal_says_so_rather_than_printing_nothing():
-    with _exported([]):
-        text, error = _pdf_text("journal_empty", "#show-journal()\n")
-        assert text is not None, error
-        assert "Noch keine Revision" in text, text
-        french, error = _pdf_text("journal_empty_fr", "#show-journal()\n", lang="fr")
-        assert french is not None, error
-        assert "Aucune révision" in french, french
-
-
-def test_the_engineers_own_words_are_never_translated():
-    """A label is free text, and free text is the one case the glossary's own rule can go wrong on: a template matches on the literal segments around its holes, so «Element 3» matches «Element {n}» and a French report would print «élément 3» (docs/typst/language.md §4bis, section 14's `tl-of` risk). The engineer's three texts go into the table as content, which render-table passes through untouched (table-cell, v0.99).
-
-    Held on a label that IS a term of the glossary: «Schneelast» is «Charge de neige» in a French report wherever the export carries it, and must stay «Schneelast» where the engineer typed it as the name of a revision.
-    """
-    with _exported([dict(ENTRIES[0], label="Schneelast", summary="Element 3", description="Bezugshöhe")]):
-        for form in ("table", "list", "grid"):
-            text, error = _pdf_text(f"journal_words_{form}", f'#show-journal(form: "{form}", level: 3)\n', lang="fr")
-            assert text is not None, error
-            flat = " ".join(text.split())
-            assert "Schneelast" in flat and "Charge de neige" not in flat, f"{form}: {flat}"
-            assert "Element 3" in flat and "élément 3" not in flat.lower(), f"{form}: {flat}"
-            # and the engine's OWN words do follow the language
-            assert "Rév." in flat or "Date" in flat, f"{form}: {flat}"
-
-
-def test_the_headings_of_the_table_follow_the_report_s_language():
-    with _exported(ENTRIES):
-        german, error = _pdf_text("journal_head_de", "#show-journal(level: 2)\n")
-        assert german is not None, error
-        assert "Kürzel" in german and "Kurzbeschreibung" in german, german
-        french, error = _pdf_text("journal_head_fr", "#show-journal(level: 2)\n", lang="fr")
-        assert french is not None, error
-        assert "Sigle" in french and "Désignation" in french, french
-
-
-def test_a_form_or_a_level_the_command_does_not_have_is_refused_naming_the_valid_ones():
-    with _exported(ENTRIES):
-        text, error = _probe("journal_bad_form", '#show-journal(form: "card")\n')
-        assert text is None
-        assert "table, list, grid" in conftest.panic_message(error or ""), error
-        text, error = _probe("journal_bad_level", "#show-journal(level: 4)\n")
-        assert text is None and "invalid level" in error, error
-
-
 def test_journal_entries_reads_the_export_newest_first():
     with _exported(ENTRIES):
         text, error = _probe("journal_access", "#journal-entries().map(e => str(e.index)).join(\"-\")\n")
@@ -305,7 +234,7 @@ def test_the_pdf_keywords_name_the_latest_revision():
                 info["revision"] = revision
             record.write_text(json.dumps(info, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             source = folder / "keywords.typ"
-            source.write_text('#import "/commands.typ": *\n#show: woodcore-document\nEin Bericht.\n', encoding="utf-8")
+            source.write_text('#import "/000-Typst-Config/commands.typ": *\n#show: woodcore-document\nEin Bericht.\n', encoding="utf-8")
             out = folder / "keywords.pdf"
             run = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(source), str(out)],
                                  capture_output=True, text=True, encoding="utf-8", errors="replace")
@@ -373,7 +302,7 @@ def _compile(name, body, lang="de"):
     folder = conftest.probe_dir(name)
     source = folder / f"{name}.typ"
     source.write_text(
-        '#import "/commands.typ": *\n'
+        '#import "/000-Typst-Config/commands.typ": *\n'
         '#set page(width: 18cm, height: auto, margin: 1cm)\n'
         '#number-digits.update(3)\n'
         f'#set-report-language("{lang}")\n' + body,
@@ -399,44 +328,6 @@ def _need_pypdf():
         import pypdf  # noqa: F401
     except ImportError as exc:
         raise Skip(f"pypdf is not installed ({exc})")
-
-
-def test_a_convention_prints_its_own_journal_and_never_the_statical_reports():
-    """Each document has its own «Historique des versions» (the engineer's decision): `#show: woodcore-document.with(document: "cu")` is what `show-journal` reads it from (the state `wc-document`), in every form and at every level. A document that says nothing is the statical report and prints its own journal, as before."""
-    _need_pypdf()
-    with _journals(rs=ENTRIES, cu=CU_ENTRIES, bp=BP_ENTRIES):
-        for form in ("table", "list", "grid"):
-            pdf, error = _compile(f"journal_doc_cu_{form}", f'#show: woodcore-document.with(document: "cu")\n#show-journal(form: "{form}", level: 3)\n')
-            assert pdf is not None, error
-            assert "did not converge" not in error, error
-            text, _ = _text_and_keywords(pdf)
-            flat = " ".join(text.split())
-            assert "Nutzungsentwurf" in flat and "Nutzung bestätigt" in flat, f"{form}: {flat}"
-            assert not any(label in flat for label in RS_LABELS), f"the statical report's journal in a convention ({form}): {flat}"
-            assert flat.index("Nutzung bestätigt") < flat.index("Nutzungsentwurf"), f"{form}: not newest first: {flat}"
-        # the base de projet reads its own, a third file
-        pdf, error = _compile("journal_doc_bp", '#show: woodcore-document.with(document: "bp")\n#show-journal(level: 2)\n')
-        assert pdf is not None, error
-        flat = " ".join(_text_and_keywords(pdf)[0].split())
-        assert "Projektbasisentwurf" in flat and not any(l in flat for l in RS_LABELS + CU_LABELS), flat
-        # and the statical report, saying nothing -- or saying "rs" -- prints the one it always printed
-        for name, rule in (("journal_doc_rs_default", "#show: woodcore-document\n"), ("journal_doc_rs_named", '#show: woodcore-document.with(document: "rs")\n'), ("journal_doc_none", "")):
-            pdf, error = _compile(name, rule + "#show-journal(level: 3)\n")
-            assert pdf is not None, error
-            flat = " ".join(_text_and_keywords(pdf)[0].split())
-            assert all(label in flat for label in RS_LABELS), f"{name}: {flat}"
-            assert not any(label in flat for label in CU_LABELS), f"{name}: a convention's journal in the statical report: {flat}"
-
-
-def test_the_statical_report_is_the_same_bytes_whether_it_says_rs_or_says_nothing():
-    """`woodcore-document` gained an argument and an invisible state update, and the statical report -- which is most of what the suite and the engineer compile -- must not notice: the same PDF, byte for byte, with or without `document: "rs"`, journal in three forms included. (Checked once against the engine as it stood before the argument: the example project's whole report and this journal probe, identical.)"""
-    body = "= Bericht\n#show-journal(form: \"table\", level: 3)\n#show-journal(form: \"list\", level: 2)\n#show-journal(form: \"grid\", level: 1)\n"
-    with _journals(rs=ENTRIES):
-        a, error = _compile("journal_same_default", "#show: woodcore-document\n" + body)
-        assert a is not None, error
-        b, error = _compile("journal_same_named", '#show: woodcore-document.with(document: "rs")\n' + body)
-        assert b is not None, error
-        assert a.read_bytes() == b.read_bytes(), "naming the statical report changed its PDF"
 
 
 def test_the_pdf_keywords_of_a_convention_name_its_own_latest_revision():
@@ -510,7 +401,7 @@ def test_a_convention_with_no_exported_journal_stops_naming_the_file():
 def test_the_journal_files_the_engine_reads_are_the_ones_the_export_writes():
     """`journal-files` in lib/calc-engine.typ names the file each document's journal is exported to. Held against the Python side: the statical report's is `journal.EXPORT_FILE`, and once `calc/documents.py` exists its `JOURNAL_FILES` is the whole table -- two lists of three file names that agree by being held equal, not by being remembered."""
     import re
-    source = (ROOT / "lib" / "calc-engine.typ").read_text(encoding="utf-8")
+    source = conftest.engine_source()
     found = re.search(r"#let journal-files = \(([^)]*)\)", source)
     assert found, "the table of journal files is gone from lib/calc-engine.typ"
     table = dict(re.findall(r'(\w+): "([^"]+)"', found.group(1)))
@@ -597,7 +488,8 @@ def test_the_tab_lists_the_revisions_newest_first_in_the_projects_group():
     import chrome
     import woodcore_gui
     keys = [key for key, _factory in woodcore_gui.TABS]
-    assert keys[keys.index("tab_positions") + 1] == "tab_journal", keys
+    # «Métré» stands between them since the spec 2026-10-21-commandes-typst-refonte (UI-003): what the positions' plans draw, under «Positions»
+    assert keys[keys.index("tab_positions") + 1] == "tab_metre" and keys[keys.index("tab_metre") + 1] == "tab_journal", keys
     # ⚠️ A **relative** ordering, and deliberately not the exact tuple this line held until v0.100: what this check is
     # about is that *Journal* sits in «Projet» right after *Positions*, not how many modules that group holds. The exact
     # form had to be updated twice in two versions -- v0.99 for the journal itself, v0.100 for *Python* -- each time going
@@ -608,7 +500,7 @@ def test_the_tab_lists_the_revisions_newest_first_in_the_projects_group():
     # by letting this group grow.
     group = dict(woodcore_gui.NAV_GROUPS)["nav_project"]
     assert "tab_journal" in group, group
-    assert group.index("tab_positions") + 1 == group.index("tab_journal"), group
+    assert group.index("tab_positions") + 2 == group.index("tab_journal"), group
     assert "tab_journal" in chrome.ICONS
     with project.using(here):
         tab = _tab(window)
@@ -715,11 +607,10 @@ def test_the_tabs_words_are_the_same_keys_in_three_languages():
 
 def test_the_calls_the_tab_copies_are_the_one_place_a_call_is_spelled_out():
     import build_reference as ref
-    assert ref.call_show_journal() == "#show-journal()"
-    assert ref.call_show_journal(form="list") == '#show-journal(form: "list")'
-    assert ref.call_show_journal(form="grid", level=3) == '#show-journal(form: "grid", level: 3)'
-    assert "show-journal" in ref.PUBLIC_NAMES and "journal-entries" in ref.PUBLIC_NAMES
-    assert ref.category_of("show-journal") == "display" and ref.category_of("journal-entries") == "data"
+    # the journal written once in raw Typst beside its document, included by domain-file (spec 2026-10-21-commandes-typst-refonte, Q-008, ARCH-008)
+    assert ref.call_include_domain("journal", "cu") == '#include domain-file("journal", "cu")'
+    assert "journal-entries" in ref.PUBLIC_NAMES and "show-journal" not in ref.PUBLIC_NAMES
+    assert ref.category_of("journal-entries") == "data"
 
 
 def test_the_template_carries_the_journals_own_page():
@@ -731,6 +622,6 @@ def test_the_template_carries_the_journals_own_page():
     # The import line is asked of calc/documents.py's `import_line` and never spelt out here: it is the one place the line is written down (docs/typst/reference-workbook.md §10ter; build_reference.import_line delegates to it), so this follows the line if it ever moves. ⚠️ And spelling it out would fail `test_harness.test_a_probe_imports_by_a_path_its_depth_cannot_break`, whose grep cannot tell a relative import a test *reads* from one it *writes* -- which is also why this comment names neither.
     # It is the line of **no project** -- a report alone's, which is what the Standard template's sections carry, the template being laid out as one report on disk -- and not the line of the project the suite works on, which is laid out in three documents and whose sections import from the root.
     import documents
-    assert "#show-journal(" in body and body.startswith(documents.import_line(None))
+    assert '#include domain-file("journal", "rs")' in body and body.startswith(documents.import_line(None))
     entry = (report_dir / "Statischer Rapport.typ").read_text(encoding="utf-8")
     assert '#include "Sections/008-journal.typ"' in entry, "the journal section is not included"

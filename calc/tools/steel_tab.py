@@ -27,11 +27,8 @@ from steel_tab_words import STRINGS  # noqa: F401  -- merged into the window's S
 USER = position_section.USER_CODE
 
 
-def _section_label(code, size):
-    return "%s %s" % (code, size.replace("x", "×"))
-
-
 class SteelCheckTab(MemberCheckTab):
+    GRAPH_KIND = "steel"   # a steel check of the graph of dependencies (issue #71)
     """A tab of steel checks of one kind -- see the module's docstring."""
 
     DOMAIN = steel_check
@@ -48,11 +45,6 @@ class SteelCheckTab(MemberCheckTab):
 
     def resolve_draft(self, source):
         return steel_check.resolve(source, self.positions())
-
-    def shown_keys_of(self, record):
-        """What -1 offers: the values the export's rows print."""
-        result = self._computed(record)
-        return list((result or {}).get("calc", {}).get("vars", {}))
 
     # --- the profile and the steel -----------------------------------------------------
 
@@ -237,15 +229,9 @@ class SteelCheckTab(MemberCheckTab):
 
     # --- the call and the page --------------------------------------------------------------
 
-    def build_display(self):
-        super().build_display()
-        # #show-check-steel prints no member line and no description (lib/steel.typ)
-        self.options_form.setRowVisible(self.member_box, False)
-        self.options_form.setRowVisible(self.description_box, False)
-
     def command_text(self):
-        o = self.options()
-        return ref.call_show_check_steel(self.draft()["id"], level=o["level"], title=o["title"], unit=o["unit"], shown=o["shown"])
+        """Its domain written out by the export, where a section prints it: `#include domain-file("steel", id)` (spec 2026-10-21-commandes-typst-refonte, REQ-017, UI-002)."""
+        return ref.call_include_domain("steel", self.draft()["id"])
 
     def preview_source(self):
         """The page of the check as the last export computed it -- a draft has no page: it is saved first, the export being where a steel check is computed."""
@@ -259,12 +245,8 @@ class SteelCheckTab(MemberCheckTab):
         reason = "" if self.record is not None and self.record.get("calculable") else (self.reason or self.t("mc_preview_none"))
         if unsaved and not reason:
             reason = self.t("st_save_first")
-        return [
-            display_view.Entry("steel", "show-check-steel", panel=self.options_panel, call_fn=lambda _v: self.command_text(),
-                               snippet_fn=lambda _v: self.preview_source(), note_text=reason,
-                               banner=self.t("mc_save_first") if unsaved else ""),
-            display_view.Entry("loop", self.t("ds_loop", command="show-check-steel"), call=ref.call_check_steel_loop(), note="ds_note_loop"),
-        ]
+        return [display_view.Entry("steel", "domain-file", call_fn=lambda _v: self.command_text(), snippet_fn=lambda _v: self.preview_source(),
+                                   note_text=reason, banner=self.t("mc_save_first") if unsaved else "")]
 
 
 class SteelClassTab(SteelCheckTab):

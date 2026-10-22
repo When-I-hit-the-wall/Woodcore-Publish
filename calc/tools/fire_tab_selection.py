@@ -11,6 +11,7 @@ import text_pane  # a text's pane, the four drawing engines' one (issue #43)
 from drawing_tab import DrawingTab, number_text, plain_label
 from domains import figure_style  # which of the factors each kind of entry may state
 from domains import fire
+from domains import plan_clip  # Ctrl+C and Ctrl+V between fire-protection plans (issue #61)
 from i18n import strings  # the German name of a fire resistance or of a kind of surface, in the window's language
 from norms import vkf  # the fire resistances, the escape routes and the doors of the VKF sheet of symbols, and their colours
 
@@ -137,6 +138,23 @@ class FireTabSelectionMixin:
             self.sync_rows(keep=tree)
         finally:
             self.syncing = False
+
+    # -- Ctrl+C and Ctrl+V (issue #61, drawing_tab_clip.py): what is the fire-protection plan's own --
+
+    def make_clip(self, point):
+        """The entries selected, taken at `point`."""
+        return plan_clip.clip_fire(self.source, list(self.canvas.selected), point, self.canvas.per_m(), self.clip_root())
+
+    def paste_clip(self, clip, point):
+        """The clip put down at `point`, inside the change the caller opened, each entry with an id of its own. Returns (the ids pasted, what is said)."""
+        result = plan_clip.paste_fire(self.source, clip, point, self.canvas.per_m())
+        said = [self.t("plan_paste_done", n=len(result["added"]))]
+        if plan_clip.ratio(clip, self.canvas.per_m()) != 1.0:
+            said.append(self.t("plan_paste_scaled"))
+        return result["added"], said
+
+    def select_pasted(self, ids):
+        self.canvas.select_ids(ids)
 
     def on_selection(self):
         if not self.syncing:

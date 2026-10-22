@@ -8,4 +8,4 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#var("R_k", 7, "kN", label: "Kapazität Sherpa XS", descr: "Aus dem Katalog des Herstellers", norm: "Sherpa", norm-ref: "ETA-12/0197", note: "line", level: 3)
+#var("s_k", 1.394, "kN/m²", domain: ("snow-load", "SL"))

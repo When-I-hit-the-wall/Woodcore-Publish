@@ -17,11 +17,13 @@ The engineer, 08.10.2026: «écrire des calculs de manière simplifiée et que �
     ]
     // woodcore:/object domain
 
-**The id is the file's name** (issue #15, D-02, D-06): `#var-domain` is given it, so a value is read elsewhere with `#val(key, domain: "<id>")`, and the **name** the tab shows is the call's `title:`, which the report prints as a heading (D-10). A file whose `#var-domain` names another id than its own name -- copied, or renamed in the explorer -- is `hand_edited`, and written back under its own name.
+**`#domain` since the spec 2026-10-21-commandes-typst-refonte** (REQ-008, ARCH-005): the tab writes a domain `#domain("<id>", label: "<name>")[…]`, its `label:` the `title:` of the `#var-domain` it replaces; a file written with `#var-domain` is read as it always was and kept to its bytes while its header is not changed, and a `#var` with no value prints a variable again (REQ-002). The commands keep every fine argument they are written with -- `display`, `role`, the positions, `id` -- as options, read and written back unchanged.
+
+**The id is the file's name** (issue #15, D-02, D-06): `#var-domain` is given it, so a value is read elsewhere with `#val(key, domain: "<id>")`, and the **name** the tab shows is the call's `title:`, which the report prints as a heading (D-10). A file whose `#var-domain` names another id than its own name -- copied, or renamed in the explorer -- is `misnamed`, and written back under its own name.
 
 **Between the commands, Typst of the engineer's own** (REQ-006): a title, a sentence, a formula in mathematics -- one `text` item each run of it, written flush left and read back as it was typed. It is printed and never computed; what Typst would compute and Python could not -- a `#var`, `#eq`, `#var-unit` or `#verify` inside it -- is refused, as is a line of tags, and the body is read back in memory before anything is written (ARCH-RISK-108).
 
-**One tag** around the one `#var-domain` call, read by `structure.pair_tags` -- the one reader of tags -- and the call by `typst_objects`'s parser with positional arguments allowed (D-20). Its state has `typst_objects`'s three words: `canonical` (what this module writes reads back to the same bytes), `hand_edited` (it parses, in another form -- written back in Woodcore's only after the tab warns), `unreadable` (it does not parse: shown read only, corrected in VS Code, and an export stops on it naming the file).
+**One tag** around the one `#var-domain` call, read by `structure.pair_tags` -- the one reader of tags -- and the call by `typst_objects`'s parser with positional arguments allowed (D-20). Its state: `canonical` (it reads; since v0.119 a form of the engineer's own -- a call over two lines, a comment -- is no state, the tab writing back only the arguments it changed, ARCH-003), `misnamed` (it reads and declares another id than its file's name -- written back under its own after the tab says so), `unreadable` (it does not parse: shown read only, corrected in VS Code, and an export stops on it naming the file).
 
 **A report prints a domain** with `#include "/Formules/<id>.typ"` (issue #15, D-01), each command at its own `level:` or the report's. The index the export writes, `data/formulas.json`, lists the domains for the «Variables» tab and for the export's own checks (D-08); Typst no longer reads it.
 
@@ -42,24 +44,27 @@ import structure
 import typst_objects
 import units
 import validation
-from tools import build_reference as ref
+import build_reference as ref
 
 TAG_TYPE = "formula-domain"
 TAG_ID = "domain"
 EXPORT_FILE = "formulas.json"
 EXPORT_SCHEMA_VERSION = "2.0"   # 2.0 (issue #15): keyed by the id, the file's name, and carrying the title -- 1.0 was keyed by the name v0.117's retired #show-formula read
-# The commands a domain holds, in the order the palette offers them (D-04); `var-domain` is the domain itself
-COMMANDS = ("var", "eq", "verify", "val", "var-unit")
+# The commands a domain holds, in the order the palette offers them (D-04); `domain` is the domain itself. `#val` and `#var-unit` were merged into `#var` (spec 2026-10-21-commandes-typst-refonte, REQ-009): a line that still writes one is the engineer's own text, which the export says (commands_migrate)
+COMMANDS = ("var", "eq", "verify")
 # The item a run of the engineer's own Typst between two commands is (REQ-006): printed, never computed
 TEXT = "text"
-# What Typst would compute and Python could not, were it written inside a text: refused there (ARCH-RISK-108) -- `#val` only reads, and a sentence may print a value with it
-COMPUTING = ("var", "eq", "verify", "var-unit")
+# What Typst would compute and Python could not, were it written inside a text: refused there (ARCH-RISK-108)
+COMPUTING = ("var", "eq", "verify")
 DIGITS = 3   # the decimals the tab prints with -- the report's own default (calc-engine.typ's `number-digits`)
-_IMPORT_LINE = '#import "/commands.typ": *'
+# A domain's first line is the engine imported from the Typst root, `/000-Typst-Config/commands.typ` in a project laid out by folders (calc/documents.py `root_import_line`, issue #64): the current project's, else the form every project laid out before writes (`_import_line`).
+
+# What a domain's file is in, read (spec 2026-10-15, ARCH-006): it reads, it reads and declares another id than its file's name, it does not read. A form of the engineer's own is none of them -- the tab writes back only what it changed (ARCH-003)
+STATES = ("canonical", "misnamed", "unreadable")
 
 
-class DomainError(ValueError):
-    """A domain the tab cannot save as asked -- a name taken, a key used twice -- said in a sentence and a code the window translates (`code`, `args`)."""
+class DomainError(validation.ValidationError, ValueError):
+    """A domain the tab cannot save as asked -- a name taken, a key used twice -- said in a sentence and a code the window translates (`code`, `args`). A ValidationError (v0.120, C7), so an export it stops says so as a defect of the input; still a ValueError for the callers that catch one."""
 
     def __init__(self, code, message, **args):
         super().__init__(message)
@@ -81,6 +86,12 @@ class Command:
     options: dict = field(default_factory=dict)
     source: object = None   # None; ("var-of", "<the call>"); ("domain", "<name>" or (calc, instance))
     raw: str = ""
+    # A command the engineer wrote inside a line (spec 2026-10-14-commandes-en-ligne-domaine, D-02): `glued_before`, it begins on the line the item before it ends on (`- $0°$: #var(…)`); `glued_after`, the item after it begins on its line (`#var(…) --- Auflast`). A write keeps it there. A text carries no flag of its own: the pane rebuilds texts from strings, a command keeps its identity
+    glued_before: bool = False
+    glued_after: bool = False
+    # What the file held for this command when it was read (spec 2026-10-15, ARCH-006, D-17): its lines exactly as written -- arguments over several lines, a comment after the call --, and the call Woodcore would write for it then. A command the tab did not change is written back as `written`, byte for byte; only one it changed is written in Woodcore's form.
+    written: str = ""
+    read_call: str = ""
 
     @property
     def shown_symbol(self):
@@ -89,7 +100,7 @@ class Command:
     @property
     def defines(self):
         """The registry key this command writes: a variable's, an equation's, a conversion's."""
-        return self.key if self.kind in ("var", "eq", "var-unit") else None
+        return self.key if self.kind in ("var", "eq") else None
 
     @property
     def is_text(self):
@@ -108,6 +119,13 @@ class Domain:
     problem: str = ""
     text: str = None   # the whole file as it was read, kept so a write changes the body and nothing else
     declared: str = ""
+    # `gen:` of an unfolded check (spec 2026-10-15, REQ-003): the form it was written from, (kind, form, version), or None for a domain written by hand
+    gen: object = None
+    # What the file held when it was read (ARCH-006): the `#var-domain(...)[` header as written and the one Woodcore would write, and the body's items as they were -- what lets a write leave everything it did not change as it stands
+    header_written: str = ""
+    header_call: str = ""
+    read_items: tuple = ()
+    body_read: str = ""
     index_problem: str = ""   # set by `save` alone: the file was written, but the index of the domains could not be (another file unreadable, two files of one id) -- said, never raised
 
     def keys(self):
@@ -276,10 +294,19 @@ def from_call(call):
         symbol = rest.pop(0) if rest and isinstance(rest[0], str) else ""
         command = Command("var", key=key, symbol=symbol)
         if "domain" in named:
-            if rest:
-                raise typst_objects.ParseError(f"#var({key!r}) reads its value from domain: and states one besides")
             where = named.pop("domain")
             command.source = ("domain", where if isinstance(where, str) else tuple(where) if isinstance(where, list) else _literal(where))
+            # a value written beside domain: is a literal checked by it (lib/formula.typ, spec 2026-10-15 REQ-001): the value is the one computed with
+            if rest:
+                if not isinstance(rest[0], (int, float)) or isinstance(rest[0], bool):
+                    raise typst_objects.ParseError(f"#var({key!r}): beside domain: the value is a number")
+                command.value = rest[0]
+                if len(rest) > 1:
+                    if not isinstance(rest[1], str):
+                        raise typst_objects.ParseError(f"#var({key!r}): its unit is a string")
+                    command.unit = rest[1]
+                if len(rest) > 2:
+                    raise typst_objects.ParseError(f"#var({key!r}) has more than a symbol, a value and a unit")
         elif rest and isinstance(rest[0], typst_objects.Expr):
             command.source = ("var-of", rest[0].source)
             if len(rest) > 1:
@@ -292,6 +319,9 @@ def from_call(call):
                 command.unit = rest[1]
             if len(rest) > 2:
                 raise typst_objects.ParseError(f"#var({key!r}) has more than a symbol, a value and a unit")
+        elif not rest:
+            # no value and no domain: the line prints a variable declared above it again (spec 2026-10-21-commandes-typst-refonte, REQ-002) -- `unit:`, if given, for that line alone
+            command.source = ("again", None)
         else:
             raise typst_objects.ParseError(f"#var({key!r}) has no value")
     elif kind == "eq":
@@ -304,17 +334,8 @@ def from_call(call):
         if len(pos) != 1:
             raise typst_objects.ParseError("#verify takes one relation")
         command = Command("verify", formula=_raw_text(pos[0]))
-    elif kind == "val":
-        if len(pos) != 1:
-            raise typst_objects.ParseError("#val takes one name")
-        command = Command("val", key=pos[0])
-        if "domain" in named:
-            where = named.pop("domain")
-            command.source = ("domain", where if isinstance(where, str) else tuple(where) if isinstance(where, list) else _literal(where))
     else:
-        if len(pos) != 2 or not isinstance(pos[1], str):
-            raise typst_objects.ParseError("#var-unit takes a name and a unit")
-        command = Command("var-unit", key=pos[0], unit=pos[1])
+        raise typst_objects.ParseError(f"#{kind} is no command of a domain -- {', '.join(COMMANDS)}")
     command.options = named
     return command
 
@@ -331,56 +352,179 @@ def to_call(command):
         head = [c.key] + ([c.symbol] if c.symbol else [])
         if c.source and c.source[0] == "domain":
             where = c.source[1]
-            options["domain"] = list(where) if isinstance(where, tuple) else where
-            return ref.call_command("var", *head, **options)
+            # the literal checked by domain: before the named arguments, where the value goes (REQ-001)
+            literal = [c.value] + ([c.unit] if c.unit else []) if c.value is not None else []
+            return ref.call_command("var", *head, *literal, **{"domain": list(where) if isinstance(where, tuple) else where, **options})
         if c.source and c.source[0] == "var-of":
             return ref.call_command("var", *head, ref.Raw(c.source[1]), *([c.unit] if c.unit else []), **options)
+        if c.source and c.source[0] == "again":
+            return ref.call_command("var", c.key, **options)
         return ref.call_command("var", *head, c.value, *([c.unit] if c.unit else []), **options)
     if c.kind == "eq":
         return ref.call_command("eq", c.key, *([c.symbol] if c.symbol else []), ref.Raw("`" + c.formula + "`"), **options)
-    if c.kind == "verify":
-        return ref.call_command("verify", ref.Raw("`" + c.formula + "`"), **options)
-    if c.kind == "val":
-        if c.source and c.source[0] == "domain":
-            where = c.source[1]
-            options["domain"] = list(where) if isinstance(where, tuple) else where
-        return ref.call_command("val", c.key, **options)
-    return ref.call_command("var-unit", c.key, c.unit, **options)
+    return ref.call_command("verify", ref.Raw("`" + c.formula + "`"), **options)
 
 
 def header_of(domain):
-    """`#var-domain("<id>", title: "<name>")[` -- the line a domain's body opens with (D-06, D-10)."""
-    title = f", title: {ref.typst_str(domain.name)}" if domain.name else ""
-    return "#var-domain(" + ref.typst_str(domain.id) + title + ")["
+    """`#domain("<id>", label: "<name>")[` -- the line a domain's body opens with (D-06, D-10; spec 2026-10-21-commandes-typst-refonte, REQ-008, ARCH-005: `#domain` replaces `#var-domain`, whose `title:` is its `label:`). A file that writes `#var-domain` keeps its header while the tab changes none of it (`body_of`), and an unfolded check's -- which carries its `gen:` (REQ-003) until its generator writes `#domain` (lot 8) -- is still written so."""
+    label = f", label: {ref.typst_str(domain.name)}" if domain.name else ""
+    return "#domain(" + ref.typst_str(domain.id) + label + ")["
+
+
+def _signature(items):
+    """What tells one list of items from another for a write: each item's kind, the text Woodcore would write for it, and for a command what it is glued to (D-02)."""
+    return tuple(item_key(c) for c in items)
 
 
 def body_of(domain):
-    """The `#var-domain(…)[…]` call as the file writes it: one command a line, two spaces in; a text flush left, as it was typed (REQ-006) -- indenting it would change a raw block or a string it holds."""
-    lines = [header_of(domain)]
+    """The `#var-domain(…)[…]` call as the file writes it: one command a line, two spaces in; a text flush left, as it was typed (REQ-006) -- indenting it would change a raw block or a string it holds. A command glued to what is beside it (spec 2026-10-14-commandes-en-ligne-domaine, D-02) is written on that line, in Woodcore's form.
+
+    **Only what changed is written in Woodcore's form** (spec 2026-10-15, ARCH-006, D-17, reversing the canonical rewrite of issue #15): a domain whose items and header are what the file held is its body as read, byte for byte; otherwise every command the tab did not change is written as it was written -- its arguments over several lines, a comment after it --, every text as typed, and the header as written unless it changed."""
+    if domain.body_read and _signature(domain.commands) == domain.read_items and header_of(domain) == domain.header_call:
+        return domain.body_read
+    header = domain.header_written if domain.header_written and header_of(domain) == domain.header_call else header_of(domain)
+    lines = [header]
+    prev = None
     for c in domain.commands:
-        lines.append(c.raw if c.is_text else "  " + to_call(c))
+        if prev is not None and same_line(prev, c):
+            lines[-1] += c.raw if c.is_text else to_call(c)
+        elif c.is_text:
+            lines.append(c.raw)
+        elif c.written and to_call(c) == c.read_call:
+            lines.append(c.written)
+        elif c.written:
+            lines.append(patched(c.written, c.read_call, to_call(c)))
+        else:
+            lines.append("  " + to_call(c))
+        prev = c
     lines.append("]")
     return "\n".join(lines)
 
 
-def file_text(domain):
-    """A new domain's whole file."""
-    return "\n".join([_IMPORT_LINE, "", f"// woodcore:object {TAG_TYPE} {TAG_ID}", body_of(domain), f"// woodcore:/object {TAG_ID}", ""])
+def same_line(prev, item):
+    """Whether `item` is written on the line `prev` ends on (D-02): a command glued to what precedes it, or what follows a command glued to it."""
+    return (not prev.is_text and prev.glued_after) or (not item.is_text and item.glued_before)
+
+
+def _arguments(text, at):
+    """{index or name: (where the argument starts, where its value starts, where it ends, its value's source)} of the call at `at` of `text`, and the index after its `)`."""
+    parser = typst_objects._Parser(text)
+    _call, end = parser.call(at, positional=True)
+    return {key: (start, value, stop, text[value:stop]) for key, start, value, stop in parser.spans}, end
+
+
+def _taken_away(written, mine, key):
+    """The edits that take the named argument `key` out of the call as written: its line where it stands alone on one, else the argument with the comma after it, else -- the last one -- with the comma before it; a comment beside it stays. None where none of these holds."""
+    start, _value, stop, _source = mine[key]
+    j = stop
+    while j < len(written) and written[j] in " \t":
+        j += 1
+    comma_after = j < len(written) and written[j] == ","
+    end = j + 1 if comma_after else stop
+    line_start = written.rfind("\n", 0, start) + 1
+    line_end = written.find("\n", end)
+    if not written[line_start:start].strip() and line_end >= 0 and not written[end:line_end].strip():
+        return [(line_start, line_end + 1, "")]   # alone on its line: the line goes
+    if comma_after:
+        while end < len(written) and written[end] in " \t":
+            end += 1
+        return [(start, end, "")]
+    previous = max((span[2] for span in mine.values() if span[2] <= start), default=None)
+    comma = -1 if previous is None else written.find(",", previous, start)
+    if comma < 0:
+        return None
+    if written[comma + 1:start].strip():
+        return [(comma, comma + 1, ""), (start, stop, "")]   # a comment between the comma and the argument stays
+    return [(comma, stop, "")]
+
+
+def patched(written, was, now):
+    """A command the tab changed, written over its lines as the engineer wrote them (spec 2026-10-15, ARCH-003): **only the arguments whose value changed are replaced**, an argument added written after the last one, one taken away removed with the comma before it -- every other byte kept, arguments over several lines and a comment after the call included. `was` is the call Woodcore would have written for the command as read, `now` the one it writes for it as it is. Where the number of positional arguments changes, or the result would not read back as `now`, the call alone is written in Woodcore's form, what stood before and after it on its lines kept."""
+    at = written.index("#")
+    try:
+        before, _ = _arguments(was, 0)
+        after, _ = _arguments(now, 0)
+        mine, close = _arguments(written, at)
+    except (typst_objects.ParseError, ValueError):
+        return written
+    whole = written[:at] + now + written[close:]
+    positional = lambda args: sorted(k for k in args if isinstance(k, int))
+    if positional(before) != positional(after) or positional(mine) != positional(after):
+        return whole
+    edits = []   # (start, end, new text), never overlapping: one per argument
+    for key in after:
+        value = after[key][3]
+        if key in mine:
+            if (before.get(key) or (0, 0, 0, None))[3] != value:
+                edits.append((mine[key][1], mine[key][2], value))
+        else:
+            last = max(span[2] for span in mine.values())
+            edits.append((last, last, f", {key}: {value}"))
+    for key in before:
+        if key not in after and key in mine and not isinstance(key, int):
+            taken = _taken_away(written, mine, key)
+            if taken is None:
+                return whole
+            edits.extend(taken)
+    text = written
+    for start, end, new in sorted(edits, key=lambda edit: (edit[0], edit[1]), reverse=True):
+        text = text[:start] + new + text[end:]
+    try:
+        call, _ = typst_objects._Parser(text).call(at, positional=True)
+        same = to_call(from_call(call)) == to_call(from_call(typst_objects._Parser(now).call(0, positional=True)[0]))
+    except (typst_objects.ParseError, DomainError):
+        same = False
+    return text if same else whole
+
+
+def file_text(domain, here=None):
+    """A new domain's whole file: the import line -- project `here`'s, else the current project's (`_import_line`) -- and the `#var-domain` call -- no tag, the call being what Woodcore finds the domain by (ARCH-006)."""
+    return "\n".join([_import_line(here), "", body_of(domain), ""])
+
+
+def _import_line(here=None):
+    """The engine imported from the Typst root, as project `here` -- else the current one, else none -- spells it (documents.root_import_line)."""
+    import documents
+    if here is None:
+        try:
+            here = project.current()
+        except project.ProjectError:
+            here = None
+    return documents.root_import_line(here)
 
 
 def _body_span(text):
-    """(first line, line after the last) of the body between the domain's two tags, the lines as structure splits them, or a reason the tags cannot be read."""
-    blocks, problems = structure.pair_tags(text, object_types=(TAG_TYPE,))
-    if problems:
-        return None, "; ".join(str(p) for p in problems)
-    found = [b for b in blocks if b.kind == "object" and b.type == TAG_TYPE]
+    """(first line, line after the last) of the domain's `#var-domain(...)[...]` call, the lines as structure splits them, or a reason it cannot be found.
+
+    **Found by the call, not by a tag** (spec 2026-10-15, ARCH-006, REQ-005): the one `#var-domain(` that stands at the top of the file's markup, read with typst_paths' lexer, to the `]` that closes it. The tag `// woodcore:object formula-domain domain` around it, which every domain carried until then, is neither needed nor in the way -- a file that still has it, or has lost one of its two lines, is read all the same, and the migration takes it away (calc/domains/unfold.py)."""
+    norm = typst_objects._normalise(text)
+    _top, hashes = _top_level_lines(norm)
+    found = [j for j, name, _at_top in hashes if name in ("var-domain", "domain")]
     if len(found) != 1:
-        return None, f"a domain's file holds one `// woodcore:object {TAG_TYPE} {TAG_ID}` block -- this one holds {len(found)}"
-    return (found[0].start + 1, found[0].end), ""
+        return None, f"a domain's file holds one #var-domain(...)[...] call at its top level -- this one holds {len(found)}"
+    j = found[0]
+    if norm[norm.rfind("\n", 0, j) + 1:j].strip():
+        return None, "#var-domain(...) stands at the start of its line"
+    try:
+        call, end = typst_objects._Parser(norm).call(j, positional=True)
+    except typst_objects.ParseError as exc:
+        return None, f"#var-domain(...) cannot be read: {exc}"
+    eol = norm.find("\n", end)
+    eol = len(norm) if eol < 0 else eol
+    rest = norm[end:eol].strip()
+    if rest and not rest.startswith("//"):
+        return None, f"#var-domain(...)[...] is followed on its last line by {rest!r}"
+    return (norm.count("\n", 0, j), norm.count("\n", 0, end) + 1), ""
 
 
 def parse_body(body):
     """(declared name, title, items) of a `#var-domain("…", title: "…")[…]` body -- the commands and, between them, the runs of the engineer's own Typst (`text` items). Raises typst_objects.ParseError."""
+    declared, title, items, _gen, _header = parse_domain(body)
+    return declared, title, items
+
+
+def parse_domain(body):
+    """`parse_body`, and the `gen:` of an unfolded check (None for a domain written by hand) and the header as it is written, `#var-domain(...)[` to its bracket."""
     text = typst_objects._normalise(body)
     parser = typst_objects._Parser(text)
     start = parser.ws(0)
@@ -389,13 +533,22 @@ def parse_body(body):
     call, end = parser.call(start, positional=True)
     if parser.ws(end) < parser.n:
         parser.fail("a domain's block holds its #var-domain call and nothing after it", parser.ws(end))
-    title = call.args.get("title", "") if call.type == "var-domain" else None
-    if (call.type != "var-domain" or len(call.positional) != 1 or not isinstance(call.positional[0], str)
-            or set(call.args) - {"title"} or not isinstance(title, str)):
-        parser.fail('a domain is written #var-domain("its id", title: "its name")[…]', start)
+    # `#domain(id, label:, …)` since the spec 2026-10-21-commandes-typst-refonte (REQ-008), `#var-domain(id, title:, gen:)` before it: both read, the label the domain's name
+    allowed = {"var-domain": {"title", "gen"}, "domain": {"label", "label-position", "descr", "descr-position", "norm", "norm-section", "norm-position", "level"}}
+    title = call.args.get("title" if call.type == "var-domain" else "label", "") if call.type in allowed else None
+    if (call.type not in allowed or len(call.positional) != 1 or not isinstance(call.positional[0], str)
+            or set(call.args) - allowed[call.type] or not isinstance(title, str)):
+        parser.fail('a domain is written #domain("its id", label: "its name")[…]', start)
     if call.body is None:
         parser.fail("#var-domain has no content block", end)
-    return call.positional[0], title, split_items(call.body.markup)
+    gen = call.args.get("gen")
+    if gen is not None and not (isinstance(gen, dict) and set(gen) == {"kind", "form", "version"}
+                                and isinstance(gen["kind"], str) and isinstance(gen["form"], str) and isinstance(gen["version"], int)):
+        parser.fail('gen: is (kind: "tension", form: "(6)", version: 1), written by Woodcore when it unfolds a check', start)
+    # the header as written: the text before the content block's own markup and its `[`
+    closing = text.rstrip()
+    header = closing[start:len(closing) - 1 - len(call.body.markup) - 1] + "["
+    return call.positional[0], title, split_items(call.body.markup), gen, header
 
 
 # A line that opens with one of the domain's commands: a command, where it stands alone on its line at the top of the body
@@ -403,7 +556,7 @@ _COMMAND_LINE = re.compile(r"[ \t]*#(" + "|".join(sorted((re.escape(c) for c in 
 
 
 def _top_level_lines(markup):
-    """The offsets of the lines of `markup` that begin in its own markup -- not inside a raw block, a comment, a string, an equation or a call --, read with typst_paths' lexer, the one that walks Typst's modes (ARCH-RISK-108: never a regex on `#var(`). Also every `#name` the lexer met, with its offset: what `check_text` refuses."""
+    """The offsets of the lines of `markup` that begin in its own markup -- not inside a raw block, a comment, a string, an equation or a call --, read with typst_paths' lexer, the one that walks Typst's modes (ARCH-RISK-108: never a regex on `#var(`). Also every `#name` the lexer met, as (offset, name, top): `top` where it stands in the body's own markup, outside any content block, call or equation -- where `split_items` may cut a command out of a line (D-02) --, every one of them what `check_text` refuses."""
     import typst_paths
     starts = [0] + [i + 1 for i, c in enumerate(markup) if c == "\n"]
     top, hashes = set(), []
@@ -413,7 +566,8 @@ def _top_level_lines(markup):
     def hashed(j):
         found = typst_paths._IDENT.match(markup, j + 1)
         if found is not None:
-            hashes.append((j, found.group()))
+            frame = lexer.stack[-1]
+            hashes.append((j, found.group(), len(lexer.stack) == 1 and frame[0] == "markup" and frame[2] == 0))
         original(j)
     lexer._hash = hashed
     k = 0
@@ -457,11 +611,16 @@ def tidy_items(items):
             tidy.append(c)
             continue
         lines = typst_objects._normalise(c.raw).split("\n")
-        head = bool(lines) and not lines[0].strip()
-        while lines and not lines[0].strip():
+        # a side glued to a command (D-02) is part of the command's line: kept as typed -- a space between two commands with it
+        glued_head = i > 0 and out[i - 1].glued_after
+        glued_tail = i < len(out) - 1 and out[i + 1].glued_before
+        if (glued_head or glued_tail) and c.raw == "":
+            continue   # nothing between a command and what it is glued to
+        head = not glued_head and bool(lines) and not lines[0].strip()
+        while not glued_head and len(lines) > glued_tail and not lines[0].strip():
             lines.pop(0)
-        tail = bool(lines) and not lines[-1].strip()
-        while lines and not lines[-1].strip():
+        tail = not glued_tail and bool(lines) and not lines[-1].strip()
+        while not glued_tail and len(lines) > glued_head and not lines[-1].strip():
             lines.pop()
         before, after = i > 0, i < len(out) - 1   # a command on that side: the text stands between the two
         if not lines:
@@ -469,13 +628,43 @@ def tidy_items(items):
                 tidy.append(Command(TEXT, raw=""))
             continue
         tidy.append(Command(TEXT, raw="\n".join(([""] if head and before else []) + lines + ([""] if tail and after else []))))
-    return tidy
+    return _settle_glue(tidy)
+
+
+def _settle_glue(items):
+    """The items with the flags of their glued commands (D-02) saying what the file will hold once written, so that it reads back to the same items: a run of blanks on one line beside a command is a space only between two commands glued to it, and goes otherwise, with the glue; a command is glued to no text that begins (ends) with a line break, nor to the edge of the body; two commands glued on either side share their line. The flags are changed in place -- the tab knows a command by its identity."""
+    out = []
+    for k, c in enumerate(items):
+        prev = items[k - 1] if k > 0 else None
+        nxt = items[k + 1] if k + 1 < len(items) else None
+        glued = (prev is not None and not prev.is_text and prev.glued_after) or (nxt is not None and not nxt.is_text and nxt.glued_before)
+        if c.is_text and glued and "\n" not in c.raw and not c.raw.strip():
+            if not (prev is not None and prev.glued_after and nxt is not None and nxt.glued_before):
+                if prev is not None:
+                    prev.glued_after = False
+                if nxt is not None:
+                    nxt.glued_before = False
+                continue
+        out.append(c)
+    for k, c in enumerate(out):
+        if c.is_text:
+            continue
+        prev = out[k - 1] if k > 0 else None
+        nxt = out[k + 1] if k + 1 < len(out) else None
+        if prev is None or (prev.is_text and "\n" in prev.raw and not prev.raw.split("\n")[-1].strip()):
+            c.glued_before = False
+        if nxt is None or (nxt.is_text and "\n" in nxt.raw and not nxt.raw.split("\n")[0].strip()):
+            c.glued_after = False
+        if nxt is not None and not nxt.is_text and (c.glued_after or nxt.glued_before):
+            c.glued_after = nxt.glued_before = True
+    return out
 
 
 def split_items(markup):
-    """The items of a domain's body: each command that stands alone on its line(s) at the top of the body, and each run of lines between two of them as one `text` item, kept as typed -- one blank line beside a command kept as the paragraph it is, an empty text between two commands (`tidy_items`, issue #40, D-05: until then every blank line beside a command was left out, and two paragraphs ran into one). Raises typst_objects.ParseError where a command cannot be read."""
+    """The items of a domain's body: each command that stands alone on its line(s) at the top of the body, each computing command written inside a line of the body's own markup -- `- $0°$: #var(…)`, `#var(…) --- Auflast`, glued to what is beside it (spec 2026-10-14-commandes-en-ligne-domaine, D-02; until then refused, `text_trailing`) --, and each run of text between two of them as one `text` item, kept as typed -- one blank line beside a command kept as the paragraph it is, an empty text between two commands (`tidy_items`, issue #40, D-05: until then every blank line beside a command was left out, and two paragraphs ran into one). Raises typst_objects.ParseError where a command cannot be read."""
     markup = typst_objects._normalise(markup)
-    top, _hashes = _top_level_lines(markup)
+    top, hashes = _top_level_lines(markup)
+    inline = [j for j, name, at_top in hashes if at_top and name in COMPUTING]
     sub = typst_objects._Parser(markup)
     items, pending, i = [], [], 0
     n = len(markup)
@@ -499,15 +688,46 @@ def split_items(markup):
                 if call.body is not None:
                     sub.fail(f"#{call.type} takes no content block", end)
                 flush()
-                items.append(from_call(call))
-                if rest:   # a comment after a call, written by hand: kept, on a line of its own (the file is then hand_edited)
-                    pending.append(rest)
+                command = from_call(call)
+                # its lines as written, a comment after the call included, kept with it (ARCH-006): what it is written back as while the tab does not change it
+                command.written = markup[i:after]
+                command.read_call = to_call(command)
+                items.append(command)
                 i = after + 1
                 continue
-        pending.append(line)
-        i = eol + 1
+        i = _split_line(markup, i, eol, [j for j in inline if i <= j < eol], sub, items, pending, flush)
     flush()
     return tidy_items(items)
+
+
+def _split_line(markup, i, eol, cuts, sub, items, pending, flush):
+    """The line that begins at `i` read into `items` and `pending`: each computing command whose `#` is in `cuts` a command glued to what is beside it on the line (D-02), the rest text as typed. A call Typst carries on into what follows it (`#var(…)[…]`, `#var(…).x`, `#var(…)(…)`) is left in the text, which `check_text` refuses. Returns where the next line begins -- after the line a call written over several lines ends on."""
+    n, pos, cut = len(markup), i, False
+    for j in cuts:
+        if j < pos:
+            continue
+        call, end = sub.call(j, positional=True)
+        if call.body is not None or markup[end:end + 1] in ("(", "[") or re.match(r"\.[A-Za-z_]", markup[end:end + 2]):
+            continue
+        before = markup[pos:j]
+        if before.strip() or (cut and before):   # the indentation before a command that opens its line is no text, as for one alone on it
+            pending.append(before)
+        flush()
+        command = from_call(call)
+        command.glued_before = bool(markup[i:j].strip())
+        items.append(command)
+        if end > eol:
+            eol = markup.find("\n", end)
+            eol = n if eol < 0 else eol
+        rest = markup[end:eol].strip()
+        if not rest or rest.startswith("//"):
+            if rest:   # a comment after it: on a line of its own, as after a call alone on its line
+                pending.append(rest)
+            return eol + 1
+        command.glued_after = True
+        pos, cut = end, True
+    pending.append(markup[pos:eol])
+    return eol + 1
 
 
 def check_text(raw):
@@ -517,36 +737,14 @@ def check_text(raw):
             raise DomainError("text_tag", f"a text of the domain holds a line of Woodcore's tags: {line.strip()!r}", line=line.strip())
     text = typst_objects._normalise(raw)
     _top, hashes = _top_level_lines(text)
-    for j, name in hashes:
+    for j, name, _at_top in hashes:
         if name in COMPUTING:
+            # since spec 2026-10-14-commandes-en-ligne-domaine a computing command in the body's own markup is a command wherever it stands on its line (`text_trailing` retired): what reaches here sits in a content block, a call, an equation, or carries on into what follows it
             start = text.rfind("\n", 0, j) + 1
             eol = text.find("\n", j)
             eol = len(text) if eol < 0 else eol
             line = text[start:eol].strip()
-            trailing = _after_call(text, j, eol) if not text[start:j].strip() else ""
-            if trailing:
-                # the commonest case: `#var(...) ;` -- the call alone on its line but for what follows it, which makes the line a text
-                hint = f'#{name}(..., sep: "{trailing}")' if name in SEPARATED and _PUNCTUATION.fullmatch(trailing) else f"#{name}(...) alone on its line"
-                raise DomainError("text_trailing", f"{line!r}: {trailing!r} after #{name}(...) on the same line is refused -- it makes the line a text, which Woodcore does not compute. Write {hint}, without {trailing!r} after the call; several values written one line after the other print on one line (inline is the default, note: \"line\" sets one on a line of its own)", command=name, line=line, rest=trailing, hint=hint)
             raise DomainError("text_command", f"a text of the domain holds #{name} ({line!r}): write it as a block of its own, which Woodcore computes -- in a text the report would compute it and Woodcore would not", command=name, line=line)
-
-
-# The commands that take `sep:` (lib/formula.typ, spec 2026-10-11-argument-sep-var), and what a separator typed after one of them looks like: what the refusal proposes to write as `sep:` instead
-SEPARATED = ("var", "eq", "var-unit")
-_PUNCTUATION = re.compile(r"[;,:/|–—-]")
-
-
-def _after_call(text, at, eol):
-    """What follows the call that starts at `at` on its own line, stripped -- "" where the call cannot be read or nothing follows it."""
-    try:
-        _call, end = typst_objects._Parser(text).call(at, positional=True)
-    except typst_objects.ParseError:
-        return ""
-    if end > eol:
-        after = text.find("\n", end)
-        eol = len(text) if after < 0 else after
-    rest = text[end:eol].strip()
-    return "" if rest.startswith("//") else rest
 
 
 def read(path):
@@ -562,7 +760,7 @@ def read(path):
     lines = structure._split(text)
     body = "".join(lines[span[0]:span[1]])
     try:
-        domain.declared, domain.name, domain.commands = parse_body(body)
+        domain.declared, domain.name, domain.commands, domain.gen, domain.header_written = parse_domain(body)
         for c in domain.commands:
             if c.is_text:
                 check_text(c.raw)
@@ -572,9 +770,18 @@ def read(path):
     except DomainError as exc:   # a computing command inside a text: Typst and Python would disagree on what it gives
         domain.state, domain.problem = "unreadable", str(exc)
         return domain
-    if domain.declared != domain.id or typst_objects._normalise(body).strip() != body_of(domain).strip():
-        domain.state = "hand_edited"   # another id than its file's name -- copied, renamed outside -- is written back under its own
+    # what was read, so that a write changes what the tab changed and nothing else (ARCH-006, D-17): a form of the engineer's own -- arguments over several lines, a comment, a blank line -- is no longer a state to rewrite
+    domain.read_items = _signature(domain.commands)
+    domain.header_call = header_of(replace(domain, id=domain.declared))
+    domain.body_read = typst_objects._normalise(body).rstrip("\n")
+    if domain.declared != domain.id:
+        domain.state = "misnamed"   # another id than its file's name -- copied, renamed outside -- is written back under its own
     return domain
+
+
+def item_key(c):
+    """What an item is, to compare two lists of them: its kind, its text or its call, and for a command what it is glued to (D-02)."""
+    return (c.kind, c.raw) if c.is_text else (c.kind, to_call(c), c.glued_before, c.glued_after)
 
 
 def check_body(domain):
@@ -588,7 +795,7 @@ def check_body(domain):
         _declared, _title, back = parse_body(body)
     except typst_objects.ParseError as exc:
         raise DomainError("text_unbalanced", f"the domain would not read back once written -- a text's brackets do not balance? ({exc})", reason=str(exc))
-    if [(c.kind, c.raw if c.is_text else to_call(c)) for c in back] != [(c.kind, c.raw if c.is_text else to_call(c)) for c in items]:
+    if [item_key(c) for c in back] != [item_key(c) for c in items]:
         raise DomainError("text_unbalanced", "the domain would not read back once written as it is now -- a text holds what reads as a command, or the brackets of a text do not balance")
     return items
 
@@ -600,7 +807,7 @@ def write_text(domain):
         return file_text(domain)
     span, why = _body_span(domain.text)
     if span is None:
-        raise DomainError("unreadable", f"{domain.path.name if domain.path else domain.id}: its tags cannot be read ({why}) -- correct it in VS Code", file=domain.id, reason=why)
+        raise DomainError("unreadable", f"{domain.path.name if domain.path else domain.id}: its #var-domain call cannot be found ({why}) -- correct it in VS Code", file=domain.id, reason=why)
     lines = structure._split(domain.text)
     newline = "\r\n" if lines and lines[0].endswith("\r\n") else "\n"
     body = body_of(domain).replace("\n", newline) + newline
@@ -610,10 +817,48 @@ def write_text(domain):
 # --- the project's domains ----------------------------------------------------------------------
 
 def list_domains(here=None):
-    """Every domain of the project, by file name: `<Typst root>/Formules/*.typ`."""
+    """Every domain of the project, by file name: the engineer's own, `<Typst root>/Domains/*.typ` (`Formules/` in a project laid out before), and in a project laid out by folders every domain a specialised tab's folder holds written out whole -- a member check unfolded, `Timber-checks/Tension/<id>.typ` (issue #64, REQ-016). A stub there (domains/domain_file.py), which prints its domain by one call and holds no `#var-domain`, is no domain of this tab and is not read (spec 2026-10-15 ARCH-RISK-B02)."""
     here = here or project.current()
     folder = here.formulas_dir
-    return [read(path) for path in sorted(folder.glob("*.typ"))] if folder.is_dir() else []
+    found = [read(path) for path in sorted(folder.glob("*.typ"))] if folder.is_dir() else []
+    for path in specialised_files(here):
+        if any(call in path.read_text(encoding="utf-8", errors="replace") for call in _VAR_DOMAIN):
+            found.append(read(path))
+    return found
+
+
+# What a file written out whole holds and a stub does not: a domain's `#var-domain` call.
+_VAR_DOMAIN = ("#var-domain(", "#domain(")
+
+
+def specialised_files(here):
+    """Every `.typ` at the top of a specialised tab's domain folder -- a stub or a domain written out whole -- in a project laid out by folders, archives aside; [] before."""
+    out = []
+    for kind in project.DOMAIN_FOLDERS:
+        for sub in (list(project.KIND_FOLDERS.get(kind, {})) or [None]):
+            folder = here.domain_dir(kind, sub)
+            if folder is not None and folder.is_dir():
+                out += sorted(folder.glob("*.typ"))
+    return out
+
+
+def group_of(here, domain):
+    """The group the «Domaines» tab shows `domain` in (REQ-016): None for the engineer's own -- Domains/ --, else (kind, sub) of the folder of the specialised tab it lies in: ("check", "tension") for `Timber-checks/Tension/<id>.typ`."""
+    if domain.path is None or domain.path.parent.resolve() == here.formulas_dir.resolve():
+        return None
+    for kind in project.DOMAIN_FOLDERS:
+        for sub in (list(project.KIND_FOLDERS.get(kind, {})) or [None]):
+            folder = here.domain_dir(kind, sub)
+            if folder is not None and domain.path.parent.resolve() == folder.resolve():
+                return (kind, sub)
+    return None
+
+
+def _taken(here, fid):
+    """Whether a file of a domain bears `fid` already: in Domains/ or, laid out by folders, in a specialised tab's folder -- a domain's id is its `#var-domain`'s and `#val(domain:)`'s, one for the whole project (spec 2026-10-15 ARCH-RISK-B04)."""
+    if (here.formulas_dir / f"{fid}.typ").exists():
+        return True
+    return any(path.stem == fid for path in specialised_files(here))
 
 
 def slug(name):
@@ -624,9 +869,9 @@ def slug(name):
 
 
 def free_id(here, base, taken=()):
-    """`base`, or `base-2`, `base-3`…, the first no domain and no file of Formules/ bears."""
+    """`base`, or `base-2`, `base-3`…, the first no domain and no file of a domain bears (`_taken`)."""
     fid, n = base, 1
-    while fid in taken or (here.formulas_dir / f"{fid}.typ").exists():
+    while fid in taken or _taken(here, fid):
         n += 1
         fid = f"{base}-{n}"
     return fid
@@ -648,12 +893,16 @@ def check_name(name):
         raise DomainError("name_line", "a domain's name is one line", name=name)
 
 
-def check_id(fid, domains, own=None, here=None):
-    """An id a domain may take: lower-case letters, digits and hyphens (structure.ID_PATTERN, the file's name), and no other domain's -- nor another file's of Formules/. Raises DomainError `id_invalid` or `id_taken`."""
-    if not fid or not structure.ID_PATTERN.match(fid):
+# The id of a member check (calc/domains/member_check.py), which an unfolded check's domain keeps as it is (spec 2026-10-15, D-14): `ZT-01` names the check, its file and its `#var-domain` alike
+CHECK_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.+-]*$")
+
+
+def check_id(fid, domains, own=None, here=None, unfolded=False):
+    """An id a domain may take: lower-case letters, digits and hyphens (structure.ID_PATTERN, the file's name) -- or, for an unfolded check (`unfolded`), its check's id as it is (D-14) --, and no other domain's -- nor another file's of Formules/. Raises DomainError `id_invalid` or `id_taken`."""
+    if not fid or not (CHECK_ID if unfolded else structure.ID_PATTERN).match(fid):
         raise DomainError("id_invalid", f"{fid!r} is no id: lower-case letters, digits and hyphens, starting with a letter", id=fid)
     taken = {d.id for d in domains if d.id != own}
-    if fid in taken or (here is not None and fid != own and (here.formulas_dir / f"{fid}.typ").exists()):
+    if fid in taken or (here is not None and fid != own and _taken(here, fid)):
         raise DomainError("id_taken", f"the id {fid!r} is another domain's", id=fid)
 
 
@@ -671,7 +920,7 @@ def cited_by(here, fid):
     """[(file relative to the Typst root, line number, line)] of the project's Typst that cite the domain `fid` -- `#include "/Formules/<id>.typ"` or `domain: "<id>"` --: what an id changed leaves to correct, said and never rewritten (D-11). The generated folder and the archives are not read."""
     root = here.typst_root
     generated = here.generated_dir.resolve()
-    patterns = (f'"/{project.FORMULAS_FOLDER}/{fid}.typ"', f'domain: "{fid}"', f'domain:"{fid}"')
+    patterns = (f'"{here.from_root(here.formulas_dir / f"{fid}.typ")}"', f'domain: "{fid}"', f'domain:"{fid}"')
     found = []
     for path in sorted(root.rglob("*.typ")):
         resolved = path.resolve()
@@ -698,7 +947,7 @@ def rename(here, domain, new_id, domains=None):
         return domain, []
     check_id(new_id, domains, own=old, here=here)
     check_unchanged(domain)   # before the move: a file changed meanwhile is read again, not renamed and then written over
-    target = here.formulas_dir / f"{new_id}.typ"
+    target = (domain.path.parent if domain.path is not None else here.formulas_dir) / f"{new_id}.typ"   # in its own folder: Domains/, or a specialised tab's for a domain written there
     if domain.path is not None and domain.path.is_file():
         try:
             os.replace(domain.path, target)
@@ -783,7 +1032,7 @@ def restore(here, key, domains=None):
     domains = list_domains(here) if domains is None else domains
     path = here.formulas_dir / ARCHIVES / key
     if not path.is_file():
-        raise DomainError("archive_missing", f"{key} is no longer in {project.FORMULAS_FOLDER}/{ARCHIVES}/", key=key)
+        raise DomainError("archive_missing", f"{key} is no longer in {here.rel(here.formulas_dir / ARCHIVES)}/", key=key)
     domain = read(path)
     if domain.state == "unreadable":
         raise DomainError("unreadable", f"{key}: {domain.problem}", file=key, reason=domain.problem)
@@ -813,14 +1062,14 @@ def prepare(here=None):
     here = here or project.current()
     data, notes, files = empty(), [], {}
     for domain in list_domains(here):
-        rel = f"{project.FORMULAS_FOLDER}/{domain.path.name}"
+        rel = here.rel(domain.path)
         if domain.state == "unreadable":
-            raise validation.ValidationError(f"{rel}: the calculation domain cannot be read -- {domain.problem}. Correct it in VS Code or in Woodcore's «Formules» tab")
+            raise validation.ValidationError(f"{rel}: the calculation domain cannot be read -- {domain.problem}. Correct it in VS Code or in Woodcore's «Domaines» tab")
         if domain.declared in files:
             raise validation.ValidationError(f"{rel} and {files[domain.declared]} both declare #var-domain({domain.declared!r}) -- give one of the two its own id")
         files[domain.declared] = rel
-        if domain.state == "hand_edited":
-            notes.append(engine.Note("formula_hand_edited", f"{rel}: the domain {domain.id!r} is written by hand in another form than Woodcore's -- it is exported as it stands, and the «Formules» tab rewrites it in its own", file=rel, domain=domain.id))
+        if domain.state == "misnamed":
+            notes.append(engine.Note("formula_misnamed", f"{rel}: the domain declares #var-domain({domain.declared!r}) and its file is named {domain.id!r} -- it is exported as it stands, and the «Domaines» tab writes its own id back at the next save", file=rel, domain=domain.id))
         data["domains"][domain.id] = {"title": domain.name, "file": rel}
     data["domains"] = dict(sorted(data["domains"].items()))
     validation.validate_structure(data, "formulas")
@@ -891,8 +1140,25 @@ def compute(domain, resolve=None, digits=DIGITS):
             out.append(r)
             continue
         try:
-            if c.kind == "var":
-                if c.source:
+            if c.kind == "var" and c.source and c.source[0] == "again":
+                # a variable printed again (REQ-002): the value it holds, shown in `unit:` for this line alone -- the registry keeps its own (Q-011)
+                if c.key not in values:
+                    raise units.FormulaError(f"var: no variable named {c.key!r} here -- declared here: {', '.join(values) or 'none'}")
+                value, unit = values[c.key]
+                shown_unit = c.options.get("unit")
+                if isinstance(shown_unit, str) and shown_unit:
+                    q = units.quantity(float(value), unit)
+                    new = units.written_unit(shown_unit)
+                    parsed = units.parse_unit(new)
+                    if parsed is None or q is None or not units.dims_equal(q.dims, parsed[1]):
+                        raise units.FormulaError(f"var: {c.key!r} is in {unit}, which cannot be shown in {shown_unit}")
+                    value, unit = q.base / parsed[0], new
+                r.value, r.unit = value, unit
+            elif c.kind == "var":
+                if c.source and c.value is not None:
+                    # a literal checked by domain: is computed with as written, as Typst does (REQ-001); whether it is stale is Typst's to say (unfold.query_state)
+                    value, unit = c.value, units.written_unit(c.unit or "")
+                elif c.source:
                     got = resolve(c) if resolve else None
                     if got is None:
                         raise units.FormulaError(f"var: {c.key!r} is taken from {describe_source(c)}, which gives no value here")
@@ -909,6 +1175,11 @@ def compute(domain, resolve=None, digits=DIGITS):
                 q, operands = units.evaluate("eq", c.formula, values)
                 symbol = c.symbol or c.key
                 value, unit, warning = units.present("eq", symbol, q, units.written_unit(c.unit) or None)
+                as_unit = c.options.get("as-unit")
+                if isinstance(as_unit, str) and as_unit:
+                    # the answer given another unit without converting it (spec 2026-10-21-commandes-typst-refonte, REQ-003): its number kept, and said in the window and not in the report (Q-004)
+                    warning = {"as_unit": True, "wanted": units.written_unit(as_unit), "natural": unit}
+                    unit = units.written_unit(as_unit)
                 r.value, r.unit, r.warning = value, unit, warning
                 r.letters = _letters(c.formula, {k: symbols.get(k, "") for k in operands})
                 r.numbers = _numbers(c.formula, {k: values[k] for k in operands}, digits)
@@ -935,29 +1206,6 @@ def compute(domain, resolve=None, digits=DIGITS):
                         shown.append((v, u))
                 r.value = (shown[0], shown[1])
                 r.letters = _letters(left.strip(), {k: symbols.get(k, "") for k in lops}) + f" {op} " + _letters(right.strip(), {k: symbols.get(k, "") for k in rops})
-            elif c.kind == "val":
-                if c.source:
-                    got = resolve(c) if resolve else None
-                    if got is None:
-                        raise units.FormulaError(f"val: {c.key!r} is read from {describe_source(c)}, which gives no value here")
-                    r.value, r.unit = got
-                elif c.key not in values:
-                    raise units.FormulaError(f"val: no variable named {c.key!r} here -- declared here: {', '.join(values) or 'none'}")
-                else:
-                    r.value, r.unit = values[c.key]
-            else:  # var-unit
-                if c.key not in values:
-                    raise units.FormulaError(f"var-unit: no variable named {c.key!r} here -- declared here: {', '.join(values) or 'none'}")
-                value, unit = values[c.key]
-                q = units.quantity(float(value), unit)
-                new = units.written_unit(c.unit)
-                p = units.parse_unit(new)
-                if p is None:
-                    raise units.FormulaError(f"var-unit: cannot read the unit {c.unit!r}")
-                if q is None or not units.dims_equal(q.dims, p[1]):
-                    raise units.FormulaError(f"var-unit: {c.key!r} is in {unit}, which is not of the dimension of {new}")
-                values[c.key] = (q.base / p[0], new)
-                r.value, r.unit = values[c.key]
         except units.FormulaError as exc:
             r.error = str(exc)
         out.append(r)
@@ -993,17 +1241,29 @@ def describe_source(command):
     return " / ".join(where) if isinstance(where, tuple) else str(where)
 
 
-def resolve_import(here, command, domains=(), _stack=(), calculations=None):
-    """The (value, unit) a variable taken from elsewhere has now, or None where it cannot be read here: a value of the export (`var-of(calc, instance, name)`, or `domain:` a pair), read off `data/calculations.json`; a variable of another of the project's domains (`domain:` a name), computed now -- a cycle between domains is refused, naming it. A domain of a document's own sections is compiled, never computed here: it gives None, and the tab says the value is read when the document is."""
+def reference(command):
+    """What a command takes from elsewhere, (domain, instance, name): a value of the export -- `var-of("snow-load", "SL", "s_k")`, `domain:` a pair -- or, `instance` None, a variable of another domain of the project named by its id; None where the command takes nothing, or names it in a way that is not read here. The one reading of a command's source, for `resolve_import` and for the graph of dependencies (spec 2026-10-21-graphe-dependances, ARCH-RISK-1103)."""
+    if not command.source:
+        return None
     kind, where = command.source
-    name = command.key
-    pair = None
     if kind == "var-of":
         found = _VAR_OF.match(where)
-        if found:
-            pair, name = (found.group(1), found.group(2)), found.group(3)
-    elif isinstance(where, tuple) and len(where) == 2:
-        pair = where
+        return (found.group(1), found.group(2), found.group(3)) if found else None
+    if isinstance(where, tuple) and len(where) == 2:
+        return where[0], where[1], command.key
+    if isinstance(where, str):
+        return where, None, command.key
+    return None
+
+
+def resolve_import(here, command, domains=(), _stack=(), calculations=None):
+    """The (value, unit) a variable taken from elsewhere has now, or None where it cannot be read here: a value of the export (`var-of(calc, instance, name)`, or `domain:` a pair), read off `data/calculations.json`; a variable of another of the project's domains (`domain:` a name), computed now -- a cycle between domains is refused, naming it. A domain of a document's own sections is compiled, never computed here: it gives None, and the tab says the value is read when the document is."""
+    found = reference(command)
+    if found is None:
+        return None
+    pair = (found[0], found[1]) if found[1] is not None else None
+    name = found[2]
+    where = found[0]
     if pair is not None:
         try:
             # the export being built where one is handed over (export_all: the values a linked field follows, spec 2026-10-11-variables-liees-champs-et-textes ARCH-RISK-003), else the last one written
@@ -1055,9 +1315,11 @@ def variable_domains(data, here=None, calculations=None):
 
 # --- the Typst a report prints a domain with ---------------------------------------------------
 
-def include_call(domain):
-    """`#include "/Formules/<id>.typ"` -- what a section pastes to print the domain where it stands (issue #15, D-01): from the Typst root, where Formules/ lies."""
-    return f'#include "/{project.FORMULAS_FOLDER}/{domain.id}.typ"'
+def include_call(domain, here=None):
+    """`#include "/Domains/<id>.typ"` -- what a section pastes to print the domain where it stands (issue #15, D-01): its file from the Typst root, wherever it lies -- Domains/, a specialised tab's folder for a domain written there (issue #64), Formules/ in a project laid out before. `here` is the project, the current one where none is given."""
+    here = here or project.current()
+    path = domain.path if domain.path is not None else here.formulas_dir / f"{domain.id}.typ"
+    return f'#include "{here.from_root(path)}"'
 
 
 # --- «Archives» in the tab's list: source_archive.Actions' backend for a domain ---------------------

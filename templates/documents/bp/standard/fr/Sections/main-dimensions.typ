@@ -8,19 +8,17 @@
 Les dimensions principales des éléments porteurs sont consignées dans les plans du concept de la structure et reposent sur le dimensionnement statique de l'ouvrage.
 // woodcore:/object p1
 
-// woodcore:object doc-table main-dimensions-table
-#doc-table(
-  columns: (
-    (id: "position", title: [Position]),
-    (id: "member", title: [Élément]),
-    (id: "material", title: [Matériau / classe de résistance]),
-    (id: "section", title: [Dimensions]),
-    (id: "remark", title: [Remarque]),
-  ),
-  hidden: ("remark",),
-  rows: (
-    (position: [[…]], member: [[Poutre principale]], material: [[…]], section: [[…]], remark: []),
-    (position: [[…]], member: [[Poteau]], material: [[…]], section: [[…]], remark: []),
+// woodcore:object table main-dimensions-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Position*], [*Élément*], [*Matériau / classe de résistance*], [*Dimensions*]),  // woodcore:hidden 5=[Remarque]
+    table.hline(stroke: 0.5pt),
+    [[…]], [[Poutre principale]], [[…]], [[…]],  // woodcore:hidden 5=[]
+    [[…]], [[Poteau]], [[…]], [[…]],  // woodcore:hidden 5=[]
+    table.hline(stroke: 1pt),
   ),
   caption: [Éléments porteurs principaux],
 )

@@ -465,6 +465,10 @@ def test_the_list_shows_the_length_each_position_is_drawn_with():
         tab = _tab(window)
         _drawn(here)
         _fresh(tab, here)
+        # the lengths are the export's (spec 2026-10-21-commandes-typst-refonte, UI-003): read again once data/quantities.json says what EG draws
+        from domains import quantities as q
+        q.write_document(here)
+        tab.on_shown()
         assert tab.list.columnCount() == len(positions_tab.COLUMNS) + 1
         assert tab.list.headerItem().text(positions_tab.LENGTH_COLUMN) == tab.t("po_col_length")
         from domains import plan, quantities
@@ -478,41 +482,4 @@ def test_the_list_shows_the_length_each_position_is_drawn_with():
         tab.save()
         after = _rows(here)
         assert all("length" not in row and "length_m" not in row for row in after.values()), "the length is never written"
-        tab.dirty = False
-
-
-def test_the_quantities_card_follows_its_scope():
-    """Issue #14 (REQ-004, D-011): the card «Métrés» of the right pane -- everything drawn, one plan, or the positions selected in a list that now selects several -- read off quantities.summary."""
-    from PySide6.QtWidgets import QAbstractItemView
-    from domains import plan, quantities
-    import positions_store as store
-    window, here = _window()
-    with project.using(here), _boxes():
-        tab = _tab(window)
-        _drawn(here)
-        _fresh(tab, here)
-        assert tab.list.selectionMode() == QAbstractItemView.SelectionMode.ExtendedSelection
-        found, _notes = quantities.rows(plan.position_plan_sources(here.plans_dir), store.read(here))
-        groups, totals = quantities.summary(found, "all")
-        def table():
-            return [[item.text(c) for c in range(5)] for item in (tab.quantity_table.topLevelItem(i) for i in range(tab.quantity_table.topLevelItemCount()))]
-        tab.scope_combo.setCurrentIndex(tab.scope_combo.findData("all"))
-        shown = table()
-        assert any(row[0] == groups[0]["material"] and row[3] == quantities.metres(groups[0]["length_m"]) for row in shown), (shown, groups)
-        tab.scope_combo.setCurrentIndex(tab.scope_combo.findData("plans"))
-        assert tab.plan_combo.isVisibleTo(tab) or not tab.isVisible()
-        # the copy's own plans (Fluchttreppe, Geratehaus...) come before EG: the plan is chosen, and its table is EG's alone
-        assert tab.plan_combo.findData("EG") >= 0, [tab.plan_combo.itemData(i) for i in range(tab.plan_combo.count())]
-        tab.plan_combo.setCurrentIndex(tab.plan_combo.findData("EG"))
-        eg_groups, _eg_totals = quantities.summary(found, "plans", plans=["EG"])
-        on_eg = table()
-        assert any(row[0] == eg_groups[0]["material"] and row[3] == quantities.metres(eg_groups[0]["length_m"]) for row in on_eg), (on_eg, eg_groups)
-        tab.scope_combo.setCurrentIndex(tab.scope_combo.findData("positions"))
-        tab.list.clearSelection()
-        tab.refresh_quantities()
-        assert table() == [] and tab.quantity_note.text() == tab.t("po_q_none_selected")
-        tab.list.item_of("S001").setSelected(True)
-        selected = table()
-        assert selected and all(row[3] in ("—", "") for row in selected), selected   # a column: a piece, no length
-        tab.scope_combo.setCurrentIndex(tab.scope_combo.findData("all"))
         tab.dirty = False

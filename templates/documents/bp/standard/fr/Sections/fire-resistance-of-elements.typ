@@ -4,19 +4,17 @@
 == Résistance au feu des éléments de construction
 // woodcore:/object title
 
-// woodcore:object doc-table fire-resistance-table
-#doc-table(
-  columns: (
-    (id: "category", title: [Catégorie]),
-    (id: "zone", title: [Zone / élément]),
-    (id: "basis", title: [Base]),
-    (id: "requirement", title: [Exigence]),
-    (id: "execution", title: [Exécution / valeurs]),
-  ),
-  hidden: (),
-  rows: (
-    (category: [Structure porteuse], zone: [[Sous-sol – rez]], basis: [AEAI 15-15], requirement: [R 60], execution: [[…]]),
-    (category: [Compartiments coupe-feu], zone: [[Dalle sur rez]], basis: [AEAI 15-15], requirement: [REI 60], execution: [[…]]),
+// woodcore:object table fire-resistance-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto),
+    align: (left, left, left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Catégorie*], [*Zone / élément*], [*Base*], [*Exigence*], [*Exécution / valeurs*]),
+    table.hline(stroke: 0.5pt),
+    [Structure porteuse], [[Sous-sol – rez]], [AEAI 15-15], [R 60], [[…]],
+    [Compartiments coupe-feu], [[Dalle sur rez]], [AEAI 15-15], [REI 60], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Résistance au feu des éléments de construction],
 )

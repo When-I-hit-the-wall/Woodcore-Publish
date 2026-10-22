@@ -50,12 +50,13 @@ def _load(path):
         return {}
 
 
-def _reader(here):
-    """`value(domain, instance, name)`: a var of the export, looked up where `find-calculation` looks in Typst -- the calculation domains first, then the connectors and the connections."""
+def _reader(here, calculations_file=None):
+    """`value(domain, instance, name)`: a var of the export, looked up where `find-calculation` looks in Typst -- the calculation domains first, then the connectors and the connections. The calculation domains are `calculations_file`'s where the export names one -- the calculations it is making, in memory, and not the last ones on the disk, whose names may be another version's (spec 2026-10-21-restes-issue-69, ARCH-RISK-804) --, data/calculations.json's otherwise."""
     data = here.data_dir
 
     def value(domain, instance, name):
-        doms = _load(data / "calculations.json").get("domains", {})
+        value.reads.append([domain, instance, name])   # what the script read, for the graph of dependencies (spec 2026-10-21-graphe-dependances, ARCH-RISK-1105)
+        doms = _load(calculations_file or data / "calculations.json").get("domains", {})
         if domain in doms:
             insts = doms[domain].get("instances", {})
             if instance not in insts:
@@ -73,6 +74,7 @@ def _reader(here):
         if name not in found:
             raise KeyError(f"{domain}/{instance} carries no {name!r} -- valid: {', '.join(sorted(found))}")
         return found[name]["value"]
+    value.reads = []
     return value
 
 
@@ -99,8 +101,8 @@ def _inspected(name, held):
     return out
 
 
-def execute(path, project_file=None, results_only=False):
-    """Runs the script at `path` and gives back its report: `{"reason", "results", "variables"}`.
+def execute(path, project_file=None, results_only=False, calculations_file=None):
+    """Runs the script at `path` and gives back its report: `{"reason", "results", "variables", "reads"}` -- `reads` what its value() calls read, [[domain, instance, name]] (spec 2026-10-21-graphe-dependances).
 
     `reason` is "" where it ran through. It never raises for anything the script did -- a syntax error, an exception, a refused write all come back as a reason, because the export must go on running the other scripts (the v0.33 rule).
     """
@@ -122,16 +124,21 @@ def execute(path, project_file=None, results_only=False):
                 raise ValueError(f"result({name!r}): a result is a number, not {type(value).__name__}") from None
         if not isinstance(unit, str):
             raise ValueError(f"result({name!r}): the unit is a string -- \"\" where the value has none")
+        # the line of the script's own call, which a result without a norm is cited by (spec 2026-10-20-indices-et-niveaux, REQ-002): the first frame up the stack that is the script's file -- result() may be called from a function of the script, or from a module it imports
+        frame = sys._getframe(1)
+        while frame is not None and frame.f_code.co_filename != str(path):
+            frame = frame.f_back
         results.append({"name": name.strip(), "value": float(value), "unit": unit,
                         "symbol": symbol or name.strip(), "label": label or "", "descr": descr or "",
-                        "norm": norm or "", "norm_ref": norm_ref or ""})
+                        "norm": norm or "", "norm_ref": norm_ref or "", "line": frame.f_lineno if frame is not None else None})
 
+    reader = _reader(here, calculations_file)
     scope = {
         "__name__": "__woodcore_script__",
         "__file__": str(path),
         "__doc__": None,
         "result": result,
-        "value": _reader(here),
+        "value": reader,
         "PROJECT": here.root,
         "DATA": here.data_dir,
     }
@@ -157,20 +164,21 @@ def execute(path, project_file=None, results_only=False):
         if name not in INJECTED and not name.startswith("_") and not callable(held)
         and type(held).__name__ != "module"
     ]
-    return {"reason": reason, "results": results, "variables": variables}
+    return {"reason": reason, "results": results, "variables": variables, "reads": reader.reads}
 
 
 def main(argv):
-    """`woodcore-cli run-script <source> --report <file> [--project P] [--results-only]`."""
+    """`woodcore-cli run-script <source> --report <file> [--project P] [--results-only] [--calculations F]`."""
     import argparse
     ap = argparse.ArgumentParser(prog="woodcore-cli run-script")
     ap.add_argument("source")
     ap.add_argument("--report", required=True)
     ap.add_argument("--project")
     ap.add_argument("--results-only", action="store_true")
+    ap.add_argument("--calculations")
     args = ap.parse_args(argv)
-    report = execute(args.source, args.project, results_only=args.results_only)
-    Path(args.report).write_text(json.dumps(report, ensure_ascii=False, default=str), encoding="utf-8")
+    report = execute(args.source, args.project, results_only=args.results_only, calculations_file=args.calculations)
+    Path(args.report).write_text(json.dumps(report, ensure_ascii=False, default=str), encoding="utf-8", newline="\n")
     return 0 if not report["reason"] else 1
 
 

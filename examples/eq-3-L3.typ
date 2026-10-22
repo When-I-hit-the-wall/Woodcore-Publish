@@ -8,6 +8,7 @@
 #report-level.update(3)
 #number-digits.update(3)
 
-#var("M_Ed", 0.275, "kNm")
-#var("a", 135, "mm")
-#eq("F_Ed", `M_Ed / a`)
+#var("N_d", 50, "kN", level: 0)
+#var("A", 56000, "mm²", level: 0)
+#eq("sigma", `N_d / A`, display-formula: "variable-value-unit", display-equation: "variable-value-unit")
+#eq("sigma2", "sigma", `N_d / A`, display-formula: "variable", display-equation: "variable")

@@ -15,23 +15,17 @@
 // ⚠️ Still untraced, like everything computed in Typst (section 1): no `source`, nothing in `data/`, nothing catalogued. What it guarantees is that the printed formula, the printed numbers and the printed answer are one statement. A value a checker must re-derive from the data belongs in a Python domain.
 
 // The display helpers this file prints through. The dependency runs one way only -- calc-engine.typ knows nothing of this file -- and commands.typ imports both, which is how section 10bis says a second library file joins the report.
-#import "calc-engine.typ": annotated-rows, chain-leading, chain-line, colon-str, connection-domain, connector-domain, domain-ids, find-calculation, fmt-decimals, formula-chain, get-choices, instance-ids, norm-text, number-digits, override-colour, render-prose, render-symbol, render-table, resolve-level, semicolon-str, signed-text, source-label, t-str, test-aliases, test-nok, test-ok, test-relations, tl-str, value-type, var-current, var-lookup, var-names, var-of, var-registry, var-store
+#import "calc-engine.typ": cite-text, uniform-level, sync-depth, note-column, note-gutter, load-domain-state, annotated-rows, chain-leading, chain-line, colon-str, connection-domain, connector-domain, ids, find-calculation, formula-chain, get, norm-text, render-prose, render-symbol, render-table, resolve-level, semicolon-str, source-label, t-str, test-aliases, test-nok, test-ok, test-relations, tl-str, value-type, var-current, var-lookup, var-names, var-registry, var-store, display-number, display-quantity, display-source, sup, superscript-digits, math-eval, greek-names
 // The minimum distances of SIA 265 computed with a diameter (lib/distance.typ, v0.87): imported here by name, so commands.typ, which re-exports this file at the wildcard, gives every section `distance` and none of its helpers.
 #import "distance.typ": distance
-// The member checks of SIA 265 4.2 (lib/timber.typ, v0.88): imported here by name for the same reason, and the only other file this one imports -- timber.typ needs var, eq and verify back, and imports them inside its commands' bodies, which is what keeps the two out of a cycle.
-#import "timber.typ": member, show-check-member, check-member-ids, verify-tension, verify-compression, verify-compression-perp, verify-bending, verify-bending-normal, verify-shear, verify-shear-off, verify-shear-perp
-// the steel checks of Woodcore's «Acier» tabs, printed as the export computed them (issues #50-#52)
-#import "steel.typ": show-check-steel, check-steel-ids
 // The bibliography (lib/bibliography.typ, v0.99): its two commands by name, on distance.typ's arrangement, and `bib-note` -- which every command below that takes a `norm:` emits **before its context**, so that the document it cites is listed at the end (docs/typst/api-conventions.md §10bis).
 #import "bibliography.typ": bib-note, cite-norm, show-bibliography
-// The summary tables (lib/summary.typ, v0.99): the three commands by name, and `summary-mark` -- which `var` and `eq` call inside the `var-registry.update` they already have when they are given `summary: true`. summary.typ imports calc-engine.typ and nothing else, so the chain calc-engine -> summary -> formula stays acyclic (docs/typst/api-conventions.md §10bis).
-#import "summary.typ": show-line-load-summary, show-load-summary, show-result-summary, summary-mark
-// The parametric objects of a project's documents (lib/document.typ, the three document modes): the eleven commands by name, on distance.typ's arrangement -- document.typ imports calc-engine.typ and bibliography.typ at its top and nothing from this file, a value in a cell being `doc-value`'s, so the chain stays acyclic.
-#import "document.typ": doc-annexes, doc-checklist, doc-choice, doc-extract, doc-field, doc-fire-plan, doc-image, doc-plan, doc-signatures, doc-table, doc-value, dead-load-table, live-load-table, show-norm-list
-// The export sheets (lib/sheet.typ, v0.114): the six commands, and since v0.115 the fire-protection plan's two, by name, on the same arrangement -- sheet.typ imports calc-engine.typ and document.typ and nothing from this file, so the chain stays acyclic.
-#import "sheet.typ": sheet, sheet-fire-legend, sheet-fire-viewport, sheet-legend, sheet-position-list, sheet-quantities, sheet-section, sheet-text, sheet-titleblock, sheet-viewport
-// The list of the positions (lib/positions.typ, v0.116): its one command by name -- positions.typ imports calc-engine.typ and nothing else, and sheet.typ imports its table builder, so the chain calc-engine -> positions -> sheet -> formula stays acyclic.
-#import "positions.typ": show-plan-quantities, show-position-list
+// The list of the norms a document cites (lib/document.typ), by name -- the parametric objects of the documents left with their own commands when the documents were written in raw Typst (spec 2026-10-21-commandes-typst-refonte, REQ-019); document.typ imports calc-engine.typ and bibliography.typ and nothing from this file, so the chain stays acyclic.
+#import "document.typ": show-norm-list
+// The export sheets (lib/sheet.typ, v0.114): the page and the three images a sheet's `#place` holds besides the plans (spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015) -- sheet.typ imports calc-engine.typ, document.typ and positions.typ and nothing from this file, so the chain stays acyclic.
+#import "sheet.typ": sheet, image-legend, image-section, image-titleblock
+// A position on its line (lib/positions.typ, spec 2026-10-21-commandes-typst-refonte, REQ-015): positions.typ imports calc-engine.typ and nothing else, and sheet.typ imports its table builders, so the chain calc-engine -> positions -> sheet -> formula stays acyclic.
+#import "positions.typ": position
 
 // --- Units ------------------------------------------------------------------
 // A unit is parsed into a scale factor and a map of base dimensions, so that two units can be multiplied, divided and compared. `kN` is (1000, N:1); `mm²` is (1e-6, m:2); `kN/m²` is (1000, N:1 m:-2) and `N/mm²` is (1e6, N:1 m:-2) -- the same dimensions, a factor of a thousand apart, which is what makes 1 N/mm² print as 1000 kN/m² rather than as an error.
@@ -52,14 +46,14 @@
 //
 // ⚠️ A caret would not do, and this is the whole of the v0.63 display bug: every unit this file writes is printed as a **quoted word inside math**, where `^` is not an operator but a character -- so a dimension the preference table did not name came out on the page as `1000000 N^2`, caret and all.
 // ⚠️ Both minus signs: `str(-5)` gives a **typographic** minus (U+2212), not the hyphen the keyboard writes, and a table holding only the hyphen fails on the first negative exponent it meets.
-#let superscript-digits = units-data.superscripts
-
-#let sup(n) = str(n).clusters().map(c => superscript-digits.at(c)).join("")
 
 // A unit written by hand with a caret, spelt as the report prints one: `N/mm^2` → `N/mm²`, `m^3` → `m³`. Applied where a unit enters from a call -- `var`, `var-unit`, `eq`'s `unit:`, `unit`, `val`'s `unit:` -- so that the registry holds one spelling and every line printing it shows a real exponent (v0.86, the engineer's request: a caret is quicker to type than ², which a Swiss keyboard has no key for). parse-unit already read `^2` as an exponent; only the page showed the caret, for the reason `superscript-digits` gives.
 // Only `^` followed by digits, which is all parse-unit reads after a caret: `^-1` is left as written, and refused where it is read.
 #let written-unit(u) = {
-  if type(u) != str or not u.contains("^") { return u }
+  if type(u) != str { return u }
+  // per mille is written "%%", two signs one after the other as the keyboard has them, and printed ‰ (the engineer, 22.10.2026)
+  let u = u.replace("%%", "‰")
+  if not u.contains("^") { return u }
   u.replace(regex("\^([0-9]+)"), m => m.captures.at(0).clusters().map(c => superscript-digits.at(c)).join(""))
 }
 
@@ -515,12 +509,7 @@
 // --- Symbols ----------------------------------------------------------------
 // A registry key is an identifier -- `k_dens`, `mu_11` -- and the formula names the symbol as math source -- `k_"dens"`, `mu_11`. The two are tied by the project's own rule (section 3.1): a multi-letter subscript that is not a known Greek name is quoted. A key that cannot be written as an identifier at all (`q_(k,11)`) is given as a string instead and used exactly as written.
 
-#let greek-names = (
-  "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota",
-  "kappa", "lambda", "mu", "nu", "xi", "pi", "rho", "sigma", "tau", "upsilon",
-  "phi", "chi", "psi", "omega",
-  "Gamma", "Delta", "Theta", "Lambda", "Xi", "Pi", "Sigma", "Upsilon", "Phi", "Psi", "Omega",
-)
+// The Greek names math knows are lib/subscript.typ's `greek-names`, imported above: the subscript rule writes them as their letters (UI-001).
 
 // `key-symbol` stands below `quoted-words`, which it reads: a key whose part before its first `_` is not one letter or a Greek name is printed as a symbol written by hand would be.
 
@@ -726,7 +715,52 @@
 // The table in force where a variable is written.
 //
 // 👉 It lives **inside the registry's own dictionary**, under `units`, rather than in a state of its own -- and that is not tidiness, it is the same constraint that put var-domain's stack there (calc-engine.typ, above `var-registry`): `#eq` computes and stores its answer inside `var-registry.update(...)`, and the function of a state's update cannot read another state. Reading it out of the `d` it is handed is the only way `#eq` can know what `#unit` asked for. The default is given here rather than in the state's initial value so that calc-engine.typ, which knows nothing of units, does not have to.
-#let unit-table(d) = d.at("units", default: default-units)
+// ⚠️ Since the fine arguments (spec 2026-10-21-commandes-typst-refonte, REQ-005) the table is three layers: the document's (`units`), the domains' open around the line (their frames' `units`, innermost last), and the next answer's (`next-units`) -- the last one written for a dimension wins.
+#let unit-table(d) = {
+  let table = d.at("units", default: default-units)
+  for f in d.at("frames", default: ()) { for (k, u) in f.units.pairs() { table.insert(k, u) } }
+  for (k, u) in d.at("next-units", default: (:)).pairs() { table.insert(k, u) }
+  table
+}
+
+// How far a `#unit` or a `#calc-defaults` reaches (REQ-005, REQ-006): the next line it concerns, the rest of the domain it stands in -- the document's rest where it stands in none --, the rest of the document.
+#let scopes = ("next", "domain", "document")
+
+#let check-scope(fn, scope) = {
+  if not (scope in scopes) { panic(fn + ": scope: " + repr(scope) + " is not one of " + scopes.map(s => repr(s)).join(", ") + " -- the next line, the rest of the domain, the rest of the document") }
+}
+
+// A unit set for one dimension at one scope, in the registry: the next answer of that dimension (`next-units`, spent by it -- `spend-next-unit`), the innermost domain (its frame's `units`, gone with it), the document (`units`).
+#let set-unit(d, dims-key, written, scope) = {
+  let frames = d.at("frames", default: ())
+  if scope == "next" {
+    let next = d.at("next-units", default: (:))
+    next.insert(dims-key, written)
+    d.insert("next-units", next)
+  } else if scope == "domain" and frames.len() > 0 {
+    let f = frames.last()
+    f.units.insert(dims-key, written)
+    frames.at(frames.len() - 1) = f
+    d.insert("frames", frames)
+  } else {
+    let table = d.at("units", default: default-units)
+    table.insert(dims-key, written)
+    d.insert("units", table)
+  }
+  d
+}
+
+// The unit `#unit(scope: "next")` set for this dimension, spent by the first answer of it.
+#let spend-next-unit(d, dims) = {
+  let next = d.at("next-units", default: (:))
+  let k = dims-text(clean-dims(dims))
+  if k in next {
+    let _ = next.remove(k)
+    d.insert("next-units", next)
+  }
+  d
+}
+
 
 // The unit a computed result of these dimensions is printed in, or `none` for a dimension the table does not name -- a square of forces, a stiffness nobody declared -- which then falls back to base units.
 #let pick-unit(dims, table) = table.at(dims-text(clean-dims(dims)), default: none)
@@ -828,34 +862,18 @@
 // A calculation written by hand reaches sizes the rest of the report does not: a second moment of area in mm⁴, a stress in N/m², a square of forces. Past 99 999 those are unreadable written out, so they are printed as a mantissa and a power of ten.
 //
 // 👉 Confined to this file **on purpose**. `fmt-decimals` is the primitive every other display path goes through -- show-calc, show-input, the tables, the figures -- and putting the rule there would have rewritten numbers on pages nobody asked about (a connection's I_p = 157000 mm² among them). So these three are this file's own, and `fmt-decimals` underneath them is untouched: the scientific notation reaches exactly `#var`, `#eq`, `#verify`, `#val` and `#var-unit`.
-#let sci-threshold = 99999
-
-/// A number at the document's decimals, as a mantissa and a power of ten past 99 999: `1234567` → `"1.235 · 10⁶"`.
-///
-/// ⚠️ The exponent is written with **superscript digits**, never `10^6`. These strings are printed inside quoted words in math -- which is what keeps a substituted operand one atom, so that `M / a` does not read as `M · (kNm/a) · mm` -- and inside quotes a caret is a caret.
-/// - x (int, float, str): the value. A string passes through, a var's value being allowed to be text.
-/// - digits (int): decimals, as `number-digits` sets them.
-/// -> str
-#let fmt-magnitude(x, digits) = {
-  if type(x) != int and type(x) != float { return fmt-decimals(x, digits) }
-  if calc.abs(x) <= sci-threshold { return fmt-decimals(x, digits) }
-  let e = int(calc.floor(calc.log(calc.abs(x), base: 10)))
-  // an exponent the rounding carries over: 999999.9 is 10.000 · 10⁵, which is 1 · 10⁶
-  if calc.abs(float(fmt-decimals(x / calc.pow(10.0, e), digits))) >= 10 { e += 1 }
-  fmt-decimals(x / calc.pow(10.0, e), digits) + " · 10" + sup(e)
-}
-
 // A number as it is **printed** takes the typographic minus, U+2212, for its sign and never the hyphen `fmt-decimals` and `fmt-magnitude` write (v0.87, the engineer: «un signe moins doit être affiché»): calc-engine.typ's `signed-text`, one rule for both files. Applied at the point of display and nowhere earlier, so that nothing is converted twice and every string that is read again -- math source, where math sets a hyphen as a minus by itself; the registry; an SVG -- keeps the hyphen it can parse.
 
 // `fmt-number`'s counterpart for a value written by hand: the same line, with the scientific notation above. A value that is a word rather than a number goes through the glossary, as it does everywhere else (docs/typst/language.md §4bis). The number and its unit are joined by a no-break space, as fmt-number joins them (v0.86): a line ending on «R_d = 4.969» and the next beginning with «kN» is what a plain space allowed.
-#let formula-number(value, unit, digits) = {
-  let s = if type(value) == str { tl-str(value) } else { signed-text(fmt-magnitude(value, digits)) }
+#let formula-number(value, unit) = {
+  if type(value) != str { return display-quantity(value, unit) }
+  let s = tl-str(value)
   if unit == "" { s } else { s + "\u{a0}" + unit }
 }
 
 // `quantity-in-formula`'s counterpart: "5.544 kN" as **quoted math source**, one atom, with a typographic minus for a sign -- quoted text keeps a hyphen where math would set a minus.
-#let formula-quantity(x, unit, digits) = {
-  let s = signed-text(fmt-magnitude(x, digits))
+#let formula-quantity(x, unit) = {
+  let s = display-number(x)
   "\"" + s + (if unit == "°" { "" } else { " " }) + unit + "\""
 }
 
@@ -873,11 +891,11 @@
 // ⚠️ One atom is the whole point. `M / a` substituted as `0.275 "kNm" / 135 "mm"` is four atoms, and math's `/` takes the single atom on each side of it: the line then reads 0.275 · (kNm/135) · mm -- a printed formula that does not state what was computed, which is the one thing this file exists to prevent (v0.60.1). So a value that carries a unit is quoted whole, the way `#test` writes its two sides (`quantity-in-formula`), which also turns a leading `-` into a typographic minus. A value without a unit is a bare number, math already, parenthesised where it is negative so that `a - b` never reads `a - -b` -- `value-in-formula`'s rule, which `show-calc` applies for the same reason.
 //
 // 👉 `show-calc` has no such case: it substitutes the bare number and lets the result carry the unit at the end of the line. `eq` cannot, its whole subject being operands whose units differ.
-#let substituted(value, unit, digits) = {
+#let substituted(value, unit) = {
   if type(value) != int and type(value) != float { return "\"" + str(value) + "\"" }
-  if unit != "" { return formula-quantity(value, unit, digits) }
-  let s = fmt-magnitude(value, digits)
-  if value < 0 { "(" + s + ")" } else { s }
+  if unit != "" { return formula-quantity(value, unit) }
+  // a negative one in parentheses, so "a - b" never reads "a - -b" (display-source)
+  display-source(value)
 }
 
 // A formula as it is printed twice over: in letters, every key replaced by its symbol, and in numbers, every key replaced by its value and unit -- the two lines `#eq` prints, and the two `#verify` prints of a side that is a whole expression.
@@ -899,7 +917,7 @@
   s
 }
 
-#let formula-lines(src, operands, digits) = {
+#let formula-lines(src, operands) = {
   let coded = src
   for (i, o) in operands.enumerate() { coded = replace-word(coded, o.key, placeholder(i)) }
   // the short names of the inverse functions are printed as math knows them (formula-display-names)
@@ -908,10 +926,197 @@
   let numbers = coded
   for (i, o) in operands.enumerate() {
     letters = letters.replace(placeholder(i), atom-symbol(o.symbol))
-    numbers = numbers.replace(placeholder(i), substituted(o.value, o.unit, digits))
+    numbers = numbers.replace(placeholder(i), substituted(o.value, o.unit))
   }
   (letters, numbers)
 }
+
+// --- The fine display arguments, and the level as a preset of them (spec 2026-10-21-commandes-typst-refonte, REQ-001, REQ-005 to REQ-008, ARCH-001) ---
+// What a line of `#var`, `#eq` and `#verify` shows is set by **fine arguments**, one per thing it may show and where: `display` (what of the line itself -- its symbol, its value, its unit; on `#eq`, `display-formula` and `display-equation`), `label-position`, `descr-position` and `norm-position`. A level is no longer a scale of its own but a **preset** of them, `lib/display-presets.json`, which reproduces what each level printed before the fine arguments existed. The engineer's order decides which layer wins (REQ-007): the call's argument, the call's level, `#calc-defaults` of the domain, the domain's level, `#calc-defaults` of the document, the document's level -- and `--input uniform=N` alone over the arguments written (Q-005), save in a `#sync`, whose content prints as it is written (Q-007).
+//
+// ⚠️ The layers live in the registry's own dictionary -- `defaults` for the document, `frames` for the domains open around a line, `next` for the next line --, for var-domain's reason: an update cannot read another state, and a command resolves what it can of them in its update. The last two layers, the document's level and the uniform one, are states, read in the command's context by `resolve-display`.
+#let display-presets = json("display-presets.json").commands
+// The families of presets (Q-014, 21.10.2026): `inline`, the default, and `block` -- the same visibility at each level, the label after the line and the citation in the right-hand column, the line set apart, what `note: "line"` printed. A domain chooses one with `#calc-defaults(presets: "block", scope: "domain")`; a line written `note: "line"` is printed with `block`.
+#let display-families = (inline: display-presets, block: json("display-presets.json").block)
+
+// The values each fine argument takes: what the engineer listed (20.10.2026), refused otherwise naming the argument and the values (REQ-001).
+#let display-values = ("none", "variable", "value", "value-unit", "variable-value-unit")
+#let fine-values = (
+  "display": display-values,
+  "display-formula": display-values,
+  "display-equation": display-values,
+  "label-position": ("none", "before", "after", "footnote"),
+  "descr-position": ("none", "after", "footnote"),
+  "norm-position": ("none", "in-line", "line-right", "footnote"),
+  "style": ("normal", "bold", "underline", "double"),
+  "role": ("data", "compute", "result"),
+)
+
+// The fine arguments each command takes: `#verify` has no `display: "value"` -- the engineer's list for it --, and no `style:`, its double rule saying whether the relation holds.
+#let fine-keys = (
+  "var": ("display", "label-position", "descr-position", "norm-position"),
+  "eq": ("display-formula", "display-equation", "label-position", "descr-position", "norm-position"),
+  "verify": ("display", "label-position", "descr-position", "norm-position"),
+  "domain": ("label-position", "descr-position", "norm-position"),
+)
+
+// The role a line has where nothing states one (D-9): a `#var` writes a datum down, an `#eq` computes, a `#verify` concludes.
+#let default-roles = ("var": "data", "eq": "compute", "verify": "result")
+
+// One fine argument checked against its values -- `auto` is always allowed, and means «not written».
+#let check-fine(fn, name, value) = {
+  if value == auto { return }
+  let allowed = fine-values.at(name)
+  if fn == "verify" and name == "display" { allowed = allowed.filter(v => v != "value") }
+  if not (value in allowed) {
+    panic(fn + ": " + name + ": " + repr(value) + " is not one of " + allowed.map(v => repr(v)).join(", "))
+  }
+}
+
+// The fine arguments a call wrote, as a dictionary without its `auto`s: the strongest layer.
+#let written-fine(fn, args) = {
+  let out = (:)
+  for (name, value) in args.pairs() {
+    check-fine(fn, name, value)
+    if value != auto { out.insert(name, value) }
+  }
+  out
+}
+
+// What a level presets of a command's fine arguments, in a family of presets.
+#let preset(command, lv, family: "inline") = display-families.at(family).at(command).at(str(lv))
+
+// The next line's `#calc-defaults` and `#unit`, taken by the update of the line that consumes them: `next` emptied, what it held kept under `last-next` for that line's context, which reads the registry after its own update (REQ-005, REQ-006).
+#let take-next(d) = {
+  d.insert("last-next", d.at("next", default: (:)))
+  d.insert("next", (:))
+  d
+}
+
+// The frame a domain opens around its lines: its id, its level, the `#calc-defaults` and the `#unit` given for it (scope: "domain"). One per open `#domain` or `var-domain`, innermost last; what they held is gone with them when the domain closes.
+#let push-frame(d, id, level) = {
+  let frames = d.at("frames", default: ())
+  frames.push((id: id, level: level, defaults: (:), units: (:)))
+  d.insert("frames", frames)
+  d
+}
+#let pop-frame(d) = {
+  let frames = d.at("frames", default: ())
+  if frames.len() > 0 { d.insert("frames", frames.slice(0, -1)) }
+  d
+}
+
+// The layers of `#calc-defaults` a line reads, from the strongest: the one given for it alone, then the domains' from the innermost out, then the document's.
+#let default-layers(d, next-key) = (d.at(next-key, default: (:)),) + d.at("frames", default: ()).rev().map(f => f.defaults) + (d.at("defaults", default: (:)),)
+
+// The role a line takes: the one written, else the defaults' (`default-layers`), else the command's own (D-9). Resolved in the update, being a pure function of the registry, and stored with the variable for `#var-table`. Read before `take-next`, so the next line's defaults are still `next`.
+#let resolve-role(command, written, d) = {
+  if written != auto { return written }
+  for layer in default-layers(d, "next") { if "role" in layer { return layer.role } }
+  default-roles.at(command)
+}
+
+// The style a line takes where it writes none, by the same layers; `none` where none says one. Read in the context, after `take-next`.
+#let resolve-style(written, d) = {
+  if written != auto { return if written == "normal" { none } else { written } }
+  for layer in default-layers(d, "last-next") { if "style" in layer { return if layer.style == "normal" { none } else { layer.style } } }
+  none
+}
+
+// The fine arguments a line is printed with, and the level it stands at: every layer of REQ-007 from the strongest down, the first to say a thing deciding it. Call inside the command's context, with the registry as its own update left it (`last-next` holding what `#calc-defaults(scope: "next")` gave it). `written` is what the call wrote, `level` its `level:`.
+//
+// The level returned is the one a level-bound thing still reads -- an item of a `var-line`, the metadata --: the first layer that states one, the uniform level over all.
+#let resolve-display(command, written, level, d, family: auto) = {
+  let keys = fine-keys.at(command)
+  // a line a `#sync` holds keeps what its call states: the uniform level stops at a value kept in step (lib/calc-engine-core.typ, `sync`)
+  let forced = if sync-depth.get() > 0 { none } else { uniform-level.get() }
+  // the family of presets: the line's own (a call written `note: "line"`), else the first layer of `#calc-defaults` to choose one, else inline (Q-014)
+  let family = if family != auto { family } else {
+    let chosen = default-layers(d, "last-next").find(layer => "presets" in layer)
+    if chosen == none { "inline" } else { chosen.presets }
+  }
+  let preset(command, lv) = display-families.at(family).at(command).at(str(lv))
+  let layers = (written,)
+  let lv = none
+  let with-level(layer) = {
+    let out = (layer,)
+    if layer.at("level", default: auto) != auto { out.push(preset(command, layer.level)) }
+    out
+  }
+  if level != auto { layers.push(preset(command, level)); lv = level }
+  let next = d.at("last-next", default: (:))
+  layers += with-level(next)
+  if lv == none and next.at("level", default: auto) != auto { lv = next.level }
+  for f in d.at("frames", default: ()).rev() {
+    layers += with-level(f.defaults)
+    if f.level != auto { layers.push(preset(command, f.level)) }
+    if lv == none and f.defaults.at("level", default: auto) != auto { lv = f.defaults.level }
+    if lv == none and f.level != auto { lv = f.level }
+  }
+  let doc = d.at("defaults", default: (:))
+  layers += with-level(doc)
+  if lv == none and doc.at("level", default: auto) != auto { lv = doc.level }
+  if lv == none { lv = resolve-level(auto) }
+  layers.push(preset(command, lv))
+  let settings = (:)
+  for k in keys {
+    let found = layers.find(layer => k in layer)
+    settings.insert(k, found.at(k))
+  }
+  // `--input uniform=N`: one level throughout, the arguments written included -- what a uniform report is for (Q-005)
+  if forced != none {
+    lv = forced
+    settings = preset(command, forced)
+  }
+  (settings: settings, lv: lv, family: family)
+}
+
+// `level: 0` and `display: "none"` are one thing since the fine arguments (REQ-007): nothing of the line is printed.
+#let shows-nothing(command, s) = if command == "eq" { s.at("display-formula") == "none" and s.at("display-equation") == "none" } else { s.at("display") == "none" }
+
+// An `id:` given to a line of `#var`, `#eq` or `#verify`: what Woodcore finds the line by, wherever it stands in its file (REQ-001, REQ-012). Once per domain, for the three commands together -- counted by an update and refused in a context, which always runs, where a refusal in the update would be silent.
+#let check-line-id(fn, id) = {
+  if id != none and (type(id) != str or id.trim() == "") { panic(fn + ": id: is a non-empty string, got " + repr(id)) }
+}
+#let count-line-id(d, id) = {
+  if id == none { return d }
+  let seen = d.at("verify_ids", default: (:))
+  let k = var-current(d) + "/" + id
+  seen.insert(k, seen.at(k, default: 0) + 1)
+  d.insert("verify_ids", seen)
+  d
+}
+#let refuse-twice(fn, id, d) = {
+  if id == none { return }
+  let here-domain = var-current(d)
+  if d.at("verify_ids", default: (:)).at(here-domain + "/" + id, default: 0) > 1 {
+    panic(fn + ": the id " + repr(id) + " is given to two lines of " + (if here-domain == "" { "the report outside every domain" } else { "the domain " + repr(here-domain) }) + " -- an id names one line")
+  }
+}
+
+// A label, a description and a citation placed by their fine arguments, around a line already built: `before` and `after` on the line, `footnote` gathered into the **one** footnote of the line (line-note's rule: three markers side by side read as one three-digit number), `in-line` after the line in the citation grey, `line-right` in the right-hand column -- which makes the line a block of its own (`annotated-rows`). `record` carries `label`, `description`, `choices`, `norm` and `norm_ref`. Returns what to set before the line, after it, its footnote, and the citation of the right-hand column, each `none` where there is nothing.
+#let placed-extras(record, s) = {
+  let label = record.at("label", default: none)
+  let descr = record.at("description", default: none)
+  let choices = record.at("choices", default: none)
+  let norm = record.at("norm", default: none)
+  let before = if s.at("label-position") == "before" and label != none { [#render-prose(tl-str(label))#colon-str()#h(0.35em)] } else { none }
+  let after = ()
+  if s.at("label-position") == "after" and label != none { after.push([ --- #render-prose(tl-str(label))]) }
+  if s.at("descr-position") == "after" and descr != none { after.push([ (#render-prose(tl-str(descr)))]) }
+  if s.at("norm-position") == "in-line" and norm != none { after.push([ #cite-text(norm-text(record), size: auto)]) }
+  let parts = ()
+  if s.at("label-position") == "footnote" and label != none { parts.push(render-prose(tl-str(label))) }
+  if s.at("descr-position") == "footnote" and descr != none { parts.push(render-prose(tl-str(descr))) }
+  if s.at("descr-position") == "footnote" and choices != none {
+    parts.push(choices.map(c => [#render-symbol(record) = #render-prose(tl-str(c.value))#colon-str() #render-prose(tl-str(c.desc))]).join(linebreak()))
+  }
+  if s.at("norm-position") == "footnote" and norm != none { parts.push(norm-text(record)) }
+  let note = if parts.len() == 0 { none } else { [#h(0.2em)#footnote(parts.join([#semicolon-str() ]))] }
+  let right = if s.at("norm-position") == "line-right" and norm != none { record } else { none }
+  (before: before, after: if after.len() == 0 { none } else { after.join() }, footnote: note, right: right)
+}
+
 
 // --- The commands -------------------------------------------------------
 // `var` writes a variable down, `eq` computes one from the others, `verify` states a relation between them, `var-unit` carries one into another unit, `unit` says which unit a whole dimension is printed in, and `var-domain` keeps two sets of variables apart. Between them the report never names a variable twice: the string given to `var` is the key a formula cites and, unless a second one is given, the symbol that is printed.
@@ -919,93 +1124,6 @@
 // Each of those that store something is **two pieces of content**: a `var-registry.update(...)`, then a `context` that reads the registry back and prints. The order matters and is the whole mechanism -- an update is a pure function of the dictionary, so the arithmetic runs there without reading a state, and the `context` placed after it sees the result. Reading and writing one state from inside one `context` is what Typst cannot be asked to do.
 //
 // ⚠️ And the corollary, which cost a silent refusal in v0.63: the function of an update runs **only where something reads that state**. A `panic` written inside one is silent in a document that never looks the registry up again -- so a check that must always fire belongs in the `context`, which is where `var-unit` refuses a name it cannot find and where `eq` reads the registry at every level.
-
-// --- A row of variables (docs/typst/formulas.md §10quinquies) ---------------------
-// `var-line` sets several declarations on one line -- "R_k = 7 kN; k_dens = 0.806; gamma_M = 1.7" -- the way `show-calc` sets the vars of a `group` (section 3.3). Each `#var` keeps every argument it has; what the row adds is the **joining**, and that is the whole reason it is a container rather than an `inline: true` flag on each command:
-//
-//   * the separator is written by the engine, so a value hidden by its level takes its separator with it, where hand-typed commas would be left behind -- and a `;` is never typed after a `#var(...)`, where Typst swallows it as the end of the expression;
-//   * the row carries one label, like a var's `group_label`, and one citation in the right-hand column, which is a grid and so cannot be reached from inside a line;
-//   * a label and a citation of an item's own become **one footnote**, since neither can be set after an em dash in the middle of a line (section 9's rule for a description and its choices, applied to a row).
-//
-// The state is what tells a command inside a row from one printing on a line of its own: `none` outside, and inside a dictionary carrying how many items the row has printed, the row's label, its separator and its level. Every command reads it in the `context` it already prints from, so a row passes nothing as an argument.
-#let var-line-state = state("var-line", none)
-
-// A space and a paragraph break, as the children of a content block report themselves. ⚠️ Compared by the *name of the element function*: `space` and `parbreak` are elements a markup block produces and neither is a binding this file could name.
-#let line-filler = ("space", "parbreak")
-
-// One item of a row: the separator the row is joined with -- or the row's label, before the first item -- and then the item. The count lives in the state, which is what makes a hidden item take its separator with it.
-#let line-item(st, item) = {
-  if st.count > 0 {
-    [#(if st.sep == auto { semicolon-str() } else { st.sep })]
-    h(0.5em)
-  } else if st.label != none {
-    [#tl-str(st.label)#colon-str()]
-    h(0.35em)
-  }
-  item
-  var-line-state.update(s => if s == none { s } else { (count: s.count + 1, label: s.label, sep: s.sep, level: s.level) })
-}
-
-// The level one command prints at: the row's, where the row states one, and the command's own otherwise -- a row's level is what hides a whole line of declarations at once. `--input uniform=N` still wins, resolve-level reading it last. (v0.117's level of a whole calculation domain, set by `#show-formula`, went with that command: a domain of the «Formules» tab is printed by `#include`, each command at its own level -- issue #15.)
-#let line-level(st, level) = resolve-level(if st != none and st.level != auto { st.level } else { level })
-
-// What a value carries beside itself when it is printed inline -- inside a row, or in a sentence: its label from level 2, its choices with it, and its citation from level 3, as **one** footnote. One footnote and not three: three markers side by side read as one three-digit number rather than as three references (section 9).
-//
-// `extra` is a sentence printed at **every** level and set before the rest -- today the orange line `val` writes under a value shown in another unit than the one it carries. `colour` is the colour of the footnote's own marker, so that such a value is marked in the text and not only at the foot of the page (v0.80, the engineer's request).
-// `with-label`, `with-descr` and `with-norm` are what let a line that already has somewhere to put them ask for the rest: a block line sets its label after an em dash and its citation in the right-hand column, so its footnote carries the description alone (v0.85.2); `#val(note: "line")` sets its description in parentheses as well, so its footnote carries at most the choices and the orange line (v0.86).
-#let line-note(record, lv, extra: none, colour: none, with-label: true, with-descr: true, with-norm: true) = {
-  let parts = ()
-  if extra != none { parts.push(extra) }
-  // What the variable *is* comes first, then why this value was chosen: a label and a description are two fields in the data (section 3.1) and two different sentences, and the registry has carried both since v0.85.1.
-  //
-  // ⚠️ And they are printed at **different levels** (v0.85.2, the engineer's rule): the label at 2, because a number wants the word that names it as soon as it is shown; the description and the `choices` it explains at 3, with the citation, because why *this* value was chosen is what a checker reads and a level-2 report does not. Level 3 is therefore complete -- label, description, norm and norm-ref, in that order.
-  let said = if with-label { record.at("label", default: none) } else { none }
-  if lv >= 2 and said != none { parts.push(render-prose(tl-str(said))) }
-  let descr = if with-descr { record.at("description", default: none) } else { none }
-  if lv >= 3 and descr != none { parts.push(render-prose(tl-str(descr))) }
-  let choices = record.at("choices", default: none)
-  if lv >= 3 and choices != none {
-    // A choice goes through the glossary like every other string the data carries: the norm's own wording follows the report's language, a value the workbook alone names is left as it was.
-    parts.push(choices.map(c => [#render-symbol(record) = #render-prose(tl-str(c.value))#colon-str() #render-prose(tl-str(c.desc))]).join(linebreak()))
-  }
-  if with-norm and lv >= 3 and record.at("norm", default: none) != none { parts.push(norm-text(record)) }
-  // Joined with the engine's own semicolon, which carries French's narrow space before it: a label and a citation set one after the other with nothing between them read as one sentence («Kapazität Sherpa XS Sherpa §ETA-12/0197»).
-  let joined = parts.join([#semicolon-str() ])
-  // ⚠️ A thin space before the marker: set flush after a unit it read as one more exponent -- «kN/m²³» -- which is what step-rows' own h(0.35em) already prevents (v0.86).
-  if parts.len() == 0 { none }
-  else if colour == none { [#h(0.2em)#footnote(joined)] }
-  // The marker takes the colour, the sentence inside carries its own: a footnote's body is laid out at the foot of the page and does not inherit this, which is what lets the label and the citation beside the orange line stay in the text's own ink.
-  else { [#h(0.2em)#text(fill: colour, footnote(joined))] }
-}
-
-// Where a value's extras go -- its label, its description and its citation -- when it stands on its own rather than in a `var-line` (v0.87, the engineer: «un argument permet de régler si la note vient en ligne ou en note de bas de page», on `#var`, `#val` and `#eq`). `"footnote"` gathers the three into the **one** footnote `line-note` builds, which is what a value in a sentence needs; `"line"` sets them on the line, as a block line has always set them -- the label after an em dash, the description a footnote, the citation in the right-hand column (`#val`, which has no column, sets the description and the citation in parentheses after its label). Inside a `var-line` it has no effect: a row has one citation column for all of it, and its items take one footnote each.
-#let note-modes = ("footnote", "line")
-
-#let check-note(fn, note) = {
-  if not (note in note-modes) {
-    panic(fn + ": invalid note " + repr(note) + " -- use " + note-modes.map(m => repr(m)).join(" or ")
-      + ": \"footnote\" puts the label, the description and the citation in one footnote, \"line\" sets them on the line")
-  }
-}
-
-// `sep:` (v0.117, the engineer: «l'option ... serait un argument de var», spec 2026-10-11-argument-sep-var): the separator a value printed **inline** is followed by -- `#var("b", 208, "mm", sep: ";")` where `#var(...) ;` was typed until a `;` after a call made its line a text. It is printed with the value, after its footnote, so a value its level hides takes its separator with it -- what `var-line` was made for. Refused where there is nothing to separate: a value on a line of its own (`note: "line"`), and a value in a `var-line`, which writes its own separators (`check-sep-row`, read in the context where the row is known).
-#let check-sep(fn, sep, note) = {
-  if sep != none and value-type(sep) != str {
-    panic(fn + ": sep: is the separator printed after the value, a string -- \";\", \",\" -- got " + repr(sep))
-  }
-  if sep != none and note == "line" {
-    panic(fn + ": sep: " + repr(sep) + " separates values printed inline, and note: \"line\" sets this one on a line of its own, with no neighbour to separate it from -- drop one of the two")
-  }
-}
-
-#let check-sep-row(fn, st, sep) = {
-  if sep != none and st != none {
-    panic(fn + ": sep: " + repr(sep) + " inside a var-line, which writes its own separator between its items -- drop it here, or give the row var-line(sep: ...)")
-  }
-}
-
-// What follows a value printed inline: its separator, glued to it as a `;` is to the word before it -- the space after it is the line break of the source, as between any two values written one under the other.
-#let sep-after(sep) = if sep == none { none } else { [#sep] }
 
 // One value set inline: the value, its footnote marker, and the red line of a unit it could not be carried into -- set a space apart, where glued to the value it read as part of it.
 #let inline-item(value, note, warning) = {
@@ -1028,11 +1146,18 @@
 // ⚠️ The scope name is a **bare word of two letters or more, with neither hyphen nor underscore**: in math a single letter is that letter and never a lookup (`v` printed as an italic v), a hyphen is a minus and an underscore a subscript. Found by compiling all three.
 #let apply-style(style, body) = {
   if style == none { return body }
-  eval((if style == "double" { "dbl" } else { style }) + "(printed)",
-    mode: "math", scope: (printed: body, dbl: double-rule))
+  math-eval((if style == "double" { "dbl" } else { style }) + "(printed)",
+    scope: (printed: body, dbl: double-rule))
 }
 
-#let var-argument-names = ("domain", "label", "descr", "level", "norm", "norm-ref", "note", "sep", "style", "summary")
+// What one command says of itself to `typst query` (spec 2026-10-15, REQ-004): one label for all of them, `<woodcore-var>`, read by calc/domains/unfold.py (`query_state`) -- so that Woodcore learns what a domain holds from the compiler and never from parsing the file. Emitted from the command's context, where its value is known, outside every row item; invisible, at every level, level 0 included. A value that is not JSON (`auto`) is written as its repr.
+#let wc-meta(fields) = {
+  let plain(v) = if v == auto { "auto" } else if type(v) == dictionary { v.pairs().map(((k, x)) => (k, plain(x))).to-dict() } else if type(v) == array { v.map(plain) } else if type(v) in (str, int, float, bool) or v == none { v } else { repr(v) }
+  // no space before the label: in markup it would be printed, a space before every separator of a row (found by tests/test_formula.py on the first build)
+  [#metadata(plain(fields))<woodcore-var>]
+}
+
+#let var-argument-names = ("name-calc", "name-visible", "value", "unit", "domain", "display", "style", "role", "label", "label-position", "descr", "descr-position", "norm", "norm-section", "norm-position", "id", "level")
 
 // A value carried from one unit into another: the number as `to` writes it, or -- where the two are not the same dimension -- the value left exactly as it was, with the warning the caller prints in red. The one piece of arithmetic `#var`, `#var-unit` and a data value handed a unit all share.
 //
@@ -1051,6 +1176,36 @@
     return (value: value, unit: from, warning: (wanted: to, natural: from))
   }
   (value: value * a.factor / b.factor, unit: to, warning: none)
+}
+
+// The relative gap under which a value written beside `domain:` is taken as the one it names (docs/typst/formulas.md, «a literal checked by domain:», spec 2026-10-15). One constant for Typst; Python writes a value it unfolds with at least this precision (calc/domains/unfold.py LITERAL_TOLERANCE, held equal by tests/test_unfold.py).
+#let literal-tolerance = 1e-6
+
+// The largest relative gap a value written rounded may keep from the export and still agree with it: what a value typed by hand to the decimals it is printed at stays within.
+#let literal-rounding = 1e-3
+
+// A value written beside `domain:` against the value `domain:` reads: none where they agree, else the value read, in the written unit -- what the line prints in red as stale. A reference of another dimension than the written value is stale too, shown in its own unit. A reference that is a word, or a written value that is, agrees only when equal.
+#let literal-stale(written, reference) = {
+  let ref-value = reference.at("value", default: none)
+  let ref-unit = reference.at("unit", default: "")
+  if ref-unit == none { ref-unit = "" }
+  let numeric = v => type(v) == int or type(v) == float
+  if not numeric(written.value) or not numeric(ref-value) {
+    return if written.value == ref-value { none } else { (value: ref-value, unit: ref-unit) }
+  }
+  let carried = if ref-unit == written.unit or written.unit == "" and ref-unit == "" { (value: ref-value, unit: written.unit, warning: none) } else {
+    let a = parse-unit(ref-unit)
+    let b = parse-unit(written.unit)
+    if a == none or b == none or not dims-equal(a.dims, b.dims) { (value: ref-value, unit: ref-unit, warning: true) } else { converted("var", "", ref-value, ref-unit, written.unit) }
+  }
+  if carried.warning != none { return (value: ref-value, unit: ref-unit) }
+  let scale = calc.max(calc.abs(written.value), calc.abs(carried.value))
+  // A value written to fewer decimals than the export holds agrees where the export rounds to it -- 1.394 against 1.39411547558108 -- as long as that rounding stays within a relative `literal-rounding`: 25 written for an export's 25.4 is half a unit off and still stale. Otherwise the two agree within `literal-tolerance`, what Python's own writing keeps.
+  let written-text = str(written.value)
+  let decimals = if written-text.contains("e") or not written-text.contains(".") { 0 } else { written-text.split(".").at(1).len() }
+  let rounding = calc.min(0.5 * calc.pow(10.0, -decimals), literal-rounding * scale)
+  let gap = calc.abs(written.value - carried.value)
+  if gap <= calc.max(literal-tolerance * scale + 1e-12, rounding) { none } else { (value: carried.value, unit: carried.unit) }
 }
 
 // The value and unit a `#var` was given: a number with the unit beside it, or a var object -- from `var-of(...)`, from an earlier `#var`, or from an `#eq` -- which carries both already.
@@ -1094,7 +1249,38 @@
   )
 }
 
-/// Writes one variable down: it is stored under `key`, where every formula below can name it, and printed -- **inline**, `symbol = value unit`, like a word of the sentence it stands in, so that several written one after the other run on in one paragraph and a blank line starts a new one.
+#let var-line-print(command, held, written, level, d, style, stale) = {
+  // the number in red with the value the export now holds where it is stale -- the mark a literal checked by domain: carries
+  let marked(number) = if stale != none {
+    text(fill: test-nok, number) + text(fill: test-nok, size: 8pt, [~(#t-str("formula.stale", value: formula-number(stale.value, stale.unit)))])
+  } else { number }
+  let symbol = held.at("symbol", default: none)
+  let warning = unit-warning(held.at("warning", default: none))
+  let rd = resolve-display("var", written, level, d)
+  let s = rd.settings
+  if not shows-nothing("var", s) {
+    let number = marked(formula-number(held.value, held.unit))
+    let shown = if s.display == "variable" { math-eval(symbol) }
+      else if s.display == "value" { marked(formula-number(held.value, "")) }
+      else if s.display == "value-unit" { number }
+      else { [#math-eval(symbol)~=~#number] }
+    let value = apply-style(style, shown)
+    let x = placed-extras(held, s)
+    if rd.family == "block" or x.right != none {
+      // The line set apart: its label after an em dash (v0.61.1, the engineer's own correction: what the variable *is* is read with it), its description in a footnote, its citation in the right-hand column -- the `block` presets (Q-014) or a citation placed on the right
+      let line = [
+        #x.before#value#x.after#x.footnote
+      ]
+      annotated-rows(((line, x.right),))
+      if warning != none { warning }
+    } else {
+      // Inline, which is the default since v0.87 (the engineer: «de base, #var doit s'afficher inline, afin de pouvoir afficher plusieurs var les uns après les autres»): its footnote gathers what goes to the foot of the page
+      inline-item([#x.before#value#x.after], x.footnote, warning)
+    }
+  }
+}
+
+/// Writes one variable down: it is stored under its name, where every formula below can name it, and printed -- **inline**, `symbol = value unit`, like a word of the sentence it stands in, so that several written one after the other run on in one paragraph and a blank line starts a new one.
 ///
 /// ```typ
 /// #var("R_k", 7, "kN")
@@ -1109,10 +1295,17 @@
 /// ```
 ///
 /// ```typ
-/// #var("s_k", var-of("snow-load", "SL", "s_k"))
+/// #var("s_k", domain: ("snow-load", "SL"))
 /// ```
 ///
-/// A value written down somewhere else is named the way `val` names it, with `domain:` -- a **pair** being a calculation of the export and its instance, a **string** a `var-domain` of the report. The first is the short form of `#var("R_d", var-of("connector", "SD-10", "R_d"))`, and the two store exactly the same thing:
+/// **Without a value it prints a variable already declared** -- with everything it was declared with, its label, its citation and how it was shown, the level and the id aside -- and `unit:` shows it in another unit of the same dimension, for that line alone: the variable keeps its own, and the formulas below compute with it (spec 2026-10-21-commandes-typst-refonte, REQ-002, Q-011). `#val` and `#var-unit` were this until then.
+///
+/// ```typ
+/// #var("R_d", 5, "kN", norm: "SIA 265", norm-section: "6.5.5.2", level: 0)
+/// Der Widerstand beträgt #var("R_d") oder #var("R_d", unit: "N").
+/// ```
+///
+/// A value written down somewhere else is named with `domain:` -- a **pair** being a calculation of the export and its instance, a **string** a `#domain` of the report. The first is the short form of `#var("R_d", var-of("connector", "SD-10", "R_d"))`, and the two store exactly the same thing:
 ///
 /// ```typ
 /// #var("s_k", domain: ("snow-load", "SL"))
@@ -1121,11 +1314,27 @@
 /// The second is what carries a result out of the column that computed it, so that a `#verify` below can name it -- a formula reads the current domain and the default one, and nothing else:
 ///
 /// ```typ
-/// #var-domain("Ende")[ #var("F", 0.55, "kN") ]
+/// #domain("Ende")[ #var("F", 0.55, "kN") ]
 /// #var("F", domain: "Ende")
 /// ```
 ///
-/// At `level: 0` the variable is written down and nothing is printed, so that a formula below can name a coefficient the page does not show:
+/// A value **written beside** `domain:` is a literal checked by it: the number written is the one printed and computed with, and the export's is compared with it -- the same, nothing more; another, the written value is printed in red with the one the export now holds. It is how Woodcore writes a calculation it generates, so that the value can be read in the file and still cannot age unseen:
+///
+/// ```typ
+/// #var("s_k", 1.394, "kN/m²", domain: ("snow-load", "SL"))
+/// ```
+///
+/// **What is printed, and where** (REQ-001): `display` says what of the line itself -- `"variable"`, `"value"`, `"value-unit"`, `"variable-value-unit"` or `"none"` --, and `label-position`, `descr-position` and `norm-position` where its label, its description and its citation go: `"before"` and `"after"` on the line, `"footnote"` in its one footnote, `"in-line"` after it in grey, `"line-right"` in the right-hand column, which sets the line apart. A level is a preset of them, and an argument written wins over it (`lib/display-presets.json`):
+///
+/// ```typ
+/// #var("R_k", 7, "kN", label: "Kapazität Sherpa XS", descr: "Aus dem Katalog des Herstellers", norm: "Sherpa", norm-section: "ETA-12/0197", label-position: "after", norm-position: "line-right", level: 3)
+/// ```
+///
+/// ```typ
+/// #var("gamma_M", 1.7, label: "Teilsicherheitsbeiwert", label-position: "before", norm: "SIA 265", norm-section: "2.2.5", norm-position: "in-line")
+/// ```
+///
+/// At `level: 0` -- or `display: "none"` -- the variable is written down and nothing is printed, so that a formula below can name a coefficient the page does not show:
 ///
 /// ```typ
 /// #var("k_dens", 0.806, level: 0)
@@ -1133,27 +1342,7 @@
 /// #eq("R_d", `k_dens dot R_k`)
 /// ```
 ///
-/// Its label, its description and its citation go into **one footnote** by default. `note: "line"` sets them on the line instead, the line then a block of its own: the label after an em dash, the description a footnote, the citation in the right-hand column.
-///
-/// ```typ
-/// #var("R_k", 7, "kN", label: "Kapazität Sherpa XS", descr: "Aus dem Katalog des Herstellers", norm: "Sherpa", norm-ref: "ETA-12/0197", note: "line", level: 3)
-/// ```
-///
-/// Values printed one after the other on a line are told apart by `sep:`, the separator written after the value it follows -- and printed with it, so a value its level hides takes its separator with it:
-///
-/// ```typ
-/// #var("b", 208, "mm", sep: ";")
-/// #var("t", 8.5, "mm", sep: ";")
-/// #var("epsilon", 124)
-/// ```
-///
-/// ```typ
-/// #var("a", 145, "mm", sep: ";")
-/// #var("r", 27, "mm", sep: ";")
-/// #eq("b_2", `a - r`)
-/// ```
-///
-/// The line may be set apart the way `#eq` sets an answer: `style:` names a math function applied to the whole of it -- `symbol = value unit`, and not the value alone -- or `"double"`, which rules it twice underneath, for a value a section rests on.
+/// The line may be set apart the way `#eq` sets an answer: `style:` -- `"bold"`, `"underline"`, or `"double"`, which rules it twice underneath, for a value a section rests on.
 ///
 /// ```typ
 /// #var("R_d", 4.969, "kN", style: "bold")
@@ -1165,264 +1354,211 @@
 /// #var("W_y_erf", "W_(y,erf)", 12.5, "cm³")
 /// ```
 ///
-/// ⚠️ There is no `#let`: Typst gives a function no way to bind a name in its caller's scope, so the name is the string, and the registry is where it lives (see `var-registry`). Read one back with `val`, not with a binding.
-/// - key (str): the name a formula cites. Letters, digits and `_`; never a `-`, which a formula would read as a subtraction, nor a word a formula reads as an operation -- `dot`, `max`, `sqrt`. Where no symbol is given it is printed as a symbol written by hand would be: `k_dens` as k with the subscript "dens", `M2` as M and 2, `FEd` as one word.
-/// - ..rest (any): the positional tail, whose three slots are the bullets below -- the optional printed symbol, the value, then its optional unit, in that order. Variadic only because Typst has no optional positionals; every *named* argument is declared, so an editor shows them all.
-/// - symbol (str): optional second positional argument, the math source that is *printed* -- `"q_(k,11)"`. A word math does not know may be written without its quotes, `"W_(y,erf)"`. Left out, the key itself is printed, requoted by `key-symbol` so `"k_dens"` comes out as k with the subscript "dens".
-/// - value (int, float, dictionary): the number, or a var object which brings its own unit and description.
-/// - unit (str): optional, after the value. No unit given means the variable has none.
-/// - domain (none, str, array): where the value is read. A **pair** is a calculation of the export and its instance -- `("snow-load", "SL")`, `("connector", "SD-10")` -- and falls back to the `var-domain` named after that instance for a name the export does not carry, which is where `show-polar-moment` puts the forces it computed and what `find` lists under the same pair; a **string** is a `var-domain` of the report, and the variable is copied out of it into wherever this line stands. Either way the var of this same `key` is what is taken, with its unit, its symbol, its description and its citation, so nothing is written beside it -- `label:`, `norm:` and `norm-ref:` still override what it carries. To store it under another name, or to convert it, name it the long way: `#var("R", var-of("connector", "SD-10", "R_d"), "N")`.
-/// - label (str, none): what the value is -- «Expositionsbeiwert» -- printed from level 2: in the footnote, or with `note: "line"` on the line after the unit, set apart by an em dash. It **overrides** the label a var object carries.
-/// - descr (str, none): why *this* value was chosen, printed in the footnote from level 3, which is section 9's own form for it. The other half of what was one field until v0.85.1; it overrides the description a var object carries, and is the argument `descr:` named before v0.80, given back its own meaning rather than the label's.
-/// - level (int, auto): 0 prints nothing (the variable is still stored, and `#find(object: "variable")` is what shows it), 1 the symbol, value and unit, 2 also the label, 3 also the description and the citation. auto follows the report (section 4).
-/// - norm (str, none), norm-ref (str): the citation, printed from level 3: in the footnote, or with `note: "line"` in the right-hand column.
-/// - style (str, none): a math function applied to the **whole line**, `symbol = value unit` -- `"bold"`, `"underline"` -- or `"double"`, which rules it twice underneath in the document's own ink, the mark `verify` sets a relation with, for a value a section rests on. `#eq`'s own argument (v0.100); ⚠️ a line it is given is set with math's own spacing around its `=`, a little wider than a line without it.
-/// - note (str): where the label, the description and the citation go. `"footnote"` (the default) prints the variable inline and gathers the three into one footnote; `"line"` prints it on a line of its own, the label after an em dash, the description a footnote and the citation in the right-hand column. No effect inside a `var-line`, whose items are always inline with one footnote each.
-/// - sep (str, none): the separator printed after the variable when it is printed inline -- `";"`, `","` --, glued to it, and hidden with it by its level. Refused with `note: "line"` and inside a `var-line`, which writes its own.
-/// - summary (bool): lists this variable in a summary table (`show-load-summary`, `show-line-load-summary`), which is how a load the export does not carry -- a line load, a load read off a manufacturer's table -- reaches one. **Its unit decides which table**: kN/m² an area load, kN/m a line load, any other unit refused naming the two, where the table is printed. It changes nothing about how the line itself prints, so a declaration at `level: 0` is listed like any other.
+/// ⚠️ There is no `#let`: Typst gives a function no way to bind a name in its caller's scope, so the name is the string, and the registry is where it lives (see `var-registry`). Read one back with `#var` without a value, or `get` in a context.
+/// - ..rest (any): the positional arguments, whose four slots are the bullets below -- the name, the optional printed symbol, the value, then its optional unit, in that order. Variadic only because Typst has no optional positionals; every *named* argument is declared, so an editor shows them all.
+/// - key (str): the name a formula cites -- the first positional, or `name-calc:`. Letters, digits and `_`; never a `-`, which a formula would read as a subtraction, nor a word a formula reads as an operation -- `dot`, `max`, `sqrt`. Where no symbol is given it is printed as a symbol written by hand would be: `k_dens` as k with the subscript "dens", `M2` as M and 2, `FEd` as one word.
+/// - symbol (str): optional second positional argument, or `name-visible:`, the math source that is *printed* -- `"q_(k,11)"`. A word math does not know may be written without its quotes, `"W_(y,erf)"`. Left out, the key itself is printed, requoted by `key-symbol`.
+/// - name-calc (str, none): the name, written by name rather than first -- `#var(name-calc: "l_1", name-visible: "l", value: 5, unit: "m")`.
+/// - name-visible (str, none): the printed symbol, written by name.
+/// - value (int, float, dictionary, none): the value, written by name -- the number, or a var object which brings its own unit and description. Left out with every positional value, the line prints a variable already declared.
+/// - unit (str, none): the value's unit, written by name; on a line that prints a variable already declared, the unit to show it in, for that line alone (same dimension, else the line says so in red).
+/// - domain (none, str, array): where the value is read. A **pair** is a calculation of the export and its instance -- `("snow-load", "SL")`, `("connector", "SD-10")` -- and falls back to the domain named after that instance for a name the export does not carry; a **string** is a `#domain` of the report, and the variable is copied out of it into wherever this line stands. Either way the var of this same name is what is taken, with its unit, its symbol, its description and its citation -- `label:`, `norm:` and `norm-section:` still override what it carries.
+/// - display (str, auto): what of the line is printed -- `"none"`, `"variable"` (the symbol), `"value"` (the number), `"value-unit"`, `"variable-value-unit"` (`symbol = value unit`). auto leaves it to the level.
+/// - style (str, auto): `"normal"`, `"bold"`, `"underline"` or `"double"` (ruled twice underneath, the mark `verify` sets a relation with), applied to the **whole line**. auto leaves it to `#calc-defaults`, else normal.
+/// - role (str, auto): what the value is to the calculation -- `"data"` (the default of `#var`), `"compute"`, `"result"` --, which `#var-table` lists by.
+/// - label (str, none): what the value is -- «Expositionsbeiwert». It **overrides** the label a var object carries.
+/// - label-position (str, auto): `"none"`, `"before"` (before the line, followed by a colon), `"after"` (after it, set apart by an em dash), `"footnote"`. auto leaves it to the level -- the footnote from level 2.
+/// - descr (str, none): why *this* value was chosen. It overrides the description a var object carries.
+/// - descr-position (str, auto): `"none"`, `"after"` (after the line, in parentheses), `"footnote"`. auto leaves it to the level -- the footnote from level 3, with the choices it explains.
+/// - norm (str, none), norm-section (str, none): the citation -- the norm, and its clause or table, «SIA 265 6.5.5.2».
+/// - norm-position (str, auto): `"none"`, `"in-line"` (after the line, in grey), `"line-right"` (in the right-hand column, the line then a block of its own), `"footnote"`. auto leaves it to the level -- the footnote from level 3.
+/// - id (str, none): the name the line is found by -- by Woodcore in its file, and by `typst query` -- wherever it is moved. Once per domain, for `#var`, `#eq` and `#verify` together.
+/// - level (int, auto): a preset of the fine arguments above -- 0 nothing, 1 the line, 2 also the label, 3 also the description and the citation (`lib/display-presets.json`) --, which an argument written overrides. auto follows the domain, else the report.
+/// - norm-ref (str): written before `norm-section:`, which it is.
 /// -> content
-#let var(key, ..rest, domain: none, label: none, descr: none, level: auto, norm: none, norm-ref: "", note: "footnote", sep: none, style: none, summary: false) = {
-  // ⚠️ The named arguments are declared one by one rather than swept into `..rest`, and that is what an editor reads: a function whose whole signature is `..args` shows as `var(args: arguments)` in a tooltip, and `label:`, `level:`, `norm:` and `norm-ref:` are then invisible to the engineer writing the call (v0.63.1, from a screenshot of `#eq`'s own tooltip). Only the *positional* tail stays variadic, because the printed symbol is an optional second positional and Typst has no optional positionals.
+#let var(..rest, name-calc: none, name-visible: none, value: none, unit: none, domain: none, display: auto, style: auto, role: auto, label: none, label-position: auto, descr: none, descr-position: auto, norm: none, norm-section: none, norm-ref: "", norm-position: auto, id: none, level: auto) = {
+  // ⚠️ The named arguments are declared one by one rather than swept into `..rest`, and that is what an editor reads: a function whose whole signature is `..args` shows as `var(args: arguments)` in a tooltip, and `label:`, `level:`, `norm:` are then invisible to the engineer writing the call (v0.63.1). Only the *positional* tail stays variadic, because the printed symbol is an optional second positional and Typst has no optional positionals.
   // ⚠️ `panic` inside an `if`, not `assert(cond, message: ...)`: Typst builds an assert's message *before* it tests the condition, so `unknown.first()` on an empty array fails every correct call.
   let unknown = rest.named().keys()
   if unknown.len() > 0 {
     panic("var: unknown argument " + repr(unknown.first())
       + " -- " + var-argument-names.map(n => repr(n)).join(", "))
   }
+  // The name, the symbol, the value and the unit, written by position or by name (REQ-002): one tail of positionals after the name, whichever way they came.
+  let pos = rest.pos()
+  if name-calc == none and pos.len() == 0 { panic("var: write #var(\"key\", value) at least -- the name first, or name-calc:") }
+  let key = if name-calc != none { name-calc } else { pos.first() }
+  let tail = if name-calc != none { pos } else { pos.slice(1) }
+  if name-visible != none {
+    if tail.len() > 0 and type(tail.first()) == str { panic("var: " + repr(key) + " is given its symbol twice, by position and as name-visible:") }
+    tail = (name-visible,) + tail
+  }
+  let declared-by-name = value != none
+  if declared-by-name {
+    if tail.filter(x => type(x) != str).len() > 0 { panic("var: " + repr(key) + " is given its value twice, by position and as value:") }
+    tail.push(value)
+    if unit != none { tail.push(unit) }
+  }
   check-key("var", key)
   check-level("var", level)
-  check-note("var", note)
-  check-sep("var", sep, note)
+  check-line-id("var", id)
+  if norm-section != none and norm-ref != "" { panic("var: norm-section: and norm-ref: are one argument -- write norm-section: alone") }
+  let norm-ref = if norm-section != none { norm-section } else { norm-ref }
+  let written = written-fine("var", (display: display, label-position: label-position, descr-position: descr-position, norm-position: norm-position))
+  // `style: none` was the default until the fine arguments, and is still the plain line
+  let style = if style == none { "normal" } else { style }
+  check-fine("var", "style", style)
+  check-fine("var", "role", role)
+  // what a line printing this variable again takes from this one (REQ-002: «reprendrait tous les arguments donnés initialement»), its level and its id aside
+  let shown = written + (if style != auto { (style: style) } else { (:) })
 
-  // `domain:` says where the value is read and hands it over as if it had been written positionally (v0.85): `#var("R_d", domain: ("connector", "SD-10"))` and `#var("R_d", var-of("connector", "SD-10", "R_d"))` store the same record, which is what makes the two spellings one command rather than two.
-  //
-  // ⚠️ The two shapes are read in different places, and that is why a string runs a path of its own below. A **pair** is the export: a plain json read, so it can be made here and turned into a positional like any other value. A **string** is a `var-domain`, which lives in the registry -- a state, which nothing outside a context may read -- so its record is built **inside the update**, which is handed the dictionary itself, exactly as `#eq` computes its answer there; the line then prints what it reads back. Until v0.85 the string was refused for want of that second path.
-  if domain != none and rest.pos().len() > 0 {
-    panic("var: " + repr(key) + " takes its value from domain: " + repr(domain)
-      + ", so there is nothing to write beside it -- drop one of the two")
-  }
-  let pair = domain != none and value-type(domain) == array
-  if domain != none and not pair and value-type(domain) != str {
-    panic("var: domain: is a var-domain of the report (\"Gelenkige Verbindung\") or a calculation and its instance ((\"snow-load\", \"SL\")) -- got " + repr(domain))
-  }
-  if pair and domain.len() != 2 {
-    panic("var: domain: names a calculation and its instance, two of them ((\"snow-load\", \"SL\")) -- got " + repr(domain))
-  }
-  let exported = if pair { find-calculation("var", domain.at(0), domain.at(1)).vars } else { (:) }
-  // ⚠️ A pair the export does not carry falls back to the **var-domain named after its instance** (v0.85), which is where `show-polar-moment` publishes the forces it worked out (section 3.3quinquies) -- and which `find` already lists under that very pair. Without the fallback the two commands disagreed about what `("connection", "VU-MP-1")` holds: the table named F_max and this refused it. The export wins a name both carry, being the traced one.
-  let from-domain = (domain != none and not pair) or (pair and not (key in exported))
-  let source-domain = if pair { domain.at(1) } else { domain }
-  let pos = if domain == none or from-domain { rest.pos() } else { (exported.at(key),) }
-  let record = if from-domain { none } else {
-    assert(pos.len() >= 1, message: "var: write #var(\"key\", value) at least, optionally #var(\"key\", \"symbol\", value, \"unit\")")
-    // The first of them is the printed symbol when it is a string: a *value* is a number or a var object, never a string, so the two can never be confused. `none` here means "not stated", and var-record then takes the symbol the value brought with it, or the key.
-    let has-symbol = type(pos.at(0)) == str
-    let symbol = if has-symbol { pos.at(0) } else { none }
-    let after = if has-symbol { pos.slice(1) } else { pos }
-    assert(after.len() >= 1, message: "var: `" + key + "` has a symbol but no value")
-    // a var object carries its own symbol, and then the key is never printed
-    if not has-symbol and not (type(after.at(0)) == dictionary and "symbol" in after.at(0)) { check-printable-key("var", key) }
-    var-record(key, symbol, after.at(0), after.at(1, default: none), label, descr, norm, norm-ref)
-  }
-
-  // The document this line rests on, for the bibliography (lib/bibliography.typ, v0.99): the citation the record ends up carrying -- the `norm:` written here, else the one a var object of the export brought with it. ⚠️ Emitted **here**, before the context below, exactly as the registry's own update is: a state written inside a context is not read back by the folded chain an update function reads (section 3.3quinquies). ⚠️ And it follows the *record* and not the level: whether the clause is printed is a matter of level, whether the document is a source is not, so a value declared at level 0 and used by the formula under it still names its norm.
-  bib-note(if record == none { norm } else { record.at("norm", default: norm) })
-
-  // ⚠️ A name the var-domain does not hold stores nothing here rather than panicking: the function of a state update runs only where something reads that state, so a refusal written here would be silent in a document that never looks the registry up again (the finding `var-unit` records). The context below always runs, and is where it is refused.
-  if from-domain {
-    var-registry.update(d => {
-      let src = d.domains.at(source-domain, default: (:))
-      if key in src { summary-mark(var-store(d, key, var-record(key, none, src.at(key), none, label, descr, norm, norm-ref)), summary, key) } else { d }
-    })
-  } else {
-    var-registry.update(d => summary-mark(var-store(d, key, record), summary, key))
-  }
-  context {
-    let held = if not from-domain { record } else {
+  // **No value, no domain: the variable is printed again** (REQ-002), with what it was declared with; `unit:` converts it for this line alone, the registry keeping the unit it was declared in (Q-011).
+  let has-value = tail.filter(x => type(x) != str).len() > 0
+  if domain == none and not has-value {
+    if tail.len() > 0 { panic("var: " + repr(key) + " has a symbol but no value -- to print it in another unit, write unit: \"" + str(tail.first()) + "\"") }
+    var-registry.update(d => count-line-id(take-next(d), id))
+    context {
       let d = var-registry.get()
-      let declared = d.domains.keys().filter(k => k != "")
-      // A pair got here because the export has no such name, so its own list belongs in the refusal: the reader asked one question and both places have to answer it.
-      let carried = if not pair { "" } else {
-        source-label(domain.at(0), domain.at(1)) + " carries " + exported.keys().join(", ") + ", and "
+      refuse-twice("var", id, d)
+      let r = var-lookup(d, key)
+      if r == none {
+        let known = var-names(d)
+        panic("var: no variable named " + repr(key) + " -- " + (if known.len() == 0 { "none is declared yet" } else { "declared here: " + known.join(", ") }) + ". A value is written #var(\"" + key + "\", value)")
       }
-      let published = if not pair { "" } else {
-        " A polar moment publishes its forces where show-polar-moment has already run above this line (F_max, F_1 …, beta_1 …)."
+      let held = r
+      if unit != none {
+        let c = converted("var", r.at("symbol", default: key-symbol(key)), r.value, r.at("unit", default: ""), written-unit(unit))
+        held = held + (value: c.value, unit: c.unit, warning: c.warning)
       }
-      if not (source-domain in d.domains) {
-        panic("var: " + carried + "no var-domain " + repr(source-domain) + " is declared above this line -- "
-          + (if declared.len() == 0 { "none is" } else { "declared: " + declared.map(k => repr(k)).join(", ") })
-          + "." + (if pair { published } else { " A calculation of the export is named as a pair, (\"snow-load\", \"SL\")" }))
-      }
-      if not (key in d.domains.at(source-domain)) {
-        panic("var: " + carried + "the var-domain " + repr(source-domain) + " declares no " + repr(key)
-          + " -- it declares: " + d.domains.at(source-domain).keys().join(", ") + "." + published)
-      }
-      var-lookup(d, key)
+      if label != none { held.insert("label", label) }
+      if descr != none { held.insert("description", descr) }
+      if norm != none { held.insert("norm", norm) }
+      if norm != none or norm-ref != "" { held.insert("norm_ref", norm-ref) }
+      let inherited = r.at("shown", default: (:))
+      let fine = inherited + written
+      let st = if "style" in fine { fine.style } else { auto }
+      wc-meta((kind: "var", domain: var-current(d), key: key, value: held.value, unit: held.unit, symbol: held.symbol, from: none, stale: none, level: level, id: id, role: r.at("role", default: "data"), again: true))
+      var-line-print("var", held, fine.pairs().filter(((k, _)) => k != "style").to-dict(), level, d, resolve-style(st, d), none)
     }
-    let st = var-line-state.get()
-    check-sep-row("var", st, sep)
-    let lv = line-level(st, level)
-    // Level 0 and nothing else prints nothing: a declaration that belongs on no page says so with a level of its own, where until v0.85 it said it with `level: 1` and so vanished from the client report alone.
-    if lv >= 1 {
-      // joined by no-break spaces: inline, a variable is one word of its sentence, and a line ending on «a» with «= 2 m» on the next is what plain spaces allowed -- formula-number already keeps the number with its unit
-      let value = apply-style(style, [#eval(held.symbol, mode: "math")~=~#formula-number(held.value, held.unit, number-digits.get())])
-      let warning = unit-warning(held.at("warning", default: none))
-      if st == none and note == "line" {
-        // The label is set **on the line**, after the unit, and not as a footnote: a variable's label is what that variable *is*, so it is read with it (v0.61.1, the engineer's own correction). An em dash sets it apart, which is how a position's line (#member's at level 1) and show-connector print theirs. It still goes through render-prose, so a symbol written between dollars comes out as math (section 4bis).
-        // The label after an em dash, the description in a footnote: the first is what the variable *is* and is read with it (v0.61.1, the engineer's own correction), the second is why this value was chosen and is section 9's footnote. Neither is the other's level -- 2 and 3 (v0.85.2).
-        let extra = line-note(held, lv, with-label: false, with-norm: false)
-        let line = [
-          #value#if lv >= 2 and held.at("label", default: none) != none [ --- #render-prose(tl-str(held.label))]#if extra != none [#extra]
-        ]
-        // The citation stands in the right-hand column from level 3 and not before: one scale for the three commands that print a single value -- 1 the value, 2 what it is, 3 where it comes from (v0.85.1, the engineer's rule). Until then it was printed at every level, so a client report carried «SIA 265 §6.2.1» beside a bare number and nothing saying what the number was.
-        let cite = if lv >= 3 and held.norm != none { held } else { none }
-        annotated-rows(((line, cite),))
-        if warning != none { warning }
+  } else {
+
+    // `domain:` says where the value is read and hands it over as if it had been written positionally (v0.85): `#var("R_d", domain: ("connector", "SD-10"))` and `#var("R_d", var-of("connector", "SD-10", "R_d"))` store the same record, which is what makes the two spellings one command rather than two.
+    //
+    // ⚠️ The two shapes are read in different places, and that is why a string runs a path of its own below. A **pair** is the export: a plain json read, so it can be made here and turned into a positional like any other value. A **string** is a domain of the report, which lives in the registry -- a state, which nothing outside a context may read -- so its record is built **inside the update**, which is handed the dictionary itself, exactly as `#eq` computes its answer there; the line then prints what it reads back.
+    // ⚠️ A value written **beside** `domain:` is a literal checked by it (spec 2026-10-15-calculs-deplies-balises-figures-natives, REQ-001): the value written is the one printed and computed with, and the one `domain:` reads is compared with it -- the same, nothing more; another, the value printed in red with the one the export now holds. `own: true` says the value is the engineer's own over the one `domain:` names: printed in orange, never stale.
+    let controlled = domain != none and tail.len() > 0
+    let pair = domain != none and value-type(domain) == array
+    if domain != none and not pair and value-type(domain) != str {
+      panic("var: domain: is a domain of the report (\"Gelenkige Verbindung\") or a calculation and its instance ((\"snow-load\", \"SL\")) -- got " + repr(domain))
+    }
+    if pair and domain.len() != 2 {
+      panic("var: domain: names a calculation and its instance, two of them ((\"snow-load\", \"SL\")) -- got " + repr(domain))
+    }
+    let exported = if pair { find-calculation("var", domain.at(0), domain.at(1)).vars } else { (:) }
+    // ⚠️ A pair the export does not carry falls back to the **domain named after its instance** (v0.85), which is where `show-polar-moment` publishes the forces it computed (section 3.3quinquies) -- and which `find` already lists under that very pair. The export wins a name both carry, being the traced one.
+    let named-domain = (domain != none and not pair) or (pair and not (key in exported))
+    // `from-domain`: the value is read from a domain of the report; `checked-domain`: the value is written, and a domain holds what it is checked against
+    let from-domain = named-domain and not controlled
+    let checked-domain = named-domain and controlled
+    let source-domain = if pair { domain.at(1) } else { domain }
+    let pos = if domain == none or from-domain or controlled { tail } else { (exported.at(key),) }
+    let record = if from-domain { none } else {
+      // The first of them is the printed symbol when it is a string: a *value* is a number or a var object, never a string, so the two can never be confused. `none` here means "not stated", and var-record then takes the symbol the value brought with it, or the key.
+      let has-symbol = type(pos.at(0)) == str
+      let symbol = if has-symbol { pos.at(0) } else { none }
+      let after = if has-symbol { pos.slice(1) } else { pos }
+      assert(after.len() >= 1, message: "var: `" + key + "` has a symbol but no value")
+      // a var object carries its own symbol, and then the key is never printed
+      if not has-symbol and not (type(after.at(0)) == dictionary and "symbol" in after.at(0)) { check-printable-key("var", key) }
+      // A literal checked against the export keeps everything the export's var carries -- its symbol, label, citation and `source` -- but the value and the unit, which are the ones written.
+      let ref = if controlled and pair and key in exported { exported.at(key) } else { none }
+      if type(ref) == dictionary and (type(after.at(0)) == int or type(after.at(0)) == float) {
+        let given-unit = after.at(1, default: none)
+        var-record(key, symbol, ref + (value: after.at(0), unit: if given-unit == none { "" } else { written-unit(given-unit) }), none, label, descr, norm, norm-ref)
       } else {
-        // Inline, which is the default since v0.87 (the engineer: «de base, #var doit s'afficher inline, afin de pouvoir afficher plusieurs var les uns après les autres») and what a row has always been: there is no em dash to hang the label on and no column for the citation, so both go into the one footnote `line-note` builds, with the description between them.
-        let item = inline-item(value, line-note(held, lv), warning)
-        if st == none { item + sep-after(sep) } else { line-item(st, item) }
+        var-record(key, symbol, after.at(0), after.at(1, default: none), label, descr, norm, norm-ref)
       }
     }
+
+    // The document this line rests on, for the bibliography (lib/bibliography.typ, v0.99): the citation the record ends up carrying -- the `norm:` written here, else the one a var object of the export brought with it. ⚠️ Emitted **here**, before the context below, exactly as the registry's own update is: a state written inside a context is not read back by the folded chain an update function reads (section 3.3quinquies). ⚠️ And it follows the *record* and not the level: whether the clause is printed is a matter of level, whether the document is a source is not, so a value declared at level 0 and used by the formula under it still names its norm.
+    bib-note(if record == none { norm } else { record.at("norm", default: norm) })
+
+    // A literal checked against the export: the comparison needs no state, so it is made here; the record keeps the export's provenance (`source`), the value being the one written.
+    let exported-ref = if controlled and not named-domain { exported.at(key) } else { none }
+    let stale-now = if exported-ref == none { none } else { literal-stale(record, if type(exported-ref) == dictionary { exported-ref } else { (value: exported-ref, unit: "") }) }
+
+    // What a line stores beside its value (REQ-002, REQ-010): its role, resolved against the `#calc-defaults` in force, and the fine arguments it was written with, which a line printing it again takes.
+    let with-role(d, r) = r + (role: resolve-role("var", role, d), shown: shown)
+    // ⚠️ A name the domain does not hold stores nothing here rather than panicking: the function of a state update runs only where something reads that state, so a refusal written here would be silent in a document that never looks the registry up again (the finding `var-unit` records). The context below always runs, and is where it is refused.
+    if from-domain {
+      var-registry.update(d => {
+        let src = d.domains.at(source-domain, default: (:))
+        let d = if key in src { var-store(d, key, with-role(d, var-record(key, none, src.at(key), none, label, descr, norm, norm-ref))) } else { d }
+        count-line-id(take-next(d), id)
+      })
+    } else if checked-domain {
+      // the value a domain holds is read **before** the literal is stored, which may land in that very domain, and kept beside it for the context below
+      var-registry.update(d => {
+        let src = d.domains.at(source-domain, default: (:))
+        let against = src.at(key, default: none)
+        count-line-id(take-next(var-store(d, key, with-role(d, record) + (checked_against: against))), id)
+      })
+    } else {
+      var-registry.update(d => count-line-id(take-next(var-store(d, key, with-role(d, record))), id))
+    }
+    context {
+      let d = var-registry.get()
+      refuse-twice("var", id, d)
+      let held = if not from-domain and not checked-domain { record } else {
+        let declared = d.domains.keys().filter(k => k != "")
+        // A pair got here because the export has no such name, so its own list belongs in the refusal: the reader asked one question and both places have to answer it.
+        let carried = if not pair { "" } else {
+          source-label(domain.at(0), domain.at(1)) + " carries " + exported.keys().join(", ") + ", and "
+        }
+        let published = if not pair { "" } else {
+          " A polar moment publishes its forces where show-polar-moment has already run above this line (F_max, F_1 …, beta_1 …)."
+        }
+        if not (source-domain in d.domains) {
+          panic("var: " + carried + "no domain " + repr(source-domain) + " is declared above this line -- "
+            + (if declared.len() == 0 { "none is" } else { "declared: " + declared.map(k => repr(k)).join(", ") })
+            + "." + (if pair { published } else { " A calculation of the export is named as a pair, (\"snow-load\", \"SL\")" }))
+        }
+        if not (key in d.domains.at(source-domain)) {
+          panic("var: " + carried + "the domain " + repr(source-domain) + " declares no " + repr(key)
+            + " -- it declares: " + d.domains.at(source-domain).keys().join(", ") + "." + published)
+        }
+        var-lookup(d, key)
+      }
+      let stale = if checked-domain {
+        let against = held.at("checked_against", default: none)
+        if against == none { none } else { literal-stale(held, against) }
+      } else { stale-now }
+      wc-meta((kind: "var", domain: var-current(d), key: key, value: held.value, unit: held.unit, symbol: held.symbol, from: domain, stale: stale, level: level, id: id, role: (var-lookup(d, key) + (:)).at("role", default: "data")))
+      var-line-print("var", held, written, level, d, resolve-style(style, d), stale)
+    }
+
   }
 }
 
-/// Converts a variable already declared into another unit, and prints it as `#var` does: `#var-unit("R", "N")` turns the 7 kN it holds into 7000 N, inline.
-///
-/// ```typ
-/// #var("F", 7, "kN")
-///
-/// #var-unit("F", "N")
-/// ```
-///
-/// ```typ
-/// #var("A", 0.12, "m²")
-///
-/// #var-unit("A", "mm²")
-/// ```
-///
-/// A value taken out of the export, carried into the unit the report wants to print it in -- the polar moment is exported in mm² and read in cm²:
-///
-/// ```typ
-/// #var("I_p", var-of("connection", "VU-MP-1", "I_p"))
-///
-/// #var-unit("I_p", "cm²")
-/// ```
-///
-/// At `level: 0` the conversion is made and nothing is printed, so that the lines below read the variable in its new unit:
-///
-/// ```typ
-/// #var("F", 7, "kN", level: 0)
-/// #var-unit("F", "N", level: 0)
-/// Die Kraft beträgt #val("F", type: "expression").
-/// ```
-///
-/// Its line being `#var`'s, it takes `#var`'s `style:` too -- the whole of it set bold, underlined or ruled twice:
-///
-/// ```typ
-/// #var("F", 7, "kN", level: 0)
-///
-/// #var-unit("F", "N", style: "bold")
-/// ```
-///
-/// It prints, which is why it is called `var-unit` and not `change-unit`: its line is `#var`'s line, inline and with one footnote unless `note: "line"` says otherwise, and the two read as one pair. From here on every formula that names it substitutes the new unit, and `#val` gives it.
-///
-/// Its `label:`, `descr:`, `norm:` and `norm-ref:` are `#var`'s: given, they **override** what the variable carries -- stored with it, so every line below reads them too -- and they are printed by the same levels, in the one footnote or, with `note: "line"`, on the line:
-///
-/// ```typ
-/// #var("I_p", var-of("connection", "VU-MP-1", "I_p"), level: 0)
-/// #var-unit("I_p", "cm²", label: "Polares Trägheitsmoment", descr: "In cm² für den Vergleich mit dem Handbuch", norm: "bauforumstahl", level: 3)
-/// ```
-///
-/// A unit of another dimension leaves the variable exactly as it was and says so in red beside it, as `#eq` does with an unreachable `unit:` -- a conversion nobody can perform is a disagreement to read, not a build to stop. A unit that cannot be *read*, and a name the registry does not hold, do stop it.
-/// - key (str): the variable's name, as `#var` stored it.
-/// - unit (str): the unit to carry it into. The same dimension, or the line comes out red.
-/// - label (str, none): what the value is, printed from level 2 as `#var` prints it. It **overrides** the label the variable carries, and is stored with it.
-/// - descr (str, none): why *this* value was chosen, printed from level 3 as `#var` prints it. It overrides the description the variable carries, and is stored with it.
-/// - level (int, auto): as `#var`: 0 prints nothing (the conversion still happens), 1 the line, 2 also the label, 3 also the description and the citation.
-/// - norm (str, none), norm-ref (str): the citation, printed from level 3: in the footnote, or with `note: "line"` in the right-hand column. They override the citation the variable carries; `norm-ref:` given alone replaces the clause and keeps the norm.
-/// - style (str, none): a math function applied to the **whole line**, `symbol = value unit` -- `"bold"`, `"underline"` -- or `"double"`, which rules it twice underneath in the document's own ink, the mark `verify` sets a relation with, for a value a section rests on. `#eq`'s own argument (v0.100); ⚠️ a line it is given is set with math's own spacing around its `=`, a little wider than a line without it.
-/// - note (str): as `#var`: `"footnote"` (the default) inline, the label, the description and the citation in one footnote; `"line"` on a line of its own, the label after an em dash, the description a footnote and the citation in the right-hand column. No effect inside a `var-line`.
-/// - sep (str, none): as `#var`: the separator printed after the line when it is printed inline, hidden with it by its level; refused with `note: "line"` and inside a `var-line`.
-/// -> content
-#let var-unit(key, unit, label: none, descr: none, level: auto, norm: none, norm-ref: "", note: "footnote", sep: none, style: none) = {
-  check-key("var-unit", key)
-  check-level("var-unit", level)
-  check-note("var-unit", note)
-  check-sep("var-unit", sep, note)
-  let unit = written-unit(unit)
-  assert(type(unit) == str, message: "var-unit: the unit of `" + key + "` must be a string, got " + repr(unit))
-  // read here rather than inside the update: an argument that is not a unit at all is a typo, and a typo must be refused where it is written
-  assert(parse-unit(unit) != none, message: "var-unit: cannot read the unit " + repr(unit) + " of `" + key
-    + "` -- write it as the report writes one, `kN`, `N/mm²`, `kNm`")
+#let eq-argument-names = ("name-calc", "name-visible", "equation", "unit", "as-unit", "value", "display-formula", "display-equation", "style", "role", "label", "label-position", "descr", "descr-position", "norm", "norm-section", "norm-position", "id", "level")
 
-  // the citation this conversion states, for the bibliography -- before the update, as `var`'s is (lib/bibliography.typ, v0.99). The one the variable already carries was registered where it was declared.
-  bib-note(norm)
-
-  var-registry.update(d => {
-    // written back **where the name lives** -- the current domain, or the default one it falls back to -- rather than into whichever domain happens to be open, which would shadow the variable instead of converting it
-    let here = var-current(d)
-    let dom = if here in d.domains and key in d.domains.at(here) { here } else if "" in d.domains and key in d.domains.at("") { "" } else { none }
-    // a name the registry does not hold is refused in the `context` below, which is reached at every level. ⚠️ Here it would not be: the function of a `state.update` runs only where something reads that state, so a panic written here is silent in a document that never looks the registry up again -- which is exactly the document a mistyped name produces.
-    if dom == none { return d }
-    let r = d.domains.at(dom).at(key)
-    let c = converted("var-unit", r.at("symbol", default: key-symbol(key)), r.value, r.at("unit", default: ""), unit)
-    let out = r
-    out.insert("value", c.value)
-    out.insert("unit", c.unit)
-    out.insert("warning", c.warning)
-    // What the call states overrides what the variable carries, field by field and stored with it, as `#var` stores its own (var-record): a conversion is a new declaration of the same variable, and the lines below -- a `#val`, a `#find` -- read the label it was given here.
-    if label != none { out.insert("label", label) }
-    if descr != none { out.insert("description", descr) }
-    if norm != none { out.insert("norm", norm) }
-    // `norm-ref:` alone replaces the clause and keeps the norm, as on `#var` (v0.86)
-    if norm != none or norm-ref != "" { out.insert("norm_ref", norm-ref) }
-    let bucket = d.domains.at(dom)
-    bucket.insert(key, out)
-    d.domains.insert(dom, bucket)
-    d
-  })
-
-  context {
-    // the registry is read at **every** level, so that an unknown name is refused whatever the report is compiled at -- and so that the update above is resolved at all
-    let d = var-registry.get()
-    let r = var-lookup(d, key)
-    if r == none {
-      let known = var-names(d)
-      panic("var-unit: no variable named " + repr(key) + " -- "
-        + (if known.len() == 0 { "none is declared yet" } else { "declared here: " + known.join(", ") }))
-    }
-    let st = var-line-state.get()
-    check-sep-row("var-unit", st, sep)
-    let lv = line-level(st, level)
-    if lv >= 1 {
-      let value = apply-style(style, [#eval(r.at("symbol", default: key-symbol(key)), mode: "math")~=~#formula-number(r.value, r.unit, number-digits.get())])
-      let warning = unit-warning(r.at("warning", default: none))
-      if st == none and note == "line" {
-        let extra = line-note(r, lv, with-label: false, with-norm: false)
-        let line = [
-          #value#if lv >= 2 and r.at("label", default: none) != none [ --- #render-prose(tl-str(r.label))]#if extra != none [#extra]
-        ]
-        annotated-rows(((line, if lv >= 3 and r.at("norm", default: none) != none { r } else { none }),))
-        if warning != none { warning }
-      } else {
-        let item = inline-item(value, line-note(r, lv), warning)
-        if st == none { item + sep-after(sep) } else { line-item(st, item) }
-      }
-    }
-  }
+// A formula with its numbers put in and their units left out -- what `display-formula: "value"` prints (REQ-001): `formula-lines`'s numbers, each a bare number.
+#let formula-bare(src, operands) = {
+  let coded = src
+  for (i, o) in operands.enumerate() { coded = replace-word(coded, o.key, placeholder(i)) }
+  for (short, long) in formula-display-names { coded = replace-word(coded, short, long) }
+  for (i, o) in operands.enumerate() { coded = coded.replace(placeholder(i), substituted(o.value, "")) }
+  coded
 }
 
-#let eq-argument-names = ("style", "label", "descr", "norm", "norm-ref", "unit", "level", "value", "note", "sep", "summary")
-
-/// A calculation written by hand: the formula in letters, the same formula with the numbers and their units put in, and the answer -- **computed from the formula**, with its units checked. The result is stored under `key`, so the next line names it without redeclaring anything.
+/// A calculation written by hand: the formula in letters, the same formula with the numbers and their units put in, and the answer -- **computed from the formula**, with its units checked. The result is stored under its name, so the next line names it without redeclaring anything.
 ///
 /// ```typ
 /// #var("R_k", 7, "kN")
 /// #var("k_dens", 0.806, level: 0)
 /// #var("eta_w", 0.8, level: 0)
 /// #var("gamma_M", 1.7, level: 0)
-/// #eq("R_d", `k_dens dot eta_w / gamma_M dot R_k`, style: "bold", norm: "Sherpa", norm-ref: "ETA-12/0197")
+/// #eq("R_d", `k_dens dot eta_w / gamma_M dot R_k`, style: "bold", norm: "Sherpa", norm-section: "ETA-12/0197")
 /// ```
 ///
 /// The answer a section ends on, ruled twice as `verify` rules a relation:
@@ -1433,13 +1569,16 @@
 /// #eq("F", `M_Ed / a`, style: "double")
 /// ```
 ///
+/// **What is printed** is two fine arguments (spec 2026-10-21-commandes-typst-refonte, Q-001): `display-equation` the name and the answer -- `"variable"` the symbol, `"value"` the bare number, `"value-unit"` the number and its unit, `"variable-value-unit"` both --, `display-formula` the formula between them -- `"variable"` in letters, `"value"` with the numbers put in, `"value-unit"` with the numbers and their units, `"variable-value-unit"` the letters then the numbers. The line is `name = formula = answer`, every part left out skipped:
+///
 /// ```typ
-/// #var("M_Ed", 0.275, "kNm")
-/// #var("a", 135, "mm")
-/// #eq("F_Ed", `M_Ed / a`)
+/// #var("N_d", 50, "kN", level: 0)
+/// #var("A", 56000, "mm²", level: 0)
+/// #eq("sigma", `N_d / A`, display-formula: "variable-value-unit", display-equation: "variable-value-unit")
+/// #eq("sigma2", "sigma", `N_d / A`, display-formula: "variable", display-equation: "variable")
 /// ```
 ///
-/// At `level: 0` the answer is computed, checked and stored, and nothing is printed -- an intermediate value the next line names:
+/// At `level: 0` -- both `"none"` -- the answer is computed, checked and stored, and nothing is printed: an intermediate value the next line names.
 ///
 /// ```typ
 /// #var("b", 100, "mm", level: 0)
@@ -1449,6 +1588,14 @@
 /// #eq("sigma", `N / A`)
 /// ```
 ///
+/// `unit:` converts the answer into another unit of its dimension; `as-unit:` gives the answer **another unit without converting it** -- the number kept, the unit replaced, as the engineer asked for a factor whose unit the formula cannot carry (REQ-003): Woodcore says so beside the domain in its window (Q-004).
+///
+/// ```typ
+/// #var("M_d", 4.2, "kNm", level: 0)
+/// #eq("M_N", `M_d`, unit: "Nmm")
+/// #eq("q_d", `M_d / (100 "mm")`, as-unit: "kN/m")
+/// ```
+///
 /// A `*` is a product, printed as `·`, and a word math does not know may stand in the symbol without its quotes -- `G_(1,Ed)` for `G_(1,"Ed")`:
 ///
 /// ```typ
@@ -1456,54 +1603,72 @@
 /// #eq("G_1_Ed", "G_(1,Ed)", `1.35 * g_k`, unit: "kN/m²")
 /// ```
 ///
-/// It is printed **inline** by default, as `#var` is (v0.117, issue #19): one word of its sentence, so it may follow a `#var` on the same line, with its label, its description and its citation gathered into one footnote on the answer. `note: "line"` sets it on a line of its own -- the label after the answer, the description as a footnote, the citation in the right-hand column:
+/// It is printed **inline**, as `#var` is: one word of its sentence, so it may follow a `#var` on the same line -- a blank line before and after sets it as a paragraph of its own. Its label, description and citation go where their positions say, as `#var`'s:
 ///
 /// ```typ
 /// #var("R_k", 7, "kN", level: 0)
-/// Mit #var("gamma_M", 1.7, "") wird #eq("R_d", `R_k / gamma_M`, label: "Bemessungswert", norm: "SIA 265", norm-ref: "2.2.5", level: 3).
-/// #eq("R_d2", "R_(d,2)", `R_k / 1.7`, label: "Bemessungswert", descr: "Mit $gamma_M = 1.7$", norm: "SIA 265", norm-ref: "2.2.5", note: "line", level: 3)
+/// Mit #var("gamma_M", 1.7, "") wird #eq("R_d", `R_k / gamma_M`, label: "Bemessungswert", norm: "SIA 265", norm-section: "2.2.5", level: 3).
+///
+/// #eq("R_d2", "R_(d,2)", `R_k / 1.7`, label: "Bemessungswert", label-position: "before", norm: "SIA 265", norm-section: "2.2.5", norm-position: "line-right", level: 3)
 /// ```
 ///
-/// The formula names the **keys of the registry** and nothing else -- there is no `where:`, and a name the registry does not hold stops the compile saying which names it does hold. A key that is the beginning of another (`F` and `F_Ed`) is safe: the longest is substituted first, and only whole words are.
+/// The formula names the **keys of the registry** and literals, a literal taking its unit in quotes -- `(100 "mm")` --, and nothing else: a name the registry does not hold stops the compile saying which names it does hold. A key that is the beginning of another (`F` and `F_Ed`) is safe: the longest is substituted first, and only whole words are.
 ///
-/// **The units are algebra, not decoration.** Each operand's unit is parsed into dimensions, the formula's operations propagate them, and the answer comes out in the unit `unit:` declares -- or, left to itself, in the one unit the table names for that dimension, which `#unit` sets. `M_Ed / a`, kNm over mm, comes to kN with no conversion factor typed in by hand. A sum whose sides have different dimensions, a `sqrt` of an odd power, an unreadable unit, an answer given with `value:` that the formula contradicts: each stops the compile naming both sides. A declared unit the formula cannot *reach* does not: the answer is printed in the unit the operands were written in, with a red line naming both (v0.63). A *dimensionless* mistake it cannot catch -- 1000 is a valid factor -- which is why the substituted line is printed.
+/// **The units are algebra, not decoration.** Each operand's unit is parsed into dimensions, the formula's operations propagate them, and the answer comes out in the unit `unit:` declares -- or, left to itself, in the one unit the table names for that dimension, which `#unit` sets. A sum whose sides have different dimensions, a `sqrt` of an odd power, an unreadable unit, an answer given with `value:` that the formula contradicts: each stops the compile naming both sides. A declared unit the formula cannot *reach* does not: the answer is printed in the unit the operands were written in, with a red line naming both.
 ///
 /// **What cannot be computed is still printed.** An integral, a derivative: the formula displays exactly as written, and `value:` gives the answer. Nothing is verified then.
-/// - key (str): the name the result is stored under, and printed as where no symbol is given -- as `#var` prints a key, `M2` as M and 2.
-/// - ..rest (any): the positional tail, whose two slots are the bullets below -- the optional printed symbol, then the formula. Variadic only because Typst has no optional positionals; every *named* argument is declared, so an editor shows them all.
-/// - symbol (str): optional second positional argument, the math source printed in the key's place. A word math does not know may be written without its quotes, `"G_(1,Ed)"`.
-/// - formula (content, str): the formula, in Typst math source naming the registry's keys. A raw block -- `` `M / a` `` -- saves escaping every quote, and is the expected form. `*` multiplies, as `dot` does, and is printed as it. A literal takes its unit in quotes, `(3 "m")`, and what is quoted is never read as a name: `(3 "m")` is three metres even where a variable `m` is declared.
-/// - unit (str, auto): the unit of the answer. auto takes the one the table names for that dimension (`#unit` sets it); `""` asserts it is dimensionless. A unit of another dimension prints the answer in the operands' own units, with a red line.
-/// - style (str, none): a math function applied to the answer -- `"bold"`, `"underline"` -- or `"double"`, which rules the answer twice underneath, in the document's own ink: the mark `verify` sets a relation with, drawn the same way and at the same weight, for a result a section ends on.
-/// - label (str, none): what the answer is, printed from level 2 -- in the answer's footnote, inline (the default) or in a `var-line`, and after it, set apart by an em dash, with `note: "line"`. `#var`'s own `label:`, on the command that computes rather than declares.
-/// - descr (str, none): why the answer is what it is -- an assumption, a branch taken -- printed as a footnote from level 3, as `#var`'s is.
-/// - level (int, auto): 0 prints nothing (the answer is still computed, checked and stored), 1 the symbol and the answer, 2 also the formula in letters and the label, 3 also the formula in numbers, the description and the citation. auto follows the report.
-/// - norm (str, none), norm-ref (str): the citation, from level 3: in the answer's footnote, or in the right-hand column with `note: "line"`.
+/// - ..rest (any): the positional arguments -- the name, the optional printed symbol, then the formula, in that order. Variadic only because Typst has no optional positionals; every *named* argument is declared, so an editor shows them all.
+/// - key (str): the name the result is stored under -- the first positional, or `name-calc:` -- and printed as where no symbol is given, as `#var` prints a key.
+/// - symbol (str): optional second positional argument, or `name-visible:`, the math source printed in the key's place.
+/// - formula (content, str): the formula -- the last positional, or `equation:` --, in Typst math source naming the registry's keys. A raw block -- `` `M / a` `` -- saves escaping every quote. `*` multiplies, as `dot` does. A literal takes its unit in quotes, `(3 "m")`, and what is quoted is never read as a name.
+/// - name-calc (str, none), name-visible (str, none), equation (content, str, none): the name, the symbol and the formula, written by name.
+/// - unit (str, auto): the unit of the answer, **converted** into. auto takes the one the table names for that dimension (`#unit` sets it); `""` asserts it is dimensionless. A unit of another dimension prints the answer in the operands' own units, with a red line.
+/// - as-unit (str, none): the unit the answer is **given without conversion** -- its number kept. Not with `unit:`.
 /// - value (int, float, auto): the answer, for a formula that cannot be evaluated.
-/// - note (str): how the formula is set. `"footnote"` (the default since v0.117, as `#var`'s) prints it inline, one word of its sentence, and gathers the label, the description and the citation into one footnote on the answer. `"line"` sets it on a line of its own: the label after the answer, the description as a footnote and the citation in the right-hand column -- the engine's own checks are set so. No effect inside a `var-line`, whose items take one footnote each.
-/// - sep (str, none): as `#var`: the separator printed after the answer when it is printed inline, hidden with it by its level; refused with `note: "line"` and inside a `var-line`.
-/// - summary (bool): lists the answer in a summary table, as `#var`'s own does -- **its unit decides which**: kN/m² an area load, kN/m a line load, any other unit refused naming the two, where the table is printed. It is what puts a line load the export does not carry into `show-line-load-summary`.
+/// - display-formula (str, auto): the formula between the name and the answer -- `"none"`, `"variable"`, `"value"`, `"value-unit"`, `"variable-value-unit"`. auto leaves it to the level.
+/// - display-equation (str, auto): the name and the answer -- `"none"`, `"variable"`, `"value"`, `"value-unit"`, `"variable-value-unit"`. auto leaves it to the level.
+/// - style (str, auto): `"normal"`, `"bold"`, `"underline"` or `"double"`, applied to the answer.
+/// - role (str, auto): `"data"`, `"compute"` (the default of `#eq`) or `"result"`, which `#var-table` lists by.
+/// - label (str, none), label-position (str, auto): what the answer is, and where: `"none"`, `"before"`, `"after"`, `"footnote"` -- the footnote from level 2 where auto.
+/// - descr (str, none), descr-position (str, auto): why the answer is what it is, and where: `"none"`, `"after"`, `"footnote"` -- the footnote from level 3 where auto.
+/// - norm (str, none), norm-section (str, none), norm-position (str, auto): the citation, and where: `"none"`, `"in-line"`, `"line-right"`, `"footnote"` -- the footnote from level 3 where auto.
+/// - id (str, none): the name the line is found by, once per domain for `#var`, `#eq` and `#verify` together.
+/// - level (int, auto): a preset of the fine arguments -- 0 nothing, 1 the symbol and the answer, 2 also the formula in letters and the label, 3 also the formula in numbers, the description and the citation (`lib/display-presets.json`) --, which an argument written overrides.
+/// - norm-ref (str): written before `norm-section:`, which it is.
 /// -> content
-#let eq(key, ..rest, unit: auto, style: none, label: none, descr: none, level: auto, norm: none, norm-ref: "", value: auto, note: "footnote", sep: none, summary: false) = {
-  // ⚠️ Declared one by one rather than swept into `..args`: a tooltip on a sink signature reads `eq(args: arguments) -> any` and says nothing about `unit:`, which is how this was found (v0.63.1). Only the positional tail stays variadic — the printed symbol is an optional second positional, and Typst has no optional positionals.
+#let eq(..rest, name-calc: none, name-visible: none, equation: none, unit: auto, as-unit: none, value: auto, display-formula: auto, display-equation: auto, style: auto, role: auto, label: none, label-position: auto, descr: none, descr-position: auto, norm: none, norm-section: none, norm-ref: "", norm-position: auto, id: none, level: auto) = {
+  // ⚠️ Declared one by one rather than swept into `..args`: a tooltip on a sink signature reads `eq(args: arguments) -> any` and says nothing about `unit:`, which is how this was found (v0.63.1). Only the positional tail stays variadic.
   let unknown = rest.named().keys()
   if unknown.len() > 0 {
     panic("eq: unknown argument " + repr(unknown.first())
       + " -- " + eq-argument-names.map(n => repr(n)).join(", "))
   }
+  let pos = rest.pos()
+  if name-calc == none and pos.len() == 0 { panic("eq: write #eq(\"key\", `formula`) -- the name first, or name-calc:") }
+  let key = if name-calc != none { name-calc } else { pos.first() }
+  let tail = if name-calc != none { pos } else { pos.slice(1) }
+  if name-visible != none { tail = (name-visible,) + tail }
+  if equation != none { tail.push(equation) }
   check-key("eq", key)
   check-level("eq", level)
-  check-note("eq", note)
-  check-sep("eq", sep, note)
+  check-line-id("eq", id)
+  if norm-section != none and norm-ref != "" { panic("eq: norm-section: and norm-ref: are one argument -- write norm-section: alone") }
+  let norm-ref = if norm-section != none { norm-section } else { norm-ref }
+  let written = written-fine("eq", (display-formula: display-formula, display-equation: display-equation, label-position: label-position, descr-position: descr-position, norm-position: norm-position))
+  // `style: none` was the default until the fine arguments, and is still the plain answer
+  let style = if style == none { "normal" } else { style }
+  check-fine("eq", "style", style)
+  check-fine("eq", "role", role)
+  if as-unit != none and unit != auto { panic("eq: unit: converts the answer and as-unit: gives it another unit without converting it -- write one of the two") }
+  if as-unit != none and (type(as-unit) != str or parse-unit(written-unit(as-unit)) == none) { panic("eq: as-unit: is a unit the report can read, `kN/m`, `Nmm` -- got " + repr(as-unit)) }
 
-  let pos = rest.pos()
-  // ⚠️ The unit is named and cannot be a third positional, where `var`'s is the last one: a formula may be written as a string (`#eq("N_Ed", "N - N_gunstig")`), so with two positionals a unit and a formula are the same shape and nothing could tell `#eq("eta", "F/R", "%")` from a symbol and a formula. `var` has no such trouble -- a value is a number or a var object, never a string. So the message names `unit:` rather than leaving it to be found.
-  assert(pos.len() >= 1 and pos.len() <= 2,
+  // ⚠️ The unit is named and cannot be a third positional, where `var`'s is the last one: a formula may be written as a string (`#eq("N_Ed", "N - N_gunstig")`), so with two positionals a unit and a formula are the same shape and nothing could tell `#eq("eta", "F/R", "%")` from a symbol and a formula. So the message names `unit:` rather than leaving it to be found.
+  assert(tail.len() >= 1 and tail.len() <= 2,
     message: "eq: write #eq(\"key\", `formula`), or #eq(\"key\", \"symbol\", `formula`) -- the unit is a named argument, #eq(..., unit: \"%\"), a formula being written as a string too")
-  let has-symbol = pos.len() == 2
+  let has-symbol = tail.len() == 2
   if not has-symbol { check-printable-key("eq", key) }
-  let symbol = if has-symbol { quoted-words(pos.at(0)) } else { key-symbol(key) }
-  let formula = pos.at(if has-symbol { 1 } else { 0 })
+  let symbol = if has-symbol { quoted-words(tail.at(0)) } else { key-symbol(key) }
+  let formula = tail.at(if has-symbol { 1 } else { 0 })
   // a `*` is a product, printed as `dot` (star-as-dot)
   let src = star-as-dot(if type(formula) == str { formula } else { formula.text })
 
@@ -1531,92 +1696,110 @@
       panic("eq: " + symbol + " cannot be computed from its formula -- an operation this evaluator does not "
         + "read (an integral, a derivative). Give the answer with value:, which prints it without checking it")
     }
-    summary-mark(var-store(d, key, (
+    // `as-unit:` keeps the number and gives it the unit written, with no conversion (REQ-003): what the line computed in is kept beside it, for the window to say (Q-004)
+    let answer = if as-unit == none { answer } else { (value: answer.value, unit: written-unit(as-unit), as_unit_from: answer.unit) }
+    // a unit `#unit(scope: "next")` set for this dimension is spent by the first answer of it (REQ-005)
+    let d = if got.result == none { d } else { spend-next-unit(d, got.result.dims) }
+    count-line-id(take-next(var-store(d, key, (
       value: answer.value, unit: answer.unit, symbol: symbol,
-      warning: answer.at("warning", default: none),
+      warning: answer.at("warning", default: none), as_unit_from: answer.at("as_unit_from", default: none),
       label: label, description: descr, norm: norm, norm_ref: norm-ref, source: none,
-    )), summary, key)
+      role: resolve-role("eq", role, d), shown: written + (if style != auto { (style: style) } else { (:) }),
+    ))), id)
   })
 
   context {
     let d = var-registry.get()
+    refuse-twice("eq", id, d)
     let r = var-lookup(d, key)
-    let st = var-line-state.get()
-    check-sep-row("eq", st, sep)
-    let lv = line-level(st, level)
-    let digits = number-digits.get()
+    wc-meta((kind: "eq", domain: var-current(d), key: key, value: r.value, unit: r.unit, symbol: r.symbol, formula: src, level: level, id: id, role: r.at("role", default: "compute"), as_unit_from: r.at("as_unit_from", default: none)))
     // The result itself is in the registry by now; it is not one of its own operands.
     let operands = formula-operands(d, src).filter(o => o.key != key)
-    let (letters, numbers) = formula-lines(src, operands, digits)
+    let (letters, numbers) = formula-lines(src, operands)
+    let style = resolve-style(style, d)
 
-    let tail = fmt-magnitude(r.value, digits) + (if r.unit == "" { "" } else { " \"" + r.unit + "\"" })
-    // `style` is spliced into the math **source** and evaluated with the rest of the chain, which is what lets it name any math function -- `bold`, `underline` -- without this file knowing one of them. A double rule is not a math function at all but two nested boxes (verify, below), so it is handed to the same eval through its `scope`: one equation still, so the spacing around every `=` stays math's own, where a box concatenated after the equation would have carried text spacing into it.
-    if style != none { tail = (if style == "double" { "dbl" } else { style }) + "(" + tail + ")" }
+    let tail = display-source(r.value) + (if r.unit == "" { "" } else { " \"" + r.unit + "\"" })
+    // `style` is spliced into the math **source** and evaluated with the rest of the chain, which is what lets it name any math function -- `bold`, `underline` -- without this file knowing one of them. A double rule is not a math function at all but two nested boxes (verify, below), so it is handed to the same eval through its `scope`: one equation still, so the spacing around every `=` stays math's own.
+    let styled(x) = if style != none { (if style == "double" { "dbl" } else { style }) + "(" + x + ")" } else { x }
 
-    let parts = (symbol,)
-    if lv >= 2 { parts.push(letters) }
-    // left out where nothing was substituted -- an integral would otherwise be printed twice over
-    if lv >= 3 and numbers != letters { parts.push(numbers) }
-    parts.push(tail)
+    // The parts the line is made of, by its fine arguments (Q-001): the name, the formula, the answer.
+    let parts = ()
+    let rd = resolve-display("eq", written, level, d)
+    let s = rd.settings
+    let blocked = rd.family == "block"
+    let df = s.at("display-formula")
+    let de = s.at("display-equation")
+    if de in ("variable", "variable-value-unit") { parts.push(symbol) }
+    if df == "variable" { parts.push(letters) }
+    else if df == "value" { parts.push(formula-bare(src, operands)) }
+    else if df == "value-unit" { parts.push(numbers) }
+    else if df == "variable-value-unit" {
+      parts.push(letters)
+      // left out where nothing was substituted -- an integral would otherwise be printed twice over
+      if numbers != letters { parts.push(numbers) }
+    }
+    if de == "value" { parts.push(styled(display-source(r.value))) }
+    else if de in ("value-unit", "variable-value-unit") { parts.push(styled(tail)) }
 
-    let cite = if lv >= 3 and norm != none { (norm: norm, norm_ref: norm-ref) } else { none }
     // The double rule is `double-rule` above, one place for the three commands that draw one (v0.100); it is handed to the eval through its `scope` because it is not a math function at all but two nested boxes.
     let dbl = double-rule
-    let body = eval(parts.join(" = "), mode: "math", scope: (dbl: dbl))
-    // The same statement stacked at its `=` signs, for a line too wide for its row (annotated-rows, formula-chain): `symbol = <letters>`, then `= <numbers>` and `= <answer>` under it -- together where the width holds them, each on its own where it does not -- each `=` under the first, a display fraction being one atom that no line break can enter. `after` is what the line ends on, its label or its footnote, set after the answer on the last line. A line of one `=` has nothing to stack and stays one line.
-    let chained(line, after) = {
+    // a line with nothing to show -- level 0, both displays "none" -- is computed and checked all the same, and builds nothing
+    let body = if parts.len() == 0 { none } else { math-eval(parts.join(" = "), scope: (dbl: dbl)) }
+    // The same statement stacked at its `=` signs, for a line too wide for its row (annotated-rows, formula-chain): `symbol = <letters>`, then `= <numbers>` and `= <answer>` under it -- together where the width holds them, each on its own where it does not -- each `=` under the first. `after` is what the line ends on, its label or its footnote, set after the answer on the last line. A line of one `=` has nothing to stack and stays one line.
+    let chained(line, before, after) = {
       if parts.len() < 3 { return line }
-      formula-chain(line, eval(parts.at(0) + " = " + parts.at(1), mode: "math", scope: (dbl: dbl)), parts.slice(2),
-        s => chain-line(symbol, "=", s, scope: (dbl: dbl)), last: after)
+      formula-chain(line, [#before#math-eval(parts.at(0) + " = " + parts.at(1), scope: (dbl: dbl))], parts.slice(2),
+        x => chain-line(symbol, "=", x, scope: (dbl: dbl)), last: after)
     }
     let warning = unit-warning(r.at("warning", default: none))
     // ⚠️ Everything above is computed at **every** level, level 0 included, and only the emission is held back: the registry is read, the operands are resolved and the units are checked, so a formula naming a variable that does not exist is refused whatever the level -- a line hidden today is a line printed in the next report, and it must not be the report that finds the mistake.
-    let said = (label: label, description: descr, norm: norm, norm_ref: norm-ref)
-    if lv >= 1 {
-      if st == none and note == "line" {
-        // The label follows the answer as `#var`'s follows its value, and for the same reason: what the result *is* is read with it, not at the foot of the page. The description is the footnote beside it, at level 3.
-        let extra = line-note(said, lv, with-label: false, with-norm: false)
-        let after(x) = [#x#if lv >= 2 and label != none [ --- #render-prose(tl-str(label))]#if extra != none [#extra]]
-        annotated-rows(((chained(after(body), after), cite),))
+    let said = (label: label, description: descr, norm: norm, norm_ref: norm-ref, symbol: symbol)
+    if parts.len() > 0 {
+      let x = placed-extras(said, s)
+      if blocked or x.right != none {
+        // The label follows the answer as `#var`'s follows its value, and for the same reason: what the result *is* is read with it, not at the foot of the page.
+        let after(y) = [#y#x.after#x.footnote]
+        annotated-rows(((chained([#x.before#after(body)], x.before, after), x.right),))
         if warning != none { warning }
-      } else if st == none {
-        // Inline, the default since v0.117 (issue #19: «#eq s'imprime en ligne par défaut, comme #var»): one word of its sentence, so it may follow a `#var` on the same line, and the label, the description and the citation are the answer's one footnote -- `#var`'s own inline branch. Until v0.117 `note: "footnote"` kept a block of its own.
-        inline-item(body, line-note(said, lv), warning) + sep-after(sep)
       } else {
-        // In a row there is no em dash and no column, so the label and the citation become the item's one footnote (`line-note`).
-        line-item(st, inline-item(body, line-note(said, lv), warning))
+        // Inline, the default since v0.117 (issue #19: «#eq s'imprime en ligne par défaut, comme #var»): one word of its sentence.
+        inline-item([#x.before#body#x.after], x.footnote, warning)
       }
     }
   }
 }
 
-/// Sets the unit every **computed** result of one dimension is printed in, from here to the end of the document.
+/// Sets the unit **computed** results of one dimension are printed in: for the next one (the default), for the rest of the domain, or for the rest of the document (spec 2026-10-21-commandes-typst-refonte, REQ-005).
 ///
 /// ```typ
-/// #unit("N/mm²")
 /// #var("F", 12, "kN")
 /// #var("A", 2400, "mm²")
+/// #unit("N/mm²")
 /// #eq("sigma", `F / A`)
 /// ```
 ///
 /// ```typ
 /// #var("M", 4.2, "kNm")
 /// #var("l", 3, "m")
+/// #unit("N", scope: "document")
 /// #eq("V", `M / l`)
-/// #unit("N")
-/// #eq("V_N", `M / l`)
+/// #eq("V_2", `2 * M / l`)
 /// ```
 ///
-/// The dimension is read from the unit itself, so one call settles one kind of result and leaves the others alone. The defaults are `default-units`: mm, mm², mm³, mm⁴, s, kN, kNm, N/mm², kN/m, kg, °.
+/// The dimension is read from the unit itself, so one call settles one kind of result and leaves the others alone: `scope: "next"` is spent by the first answer **of that dimension**, the lines of another dimension between them taking nothing of it. The defaults are `default-units`: mm, mm², mm³, mm⁴, s, kN, kNm, N/mm², kN/m, kg, °.
 ///
-/// It reaches **only what the engine computes** -- the answer of an `#eq`, a side of a `#verify` that is a whole expression. A value that already carries a unit keeps it: one read from the export (`var-of`, `show-calc`, `show-input`), and one written out by hand (`#var("R_k", 7, "kN")`). The unit of a value is the data's, and is never retyped (docs/architecture/principles.md §2, rule 1); `#var-unit` is what carries one into another unit deliberately.
+/// It reaches **only what the engine computes** -- the answer of an `#eq`, a side of a `#verify` that is a whole expression. A value that already carries a unit keeps it: one read from the export, and one written out by hand (`#var("R_k", 7, "kN")`). The unit of a value is the data's, and is never retyped (docs/architecture/principles.md §2, rule 1); `#var("R_k", unit: "N")` shows one in another unit for its line.
 ///
-/// ⚠️ A stress and a surface load are **one** dimension, N/m². The default serves the stress; a line that wants kN/m² says `unit: "kN/m²"`, or this command says it for a whole section.
+/// ⚠️ Until the fine arguments `#unit` reached the rest of the document; it now reaches the next answer unless `scope:` says otherwise -- `scope: "document"` is the former reach.
+///
+/// ⚠️ A stress and a surface load are **one** dimension, N/m². The default serves the stress; a line that wants kN/m² says `unit: "kN/m²"`, or this command says it for a domain or the document.
 /// - written (str): the unit, as the report writes one. Must have a dimension -- `#unit("%")` is refused, a dimensionless result being printed as a bare number.
+/// - scope (str): `"next"` (the default) -- the next answer of that dimension --, `"domain"` -- the rest of the `#domain` it stands in, the rest of the document outside every domain --, or `"document"` -- the rest of the document.
 /// -> content
-#let unit(written) = {
+#let unit(written, scope: "next") = {
   assert(type(written) == str and written.trim() != "",
     message: "unit: write the unit as a string, as in #unit(\"Nmm\") -- got " + repr(written))
+  check-scope("unit", scope)
   let written = written-unit(written)
   let p = parse-unit(written)
   assert(p != none, message: "unit: cannot read " + repr(written)
@@ -1624,274 +1807,262 @@
   assert(clean-dims(p.dims).len() > 0, message: "unit: " + repr(written)
     + " has no dimension, so there is no kind of result it could be the unit of "
     + "-- a result without dimensions is printed as a bare number")
+  var-registry.update(d => set-unit(d, dims-text(clean-dims(p.dims)), written.trim(), scope))
+}
+
+// What `#calc-defaults` may set: every fine argument the lines take, their level, and a unit.
+#let calc-default-names = ("display", "display-formula", "display-equation", "label-position", "descr-position", "norm-position", "style", "role", "level", "unit", "presets")
+
+/// Sets the fine arguments of the lines that follow -- the next one (the default), the rest of the domain, or the rest of the document -- where they write none of their own: what to show of them, where their labels, descriptions and citations go, their style, their role, their level, and the unit of a dimension (spec 2026-10-21-commandes-typst-refonte, REQ-006). A line's own argument still wins, then its own `level:`, then these (REQ-007).
+///
+/// ```typ
+/// #calc-defaults(norm-position: "line-right", scope: "document")
+/// #var("gamma_M", 1.7, norm: "SIA 265", norm-section: "2.2.5", level: 3)
+/// #var("k_mod", 0.8, norm: "SIA 265", norm-section: "Tabelle 7", level: 3)
+/// ```
+///
+/// ```typ
+/// #domain("P1", label: "Poutre P1")[
+///   #calc-defaults(level: 3, label-position: "before", scope: "domain")
+///   #var("b", 140, "mm", label: "Largeur")
+///   #var("h", 400, "mm", label: "Hauteur", level: 1)
+/// ]
+/// ```
+///
+/// - scope (str): `"next"` (the default) -- the next line of `#var`, `#eq` or `#verify` --, `"domain"` -- the rest of the `#domain` it stands in, the rest of the document outside every domain --, or `"document"`.
+/// - ..defaults (any): named arguments only, among `display`, `display-formula`, `display-equation`, `label-position`, `descr-position`, `norm-position`, `style`, `role`, `level`, `unit` -- each with the values the lines take -- and `presets`: `"inline"`, the default family of presets, or `"block"`, the same visibility at each level with the label after the line and the citation in the right-hand column, the line set apart (what a generated file writes once at its head).
+/// -> content
+#let calc-defaults(scope: "next", ..defaults) = {
+  check-scope("calc-defaults", scope)
+  if defaults.pos().len() > 0 { panic("calc-defaults: every default is named -- calc-defaults(norm-position: \"line-right\", scope: \"domain\")") }
+  let given = defaults.named()
+  let fine = (:)
+  let unit-set = none
+  for (name, value) in given.pairs() {
+    if not (name in calc-default-names) { panic("calc-defaults: " + repr(name) + " is not a default -- " + calc-default-names.map(n => repr(n)).join(", ")) }
+    if name == "level" {
+      check-level("calc-defaults", value)
+      if value != auto { fine.insert("level", value) }
+    } else if name == "presets" {
+      if not (value in display-families.keys()) { panic("calc-defaults: presets: " + repr(value) + " is not a family of presets -- " + display-families.keys().map(k => repr(k)).join(", ")) }
+      fine.insert("presets", value)
+    } else if name == "unit" {
+      let written = written-unit(value)
+      let p = if type(written) == str { parse-unit(written) } else { none }
+      if p == none or clean-dims(p.dims).len() == 0 { panic("calc-defaults: unit: " + repr(value) + " is not a unit with a dimension the report can read") }
+      unit-set = (dims: dims-text(clean-dims(p.dims)), written: written.trim())
+    } else {
+      check-fine("calc-defaults", name, value)
+      if value != auto { fine.insert(name, value) }
+    }
+  }
   var-registry.update(d => {
-    let table = unit-table(d)
-    table.insert(dims-text(p.dims), written.trim())
-    d.insert("units", table)
+    let d = if unit-set == none { d } else { set-unit(d, unit-set.dims, unit-set.written, scope) }
+    let frames = d.at("frames", default: ())
+    if scope == "next" {
+      d.insert("next", d.at("next", default: (:)) + fine)
+    } else if scope == "domain" and frames.len() > 0 {
+      let f = frames.last()
+      f.defaults = f.defaults + fine
+      frames.at(frames.len() - 1) = f
+      d.insert("frames", frames)
+    } else {
+      d.insert("defaults", d.at("defaults", default: (:)) + fine)
+    }
     d
   })
 }
 
-/// Keeps one set of variables apart from another, **without losing it**: what is declared inside belongs to `name`, and stays readable further down the document through `val(key, domain: name)`.
+// The heading a domain's label is printed as: one level below the heading it stands under (1 where there is none), as var-domain's title always was. A footnote is attached **by reference** -- the footnote itself placed invisibly beside the heading, its marker in it --, the outline repeating everything a heading holds: a footnote in it is printed twice, once for the outline (found by compiling it, Typst 0.15).
+#let domain-heading(title, notes, cite-right) = context {
+  // the headings of the document, a domain's own left out: a domain set after another is not one level below it, and the level of one heading never hangs on another's (Typst converges -- the example's 38 domains in a row did not)
+  let above = query(selector(heading).before(here())).filter(h => h.at("label", default: none) != <wc-domain-heading>)
+  let at = if above.len() > 0 { above.last().level + 1 } else { 1 }
+  let mark = std.label("wc-domain-note-" + str(here().page()) + "-" + repr(here().position().y))
+  let body = if notes == none { title } else { [#title#footnote(mark)] }
+  let head = [#heading(level: at, body) <wc-domain-heading>]
+  if cite-right != none {
+    grid(columns: (1fr, note-column), column-gutter: note-gutter, head, align(right + horizon, cite-text(cite-right)))
+  } else { head }
+  if notes != none { place(hide[#footnote(notes)#mark]) }
+}
+
+/// A calculation domain: keeps one set of variables apart from another, **without losing it** -- what is declared inside belongs to `id`, and stays readable further down the document through `#var(key, domain: id)` --, prints its label as a heading, and sets a level for every line it holds (spec 2026-10-21-commandes-typst-refonte, REQ-008). `var-domain` was it until then.
 ///
 /// ```typ
 /// #var("l", 2.4, "m")
-/// #var-domain("S10 - 0.55 kN Ende")[
+/// #domain("ende", label: "Ende")[
 ///   #var("F", 0.55, "kN")
 ///   #eq("M", `F dot l`)
 /// ]
+/// Das massgebende Moment beträgt #var("M", domain: "ende").
 /// ```
 ///
 /// ```typ
-/// #var("l", 2.4, "m")
-/// #grid(columns: (1fr, 1fr),
-///   var-domain("Ende")[ #var("F", 0.55, "kN") #eq("M", `F dot l`) ],
-///   var-domain("Mitte")[ #var("F", 1, "kN") #eq("M", `F dot l / 2`) ],
-/// )
-/// Das massgebende Moment beträgt #val("M", domain: "Ende").
+/// #domain("traction", label: "Vérification à la traction", descr: "Barre tendue, section nette", norm: "SIA 265", norm-section: "4.2.1", norm-position: "line-right", level: 3)[
+///   #var("N_t_d", 50, "kN", label: "Effort de traction")
+///   #var("A", 56000, "mm²", level: 1)
+///   #eq("sigma_t_d", `N_t_d / A`)
+/// ]
 /// ```
 ///
 /// Without it the second `F` would quietly replace the first, the registry being one dictionary for the whole document. A name is looked up in the innermost domain first and then in the default one, so what a section declares outside every domain -- R_d, a partial factor -- is readable inside all of them.
 ///
-/// **A title** is printed as a heading one level below the heading it stands under -- a calculation domain of Woodcore's «Formules» tab is written `#var-domain("<its id>", title: "<its name>")[…]` in its own file `Formules/<id>.typ`, and a section prints it with `#include "/Formules/<id>.typ"`: the id is what `val(domain:)` reads, so renaming the domain breaks no call, and the name is the title the report shows (issue #15).
-///
-/// ```typ
-/// = Poutre P1
-/// #var-domain("poutre-p1", title: "Moment de flexion")[
-///   #var("q_d", 4.5, "kN/m")
-///   #var("l_1", "l", 5, "m")
-///   #eq("M_d", `q_d * l_1^2 / 8`, unit: "kNm")
-/// ]
-/// Le moment vaut #val("M_d", domain: "poutre-p1").
-/// ```
+/// **Its level** is the level of every line inside that states none of its own: a line's own `level:`, or a fine argument it writes, wins (REQ-007). `#calc-defaults(scope: "domain")` sets the defaults of its lines, and a `#unit(scope: "domain")` the unit of a dimension -- both gone when the domain closes.
 ///
 /// 👉 A *domain* here is a set of names in the report. It has nothing to do with a calculation domain of the Excel workbooks (docs/domain/calculation-domains.md §3.3), which is a kind of calculation -- `snow-load`, `dead-load` -- whose instances are Excel sheets.
-/// - name (str): the domain's name -- for a domain of the «Formules» tab, its id, the name of its file.
-/// - title (str, none): printed as a heading one level below the heading before it (level 1 where there is none); none prints nothing.
-/// - body (content): where its variables are declared.
+/// - id (str): the domain's name -- what `#var(key, domain: id)` reads, and what Woodcore finds the domain by.
+/// - label (str, none): its title.
+/// - label-position (str, auto): `"none"`, `"before"` (a heading before the domain, one level below the heading above it), `"after"` (the same heading after it), `"footnote"`. auto leaves it to the level -- before, from level 1.
+/// - descr (str, none): what the domain is about.
+/// - descr-position (str, auto): `"none"`, `"after"` (a paragraph after its label), `"footnote"` (on its label). auto leaves it to the level -- after, from level 2.
+/// - norm (str, none), norm-section (str, none): the norm the domain follows.
+/// - norm-position (str, auto): `"none"`, `"in-line"` (after its label, in grey), `"line-right"` (level with its label, in the right-hand column), `"footnote"` (on its label). auto leaves it to the level -- the right-hand column at level 3.
+/// - level (int, auto): the level of every line it holds that states none of its own; auto follows the domain around it, else the report.
+/// - body (content): its lines.
 /// -> content
-#let var-domain(name, title: none, body) = {
-  assert(type(name) == str and name != "", message: "var-domain: the name must be a non-empty string, got " + repr(name))
-  assert(title == none or (type(title) == str and title != ""), message: "var-domain: the title is a non-empty string or none, got " + repr(title))
-  if title != none {
-    context {
-      let above = query(selector(heading).before(here()))
-      heading(level: if above.len() > 0 { above.last().level + 1 } else { 1 }, title)
-    }
+#let domain(id, label: none, label-position: auto, descr: none, descr-position: auto, norm: none, norm-section: none, norm-position: auto, level: auto, body) = {
+  if type(id) != str or id.trim() == "" { panic("domain: the id is a non-empty string, got " + repr(id)) }
+  if label != none and (type(label) != str or label == "") { panic("domain: label: is a non-empty string or none, got " + repr(label)) }
+  check-level("domain", level)
+  let written = written-fine("domain", (label-position: label-position, descr-position: descr-position, norm-position: norm-position))
+  let record = (label: label, description: descr, norm: norm, norm_ref: if norm-section == none { "" } else { norm-section })
+  bib-note(norm)
+  // What of its own the domain prints, by its fine arguments over its level's preset -- the uniform level over both.
+  let settings() = {
+    let forced = uniform-level.get()
+    if forced != none { return preset("domain", forced) }
+    preset("domain", if level == auto { resolve-level(auto) } else { level }) + written
   }
-  var-registry.update(d => { d.stack.push(name); d })
+  let notes(s) = {
+    let parts = ()
+    if s.at("label-position") == "footnote" and label != none { parts.push(render-prose(tl-str(label))) }
+    if s.at("descr-position") == "footnote" and descr != none { parts.push(render-prose(tl-str(descr))) }
+    if s.at("norm-position") == "footnote" and norm != none { parts.push(norm-text(record)) }
+    if parts.len() == 0 { none } else { parts.join([#semicolon-str() ]) }
+  }
+  let title(s) = {
+    let t = render-prose(tl-str(label))
+    if s.at("norm-position") == "in-line" and norm != none { [#t #cite-text(norm-text(record), size: auto)] } else { t }
+  }
+  let right(s) = if s.at("norm-position") == "line-right" and norm != none { norm-text(record) } else { none }
+  // where the domain stands against its data, where Woodcore wrote it (REQ-012, ARCH-007): its form, and the lines not applied -- said in red at its head, the file being the engineer's and never rewritten for it
+  let state = load-domain-state().at(id, default: none)
+  let matches = state == none or state.matches
+  wc-meta((kind: "domain", domain: id, title: label, gen: none, matches: matches, level: level))
+  if state != none and (not state.matches or state.missing.len() > 0 or state.conflict.len() > 0) {
+    let form(g) = if g == none { "?" } else { g.form + " (" + g.kind + ", v" + str(g.version) + ")" }
+    context block(above: 0.6em, below: 0.6em, text(fill: test-nok, {
+      if state.at("gone", default: false) { t-str("formula.unfold_missing", id: id) }
+      else if not state.matches { t-str("formula.unfold_mismatch", have: form(state.written), want: form(state.form)) }
+      let lines = state.missing + state.conflict
+      if lines.len() > 0 { [ ] + t-str("formula.unfold_lines", lines: lines.join(", ")) }
+    }))
+  }
+  context {
+    let s = settings()
+    if s.at("label-position") == "before" and label != none {
+      domain-heading(title(s), notes(s), right(s))
+    } else {
+      // no heading to carry them: the footnote at the head of the domain, the citation on a line of its own
+      if notes(s) != none { footnote(notes(s)) }
+      if s.at("norm-position") == "in-line" and norm != none { block(cite-text(norm-text(record), size: auto)) }
+      if right(s) != none { block(width: 100%, align(right, cite-text(right(s)))) }
+    }
+    if s.at("descr-position") == "after" and descr != none { block(render-prose(tl-str(descr))) }
+  }
+  var-registry.update(d => {
+    d.stack.push(id)
+    push-frame(d, id, level)
+  })
   body
-  var-registry.update(d => { d.stack = d.stack.slice(0, -1); d })
+  var-registry.update(d => {
+    d.stack = d.stack.slice(0, -1)
+    pop-frame(d)
+  })
+  context {
+    let s = settings()
+    if s.at("label-position") == "after" and label != none { domain-heading(title(s), none, none) }
+  }
 }
 
-#let val-argument-names = ("domain", "type", "unit", "symbol", "level", "label", "descr", "norm", "norm-ref", "note", "style")
+// The columns `#var-table` may show, in the order they stand in when named: what the engineer listed (T3: «colonne descr, norm, norm-section, label, etc.»).
+#let var-table-columns = ("label", "descr", "symbol", "value", "unit", "norm", "norm-section")
 
-// The four parts a value can be printed as, in the engineer's own words (v0.80): the value alone, its unit alone, the two together -- the default -- and the whole expression, `s_k = 1.729 kN/m²`. They replace `"number"`, `"unit"`, `"number+unit"`, which `fmt` and `live-load` also read before those two commands were folded into this one.
-#let val-types = ("val", "unit", "val+unit", "expression")
-
-/// **One value, printed** -- wherever it comes from: a variable of the report, a value of the export, or a number written here. It is the one command that prints a single value without writing it down -- `#var` prints inline too since v0.86, and stores what it prints -- and it replaced `fmt`, `inline-value` and `live-load` in v0.80.
+/// A table of the variables of one role -- the data, the computed values or the results -- of a domain, of several, or of the whole document, **read from the registry and never copied**: the values are those the lines declare, wherever they stand, so a table at the head of a domain lists what is declared below it (spec 2026-10-21-commandes-typst-refonte, REQ-010).
 ///
 /// ```typ
-/// #var("R_d", 4.969, "kN")
-///
-/// Der Bemessungswiderstand beträgt #val("R_d"), also #val("R_d", type: "expression").
-/// ```
-///
-/// ```typ
-/// Auf horizontalem Gelände liegt #val("s_k", domain: ("snow-load", "SL"), type: "expression").
-/// ```
-///
-/// ```typ
-/// #var-domain("Ende")[ #var("M", 1.32, "kNm") ]
-///
-/// In der Einheit #val("M", domain: "Ende", type: "unit") ist das #val("M", domain: "Ende", type: "val").
-/// ```
-///
-/// A number quoted with where it comes from, which no variable of the report carries:
-///
-/// ```typ
-/// #val(7, unit: "kN", symbol: "R_k", type: "expression", label: "Kapazität Sherpa XS", norm: "Sherpa", norm-ref: "ETA-12/0197", level: 3)
-/// ```
-///
-/// Whatever part it prints may be set apart, as `#var`'s line is: `style:` names a math function -- `"bold"`, `"underline"` -- or `"double"`, which rules it twice underneath.
-///
-/// ```typ
-/// #var("R_d", 4.969, "kN", level: 0)
-///
-/// Der Bemessungswiderstand beträgt #val("R_d", style: "bold").
-/// ```
-///
-/// The same with its extras on the line rather than in a footnote -- the label after an em dash, the description and the citation in parentheses after it:
-///
-/// ```typ
-/// #val(7, unit: "kN", symbol: "R_k", type: "expression", label: "Kapazität Sherpa XS", descr: "Katalogwert", norm: "Sherpa", norm-ref: "ETA-12/0197", note: "line", level: 3)
-/// ```
-///
-/// At `level: 0` nothing is printed and the name is still read -- a value left out of a row takes its separator with it, and the relation after it still names it:
-///
-/// ```typ
-/// #var("F_Ed", 2.037, "kN", level: 0)
-/// #var("R_d", 4.969, "kN", level: 0)
-/// #var-line[
-///   #val("F_Ed", type: "expression")
-///   #val("R_d", type: "expression", level: 0)
-///   #verify(`F_Ed <= R_d`)
+/// #domain("p1", label: "Poutre P1")[
+///   #var-table(role: "data", columns: ("label", "symbol", "value"))
+///   #var("b", 140, "mm", label: "Largeur", level: 0)
+///   #var("h", 400, "mm", label: "Hauteur", level: 0)
+///   #eq("A", `b * h`, level: 0)
 /// ]
 /// ```
 ///
-/// **What is printed follows the level**, and only the extras do -- level 0 apart, which prints nothing at all, as it does everywhere here: level 1 the value as `type` asks for it, level 2 the label with it, level 3 also the description, the `choices` it explains and the citation -- all of them as **one** footnote by default, because inline there is no column for a citation (section 9). So `level: 1` is what keeps a bare number in a sentence of a checking report.
+/// Over every domain and filtered by unit, it is the summary of the loads or of the results -- what `show-load-summary` and `show-result-summary` printed (Q-009):
 ///
-/// **`unit:` is display only**: the variable in the registry keeps the unit it was declared with, which is what tells this command from `var-unit`. A unit of another dimension is refused, a conversion nobody can perform being a mistake at the call site rather than a disagreement to read (`eq`'s red line).
-/// - what (str, dictionary, int, float): a variable's name, a var object (`var-of(...)`), or a number written here.
-/// - ..rest (any): nothing. The domain used to be a second positional argument; it is `domain:` since v0.80, and a second positional is refused saying so.
-/// - domain (none, str, array): where the name is read. Left out, the innermost `var-domain` and then the report's own variables; a string, that `var-domain`; a pair, a calculation and its instance -- `("snow-load", "SL")`, `("live-load", "A1")`, `("connection", "VU-MP-1")`.
-/// - type (str): `"val+unit"` (the default) e.g. `1.729 kN/m²`, `"val"` e.g. `1.729`, `"unit"` e.g. `kN/m²`, `"expression"` e.g. `s_k = 1.729 kN/m²`.
-/// - unit (none, str): the unit it is printed in, converted from the one it carries. A bare number takes it as its own.
-/// - symbol (none, str): the math source printed by `"expression"`, for a number that carries none. A variable brings its own. A word math does not know may be written without its quotes, `"W_(y,erf)"`.
-/// - level (int, auto): 0 nothing, 1 the value, 2 also the label, 3 also the description, its choices and the citation -- in one footnote. auto follows the report (section 4).
-/// - label (none, str): what the value is, in place of the one it carries -- printed from level 2.
-/// - descr (none, str): why *this* value was chosen, in place of the one it carries -- printed from level 3, with the `choices` it explains.
-/// - norm (none, str), norm-ref (str): the citation, in place of the one it carries.
-/// - style (str, none): a math function applied to the **whole line**, `symbol = value unit` -- `"bold"`, `"underline"` -- or `"double"`, which rules it twice underneath in the document's own ink, the mark `verify` sets a relation with, for a value a section rests on. `#eq`'s own argument (v0.100); ⚠️ a line it is given is set with math's own spacing around its `=`, a little wider than a line without it.
-/// - note (str): where the label, the description and the citation go. `"footnote"` (the default) gathers them into one footnote; `"line"` sets the label after an em dash on the line and the description and the citation in parentheses after it -- a value in a sentence having no column -- the `choices` and the orange line of a unit written over staying a footnote. No effect inside a `var-line`, whose items take one footnote each.
+/// ```typ
+/// #var("g_k", 1.2, "kN/m²", label: "Eigengewicht", level: 0)
+/// #var("q_k", 3, "kN/m²", label: "Nutzlast", level: 0)
+/// #var("s_k", 1.4, "kN/m²", label: "Schnee", level: 0)
+/// #var-table(role: "data", domain: "all", unit: "kN/m²")
+/// ```
+///
+/// It is a Typst `#table`, set as the document sets its tables: `#show table` and `#set table` style it like any other.
+/// - role (str, auto): `"data"`, `"compute"` or `"result"` -- the role a line was given, or its command's own (`#var` data, `#eq` compute, `#verify` result). auto lists every role.
+/// - domain (auto, str, array): the domain whose variables are listed -- auto the one the table stands in, a string one domain by its id, an array several, `"all"` every domain of the document and the variables outside them.
+/// - unit (none, str, array): only the variables in that unit, or in one of those units -- `"kN/m²"` the area loads, `"kN/m"` the line loads.
+/// - columns (array): the columns, among `"label"`, `"descr"`, `"symbol"`, `"value"`, `"unit"`, `"norm"`, `"norm-section"`. `"value"` writes the unit beside the number unless `"unit"` is a column of its own; `"norm"` cites the norm and its clause unless `"norm-section"` is one.
 /// -> content
-#let val(what, ..rest, domain: none, type: "val+unit", unit: none, symbol: none, level: auto, label: none, descr: none, norm: none, norm-ref: "", note: "footnote", style: none) = bib-note(norm) + context {
-  // ⚠️ `bib-note(norm) + context { … }` above: the registration for the bibliography is emitted **outside** this context, which is where a state written is read back by the folded chain an update function reads (docs/domain/connections.md §3.3quinquies, v0.99). Only the `norm:` written here is registered: every other citation `val` can print comes either from the export -- which the bibliography walks itself -- or from a variable of the registry, which the `var` or `eq` that declared it has already registered.
-  check-level("val", level)
-  check-note("val", note)
-  // ⚠️ `panic` inside an `if`, never `assert(cond, message: ...)`: Typst builds an assert's message before it tests the condition, so `unknown.first()` on an empty array would fail every correct call (v0.63.1).
-  let unknown = rest.named().keys()
-  if unknown.len() > 0 {
-    panic("val: unknown argument " + repr(unknown.first())
-      + " -- " + val-argument-names.map(n => repr(n)).join(", "))
-  }
-  // The v0.61 form was #val("domain", "key"). Refused rather than read both ways, so that one spelling says one thing -- and the message is the rewrite.
-  if rest.pos().len() > 0 {
-    panic("val: the domain is a named argument since v0.80 -- write #val("
-      + repr(rest.pos().first()) + ", domain: " + repr(what) + ")")
-  }
-  if not (type in val-types) {
-    panic("val: invalid type " + repr(type) + " -- use " + val-types.map(t => repr(t)).join(", "))
-  }
-
-  let d = var-registry.get()
-  let given-number = value-type(what) == int or value-type(what) == float
-  let base = if value-type(what) == dictionary and "value" in what {
-    if domain != none { panic("val: a var object carries where it comes from, so domain: says it a second time -- drop one of the two") }
-    what
-  } else if given-number {
-    if domain != none { panic("val: a number written here is read from nowhere, so domain: has nothing to name -- drop it") }
-    (value: what, unit: "", symbol: none, label: none, description: none, norm: none, norm_ref: "")
-  } else if value-type(what) == str {
-    if domain == none {
-      let r = var-lookup(d, what)
-      if r == none {
-        panic("val: no variable named " + repr(what) + " -- "
-          + (if var-names(d).len() == 0 { "none is declared yet" } else { "declared here: " + var-names(d).join(", ") })
-          + ". A value of the export is read with domain: (\"snow-load\", \"SL\")")
-      }
-      r
-    } else if value-type(domain) == str {
-      let known = if domain in d.domains { d.domains.at(domain).keys() } else { () }
-      if not (what in known) {
-        panic("val: no variable named " + repr(what) + " in the domain " + repr(domain) + " -- "
-          + (if known.len() == 0 { "that domain declares nothing" } else { "it declares: " + known.join(", ") })
-          + ". A variable declared outside every var-domain is read without domain:")
-      }
-      d.domains.at(domain).at(what)
-    } else if value-type(domain) == array and domain.len() == 2 {
-      let vars = find-calculation("val", domain.at(0), domain.at(1)).vars
-      // ⚠️ A name the export does not carry is looked up in the var-domain named after the instance, which is where show-polar-moment publishes the forces it worked out -- as `var` and `find` already did for the very same pair, so that `#val("F_max", domain: ("connection", "VU-MP-1"))` no longer refused what the other two named (v0.86). The export wins a name both carry, being the traced one.
-      let published = d.domains.at(domain.at(1), default: (:))
-      if what in vars { vars.at(what) } else if what in published { published.at(what) } else {
-        panic("val: unknown var " + repr(what) + " in " + source-label(domain.at(0), domain.at(1))
-          + " -- valid vars: " + (vars.keys() + published.keys()).join(", "))
-      }
-    } else {
-      panic("val: domain: is a domain of the report (\"S10 - 0.55 kN Ende\") or a calculation and its instance"
-        + " ((\"snow-load\", \"SL\")) -- got " + repr(domain))
-    }
-  } else {
-    panic("val: write a variable's name, a var object (var-of(...)) or a number -- got " + repr(what))
-  }
-
-  let unit = written-unit(unit)
-  let have = base.at("unit", default: "")
-  let value = base.value
-  let shown-unit = have
-  // A unit written over the one the value carries is said on the page, in orange, at every level: the number printed is then not the number the registry or the export holds, and a reader who cannot see that has no way of finding it out (v0.80, the engineer's request). A bare number given its unit here has overwritten nothing, and neither has a unit equal to the one carried.
-  let overridden = none
-  if unit != none {
-    if have == "" and given-number {
-      shown-unit = unit
-    } else {
-      // a dimensionless value goes through the same conversion as any other, which is what lets it be printed in % -- refused outright until v0.86, where var-unit carried it there
-      let c = converted("val", base.at("symbol", default: repr(what)), value, have, unit)
-      if c.warning != none and have == "" {
-        panic("val: " + repr(what) + " carries no unit, so it cannot be printed in " + repr(unit))
-      }
-      if c.warning != none {
-        panic("val: " + repr(unit) + " and " + repr(have) + " are not the same dimension, so "
-          + repr(what) + " cannot be printed in it")
-      }
-      value = c.value
-      shown-unit = c.unit
-      if shown-unit != have {
-        // a ratio printed in % has no unit of its own to name, and «statt in .» said so badly (v0.86)
-        overridden = text(fill: override-colour, if have == "" { t-str("formula.unit_override_bare", shown: shown-unit) } else { t-str("formula.unit_override", shown: shown-unit, have: have) })
+#let var-table(role: auto, domain: auto, unit: none, columns: ("label", "symbol", "value", "norm")) = {
+  if role != auto { check-fine("var-table", "role", role) }
+  if type(columns) != array or columns.len() == 0 { panic("var-table: columns: is a list of columns among " + var-table-columns.map(c => repr(c)).join(", ")) }
+  for c in columns { if not (c in var-table-columns) { panic("var-table: " + repr(c) + " is not a column -- " + var-table-columns.map(c => repr(c)).join(", ")) } }
+  let units = if unit == none { none } else if type(unit) == str { (written-unit(unit),) } else { unit.map(written-unit) }
+  context {
+    // the domain the table stands in is read where it stands; the variables, from the registry as the whole document leaves it -- so a table placed before its lines lists them
+    let here-domain = var-current(var-registry.get())
+    let final = var-registry.final()
+    let wanted = if domain == auto { (here-domain,) } else if domain == "all" { final.domains.keys() } else if type(domain) == str { (domain,) } else { domain }
+    let rows = ()
+    for name in wanted {
+      for (key, r) in final.domains.at(name, default: (:)).pairs() {
+        if role != auto and r.at("role", default: "data") != role { continue }
+        if units != none and not (r.at("unit", default: "") in units) { continue }
+        rows.push(r + (key: key))
       }
     }
-  }
-
-  let sym = if symbol != none { quoted-words(symbol) } else { base.at("symbol", default: none) }
-  let digits = number-digits.get()
-  // `style:` wraps what is printed, whichever of the four parts it is -- `#var`'s own argument (v0.100), so that a value quoted in a sentence can be set bold or ruled like the declaration it comes from.
-  let printed = apply-style(style, if type == "unit" {
-    if shown-unit == "" { panic("val: type: \"unit\" needs a value that carries one, and " + repr(what) + " has none") }
-    [#shown-unit]
-  } else if type == "val" {
-    [#formula-number(value, "", digits)]
-  } else if type == "val+unit" {
-    [#formula-number(value, shown-unit, digits)]
-  } else {
-    if sym == none {
-      panic("val: type: \"expression\" prints `symbol = value unit`, and a number written here has no symbol"
-        + " -- give one with symbol:, or read a variable by its name")
+    if rows.len() == 0 { return emph(t-str("var_table.empty")) }
+    let split-unit = "unit" in columns
+    let split-section = "norm-section" in columns
+    let cell(r, c) = {
+      if c == "label" { let x = r.at("label", default: none); if x == none { [] } else { render-prose(tl-str(x)) } }
+      else if c == "descr" { let x = r.at("description", default: none); if x == none { [] } else { render-prose(tl-str(x)) } }
+      else if c == "symbol" { math-eval(r.at("symbol", default: key-symbol(r.key))) }
+      else if c == "value" { formula-number(r.value, if split-unit { "" } else { r.at("unit", default: "") }) }
+      else if c == "unit" { r.at("unit", default: "") }
+      else if c == "norm" {
+        if r.at("norm", default: none) == none { [] } else if split-section { [#r.norm] } else { norm-text(r) }
+      }
+      else if c == "norm-section" { r.at("norm_ref", default: "") }
     }
-    // one word of its sentence, as #var's is: no line break between the symbol, the sign and the value
-    [#render-symbol((symbol: sym))~=~#formula-number(value, shown-unit, digits)]
-  })
-
-  // The label and the citation the call states win over the ones the value carries: a number of a manufacturer's table has neither of its own, and a var of the export may be quoted for something narrower than its own label says.
-  let noted = (
-    symbol: if sym == none { "" } else { sym },
-    label: if label != none { label } else { base.at("label", default: none) },
-    description: if descr != none { descr } else { base.at("description", default: none) },
-    choices: base.at("choices", default: none),
-    norm: if norm != none { norm } else { base.at("norm", default: none) },
-    norm_ref: if norm != none or norm-ref != "" { norm-ref } else { base.at("norm_ref", default: "") },
-  )
-  let st = var-line-state.get()
-  let lv = line-level(st, level)
-  // `note: "line"` (v0.87): the label after an em dash, as `#var`'s line sets it, and the description and the citation in parentheses after it -- a value in a sentence has no right-hand column to give a citation. What stays a footnote is what is not one sentence: the `choices`, a list, and the orange line of a unit written over, whose marker is the point.
-  let on-line = st == none and note == "line"
-  let extra = line-note(noted, lv, extra: overridden, colour: if overridden == none { none } else { override-colour },
-    with-label: not on-line, with-descr: not on-line, with-norm: not on-line)
-  let item = if on-line {
-    let paren = ()
-    if lv >= 3 and noted.description != none { paren.push(render-prose(tl-str(noted.description))) }
-    if lv >= 3 and noted.norm != none { paren.push(norm-text(noted)) }
-    [#printed#if extra != none [#extra]#if lv >= 2 and noted.label != none [ --- #render-prose(tl-str(noted.label))]#if paren.len() > 0 [ (#paren.join([#semicolon-str() ]))]]
-  } else { printed + (if extra == none { [] } else { extra }) }
-  // ⚠️ Level 0 prints nothing here too, and this is where the rule reads oddest: a value quoted in a sentence and then not printed leaves a hole in it. It is kept all the same, because 0 means "not printed" for every command of this file and an exception would be one more thing to remember -- and because in a row it is exactly right, an item that is not printed taking its separator with it (`line-item` is what counts an item, so one that never reaches it is never counted).
-  if lv >= 1 { if st == none { item } else { line-item(st, item) } }
+    table(
+      columns: columns.len(),
+      table.header(..columns.map(c => strong(t-str("var_table." + c)))),
+      ..rows.map(r => columns.map(c => cell(r, c))).flatten(),
+    )
+  }
 }
 
 // --- find: what there is to name in a call (v0.85) ------------------------
 // A command for **writing** a report rather than for the finished page: it prints which domains exist, which keys each one carries and which variables one of them holds, so that a call can be written without reading data/ by hand. It is the one command here whose output is not meant to be delivered -- one calls it, reads it, and deletes the call. What makes it necessary rather than convenient is that nothing else answers the question: the catalog window's loads tab reads data/calculations.json and nothing else (section 10quater), so a connector's three dozen vars and a polar moment's geometry, which are files of their own, are listed nowhere at all.
 
-// Every domain a call may address: the calculation domains of data/calculations.json, then the two that are files of their own. `domain-ids()` lists the first alone and says so in its own header, that being what calculations.json holds; a command written to answer "what is there?" has to be complete, so it names all of them here rather than widening a promise made elsewhere.
-#let find-domains() = domain-ids() + (connector-domain, connection-domain)
+// The four parts a value can be printed as, in the engineer's own words (v0.80): the value alone, its unit alone, the two together -- the default -- and the whole expression, `s_k = 1.729 kN/m²` -- what `find` prints a variable as.
+#let val-types = ("val", "unit", "val+unit", "expression")
+
+// Every domain a call may address: the calculation domains of data/calculations.json, then the two that are files of their own. `ids("domain")` lists the first alone and says so in its own header, that being what calculations.json holds; a command written to answer "what is there?" has to be complete, so it names all of them here rather than widening a promise made elsewhere.
+#let find-domains() = ids("domain") + (connector-domain, connection-domain)
 
 #let find-objects = ("domain", "variable")
 
@@ -1943,12 +2114,11 @@
     }
     // One line per domain, its name and its keys set in the face they are typed in: what one comes here to take away is a string to paste into a call.
     named.map(d => {
-      let keys = instance-ids(d)
+      let keys = ids(d)
       [#raw(d)#colon-str() #(if keys.len() == 0 { emph(t-str("find.none")) } else { keys.map(k => raw(k)).join(", ") })]
     }).join(linebreak())
   } else {
-    let digits = number-digits.get()
-    let reg = var-registry.get()
+      let reg = var-registry.get()
     let found = if domain == none {
       (title: t-str("find.vars_report"), vars: var-names(reg).map(k => (k, var-lookup(reg, k))), note: none)
     } else if value-type(domain) == str {
@@ -1989,16 +2159,16 @@
     let symbol-column = if type == "expression" { () } else { ((label: "Symbol", kind: "math"),) }
     let symbol-cell(k, v) = if type == "expression" { () } else { (v.at("symbol", default: key-symbol(k)),) }
     // A value as prose for a `wide` cell: a word as the glossary gives it, a number as the math it is set as elsewhere, between dollars.
-    let prose-value(v, unit) = if value-type(v) == str { tl-str(v) } else if type == "val" { signed-text(fmt-magnitude(v, digits)) } else { "$" + formula-quantity(v, unit, digits) + "$" }
+    let prose-value(v, unit) = if value-type(v) == str { tl-str(v) } else if type == "val" { display-number(v) } else { "$" + formula-quantity(v, unit) + "$" }
     let value-cell(k, v) = {
       let unit = v.at("unit", default: "")
       let symbol = v.at("symbol", default: key-symbol(k))
       if type == "name" { () } else if type == "unit" { (unit,) }
       else if has-words and type == "expression" { ("$" + symbol + " =$ " + prose-value(v.value, unit),) }
       else if has-words { (prose-value(v.value, unit),) }
-      else if type == "val" { (signed-text(fmt-magnitude(v.value, digits)),) }
-      else if type == "val+unit" { (formula-quantity(v.value, unit, digits),) }
-      else { (symbol + " = " + formula-quantity(v.value, unit, digits),) }
+      else if type == "val" { (display-number(v.value),) }
+      else if type == "val+unit" { (formula-quantity(v.value, unit),) }
+      else { (symbol + " = " + formula-quantity(v.value, unit),) }
     }
     // What a variable *is*, in `label`, whether it came from the export or was written down here -- the two agree since v0.85.1, where a var the report declared kept it under `description` and this column had to look in both. It is a word of the engine, so the table translates it as it translates every other text cell.
     let designation(v) = {
@@ -2020,84 +2190,27 @@
   }
 }
 
-/// Sets several declarations on **one line**, joined the way `show-calc` joins the vars of a group: `R_k = 7 kN; k_dens = 0.806; γ_M = 1.7`.
-///
-/// ```typ
-/// #var-line[
-///   #var("R_k", 7, "kN")
-///   #var("k_dens", 0.806)
-///   #var("eta_w", 0.8)
-/// ]
-/// ```
-///
-/// ```typ
-/// #var-line(label: "Teilsicherheitsbeiwerte", norm: "SIA 265", norm-ref: "2.2.5")[
-///   #var("gamma_M", 1.7)
-///   #var("eta_M", 1)
-/// ]
-/// ```
-///
-/// A row of what is declared here beside what is read from the export, and a value hidden by its own level -- which takes its separator with it, where a hand-typed one would be left behind:
-///
-/// ```typ
-/// #var-line(sep: ",")[
-///   #var("b", 100, "mm")
-///   #var("h", 200, "mm", level: 0)
-///   #val("s_k", domain: ("snow-load", "SL"), type: "expression")
-/// ]
-/// ```
-///
-/// A whole row at `level: 0` declares its variables and prints nothing, not even the space of a line -- the inputs of a formula the page shows:
-///
-/// ```typ
-/// #var-line(level: 0)[
-///   #var("gamma_M", 1.7)
-///   #var("eta_M", 1)
-/// ]
-/// #var("R_k", 7, "kN", level: 0)
-/// #eq("R_d", `R_k dot eta_M / gamma_M`)
-/// ```
-///
-/// `#var`, `#var-unit`, `#eq`, `#val` and `#verify` all know they are in a row: each prints inline instead of taking a line of its own, and its own label and citation become one footnote whatever its `note:` says, since a row has one citation column for all of it. Anything else in the body is printed as it comes, without a separator.
-/// - label (none, str): a name for the row, printed before the first value with a colon -- a var's `group_label` (section 3.3), for a line written by hand. Left out where the whole row is hidden.
-/// - norm (none, str), norm-ref (str): one citation for the row, in the right-hand column from level 3. An item's own citation stays in its own footnote.
-/// - level (int, auto): one level for the whole row, overriding each item's own -- `level: 0` declares the variables and prints nothing, not even the space of a line. auto leaves every item to its own level.
-/// - sep (auto, str): what the values are joined with. auto is the engine's own semicolon, which carries French's narrow space before it.
-/// - body (content): the declarations, in any order, one per line or several on one.
-/// -> content
-#let var-line(label: none, norm: none, norm-ref: "", level: auto, sep: auto, body) = bib-note(norm) + context {
-  // The row's own citation is registered for the bibliography outside this context, as `val`'s is (v0.99); each item of the row registers its own.
-  check-level("var-line", level)
-  if not (sep == auto or value-type(sep) == str) {
-    panic("var-line: sep must be auto or a string, got " + repr(sep))
-  }
-
-  // ⚠️ The spaces between the items are dropped. A body written one `#var` to a line carries the newline between them as a `space` child, which would stand *before* the separator the row writes itself -- "R_k = 7 kN ; k_dens = 0.806".
-  let items = if body.has("children") {
-    body.children.filter(c => not (repr(c.func()) in line-filler)).join()
-  } else { body }
-
-  let st = (count: 0, label: label, sep: sep, level: level)
-  var-line-state.update(st)
-  // A row the level hides still declares its variables: the body is emitted, every item prints nothing, and no grid is laid out around it -- an empty row would otherwise leave the space of a line behind.
-  if level != auto and resolve-level(level) < 1 {
-    items
-  } else {
-    // The row's citation follows its items': in the right-hand column from level 3, never below it.
-    let lv = resolve-level(level)
-    annotated-rows(((items, if lv >= 3 and norm != none { (norm: norm, norm_ref: norm-ref) } else { none }),))
-  }
-  var-line-state.update(none)
-}
-
 // The relation a failed comparison is printed with instead: the line then states something true, and the ✘ says the relation the report *wanted* is not the one that holds.
 #let relation-negation = ("<=": ">", ">=": "<", "<": ">=", ">": "<=", "=": "!=", "!=": "=")
 
 // The operators a relation may be written with, two characters first so that `<=` is never read as `<`.
 #let relation-ops = ("==", "<=", ">=", "!=", "≤", "≥", "≠", "<", ">", "=")
 
+// A relation cut at its operator: the operator found first in `relation-ops`' order, and the two sides as written.
+#let relation-split(src) = {
+  let found = none
+  for o in relation-ops {
+    if found == none {
+      let i = src.position(o)
+      if i != none { found = (op: o, at: i, len: o.len()) }
+    }
+  }
+  if found == none { panic("verify: no relation in " + repr(src) + " -- write one of " + relation-ops.join(", ")) }
+  (op: found.op, left: src.slice(0, found.at), right: src.slice(found.at + found.len))
+}
+
 // One side of a relation, read against the registry: its value and unit, and what it is -- `"number"` for a bare number, `"var"` for exactly one variable, `"formula"` for anything else -- with the math source of its symbols (`letters`) and, for a formula, of the same formula with the numbers put in (`numbers`). A bare number has neither.
-#let relation-side(d, src, digits) = {
+#let relation-side(d, src) = {
   let trimmed = src.trim()
   let got = evaluate-formula("verify", d, trimmed)
   if got.result == none {
@@ -2109,7 +2222,7 @@
   let literal = trimmed.match(regex("^([0-9]+(?:\.[0-9]+)?)\s*\"([^\"]+)\"$"))
   let shown = if one != none { (value: one.value, unit: one.unit) } else if literal != none { (value: float(literal.captures.at(0)), unit: literal.captures.at(1)) } else { present("verify", trimmed, got.result, auto, unit-table(d)) }
   // Through placeholders, as `#eq` substitutes: one key replaced after another rewrote the symbol an earlier one had just become.
-  let (letters, numbers) = formula-lines(trimmed, got.operands, digits)
+  let (letters, numbers) = formula-lines(trimmed, got.operands)
   let kind = if got.operands.len() == 0 { "number" } else if one != none { "var" } else { "formula" }
   (base: got.result.base, dims: got.result.dims, value: shown.value, unit: shown.unit, kind: kind,
    letters: if kind == "number" { none } else { letters }, numbers: if kind == "formula" { numbers } else { none })
@@ -2118,8 +2231,9 @@
 // One side as the relation prints it at `lv`. Level 1 the symbols, level 2 the value, level 3 everything: a variable `F_Ed = 12 kN`, a formula `F_Ed / R_d = 12 kN / 24 kN = 0.5` -- its letters, its numbers and its value (v0.86, the engineer: «au niveau 3 doit afficher F_Ed/R_d = 12 kN/24 kN = 0.5 <= 1»). A bare number is its value at every level. `mirrored` writes the right-hand side the other way round, the value first, so that the two values meet at the sign, which is what the eye compares.
 // Returned as the segments the side's `=` signs part, so that a relation too wide for its line can be stacked at them (verify); joined with " = " they are the side as one line.
 // `brief` (verify-core, the member checks' verdict, issue #12): at level 1 the symbols *and* the value, `σ_t,0,d / f_t,0,d = 0.41`, where `verify` prints the symbols alone.
-#let relation-segments(side, lv, mirrored, digits, brief: false) = {
-  let value = if side.unit == "" { fmt-magnitude(side.value, digits) } else { formula-quantity(side.value, side.unit, digits) }
+#let relation-segments(side, lv, mirrored, brief: false) = {
+  // the side's value ends its chain: no parentheses for a sign, a power of ten as one quoted atom
+  let value = if side.unit == "" { "\"" + display-number(side.value) + "\"" } else { formula-quantity(side.value, side.unit) }
   if side.kind == "number" or lv == 2 { return (value,) }
   if lv <= 1 { return if brief { (side.letters, value) } else { (side.letters,) } }
   let chain = (side.letters,) + (if side.kind == "formula" and side.numbers != side.letters { (side.numbers,) } else { () }) + (value,)
@@ -2133,7 +2247,8 @@
 #let tall-relation = 1.2em
 
 // What `verify` does, with what only the engine asks of it (issue #12, the member checks' verdict, lib/timber.typ `timber-verdict`): `brief` prints a side that is a formula at level 1 as its symbols *and* its value; `left-unit` shows the left-hand side's value in that unit -- `"%"`, a ratio of 0.41 shown as 41 % --; `left-only` prints the left-hand side and the mark and not the relation's sign nor its right-hand side, the comparison still made against it (the engineer, 09.10.2026: «afficher sigma/f = 41 %», and not «⩽ 100 %» besides).
-#let verify-core(relation, level: auto, brief: false, left-unit: none, left-only: false) = context {
+// `written`, `prefix` and `extras` are the public `#verify`'s (spec 2026-10-21-commandes-typst-refonte, REQ-004): the fine arguments it was written with, resolved here against the layers of REQ-007 -- `display` taking the place of the level's scale --, the printed name it sets before the relation (`name-visible`), and its label, description and citation, placed as `#var` places them. The engine's own callers give none of them and print by the level, as they always did.
+#let verify-core(relation, level: auto, brief: false, left-unit: none, left-only: false, id: none, written: none, prefix: none, extras: none) = context {
   check-level("verify", level)
   // a `*` is a product, printed as `dot` (star-as-dot)
   let src = star-as-dot(if type(relation) == str { relation } else { relation.text })
@@ -2151,9 +2266,8 @@
 
   let key = test-aliases.at(found.op, default: found.op)
   let d = var-registry.get()
-  let digits = number-digits.get()
-  let l = relation-side(d, src.slice(0, found.at), digits)
-  let r = relation-side(d, src.slice(found.at + found.len), digits)
+  let l = relation-side(d, src.slice(0, found.at))
+  let r = relation-side(d, src.slice(found.at + found.len))
   if left-unit == "%" { l = (..l, value: l.base * 100, unit: "%") }
 
   assert(dims-equal(l.dims, r.dims),
@@ -2162,15 +2276,23 @@
 
   let holds = (test-relations.at(key).holds)(l.base, r.base)
   let shown-op = if holds { key } else { relation-negation.at(key) }
-  let st = var-line-state.get()
-  let lv = line-level(st, level)
+  // what the relation says of itself to `typst query` (REQ-004), joined to whatever the lines below print -- which is why they are a closure: a `return` of theirs would otherwise drop it
+  let meta = wc-meta((kind: "verify", domain: var-current(d), id: id, relation: src, holds: holds, left: (value: l.value, unit: l.unit), right: (value: r.value, unit: r.unit), level: level))
+  let render() = {
+  // the level's scale -- 1 the symbols, 2 the values, 3 all of it -- is what `display` names since the fine arguments: `"variable"`, `"value-unit"`, `"variable-value-unit"`
+  let rd = if written == none { none } else { resolve-display("verify", written, level, d) }
+  let s = if rd == none { none } else { rd.settings }
+  let lv = if s == none { resolve-level(level) } else { ("none": 0, "variable": 1, "value": 2, "value-unit": 2, "variable-value-unit": 3).at(s.display) }
+  let x = if s == none or extras == none { (before: none, after: none, footnote: none, right: none) } else { placed-extras(extras, s) }
 
   // At level 3 the right-hand side is written the other way round -- value, numbers, symbols -- so the two values meet in the middle of the line, which is what the eye compares.
-  let left = relation-segments(l, lv, false, digits, brief: brief)
-  let right = if left-only { () } else { relation-segments(r, lv, true, digits) }
+  let left = relation-segments(l, lv, false, brief: brief)
+  // the name the relation is given (`name-visible`), before its left-hand side: `η = σ/f = … ⩽ 1`
+  if prefix != none and lv >= 1 { left = (prefix,) + left }
+  let right = if left-only { () } else { relation-segments(r, lv, true) }
   let op = test-relations.at(shown-op).math
 
-  let body = eval(left.join(" = ") + (if left-only { "" } else { " " + op + " " + right.join(" = ") }), mode: "math")
+  let body = math-eval(left.join(" = ") + (if left-only { "" } else { " " + op + " " + right.join(" = ") }))
   let colour = if holds { test-ok } else { test-nok }
   // Two nested boxes, each drawing a bottom rule, rather than two nested `underline`s: underline decorates the text runs it finds, so inside an equation it comes out under the units and not under the numbers between them.
   let rule = (bottom: 0.9pt + colour)
@@ -2189,14 +2311,15 @@
   }
   // Already inline content, so a row only has to join it: what `var-line` adds is the separator before it (v0.80). The comparison itself is made at every level, level 0 included -- two sides of different dimensions stop the compile whether or not the line is printed.
   if lv < 1 { return }
-  if st != none { return line-item(st, marked) }
-  if left.len() + right.len() <= 2 { return marked }
+  // its label, description and citation where their positions put them, as `#var` places them; the right-hand column sets the relation apart
+  let placed(m) = if x.right != none { annotated-rows((([#x.before#m#x.after#x.footnote], x.right),)) } else if x.before == none and x.after == none and x.footnote == none { m } else { [#x.before#m#x.after#x.footnote] }
+  if left.len() + right.len() <= 2 { return placed(marked) }
   // A relation wider than its line is stacked at its signs, as `#eq` stacks a formula (annotated-rows): the left side's letters, then `= <numbers>`, then `= <value> ⩽ <the right side>` -- as much of it on each line as the width holds, so the two values the eye compares stay together where they can -- each sign under the one before, the whole double-ruled and marked as the one line is. A display fraction is one atom no line break can enter, so without this the relation ran off the page. What fits is set exactly as before, in a box the width of the line it stands in, so it still sits in a sentence.
-  box(layout(size => {
+  placed(box(layout(size => {
     if measure(marked).width <= size.width + 0.01pt { return marked }
     // The signs stand where the first line's would: after its variable, or -- where the first line is a whole formula, as wide as the widest line -- at a fixed indent.
-    let pad = box(width: if l.kind == "var" { measure(eval(left.first(), mode: "math")).width } else { relation-indent })
-    let line(src) = eval("#chain-pad " + src, mode: "math", scope: (chain-pad: pad))
+    let pad = box(width: if l.kind == "var" { measure(math-eval(left.first())).width } else { relation-indent })
+    let line(src) = math-eval("#chain-pad " + src, scope: (chain-pad: pad))
     let pieces = left.slice(1).map(s => "= " + s) + (if left-only { () } else { (op + " " + right.first(),) + right.slice(1).map(s => "= " + s) })
     let rows = ()
     let current = none
@@ -2205,7 +2328,7 @@
       if current != none and measure(line(candidate)).width > size.width + 0.01pt { rows.push(current); current = p } else { current = candidate }
     }
     rows.push(current)
-    let lines = (eval(left.first(), mode: "math"),) + rows.map(line)
+    let lines = (math-eval(left.first()),) + rows.map(line)
     // the lines of one relation, as close as #eq's stacked lines: measured to their ink between them, and to the text's own edges above the first and below the last, so the rules stand under the last as they stand under the one line
     let edges(i) = (top: if i == 0 { auto } else { "bounds" }, bottom: if i == lines.len() - 1 { auto } else { "bounds" })
     let inked(x, top, bottom) = block({
@@ -2220,7 +2343,9 @@
     ruled(stacked)
     h(0.35em)
     mark(lift: below + outer + inner)
-  }))
+  })))
+  }
+  meta + render()
 }
 
 /// States a relation between the report's variables, **performs it**, and marks the answer: double-ruled in green with a ✔ where it holds, in red with a ✘ where it does not.
@@ -2239,15 +2364,24 @@
 /// #verify(`F_Ed / R_d <= 1`)
 /// ```
 ///
-/// A side that is a whole formula is printed at level 3 as its letters, then the same with the numbers put in, then its value -- `F_Ed / R_d = 12 kN / 24 kN = 0.5 ⩽ 1`:
+/// A side that is a whole formula is printed with `display: "variable-value-unit"` -- level 3's -- as its letters, then the same with the numbers put in, then its value -- `F_Ed / R_d = 12 kN / 24 kN = 0.5 ⩽ 1`:
 ///
 /// ```typ
 /// #var("F_Ed", 12, "kN", level: 0)
 /// #var("R_d", 24, "kN", level: 0)
-/// #verify(`F_Ed / R_d <= 1`, level: 3)
+/// #verify(`F_Ed / R_d <= 1`, display: "variable-value-unit")
 /// ```
 ///
-/// At `level: 0` the relation is still performed -- two sides of different dimensions still stop the compile -- and nothing is printed; the line below names the same variables:
+/// **Its utilisation, named** (spec 2026-10-21-commandes-typst-refonte, REQ-004, D-12): `name-calc:` keeps the ratio of the two sides -- the left over the right for `<=` and `<`, the right over the left for `>=` and `>` -- under that name, for a line below; `name-visible:` prints the relation as that ratio against 1, under that name -- `η = σ/f = … ⩽ 1`:
+///
+/// ```typ
+/// #var("sigma_t_d", 0.893, "N/mm²", level: 0)
+/// #var("f_t_d", 1.187, "N/mm²", level: 0)
+/// #verify(`sigma_t_d <= f_t_d`, name-calc: "eta", name-visible: "eta", display: "variable-value-unit")
+/// Le taux de travail vaut #var("eta").
+/// ```
+///
+/// At `level: 0` -- `display: "none"` -- the relation is still performed, two sides of different dimensions still stopping the compile, and nothing is printed:
 ///
 /// ```typ
 /// #var("F_Ed", 2.037, "kN", level: 0)
@@ -2256,12 +2390,59 @@
 /// #eq("eta", `F_Ed / R_d`)
 /// ```
 ///
+/// Its label, description and citation are placed as `#var` places them -- the norm in the right-hand column with `norm-position: "line-right"`:
+///
+/// ```typ
+/// #var("sigma_t_0_d", 4.2, "N/mm²")
+/// #var("f_t_0_d", 9.9, "N/mm²")
+/// #verify(`sigma_t_0_d <= f_t_0_d`, label: "Zugspannung", norm: "SIA 265", norm-section: "4.2.1", norm-position: "line-right", id: "v-6")
+/// ```
+///
 /// **The printed sign follows the truth.** Where `F_Ed <= R_d` does not hold, the line prints `F_Ed > R_d`: what is written is then a true statement, and the ✘ is what says the relation the report wanted is not the one that holds.
 ///
 /// The comparison is made on the **full** values, not on the decimals printed, so two numbers that print alike can still be marked ✘; a tie is absorbed at a relative 1e-9. Two sides whose dimensions differ stop the compile -- comparing a kN with a kNm is a mistake at the call site, not a comparison.
-///
-/// ⚠️ Untraced, like everything computed in Typst (section 1): it carries no citation and no `source`. It guarantees that the mark agrees with the numbers beside it, not that those numbers are right.
-/// - relation (content, str): the relation, in math source naming the registry's keys. `<=`, `>=`, `<`, `>`, `=`, `==`, `!=` (and ≤, ≥, ≠). `*` multiplies, as `dot` does, and is printed as it. What is quoted -- a literal's unit, `(21 "N/mm²")` -- is never read as a name.
-/// - level (int, auto): 0 prints nothing (the relation is still performed), 1 the symbols alone, 2 the values alone, 3 all of it -- a variable as `F_Ed = 2.037 kN`, a formula as its letters, its numbers and its value, a bare number as itself, and the right-hand side reversed, `F_Ed = 2.037 kN ⩽ 4.969 kN = R_d`. auto follows the report.
+/// - relation (content, str): the relation, in math source naming the registry's keys. `<=`, `>=`, `<`, `>`, `=`, `==`, `!=` (and ≤, ≥, ≠). `*` multiplies, as `dot` does. What is quoted -- a literal's unit, `(21 "N/mm²")` -- is never read as a name.
+/// - name-calc (str, none): the name the ratio of the two sides is kept under -- not for `=` and `!=`, which have none.
+/// - name-visible (str, none): the symbol the relation is printed under, as its ratio against 1 -- not for `=` and `!=`.
+/// - display (str, auto): `"none"`, `"variable"` (the symbols), `"value-unit"` (the values), `"variable-value-unit"` (all of it, the right-hand side reversed so that the two values meet at the sign). auto leaves it to the level.
+/// - role (str, auto): `"data"`, `"compute"` or `"result"` (the default of `#verify`) -- the role of the ratio `name-calc:` keeps.
+/// - label (str, none), label-position (str, auto): what the relation states, and where -- `"none"`, `"before"`, `"after"`, `"footnote"`.
+/// - descr (str, none), descr-position (str, auto): why, and where -- `"none"`, `"after"`, `"footnote"`.
+/// - norm (str, none), norm-section (str, none), norm-position (str, auto): the citation, and where -- `"none"`, `"in-line"`, `"line-right"`, `"footnote"`.
+/// - id (str, none): the name the relation is found by -- by Woodcore in the file, and by `typst query` -- once per domain for `#var`, `#eq` and `#verify` together.
+/// - level (int, auto): a preset of `display` and the positions -- 0 nothing, 1 the symbols, 2 the values, 3 all of it --, which an argument written overrides.
 /// -> content
-#let verify(relation, level: auto) = verify-core(relation, level: level)
+#let verify(relation, name-calc: none, name-visible: none, display: auto, role: auto, label: none, label-position: auto, descr: none, descr-position: auto, norm: none, norm-section: none, norm-position: auto, id: none, level: auto) = {
+  check-level("verify", level)
+  check-line-id("verify", id)
+  check-fine("verify", "role", role)
+  let written = written-fine("verify", (display: display, label-position: label-position, descr-position: descr-position, norm-position: norm-position))
+  // a `*` is a product, printed as `dot` (star-as-dot)
+  let src = star-as-dot(if type(relation) == str { relation } else { relation.text })
+  let split = relation-split(src)
+  let named = name-calc != none or name-visible != none
+  if named and split.op in ("=", "==", "!=", "≠") {
+    panic("verify: " + repr(src) + " is an equality, which has no ratio -- name-calc: and name-visible: name the ratio of a relation <=, <, >= or >")
+  }
+  if name-calc != none { check-key("verify", name-calc) }
+  // the ratio against 1 the relation is printed as where it is given a name (D-12): the left over the right for <= and <, the right over the left for >= and >, so that a relation that holds stays one that holds
+  let greater = split.op in (">=", ">", "≥")
+  let ratio = "(" + (if greater { split.right } else { split.left }).trim() + ") / (" + (if greater { split.left } else { split.right }).trim() + ")"
+  let shown-src = if name-visible == none { src } else { ratio + " " + (if greater { ("≥": "<=", ">=": "<=", ">": "<").at(split.op) } else { split.op }) + " 1" }
+  bib-note(norm)
+  var-registry.update(d => {
+    let d = count-line-id(d, id)
+    let d = if name-calc == none { d } else {
+      let got = evaluate-formula("verify", d, ratio)
+      if got.result == none { d } else {
+        var-store(d, name-calc, (value: got.result.base, unit: "", symbol: key-symbol(name-calc), warning: none,
+          label: label, description: descr, norm: norm, norm_ref: if norm-section == none { "" } else { norm-section }, source: none,
+          role: resolve-role("verify", role, d), shown: (:)))
+      }
+    }
+    take-next(d)
+  })
+  context refuse-twice("verify", id, var-registry.get())
+  let extras = (label: label, description: descr, norm: norm, norm_ref: if norm-section == none { "" } else { norm-section })
+  verify-core(shown-src, level: level, id: id, written: written, prefix: if name-visible == none { none } else { quoted-words(name-visible) }, extras: extras)
+}

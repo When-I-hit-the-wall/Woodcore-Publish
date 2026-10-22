@@ -16,6 +16,7 @@ import conftest
 from conftest import ROOT, Skip
 
 import project
+from domains import unfold
 
 TOOLS = ROOT / "calc" / "tools"
 _STATE = {}
@@ -89,14 +90,6 @@ def _fresh(tab):
     tab.live = False
 
 
-def _reset_options(tab):
-    """The options of the command back at the command's own: the tests share one tab, and an option left set by one would be read by the next."""
-    for box, data in ((tab.level_box.combo, "auto"), (tab.member_box, 1), (tab.title_box, "auto"), (tab.unit_box, None)):
-        _select(box, data)
-    tab.title_text.setText("")
-    tab.description_box.setChecked(False)
-
-
 def _select(combo, data):
     index = combo.findData(data)
     assert index >= 0, (data, [combo.itemData(i) for i in range(combo.count())])
@@ -146,7 +139,8 @@ def test_the_navigation_shows_the_nine_rows_in_the_report():
 def test_the_placeholders_say_they_are_to_come_in_three_languages():
     window, here = _window()
     import member_check_tab
-    soon = [t for t in window.tabs if isinstance(t, member_check_tab.SoonTab)]
+    import reserved_tab
+    soon = [t for t in window.tabs if isinstance(t, reserved_tab.ReservedTab) and t.key in member_check_tab.SOON]
     assert len(soon) == 3, len(soon)      # Compression and Flexion are built since v0.117, Effort tranchant, Flambage and Déversement since issue #38
     assert not {"tab_mc_bending", "tab_mc_shear", "tab_mc_buckling", "tab_mc_ltb"} & set(member_check_tab.SOON)
     for tab in soon:
@@ -160,9 +154,9 @@ def test_the_placeholders_say_they_are_to_come_in_three_languages():
             assert table[what] in text and all(c in text for c in commands), text
     for what in ("mc_what_bending", "mc_what_shear", "mc_what_buckling", "mc_what_ltb"):
         assert all(what not in table for table in (fr, de, en)), "the placeholder's words went with it: " + what
-    # «Effort tranchant» says which shear checks stay commands of the report
+    # «Effort tranchant» computes the shear-off and the shear across the grain since the spec 2026-10-21-commandes-typst-refonte (REQ-021); torsion is no check of Woodcore's, written in the report by hand since #verify-shear was retired (lot 19)
     for table in (fr, de, en):
-        assert "#verify-shear-off" in table["mc_shear_hint"] and "#verify-shear-perp" in table["mc_shear_hint"]
+        assert "#verify" in table["mc_shear_hint"] and "#verify-shear" not in table["mc_shear_hint"]
     # the two serviceability modules say that no command computes them yet
     assert not member_check_tab.SOON["tab_sls_deformation"][1] and not member_check_tab.SOON["tab_sls_vibration"][1]
 
@@ -222,8 +216,10 @@ def test_the_tension_tab_has_three_panes_and_its_cards():
         assert tab.splitter.count() == 3
         from PySide6.QtWidgets import QGroupBox
         titles = {box.title() for box in tab.findChildren(QGroupBox)}
-        for key in ("mc_box_position", "mc_box_material", "mc_box_section", "mc_box_effort", "mc_results", "mc_options", "ds_call"):
+        for key in ("mc_box_position", "mc_box_material", "mc_box_section", "mc_box_effort", "mc_results", "ds_call"):
             assert tab.t(key) in titles, key
+        # every kind is printed unfolded (spec 2026-10-15, UI-003; spec 2026-10-21-commandes-typst-refonte, REQ-017): its domain one click away, no option of its own
+        assert tab.UNFOLDED and not tab.formulas_button.isHidden() and _ctab(window).UNFOLDED
         # two views since v0.117: «Calcul» -- the list, the form, the result -- and «Affichage» -- the list, the page, the options and the call
         assert tab.VIEWS == ("calc", "display")
         tab.set_view("calc")
@@ -359,43 +355,6 @@ def test_an_id_taken_is_refused_ignoring_case_and_a_rename_is_asked_first():
         tab.dirty = False
 
 
-def test_the_options_change_the_command_and_it_says_it_needs_the_check_saved():
-    window, here = _window()
-    with project.using(here):
-        tab = _tab(window)
-        tab.dirty = False
-        tab.load("ZT-01")
-        _reset_options(tab)
-        assert tab.command_text() == "#show-check-member(\"ZT-01\")", tab.command_text()
-        assert tab.display.banner.isHidden() and tab.command_field.text() == tab.command_text()
-        _select(tab.level_box.combo, "3")
-        assert tab.command_text() == '#show-check-member("ZT-01", level: 3)', tab.command_text()
-        _select(tab.member_box, "none")
-        assert "member-level: none" in tab.command_text() and not tab.description_box.isEnabled()
-        _select(tab.member_box, 2)
-        assert "member-level: 2" in tab.command_text() and tab.description_box.isEnabled()
-        tab.description_box.setChecked(True)
-        assert "description: true" in tab.command_text()
-        _select(tab.title_box, "none")
-        assert "title: none" in tab.command_text()
-        _select(tab.title_box, "text")
-        assert tab.title_text.isEnabled()
-        tab.title_text.setText("Zug im Träger")
-        assert 'title: "Zug im Träger"' in tab.command_text()
-        _select(tab.unit_box, "%")
-        assert 'unit: "%"' in tab.command_text()
-        assert tab.command_field.text() == tab.command_text(), "the field shows the call"
-        # the draft's id is in the call, and the tab says, until it is saved, that Typst does not know the check
-        tab.identity.id.setText("ZT-01x")
-        tab.refresh()
-        assert '"ZT-01x"' in tab.command_text() and not tab.display.banner.isHidden() and tab.display.banner.text() == tab.t("mc_save_first")
-        tab.dirty = False
-        tab.load("ZT-01")
-        assert tab.display.banner.isHidden()
-        _reset_options(tab)
-        assert tab.command_text() == '#show-check-member("ZT-01")'
-
-
 def test_the_page_is_asked_for_from_the_draft_with_its_values_written_into_the_call():
     window, here = _window()
     with project.using(here):
@@ -412,17 +371,15 @@ def test_the_page_is_asked_for_from_the_draft_with_its_values_written_into_the_c
         assert asked, "shown, the tab asks for its page"
         _here, mode, source, key = asked[-1]
         assert mode == window.current_document() and key
-        assert source.startswith("#import") and '"/commands.typ"' in source
-        assert "#member(" in source and "#verify-tension(" in source and "GL24h" in source and "120" in source and "20 kN" in source, source
+        assert source.startswith("#import") and '"/000-Typst-Config/commands.typ"' in source
+        # a tension's page is its domain unfolded (spec 2026-10-15, UI-003): its values written as literals, no domain: a draft is in no export
+        assert '#domain("ZT-02"' in source and "#verify(" in source and "GL24h" in source and "120/240" in source and '20, "kN"' in source, source
+        assert 'domain: ("check"' not in source and "gen:" not in source
+        assert tab.command_text() == '#include domain-file("check", "ZT-02")'   # no path written by hand (ARCH-008)
         # an edit in the form -- not saved -- is in the next page, newest request first
         tab.n_spin.setValue(55.0)
         tab.refresh()
-        assert "55 kN" in asked[-1][2] and tab.dirty
-        # the options reach the draft's call too: the member line left out, a title written
-        _select(tab.member_box, "none")
-        _select(tab.title_box, "none")
-        assert "title: none" in asked[-1][2]
-        assert "level: 0" in asked[-1][2], "no member line is level 0 of `#member`"
+        assert '55, "kN"' in asked[-1][2] and tab.dirty
         # a check that cannot be calculated asks for no page and says why in the pane
         tab.n_spin.setValue(0.0)
         count = len(asked)
@@ -490,100 +447,27 @@ def test_a_project_opened_read_only_writes_nothing():
         tab.load("ZT-02")
 
 
-def test_the_verdict_of_a_check_is_offered_from_0_to_3_and_a_choice_survives_a_draft_not_calculable():
-    """UI-001, UI-002 (issue #58, D-02, ARCH-RISK-206): at -1 the verdict of a tension, `eta`, is offered by its symbol with `0 | 1 | 2 | 3` like every line, nothing locked: left at 0 it is not in `shown:`, and neither is the stress; a draft a moment not calculable, then calculable again, gives the engineer's choice back."""
-    from PySide6.QtWidgets import QLabel
+def test_the_draft_travels_through_a_rebuild():
     window, here = _window()
     with project.using(here):
-        import member_check_tab
-        tab = member_check_tab.TensionTab(window)
-        try:
-            tab.dirty = False
-            tab.load("ZT-01")
-            _select(tab.level_box.combo, "-1")
-            assert "eta" in tab.level_box.rows and "sigma_t_0_d" in tab.level_box.rows, list(tab.level_box.rows)
-            for key, switch in tab.level_box.rows.items():
-                assert switch.keys == ["0", "1", "2", "3"], key
-            label = tab.level_box.rows["eta"].parentWidget().findChild(QLabel)
-            assert "η" in label.text() or "&eta;" in label.text(), label.text()
-            assert tab.level_box.picked() == {} and "shown" not in tab.options() or not tab.options()["shown"], tab.options()
-            tab.level_box.rows["eta"].button("2").click()
-            assert tab.level_box.picked() == {"eta": 2}, tab.level_box.picked()
-            assert 'shown: (eta: 2)' in tab.command_text(), tab.command_text()
-            tab.level_box.rows["eta"].button("0").click()
-            assert tab.level_box.picked() == {}, "a verdict at 0 is left out (issue #58)"
-            tab.level_box.set_state(("-1", {"A": 2, "eta": 1}))
-            assert tab.level_box.picked() == {"A": 2, "eta": 1}, tab.level_box.picked()
-            keys = list(tab.level_box.rows)
-            tab.level_box.set_keys([])
-            tab.level_box.set_keys(keys)
-            assert tab.level_box.picked() == {"A": 2, "eta": 1}, "a choice survives a list that lacked it"
-        finally:
-            tab.dirty = False
-            tab.deleteLater()
-
-
-def test_minus_one_offers_the_lines_of_the_check_and_writes_one_list():
-    """UI-005 (issue #20, D-11, D-15): in a compression, -1 «Sélection manuelle» shows a box and a level for the member's lines and the check's own -- never one a compression along the grain does not print --, ticking writes `level: -1, shown: (…)` in the call and in the draft the page compiles, the member line's level gives way, and the choice travels through a rebuild."""
-    window, here = _window()
-    with project.using(here):
-        import member_check_tab
-        from domains import member_check
-        tab = member_check_tab.CompressionTab(window)
-        try:
-            tab.dirty = False
-            tab.load("DR-02")
-            _select(tab.level_box.combo, "-1")
-            keys = list(tab.level_box.rows)
-            assert "A" in keys and "sigma_c_0_d" in keys and "eta_s" in keys and "lambda_rel_y" not in keys and "f_c_alpha_d" not in keys and "eta_y" not in keys, keys
-            assert tab.command_text() == '#show-check-member("DR-02", level: -1, shown: (:))', tab.command_text()   # nothing printed unless chosen, the verdict included (issue #58)
-            assert not tab.member_box.isEnabled()
-            tab.level_box.rows["A"].button("1").click()
-            tab.level_box.rows["sigma_c_0_d"].button("2").click()
-            tab.level_box.rows["eta_s"].button("3").click()   # the verdict of the section along the grain (issue #58)
-            assert tab.command_text() == '#show-check-member("DR-02", level: -1, shown: (A: 1, sigma_c_0_d: 2, eta_s: 3))', tab.command_text()
-            draft = member_check.draft_typst(tab.record, **tab.draft_options())
-            assert "level: -1, shown: (A: 1)" in draft and "level: -1, shown: (sigma_c_0_d: 2, eta_s: 3)" in draft, draft
-            state = tab.view_state()
-            window.views["tab_mc_compression"] = state
-            other = member_check_tab.CompressionTab(window)
-            try:
-                assert other.level_box.level() == "-1" and other.level_box.picked() == {"A": 1, "sigma_c_0_d": 2, "eta_s": 3}, other.level_box.state()
-            finally:
-                window.views.pop("tab_mc_compression", None)
-                other.dirty = False
-                other.deleteLater()
-        finally:
-            tab.dirty = False
-            tab.deleteLater()
-
-
-def test_the_draft_and_the_options_travel_through_a_rebuild():
-    window, here = _window()
-    with project.using(here):
-        tab = _tab(window)
+        tab = _ctab(window)
         tab.dirty = False
-        tab.load("ZT-02")
+        tab.load("DR-02")
         tab.n_spin.setValue(33.0)
-        _select(tab.level_box.combo, "2")
-        tab.title_box.setCurrentIndex(tab.title_box.findData("text"))
-        tab.title_text.setText("Titel")
         state = tab.view_state()
-        _reset_options(tab)
-        assert state["dirty"] and state["draft"]["N"]["value"] == 33.0 and state["current_id"] == "ZT-02"
+        assert state["dirty"] and state["draft"]["N"]["value"] == 33.0 and state["current_id"] == "DR-02"
         import member_check_tab
-        window.views["tab_mc_tension"] = state
-        other = member_check_tab.TensionTab(window)
+        window.views["tab_mc_compression"] = state
+        other = member_check_tab.CompressionTab(window)
         try:
-            assert other.dirty and other.current_id == "ZT-02" and other.n_spin.value() == 33.0
-            assert other.level_box.level() == "2" and other.title_text.text() == "Titel" and other.title_text.isEnabled()
-            assert 'title: "Titel"' in other.command_text() and "level: 2" in other.command_text()
+            assert other.dirty and other.current_id == "DR-02" and other.n_spin.value() == 33.0
+            assert other.command_text() == '#include domain-file("check", "DR-02")'
         finally:
-            window.views.pop("tab_mc_tension", None)
+            window.views.pop("tab_mc_compression", None)
             other.dirty = False
             other.deleteLater()
         tab.dirty = False
-        tab.load("ZT-02")
+        tab.load("DR-02")
 
 
 def test_the_words_are_in_three_languages_with_no_sharp_s_and_a_space_before_a_french_colon():
@@ -630,7 +514,7 @@ def test_the_compression_tab_is_built_in_the_report_alone_and_the_two_tabs_share
         assert tab.splitter.count() == 3
         from PySide6.QtWidgets import QGroupBox
         titles = {box.title() for box in tab.findChildren(QGroupBox)}
-        for key in ("mc_box_position", "mc_box_material", "mc_box_section", "mc_box_effort", "mc_box_support", "mc_results", "mc_options", "ds_call"):
+        for key in ("mc_box_position", "mc_box_material", "mc_box_section", "mc_box_effort", "mc_box_support", "mc_results", "ds_call"):
             assert tab.t(key) in titles, key
     # the read-only guard sits on the base, so on both tabs, and the subclasses override no writer
     assert "save" in {k: v for c in reversed(woodcore_gui.own_classes(member_check_tab.MemberCheckTab)) for k, v in vars(c).items()} and "save" not in vars(member_check_tab.CompressionTab)
@@ -823,10 +707,11 @@ def test_a_compression_is_saved_with_its_kind_and_its_bearing():
         tab.pane.request_snippet = lambda here_, mode, source, key: asked.append(source)
         tab.set_view("display")
         tab.on_shown()
-        assert asked and "#verify-compression-perp(" in asked[-1] and 'case: "mit_vorholz"' in asked[-1] and "larger: true" in asked[-1], asked[-1:]
+        # the page is the domain the export would write (spec 2026-10-15, UI-003): across the grain f_c,90,d, along it f_c,0,d
+        assert asked and "#domain(" in asked[-1] and '"f_c_90_d"' in asked[-1], asked[-1:]
         tab.alpha_spin.setValue(0.0)
         tab.refresh()
-        assert "#verify-compression(" in asked[-1]
+        assert '"f_c_0_d"' in asked[-1] and '"f_c_90_d"' not in asked[-1], asked[-1:]
         tab.set_view("calc")
         tab.live = False
         tab.dirty = False
@@ -933,15 +818,15 @@ def test_a_bending_is_saved_exported_and_computed_at_once():
         member_check.read_source(path)
         exported = json.loads((here.data_dir / "checks.json").read_text(encoding="utf-8"))["checks"]["BI-new"]
         assert exported["calculable"] and exported["M_y"] == {"value": 4.0, "unit": "kNm"}, exported
-        # the call the page compiles is verify-bending-normal's, the section alone; without N verify-bending's
+        # the page is the domain the export would write: with N its compression, without N the bending alone
         asked = []
         tab.pane.request_snippet = lambda here_, mode, source, key: asked.append(source)
         tab.set_view("display")
         tab.on_shown()
-        assert asked and "#verify-bending-normal(" in asked[-1] and "stability: false" in asked[-1], asked[-1:]
+        assert asked and "#domain(" in asked[-1] and '"N_c_d"' in asked[-1], asked[-1:]
         tab.n_spin.setValue(0.0)
         tab.refresh()
-        assert "#verify-bending(" in asked[-1] and "N:" not in asked[-1].split("#verify-bending(")[1]
+        assert '"N_c_d"' not in asked[-1], asked[-1:]
         # no moment at all: not calculable, said in the results
         tab.my_spin.setValue(0.0)
         tab.mz_spin.setValue(0.0)
@@ -1068,11 +953,6 @@ def test_the_verdict_has_its_own_colour_for_ok_and_not_ok():
             tab.refresh()
             text = tab.verdict_label.text()
             assert danger_colour in text and "✘" in text and ok_colour not in text and ">" in text.replace("&nbsp;", "") and "1.3" in text, text
-        with _compute(ok=True, eta=0.5):
-            _select(tab.unit_box, "%")
-            text = tab.verdict_label.text()
-            assert "50 %" in text and "100 %" not in text and "⩽" not in text and "η" not in text, text   # issue #12 (D-010): «σ/f = 50 %», nothing after it
-            _select(tab.unit_box, None)
         tab.dirty = False
 
 
@@ -1109,12 +989,12 @@ def test_calcul_compiles_nothing_and_affichage_compiles_the_draft_at_every_edit(
             assert asked == [], "«Calcul»: no request at all"
             tab.set_view("display")                     # «Affichage» compiles the draft
             tab.request_preview()
-            assert asked and "41 kN" in asked[-1]
+            assert asked and ("41 kN" in asked[-1] or '41, "kN"' in asked[-1]), asked[-1]   # the unfolded tension writes its literal (spec 2026-10-15)
             count = len(asked)
             tab.n_spin.setValue(42.0)                   # an edit asks again, a moment later
             tab.refresh_timer.stop()
             tab.request_preview()
-            assert len(asked) > count and "42 kN" in asked[-1]
+            assert len(asked) > count and ("42 kN" in asked[-1] or '42, "kN"' in asked[-1])
             tab.set_view("calc")
             count = len(asked)
             tab.n_spin.setValue(43.0)
@@ -1127,13 +1007,104 @@ def test_calcul_compiles_nothing_and_affichage_compiles_the_draft_at_every_edit(
             tab.load("ZT-02" if pick is _tab else "DR-02")
 
 
-def test_calcul_shows_the_result_and_affichage_the_command_its_options_and_the_call():
+def test_calcul_shows_the_result_and_affichage_the_command_and_the_call():
     window, here = _window()
     from PySide6.QtWidgets import QGroupBox
     with project.using(here):
-        tab = _tab(window)
+        tab = _ctab(window)
         work = [b.title() for b in tab.panes.right.widget(0).findChildren(QGroupBox) if b.property("card")]
-        assert tab.t("mc_results") in work and tab.t("mc_options") not in work and tab.t("ds_call") not in work, work
+        assert tab.t("mc_results") in work and tab.t("ds_call") not in work, work
         shown = [b.title() for b in tab.display.right.findChildren(QGroupBox) if b.property("card") and b.title()]
-        order = [title for title in shown if title in (tab.t("ds_command"), tab.t("mc_options"), tab.t("ds_call"))]
-        assert order == [tab.t("ds_command"), tab.t("mc_options"), tab.t("ds_call")], order
+        order = [title for title in shown if title in (tab.t("ds_command"), tab.t("ds_call"))]
+        assert order == [tab.t("ds_command"), tab.t("ds_call")], order
+
+
+def test_a_tension_saved_is_unfolded_shows_a_value_imported_from_its_file_and_opens_in_formulas():
+    """UI-003 (spec 2026-10-15): saving a tension writes its source through `member_check.write_source` and its domain Formules/<id>.typ; N changed to 30 kN in that file and imported in the «Formules» tab is what the «Traction» tab then shows; «Ouvrir dans Formules» brings that tab forward on the check's domain."""
+    window, here = _window()   # calc/tools is on the path once the window is built: a tab's module is imported after it
+    import formula_tab
+    from domains import unfold
+    with project.using(here):
+        tab = _tab(window)
+        tab.dirty = False
+        tab.load("ZT-01")
+        tab.save()
+        path = unfold.domain_path(here, "ZT-01")   # Timber-checks/Tension/ laid out by folders (issue #64)
+        try:
+            assert path.is_file()
+            path.write_text(path.read_text(encoding="utf-8").replace('"N_(t,d)", 25, "kN"', '"N_(t,d)", 30, "kN"'), encoding="utf-8")
+            assert unfold.import_lines(here, "ZT-01", ["var:N_t_d"], lang="de")["imported"] == ["var:N_t_d"]
+            tab.dirty = False
+            tab.load("ZT-01")
+            assert tab.n_spin.value() == 30.0
+            assert tab.open_in_formulas() is True
+            ftab = next(t for t in window.tabs if isinstance(t, formula_tab.FormulaTab))
+            assert window.tab_widget.currentWidget() is ftab and ftab.current_id == "ZT-01"
+        finally:
+            src = json.loads((here.checks_dir / "ZT-01.json").read_text(encoding="utf-8"))
+            src["N"] = {"value": 25, "unit": "kN"}
+            (here.checks_dir / "ZT-01.json").write_text(json.dumps(src, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            path.unlink(missing_ok=True)
+            base = unfold.read_base(here)
+            base["domains"].pop("ZT-01", None)
+            unfold.write_base(here, base)
+            tab.dirty = False
+            tab.load("ZT-01")
+
+
+def test_a_domain_whose_form_no_longer_matches_its_check_says_so_in_red_in_the_formulas_tab():
+    """Spec 2026-10-21-commandes-typst-refonte, UI-004 (REQ-012): after a regeneration that cannot apply -- the form a check's domain was written from no longer the check's -- the domain's tab says so at its head, in the theme's red, as the report prints it."""
+    window, here = _window()   # calc/tools is on the path once the window is built: a tab's module is imported after it
+    import formula_tab
+    import theme
+    from domains import unfold
+    with project.using(here):
+        tab = _tab(window)
+        tab.dirty = False
+        tab.load("ZT-01")
+        tab.save()
+        path = unfold.domain_path(here, "ZT-01")
+        base = unfold.read_base(here)
+        try:
+            assert path.is_file() and "ZT-01" in base["domains"]
+            base["domains"]["ZT-01"]["gen"] = dict(base["domains"]["ZT-01"]["gen"], form="(8)/(9)")   # written from another form: a regeneration that cannot apply
+            unfold.write_base(here, base)
+            assert tab.open_in_formulas() is True
+            ftab = next(t for t in window.tabs if isinstance(t, formula_tab.FormulaTab))
+            ftab.refresh_unfold()
+            assert ftab.unfold_card.isVisibleTo(ftab), "the card of a domain Woodcore wrote out"
+            head = ftab.unfold_head.text()
+            assert ftab.t("fm_unfold_no_match") in head and theme.colour("danger") in head, head
+        finally:
+            path.unlink(missing_ok=True)
+            base = unfold.read_base(here)
+            base["domains"].pop("ZT-01", None)
+            unfold.write_base(here, base)
+            tab.dirty = False
+            tab.load("ZT-01")
+
+
+def test_the_shear_tab_offers_its_three_checks_in_a_list():
+    """Spec 2026-10-21-commandes-typst-refonte, UI-005, REQ-021, Q-010: «Effort tranchant» chooses in a list what it checks -- the shear of 4.2.5.1, the shear-off of 4.2.6, the shear with a stress perpendicular to the grain of 4.2.7.1 --, each showing its own fields; a shear-off saved is exported calculable, its variant and its fields kept, and computed by Python."""
+    window, here = _window()
+    with project.using(here):
+        from domains import member_check
+        shear = _tab_of(window, "tab_mc_shear")
+        assert [shear.variant_box.itemData(i) for i in range(shear.variant_box.count())] == list(member_check.SHEAR_VARIANTS)
+        shear.new()
+        _select(shear.position_box, "T001")
+        shear.variant_box.setCurrentIndex(shear.variant_box.findData("shear-off"))
+        assert shear.effort_form.isRowVisible(shear.f_off) and not shear.effort_form.isRowVisible(shear.pith_box) and not shear.effort_form.isRowVisible(shear.s90)
+        shear.f_off.setValue(20.0)
+        shear.l_off.setValue(200.0)
+        draft = shear.draft()
+        assert draft["variant"] == "shear-off" and draft["F"] == {"value": 20.0, "unit": "kN"} and draft["l"] == 200.0 and draft["w"] is None and draft["V_z"] is None, draft
+        assert shear.save(), "a shear-off is saved"
+        saved = shear.current_id
+        exported = json.loads((here.data_dir / member_check.EXPORT_FILE).read_text(encoding="utf-8"))["checks"][saved]
+        assert exported["calculable"] and exported["variant"] == "shear-off" and member_check.compute(exported)["equation"] in ("(26)", "(27)"), exported
+        shear.variant_box.setCurrentIndex(shear.variant_box.findData("shear-perp"))
+        assert shear.effort_form.isRowVisible(shear.s90) and not shear.effort_form.isRowVisible(shear.f_off)
+        shear.dirty = False
+        (here.checks_dir / ("%s.json" % saved)).unlink()
+        member_check.export(here)

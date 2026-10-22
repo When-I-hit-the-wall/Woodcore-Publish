@@ -8,4 +8,4 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#fmt-value(var-of("snow-load", "SL", "s_k"))
+#fmt-value((value: 26.916, unit: "kNm"))

@@ -16,6 +16,7 @@ from PySide6.QtGui import QBrush, QColor, QFont, QImage, QPainter, QPainterPath,
 from PySide6.QtPdf import QPdfDocument, QPdfDocumentRenderOptions, QPdfPageRenderer
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsPathItem, QGraphicsPixmapItem, QGraphicsRectItem, QGraphicsScene, QGraphicsSimpleTextItem, QGraphicsView, QLineEdit
 import theme  # the desk around the sheet (theme.py, v0.90)
+from canvas_items import PIXMAP_CACHE_KB, SvgLayer, cosmetic as _cosmetic, ensure_pixmap_cache  # the canvases' layer, pen and cache, written once (D2)
 
 
 def _probe_pdf():
@@ -277,39 +278,6 @@ class PdfPages(QObject):
         shiboken6.delete(self)
 
 
-# Qt keeps an item's cached picture in QPixmapCache, 10 MB by default -- less than one picture of a full-screen view (1920 x 1080 at 150 %: 19 MB). Past it the cache keeps nothing, and the SVG of the symbols was drawn again, vector by vector, at every frame of a pan or a zoom (measured, docs/architecture/performance.md, v0.117).
-PIXMAP_CACHE_KB = 256 * 1024
-
-
-def ensure_pixmap_cache():
-    """QPixmapCache made large enough for a cached layer of a full-screen view -- never smaller than it is."""
-    if QPixmapCache.cacheLimit() < PIXMAP_CACHE_KB:
-        QPixmapCache.setCacheLimit(PIXMAP_CACHE_KB)
-
-
-class SvgLayer(QGraphicsItem):
-    """An SVG drawn over an exact rectangle of the scene. QGraphicsSvgItem would size itself by the SVG's whole-pixel default size, and an A3 page of 1190.55 points would come out 0.45 points short at its far edge -- enough to set a symbol beside what it marks."""
-
-    def __init__(self, renderer, rect):
-        super().__init__()
-        self.renderer = renderer
-        self.rect = QRectF(rect)
-        ensure_pixmap_cache()   # or the cached picture is thrown away as soon as made (PIXMAP_CACHE_KB)
-        self.setCacheMode(QGraphicsItem.CacheMode.DeviceCoordinateCache)
-
-    def set_rect(self, rect):
-        self.prepareGeometryChange()
-        self.rect = QRectF(rect)
-        self.update()
-
-    def boundingRect(self):
-        return self.rect
-
-    def paint(self, painter, _option, _widget=None):
-        if self.renderer.isValid():
-            self.renderer.render(painter, self.rect)
-
-
 class PageTile(QGraphicsItem):
     """A part of a PDF page rendered for the view, over the rectangle of the sheet it shows. While the view is at the scale it was rendered for, it is drawn pixel for pixel: smoothing an image drawn at its own size would only blur it, by the half pixel a scroll position may fall between. Once the view has zoomed away from it, it is smoothed like any image, until the next render replaces it."""
 
@@ -388,14 +356,6 @@ def tint_svg(svg, ink):
     """An SVG of symbols with every colour but white and none made `ink` -- the superposed plan's elements in the superposition's one colour (v0.116). The texts that state no fill take the ink from the root."""
     svg = _SVG_PAINT.sub(lambda m: m.group(0) if m.group(2).strip().lower() in _WHITE else f'{m.group(1)}="{ink}"', svg)
     return svg.replace("<svg ", f'<svg fill="{ink}" ', 1)
-
-
-def _cosmetic(colour, width=1.5, dash=None):
-    pen = QPen(colour, width)
-    pen.setCosmetic(True)
-    if dash:
-        pen.setDashPattern(dash)
-    return pen
 
 
 class BackgroundFallback(Exception):

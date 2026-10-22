@@ -12,12 +12,13 @@ The tab lives in its own module, which woodcore_gui.py lists in its TABS and who
 """
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QAbstractItemView, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QMessageBox,
     QPlainTextEdit, QPushButton, QSpinBox, QSplitter, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
+import list_file_card  # the journal written once in raw Typst (spec 2026-10-21-commandes-typst-refonte, Q-008)
+import source_editor  # Ctrl+S bound the one way (source_editor.save_shortcut)
 import build_reference as ref  # the one place a Typst call is spelled out (docs/typst/reference-workbook.md §10ter)
 import cards  # the form in cards, after the website (cards.py, v0.93)
 import display_view  # the «Affichage» view: the command, its options, the call and the page (display_view.py, v0.117)
@@ -180,7 +181,7 @@ class JournalList(QTreeWidget):
         return next((item for item, key in self.rows() if key == index), None)
 
 
-class JournalTab(display_view.DisplayTab, QWidget):
+class JournalTab(source_editor.SourceEditorTab, display_view.DisplayTab, QWidget):
     """Lists the report's revisions, edits one at a time, and writes the journal back through calc/journal.py."""
 
     VIEWS = views.ENTRY_VIEWS   # «Saisie» and «Affichage» (views.py, v0.117)
@@ -206,9 +207,7 @@ class JournalTab(display_view.DisplayTab, QWidget):
         self.splitter.setStretchFactor(0, 3)
         self.splitter.setStretchFactor(1, 2)
         layout.addWidget(self.splitter, 1)
-        shortcut = QShortcut(QKeySequence(QKeySequence.StandardKey.Save), self)   # Ctrl+S, as in every editor tab
-        shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        shortcut.activated.connect(self.save)
+        source_editor.save_shortcut(self)   # Ctrl+S, as in every editor tab
         self.restore(app.views.get("tab_journal"))
 
     # -- building ---------------------------------------------------------------------
@@ -300,6 +299,9 @@ class JournalTab(display_view.DisplayTab, QWidget):
         group_note = cards.note(self.t("jo_levels"))
         form.addRow(group_note)
         box.addWidget(group)
+        # the journal of the document shown, written once in raw Typst and added to (spec 2026-10-21-commandes-typst-refonte, Q-008)
+        self.list_card = list_file_card.ListFileCard(self.app, "journal", self.mode)
+        box.addWidget(self.list_card.card)
 
         box.addStretch(1)
         shell.addWidget(area, 1)
@@ -339,9 +341,9 @@ class JournalTab(display_view.DisplayTab, QWidget):
         self.captions[key] = caption
 
     def display_entries(self):
-        """What prints the journal of the document shown (v0.117, «Affichage»): `show-journal` -- its form, its level, its title -- compiled as that document, and the entries read into a variable for a section that sets them its own way, which prints nothing; `document:` the window's own document, which the call copied did not say until v0.117. A journal takes no id: there is one per document."""
+        """What prints the journal of the document shown (v0.117, «Affichage»): its file written once in raw Typst, included where its section prints it -- `#include domain-file("journal", document)` (spec 2026-10-21-commandes-typst-refonte, Q-008, UI-002) --, and the entries read into a variable for a section that sets them its own way, which prints nothing; `document:` the window's own document. A journal takes no id: there is one per document."""
         return [
-            display_view.Entry("journal", "show-journal", "show-journal"),
+            display_view.Entry("journal", "domain-file", call=ref.call_include_domain("journal", self.mode())),
             display_view.Entry("entries", "journal-entries", "journal-entries", preset={"document": self.mode()},
                                call_fn=lambda o: ref.call_journal_entries(o.get("document")), note="ds_note_prints_nothing"),
         ]
@@ -365,6 +367,7 @@ class JournalTab(display_view.DisplayTab, QWidget):
         self.current = None
         self.read_journal()
         self.load_first()
+        self.list_card.refresh()
         self.update_display()   # «Affichage» compiles the journal of the document now shown
 
     def read_journal(self):
@@ -605,6 +608,7 @@ class JournalTab(display_view.DisplayTab, QWidget):
     def on_shown(self):
         """Brought to the front: the journal read again -- it may have been edited elsewhere since -- the form kept where it holds unsaved changes."""
         self.read_journal()
+        self.list_card.refresh()
         if self.dirty:
             self.fill_list()
         elif self.current is not None:
@@ -630,6 +634,7 @@ class JournalTab(display_view.DisplayTab, QWidget):
         except (validation.ValidationError, OSError) as exc:
             return self.fail(self.t("jo_refused", error=exc))
         self.read_journal()
+        self.list_card.refresh()
         return True
 
     def save(self):

@@ -3,10 +3,10 @@
 A file of its own reader, beside `sia261.py`, as the review asked (ARCH-RISK-004): the snow's coefficients are curves and choices, checked here before anything is built from them -- a polyline whose angles do not rise, a mu outside 0..2.4 (Figur 2's own axis), an exposure listed twice, a correction the map does not give.
 """
 
-import json
 from pathlib import Path
 
 import validation
+from norms import _loader  # how every reader of calc/norms/ opens its files (G3)
 
 HERE = Path(__file__).resolve().parent
 SNOW = "sia261-2020-5.2-schnee"
@@ -36,10 +36,7 @@ def clause():
     if SNOW in _cache:
         return _cache[SNOW]
     path = HERE / (SNOW + ".json")
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError) as exc:
-        _fail("cannot be read -- %s" % exc)
+    data = _loader.load(path)
     if data.get("edition") != EDITION:
         _fail("edition is %r -- expected %r" % (data.get("edition"), EDITION))
     c = data["clause"]

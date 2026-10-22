@@ -20,13 +20,12 @@ from pathlib import Path
 
 import engine
 import validation
+from domains._common import fail as _fail  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 
 # Of the source file (Woodcore-Datei/journal.json) and of the export (data/journal.json).
 SOURCE_SCHEMA_VERSION = "1.0"
 EXPORT_SCHEMA_VERSION = "1.0"
 
-# The file, inside the project's `sources` folder beside the folders of the drawings (calc/project.py, `journal_file`).
-SOURCE_FILE = "journal.json"
 
 # What the export writes, beside data/calculations.json and the rest.
 EXPORT_FILE = "journal.json"
@@ -42,10 +41,6 @@ DATE_PATTERN = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
 
 # How long an office's short form may be. Not a rule of the trade -- it is a guard against a full name typed into the wrong field, which would then be printed in a column three characters wide.
 INITIALS_MAX = 12
-
-
-def _fail(where, message):
-    raise validation.ValidationError(f"{where}: {message}")
 
 
 def blank():

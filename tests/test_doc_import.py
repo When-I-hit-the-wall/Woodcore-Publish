@@ -33,13 +33,14 @@ C = typst_objects.Content
 # --- the project ---------------------------------------------------------------------------------------------
 
 def _field(label, value):
-    return typst_objects.Call("doc-field", {"label": C(label), "value": C(value)})
+    """A field of a document as the templates write it since the spec 2026-10-21-commandes-typst-refonte (REQ-019): a paragraph, its label in bold."""
+    return f"*{label}*: {value}"
 
 
 def _table(caption, rows):
-    return typst_objects.Call("doc-table", {
-        "columns": [{"id": "a", "title": C("Raum")}, {"id": "b", "title": C("Fläche")}],
-        "hidden": [], "rows": [{"a": C(a), "b": C(b)} for a, b in rows], "caption": C(caption)})
+    """A table written in raw Typst, as the templates write theirs (REQ-019, ARCH-004)."""
+    cells = ", ".join(f"[{a}], [{b}]" for a, b in rows)
+    return f"#figure(\n  table(\n    columns: 2,\n    table.header([*Raum*], [*Fläche*]),\n    {cells},\n  ),\n  caption: [{caption}],\n)"
 
 
 def _set_section(here, mode, section_id, title, parts):
@@ -78,22 +79,22 @@ def _build_base():
     structure.add_section(here, "rs", None, None, "009-probe-rs", "Sonde RS")
     _set_section(here, "cu", "probe-a", "Sonde A", [
         "Text eins.",
-        ("doc-field", "use-field", _field("Nutzung", "Büro")),
+        ("text", "use-field", _field("Nutzung", "Büro")),
         "Text zwei.",
         "== Detail",
-        ("doc-table", "rooms-table", _table("Räume", [("Küche", "12")])),
+        ("table", "rooms-table", _table("Räume", [("Küche", "12")])),
         "Text drei.",
     ])
-    _set_section(here, "cu", "probe-b", "Sonde B", [("doc-field", "only-field", _field("Dauer", "50 Jahre"))])
+    _set_section(here, "cu", "probe-b", "Sonde B", [("text", "only-field", _field("Dauer", "50 Jahre"))])
     _set_section(here, "cu", "probe-c", "Sonde C", [
         "Text C.",
-        ("doc-field", "c-one", _field("Eins", "a")),
-        ("doc-field", "c-two", _field("Zwei", "b")),
+        ("text", "c-one", _field("Eins", "a")),
+        ("text", "c-two", _field("Zwei", "b")),
         "Ende C.",
     ])
-    _set_section(here, "bp", "probe-bp", "Sonde BP", ["BP-Text.", ("doc-field", "bp-field", _field("Basis", "x"))])
-    _set_section(here, "bp", "probe-bp2", "Sonde BP zwei", ["Zweiter BP-Text.", ("doc-field", "bp-two", _field("Zwei", "y"))])
-    _set_section(here, "rs", "009-probe-rs", "Sonde RS", ["RS-Text.", ("doc-field", "rs-field", _field("Bericht", "z"))])
+    _set_section(here, "bp", "probe-bp", "Sonde BP", ["BP-Text.", ("text", "bp-field", _field("Basis", "x"))])
+    _set_section(here, "bp", "probe-bp2", "Sonde BP zwei", ["Zweiter BP-Text.", ("text", "bp-two", _field("Zwei", "y"))])
+    _set_section(here, "rs", "009-probe-rs", "Sonde RS", ["RS-Text.", ("text", "rs-field", _field("Bericht", "z"))])
     return here
 
 
@@ -199,7 +200,7 @@ def _compiles(here, sections, name):
     root = here.typst_root
     includes = "\n".join(f'#include "/{_file(here, mode, section).relative_to(root).as_posix()}"' for mode, section in sections)
     probe = root / f".probe-{name}.typ"
-    probe.write_text(f'#import "/commands.typ": *\n{includes}\n', encoding="utf-8")
+    probe.write_text(f'#import "/000-Typst-Config/commands.typ": *\n{includes}\n', encoding="utf-8")
     out = conftest.tmpdir(f"doc_import_pdf_{name}") / "probe.pdf"
     try:
         done = subprocess.run(["typst", "compile", "--root", str(root), str(probe), str(out)], capture_output=True, text=True, encoding="utf-8")
@@ -229,15 +230,16 @@ def test_importable_lists_the_sections_and_under_each_the_objects_of_its_file():
     assert [(i.kind, i.id) for i in group.children] == [("section", "probe-a"), ("section", "probe-b"), ("section", "probe-c")]
     a = group.children[0]
     assert (a.title, a.parent, a.file, a.mode) == ("Sonde A", "probes", "Sections/probe-a.typ", "cu")
-    assert [(o.kind, o.id, o.object_type, o.section) for o in a.children] == [("object", "use-field", "doc-field", "probe-a"), ("object", "rooms-table", "doc-table", "probe-a")]
-    assert [o.title for o in a.children] == ["Nutzung", "Räume"], "the label is the caption or the label of the call"
+    assert [(o.kind, o.id, o.object_type, o.section) for o in a.children] == [("object", "use-field", "text", "probe-a"), ("object", "rooms-table", "table", "probe-a")]
+    titles = [o.title for o in a.children]
+    assert titles == ["Nutzung: Büro", "Räume"], (titles, "a paragraph by its first words, a table by its caption")
     assert all(o.shared_id is None and not o.alone for o in a.children)
     assert flat.index(a) < flat.index(a.children[0]) < flat.index(group.children[1]), "document order, an item before its children"
     # the report: sections only, and its objects where its files are tagged
     rs = doc_import.importable(here, "rs")
     assert all(i.kind == "section" for i in rs) and "009-probe-rs" in [i.id for i in rs]
     probe = next(i for i in rs if i.id == "009-probe-rs")
-    assert [(o.id, o.object_type) for o in probe.children] == [("rs-field", "doc-field")]
+    assert [(o.id, o.object_type) for o in probe.children] == [("rs-field", "text")]
     # what the objects are shared as
     sharing.share(here, "cu", "probe-c", ["bp"])
     c = next(i for i in doc_import.flatten(doc_import.importable(here, "cu")) if i.id == "probe-c")
@@ -290,7 +292,7 @@ def test_a_section_is_imported_as_an_independent_copy_with_a_fresh_id():
     assert first.sections == (("probe-a", "probe-a"),) and second.sections == (("probe-a", "probe-a-2"),)
     assert first.shared_ids == () and not first.linked
     source = _text(_file(here, "cu", "probe-a"))
-    assert source.encode("utf-8") == before["1_Nutzungsvereinbarung/Sections/probe-a.typ"], "the source is not touched"
+    assert source.encode("utf-8") == before[here.rel(_file(here, "cu", "probe-a"))], "the source is not touched"
     for name in ("probe-a", "probe-a-2"):
         assert _text(_file(here, "bp", name)) == source, "a copy of the file, no shared tag"
         leaf = _leaf(here, "bp", name)[0]
@@ -441,7 +443,7 @@ def test_a_shared_id_is_free_in_the_whole_project():
     typst_paths.write_text(path, text)
     result = doc_import.import_items(here, "rs", "cu", [("object", "probe-a", "use-field")])
     assert result.shared_ids == ("use-field-2",) and result.objects[0][2] == "use-field"
-    assert "// woodcore:shared use-field-2\n// woodcore:object doc-field use-field\n" in _text(_file(here, "cu", "probe-a"))
+    assert "// woodcore:shared use-field-2\n// woodcore:object text use-field\n" in _text(_file(here, "cu", "probe-a"))
 
 
 def test_an_object_inside_a_larger_shared_block_is_refused_linked_and_copied_independent():
@@ -454,8 +456,8 @@ def test_an_object_inside_a_larger_shared_block_is_refused_linked_and_copied_ind
     result = doc_import.import_items(here, "rs", "cu", [("object", "probe-c", "c-one")], linked=False)
     assert result.objects == (("probe-c", "c-one", "c-one", None),) and result.shared_ids == ()
     imported = _text(_file(here, "rs", result.imported))
-    assert "woodcore:object doc-field c-one" in imported and "woodcore:shared" not in imported
-    assert _text(_file(here, "cu", "probe-c")).encode("utf-8") == before["1_Nutzungsvereinbarung/Sections/probe-c.typ"]
+    assert "woodcore:object text c-one" in imported and "woodcore:shared" not in imported
+    assert _text(_file(here, "cu", "probe-c")).encode("utf-8") == before[here.rel(_file(here, "cu", "probe-c"))]
 
 
 def test_independent_objects_carry_no_shared_tag_and_take_a_free_object_id():
@@ -470,7 +472,7 @@ def test_independent_objects_carry_no_shared_tag_and_take_a_free_object_id():
     blocks = _blocks(text)
     assert blocks["use-field-2"] == blocks["use-field"].replace("use-field", "use-field-2"), "only the id differs"
     assert blocks["use-field"] == _blocks(_text(_file(here, "cu", "probe-a")))["use-field"], "the object as it was written"
-    assert _text(_file(here, "cu", "probe-a")).encode("utf-8") == before["1_Nutzungsvereinbarung/Sections/probe-a.typ"], "the source is not touched"
+    assert _text(_file(here, "cu", "probe-a")).encode("utf-8") == before[here.rel(_file(here, "cu", "probe-a"))], "the source is not touched"
     assert _leaf(here, "bp", "imported")[0].get("shared_with") is None
     assert not sharing.reconcile(here, write=False).changes and not _leftovers(here)
 
@@ -535,7 +537,7 @@ def test_every_refusal_has_its_code_and_writes_nothing():
 def test_a_file_whose_tags_cannot_be_read_is_not_imported_and_nothing_is_written():
     here = _project("refuse_tags")
     path = _file(here, "cu", "probe-b")
-    path.write_bytes(path.read_bytes() + b"\n// woodcore:object doc-field broken\n")
+    path.write_bytes(path.read_bytes() + b"\n// woodcore:object text broken\n")
     before = _snapshot(here)
     for linked in (True, False):
         exc = _code("tags_unreadable", doc_import.import_items, here, "bp", "cu", [("object", "probe-b", "only-field")], linked=linked)
@@ -560,7 +562,7 @@ def test_a_linked_object_is_given_a_fresh_id_in_the_source_and_the_copy_where_th
     source, copy = _text(_file(here, "cu", "probe-a")), _text(_file(here, "bp", "imported"))
     assert _order(source) == ["use-field-2", "rooms-table"] and _order(copy) == ["use-field", "use-field-2"], "renamed in the source too: one id in every copy of the block"
     assert structure.check_tags(source) == [] and structure.check_tags(copy) == []
-    assert "// woodcore:shared use-field-2\n// woodcore:object doc-field use-field-2\n" in source
+    assert "// woodcore:shared use-field-2\n// woodcore:object text use-field-2\n" in source
     found = sharing.copies(here, "use-field-2")
     assert sorted(c.mode for c in found) == ["bp", "cu"] and len({c.block_text for c in found}) == 1
     assert not sharing.reconcile(here, write=False).changes and not _leftovers(here)
@@ -846,7 +848,7 @@ def test_a_shared_block_alone_moves_with_its_tags_and_the_structures_follow():
     result = doc_import.move_object(here, "cu", "probe-b", "only-field", "probe-a", after="use-field")
     assert result.shared_ids == ("only-field",) and result.moved == (("only-field", "probe-b", "probe-a"),)
     moved = _text(a)
-    assert "// woodcore:shared only-field\n// woodcore:object doc-field only-field\n" in moved and "// woodcore:/shared only-field\n" in moved, "the shared tags moved with it"
+    assert "// woodcore:shared only-field\n// woodcore:object text only-field\n" in moved and "// woodcore:/shared only-field\n" in moved, "the shared tags moved with it"
     assert "woodcore:shared" not in _text(b) and structure.check_tags(moved) == []
     assert _order(moved) == ["use-field", "only-field", "rooms-table"], "above and below an object: outside a shared block of its own"
     assert _blocks(moved)["only-field"] == block["only-field"]
@@ -877,7 +879,7 @@ def test_an_object_of_a_larger_shared_block_stays_in_it_but_may_be_reordered():
     assert result.shared_changed == ("probe-c",) and result.changed and result.shared_ids == ()
     text = _text(path)
     assert _order(text) == ["c-two", "c-one"] and structure.check_tags(text) == []
-    assert text.index("// woodcore:shared probe-c") < text.index("// woodcore:object doc-field c-two") < text.index("// woodcore:/shared probe-c")
+    assert text.index("// woodcore:shared probe-c") < text.index("// woodcore:object text c-two") < text.index("// woodcore:/shared probe-c")
     # the other copy now differs: what the synchronisation will say
     differing = [c for c in sharing.copies(here, "probe-c")]
     assert len({c.block_text for c in differing}) == 2
@@ -892,8 +894,8 @@ def test_an_object_of_a_larger_shared_block_stays_in_it_but_may_be_reordered():
 def test_an_object_lies_tight_against_the_tag_of_a_shared_block_and_the_words_around_it_stay():
     here = _project("move_tight")
     path = _file(here, "cu", "probe-a")
-    one = typst_objects.insert_object("", -1, "doc-field", "one", _field("Eins", "a")).rstrip("\n")
-    two = typst_objects.insert_object("", -1, "doc-field", "two", _field("Zwei", "b")).rstrip("\n")
+    one = typst_objects.insert_object("", -1, "text", "one", _field("Eins", "a")).rstrip("\n")
+    two = typst_objects.insert_object("", -1, "text", "two", _field("Zwei", "b")).rstrip("\n")
     head = documents.import_line(here) + "\n\n"
     typst_paths.write_text(path, f"{head}// woodcore:shared tight\n{one}\n\n{two}\n// woodcore:/shared tight\n\nNach dem Block.\n")
     doc_import.move_object(here, "cu", "probe-a", "two", "probe-a", before="one")
@@ -921,7 +923,7 @@ def test_a_move_that_cannot_be_made_is_refused_with_its_code_and_writes_nothing(
     assert _snapshot(here) == before
     # an id the other file has
     other = _file(here, "cu", "probe-b")
-    other.write_bytes(other.read_bytes() + b"\n// woodcore:object doc-field use-field\n#doc-field()\n// woodcore:/object use-field\n")
+    other.write_bytes(other.read_bytes() + b"\n// woodcore:object text use-field\nEin Text.\n// woodcore:/object use-field\n")
     before = _snapshot(here)
     _code("id_exists", mv, here, "cu", "probe-a", "use-field", "probe-b")
     # a shared block the other file carries already
@@ -931,7 +933,7 @@ def test_a_move_that_cannot_be_made_is_refused_with_its_code_and_writes_nothing(
     _code("already_shared", mv, here, "cu", "probe-a", "rooms-table", "probe-b")
     assert _snapshot(here) == before
     # tags that cannot be read, in the source and in the destination
-    other.write_bytes(other.read_bytes() + b"\n// woodcore:object doc-field broken\n")
+    other.write_bytes(other.read_bytes() + b"\n// woodcore:object text broken\n")
     before = _snapshot(here)
     _code("tags_unreadable", mv, here, "cu", "probe-b", "only-field", "probe-a")
     _code("tags_unreadable", mv, here, "cu", "probe-a", "use-field", "probe-b")

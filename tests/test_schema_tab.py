@@ -409,8 +409,8 @@ def test_a_tick_sits_in_the_middle_of_its_cell_and_is_clicked_there():
     from PySide6.QtCore import QPoint, Qt
     from PySide6.QtTest import QTest
     from PySide6.QtWidgets import QApplication, QStyleOptionViewItem
-    from check_cell import CentredCheck
     tab = _tab_75()
+    from check_cell import CentredCheck   # calc/tools is on the path once the tab is built: imported first, the test hung on the order the runner gave the file's parts
     tab.window_ref.resize(1600, 1000)
     for (which, column) in tab.CHECK_COLUMNS:
         assert isinstance(tab.table_widgets[which].itemDelegateForColumn(column), CentredCheck), (which, column)
@@ -516,7 +516,9 @@ def test_the_highlighted_call_comes_first():
     tab.set_view("display")
     tab.canvas.select(("elements", "E1"))
     tab.update_calls()
-    assert tab.display.command().endswith('highlight: "E1")'), tab.display.command()
+    # the call copied is a figure of the report's own, the drawing in it (spec 2026-10-15, UI-001)
+    caption = tab.source.get("label") or "D99"
+    assert tab.display.command() == f'#figure(image-schema("D99", highlight: "E1"), kind: image, caption: [{caption}]) <fig-d99>', tab.display.command()   # the drawing as an image since the spec 2026-10-21-commandes-typst-refonte (REQ-014)
     tab.canvas.select(None)
     tab.update_calls()
     assert "highlight" not in tab.display.command(), tab.display.command()

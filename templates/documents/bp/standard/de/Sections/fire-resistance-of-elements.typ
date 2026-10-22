@@ -4,19 +4,17 @@
 == Feuerwiderstand der Bauteile
 // woodcore:/object title
 
-// woodcore:object doc-table fire-resistance-table
-#doc-table(
-  columns: (
-    (id: "category", title: [Kategorie]),
-    (id: "zone", title: [Bereich / Bauteil]),
-    (id: "basis", title: [Grundlage]),
-    (id: "requirement", title: [Anforderung]),
-    (id: "execution", title: [Ausführung / Werte]),
-  ),
-  hidden: (),
-  rows: (
-    (category: [Tragwerk], zone: [[Untergeschoss – Erdgeschoss]], basis: [VKF 15-15], requirement: [R 60], execution: [[…]]),
-    (category: [Brandabschnitte], zone: [[Decke über Erdgeschoss]], basis: [VKF 15-15], requirement: [REI 60], execution: [[…]]),
+// woodcore:object table fire-resistance-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto),
+    align: (left, left, left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Kategorie*], [*Bereich / Bauteil*], [*Grundlage*], [*Anforderung*], [*Ausführung / Werte*]),
+    table.hline(stroke: 0.5pt),
+    [Tragwerk], [[Untergeschoss – Erdgeschoss]], [VKF 15-15], [R 60], [[…]],
+    [Brandabschnitte], [[Decke über Erdgeschoss]], [VKF 15-15], [REI 60], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Feuerwiderstand der Bauteile],
 )

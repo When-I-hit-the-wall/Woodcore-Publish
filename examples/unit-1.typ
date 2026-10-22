@@ -8,7 +8,7 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#unit("N/mm²")
 #var("F", 12, "kN")
 #var("A", 2400, "mm²")
+#unit("N/mm²")
 #eq("sigma", `F / A`)

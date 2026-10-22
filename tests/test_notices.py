@@ -3,6 +3,8 @@
 The engineer, 07.10.2026: «Toutes les erreurs doivent être centralisées dans le système global de notifications d'erreurs de Woodcore» · «Il faut distinguer : Message utilisateur, traduit … Informations techniques : conserver les informations techniques originales». Each test works on a store of its own, so nothing reported here reaches the process's own.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import ast
 import threading
 

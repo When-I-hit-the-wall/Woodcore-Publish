@@ -4,41 +4,38 @@
 == Acier de construction et assemblages
 // woodcore:/object title
 
-// woodcore:object doc-table structural-steel-table
-#doc-table(
-  columns: (
-    (id: "grade", title: [Nuance]),
-    (id: "band", title: [Épaisseur]),
-    (id: "fy", title: [Limite d'élasticité $f_y$], unit: "N/mm²", kind: "number"),
-    (id: "fu", title: [Résistance à la traction $f_u$], unit: "N/mm²", kind: "number"),
-    (id: "Ea", title: [Module d'élasticité $E_a$], unit: "N/mm²", kind: "number"),
-    (id: "gamma", title: [Poids volumique $gamma$], unit: "kN/m³", kind: "number"),
-  ),
-  hidden: ("Ea", "gamma"),
-  rows: (
-    (grade: [S235], band: [t ≤ 40 mm], fy: 235, fu: 360, Ea: 210000, gamma: 78.5),
-    (grade: [S355], band: [t ≤ 40 mm], fy: 355, fu: 510, Ea: 210000, gamma: 78.5),
+// woodcore:object table structural-steel-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, right, right),
+    table.hline(stroke: 1pt),
+    table.header([*Nuance*], [*Épaisseur*], [*Limite d'élasticité $f_y$*], [*Résistance à la traction $f_u$*]),  // woodcore:hidden 5=[Module d'élasticité $E_a$] 6=[Poids volumique $gamma$]
+    table.hline(stroke: 0.5pt),
+    [S235], [t ≤ 40 mm], [235], [360],  // woodcore:hidden 5=[210000] 6=[78.5]
+    [S355], [t ≤ 40 mm], [355], [510],  // woodcore:hidden 5=[210000] 6=[78.5]
+    table.hline(stroke: 1pt),
   ),
   caption: [Acier de construction (SIA 263)],
 )
 // woodcore:/object structural-steel-table
 
-// woodcore:object doc-table bolts-table
-#doc-table(
-  columns: (
-    (id: "class", title: [Classe de résistance]),
-    (id: "fyb", title: [Limite d'élasticité $f_"yb"$], unit: "N/mm²", kind: "number"),
-    (id: "fub", title: [Résistance à la traction $f_"ub"$], unit: "N/mm²", kind: "number"),
-    (id: "use", title: [Emploi]),
-  ),
-  hidden: (),
-  rows: (
-    (class: [4.6], fyb: 240, fub: 400, use: [Boulons, tire-fonds]),
-    (class: [8.8], fyb: 640, fub: 800, use: [Vis à bois (classe minimale)]),
+// woodcore:object table bolts-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, right, right, left),
+    table.hline(stroke: 1pt),
+    table.header([*Classe de résistance*], [*Limite d'élasticité $f_"yb"$*], [*Résistance à la traction $f_"ub"$*], [*Emploi*]),
+    table.hline(stroke: 0.5pt),
+    [4.6], [240], [400], [Boulons, tire-fonds],
+    [8.8], [640], [800], [Vis à bois (classe minimale)],
+    table.hline(stroke: 1pt),
   ),
   caption: [Boulons, tire-fonds et vis à bois (SIA 263)],
-  notes: (
-    [Les broches (goujons) en acier S355 se calculent avec $f_(u,k)$ = 510 N/mm² (SN EN 14592).],
-  ),
 )
 // woodcore:/object bolts-table
+
+// woodcore:object text bolts-table-notes
+Les broches (goujons) en acier S355 se calculent avec $f_(u,k)$ = 510 N/mm² (SN EN 14592).
+// woodcore:/object bolts-table-notes

@@ -5,12 +5,15 @@ The PDF is `tests/fixtures/layered_pdf.py`'s, written in the test: three optiona
 ⚠️ What the flattening rests on, found while it was written and held by `test_a_hidden_section_still_moves_what_follows`: PDF 2.0 8.11.3.2 hides a section's **painting** and keeps its **change of the graphics state** -- a `cm`, a colour, a clip. Taking a hidden section out whole, the obvious reading, would have moved everything drawn after a hidden `cm`, and PDFium (the window) does not.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import re
 import subprocess
 from pathlib import Path
 
 import conftest
+import engine
 import validation
 from domains import plan
 from domains import plan_documents as documents
@@ -397,9 +400,85 @@ def test_the_frame_is_checked_on_its_own_and_a_background_exports_under_the_stem
         else:
             assert False, f"{broken} passed"
     files, notes = {}, []
-    got = plan.document_background(source["background"], place.root, place.plans_dir, place.root / "data", "fire/F01-plan", {}, "F01.json", "fire plan F01", files, notes)
+    got = plan.document_background(source["background"], place.root, place.plans_dir, engine.Figures(place.root / "data", "fire"), "fire/F01-plan", {}, "F01.json", "fire plan F01", files, notes)
     assert got is not None and got[0]["file"] == "fire/F01-plan.pdf" and "fire/F01-plan.pdf" in files and not notes
     plain = {"file": doc["file"], "page": 1}
-    background, sheet, more = plan.file_background(plain, got[1], place.root, place.root / "data", "fire/F02-plan", {}, "F02.json", "fire plan F02", files)
+    background, sheet, more = plan.file_background(plain, got[1], place.root, engine.Figures(place.root / "data", "fire"), "fire/F02-plan", {}, "F02.json", "fire plan F02", files)
     assert background["file"] == "fire/F02-plan.pdf" and background["origin"] == doc["file"] and "fire/F02-plan.pdf" in files
     assert plan.turn_point([10, 20], 100) == [80, 10] and plan.turn_rect({"x": 0, "y": 0, "w": 10, "h": 20}, 100)["x"] == 80
+
+
+# --- Imported Plans/: the document copied at its import (issue #64, D-09, D-18) ------------------
+
+def _folders_project(name):
+    """A copy of the project the tests work on, laid out by folders, with the caches pointed into it."""
+    here = conftest.project_copy(f"pdoc_{name}")
+    assert here.has_folders
+    documents.CACHE_ROOT = here.root / "_cache"
+    (here.root / "01_Pläne").mkdir(exist_ok=True)
+    return here
+
+
+def test_laid_out_by_folders_a_document_is_copied_into_imported_plans_from_anywhere():
+    """REQ-007: the file copied into its tab's Imported Plans/ under its name, the document naming the copy, the original untouched -- a file outside the project too; the fire plans' into their own."""
+    here = _folders_project("copied")
+    original = fx.write(conftest.tmpdir("pdoc_outside_folders") / "03_Pavillon.pdf", pages=2)
+    before = original.read_bytes()
+    doc = documents.import_file(here, original, name="Pavillon")
+    copy = documents.imported_dir(here, "plan") / "03_Pavillon.pdf"
+    assert doc["file"] == "Plans/Position-plan/Imported Plans/03_Pavillon.pdf" and copy.read_bytes() == before
+    assert original.read_bytes() == before, "the original is never touched"
+    assert documents.file_path(here, doc) == copy
+    again = documents.import_file(here, original)
+    assert again["file"] == doc["file"] and again["id"] != doc["id"], "the same file again: the copy taken as it is, nothing copied twice"
+    fire_doc = documents.import_file(here, _pdf(here, "Brandschutz.pdf"), owner="fire")
+    assert fire_doc["file"] == "Plans/Fire-plan/Imported Plans/Brandschutz.pdf"
+    assert documents.imported_dir(_project("before"), "plan") is None, "a project laid out before copies nothing"
+
+
+def test_a_document_of_the_same_name_and_other_content_is_replaced_only_on_confirmation_and_its_plans_follow():
+    """D-18: `doc_replace` first; with `replace` the copy written over and the document that names it read again -- the same id, its new pages, its new SHA-256 -- rather than a new one."""
+    here = _folders_project("replace")
+    doc = documents.import_file(here, _pdf(here, "Plan.pdf", pages=1))
+    newer = fx.write(conftest.tmpdir("pdoc_newer") / "Plan.pdf", pages=3)
+    try:
+        documents.import_file(here, newer)
+    except documents.DocumentError as exc:
+        assert exc.code == "doc_replace" and exc.values["file"] == "Plan.pdf"
+    else:
+        raise AssertionError("a document of the same name was written over without asking")
+    assert len(documents.read(here, doc["id"])["pages"]) == 1, "refused, nothing changed"
+    replaced = documents.import_file(here, newer, replace=True)
+    assert replaced["id"] == doc["id"] and len(replaced["pages"]) == 3 and replaced["sha256"] == plan.file_hash(newer)
+    assert documents.read(here, doc["id"]) == replaced and [d["id"] for d in documents.list_documents(here)] == [doc["id"]]
+
+
+def test_a_document_written_over_in_imported_plans_is_read_again_by_refresh_all():
+    """D-09: a file replaced from outside Woodcore by one of the same name -- its pages and its SHA-256 brought up to date, the rotation of a page it still has kept; nothing changed, nothing written."""
+    here = _folders_project("refresh")
+    doc = documents.import_file(here, _pdf(here, "Plan.pdf", pages=1))
+    documents.write(here, documents.set_rotation(documents.read(here, doc["id"]), 1, 90))
+    assert documents.refresh_all(here) == ([], [])
+    fx.write(documents.file_path(here, doc), pages=2)
+    changed, notes = documents.refresh_all(here)
+    assert changed == [doc["id"]] and notes
+    fresh = documents.read(here, doc["id"])
+    assert len(fresh["pages"]) == 2 and fresh["pages"][0]["rotation"] == 90 and fresh["sha256"] == plan.file_hash(documents.file_path(here, doc))
+    assert documents.refresh_all(_project("refresh_before")) == ([], []), "a project laid out before is read as it always was"
+
+
+def test_a_document_imported_before_is_adopted_into_imported_plans_once():
+    """Step 15: a document whose file lies where the engineer keeps it gets a copy in Imported Plans/ and names it; the original stays; adopting twice copies nothing; a file of that name with other bytes there gives the copy the document's id."""
+    here = _folders_project("adopt")
+    original = _pdf(here, "Grundriss.pdf")
+    doc = {"schema_version": "1.0", "id": "D01", "name": "", "file": "01_Pläne/Grundriss.pdf", "kind": "pdf",
+           "sha256": plan.file_hash(original), "pages": [{"page": 1, "rotation": 0}], "layers_off": []}
+    documents.write(here, doc)
+    folder = documents.imported_dir(here, "plan")
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "Grundriss.pdf").write_bytes(b"%PDF-1.7 the engineer's other plan")
+    done = documents.adopt(here)
+    assert [(p.name, m.name) for p, m in done] == [("D01.json", "Grundriss-D01.pdf")]
+    assert documents.read(here, "D01")["file"] == "Plans/Position-plan/Imported Plans/Grundriss-D01.pdf"
+    assert original.is_file() and (folder / "Grundriss.pdf").read_bytes() == b"%PDF-1.7 the engineer's other plan"
+    assert documents.adopt(here) == []

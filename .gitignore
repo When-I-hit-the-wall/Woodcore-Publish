@@ -24,12 +24,23 @@ tests/.last-run.json
 **/_woodcore/out/
 # What each document was compiled from, and its hash, beside the export (calc/stamps.py: «export only if changed», the three document modes): written by every compile, read to decide whether the next one is needed -- the machine's own, never versioned.
 **/_woodcore/stamps/
+# The same in 000-Woodcore/, the export's folder of a project laid out by folders (issue #64), which holds the sources and the archives beside it.
+**/000-Woodcore/lib/
+**/000-Woodcore/calc/
+**/000-Woodcore/VERSION
+**/000-Woodcore/.preview/
+**/000-Woodcore/out/
+**/000-Woodcore/stamps/
 # The example project's own archives: a migration of it, an export or a compile run on the committed example (rather than on the copy each test run makes) leaves its workspace and its zips there. The example carries its sources and its export, never an archive.
 tests/projet-exemple/_Archiv/
+tests/projet-exemple/000-Woodcore/archives/
+# A migration's folder while it runs, at the top of the project (calc/project_migrate_folders.py): moved into the archives when it is done or undone.
+.woodcore-migration-*/
 
 # The frozen examples carry a copy of the engine beside their frozen data, refreshed on every run of build_examples.py so they exercise the CURRENT engine (docs/typst/command-docs.md §10sexies). The copy is generated; the snapshot, the MWEs, their config.typ and their pages are versioned.
 examples/lib/
 examples/commands.typ
+examples/000-Typst-Config/
 
 # What PyInstaller and the installer build (step 6 of the Woodcore split): made on demand, never versioned.
 dist/

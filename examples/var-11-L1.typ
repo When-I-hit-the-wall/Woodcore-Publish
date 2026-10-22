@@ -8,4 +8,6 @@
 #report-level.update(1)
 #number-digits.update(3)
 
-#var("R_d", 4.969, "kN", style: "bold")
+#var("k_dens", 0.806, level: 0)
+#var("R_k", 7, "kN", level: 0)
+#eq("R_d", `k_dens dot R_k`)

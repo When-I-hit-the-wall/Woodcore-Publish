@@ -4,19 +4,17 @@
 == Baustelle und Zufahrt
 // woodcore:/object title
 
-// woodcore:object doc-table construction-site-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Element]),
-    (id: "text", title: [Beschreibung], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Baustelle und Zufahrt], text: [[Zufahrt zur Baustelle (Strassen, Fahrzeugprofile, Seilbahn, Helikopter …), Installations- und Lagerflächen, Umschlagplätze.]]),
-    (item: [Kranstandort], text: [[Erforderlicher Kran, zu bedienender Bereich, Standort festgelegt oder nicht.]]),
-    (item: [Lärmemissionen], text: [[Zeitliche oder saisonale Einschränkungen, empfindliche Bereiche (Wildschutzgebiet, Nachbarschaft …).]]),
+// woodcore:object table construction-site-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Baustelle und Zufahrt], [[Zufahrt zur Baustelle (Strassen, Fahrzeugprofile, Seilbahn, Helikopter …), Installations- und Lagerflächen, Umschlagplätze.]],
+    [Kranstandort], [[Erforderlicher Kran, zu bedienender Bereich, Standort festgelegt oder nicht.]],
+    [Lärmemissionen], [[Zeitliche oder saisonale Einschränkungen, empfindliche Bereiche (Wildschutzgebiet, Nachbarschaft …).]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Baustelle],
-  header: false,
 )
 // woodcore:/object construction-site-table

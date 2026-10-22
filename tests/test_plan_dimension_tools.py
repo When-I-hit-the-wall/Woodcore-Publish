@@ -3,6 +3,8 @@
 What is held: a linear dimension is its two points then a click for its line, a chain its points, Enter, then its line, an angle its corner and a point on each side -- each written into the plan in one step of «Annuler», and selected; a dimension is taken by a click on its line, its line moved by dragging it, in one step, and deleted with the selection; Escape gives up the one being drawn; and a dimension tool shows the same symbol in the static models', the schemas' and the plans' bars.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 from test_plan_canvas_rework import _canvas, _qt, _source
 
 from domains import plan

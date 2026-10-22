@@ -18,6 +18,9 @@ from domains import plan as model
 
 MOVE, COPY = "move", "copy"
 EDIT_TOOLS = (MOVE, COPY)
+# Ctrl+C and Ctrl+V (issue #61): two states of the canvas with no button of their own -- the base point the clip is taken at, then the point it is put down at, the clip following the pointer meanwhile.
+CLIP_BASE, PASTE = "clip-base", "paste"
+CLIP_TOOLS = (CLIP_BASE, PASTE)
 # The aid tools, by the kind of aid each makes.
 AID_TOOLS = {"aid-h": "horizontal", "aid-v": "vertical", "aid-2p": "two-points", "aid-par": "parallel"}
 EDIT_COLOUR = theme.qcolor("plan-select")   # the selection's own orange (plan_canvas.SELECT_COLOUR): what is moved is what was selected
@@ -26,15 +29,22 @@ AID_COLOUR = theme.qcolor("plan-track")     # the tracking's blue (plan_canvas.T
 
 def handles(tool):
     """Whether `tool` is one of this module's."""
-    return tool in EDIT_TOOLS or tool in AID_TOOLS
+    return tool in EDIT_TOOLS or tool in AID_TOOLS or tool in CLIP_TOOLS
 
 
 def click(canvas, raw, shift):
     """A left click with one of this module's tools."""
     if tool_is_aid(canvas.tool):
         return aid_click(canvas, raw, shift)
+    if canvas.tool in CLIP_TOOLS:
+        p, _kind = canvas.snapped(raw, None, shift)
+        canvas.clip_point.emit(canvas.tool, float(p[0]), float(p[1]))   # the tab takes the clip or puts it down (issue #61)
+        return
     if not canvas.has_selection():
         canvas.edit_refused.emit(canvas.tool)   # nothing selected: the tab says to select first
+        return
+    if canvas.tool == COPY and canvas.single_selected():
+        canvas.edit_refused.emit(canvas.single_selected())   # the building's outline: a plan has one, and it is moved -- said at the first click, before a step of «Annuler» is opened for nothing (issue #54)
         return
     base = canvas.drawing[0] if canvas.drawing else None
     p, _kind = canvas.snapped(raw, base, shift)
@@ -114,6 +124,12 @@ def preview(canvas):
     """(path, colour) of what the tool would do at the pointer: the selection's outline where it would go, or the aid across the frame."""
     path = QPainterPath()
     window = model.crop_of(canvas.frame_source())
+    if canvas.tool == PASTE:
+        if canvas.cursor is not None:
+            path = canvas.clip_outline(canvas.cursor)   # what Ctrl+V would put down, its base on the pointer (issue #61)
+        return path, EDIT_COLOUR
+    if canvas.tool == CLIP_BASE:
+        return path, EDIT_COLOUR
     if canvas.tool in EDIT_TOOLS:
         if canvas.drawing and canvas.cursor is not None:
             base = canvas.drawing[0]

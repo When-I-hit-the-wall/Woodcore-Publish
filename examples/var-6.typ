@@ -8,5 +8,4 @@
 #report-level.update(2)
 #number-digits.update(3)
 
-#var-domain("Ende")[ #var("F", 0.55, "kN") ]
-#var("F", domain: "Ende")
+#var("s_k", domain: ("snow-load", "SL"))

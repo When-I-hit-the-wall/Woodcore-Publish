@@ -29,5 +29,5 @@ What you draw is saved in `Woodcore-Datei/` and exported at once: the report see
 Nearly every row of the window offers the call that prints it in the report. A double-click copies it, a right-click lists them all. For a position drawn on a plan, for instance:
 
 ```typ
-#show-plan("Velo-Unterstand", highlight: "T001", detail: true)
+#figure(image-positions-plan("Velo-Unterstand", highlight: "T001", frame: "highlight"), kind: image, caption: [Velo-Unterstand]) <fig-velo>
 ```

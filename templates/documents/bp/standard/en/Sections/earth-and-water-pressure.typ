@@ -4,18 +4,16 @@
 === Earth and water pressure
 // woodcore:/object title
 
-// woodcore:object doc-table earth-water-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Item]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Earth pressure], text: [[Earth pressure coefficients, unit weight of the soil, soil surcharges, calculation assumptions.]]),
-    (item: [Water pressure], text: [[Design water levels (see “Ground”), treatment as a permanent or variable action.]]),
+// woodcore:object table earth-water-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Earth pressure], [[Earth pressure coefficients, unit weight of the soil, soil surcharges, calculation assumptions.]],
+    [Water pressure], [[Design water levels (see “Ground”), treatment as a permanent or variable action.]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Actions from the ground],
-  header: false,
 )
 // woodcore:/object earth-water-table

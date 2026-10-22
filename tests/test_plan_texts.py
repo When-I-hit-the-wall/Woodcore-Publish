@@ -8,6 +8,8 @@ What is held, without a window:
 * **moved, copied, turned, renamed, removed**: a plan's text by `translate_entry`, `copy_entry` and `rotate_source`, a schema's by `modify` and `duplicate`, a static model's by `rename` and `remove`.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 
 import conftest  # noqa: F401 -- puts calc/ on the path

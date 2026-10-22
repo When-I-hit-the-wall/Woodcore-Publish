@@ -4,19 +4,17 @@
 == Geplante Nutzung
 // woodcore:/object title
 
-// woodcore:object doc-table intended-use-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Element]),
-    (id: "text", title: [Beschreibung], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Nutzung], text: [[Vorgesehene Nutzungen (Wohnen, Büro, Schule, Verkauf, Restaurant, Mehrzweckraum …).]]),
-    (item: [Nutzlasten], text: [Die Nutzlasten werden nach Nutzungskategorie gemäss der Norm SIA 261 festgelegt (siehe Abschnitt «Nutzlasten»).]),
-    (item: [Lichtraumprofile], text: [[Gemäss den Vorprojektplänen und dem 3D-Modell der Architektur.]]),
+// woodcore:object table intended-use-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Nutzung], [[Vorgesehene Nutzungen (Wohnen, Büro, Schule, Verkauf, Restaurant, Mehrzweckraum …).]],
+    [Nutzlasten], [Die Nutzlasten werden nach Nutzungskategorie gemäss der Norm SIA 261 festgelegt (siehe Abschnitt «Nutzlasten»).],
+    [Lichtraumprofile], [[Gemäss den Vorprojektplänen und dem 3D-Modell der Architektur.]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Geplante Nutzung],
-  header: false,
 )
 // woodcore:/object intended-use-table

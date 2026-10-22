@@ -270,7 +270,8 @@ def test_the_colours_tint_the_background_and_the_opacity_lets_the_plan_through()
         assert max(black.red(), black.green(), black.blue()) < 40, black.name()
         for colour, check in (("red", lambda c: c.red() > 180 and c.green() < 90 and c.blue() < 90),
                               ("grey", lambda c: abs(c.red() - c.green()) < 8 and abs(c.green() - c.blue()) < 8 and 110 < c.red() < 170),
-                              ("blue", lambda c: c.blue() > 170 and c.red() < 80),
+                              # the palette's blue since v0.120 (lib/figure-palette.json, Q-015): #2e5faa, a blue channel of 170
+                              ("blue", lambda c: c.blue() > 150 and c.red() < 80 and c.blue() > c.green() + 50),
                               ("pink", lambda c: c.red() > 200 and c.blue() > 130 and c.green() < 120)):
             tab.source["superposition"]["colour"] = colour
             canvas.invalidate()
@@ -293,10 +294,11 @@ def test_the_elements_are_shown_or_not_tinted_or_not_and_never_selected():
         _open(tab, _sourced(plan="PB", elements=True, colour="green", tint_elements=False))
         canvas = tab.canvas
         assert canvas.sup_elements.isVisible() and canvas.sup_points == [(70.0, 70.0)]
-        assert "#2e9d4a" not in canvas.superposition_svg(other, other).lower()
+        green = plan.SUPERPOSITION_INKS["green"]
+        assert green not in canvas.superposition_svg(other, other).lower()
         tab.source["superposition"]["tint_elements"] = True
         canvas.invalidate()
-        assert "#2e9d4a" in json.loads(canvas._sup_svg_key)[3].lower(), "the elements take the colour too"
+        assert green in json.loads(canvas._sup_svg_key)[3].lower(), "the elements take the colour too"
         # its column is no object of this plan: a click on it selects nothing, a click on this plan's column selects it
         canvas.set_tool("select")
         canvas.press_select((70.0, 70.0))

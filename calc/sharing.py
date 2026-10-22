@@ -136,7 +136,7 @@ def _commit(writes):
                 path.parent.mkdir(parents=True, exist_ok=True)
             _put(path, new)
             done.append((path, old))
-    except Exception as exc:
+    except Exception as exc:  # broad: whatever stopped a write, what was written is put back first, then raised again
         for path, old in reversed(done):
             try:
                 if old is None:
@@ -254,7 +254,7 @@ class _File:
 
 def _section_files(here):
     """(mode, path) of every section file of every document of the project: `<document>/Sections/*.typ` -- not the archives beside them, which no document includes."""
-    for mode in (m for m in SHARE_MODES if m in here.modes):
+    for mode in (m for m in SHARE_MODES if m in here.created_modes):
         folder = here.document_dir(mode) / SECTIONS_DIR
         if folder.is_dir():
             for path in sorted(folder.glob("*.typ")):
@@ -471,7 +471,7 @@ def _load_structure(here, mode):
 def _restructure(here, files, touched, loaded):
     """`shared_with` of every leaf whose file is in `touched` (keys) written from the tags of `files` -- the section files as they will be. `loaded` holds the structures read so far ({mode: _Structure}), read here where more are needed. Returns the modes whose structure changes."""
     by_key = {_key(f.path): f for f in files}
-    for mode in (m for m in structure.MODES if m in here.modes):
+    for mode in (m for m in structure.MODES if m in here.created_modes):
         folder = here.document_dir(mode)
         if not any(f.mode == mode and _key(f.path) in touched for f in files):
             continue
@@ -785,7 +785,7 @@ def reconcile(here, write=True):
     files = _index(here)
     by_key = {_key(f.path): f for f in files}
     changes, written, problems = [], [], []
-    for mode in (m for m in structure.MODES if m in here.modes):
+    for mode in (m for m in structure.MODES if m in here.created_modes):
         try:
             held = _load_structure(here, mode)
         except SharingError as exc:

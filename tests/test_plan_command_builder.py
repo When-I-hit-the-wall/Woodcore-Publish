@@ -48,45 +48,34 @@ def _tick(options, *labels):
 def test_the_defaults_write_the_bare_call_and_each_option_only_what_differs():
     _qt()
     import plan_command_builder as pcb
-    assert pcb.command_text({"plan": "P01"}) == '#show-plan("P01")'
+    # a native figure of the report's own since the spec 2026-10-21-commandes-typst-refonte (REQ-013, ARCH-012): what is drawn and set under it in the vocabulary's words, only what differs from the defaults
+    assert pcb.command_text({"plan": "P01"}) == '#figure(image-positions-plan("P01"), kind: image, caption: [P01]) <fig-p01>'
     assert pcb.command_text({"plan": "P01", "width": "60%", "legend": False, "axes": False, "scale_bar": False}) == \
-        '#show-plan("P01", width: 60%, legend: false, axes: false, scale-bar: false)'
-    assert pcb.command_text({"plan": "P01", "highlight": ["T001"]}) == '#show-plan("P01", highlight: "T001")'
+        '#figure(image-positions-plan("P01", detail-figure: ("length", "dimensions", "centres"), detail-legend: "none", width: 60%), kind: image, caption: [P01]) <fig-p01>'
+    assert pcb.command_text({"plan": "P01", "highlight": ["T001"]}) == '#figure(image-positions-plan("P01", highlight: "T001"), kind: image, caption: [P01]) <fig-p01>'
     assert pcb.command_text({"plan": "P01", "highlight": ["T001", "S001"], "detail": True, "zoom": 1.5}) == \
-        '#show-plan("P01", highlight: ("T001", "S001"), detail: true, zoom: 1.5)'
-    assert pcb.command_text({"plan": "P01", "caption": False}) == '#show-plan("P01", caption: none)'
-    assert pcb.command_text({"plan": "P01", "caption": 'Plan "Nord"'}) == '#show-plan("P01", caption: "Plan \\"Nord\\"")'
-    assert pcb.command_text({"plan": "P01", "caption": None, "width": "100%"}) == '#show-plan("P01")'
+        '#figure(image-positions-plan("P01", highlight: ("T001", "S001"), frame: "highlight", zoom: 1.5), kind: image, caption: [P01]) <fig-p01>'
+    assert pcb.command_text({"plan": "P01", "caption": False}) == '#figure(image-positions-plan("P01"), kind: image) <fig-p01>'
+    assert pcb.command_text({"plan": "P01", "caption": "Plan Nord"}) == '#figure(image-positions-plan("P01"), kind: image, caption: [Plan Nord]) <fig-p01>'
+    assert pcb.command_text({"plan": "P01", "caption": None, "width": "100%"}) == '#figure(image-positions-plan("P01"), kind: image, caption: [P01]) <fig-p01>'
 
 
 def test_a_detail_needs_a_highlighted_position_and_a_zoom_a_detail_and_a_width_that_is_none_is_left_out():
     _qt()
     import plan_command_builder as pcb
     # asked for, but nothing highlighted: no detail, and so no zoom either -- the call says nothing a reader could believe
-    assert pcb.command_text({"plan": "P01", "detail": True, "zoom": 2}) == '#show-plan("P01")'
-    assert pcb.command_text({"plan": "P01", "highlight": ["T001"], "detail": False, "zoom": 2}) == '#show-plan("P01", highlight: "T001")'
+    assert pcb.command_text({"plan": "P01", "detail": True, "zoom": 2}) == '#figure(image-positions-plan("P01"), kind: image, caption: [P01]) <fig-p01>'
+    assert pcb.command_text({"plan": "P01", "highlight": ["T001"], "detail": False, "zoom": 2}) == '#figure(image-positions-plan("P01", highlight: "T001"), kind: image, caption: [P01]) <fig-p01>'
     for bad in ("", "wide", "60", "60 %", "%"):
         assert pcb.valid_width(bad) is None, bad
     assert pcb.valid_width("12cm") == "12cm" and pcb.valid_width(" 60% ") == "60%" and pcb.valid_width("100%") is None
-
-
-def test_call_show_plan_keeps_its_old_callers_and_gains_the_scale_bar_and_the_caption():
-    """The tab's own calls (plan_tab.fill_commands) and the reference workbook go on writing what they wrote."""
-    import build_reference as ref
-    assert ref.call_show_plan("EG") == '#show-plan("EG")'
-    assert ref.call_show_plan("EG", legend=False) == '#show-plan("EG", legend: false)'
-    assert ref.call_show_plan("EG", highlight="T001", detail=True) == '#show-plan("EG", highlight: "T001", detail: true)'
-    assert ref.call_show_plan("EG", width="60%", axes=False, zoom=2) == '#show-plan("EG", width: 60%, zoom: 2, axes: false)'
-    assert ref.call_show_plan("EG", scale_bar=False) == '#show-plan("EG", scale-bar: false)'
-    assert ref.call_show_plan("EG", caption=False) == '#show-plan("EG", caption: none)'
-    assert ref.call_show_plan("EG", caption="Nord") == '#show-plan("EG", caption: "Nord")'
 
 
 def test_the_controls_say_the_command_and_what_has_no_effect_is_greyed():
     pcb, options = _options()
     values = options.values()
     assert values["plan"] == "P01" and values["highlight"] == [] and values["detail"] is False and values["caption"] is None
-    assert pcb.command_text(values) == '#show-plan("P01")'
+    assert pcb.command_text(values) == '#figure(image-positions-plan("P01"), kind: image, caption: [P01]) <fig-p01>'
     # a plan with a scale: its bar is offered; nothing highlighted: no detail, no zoom
     assert options.scale_bar.isEnabled() and not options.detail.isEnabled() and not options.zoom.isEnabled()
     _tick(options, "S001", "T001")
@@ -94,14 +83,13 @@ def test_the_controls_say_the_command_and_what_has_no_effect_is_greyed():
     options.detail.setChecked(True)
     assert options.zoom.isEnabled()
     options.zoom.setValue(2)
-    assert pcb.command_text(options.values()) == '#show-plan("P01", highlight: ("T001", "S001"), detail: true, zoom: 2)' \
-        or pcb.command_text(options.values()) == '#show-plan("P01", highlight: ("S001", "T001"), detail: true, zoom: 2)'
+    assert pcb.command_text(options.values()) == '#figure(image-positions-plan("P01", highlight: ("T001", "S001"), frame: "highlight", zoom: 2), kind: image, caption: [P01]) <fig-p01>'
     # the highlighted positions are read in the order the plan lists them
     assert options.values()["highlight"] == ["T001", "S001"]
     # unticking the last position takes the detail with it, and the call
     _tick(options)
     assert not options.detail.isEnabled() and options.values()["detail"] is False
-    assert pcb.command_text(options.values()) == '#show-plan("P01")'
+    assert pcb.command_text(options.values()) == '#figure(image-positions-plan("P01"), kind: image, caption: [P01]) <fig-p01>'
     # a plan without a scale has no bar to draw: the option is greyed, says why, and writes nothing whatever it holds
     options.plan.setCurrentIndex(options.plan.findData("P02"))
     assert not options.scale_bar.isEnabled() and options.scale_bar.toolTip()
@@ -110,11 +98,11 @@ def test_the_controls_say_the_command_and_what_has_no_effect_is_greyed():
     # the caption
     assert not options.caption_text.isEnabled()
     options.caption.setCurrentIndex(options.caption.findData("none"))
-    assert pcb.command_text(options.values()) == '#show-plan("P02", caption: none)'
+    assert pcb.command_text(options.values()) == '#figure(image-positions-plan("P02"), kind: image) <fig-p02>'
     options.caption.setCurrentIndex(options.caption.findData("custom"))
     assert options.caption_text.isEnabled()
     options.caption_text.setText("Hauptgebäude")
-    assert pcb.command_text(options.values()) == '#show-plan("P02", caption: "Hauptgebäude")'
+    assert pcb.command_text(options.values()) == '#figure(image-positions-plan("P02"), kind: image, caption: [Hauptgebäude]) <fig-p02>'
 
 
 def test_a_plan_chosen_brings_its_own_positions_and_clears_the_highlight_of_the_other():
@@ -182,16 +170,16 @@ def test_the_builder_shows_the_command_copies_it_and_asks_for_a_page_of_it():
     try:
         assert not builder.copy_button.isEnabled() and builder.field.text() == "" and builder.source() is None
         builder.set_plans(PLANS)
-        assert builder.field.text() == '#show-plan("P01")' and builder.copy_button.isEnabled()
+        assert builder.field.text() == '#figure(image-positions-plan("P01"), kind: image, caption: [P01]) <fig-p01>' and builder.copy_button.isEnabled()
         builder.options.legend.setChecked(False)
-        assert builder.field.text() == '#show-plan("P01", legend: false)' and builder.command() == builder.field.text()
+        assert builder.field.text() == '#figure(image-positions-plan("P01", detail-legend: "scale-bar"), kind: image, caption: [P01]) <fig-p01>' and builder.command() == builder.field.text()
         builder.copy_button.click()
-        assert copied == ['#show-plan("P01", legend: false)']
+        assert copied == ['#figure(image-positions-plan("P01", detail-legend: "scale-bar"), kind: image, caption: [P01]) <fig-p01>']
         # without a project nothing is asked of Typst, and the pane says why
         assert builder.source() is None and not builder.pane.is_pending()
         assert builder.pane.placeholder.text() == pcb.text("pcb_no_project", "en")
         builder.set_language("fr")
-        assert builder.heading.text() == pcb.text("pcb_command", "fr") and builder.field.text() == '#show-plan("P01", legend: false)'
+        assert builder.heading.text() == pcb.text("pcb_command", "fr") and builder.field.text() == '#figure(image-positions-plan("P01", detail-legend: "scale-bar"), kind: image, caption: [P01]) <fig-p01>'
     finally:
         builder.stop()
         builder.deleteLater()
@@ -211,6 +199,9 @@ def test_the_snippet_is_the_header_and_the_call_and_it_compiles_to_the_plan():
         base = conftest.tmpdir("pcb_project")
         here = project_template.create(base / "Halle", "Halle", document_language="en", report_language="en", author="L. Exempel")
         shutil.copytree(example.data_dir, here.data_dir, dirs_exist_ok=True)
+        for kind in project.FIGURE_KINDS:   # and the figures it names, in the tabs' Exports/ laid out by folders (issue #64)
+            if example.has_folders and example.exports_dir(kind).is_dir():
+                shutil.copytree(example.exports_dir(kind), here.exports_dir(kind), dirs_exist_ok=True)
         records = json.loads((here.data_dir / "plans.json").read_text(encoding="utf-8"))["plans"]
         assert "Pavillon" in records
 
@@ -225,8 +216,8 @@ def test_the_snippet_is_the_header_and_the_call_and_it_compiles_to_the_plan():
         values = builder.options.values()
         source = pcb.snippet_source(here, mode, values, "en")
         assert source == builder.source() and source.splitlines()[:3] == structure_preview.header(here, mode, "en")[:3]
-        assert source.rstrip().endswith('#show-plan("Pavillon", legend: false, highlight: "T001")'), source
-        assert source.count("#show-plan(") == 1
+        assert source.rstrip().endswith('#figure(image-positions-plan("Pavillon", detail-legend: "scale-bar", highlight: "T001"), kind: image, caption: [Pavillon]) <fig-pavillon>'), source
+        assert source.count("image-positions-plan(") == 1
 
         # the pane compiles it, shows it, and says the command it shows
         end = time.monotonic() + 90
@@ -248,7 +239,7 @@ def test_the_snippet_is_the_header_and_the_call_and_it_compiles_to_the_plan():
             assert time.monotonic() < end, "no second page"
             app.processEvents()
             time.sleep(0.02)
-        assert 'caption: none' in builder.command()
+        assert 'caption:' not in builder.command(), "«no caption»: the figure is written without one"
     finally:
         builder.stop()
         builder.deleteLater()
@@ -270,12 +261,12 @@ def test_the_builder_takes_the_controls_and_the_command_of_another_kind_of_plan(
         assert made == ["en"] and isinstance(builder.options, FakeOptions)
         builder.set_plans(PLANS)
         assert builder.command() == "#show-fire-plan('P01')" and builder.field.text() == builder.command()
-        # the default builder is today's: #show-plan
+        # the default builder is the position plan's: its figure (spec 2026-10-21-commandes-typst-refonte, REQ-013)
         default = pcb.CommandBuilder("en", copy=lambda text: None)
         default.pane.preview_folder = conftest.tmpdir("pcb_default-cache")
         try:
             default.set_plans(PLANS)
-            assert default.command() == '#show-plan("P01")' and type(default.options) is pcb.CommandOptions
+            assert default.command() == '#figure(image-positions-plan("P01"), kind: image, caption: [P01]) <fig-p01>' and type(default.options) is pcb.CommandOptions
         finally:
             default.stop()
             default.deleteLater()
@@ -295,14 +286,15 @@ FIRE_PLANS = {
 def test_the_fire_command_is_show_fire_plan_with_only_what_differs_from_its_defaults():
     _qt()
     import plan_command_builder as pcb
-    assert pcb.fire_command_text({"plan": "Treppenhaus"}) == '#show-fire-plan("Treppenhaus")'
+    # a native figure since the spec 2026-10-21-commandes-typst-refonte (REQ-014, ARCH-012)
+    assert pcb.fire_command_text({"plan": "Treppenhaus"}) == '#figure(image-fire-plan("Treppenhaus"), kind: image, caption: [Treppenhaus]) <fig-treppenhaus>'
     assert pcb.fire_command_text({"plan": "Treppenhaus", "width": "60%", "legend": False, "scale_bar": False}) == \
-        '#show-fire-plan("Treppenhaus", width: 60%, legend: false, scale-bar: false)'
-    assert pcb.fire_command_text({"plan": "Treppenhaus", "caption": False}) == '#show-fire-plan("Treppenhaus", caption: none)'
-    assert pcb.fire_command_text({"plan": "Treppenhaus", "caption": 'Plan "Nord"'}) == '#show-fire-plan("Treppenhaus", caption: "Plan \\"Nord\\"")'
-    assert pcb.fire_command_text({"plan": "Treppenhaus", "caption": None, "width": "100%"}) == '#show-fire-plan("Treppenhaus")'
+        '#figure(image-fire-plan("Treppenhaus", detail-legend: "none", width: 60%), kind: image, caption: [Treppenhaus]) <fig-treppenhaus>'
+    assert pcb.fire_command_text({"plan": "Treppenhaus", "caption": False}) == '#figure(image-fire-plan("Treppenhaus"), kind: image) <fig-treppenhaus>'
+    assert pcb.fire_command_text({"plan": "Treppenhaus", "caption": "Plan Nord"}) == '#figure(image-fire-plan("Treppenhaus"), kind: image, caption: [Plan Nord]) <fig-treppenhaus>'
+    assert pcb.fire_command_text({"plan": "Treppenhaus", "caption": None, "width": "100%"}) == '#figure(image-fire-plan("Treppenhaus"), kind: image, caption: [Treppenhaus]) <fig-treppenhaus>'
     # a position plan's detail, axes and highlight mean nothing to a fire plan: they are not written
-    assert pcb.fire_command_text({"plan": "Treppenhaus", "axes": False, "highlight": ["T001"], "detail": True}) == '#show-fire-plan("Treppenhaus")'
+    assert pcb.fire_command_text({"plan": "Treppenhaus", "axes": False, "highlight": ["T001"], "detail": True}) == '#figure(image-fire-plan("Treppenhaus"), kind: image, caption: [Treppenhaus]) <fig-treppenhaus>'
 
 
 def test_the_fire_controls_are_the_plans_less_the_axes_the_positions_and_the_detail():
@@ -313,12 +305,12 @@ def test_the_fire_controls_are_the_plans_less_the_axes_the_positions_and_the_det
     assert options.current_plan() == "Treppenhaus"
     assert options.axes.isHidden() and options.highlight_card.isHidden() and not options.display_card.isHidden()
     assert options.legend.text() == pcb.text("pcb_fire_legend", "fr") and options.legend.text() != pcb.text("pcb_legend", "fr")
-    assert set(options.values()) == {"plan", "width", "legend", "scale_bar", "caption"}
+    assert set(options.values()) == {"plan", "width", "legend", "scale_bar", "caption", "level"}   # the level since v0.120 (UI-003)
     got = []
     options.changed.connect(got.append)
     options.legend.setChecked(False)
     options.width.setCurrentText("60%")
-    assert got[-1] == {"plan": "Treppenhaus", "width": "60%", "legend": False, "scale_bar": True, "caption": None}
+    assert got[-1] == {"plan": "Treppenhaus", "width": "60%", "legend": False, "scale_bar": True, "caption": None, "level": None}
     # the scale bar follows the plan's scale: greyed where the plan has none
     assert options.scale_bar.isEnabled()
     options.plan.setCurrentIndex(options.plan.findData("Pavillon-EG"))
@@ -340,6 +332,9 @@ def test_the_snippet_takes_the_builders_own_command_and_a_fire_plan_compiles_thr
     import plan_command_builder as pcb
     here = project_template.create(conftest.tmpdir("pcb_fire_project") / "Halle", "Halle", document_language="en", report_language="en", author="L. Exempel")
     shutil.copytree(project.current().data_dir, here.data_dir, dirs_exist_ok=True)
+    for kind in project.FIGURE_KINDS:   # and the figures it names, in the tabs' Exports/ laid out by folders (issue #64)
+        if project.current().has_folders and project.current().exports_dir(kind).is_dir():
+            shutil.copytree(project.current().exports_dir(kind), here.exports_dir(kind), dirs_exist_ok=True)
     records = json.loads((here.data_dir / "fire.json").read_text(encoding="utf-8"))["plans"]
     builder = pcb.CommandBuilder("en", copy=lambda text: None, options_factory=pcb.FireCommandOptions, command_fn=pcb.fire_command_text)
     builder.pane.preview_folder = conftest.tmpdir("pcb_fire-cache")
@@ -349,7 +344,7 @@ def test_the_snippet_takes_the_builders_own_command_and_a_fire_plan_compiles_thr
         builder.set_plan("Treppenhaus")
         builder.options.legend.setChecked(False)
         source = builder.source()
-        assert source.rstrip().endswith('#show-fire-plan("Treppenhaus", legend: false)') and "#show-plan(" not in source, source
+        assert source.rstrip().endswith('#figure(image-fire-plan("Treppenhaus", detail-legend: "scale-bar"), kind: image, caption: [Treppenhaus]) <fig-treppenhaus>') and "image-positions-plan(" not in source, source
         assert pcb.snippet_source(here, builder.mode, builder.options.values(), None, pcb.fire_command_text) == source
         end = time.monotonic() + 90
         while builder.pane.shown_snippet != builder.command():
@@ -359,7 +354,7 @@ def test_the_snippet_takes_the_builders_own_command_and_a_fire_plan_compiles_thr
         assert builder.pane.error_banner.isHidden(), builder.pane.last_error
         from pypdf import PdfReader
         words = " ".join(page.extract_text() or "" for page in PdfReader(io.BytesIO(open(builder.pane.shown, "rb").read())).pages)
-        assert "Fire-protection plan Treppenhaus" in words, words[:300]
+        assert "Treppenhaus" in words, words[:300]   # the figure's caption, the plan's id until the engineer writes his own
     finally:
         builder.stop()
         builder.deleteLater()

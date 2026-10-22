@@ -1,6 +1,6 @@
 """Document templates -- the «templates de fond», content templates: what a new Convention d'utilisation (CU), Base de projet (BP) or Rapport de statique (RS) is made from -- its sections and the text they start with.
 
-A project template (calc/templates.py) is the skeleton of a whole project, and makes the report a new project starts with; since v0.114 the report has content templates of its own beside it, as the two other documents have -- what a report's content is switched to afterwards (calc/content_switch.py), and what it is saved as. A **document template** is the skeleton of one document: a folder under `templates/documents/<mode>/<folder>/` holding a `template.json` (schemas/document-template.schema.json: the mode, the name and description in the three languages, the languages the template exists in) and, for each language, a folder that is **exactly the document's own folder** -- the entry `.typ` (the only `.typ` at its top, named after the document in that language), its `structure.json` (calc/structure.py) and `Sections/<id>.typ`, one file per lowest-level section.
+A project template (calc/templates.py) is the skeleton of a whole project, and makes the report a new project starts with; since v0.114 the report has content templates of its own beside it, as the two other documents have -- chosen as a project's report is made (calc/project_template.py) and what a report is saved as. A **document template** is the skeleton of one document: a folder under `templates/documents/<mode>/<folder>/` holding a `template.json` (schemas/document-template.schema.json: the mode, the name and description in the three languages, the languages the template exists in) and, for each language, a folder that is **exactly the document's own folder** -- the entry `.typ` (the only `.typ` at its top, named after the document in that language), its `structure.json` (calc/structure.py) and `Sections/<id>.typ`, one file per lowest-level section.
 
 **The report's** language folder is the report's own folder: its entry `Statischer Rapport.typ` -- named so in every language, as a project names it (documents.RS_ENTRY) -- and `Sections/NNN-<name>.typ`, numbered in the order they print, which is the order of the entry's `#include "Sections/…"` lines; a line commented out is a section that is not printed. It has no structure.json: the report keeps its order and its state in its include lines (calc/structure.py `tree`, calc/templates.py `sync_includes`), and `check` holds that every include names a file there and every file there is included.
 
@@ -11,7 +11,7 @@ What a template sets down is a document's sections and the text they start with.
 **Three places**, as a project template has (calc/templates.py), each a folder `documents/` holding `<mode>/<folder>/`, and a template is named `<place>:<mode>/<folder>`:
 
 * **builtin** -- `templates/documents/` beside the program, read only: `builtin:cu/standard`, `builtin:bp/standard`, `builtin:rs/standard`;
-* **user** -- `documents/` inside the engineer's own folder of templates (`%APPDATA%\\Woodcore\\templates\\documents\\`, calc/tools/usersettings.py `templates_dir`): `user:cu/<folder>`;
+* **user** -- `documents/` inside the engineer's own folder of templates (`%APPDATA%\\Woodcore\\templates\\documents\\`, calc/usersettings.py `templates_dir`): `user:cu/<folder>`;
 * **office** -- `documents/` inside the folder the settings name for the office's shared templates (`templates.shared_folder`, what calc/templates.py calls the place `shared` -- `shared:` is read as `office:`): `office:cu/<folder>`.
 
 A folder `documents/` holds no `template.json` of its own, so calc/templates.py, which lists a place's folders that carry one, never takes it for a project template.
@@ -31,6 +31,7 @@ import time
 from pathlib import Path
 
 import engine
+import project
 import structure
 import typst_paths
 import validation
@@ -38,7 +39,7 @@ import validation
 FILE = "template.json"
 FORMAT = "woodcore-document-template"
 SCHEMA_VERSION = "1.0"
-# The documents laid out by a structure.json: what the window offers a template for when a project is created (calc/tools/home_page.py) and saves one from in the structure tab. The report is not among them: it has content templates too (ALL_MODES), made and saved by the functions of this module that take a mode, and chosen when its content is switched (calc/content_switch.py).
+# The documents laid out by a structure.json: what the window offers a template for when a project is created (calc/tools/home_page.py) and saves one from in the structure tab. The report is not among them: it has content templates too (ALL_MODES), made and saved by the functions of this module that take a mode, and chosen as a document is made from the «Projet» tab (project_template.create_document).
 MODES = structure.MODES
 # Every document a content template exists for, the report included: what every function of this module that takes a mode accepts.
 ALL_MODES = structure.SHARE_MODES
@@ -268,7 +269,7 @@ def read(folder, mode, place="builtin"):
 # --- the places and the list -----------------------------------------------------------------
 
 def place_dir(place, settings=None):
-    """The folder of document templates of `place`: `templates/documents/` for builtin, `documents/` inside the engineer's own folder of templates for user, and inside the office's shared folder for office -- None for office where the settings name no folder. `settings` are Woodcore's preferences (calc/tools/usersettings.py), read where not given. The folder may not exist yet: a place holds nothing until a template is saved there."""
+    """The folder of document templates of `place`: `templates/documents/` for builtin, `documents/` inside the engineer's own folder of templates for user, and inside the office's shared folder for office -- None for office where the settings name no folder. `settings` are Woodcore's preferences (calc/usersettings.py), read where not given. The folder may not exist yet: a place holds nothing until a template is saved there."""
     place = place_name(place)
     if place == "builtin":
         return BUILTIN_DIR
@@ -429,6 +430,8 @@ def instantiate(mode, language, target_dir, entry_name=None, template=None, sibl
         raise DocTemplateError(f"{target}: {', '.join(d.relative_to(target).as_posix() for d in taken[:5])} is there already -- a document is never written over another")
 
     made_dirs, made_files = [], []
+    # a template writes what configures the documents at the root, `/commands.typ`; in a project laid out by folders it lies in 000-Typst-Config/, and each .typ is written naming it there (issue #64) -- as it is copied, one write per file: a file just written and written again is one a sync client may still hold
+    here = _project_of(target)
     try:
         missing = [p for p in [target, *target.parents] if not p.exists()]
         target.mkdir(parents=True, exist_ok=True)
@@ -437,7 +440,11 @@ def instantiate(mode, language, target_dir, entry_name=None, template=None, sibl
             if not dest.parent.exists():
                 dest.parent.mkdir(parents=True)
                 made_dirs.append(dest.parent)
-            shutil.copyfile(src, dest)
+            if here is not None and dest.suffix.lower() == ".typ":
+                import documents
+                dest.write_bytes(documents.relocate_config_text(here, typst_paths.read_text(src)).encode("utf-8"))
+            else:
+                shutil.copyfile(src, dest)
             made_files.append(dest)
         entry = target / entry_name
         if mode != "rs":
@@ -454,6 +461,18 @@ def instantiate(mode, language, target_dir, entry_name=None, template=None, sibl
                 pass
         raise
     return entry
+
+
+def _project_of(folder):
+    """The project laid out by folders whose document `folder` is -- the one `.woodcore` in the folder above it --, or None: a document made outside a project, or in one laid out before, whose files keep the template's paths."""
+    found = sorted(Path(folder).resolve().parent.glob("*" + project.EXTENSION))
+    if len(found) != 1:
+        return None
+    try:
+        here = project.Project.load(found[0])
+    except (project.ProjectError, OSError):
+        return None
+    return here if here.has_folders else None
 
 
 # --- sharing, once the documents are there -------------------------------------------------------

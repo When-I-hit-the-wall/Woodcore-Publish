@@ -4,19 +4,17 @@
 == Use of building materials
 // woodcore:/object title
 
-// woodcore:object doc-table fire-materials-table
-#doc-table(
-  columns: (
-    (id: "category", title: [Category]),
-    (id: "element", title: [Element]),
-    (id: "basis", title: [Basis]),
-    (id: "requirement", title: [Requirement]),
-    (id: "execution", title: [Execution / values]),
-  ),
-  hidden: (),
-  rows: (
-    (category: [Building envelope], element: [[External wall cladding]], basis: [[VKF 14-15]], requirement: [[RF3 (cr)]], execution: [[…]]),
-    (category: [Interior fit-out: vertical escape routes], element: [[Wall and ceiling linings]], basis: [[VKF 14-15]], requirement: [[RF1]], execution: [[…]]),
+// woodcore:object table fire-materials-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto),
+    align: (left, left, left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Category*], [*Element*], [*Basis*], [*Requirement*], [*Execution / values*]),
+    table.hline(stroke: 0.5pt),
+    [Building envelope], [[External wall cladding]], [[VKF 14-15]], [[RF3 (cr)]], [[…]],
+    [Interior fit-out: vertical escape routes], [[Wall and ceiling linings]], [[VKF 14-15]], [[RF1]], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Use of building materials],
 )

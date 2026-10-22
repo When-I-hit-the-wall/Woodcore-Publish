@@ -1,0 +1,68 @@
+{
+  "domains": {
+    "SL": {
+      "check": "SL",
+      "gen": {
+        "form": "8f7c55",
+        "kind": "snow-load",
+        "version": 2
+      },
+      "lines": {
+        "eq:h_ref": [
+          "b00720a9db1af0ce",
+          "b00720a9db1af0ce"
+        ],
+        "eq:q_k1": [
+          "e4303e8698c00d5c",
+          "e4303e8698c00d5c"
+        ],
+        "label:SL-presets": [
+          "d1606a0ad0d49a50",
+          "d1606a0ad0d49a50"
+        ],
+        "var:B": [
+          "93aef1416a718356",
+          "93aef1416a718356"
+        ],
+        "var:L": [
+          "7fdc07c59d8c9dfe",
+          "7fdc07c59d8c9dfe"
+        ],
+        "var:abgleiten": [
+          "ee9c7c3ee6c214d7",
+          "ee9c7c3ee6c214d7"
+        ],
+        "var:ce": [
+          "f50b5f5110553c0d",
+          "f50b5f5110553c0d"
+        ],
+        "var:ct": [
+          "853322fbbce2ed14",
+          "853322fbbce2ed14"
+        ],
+        "var:dachform": [
+          "cb7449f61567e35a",
+          "cb7449f61567e35a"
+        ],
+        "var:h_0": [
+          "b9cf9815fa3a4aaa",
+          "b9cf9815fa3a4aaa"
+        ],
+        "var:korrektur": [
+          "a21c1bcb1e981bcd",
+          "a21c1bcb1e981bcd"
+        ],
+        "var:mu_1": [
+          "e3dc16812726c78a",
+          "e3dc16812726c78a"
+        ],
+        "var:s_k": [
+          "2109a4801257c8de",
+          "2109a4801257c8de"
+        ]
+      }
+    }
+  },
+  "format": "woodcore-unfold",
+  "schema_version": "1.0"
+}

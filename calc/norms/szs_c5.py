@@ -7,10 +7,10 @@
 A halved profile (IPET, HEAT, HEBT) takes its t_w, t_f and r from its parent (`PARENTS`), as the page says; a tube or a bar, whose table prints one I, W_el, W_pl and i, has them about both axes, and its h, b, t or D come from its designation.
 """
 
-import json
 from pathlib import Path
 
 import validation
+from norms import _loader  # how every reader of calc/norms/ opens its files (G3)
 
 NAME = "szs-c5-2018-edv-kurzbezeichnungen"
 PATH = Path(__file__).resolve().parent / (NAME + ".json")
@@ -28,15 +28,8 @@ def _fail(what):
 def _read():
     if "data" in _cache:
         return _cache["data"]
-    try:
-        with PATH.open(encoding="utf-8") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        _fail("not found at %s -- the profile families of SZS C5 live in calc/norms/" % PATH)
-    except json.JSONDecodeError as exc:
-        _fail("is not valid JSON: %s" % exc)
-    if not data.get("edition"):
-        _fail("no 'edition'")
+    data = _loader.load(PATH)
+    _loader.edition(NAME, data)
     codes = data.get("codes")
     if not isinstance(codes, list) or not codes:
         _fail("no 'codes' list")
@@ -118,12 +111,7 @@ def _read_tables():
     families = {}
     for name in TABLE_NAMES:
         path = PATH.parent / (name + ".json")
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except FileNotFoundError:
-            _fail_table(name, "not found -- the profile tables of SZS C5 live in calc/norms/")
-        except json.JSONDecodeError as exc:
-            _fail_table(name, "is not valid JSON: %s" % exc)
+        data = _loader.load(path)
         if data.get("edition") != edition():
             _fail_table(name, "edition %r -- the family list is %r, and two editions of one book would be two books" % (data.get("edition"), edition()))
         if not str(data.get("_source", "")).strip() or not data.get("norm_ref"):

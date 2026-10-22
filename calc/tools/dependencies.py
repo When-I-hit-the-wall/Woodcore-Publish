@@ -141,4 +141,4 @@ def pin(packages):
         if m and m.group(1) in wanted:
             ending = line[len(line.rstrip("\r\n")):]
             lines[i] = f"{m.group(1)}=={wanted[m.group(1)]}{ending}"
-    REQUIREMENTS.write_text("".join(lines), encoding="utf-8")
+    REQUIREMENTS.write_text("".join(lines), encoding="utf-8", newline="\n")

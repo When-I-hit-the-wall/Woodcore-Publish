@@ -12,9 +12,8 @@
       "type": "string",
       "enum": [
         "2.0",
-        "2.1"
-      ],
-      "description": "-- 2.0, or 2.1 where a plan carries `texts` (issue #43): a file written at another version is refused rather than read as this one."
+        "2.1", "2.2"],
+      "description": "-- 2.0, or 2.1 where a plan carries `texts` (issue #43): a file written at another version is refused rather than read as this one. 2.2 (issue #64): 2.1 with the figures and the background named from the Typst root (`/Plans/Fire-plan/Exports/Figures/F01-fr.svg`), written by a project laid out by folders."
     },
     "plans": {
       "type": "object",

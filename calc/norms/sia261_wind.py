@@ -6,12 +6,12 @@
 Each table file is checked here before anything is built from it -- every row as many values as the table has columns, a column a known group, a coefficient a number, a pair (±x, a/b), null or «direct» --, as the review asked (ARCH-RISK-004); the transcription itself is held against the Belastungsannahmen workbook's tables 31-45, 59a, 59b by tests/test_wind_source.py.
 """
 
-import json
 import math
 import re
 from pathlib import Path
 
 import validation
+from norms import _loader  # how every reader of calc/norms/ opens its files (G3)
 
 HERE = Path(__file__).resolve().parent
 CLAUSE = "sia261-2020-6.2-wind"
@@ -30,19 +30,14 @@ def _name(number):
 FILES = (CLAUSE,) + tuple(_name(n) for n in NUMBERS)
 
 
-def _fail(name, what):
-    raise validation.ValidationError("calc/norms/%s.json: %s" % (name, what))
+_fail = _loader.fail   # calc/norms/<name>.json: <what> (G3)
 
 
 def _read(name):
     if name in _cache:
         return _cache[name]
-    try:
-        data = json.loads((HERE / (name + ".json")).read_text(encoding="utf-8"))
-    except (OSError, ValueError) as exc:
-        _fail(name, "cannot be read -- %s" % exc)
-    if data.get("edition") != EDITION:
-        _fail(name, "edition is %r -- expected %r" % (data.get("edition"), EDITION))
+    data = _loader.load((HERE / (name + ".json")))
+    _loader.edition(name, data, EDITION)
     _cache[name] = data
     return data
 

@@ -8,18 +8,17 @@
 Die maximalen Wärmedurchgangskoeffizienten $U_"max"$ nach der Norm #cite-norm(norm: "SIA 180") sind einzuhalten. Für den Nachweis über Einzelbauteilanforderungen gelten für Neubauten die Werte der kantonalen Energiegesetzgebung [Kanton, Verordnung]. [Angestrebtes Label (Minergie …) oder keines.]
 // woodcore:/object p1
 
-// woodcore:object doc-table u-values-table
-#doc-table(
-  columns: (
-    (id: "element", title: [Bauteil]),
-    (id: "against", title: [Gegen]),
-    (id: "U", title: [Wärmedurchgangskoeffizient $U$], unit: "W/(m²K)", kind: "number"),
-    (id: "basis", title: [Grundlage]),
-  ),
-  hidden: (),
-  rows: (
-    (element: [Dach], against: [Aussenluft], U: [[…]], basis: [[kantonale Verordnung]]),
-    (element: [Aussenwand], against: [Aussenluft], U: [[…]], basis: [[kantonale Verordnung]]),
+// woodcore:object table u-values-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto),
+    align: (left, left, right, left),
+    table.hline(stroke: 1pt),
+    table.header([*Bauteil*], [*Gegen*], [*Wärmedurchgangskoeffizient $U$*], [*Grundlage*]),
+    table.hline(stroke: 0.5pt),
+    [Dach], [Aussenluft], [[…]], [[kantonale Verordnung]],
+    [Aussenwand], [Aussenluft], [[…]], [[kantonale Verordnung]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Grenzwerte der Wärmedurchgangskoeffizienten],
 )

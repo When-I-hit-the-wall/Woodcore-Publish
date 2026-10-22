@@ -9,6 +9,8 @@ Nothing is delimited by the program any more (the engineer's decision of 2026-10
 The sheet is drawn at PER_M sheet units to the metre. Everything measured is written in metres and turned into sheet units by `m`.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 import json
 import math
@@ -25,9 +27,10 @@ from domains import plan_documents as documents
 from domains import plan_pages
 from i18n import strings
 from norms import vkf
+import project
 
-PLANS = ROOT / "tests" / "projet-exemple" / "Woodcore-Datei" / "plans"
-FIRE = ROOT / "tests" / "projet-exemple" / "Woodcore-Datei" / "fire"
+PLANS = project.Project.load(ROOT / "tests" / "projet-exemple" / "Exemple.woodcore").plans_dir   # 000-Woodcore/sources/ since the layout by folders (issue #64)
+FIRE = project.Project.load(ROOT / "tests" / "projet-exemple" / "Exemple.woodcore").fire_dir
 
 PER_M = 50
 
@@ -523,7 +526,7 @@ def test_the_legend_is_written_in_the_language_it_is_asked_for():
     assert "Legende" not in _texts(fire_svg.render(without, frame))
     # the legend is drawn over everything: its frame comes after every mark of the plan
     svg = fire_svg.render(source, frame)
-    assert svg.rindex('fill="#ffffff" stroke="#000000"') > svg.index(fire_svg._pts(fire.exit_shape(source["exits"][0]["points"])))
+    assert svg.rindex(f'fill="{fire_svg.GROUND}" stroke="{fire_svg.INK}"') > svg.index(fire_svg._pts(fire.exit_shape(source["exits"][0]["points"])))
 
 
 # --- how large, how opaque, and where a text stands ---------------------------------------

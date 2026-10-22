@@ -14,8 +14,10 @@ import json
 import re
 from pathlib import Path
 
+import engine
 import project
 import validation
+from domains._common import fail as _fail, is_number as _number  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import links  # a field that follows a variable of the export (spec 2026-10-11-variables-liees-champs-et-textes)
 from domains import dead_load, dead_load_svg, materials
 
@@ -37,14 +39,6 @@ LIBRARIES = materials.LIBRARIES + ("direct",)
 # What the table says under the layers (a glossary term: a French report says it in French)
 NOTE = ("Last je Schicht = Wichte · Dicke · Breite / Abstand; eine Flächenlast ohne die Dicke. "
         "Gewichte in kg werden mit g = 10 m/s² in kN umgerechnet.")
-
-
-def _fail(where, message):
-    raise validation.ValidationError("%s: %s" % (where, message))
-
-
-def _number(value):
-    return not isinstance(value, bool) and isinstance(value, (int, float))
 
 
 def folder(here=None):
@@ -188,7 +182,9 @@ def build_instance(src, here=None):
         if layer["breite"] is None and layer["mass"] is not None:
             row[4] = row[5] = ""
     # UI-002, UI-003: the build-up drawn, printed by show-calc above its table and shown by the tab
-    rel = "calculations/%s-%s.svg" % (DOMAIN, src["id"])
+    # where the drawing lies and how the record names it: Permanent-loads/Exports/Figures/ in a project laid out by folders, data/calculations/ otherwise (engine.Figures, issue #64)
+    place = engine.Figures(here.data_dir if here is not None else None, DOMAIN, here)
+    rel = place.name("%s-%s.svg" % (DOMAIN, src["id"]))
     instance["figures"] = [{"file": rel, "title": "Schichtaufbau", "level": 2}]
     instance["_files"] = {rel: dead_load_svg.render(rows)}
     return instance

@@ -47,7 +47,6 @@ from object_panes_fields import (  # split out of this module (issue #30): every
     CellField,
     DEBOUNCE_MS,
     ListBox,
-    OverrideField,
     Pane,
     Switch,
     Text,
@@ -58,15 +57,21 @@ from object_panes_fields import (  # split out of this module (issue #30): every
     _unescape,
     as_context,
     call_of,
-    make_combo,
     parse_number,
     plain,
     show_number,
     variable_of,
 )
-from object_panes_table import KNOWN_KINDS, KNOWN_SYMBOLS, KNOWN_TITLES, LOAD_VALUES, LiveLoadPane, TablePane  # split out of this module (issue #30): every name it had is still importable from it
-from object_panes_options import ChecklistPane, ChoicePane, FieldPane, NormListPane, OptionsPane, SIGNATURE_FIELDS, SignaturesPane  # split out of this module (issue #30): every name it had is still importable from it
-from object_panes_media import AnnexesPane, ExtractPane, FirePlanPane, ImagePane, PlanPane, set_width, write_width  # split out of this module (issue #30): every name it had is still importable from it
+from object_panes_table import (  # split out of this module (issue #30): every name it had is still importable from it
+    KNOWN_KINDS,
+    KNOWN_SYMBOLS,
+    KNOWN_TITLES,
+    LOAD_VALUES,
+    RawTablePane,
+    TablePane,
+)
+from object_panes_options import NormListPane, SIGNATURE_FIELDS  # split out of this module (issue #30): every name it had is still importable from it
+from object_panes_media import set_width  # split out of this module (issue #30): every name it had is still importable from it
 
 # The autonyms of the three languages, in the order a chapter's titles are written.
 LANGUAGE_NAMES = {"de": "Deutsch", "fr": "Français", "en": "English"}
@@ -394,18 +399,7 @@ class ChapterPane(NodePane):
 # --- choosing the pane, and the host that swaps them ---------------------------------------------------------------------
 
 PANES = {
-    "doc-table": TablePane,
-    "dead-load-table": TablePane,
-    "live-load-table": LiveLoadPane,
-    "doc-field": FieldPane,
-    "doc-checklist": ChecklistPane,
-    "doc-choice": ChoicePane,
-    "doc-image": ImagePane,
-    "doc-plan": PlanPane,
-    "doc-fire-plan": FirePlanPane,
-    "doc-extract": ExtractPane,
-    "doc-annexes": AnnexesPane,
-    "doc-signatures": SignaturesPane,
+    "table": RawTablePane,   # a table written in raw Typst (spec 2026-10-21-commandes-typst-refonte, ARCH-004)
     "show-norm-list": NormListPane,
     "heading": HeadingPane,
     "text": TextPane,

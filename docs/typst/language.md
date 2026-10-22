@@ -1,5 +1,7 @@
 # The report's language (i18n)
 
+> **Two glossaries, one rule (19.10.2026, spec 2026-10-19-base-saine-nettoyage, G7).** What the **report** prints is in `calc/i18n/` (`strings.json`, `commands.json`, `reference.json`), read by Typst and by Python. What the **window** says is its own: each tab keeps its words beside it, a `STRINGS = {"fr": …, "de": …, "en": …}` table in its module or in a `calc/tools/<tab>_words.py` split out of it, merged into the window's one table by `woodcore_gui_words.py`. Neither copies the other: a word the report prints is never in a `STRINGS`, and a word of the window never in `calc/i18n/`. `tests/test_i18n.py` holds both to the three languages and to the keys the code names.
+
 > Document language vs engine language, the glossary, figures per language.
 >
 > Moved verbatim from CLAUDE.md (§4bis) on 2026-10-07. The § numbers are kept as stable anchors: `docs/README.md` maps every § to its file.
@@ -66,7 +68,7 @@ Three blocks, and the middle one is why **`data/calculations.json` did not chang
 
 `strings.py` checks the file before a word is taken out of it: a language missing from an entry, an empty string, a template whose holes differ between two languages, a term carrying a German of its own, or a language list other than `LANGUAGES` (which `lib/i18n.typ` asserts again at compile time). `export_all.py` checks it first, whatever the project holds (v0.78), so each stops the export naming the key, exactly as a defective norm table does.
 
-**Where the French and the English come from.** Wherever a norm gives the word, the word is quoted, and each block of the file names its source: SIA 261's French edition (1.2 for the symbols' names, 5 and 6 for snow and wind, **Tabelle 8 word for word from p. 38**, and annex H's Tabelle 80, which gives German → French → English for the terms of chapter 1 — *Nutzlast* → *charge utile* → *live load*); SIA 265's French for timber and connections (table 3 for the moisture class, 6.4 for *prépercé*); SIA 260's French and English editions for *convention d'utilisation* and *base du projet*; STE Compact 02's French for the plan legend; EN 1995-1-1 for the timber terms those do not cover. What no norm gives is a translation and says so: the wording is the engineer's to correct, in that file and nowhere else. 👉 Since v0.53 every edition named here is a PDF in `ExternalFiles/000-Normes/` (§11bis), so a word is checked against the edition it was quoted from rather than against a memory of it.
+**Where the French and the English come from.** Wherever a norm gives the word, the word is quoted, and each block of the file names its source: SIA 261's French edition (1.2 for the symbols' names, 5 and 6 for snow and wind, **Tabelle 8 word for word from p. 38**, and annex H's Tabelle 80, which gives German → French → English for the terms of chapter 1 — *Nutzlast* → *charge utile* → *live load*); SIA 265's French for timber and connections (table 3 for the moisture class, 6.4 for *prépercé*); SIA 260's French and English editions for *convention d'utilisation* and *base du projet*; STE Compact 02's French for the plan legend; EN 1995-1-1 for the timber terms those do not cover. What no norm gives is a translation and says so: the wording is the engineer's to correct, in that file and nowhere else. 👉 Since v0.53 every edition named here is a PDF in the reference library (§11bis), so a word is checked against the edition it was quoted from rather than against a memory of it.
 
 ### In Typst
 
@@ -78,7 +80,7 @@ Three blocks, and the middle one is why **`data/calculations.json` did not chang
 | `set-report-language(lang)` | the command; an unknown language fails naming the three |
 | `report-lang()` | the language in force, inside `context` |
 | `t-str(key, ..values)` / `tl-str(text)` | a string, in the report's language — what the engine calls at every print site |
-| `t(key, ..values)` / `tl(text)` | the same as content, wrapped in `context` — for a caller in markup rather than inside a show-* function: `#t("governing")`, `#tl(get-label(v))`. **Not for a heading** (v0.54): those are the engineer's and are written by hand |
+| `t(key, ..values)` / `tl(text)` | the same as content, wrapped in `context` — for a caller in markup rather than inside a show-* function: `#t("governing")`, `#tl(get(v, "label"))`. **Not for a heading** (v0.54): those are the engineer's and are written by hand |
 | `t-label(key)` | the word and its colon, set the way each language sets one: French keeps a narrow no-break space before it |
 | `t-pattern(key)` | a template with its holes standing, for a sentence whose hole is a piece of *math* (`I_p`, `F_3`): split on the hole and set the math between the halves |
 | `t-of(lang, key)` / `tl-of(lang, text)` | the pure lookups the four above are built on, for a caller that states the language itself |

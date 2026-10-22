@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, Tabelle 38 (clause 6.5.2.3.3) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 75, read off a render of the page; the French wording from ExternalFiles/000-Normes/SIA265-2021-FR.pdf p. 76.",
+  "_source": "SIA 265:2021, Tabelle 38 (clause 6.5.2.3.3) -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 75, read off a render of the page; the French wording from SIA265-2021-FR.pdf p. 76.",
   "_note": "The footnotes are the norm's rules restated in a sentence each, under the norm's own numbering, and not its paragraphs: a norm is cited and never reproduced (docs/architecture/reference-library.md §11bis). The multiples of d, the floors in mm and the conditions are transcribed exactly. The first diameter column is headed «d = 4 mm» in both the German (p. 75) and the French (p. 76) edition, where Tabelle 28 heads the same column «d ≤ 4 mm»; it is read here as d ≤ 4 mm, which is what makes the two columns cover every diameter, and `printed` keeps what the page says. The loaded edge's 13 d spans both columns.",
   "edition": "SIA 265:2021",
   "table_38": {

@@ -11,6 +11,7 @@ from domains import plan as model
 from domains import plan_svg
 from domains import plan_tracking as tracking
 import plan_canvas_edit  # «Déplacer», «Copier» and «Ligne d'aide» (issue #18)
+import plan_canvas_outline  # the building's outline: taken by its edge, reshaped by its corners (issue #54)
 from plan_canvas_render import (  # split out of this module (issue #30): every name it had is still importable from it
     BackgroundFallback,
     DiskCache,
@@ -155,12 +156,15 @@ class PlanCanvasInputMixin:
         raw = self.scene_point(event)
         shift = bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
         self.hide_distance()
+        if self.tool == "select" and event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            self.press_toggle(raw)   # Ctrl+click: added to the selection or taken out of it, nothing dragged (issue #61)
+            return
         self._left_click(raw, shift)
 
     def _left_click(self, raw, shift):
         """What a left click at `raw` does with the current tool -- a click of the mouse, or a point put down by a typed distance (`place`)."""
         kind = self.tool_kind()
-        if kind in ("point", "line", "poly") and not self.drawing and model.labelled(self.tool) and not self.propose_label(self.tool):
+        if kind in ("point", "line", "poly") and not self.drawing and self.tool in model.TYPES and model.labelled(self.tool) and not self.propose_label(self.tool):
             # nothing is put down that would carry no position: Positionen.xlsx has none of this type to give it
             self.refused.emit(self.tool)
             return
@@ -235,7 +239,7 @@ class PlanCanvasInputMixin:
         elif kind in ("line", "poly"):
             p, _kind = self.snapped(raw, self.drawing[-1] if self.drawing else None, shift)
             tol = self.tolerance()
-            count = model.point_count(self.tool)
+            count = model.point_count(self.tool) if self.tool in model.TYPES else None   # the building's outline is no element type, and an area of any number of corners
             if self.drawing and math.dist(p, self.drawing[-1]) <= tol * 0.75:
                 if count is None:
                     self.finish_drawing()  # a click on the last point ends it
@@ -248,6 +252,25 @@ class PlanCanvasInputMixin:
                 self.finish_drawing()  # a beam and a bracing member are one straight line: its second end ends it
                 return
         self.update_helpers()
+
+    def entry_at(self, raw):
+        """What a click of the selection tool at `raw` would select, (kind, index) or None, and nothing else done: `press_select` asked with no object in focus -- so no handle is taken -- and its selection caught rather than made, its drag let go (ARCH-004)."""
+        focus, extra, drag = self.selection, list(self.extra), self.drag
+        caught = []
+        self.__dict__["_focus"] = None
+        self.select = lambda selection, add=False: caught.append(selection)
+        try:
+            self.press_select(raw)
+        finally:
+            del self.select
+            self.__dict__["_focus"], self.__dict__["extra"], self.drag = focus, extra, drag
+        return caught[-1] if caught else None
+
+    def press_toggle(self, raw):
+        """Ctrl+click with the selection tool (issue #61): the object under the pointer added to the selection, or taken out of it."""
+        found = self.entry_at(raw)
+        if found is not None:
+            self.select(tuple(found), add=True)
 
     def press_select(self, raw):
         tol = self.tolerance()
@@ -287,6 +310,8 @@ class PlanCanvasInputMixin:
             if vertex is not None:
                 self.drag = {"kind": "vertex", "index": self.selection[1], "vertex": vertex, "moved": False}
                 return
+        if plan_canvas_outline.press_vertex(self, raw, tol):
+            return   # a corner of the building's outline, selected: dragged as a wall's corner is (issue #54)
         # a number is drawn over every symbol, so a click on it takes the number -- to move it clear of what it hides -- and selects its element
         text = plan_svg.hit_text(self.source, raw, tol, self.values)
         if text is not None:
@@ -305,6 +330,8 @@ class PlanCanvasInputMixin:
             self.select(("element", hit))
             self.drag = {"kind": "element", "index": hit, "start": raw, "points": [list(p) for p in self.source["elements"][hit]["points"]], "moved": False}
             return
+        if plan_canvas_outline.press_edge(self, raw, tol):
+            return   # the building's outline, after every element: a wall drawn along it is the wall, and its inside is never the outline (issue #54)
         level = hit_load_level(self.source, raw, tol)
         if level is not None:
             self.select(("load-level", level))
@@ -359,11 +386,13 @@ class PlanCanvasInputMixin:
                 plan_canvas_tools.move_dimension(self, drag, raw)
                 return
             if not drag["moved"]:
-                if drag["kind"] not in ("vertex", "storey-line-end", "storey-box-corner", "load-level-end") and math.dist(raw, drag["start"]) < self.tolerance() * 0.5:
+                if drag["kind"] not in ("vertex", "storey-line-end", "storey-box-corner", "load-level-end", plan_canvas_outline.DRAG_VERTEX) and math.dist(raw, drag["start"]) < self.tolerance() * 0.5:
                     return
                 drag["moved"] = True
                 self.begin_change()
-            if drag["kind"] == "vertex":
+            if plan_canvas_outline.follow(self, drag, raw, shift):
+                pass   # the building's outline, whole or by one corner (issue #54)
+            elif drag["kind"] == "vertex":
                 element = self.source["elements"][drag["index"]]
                 points = element["points"]
                 j = drag["vertex"]
@@ -621,13 +650,6 @@ class PlanCanvasInputMixin:
             return
         super().keyPressEvent(event)
 
-    def keyReleaseEvent(self, event):
-        if event.key() == Qt.Key.Key_Space and not event.isAutoRepeat():
-            self.space_down = False
-            self.restore_cursor()
-            return
-        super().keyReleaseEvent(event)
-
     def focusNextPrevChild(self, forward):
         """Tab is the tracking's, not the focus chain's, while the cursor is locked to a ray: without this it would leave the canvas the moment a direction is locked."""
         if self.locked and not self.typing:
@@ -675,6 +697,8 @@ class PlanCanvasInputMixin:
             plan_canvas_tools.add_rotation_handle(self, element)
         elif self.selection and self.selection[0] == "dimension":
             plan_canvas_tools.add_dimension_highlight(self)
+        elif plan_canvas_outline.highlight(self, path):
+            pass   # the building's outline selected: its corners joined, a handle on each (issue #54)
         elif axis is not None or (self.selection and self.selection[0] == "aid" and self.has_selection()):
             line = axis if axis is not None else self.source["aids"][self.selection[1]]
             segment = model.axis_segment(line, model.crop_of(self.frame_source()))
@@ -711,6 +735,8 @@ class PlanCanvasInputMixin:
                 path.closeSubpath()
                 for q in corners:
                     self._add_handle(q)
+        for kind, index in self.selected_entries()[:-1]:
+            path.addPath(self.entry_outline(kind, self.source[SELECTION_LISTS[kind]][index]))   # the others selected beside the one in focus, without handles (issue #61)
         self.select_item.setPath(path)
 
         preview = QPainterPath()

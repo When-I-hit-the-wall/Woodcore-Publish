@@ -25,8 +25,12 @@ from PySide6.QtWidgets import (
 
 import theme  # the ground of a distance that cannot be read (theme.py, v0.90)
 from domains import statics as model
+from domains import statics_geometry  # the geometry the canvas asks for, computed in the domain (D8)
 from i18n import strings
 from domains import statics_svg as drawing_svg
+from canvas_items import SvgLayer, cosmetic as _cosmetic, saved_at  # the canvases' layer and pen, written once (D2)
+from canvas_base import CanvasBase  # what the four canvases share, written once (D1)
+_round = saved_at(3)   # a coordinate as it is saved: to the millimetre, far below what a click can place
 
 # How near the pointer has to be, in screen pixels, to take hold of something.
 PICK_PX = 9
@@ -85,56 +89,20 @@ TOOLS = {
     # a text, put down where the click falls (issue #43): one click, like a point, and written in the pane
     "text": {"geo": "text", "on": "free"},
 }
-TOOL_ORDER = (
-    "point", "bar", "cable", "spring",
-    "support-fixed", "support-pinned", "support-roller",
-    "release-moment", "release-shear", "release-normal", "release-spring-moment",
-    "point-load", "line-load", "line-load-linear",
-    "dimension-horizontal", "dimension-vertical", "dimension-parallel", "dimension-angle",
-    "text",
-)
 
 
-def _round(value, digits=3):
-    """A coordinate as it is saved: to the millimetre, which is far below what a click can place."""
-    value = round(float(value), digits) + 0.0
-    return int(value) if value.is_integer() else value
-
-
-def _cosmetic(colour, width, dash=None):
-    pen = QPen(QColor(colour), width)
-    pen.setCosmetic(True)
-    if dash:
-        pen.setDashPattern(dash)
-    return pen
-
-
-class SvgLayer(QGraphicsItem):
-    """An SVG drawn over an exact rectangle of the scene. QGraphicsSvgItem sizes itself by the SVG's whole-pixel default size, which on a figure of this one's proportions lands a symbol visibly beside what it marks. plan_canvas's, unchanged."""
-
-    def __init__(self, renderer, rect):
-        super().__init__()
-        self.renderer = renderer
-        self.rect = QRectF(rect)
-        from plan_canvas import ensure_pixmap_cache
-        ensure_pixmap_cache()   # or the cached picture is thrown away as soon as made (plan_canvas.PIXMAP_CACHE_KB, v0.117)
-        self.setCacheMode(QGraphicsItem.CacheMode.DeviceCoordinateCache)
-
-    def set_rect(self, rect):
-        self.prepareGeometryChange()
-        self.rect = QRectF(rect)
-        self.update()
-
-    def boundingRect(self):
-        return self.rect
-
-    def paint(self, painter, _option, _widget=None):
-        if self.renderer.isValid():
-            self.renderer.render(painter, self.rect)
-
-
-class StaticsCanvas(QGraphicsView):
+class StaticsCanvas(CanvasBase, QGraphicsView):
     """Draws a static model and lets it be drawn. Everything it computes is statics.py's; what it holds is the tool, what is half-drawn, and where the tracking has got to."""
+
+    # what CanvasBase reads of this canvas (D1)
+    MODEL = model
+    TOOLS = TOOLS
+    ROUND = staticmethod(_round)
+    MIN_ZOOM = MIN_ZOOM
+    MAX_ZOOM = MAX_ZOOM
+    GRID_STEPS = GRID_STEPS
+    GRID_MIN_PX = GRID_MIN_PX
+    SELECT_COLOUR = SELECT_COLOUR
 
     about_to_change = Signal()
     changed = Signal()
@@ -302,32 +270,10 @@ class StaticsCanvas(QGraphicsView):
         self.clamp_zoom()
         self.update_helpers()
 
-    def clamp_zoom(self):
-        scale = self.scale_px()
-        if scale < MIN_ZOOM:
-            self.scale(MIN_ZOOM / scale, MIN_ZOOM / scale)
-        elif scale > MAX_ZOOM:
-            self.scale(MAX_ZOOM / scale, MAX_ZOOM / scale)
-
     # -- the grid ---------------------------------------------------------------
 
     def scale_px(self):
         return max(self.transform().m11(), 1e-9)
-
-    def grid_step(self):
-        """The grid the view is showing: the step the engineer forced, or the finest that is still far enough apart on screen."""
-        if self.grid_mode != "auto":
-            step = float(self.grid_mode)
-            for candidate, heavy in GRID_STEPS:
-                if abs(candidate - step) < 1e-9:
-                    return candidate, heavy
-            return step, step * 5
-        scale = self.scale_px()
-        # finest first: the step taken is the smallest one whose lines are still far enough apart to be read
-        for step, heavy in reversed(GRID_STEPS):
-            if step * scale >= GRID_MIN_PX:
-                return step, heavy
-        return GRID_STEPS[0]
 
     def snap_step(self):
         return self.grid_step()[0] if self.snap_on else None
@@ -427,15 +373,6 @@ class StaticsCanvas(QGraphicsView):
         self.restore_cursor()
         self.update_helpers()
 
-    def restore_cursor(self):
-        self._over_label = False
-        if self.tool == "pan" or self.space_down:
-            self.viewport().setCursor(Qt.CursorShape.OpenHandCursor)
-        elif self.tool == "select":
-            self.viewport().setCursor(Qt.CursorShape.ArrowCursor)
-        else:
-            self.viewport().setCursor(Qt.CursorShape.CrossCursor)
-
     def tolerance(self):
         return PICK_PX / self.scale_px()
 
@@ -453,13 +390,6 @@ class StaticsCanvas(QGraphicsView):
             self.selection = selection
             self.redraw()
             self.selection_changed.emit()
-
-    def selected(self):
-        """The (collection, entry) selected, or (None, None)."""
-        if not self.selection:
-            return None, None
-        collection, eid = self.selection
-        return collection, model.entry_of(self.source, collection, eid)
 
     def begin_change(self):
         self.about_to_change.emit()
@@ -511,25 +441,6 @@ class StaticsCanvas(QGraphicsView):
         pid = model.hit_point(self.source, p, self.tolerance())
         return {"point": pid} if pid is not None else {"x": _round(p[0]), "z": _round(p[1])}
 
-    def linear_entry(self, a, b, c=None):
-        """The length dimension the clicks so far would make, or None where there is nothing to measure. `c` is the point its line is to run through; without one the line lies on the two ends, which is what the preview shows between the second click and the third. What is saved is not `c` but how far it lies from the middle of the two ends, measured at right angles to the line -- so the dimension follows the model when a point is moved."""
-        entry = {
-            "id": model.next_id(self.source, "dimensions"),
-            "kind": TOOLS[self.tool]["kind"],
-            "from": self.dimension_anchor(a),
-            "to": self.dimension_anchor(b),
-            "offset": 0.0,
-        }
-        ends = model.dimension_ends(self.source, entry)
-        frame = model.dimension_direction(self.source, entry)
-        if ends is None or frame is None or math.dist(ends[0], ends[1]) <= model.SAME_POINT:
-            return None
-        if c is not None:
-            _u, n = frame
-            middle = ((ends[0][0] + ends[1][0]) / 2.0, (ends[0][1] + ends[1][1]) / 2.0)
-            entry["offset"] = _round((c[0] - middle[0]) * n[0] + (c[1] - middle[1]) * n[1])
-        return entry
-
     def add_dimension(self, a, b, c):
         """A length, from its three clicks: the two ends, then the point the dimension line is to run through."""
         entry = self.linear_entry(a, b, c)
@@ -554,13 +465,12 @@ class StaticsCanvas(QGraphicsView):
         corner = model.dimension_corner(self.source, entry)
         if corner is None:
             return None
-        centre = corner[0]
-        reach = (p[0] - centre[0], p[1] - centre[1])
-        radius = math.hypot(reach[0], reach[1])
-        if radius <= model.SAME_POINT:
+        reached = statics_geometry.angle_reach(corner[0], p)
+        if reached is None:
             return None
+        radius, bearing = reached
         entry["offset"] = _round(radius)
-        entry["bearing"] = _round(math.degrees(math.atan2(reach[1], reach[0])), 1)
+        entry["bearing"] = _round(bearing, 1)
         return entry
 
     def add_angle_dimension(self, p):
@@ -688,24 +598,11 @@ class StaticsCanvas(QGraphicsView):
         self._drawing_cache = None
         self.redraw_timer.start()
 
-    def finish_turning(self):
-        if self.turning is not None:
-            self.turning = None
-            self.end_change()
-            self.selection_changed.emit()
-
     # -- tracking ---------------------------------------------------------------
 
     def anchor(self):
         """Where the cursor is tracking from: the last point of the member being drawn, else the point the pointer rested on."""
         return self.drawing[-1] if self.drawing else self.acquired
-
-    def acquire(self):
-        if self._hover is None or self.drawing:
-            return
-        self.acquired = self._hover
-        self.rays = model.tracking_rays(self.source, self.acquired)
-        self.update_helpers()
 
     def track(self, raw, shift=False):
         """Where a click at `raw` would land, and what it locked to."""
@@ -964,14 +861,6 @@ class StaticsCanvas(QGraphicsView):
                 self._over_label = over
                 self.viewport().setCursor(Qt.CursorShape.SizeAllCursor if over else Qt.CursorShape.ArrowCursor)
 
-    def readout(self, result):
-        """What the tab writes after the coordinates: what was locked to, and the angle along it."""
-        if result["ray"] is not None:
-            return f"{result['kind']}|{model.fmt_number(result['angle'])}|{model.fmt_number(result['distance'])}"
-        if result["kind"] == "shift":
-            return f"shift||{model.fmt_number(result['distance'])}"
-        return result["kind"] or ""
-
     def mouseReleaseEvent(self, event):
         if self.panning is not None:
             self.panning = None
@@ -981,28 +870,6 @@ class StaticsCanvas(QGraphicsView):
         self.show_snap((0, 0), None)
         if drag is not None and drag.get("moved"):
             self.end_change()
-
-    def wheelEvent(self, event):
-        """The wheel always zooms, about the pointer, between two absolute limits -- never against a limit that moves with the model."""
-        steps = event.angleDelta().y() / 120.0
-        if steps == 0:
-            return
-        self.zoom_at(event.position(), 1.15 ** steps)
-
-    def zoom_at(self, position, factor):
-        """Scales the view by `factor` about `position`, a point of the viewport: the point of the model under it stays under it. The two absolute limits are held here, so every way of zooming meets the same ones."""
-        scale = self.scale_px()
-        factor = max(MIN_ZOOM / scale, min(factor, MAX_ZOOM / scale))
-        if abs(factor - 1.0) < 1e-12:
-            return
-        at = position.toPoint()
-        anchor = self.mapToScene(at)
-        self.grow_scene()
-        self.scale(factor, factor)
-        drift = self.mapFromScene(anchor) - at
-        self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + drift.x())
-        self.verticalScrollBar().setValue(self.verticalScrollBar().value() + drift.y())
-        self.update_helpers()
 
     def focusNextPrevChild(self, _next):
         """Tab is the tracking's, not the focus chain's: without this it would leave the canvas the moment a direction is locked."""
@@ -1053,47 +920,11 @@ class StaticsCanvas(QGraphicsView):
             return
         super().keyPressEvent(event)
 
-    def keyReleaseEvent(self, event):
-        if event.key() == Qt.Key.Key_Space and not event.isAutoRepeat():
-            self.space_down = False
-            self.restore_cursor()
-            return
-        super().keyReleaseEvent(event)
-
-    def leaveEvent(self, event):
-        self.cursor = None
-        self.acquire_timer.stop()
-        self.update_helpers()
-        super().leaveEvent(event)
-
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.update_helpers()
 
     # -- what only the editor shows ---------------------------------------------
-
-    def show_snap(self, point, kind):
-        path = QPainterPath()
-        if kind and kind != "shift":
-            s = 6.0
-            if kind == "point":
-                path.addRect(-s, -s, 2 * s, 2 * s)
-            elif kind == "midpoint":
-                path.moveTo(0, -s)
-                path.lineTo(s, s)
-                path.lineTo(-s, s)
-                path.closeSubpath()
-            elif kind in ("crossing", "ray-crossing"):
-                path.moveTo(-s, -s)
-                path.lineTo(s, s)
-                path.moveTo(-s, s)
-                path.lineTo(s, -s)
-            elif kind == "grid":
-                path.addEllipse(QPointF(0, 0), s * 0.5, s * 0.5)
-            else:
-                path.addEllipse(QPointF(0, 0), s * 0.8, s * 0.8)
-            self.snap_marker.setPos(self.qp(point))
-        self.snap_marker.setPath(path)
 
     def dimension_preview(self):
         """What the dimension being drawn would look like, as a path in scene metres, or None where there is nothing to show yet.
@@ -1230,13 +1061,3 @@ class StaticsCanvas(QGraphicsView):
             r = 7.0 / self.scale_px()
             track.addEllipse(self.qp(anchor), r, r)
         self.track_item.setPath(track)
-
-    def add_handle(self, at):
-        handle = QGraphicsRectItem(-4, -4, 8, 8)
-        handle.setPos(at)
-        handle.setBrush(QBrush(theme.qcolor("paper")))
-        handle.setPen(_cosmetic(SELECT_COLOUR, 1.6))
-        handle.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations)
-        handle.setZValue(21)
-        self.scene().addItem(handle)
-        self.handles.append(handle)

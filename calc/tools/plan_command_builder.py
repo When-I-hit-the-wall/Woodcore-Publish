@@ -1,12 +1,12 @@
-"""The «Commande Typst» entry of the position-plan tab (v0.114): every option of `#show-plan` as a control, the page that exactly that command prints compiled live beside them, and the command itself to copy.
+"""The «Commande Typst» entry of the position-plan tab (v0.114): every option of the plan's figure as a control -- `#figure(image-positions-plan(…))` since the spec 2026-10-21-commandes-typst-refonte (REQ-013), `#show-plan` until then --, the page that exactly that figure prints compiled live beside them, and the figure itself to copy.
 
 It replaces the «Commandes Typst» card that stood at the bottom of the plan tab's right pane, which offered a handful of calls written in advance; here the engineer builds the call he wants -- the plan, its width, the legend, the axes, the scale bar, the positions to highlight, a detail round them and its zoom, the caption -- and sees what it prints before he pastes it into a .typ.
 
 Three pieces, and the tab places them in different panes:
 
-* `CommandOptions` -- the controls, in cards, for the right pane. `values()` is exactly the keyword arguments of `build_reference.call_show_plan`, so the command is `call_show_plan(**values)` and the controls hold no knowledge of Typst's syntax: only what differs from `show-plan`'s own defaults is written out.
+* `CommandOptions` -- the controls, in cards, for the right pane. `values()` names each switch of the drawing, which `command_text` turns into the words of `image-positions-plan`, so the figure is `command_text(values)` and the controls hold no knowledge of Typst's syntax: only what differs from `show-plan`'s own defaults is written out.
 * `command_text(values)` and `snippet_source(here, mode, values, language)` -- pure functions: the call, and the small Typst document the preview compiles (calc/structure_preview.py's header, then the call).
-* `FireCommandOptions` and `fire_command_text` (v0.115) -- the same for `#show-fire-plan`, handed to the builder as its `options_factory` and `command_fn`.
+* `FireCommandOptions` and `fire_command_text` (v0.115) -- the same for a fire-protection plan, `image-fire-plan`, handed to the builder as its `options_factory` and `command_fn`.
 * `CommandBuilder` -- assembles them: `options` goes in the right pane, `preview` in the centre (the command in a code field with its «Copié ✓» button over the compiled page, `pdf_pane.PdfPane.request_snippet`, newest request wins), and `set_project` / `set_plans` / `set_plan` drive both.
 
 A control that has no effect says so rather than being absent: the scale bar is greyed where the plan has no scale (there is none to draw), and the detail and its zoom where nothing is highlighted -- a detail frames the highlighted positions, and `zoom` enlarges a detail.
@@ -31,17 +31,19 @@ WIDTHS = ("100%", "80%", "60%", "50%", "40%")
 WIDTH_PATTERN = re.compile(r"^\d+(\.\d+)?(%|cm|mm|pt|em)$")
 ZOOM_RANGE = (0.5, 4.0)
 ZOOM_STEP = 0.25
-# The caption's three states: show-plan's own, none (no figure round the plan), and the engineer's.
+# The caption's three states: the plan's id, none (no figure round the plan), and the engineer's.
 CAPTIONS = ("auto", "none", "custom")
 # The key of the snippet the pane shows; a new one for every command, so the pane knows which it holds.
 SNIPPET_PREVIEW_FOLDER = "plan-command"
 
 STRINGS = {
     "fr": {
-        "pcb_entry": "Commande Typst",
         "pcb_plan_card": "Plan",
         "pcb_plan": "Plan",
         "pcb_width": "Largeur",
+        "pcb_level": "Niveau",
+        "pcb_level_auto": "Celui du document",
+        "pcb_level_tip": "1 : le dessin seul ; 2 : avec sa légende, sa légende de figure, son échelle, ses longueurs et ses centres ; 3 : comme 2, un plan ne citant rien. Une case décochée l'emporte sur le niveau.",
         "pcb_width_tip": "Largeur d'impression du plan entier : un pourcentage de la largeur du texte (60%) ou une longueur (12cm).",
         "pcb_display_card": "Affichage",
         "pcb_legend": "Légende sous le plan",
@@ -49,6 +51,7 @@ STRINGS = {
         "pcb_axes": "Axes et leurs bulles",
         "pcb_dimensions": "Cotes",
         "pcb_lengths": "Longueurs des éléments",
+        "pcb_centres": "Centres S, M et contour",
         "pcb_scale_bar": "Barre d'échelle",
         "pcb_scale_bar_none": "Ce plan n'a pas d'échelle : il n'y a pas de barre à dessiner.",
         "pcb_highlight_card": "Positions mises en évidence",
@@ -70,10 +73,12 @@ STRINGS = {
         "pcb_no_project": "Aucun projet ouvert.",
     },
     "de": {
-        "pcb_entry": "Typst-Befehl",
         "pcb_plan_card": "Plan",
         "pcb_plan": "Plan",
         "pcb_width": "Breite",
+        "pcb_level": "Stufe",
+        "pcb_level_auto": "Die des Dokuments",
+        "pcb_level_tip": "1: die Zeichnung allein; 2: mit Legende, Bildunterschrift, Massstab, Längen und Zentren; 3: wie 2, ein Plan zitiert nichts. Ein nicht angekreuztes Feld geht der Stufe vor.",
         "pcb_width_tip": "Druckbreite des ganzen Plans: ein Prozentsatz der Textbreite (60%) oder eine Länge (12cm).",
         "pcb_display_card": "Darstellung",
         "pcb_legend": "Legende unter dem Plan",
@@ -81,6 +86,7 @@ STRINGS = {
         "pcb_axes": "Achsen und ihre Blasen",
         "pcb_dimensions": "Masse",
         "pcb_lengths": "Längen der Elemente",
+        "pcb_centres": "Zentren S, M und Umriss",
         "pcb_scale_bar": "Massstabsbalken",
         "pcb_scale_bar_none": "Dieser Plan hat keinen Massstab: es gibt keinen Balken zu zeichnen.",
         "pcb_highlight_card": "Hervorgehobene Positionen",
@@ -102,10 +108,12 @@ STRINGS = {
         "pcb_no_project": "Kein Projekt geöffnet.",
     },
     "en": {
-        "pcb_entry": "Typst command",
         "pcb_plan_card": "Plan",
         "pcb_plan": "Plan",
         "pcb_width": "Width",
+        "pcb_level": "Level",
+        "pcb_level_auto": "The document's",
+        "pcb_level_tip": "1: the drawing alone; 2: with its legend, caption, scale bar, lengths and centres; 3: as 2, a plan citing nothing. A box left unticked outranks the level.",
         "pcb_width_tip": "The width the whole plan is printed at: a percentage of the text's width (60%) or a length (12cm).",
         "pcb_display_card": "Display",
         "pcb_legend": "Legend under the plan",
@@ -113,6 +121,7 @@ STRINGS = {
         "pcb_axes": "Axes and their bubbles",
         "pcb_dimensions": "Dimensions",
         "pcb_lengths": "Lengths of the elements",
+        "pcb_centres": "Centres S, M and outline",
         "pcb_scale_bar": "Scale bar",
         "pcb_scale_bar_none": "This plan has no scale: there is no bar to draw.",
         "pcb_highlight_card": "Highlighted positions",
@@ -142,51 +151,42 @@ def text(key, lang, **values):
     return table[key].format(**values) if values else table[key]
 
 
-def entry_title(lang):
-    """The words of the left-pane entry the tab lists this builder under: «Commande Typst»."""
-    return text("pcb_entry", lang)
-
-
 # --- the command, as pure functions --------------------------------------------------------------------------
 
 def valid_width(width):
-    """`width` as typed, if Typst would read it as a width; None -- show-plan's own 100% -- where it is empty, the default, or not a width at all."""
+    """`width` as typed, if Typst would read it as a width; None -- the image's own 100% -- where it is empty, the default, or not a width at all."""
     width = (width or "").strip()
     if not width or width == "100%" or not WIDTH_PATTERN.match(width):
         return None
     return width
 
 
+def figure_caption(values, plan):
+    """The figure's caption the options say: a text typed, none where «no caption» is chosen (`False`), else the plan's id -- the engineer's to write over in the document."""
+    caption = values.get("caption")
+    if caption is False:
+        return None
+    return caption if isinstance(caption, str) and caption else plan
+
+
 def command_text(values):
-    """The `#show-plan(…)` call the options say: `build_reference.call_show_plan`, which writes only what differs from `show-plan`'s defaults. `values` is `CommandOptions.values()` -- or any dictionary of the same keys, missing ones meaning the default."""
+    """The figure the options say (spec 2026-10-21-commandes-typst-refonte, REQ-013, ARCH-012): `#figure(image-positions-plan(…), kind: image, caption: […]) <fig-<plan>>`, through `build_reference.call_image_figure` -- each switch of what is drawn a word of `detail-figure`, the legend and the scale bar words of `detail-legend`, only what differs from the defaults written; the caption typed, else the plan's id. `values` is `CommandOptions.values()` -- or any dictionary of the same keys, missing ones meaning the default; the level is no argument of an image."""
+    plan = values.get("plan") or "?"
     highlight = [label for label in (values.get("highlight") or []) if label]
     detail = bool(values.get("detail")) and bool(highlight)    # a detail frames highlighted positions: without one it is no detail
     zoom = values.get("zoom")
     zoom = zoom if detail and zoom not in (None, 1, 1.0) else None
-    return ref.call_show_plan(
-        values.get("plan") or "?",
-        highlight=highlight or None,
-        detail=detail,
-        legend=values.get("legend", True),
-        width=valid_width(values.get("width")),
-        axes=values.get("axes", True),
-        dimensions=values.get("dimensions", True),
-        lengths=values.get("lengths", True),
-        zoom=zoom,
-        scale_bar=values.get("scale_bar", True),
-        caption=values.get("caption"),
-    )
+    drawn = [word for word, key in (("length", "lengths"), ("axes", "axes"), ("dimensions", "dimensions"), ("centres", "centres")) if values.get(key, True)]
+    under = [word for word, key in (("objects", "legend"), ("scale-bar", "scale_bar")) if values.get(key, True)] or ["none"]
+    return ref.call_image_figure("image-positions-plan", plan, figure_caption(values, plan), highlight=highlight or None, frame="highlight" if detail else None, zoom=zoom,
+                                 width=valid_width(values.get("width")), detail_figure=drawn, detail_legend=under)
 
 
 def fire_command_text(values):
-    """The `#show-fire-plan(…)` call the options say (v0.115): `build_reference.call_show_fire_plan`, which writes only what differs from `show-fire-plan`'s defaults. `values` is `FireCommandOptions.values()` -- or any dictionary of the same keys, missing ones meaning the default."""
-    return ref.call_show_fire_plan(
-        values.get("plan") or "?",
-        legend=values.get("legend", True),
-        width=valid_width(values.get("width")),
-        scale_bar=values.get("scale_bar", True),
-        caption=values.get("caption"),
-    )
+    """The figure the options say for a fire-protection plan (REQ-014, ARCH-012): `#figure(image-fire-plan(…), kind: image, caption: […]) <fig-<plan>>`, through `build_reference.call_image_figure`. `values` is `FireCommandOptions.values()` -- or any dictionary of the same keys, missing ones meaning the default."""
+    plan = values.get("plan") or "?"
+    under = [word for word, key in (("objects", "legend"), ("scale-bar", "scale_bar")) if values.get(key, True)] or ["none"]
+    return ref.call_image_figure("image-fire-plan", plan, figure_caption(values, plan), width=valid_width(values.get("width")), detail_legend=under)
 
 
 def snippet_source(here, mode, values, language=None, command_fn=None):
@@ -198,7 +198,7 @@ def snippet_source(here, mode, values, language=None, command_fn=None):
 # --- the controls --------------------------------------------------------------------------------------------
 
 class CommandOptions(QWidget):
-    """Every option of `#show-plan` as a control, in cards: for the right pane of the tab. `changed(dict)` is emitted, with `values()`, at every change the engineer makes -- and not by `set_plans` or `set_plan`, which show what the tab says."""
+    """Every option of the plan's figure as a control, in cards: for the right pane of the tab. `changed(dict)` is emitted, with `values()`, at every change the engineer makes -- and not by `set_plans` or `set_plan`, which show what the tab says."""
 
     changed = Signal(dict)
 
@@ -225,6 +225,10 @@ class CommandOptions(QWidget):
         self.plan_label, self.width_label = QLabel(), QLabel()
         form.addRow(self.plan_label, self.plan)
         form.addRow(self.width_label, self.width)
+        # the level it prints at (spec 2026-10-20-indices-et-niveaux, UI-003): the document's, or 1, 2, 3
+        self.level = QComboBox()
+        self.level_label = QLabel()
+        form.addRow(self.level_label, self.level)
         layout.addWidget(self.plan_card)
 
         # what is shown
@@ -234,8 +238,9 @@ class CommandOptions(QWidget):
         self.axes = QCheckBox()
         self.dimensions = QCheckBox()   # the plan's dimensions (issue #9)
         self.lengths = QCheckBox()      # the lengths beside its elements (issue #9)
+        self.centres = QCheckBox()      # the stiffness centre, the mass centre and the outline, where the plan prints them (issue #54)
         self.scale_bar = QCheckBox()
-        for check in (self.legend, self.axes, self.dimensions, self.lengths, self.scale_bar):
+        for check in (self.legend, self.axes, self.dimensions, self.lengths, self.centres, self.scale_bar):
             check.setChecked(True)
             box.addWidget(check)
         layout.addWidget(self.display_card)
@@ -277,7 +282,8 @@ class CommandOptions(QWidget):
 
         self.plan.currentIndexChanged.connect(self._plan_changed)
         self.width.currentTextChanged.connect(self._edited)
-        for check in (self.legend, self.axes, self.dimensions, self.lengths, self.scale_bar, self.detail):
+        self.level.currentIndexChanged.connect(self._edited)
+        for check in (self.legend, self.axes, self.dimensions, self.lengths, self.centres, self.scale_bar, self.detail):
             check.toggled.connect(self._edited)
         self.positions.itemChanged.connect(self._edited)
         self.zoom.valueChanged.connect(self._edited)
@@ -296,11 +302,21 @@ class CommandOptions(QWidget):
         self.plan_label.setText(self.t("pcb_plan"))
         self.width_label.setText(self.t("pcb_width"))
         self.width.setToolTip(self.t("pcb_width_tip"))
+        self.level_label.setText(self.t("pcb_level"))
+        self.level.setToolTip(self.t("pcb_level_tip"))
+        chosen = self.level.currentData()
+        quiet, self.quiet = self.quiet, True
+        self.level.clear()
+        for value in (None, 1, 2, 3):
+            self.level.addItem(self.t("pcb_level_auto") if value is None else str(value), value)
+        self.level.setCurrentIndex(max(self.level.findData(chosen), 0))
+        self.quiet = quiet
         self.display_card.setTitle(self.t("pcb_display_card"))
         self.legend.setText(self.t("pcb_legend"))
         self.axes.setText(self.t("pcb_axes"))
         self.dimensions.setText(self.t("pcb_dimensions"))
         self.lengths.setText(self.t("pcb_lengths"))
+        self.centres.setText(self.t("pcb_centres"))
         self.highlight_card.setTitle(self.t("pcb_highlight_card"))
         self.highlight_note.setText(self.t("pcb_highlight_note"))
         self.detail.setText(self.t("pcb_detail"))
@@ -366,7 +382,7 @@ class CommandOptions(QWidget):
         return [label for label in record.get("labels", []) if label]
 
     def values(self):
-        """The options, as the keyword arguments of `build_reference.call_show_plan`."""
+        """The options: each switch of what the plan shows, its width, its caption and the positions lit -- what `command_text` writes the figure from."""
         ticked = [self.positions.item(i).data(Qt.ItemDataRole.UserRole) for i in range(self.positions.count())
                   if self.positions.item(i).checkState() == Qt.CheckState.Checked]
         state = self.caption.currentData()
@@ -384,11 +400,13 @@ class CommandOptions(QWidget):
             "axes": self.axes.isChecked(),
             "dimensions": self.dimensions.isChecked(),
             "lengths": self.lengths.isChecked(),
+            "centres": self.centres.isChecked(),
             "scale_bar": self.scale_bar.isChecked() or self.scale_of() is None,    # no scale, no bar: the option is greyed and says nothing
             "highlight": ticked,
             "detail": detail,
             "zoom": round(self.zoom.value(), 2) if detail else 1.0,
             "caption": caption,
+            "level": self.level.currentData(),
         }
 
     # -- what the engineer does --
@@ -435,11 +453,12 @@ class CommandOptions(QWidget):
 
 
 class FireCommandOptions(CommandOptions):
-    """Every option of `#show-fire-plan` as a control (v0.115), for the fire-protection tab's right pane: the same cards as the position plan's, less what a fire plan has none of -- the axes, the positions to highlight, the detail round them. `values()` is exactly the keyword arguments of `build_reference.call_show_fire_plan`. The builder takes it as its `options_factory`, with `fire_command_text` as its `command_fn`."""
+    """Every option of a fire-protection plan's figure as a control (v0.115), for the fire-protection tab's right pane: the same cards as the position plan's, less what a fire plan has none of -- the axes, the positions to highlight, the detail round them. `values()` is exactly the keyword arguments of `build_reference.call_show_fire_plan`. The builder takes it as its `options_factory`, with `fire_command_text` as its `command_fn`."""
 
     def __init__(self, lang="en", parent=None):
         super().__init__(lang, parent)
         self.axes.hide()
+        self.centres.hide()   # the stiffness centre and the mass centre are the position plan's alone (issue #54, docs/domain/fire-plans.md §3.3vicies)
         self.highlight_card.hide()
 
     def set_language(self, lang):
@@ -447,7 +466,7 @@ class FireCommandOptions(CommandOptions):
         self.legend.setText(self.t("pcb_fire_legend"))
 
     def values(self):
-        """The options, as the keyword arguments of `build_reference.call_show_fire_plan`."""
+        """The options: the legend, the scale bar, the width and the caption -- what `fire_command_text` writes the figure from."""
         state = self.caption.currentData()
         if state == "none":
             caption = False
@@ -461,6 +480,7 @@ class FireCommandOptions(CommandOptions):
             "legend": self.legend.isChecked(),
             "scale_bar": self.scale_bar.isChecked() or self.scale_of() is None,    # no scale, no bar: the option is greyed and says nothing
             "caption": caption,
+            "level": self.level.currentData(),
         }
 
 
@@ -481,7 +501,7 @@ class CommandBuilder(QWidget):
     commandChanged = Signal(str)
 
     def __init__(self, lang="en", mono_font=None, copy=None, parent=None, options_factory=None, command_fn=None, cache_key=None):
-        """`options_factory(lang)` makes the controls and `command_fn(values)` writes the call they say: `CommandOptions` and `command_text` -- `#show-plan` -- unless another kind of plan (a fire plan) hands over its own, with the same methods."""
+        """`options_factory(lang)` makes the controls and `command_fn(values)` writes the call they say: `CommandOptions` and `command_text` -- the figure of `image-positions-plan` -- unless another kind of plan (a fire plan) hands over its own, with the same methods."""
         super().__init__(parent)
         self.lang = lang
         self.here = None
@@ -564,7 +584,7 @@ class CommandBuilder(QWidget):
         self.refresh()
 
     def command(self):
-        """The `#show-plan(…)` call for the options as they stand."""
+        """The figure the options say, as they stand."""
         return self.command_fn(self.options.values())
 
     def source(self):

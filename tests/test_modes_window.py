@@ -322,7 +322,7 @@ def test_the_variables_tab_marks_each_value_with_where_it_comes_from():
         calls = [display_view.entry_call(entry) for entry in tab.display_entries()]   # the «Affichage» view's since v0.117
         import build_reference as ref
         calc, instance = tab.address(tab.selected_key())
-        assert ref.call_val(var.key, domain=calc, instance=instance) in calls, calls
+        assert ref.call_var_domain(calc, instance, var.key) in calls, calls
         # one document alone, over every domain
         tab.all_domains_box.setChecked(True)
         tab.provenance_box.setCurrentIndex(tab.provenance_box.findData(f"{variables.TYPST}:cu"))
@@ -467,7 +467,7 @@ def test_a_project_laid_out_as_one_report_is_offered_its_migration_and_it_can_be
     import migrate_dialog
     here = _legacy_copy("migrate_offer")
     asked, ran = [], []
-    with _patched(migrate_dialog, ask=lambda parent, lang, text, details, can_migrate: asked.append((text, details, can_migrate)) or "later",
+    with _patched(migrate_dialog, ask=lambda parent, lang, text, details, can_migrate, title=None: asked.append((text, details, can_migrate)) or "later",
                   run=lambda *a, **k: ran.append(k) or (True, "")):
         try:
             assert migrate_dialog.offer(None, "fr", here) == "later"
@@ -475,7 +475,7 @@ def test_a_project_laid_out_as_one_report_is_offered_its_migration_and_it_can_be
             assert can_migrate, text
             plan = migrate_dialog.prepare(here)[0]
             for mode in project.MODES:
-                assert documents.MODE_FOLDERS[plan.language][mode] in text, (mode, text)
+                assert documents.LEGACY_MODE_FOLDERS[plan.language][mode] in text, (mode, text)
             assert "Migration of" in details, "the migration's own description is behind «Afficher les détails»"
             assert migrate_dialog.postponed(here) and not ran
             # put off: not asked again at the next opening -- the banner says it instead
@@ -512,7 +512,7 @@ def test_migrer_maintenant_runs_the_command_line_with_the_window_s_lock():
     # a migration that cannot run says why and offers nothing to agree to
     (here.root / documents_folder(here, "cu")).mkdir()
     shown = []
-    with _patched(migrate_dialog, ask=lambda parent, lang, text, details, can_migrate: shown.append((text, can_migrate)) or "later"):
+    with _patched(migrate_dialog, ask=lambda parent, lang, text, details, can_migrate, title=None: shown.append((text, can_migrate)) or "later"):
         assert migrate_dialog.offer(None, "fr", here, forced=True) == "refused"
     assert shown and not shown[0][1] and migrate_dialog.STRINGS["fr"]["mg_refused"] in shown[0][0]
     migrate_dialog.set_postponed(here, False)

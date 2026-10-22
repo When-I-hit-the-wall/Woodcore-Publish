@@ -4,4 +4,4 @@
 = Revision history
 // woodcore:/object title
 
-#show-journal()
+#include domain-file("journal", "cu")

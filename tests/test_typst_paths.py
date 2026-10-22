@@ -216,7 +216,7 @@ def _naive(text):
 
 
 def _typ_files(base):
-    return sorted(p for p in base.rglob("*.typ") if not {"_woodcore", ".probe"} & set(p.relative_to(base).parts))
+    return sorted(p for p in base.rglob("*.typ") if not {"_woodcore", "000-Woodcore", ".probe"} & set(p.relative_to(base).parts))
 
 
 def test_the_committed_reports_are_read_whole():
@@ -227,9 +227,10 @@ def test_the_committed_reports_are_read_whole():
             text = tp.read_text(file)
             lits = tp.literals(text)
             assert sorted((lit.kind, lit.value) for lit in lits) == _naive(text), f"{file}: the lexer and the regular expression disagree"
-            root = next((p for p in file.parents if (p / "commands.typ").exists()), file.parent)   # the Typst root: where commands.typ lies
+            # the Typst root: the project's folder where it is laid out by folders (issue #64, commands.typ in 000-Typst-Config/), else where commands.typ lies
+            root = next((p for p in file.parents if any(p.glob("*.woodcore"))), None) or next((p for p in file.parents if (p / "commands.typ").exists()), file.parent)
             for lit in lits:
-                if "_woodcore/lib/" in lit.value:
+                if "_woodcore/lib/" in lit.value or "000-Woodcore/lib/" in lit.value:
                     continue
                 target = tp._target(lit, lit.value, file.parent, root)
                 assert target.exists(), f"{file}: {lit.kind} {lit.value!r} resolves to {target}, which does not exist"
@@ -267,7 +268,8 @@ def _tree(name, files):
     return d
 
 
-MOVABLE = ("_woodcore", "Images", "config.typ", "commands.typ", "references.bib")
+# what the migration takes up to the top: the shared things, and the domains the export wrote out, named from the root (spec 2026-10-21-commandes-typst-refonte, REQ-017)
+MOVABLE = ("_woodcore", "Images", "config.typ", "commands.typ", "references.bib") + tuple(sorted({folder.split("/")[0] for folder in project.DOMAIN_FOLDERS.values()}))
 
 
 def _migrate(top, old_name, new_name):

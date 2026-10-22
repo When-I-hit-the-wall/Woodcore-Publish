@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, clause 3.4.2.3, equation (5), with 3.4.2.2 and 4.5.2.5 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf pp. 26, 27 and 40, read off a render of p. 27.",
+  "_source": "SIA 265:2021, clause 3.4.2.3, equation (5), with 3.4.2.2 and 4.5.2.5 -- transcribed by hand from the German edition, SIA265-2021-DE.pdf pp. 26, 27 and 40, read off a render of p. 27.",
   "_note": "k_h = (reference_height / h)^exponent <= maximum, h in mm. A permission (\"dürfen\"), for f_m,d of Brettschichtholz (Tabelle 9) with h below the reference height only. Solid timber (3.3.2, 3.3.3) has no height factor. Not together with k_sys for bending about z (3.4.2.2), and not in the fire situation (4.5.2.5).",
   "edition": "SIA 265:2021",
   "clause": {

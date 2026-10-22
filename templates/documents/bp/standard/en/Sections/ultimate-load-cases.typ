@@ -8,20 +8,17 @@
 Each load case is characterised by a leading action and the accompanying actions occurring at the same time (SIA 260, 4.2.6). The following values are the factors applied to the characteristic values; for an accompanying action the factor is $γ_Q$ · ψ₀ [state $γ_Q$ and ψ₀ or their product].
 // woodcore:/object p1
 
-// woodcore:object doc-table uls-load-cases-table
-#doc-table(
-  columns: (
-    (id: "element", title: [Member]),
-    (id: "case", title: [Load case]),
-    (id: "permanent", title: [Self-weight and permanent loads], kind: "number"),
-    (id: "live", title: [Live load [category]], kind: "number"),
-    (id: "snow", title: [Snow], kind: "number"),
-    (id: "wind", title: [Wind], kind: "math"),
-  ),
-  hidden: (),
-  rows: (
-    (element: [[Roof]], case: [CC 1], permanent: 1.35, live: [–], snow: 1.5, wind: [$γ_Q · ψ_0$]),
-    (element: [[Roof]], case: [CC 2], permanent: 0.8, live: [–], snow: [–], wind: 1.5),
+// woodcore:object table uls-load-cases-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto, auto),
+    align: (left, left, right, right, right, center),
+    table.hline(stroke: 1pt),
+    table.header([*Member*], [*Load case*], [*Self-weight and permanent loads*], [*Live load [category]*], [*Snow*], [*Wind*]),
+    table.hline(stroke: 0.5pt),
+    [[Roof]], [CC 1], [1.35], [–], [1.5], [$γ_Q · ψ_0$],
+    [[Roof]], [CC 2], [0.8], [–], [–], [1.5],
+    table.hline(stroke: 1pt),
   ),
   caption: [Load cases: structural safety],
 )

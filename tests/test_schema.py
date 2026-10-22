@@ -8,6 +8,8 @@ Three things earn most of the tests here, because each is a decision that could 
 - **A label the engineer has not moved carries no leader.** `frame["moved"]` is what tells the two apart, and it is what a checker reads on the page: a leader on every label would be as unreadable as a missing one when a label has actually left its symbol.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import re
 
@@ -400,7 +402,7 @@ def test_a_construction_line_crossing_a_piece_or_another_line_is_a_snap_point():
 
 
 def test_show_schema_prints_the_aids_the_engineer_left_shown():
-    """`show-schema(id)` stripped every aid by default, `aids: false`, so the points ticked «visible» in the «Schémas» tab -- A12 to A15 of VU-Skizze -- never reached the report unless the call said `aids: true` (periodic audit 260916, AUD-7-219). The export already leaves out what is not ticked, a construction line by default; what it keeps is printed."""
+    """`show-schema(id)` stripped every aid by default, `aids: false`, so the points ticked «visible» in the «Schémas» tab -- A12 to A15 of VU-Skizze -- never reached the report unless the call said `aids: true` (periodic audit 260916, AUD-7-219). The export already leaves out what is not ticked, a construction line by default; what it keeps is printed by `image-schema` (spec 2026-10-21-commandes-typst-refonte, REQ-013), and `detail-figure: ()` leaves it out."""
     import base64
     import re
     import subprocess
@@ -415,7 +417,7 @@ def test_show_schema_prints_the_aids_the_engineer_left_shown():
     probe = d / "probe.typ"
 
     def embedded(call):
-        probe.write_text('#import "/commands.typ": *\n' + call + "\n", encoding="utf-8")
+        probe.write_text('#import "/000-Typst-Config/commands.typ": *\n#report-level.update(2)\n' + call + "\n", encoding="utf-8")
         out = d / "probe.svg"
         run = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), "--format", "svg", str(probe), str(out)],
                              capture_output=True, text=True, encoding="utf-8")
@@ -424,8 +426,8 @@ def test_show_schema_prints_the_aids_the_engineer_left_shown():
         return "".join(base64.b64decode(b).decode("utf-8", "replace") for b in re.findall(r"data:image/svg\+xml;base64,([A-Za-z0-9+/=]+)", text))
 
     sid = shown[0]
-    assert schema_svg.POINT_COLOUR in embedded(f'#show-schema("{sid}")'), f"show-schema(\"{sid}\") left out the aids its source shows"
-    assert schema_svg.POINT_COLOUR not in embedded(f'#show-schema("{sid}", aids: false)'), "aids: false no longer leaves the aids out"
+    assert schema_svg.POINT_COLOUR in embedded(f'#image-schema("{sid}")'), f"image-schema(\"{sid}\") left out the aids its source shows"
+    assert schema_svg.POINT_COLOUR not in embedded(f'#image-schema("{sid}", detail-figure: ())'), "detail-figure: () no longer leaves the aids out"
 
 
 def test_a_marker_s_a_dimension_s_and_an_aid_s_label_dragged_clear_carry_a_leader_and_an_aid_s_label_is_drawn():
@@ -466,14 +468,15 @@ def test_a_marker_s_and_a_point_s_halo_go_over_the_pieces_and_under_the_marker()
     assert svg.index(schema_svg.HIGHLIGHT_MARK) < svg.index("<polygon") < mark
     assert _pieces(svg) and max(_pieces(svg)) < mark, "a piece is drawn over the halo"
     assert svg.rindex("stroke-linecap=\"butt\"", 0, mark) > svg.index(schema_svg.HIGHLIGHT_MARK), "the dimension's lines are drawn before it"
-    assert mark < svg.index(f'fill="{schema_svg.CONNECTOR_FILL}"'), "the markers are drawn over the halo"
+    # a marker is a circle in the connectors' fill -- the ink the texts are set in too since v0.120 (lib/figure-palette.json), so the circle is what is looked for
+    assert mark < re.search(rf'<circle[^>]*fill="{re.escape(schema_svg.CONNECTOR_FILL)}"', svg).start(), "the markers are drawn over the halo"
     assert mark < svg.index(schema_svg.AIDS_OPEN) < svg.index(schema_svg.POINT_COLOUR), "and the aids, the green cross last"
     stripped = svg[:svg.index(schema_svg.AIDS_OPEN)] + svg[svg.index(schema_svg.AIDS_CLOSE):]
     assert schema_svg.HIGHLIGHT_POINTS_MARK in stripped, "`aids: false` takes the mark with it"
     # the window's own ring round a selected marker is drawn in the same place: over the pieces, under the marker
     ringed = schema_svg.render(schema_svg.layout(source), highlight=("connectors", "C1"))
     ring = ringed.index(f'stroke="{schema_svg.HIGHLIGHT}"')
-    assert max(_pieces(ringed)) < ring < ringed.index(f'fill="{schema_svg.CONNECTOR_FILL}"')
+    assert max(_pieces(ringed)) < ring < re.search(rf'<circle[^>]*fill="{re.escape(schema_svg.CONNECTOR_FILL)}"', ringed).start()
 
 
 def _pieces(svg):
@@ -548,3 +551,24 @@ def test_a_drag_with_a_fixed_side_gives_the_rectangle_that_follows_the_cursor():
     assert schema.rectangle_with_fixed_width((0, 0), (300, 0), (100, 50), 22) == [(0, 0), (300, 0), (300, 22), (0, 22)]
     assert schema.rectangle_with_fixed_width((0, 0), (300, 0), (100, 5000), 22) == [(0, 0), (300, 0), (300, 22), (0, 22)], "its distance is ignored"
     assert schema.rectangle_with_fixed_width((0, 0), (300, 0), (100, -50), 22) == [(0, 0), (300, 0), (300, -22), (0, -22)]
+
+
+def test_a_schema_is_a_drawing_a_native_figure_holds_and_cites():
+    """REQ-012, D-16 (spec 2026-10-15), REQ-013 (spec 2026-10-21-commandes-typst-refonte): `image-schema(id)` gives the drawing alone; `#figure(schema(…), kind: image, caption: […]) <label>` is a figure of the report's own -- counted with its pictures, cited by `@label` --, two drawings stand side by side in one figure, and `show-schema` is gone from the engine."""
+    import json
+    import subprocess
+    if not conftest.have_typst():
+        raise Skip("typst is not on the path")
+    sid = next(iter(json.loads((conftest.PROJECT.data_dir / "schemas.json").read_text(encoding="utf-8"))["schemas"]))
+    probe = conftest.probe_dir("schema_figure") / "f.typ"
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n#report-level.update(2)\n#set text(lang: "de")\n'
+                     f'#figure(image-schema("{sid}"), kind: image, caption: [Detail]) <fig-a>\n'
+                     f'#figure(grid(columns: 2, image-schema("{sid}"), image-schema("{sid}", detail-figure: ())), kind: image, caption: [Zwei]) <fig-b>\n'
+                     'Siehe @fig-a und @fig-b.\n', encoding="utf-8")
+    out = probe.with_suffix(".pdf")
+    run = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(probe), str(out)], capture_output=True, text=True, encoding="utf-8")
+    assert run.returncode == 0, run.stderr
+    from pypdf import PdfReader
+    text = " ".join(" ".join(p.extract_text().split()) for p in PdfReader(str(out)).pages)
+    assert "Abbildung 1" in text and "Abbildung 2" in text and "Siehe Abbildung 1 und Abbildung 2" in text, text
+    assert "#let show-schema" not in conftest.engine_source()

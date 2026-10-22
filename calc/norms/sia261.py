@@ -1,6 +1,6 @@
 """The values of SIA 261:2020 this project reads, out of the JSON files beside this module in `calc/norms/` (docs/architecture/layout.md §11).
 
-`calc/norms/` is the one source of every value taken from a norm for a calculation made in Python: the numbers live in the JSON, once, and the code that needs them reads them through here. A value read from a norm is neither entered in Excel nor calculated -- which is why the domains built on it declare `ENGINE = "norm"` and cite the edition named here (section 3.3). Every number was transcribed by hand from `ExternalFiles/000-Normes/SIA261-2020-DE.pdf`, and each file's `_source` says at which page (section 2 rule 13).
+`calc/norms/` is the one source of every value taken from a norm for a calculation made in Python: the numbers live in the JSON, once, and the code that needs them reads them through here. A value read from a norm is neither entered in Excel nor calculated -- which is why the domains built on it declare `ENGINE = "norm"` and cite the edition named here (section 3.3). Every number was transcribed by hand from `SIA261-2020-DE.pdf`, and each file's `_source` says at which page (section 2 rule 13).
 
 One file per table, named `<norm>-<year>-<table>-<designation>.json`:
 
@@ -14,10 +14,10 @@ Tabellen 28 to 30 were read off a render of pp. 77-78, the PDF's text layer inte
 The files are hand-written -- the one place in the pipeline where a number is transcribed rather than read -- so each is checked here before anything is built from it: an id twice, a value that is neither a number nor absent, a footnote referenced but not written, a Schüttwinkel range running backwards. A norm table that contradicts itself must stop the export naming the line, exactly as a defective workbook cell does.
 """
 
-import json
 from pathlib import Path
 
 import validation
+from norms import _loader  # how every reader of calc/norms/ opens its files (G3)
 
 HERE = Path(__file__).resolve().parent
 
@@ -44,8 +44,7 @@ UNVALUED = {"leichtbeton_im_einzelfall_zu_bestimmen"}
 _cache = {}
 
 
-def _fail(name, what):
-    raise validation.ValidationError("calc/norms/%s.json: %s" % (name, what))
+_fail = _loader.fail   # calc/norms/<name>.json: <what> (G3)
 
 
 def _read(name, check):
@@ -53,15 +52,8 @@ def _read(name, check):
     if name in _cache:
         return _cache[name]
     path = HERE / (name + ".json")
-    try:
-        with path.open(encoding="utf-8") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        _fail(name, "not found at %s -- the values of SIA 261 live in calc/norms/" % path)
-    except json.JSONDecodeError as exc:
-        _fail(name, "is not valid JSON: %s" % exc)
-    if data.get("edition") != EDITION:
-        _fail(name, "edition is %r -- expected %r" % (data.get("edition"), EDITION))
+    data = _loader.load(path)
+    _loader.edition(name, data, EDITION)
     check(name, data)
     _cache[name] = data
     return data

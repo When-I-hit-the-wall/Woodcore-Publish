@@ -12,4 +12,4 @@
 #var("k_dens", 0.806, level: 0)
 #var("eta_w", 0.8, level: 0)
 #var("gamma_M", 1.7, level: 0)
-#eq("R_d", `k_dens dot eta_w / gamma_M dot R_k`, style: "bold", norm: "Sherpa", norm-ref: "ETA-12/0197")
+#eq("R_d", `k_dens dot eta_w / gamma_M dot R_k`, style: "bold", norm: "Sherpa", norm-section: "ETA-12/0197")

@@ -7,6 +7,8 @@ The tables were read off renders of a scanned book, so three independent things 
 * **the reader's guards**: a table that names another edition, a row with a value missing or not above 0, a family that is no EDV code -- each planted and refused.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import copy
 import json
 import math

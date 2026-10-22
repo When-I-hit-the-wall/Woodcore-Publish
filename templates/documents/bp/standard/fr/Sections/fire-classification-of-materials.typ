@@ -4,19 +4,17 @@
 == Utilisation des matériaux de construction
 // woodcore:/object title
 
-// woodcore:object doc-table fire-materials-table
-#doc-table(
-  columns: (
-    (id: "category", title: [Catégorie]),
-    (id: "element", title: [Élément]),
-    (id: "basis", title: [Base]),
-    (id: "requirement", title: [Exigence]),
-    (id: "execution", title: [Exécution / valeurs]),
-  ),
-  hidden: (),
-  rows: (
-    (category: [Enveloppe du bâtiment], element: [[Revêtement de paroi extérieure]], basis: [[VKF 14-15]], requirement: [[RF3 (cr)]], execution: [[…]]),
-    (category: [Aménagement intérieur : voies d'évacuation verticales], element: [[Revêtements de parois et plafonds]], basis: [[VKF 14-15]], requirement: [[RF1]], execution: [[…]]),
+// woodcore:object table fire-materials-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto),
+    align: (left, left, left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Catégorie*], [*Élément*], [*Base*], [*Exigence*], [*Exécution / valeurs*]),
+    table.hline(stroke: 0.5pt),
+    [Enveloppe du bâtiment], [[Revêtement de paroi extérieure]], [[VKF 14-15]], [[RF3 (cr)]], [[…]],
+    [Aménagement intérieur : voies d'évacuation verticales], [[Revêtements de parois et plafonds]], [[VKF 14-15]], [[RF1]], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Utilisation des matériaux de construction],
 )

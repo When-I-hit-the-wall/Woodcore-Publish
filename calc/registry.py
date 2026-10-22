@@ -8,13 +8,15 @@ The workbooks are found the same way the sheets are, by name: every `.xlsm`/`.xl
 
 Replaces the old load registry, which keyed a flat `data/loads.json` by load id and could not express two cases of the same calculation.
 
-**Loads entered in Woodcore (issues #35-#37, decision D-04).** Beside its sheets, a domain may have instances computed in Python from sources of the project -- `Woodcore-Datei/loads/<kind>/<id>.json`, one per case, written by the window's tabs. Each such module is named in `SOURCE_MODULES` and gives `source_paths(here)`, `read_source(path)` and `build_instance(src, here)`; its instances join the sheets' under the same domain, each saying where it came from (`engine: "python"`, `source_file`), and an id both a sheet and a source carry is refused naming the two. Their drawings (`figures`) are written beside the export, `data/calculations/` (`write_files`).
+**Loads entered in Woodcore (issues #35-#37, decision D-04).** Beside its sheets, a domain may have instances computed in Python from sources of the project -- `Woodcore-Datei/loads/<kind>/<id>.json`, one per case, written by the window's tabs. Each such module is named in `SOURCE_MODULES` and gives `source_paths(here)`, `read_source(path)` and `build_instance(src, here)`; its instances join the sheets' under the same domain, each saying where it came from (`engine: "python"`, `source_file`), and an id both a sheet and a source carry is refused naming the two. Their drawings (`figures`) are written beside the export, `data/calculations/` -- `Permanent-loads/Exports/Figures/` in a project laid out by folders, issue #64 (`write_files`).
 """
 
 import importlib
 
 import sys
+from pathlib import Path
 
+import engine
 import io_excel
 import validation
 from domains import links  # a load source that follows a variable (spec 2026-10-11-variables-liees-champs-et-textes)
@@ -33,6 +35,10 @@ FIGURES_FOLDER = "calculations"
 SCHEMA_VERSION = "1.5"
 # 1.6 is 1.5 with an instance's `links`, where each field of a load source that follows a variable came from (spec 2026-10-11-variables-liees-champs-et-textes, REQ-012): written only where one does
 LINKED_SCHEMA_VERSION = "1.6"
+# 1.7 is 1.6 with an instance's drawings named from the Typst root (`/Permanent-loads/Exports/Figures/dead-load-A1.svg`): written where a project laid out by folders draws one, in its domain's Exports/Figures/ (issue #64, D-10)
+ROOTED_SCHEMA_VERSION = "1.7"
+# 1.8 is 1.7 with no level on a var, a step or a check: lib/line-levels.json says the level each line is printed from, read by Typst when it prints (spec 2026-10-20-indices-et-niveaux, UI-002, D-13). Written by every export from v0.120, links and drawings from the root admitted as in 1.6 and 1.7; 1.4 to 1.7 are still read, a line's own level then read where the table names it not
+LEVELS_SCHEMA_VERSION = "1.8"
 
 
 def source_module(domain):
@@ -91,7 +97,7 @@ def open_workbooks(folder, read_before=(), record=None):
     return [io_excel.open_cells(path) for path in paths]
 
 
-def _discover(workbooks, sources=None):
+def _discover(workbooks, sources=None, notes=None):
     """{module: [(cells, [sheet, ...]), ...]} -- each domain's sheets, workbook by workbook, each in tab order.
 
     A sheet's name is its instance id, the string the report addresses it by (`show-calc("snow-load", "SL-Dach1")`), so it has to name one sheet across every load workbook at once. Two cases of it are refused outright rather than one of them silently winning: a sheet claimed by two prefixes would land in two domains with two different readers, and a sheet name found in two workbooks would be one id for two calculations. A domain with no sheet in any workbook is only a warning, since a project may genuinely have no facade, or no snow.
@@ -126,12 +132,13 @@ def _discover(workbooks, sources=None):
         # With no workbook at all there is nothing to have looked in -- the empty calculations a new project starts with (export_all.seed) -- and a warning per domain would name none. A domain whose cases are entered in Woodcore is not empty for having no sheet (D-04).
         if not per_workbook and workbooks and not (sources or {}).get(module.DOMAIN):
             names = ", ".join(cells.path.name for cells in workbooks)
-            print(
-                f"registry: WARNING no sheet named '{module.SHEET_PREFIX}...' in "
-                f"{names} -- domain '{module.DOMAIN}' will be empty and "
-                f"show-calc(\"{module.DOMAIN}\", ...) will find nothing",
-                file=sys.stderr,
-            )
+            # a warning of the export's list, said in the window's language (C4, v0.120: printed to stderr until then, where no one read it)
+            if notes is not None:
+                notes.append(engine.Note(
+                    "registry_no_sheet",
+                    f"no sheet named '{module.SHEET_PREFIX}...' in {names} -- domain '{module.DOMAIN}' will be empty and "
+                    f"show-calc(\"{module.DOMAIN}\", ...) will find nothing",
+                    prefix=module.SHEET_PREFIX, workbooks=names, domain=module.DOMAIN))
     return found
 
 
@@ -141,14 +148,15 @@ def build_calculations(workbooks, here=None, files=None, notes=None):
     A load source whose fields follow a variable (`links`) is built once every load it names is: after the sheets and the sources that follow nothing, in as many rounds as the chain is long, the «Formule» domains computed against the loads built so far and those naming one built last (`_follow_loads`). A chain that comes back to where it began stops the export, naming it (REQ-007)."""
     sources = _sources(here)
     deferred = []
-    sheets_by_module = _discover(workbooks, sources)
+    notes = notes if notes is not None else []
+    sheets_by_module = _discover(workbooks, sources, notes)
     domains = {}
     for module in DOMAIN_MODULES:
         if reads_sheets(module):
             instances = {}
             # One call per workbook, never across them: a workbook's sheets are read against that workbook's own lookup tables (the dead load's material library, the snow sheets' Dropdowns), and a workbook without a single sheet of this domain is not asked for tables it may not have.
             for cells, sheets in sheets_by_module[module]:
-                for sheet, instance in module.read_instances(cells, sheets).items():
+                for sheet, instance in module.read_instances(cells, sheets, notes).items():
                     instances[sheet] = {"workbook": cells.path.name, **instance}
             # The cases entered in Woodcore, after the sheets and in file-name order: computed here, each saying where it came from -- an id a sheet already carries is refused rather than one of the two silently winning (D-04)
             for path, src in sources.get(module.DOMAIN, ()):
@@ -162,7 +170,7 @@ def build_calculations(workbooks, here=None, files=None, notes=None):
                     deferred.append((module, where, src))
                     instances[src["id"]] = None      # its place in file-name order, filled once what it follows is built
                     continue
-                instances[src["id"]] = _build_source(module, where, src, here, files)
+                instances[src["id"]] = _build_source(module, where, src, here, files, notes=notes)
         else:
             # A norm table: its instances are the table's own rows, and they name no workbook and no sheet, since there is none to name (docs/domain/loads.md §3.3septies).
             instances = module.build_instances()
@@ -174,12 +182,17 @@ def build_calculations(workbooks, here=None, files=None, notes=None):
             "sheet_prefix": module.SHEET_PREFIX or "",
             "instances": instances,
         }
-    linked = _follow_loads(deferred, domains, here, files, notes if notes is not None else [])
-    return {"schema_version": LINKED_SCHEMA_VERSION if linked else SCHEMA_VERSION, "domains": domains}
+    linked = _follow_loads(deferred, domains, here, files, notes)
+    rooted = any(figure["file"].startswith("/") for domain in domains.values() for instance in domain["instances"].values() for figure in instance.get("figures") or ())
+    return {"schema_version": LEVELS_SCHEMA_VERSION, "domains": domains}   # 1.8 holds what 1.6 (links) and 1.7 (rooted drawings) hold
 
 
-def _build_source(module, where, src, here, files, provenance=None):
-    built = source_module(module.DOMAIN).build_instance(src, here)
+def _build_source(module, where, src, here, files, provenance=None, notes=None):
+    source = source_module(module.DOMAIN)
+    built = source.build_instance(src, here)
+    # what is said of a valid source and never printed -- a site above 5.1.4's limit, a c_red Figur 9 does not draw -- is a warning of the export (spec 2026-10-21-restes-issue-69, ARCH-RISK-811)
+    if notes is not None and hasattr(source, "notes_of"):
+        notes.extend(source.notes_of(src, where))
     figures = built.pop("_files", {})
     if files is not None:
         files.update(figures)
@@ -238,7 +251,7 @@ def _follow_loads(deferred, domains, here, files, notes):
             values = links.index(calculations, formulas=formulas)
             followed, provenance, said = links.follow(src, source_module(module.DOMAIN).LINKABLE, values, where, links.LOADS)
             notes.extend(said)
-            domains[module.DOMAIN]["instances"][src["id"]] = _build_source(module, where, followed, here, files, provenance)
+            domains[module.DOMAIN]["instances"][src["id"]] = _build_source(module, where, followed, here, files, provenance, notes=notes)
     return True
 
 
@@ -250,28 +263,29 @@ def _formula_values(here, calculations):
             for domain in formula_domain.variable_domains(index, here, calculations)}
 
 
-def write_files(files, data_dir):
-    """The drawings of the instances, `data/calculations/`: written, and any other file of that folder removed -- a case renamed or deleted takes its drawing with it."""
-    folder = data_dir / FIGURES_FOLDER
-    folder.mkdir(parents=True, exist_ok=True)
-    for rel, text in files.items():
-        path = data_dir / rel
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(text.encode("utf-8"))     # LF, whatever the platform
-    wanted = {(data_dir / rel).resolve() for rel in files}
-    for path in folder.glob("*.svg"):
-        if path.resolve() not in wanted:
-            path.unlink()
+def write_files(files, data_dir, previous=None):
+    """The drawings of the instances, under the names their records give them -- Permanent-loads/Exports/Figures/ in a project laid out by folders, `data/calculations/` otherwise (engine.Figures) --, LF whatever the platform, and those of a case renamed or deleted removed: only what the last export wrote (`previous`, the calculations.json it wrote, read here when not given -- give it when the new one is written first), never a file of the engineer's."""
+    import engine
+    data_dir = Path(data_dir)
+    if previous is None:
+        previous = engine.previous_json(data_dir / "calculations.json")
+    engine.figures(data_dir, "dead-load").write(files, previous)
 
 
 def export(here):
     """calculations.json rebuilt alone, with the drawings beside it -- what a tab of loads runs when a case is saved, as a member check writes checks.json alone (member_check.export): the load workbooks read, the sources computed, the whole checked before anything is written."""
     import engine
+    from domains import loads_migrate
+    # a project whose files still name a value of a snow or wind sheet by its name before v0.120 is not exported a half (CON-002, ARCH-RISK-805)
+    refused = loads_migrate.refusal(here)
+    if refused:
+        raise validation.ValidationError(refused)
     workbooks = open_workbooks(here.root)
     files = {}
     data = build_calculations(workbooks, here, files)
     validation.validate_structure(data, "calculations")
     validation.validate_calculations_business(data)
+    previous = engine.previous_json(here.data_dir / "calculations.json")
     engine.write_json(here.data_dir / "calculations.json", data)
-    write_files(files, here.data_dir)
+    write_files(files, here.data_dir, previous)
     return data

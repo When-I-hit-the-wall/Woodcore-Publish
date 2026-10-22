@@ -3,6 +3,8 @@
 Two windows saving one project lose the first one's work without a word, and a project lives in NextCloud and is opened from more than one machine. A window opening a project writes `<name>.woodcore.lock` beside it; a second window finding one asks. These hold who counts as someone else, when a lock is stale, and that a window never removes a lock that is not its own.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import fnmatch
 import json
 

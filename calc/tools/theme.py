@@ -20,11 +20,18 @@ SCHEMA_VERSION = "1.0"
 SCHEMES = ("light", "dark")
 APPEARANCES = ("system", "light", "dark")
 SETTING = "appearance"
+# The interface's zoom (issue #85, the engineer, 21.10.2026: «Je valide la fonctionnalité de zoom de l'interface avec CTRL plus et CTRL moins»): a percentage kept in the user's settings and never in a project, from ZOOM_MIN to ZOOM_MAX by ZOOM_STEP, 100 the size Qt gives the screen.
+ZOOM_SETTING = "ui_zoom"
+ZOOM_MIN, ZOOM_MAX, ZOOM_STEP, ZOOM_DEFAULT = 70, 200, 10, 100
+# How long the windows wait after the last step of the zoom before they are built again: a burst of Ctrl+wheel is one rebuild, which costs seconds (review ARCH-RISK-304).
+ZOOM_REBUILD_MS = 300
+# The project's name in the top bar, in points at 100 %: the font of a label the style sheet no longer sizes, so that it follows the zoom without the style sheet set again.
+BRAND_POINTS = 13
 # The CSS generic families: a browser's to resolve, never a family Qt could be asked for.
 GENERIC = {"ui-sans-serif", "ui-serif", "ui-monospace", "system-ui", "-apple-system", "sans-serif", "serif", "monospace", "cursive", "fantasy"}
 
 _tokens = None
-_state = {"scheme": None, "appearance": None, "base_size": None, "listening": False, "applying": False}
+_state = {"scheme": None, "appearance": None, "base_size": None, "listening": False, "applying": False, "zoom": None, "timer": None}
 
 
 # --- the tokens -----------------------------------------------------------------------------------------------
@@ -222,7 +229,7 @@ def images(t):
         if not file.is_file():
             try:
                 folder.mkdir(parents=True, exist_ok=True)
-                file.write_text(svg, encoding="utf-8")
+                file.write_text(svg, encoding="utf-8", newline="\n")
             except OSError:
                 pass  # a picture not drawn is not worth stopping the window for; Fusion draws none then
         paths[name] = file.as_posix()
@@ -341,7 +348,7 @@ QToolButton[segment][soft="true"] {{ padding: 1px 7px; font-weight: 500; }}
 QToolButton[segment][soft="true"]:checked {{ background: {accent_soft}; color: {accent_strong}; border-color: {line_strong}; font-weight: 700; }}
 QToolButton[chip="true"] {{ border-radius: 11px; padding: 2px 10px; background: {wood_soft}; border: 1px solid {wood}; color: {ink}; }}
 QToolButton[chip="true"]:hover {{ background: {bg_sunk}; }}
-QLabel#brand {{ font-size: 13pt; font-weight: 700; color: {ink}; }}
+QLabel#brand {{ color: {ink}; }}
 QLabel#meta, QLabel#cardText {{ color: {muted}; }}
 QLabel#eyebrow {{ color: {accent_strong}; font-weight: 700; }}
 QLabel#cardTitle {{ font-weight: 600; color: {ink}; }}
@@ -414,7 +421,7 @@ def apply(app=None, chosen=None):
     if family:
         font.setFamily(family)
     if _state["base_size"] and _state["base_size"] > 0:
-        font.setPointSizeF(_state["base_size"])
+        font.setPointSizeF(_state["base_size"] * zoom() / 100)   # the zoom kept through a change of scheme (issue #85)
     app.setFont(font)
     app.setStyleSheet(style_sheet(t))
     _state.update(scheme=resolved, appearance=chosen)
@@ -442,6 +449,101 @@ def set_appearance(chosen, app=None):
     apply(app, chosen)
     if _state["scheme"] != before:
         retheme_windows(app)
+
+
+# --- the interface's zoom (issue #85) ----------------------------------------------------------------------------
+
+def clamp_zoom(percent):
+    """`percent` brought onto the steps between ZOOM_MIN and ZOOM_MAX; ZOOM_DEFAULT for what is not a number."""
+    try:
+        percent = float(percent)
+    except (TypeError, ValueError):
+        return ZOOM_DEFAULT
+    if percent != percent:   # NaN
+        return ZOOM_DEFAULT
+    stepped = int(round(percent / ZOOM_STEP)) * ZOOM_STEP
+    return max(ZOOM_MIN, min(ZOOM_MAX, stepped))
+
+
+def zoom():
+    """The interface's zoom in percent, as the user's settings keep it -- read once per process, then what `set_zoom` made it."""
+    if _state["zoom"] is None:
+        _state["zoom"] = clamp_zoom(usersettings.read().get(ZOOM_SETTING, ZOOM_DEFAULT))
+    return _state["zoom"]
+
+
+def scaled(px):
+    """`px`, a size of the window's frame stated at 100 %, at the zoom in force: the navigation's width and rows, the buttons of the frame (issue #85). The other fixed sizes of the tabs stay as they are."""
+    return int(round(px * zoom() / 100))
+
+
+def brand_font(base=None):
+    """The font of the project's name in the top bar, and of «Woodcore» on the start page: bold, BRAND_POINTS at 100 %, following the zoom."""
+    from PySide6.QtGui import QFont
+    from PySide6.QtWidgets import QApplication
+    font = QFont(base if base is not None else QApplication.font())
+    font.setBold(True)
+    font.setPointSizeF(BRAND_POINTS * zoom() / 100)
+    return font
+
+
+def set_zoom(percent, app=None):
+    """The interface zoomed to `percent` (brought onto the steps): kept in the user's settings, the application's font set at once -- which every widget that inherits it follows --, and every window built again `ZOOM_REBUILD_MS` after the last step, for what took a copy of the font when it was built. The style sheet is not set again, which would re-polish every widget for seconds. Returns the zoom now in force."""
+    from PySide6.QtWidgets import QApplication
+    percent = clamp_zoom(percent)
+    if percent == zoom():
+        return percent
+    settings = usersettings.read()
+    settings[ZOOM_SETTING] = percent
+    usersettings.write(settings)
+    _state["zoom"] = percent
+    app = app or QApplication.instance()
+    if app is None:
+        return percent
+    ensure(app)
+    if _state["base_size"] and _state["base_size"] > 0:
+        font = app.font()
+        font.setPointSizeF(_state["base_size"] * percent / 100)
+        app.setFont(font)
+    _rezoom_later(app)
+    return percent
+
+
+def zoom_in(app=None):
+    return set_zoom(zoom() + ZOOM_STEP, app)
+
+
+def zoom_out(app=None):
+    return set_zoom(zoom() - ZOOM_STEP, app)
+
+
+def zoom_reset(app=None):
+    return set_zoom(ZOOM_DEFAULT, app)
+
+
+def _rezoom_later(app):
+    """The windows built again once the zoom has stopped moving: one timer for the process, started again at every step."""
+    from PySide6.QtCore import QTimer
+    timer = _state["timer"]
+    if timer is None:
+        timer = QTimer()
+        timer.setSingleShot(True)
+        timer.setInterval(ZOOM_REBUILD_MS)
+        timer.timeout.connect(lambda: rezoom_windows(app))
+        _state["timer"] = timer
+    timer.start()
+
+
+def rezoom_windows(app=None):
+    """Every top-level window that knows how to take the zoom (`rezoom`), or else to build itself again (`retheme`), does so."""
+    from PySide6.QtWidgets import QApplication
+    app = app or QApplication.instance()
+    if app is None:
+        return
+    for window in app.topLevelWidgets():
+        rebuild = getattr(window, "rezoom", None) or getattr(window, "retheme", None)
+        if callable(rebuild):
+            rebuild()
 
 
 def retheme_windows(app=None):

@@ -4,6 +4,7 @@
 import json
 from pathlib import Path
 import validation
+from domains._common import fail as _fail  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from structure_tags import (  # split out of this module (issue #30): every name it had is still importable from it
     ALLOWED_INSIDE,
     Block,
@@ -94,10 +95,6 @@ class StructureError(validation.ValidationError):
         super().__init__(message)
         self.code = code
         self.values = values
-
-
-def _fail(where, message):
-    raise validation.ValidationError(f"{where}: {message}")
 
 
 def blank(document):

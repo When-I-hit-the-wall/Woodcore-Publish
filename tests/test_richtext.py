@@ -218,7 +218,7 @@ def test_every_call_of_the_rewritten_tabs_is_a_coloured_field():
     # the schemas' block of calls is the «Affichage» view's coloured field since v0.117
     import richtext
     schema.update_display(force=True)
-    assert isinstance(schema.display.field, richtext.CodeField) and schema.display.field.text().startswith("#show-schema"), "the schemas' call is not a coloured field"
+    assert isinstance(schema.display.field, richtext.CodeField) and schema.display.field.text().startswith("#figure(image-schema("), "the schemas' call is not a coloured field"
     assert connectors_tab._math_html is richtext.math_html and connectors_tab._prose_html is richtext.prose_html, "the connectors tab carries its own copy of the math helpers again"
 
 

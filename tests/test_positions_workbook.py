@@ -5,6 +5,8 @@ From v0.94 to v0.113 the module also wrote the workbook, and this file held that
 The workbooks are built here -- the engineer's own is never copied into the repository.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import conftest
 
 import positions_workbook as workbook

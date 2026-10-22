@@ -381,42 +381,23 @@ class SheetOptions(QWidget):
             highlight.activated.connect(lambda _i: e.set_highlight(obj.id, highlight.currentData() or ""))
             w["highlight"] = highlight
             form.addRow(self.t("se_highlight"), highlight)
-            for key, arg, label in (("axes", "axes", "se_axes"), ("dimensions", "dimensions", "se_dimensions"), ("lengths", "lengths", "se_lengths"), ("scale_bar", "scale-bar", "se_scale_bar")):
+            for key, arg, label in (("axes", "axes", "se_axes"), ("dimensions", "dimensions", "se_dimensions"), ("lengths", "lengths", "se_lengths"), ("centres", "centres", "se_centres"), ("scale_bar", "scale-bar", "se_scale_bar")):
                 check = QCheckBox(self.t(label))
-                check.setChecked(model.get(arg) is True)
+                check.setChecked(model.get(arg) is not False)   # true, or auto -- by the level, ticked (UI-003)
                 check.toggled.connect(lambda on, arg=arg: e.set_flag(obj.id, arg, on))
                 w[key] = check
                 form.addRow(check)
         elif kind == "sheet-fire-viewport":
             for key, arg, label in (("legend", "legend", "se_legend_on_plan"), ("scale_bar", "scale-bar", "se_scale_bar")):
                 check = QCheckBox(self.t(label))
-                check.setChecked(model.get(arg) is True)
+                check.setChecked(model.get(arg) is not False)   # true, or auto -- by the level, ticked (UI-003)
                 check.toggled.connect(lambda on, arg=arg: e.set_flag(obj.id, arg, on))
                 w[key] = check
                 form.addRow(check)
 
     def _fill_position_list(self, form, obj, model):
-        """The list of the positions: which positions -- those of the sheet's plans, every one, one storey's -- and the storey."""
-        e = self.editor
-        w = self.object_widgets
-        scope = QComboBox()
-        for value, key in (("plans", "se_scope_plans"), ("all", "se_scope_all"), ("storey", "se_scope_storey")):
-            scope.addItem(self.t(key), value)
-        scope.setCurrentIndex(max(0, scope.findData(model.get("scope"))))
-        w["scope"] = scope
-        form.addRow(self.t("se_list_scope"), scope)
-        storey = QComboBox()
-        for char in e.storeys():
-            storey.addItem(char, char)
-        chosen = model.get("storey")
-        if chosen is not None and storey.findData(chosen) < 0:
-            storey.addItem(f"{chosen} (?)", chosen)
-        storey.setCurrentIndex(max(0, storey.findData(chosen)))
-        storey.setEnabled(model.get("scope") == "storey")
-        w["storey"] = storey
-        form.addRow(self.t("se_list_storey"), storey)
-        scope.activated.connect(lambda _i: e.set_list_scope(obj.id, scope.currentData(), storey.currentData()))
-        storey.activated.connect(lambda _i: e.set_list_scope(obj.id, "storey", storey.currentData()))
+        """The list of the positions: the project's own, its file included on the sheet (spec 2026-10-21-commandes-typst-refonte, Q-015) -- which positions it holds is written in that file, «Ajouter» in the «Positions» tab adding a position it lacks; here, its width, by the frame's handle."""
+        form.addRow(cards_note(self.t("se_list_file")))
 
     def _fill_titleblock(self, form, obj, model):
         """The title block's cells -- `auto` the project's where the cell has a value of the project -- and its way back into the corner."""
@@ -465,3 +446,9 @@ class SheetOptions(QWidget):
         if self.typing.isActive():
             self.typing.stop()
             self._body_typed()
+
+
+def cards_note(text):
+    """A note in the object's module: the sheet editor's words, small and wrapped (cards.note)."""
+    import cards
+    return cards.note(text)

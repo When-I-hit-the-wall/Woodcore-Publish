@@ -17,6 +17,7 @@ import copy
 import json
 
 import conftest
+import line_levels
 from conftest import ROOT, Skip, tmpdir
 from domains import connector, dowel
 from domains import schema
@@ -33,8 +34,8 @@ DESCRIPTIVE = ("position", "type", "assembly", "diameter", "length", "dimension"
 
 # What every probe of this file writes above its call: the report's own setup, read from the
 # Typst root, so the directory's depth is the harness's and not this test's (tests/test_harness.py).
-PROBE_PREAMBLE = ('#import "/config.typ": conf\n'
-                  '#import "/commands.typ": *\n'
+PROBE_PREAMBLE = ('#import "/000-Typst-Config/config.typ": conf\n'
+                  '#import "/000-Typst-Config/commands.typ": *\n'
                   '#show: conf\n')
 
 
@@ -364,7 +365,7 @@ def test_the_slip_modulus_is_a_formula_and_not_a_table():
     steps = {st["result"]: st for st in record["steps"]}
     assert 'eta_(w,"Steif")' in steps["K_ser_1"]["formula"], "eta_w belongs inside Tabelle 25's formula"
     assert steps["K_ser_Verb"]["formula"] == 'K_("ser","Verb") = n_"tot" dot p dot K_"ser"'
-    assert record["vars"]["K_ser_Verb"]["level"] == 1
+    assert line_levels.level("connector", "K_ser_Verb") == 1   # lib/line-levels.json's, a line carrying no level since v0.120 (UI-002)
     assert record["vars"]["K_ser_Verb"]["norm_ref"] == "6.2.1.4"
     # it is not one of the `results`: those are the resistances a verification reads
     assert "K_ser_Verb" not in record["results"]
@@ -422,8 +423,19 @@ def test_a_truss_node_reduces_both_answers():
         assert v[name]["norm_ref"] == "5.3.6.2.2"
 
 
+def _written_out(folder, cid):
+    """The connector `cid` of the export written out as Woodcore writes its file (calc/domains/unfold.py), into `folder`/connector.typ."""
+    import conftest
+    import project
+    from domains import unfold
+    data = json.loads((DATA / "connectors.json").read_text(encoding="utf-8"))
+    with project.using(conftest.PROJECT):
+        text = unfold.generate(unfold._module("connector").records(data)[cid], "de", "connector")
+    (folder / "connector.typ").write_text(text, encoding="utf-8")
+
+
 def test_the_report_prints_the_tables_and_the_two_figures_as_asked():
-    """v0.77, end to end on the project's own export: `show-connector-resistance` at level 3, compiled and read back out of the PDF. The two figures side by side, each with its caption; no «Lage der Verbindungsmittel», no «vorhanden»/«Nachweis»; the slip modulus's value where the var's name was; and no symbol printed with a bare underscore (`Hilfswert k_β` was, before the title learned `$k_beta$`)."""
+    """v0.77, end to end on the project's own export: the connector's domain as Woodcore writes it out (spec 2026-10-21-commandes-typst-refonte, REQ-017; `#show-connector-resistance` until then) at level 3, compiled and read back out of the PDF. The two figures, each with its caption; no «Lage der Verbindungsmittel», no «vorhanden»/«Nachweis»; the slip modulus's value where the var's name was; and no symbol printed with a bare underscore (`Hilfswert k_β` was, before the title learned `$k_beta$`)."""
     import re
     import subprocess
     import conftest
@@ -436,8 +448,9 @@ def test_the_report_prints_the_tables_and_the_two_figures_as_asked():
     d = conftest.probe_dir("connector_report")
     probe = d / "probe.typ"
     # absolute imports, read from the Typst root: the directory's depth is the harness's, not this test's (tests/test_harness.py)
-    probe.write_text('#import "/config.typ": conf\n#import "/commands.typ": *\n#show: conf\n'
-                     '#show-connector-resistance("%s", level: 3)\n' % cid, encoding="utf-8")
+    _written_out(d, cid)
+    probe.write_text('#import "/000-Typst-Config/config.typ": conf\n#import "/000-Typst-Config/commands.typ": *\n#show: conf\n'
+                     '#calc-defaults(level: 3, scope: "document")\n#include "connector.typ"\n', encoding="utf-8")
     out = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(probe), str(d / "probe.pdf")],
                          capture_output=True, text=True, encoding="utf-8")
     assert out.returncode == 0, out.stderr
@@ -575,7 +588,7 @@ def _headings(record, level=3):
     step's operand into the substituted formula that already shows it.
     """
     results, steps = record["results"], record["steps"]
-    shown = {s["result"]: s for s in steps if s["level"] <= level}
+    shown = {s["result"]: s for s in steps if line_levels.level("connector", s["result"], "step", own=s.get("level")) <= level}
     produced = {s["result"] for s in steps}
     absorbed = set()
     for s in shown.values():
@@ -586,9 +599,9 @@ def _headings(record, level=3):
         if name in shown:
             row, last_group = True, None
         elif name in produced:
-            row = v["level"] <= level
+            row = line_levels.level("connector", name, own=v.get("level")) <= level
             last_group = None if row else last_group
-        elif (name not in absorbed or v.get("keep")) and v["level"] <= level:
+        elif (name not in absorbed or v.get("keep")) and line_levels.level("connector", name, own=v.get("level")) <= level:
             group = v.get("group")
             row, last_group = not (group is not None and group == last_group), group
         else:
@@ -658,7 +671,7 @@ def test_every_heading_is_a_word_of_the_glossary():
 
 
 def test_the_headings_reach_the_page():
-    """The mechanism end to end: `heading` on a var, printed by show-calc as a line of its own.
+    """The words of the connector, printed by its domain as Woodcore writes it out (spec 2026-10-21-commandes-typst-refonte, REQ-017): the titles of its tables and its figures' captions.
 
     It exports the project's connectors into this run's own copy of the data first, because nothing
     else in the suite writes `data/` -- the committed example carries whatever export it was frozen
@@ -678,23 +691,19 @@ def test_the_headings_reach_the_page():
         raise Skip("no calculated connector in the project")
     d = conftest.probe_dir("connector_headings")
     probe = d / "probe.typ"
-    probe.write_text(PROBE_PREAMBLE + '#show-connector-resistance("%s", level: 3)\n' % cid,
-                     encoding="utf-8")
+    _written_out(d, cid)
+    probe.write_text(PROBE_PREAMBLE + '#calc-defaults(level: 3, scope: "document")\n#include "connector.typ"\n', encoding="utf-8")
     out = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(probe),
                           str(d / "probe.pdf")], capture_output=True, text=True, encoding="utf-8")
     assert out.returncode == 0, out.stderr
     from pypdf import PdfReader
     raw = "\n".join(page.extract_text() for page in PdfReader(str(d / "probe.pdf")).pages)
     text = re.sub(r"\s+", " ", re.sub(r"-\s*\n\s*", "", raw))
-    for head in ("Charakteristische Lochleibungsfestigkeiten für",
-                 "Verhältnis der Lochleibungsfestigkeiten", "Holzdicken",
-                 "Erforderliche Holzdicken und Hilfswert", "Reduktionsbeiwert",
-                 "Bemessungswert des Tragwiderstands", "Verschiebungsmodul"):
-        assert head in text, "the page carries no «%s»" % head
-    # the colon is the engine's, so it is never written into the data -- and never doubled
-    assert "Holzdicken::" not in text
+    # its labels follow the domain's presets, «block» (Q-014): the titles of its tables are printed, and its figures' captions
+    for head in ("Hilfswert", "Minimale Abstände", "Anordnung der Verbindungsmittel", "Schnitt durch die Verbindung"):
+        assert head in text, "the page carries no «%s»: %s" % (head, text[:1200])
     # and the two Figur 45 plates the engineer asked to keep are still under it
-    assert "Bauteil 1 — Seitenholz" in text and "Bauteil 2 — Mittelholz" in text
+    assert "Bauteil 1 – Seitenholz" in text and "Bauteil 2 – Mittelholz" in text
 
 
 def test_the_record_carries_no_checks():
@@ -721,7 +730,7 @@ def test_the_project_exports_and_validates():
     if not connector.source_paths(SOURCES):
         raise Skip("no connector sources in connectors/")
     data, images, warnings = connector.prepare(SOURCES, connector.known_positions(DATA), schema.read_sources(conftest.PROJECT.details_dir))
-    assert data["schema_version"] == connector.EXPORT_SCHEMA_VERSION
+    assert data["schema_version"] == connector.LEVELS_EXPORT_VERSION   # 3.3 since v0.120: no line carries a level (UI-002)
     assert data["connectors"], "the sources produced no records"
     for cid, record in data["connectors"].items():
         assert record["source"] == "connectors/%s.json" % cid
@@ -804,7 +813,7 @@ def test_a_1_0_source_is_read_as_1_1_and_sent_to_the_migration():
     assert fresh["moisture_class"] == 3, "the worst class is what the 1.0 calculation used"
     assert "moisture_class" not in fresh["members"][0]["material"]
     message = _raised(connector.check_source, fresh, "SD_99.json")
-    assert "migrate_to_schemas.py" in message, message
+    assert "0.119" in message and "before v0.74" in message, message
 
 
 def test_the_identity_travels_to_the_export():
@@ -1036,7 +1045,7 @@ def test_a_dowel_too_thin_to_see_is_drawn_larger_and_the_pattern_says_so():
     assert "Ø 1 mm" in thin and "Agrandi" in thin, "the floor bit and nothing says so"
     assert "Ø 12 mm" not in thick
     import re
-    radii = [float(r) for r in re.findall(r'<circle cx="[^"]*" cy="[^"]*" r="([^"]*)" fill="#2b2b2b"', thick)]
+    radii = [float(r) for r in re.findall(rf'<circle cx="[^"]*" cy="[^"]*" r="([^"]*)" fill="{re.escape(connector_svg.FASTENER_FILL)}"', thick)]
     assert radii and all(abs(r - 6.0) < 1e-6 for r in radii), radii
 
 
@@ -1317,6 +1326,35 @@ def test_the_section_says_what_it_had_to_resize_in_the_reader_s_language():
         assert record["section_scaled"] == state, record.get("section_scaled")
         note = {"enlarged": strings.text("connector.section_enlarged", "fr"), "reduced": strings.text("connector.section_reduced", "fr")}
         assert note[state] in connector_svg.section_of(source, note=note), "the window's preview does not say it"
+
+
+def test_a_tab_just_built_opens_a_connector_carrying_the_assembly_the_list_opens_on():
+    """A tab just built loads its first connector, and that connector may carry the very assembly the list opens on. Choosing it then changes nothing, so `on_assembly` does not run and «Broches» -- which `fill_members` builds -- is not there yet when the markers are filled.
+
+    Until v0.118 `sync_n_tot`, which `fill_markers` ends on, read that box's check all the same: «'ConnectorsTab' object has no attribute 'n_tot_override'», and Woodcore did not start (Gian's project, 2026-10-06, and again on 0.117.0 on 2026-10-12). It had been there since v0.84 and nothing here could show it: the example project's one connector is «Holz-Holz zweischnittig», the second of the list, so choosing it built the box by accident before the markers were filled.
+    """
+    tab = _tab()
+    import connectors_tab
+    first = next(iter(dowel.ASSEMBLIES))
+    assert tab.assembly_box.itemData(0) == first, "the list no longer opens on the first assembly of dowel.ASSEMBLIES: this test plants the wrong one"
+    app = tab.app
+    views, real = app.views, connector.read_source
+    app.views = {key: value for key, value in views.items() if key != "tab_connections"}   # a tab built with no state of its own loads its first connector
+    connector.read_source = lambda path: {**real(path), "assembly": first}
+    fresh = None
+    try:
+        fresh = connectors_tab.ConnectorsTab(app)
+        assert fresh.current_id is not None, "the tab opened on no connector: nothing was loaded, so nothing was tested"
+        assert fresh.assembly_box.currentData() == first
+        assert fresh.n_tot_box.value() == max(1, len(fresh.ticked_markers())), "«Broches» does not show the count of the markers ticked"
+        assert fresh.n_tot_box.isReadOnly() and not fresh.n_tot_override.isChecked()
+    finally:
+        connector.read_source = real
+        app.views = views
+        if fresh is not None:
+            fresh.dirty = False
+            fresh.hide()
+            fresh.deleteLater()
 
 
 def _steel_source(plate=None, steel="S235"):

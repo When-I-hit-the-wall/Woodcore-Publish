@@ -82,7 +82,7 @@ def _probe(name, body):
     d = conftest.probe_dir(name)
     probe = d / "probe.typ"
     # absolute imports, read from the Typst root: the directory's depth is the harness's (tests/test_harness.py)
-    probe.write_text('#import "/config.typ": conf\n#import "/commands.typ": *\n#show: conf\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/config.typ": conf\n#import "/000-Typst-Config/commands.typ": *\n#show: conf\n' + body + "\n", encoding="utf-8")
     out = subprocess.run(["typst", "compile", "--root", str(TYPST_ROOT), str(probe), str(d / "probe.pdf")],
                          capture_output=True, text=True, encoding="utf-8")
     text = ""
@@ -101,25 +101,9 @@ def _first(file, key):
     return next(iter(records))
 
 
-def test_show_connector_prints_its_type_and_assembly_in_the_reports_language():
-    """`show-connector` printed «Stabdübel, Holz-Holz zweischnittig» in a French report, where the heading of `show-connector-resistance` on the same page said «Broche» (AUD-3-1)."""
-    cid = _first("connectors.json", "connectors")
-    code, err, text = _probe("probe_connector_fr", f'#set-report-language("fr")\n#show-connector("{cid}")')
-    assert code == 0, err
-    assert "Stabdübel" not in text and "zweischnittig" not in text and "einschnittig" not in text, text
-
-
-def test_the_forces_note_of_a_polar_moment_keeps_its_semicolons():
-    """`#t-str(...);` in markup ends the expression and swallows the semicolon: the level-3 note under the forces table read «in x und z β1 zu …» (AUD-3-2)."""
-    cid = _first("connections.json", "connections")
-    code, err, text = _probe("probe_polar_note", f'#show-polar-moment("{cid}", N: 1, V: 2, M: 0.5, level: 3)')
-    assert code == 0, err
-    assert "in x und z;" in text, text[text.find("Komponenten"):][:300]
-
-
 def test_an_unknown_position_is_refused_listing_the_valid_ones():
     """`show-position("NOPE")` failed on Typst's own «file not found» with no list of ids, where every other show-* lists them (AUD-7-214). `show-position` is gone since v0.94, and the two that name a position in its place refuse one the same way."""
-    for name, call in (("probe_position", '#member("X", position: "NOPE")'), ("probe_position_block", '#calc-block("NOPE")[Body]')):
+    for name, call in (("probe_position", '#position("NOPE")'),):
         code, err, _ = _probe(name, call)
         assert code != 0
         assert "valid positions:" in err and "NOPE" in err, err[:800]
@@ -131,7 +115,7 @@ def test_an_unknown_domain_on_a_position_lists_the_calculation_domains():
     positions = json.loads((conftest.PROJECT.data_dir / "positions-index.json").read_text(encoding="utf-8"))["positions"]
     if not positions:
         raise Skip("no position exported")
-    code, err, _ = _probe("probe_domain", f'#show-calc("dead", "{positions[0]}")')
+    code, err, _ = _probe("probe_domain", f'#var("x", domain: ("dead", "{positions[0]}"))')
     assert code != 0
     assert "calculation domains:" in err and "dead-load" in err, err[:800]
 
@@ -144,7 +128,7 @@ def test_verify_accepts_a_double_equals_sign():
 
 
 def test_an_annex_is_cited_as_an_annex_in_the_report_s_language():
-    """«SIA 261 §Anhang D» was printed as it stands in French and English: a clause takes a §, an annex does not, and «Anhang» is a word (periodic audit 260916, AUD-3-13).
+    """«SIA 261 §Anhang D» was printed as it stands in French and English: «Anhang» is a word (periodic audit 260916, AUD-3-13). Since the spec 2026-10-21-commandes-typst-refonte (UI-001) no citation takes a §, a clause no more than an annex.
 
     At level 3, because that is where `#var` prints a citation since v0.85.1 — 1 the value, 2 the label, 3 where it comes from. What is checked here is the wording of the reference, not the level it appears at.
     """
@@ -152,7 +136,7 @@ def test_an_annex_is_cited_as_an_annex_in_the_report_s_language():
         code, err, text = _probe("probe_annex_" + lang, f'#set-report-language("{lang}")\n#var("h_0", 438, "m", norm: "SIA 261", norm-ref: "Anhang D", level: 3)\n#var("s_k", 1, "kN/m²", norm: "SIA 261", norm-ref: "5.2.6", level: 3)')
         assert code == 0, err
         assert "SIA 261 " + word in text and "§Anhang" not in text and "§ Anhang" not in text, (lang, text)
-        assert "§5.2.6" in text or "§ 5.2.6" in text, (lang, text)
+        assert "SIA 261 5.2.6" in text and "§" not in text, (lang, text)
 
 
 def test_a_french_report_sets_a_narrow_space_before_the_engine_s_colons_and_semicolons():
@@ -161,7 +145,8 @@ def test_a_french_report_sets_a_narrow_space_before_the_engine_s_colons_and_semi
     sheet = _first("calculations.json", "domains")
     data = __import__("json").loads((conftest.PROJECT.data_dir / "calculations.json").read_text(encoding="utf-8"))
     instance = next(iter(data["domains"]["snow-load"]["instances"]))
-    body = f'#show-calc("snow-load", "{instance}", level: 3)\n'
+    # the engine's joints: a variable's label, description and citation, joined in its footnote at level 3
+    body = f'#var("korrektur", domain: ("snow-load", "{instance}"), level: 3)\n#var("ce", domain: ("snow-load", "{instance}"), level: 3)\n'
     code, err, fr = _probe("probe_colon_fr", '#set-report-language("fr")\n' + body)
     assert code == 0, err
     glued = re.findall(r"\w{2}[:;] ", fr)

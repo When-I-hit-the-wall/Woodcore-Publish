@@ -8,19 +8,19 @@
 Horizontal displacements due to the variable actions are limited to the standard values of SIA 260, Appendix A, Table 4; h denotes the storey height and H the building height. For the earthquake design situation, the horizontal displacements per storey are limited to 1/500 or 1/200 of the storey height where fittings have brittle or ductile behaviour respectively (4.4.4.5).
 // woodcore:/object p1
 
-// woodcore:object doc-table horizontal-limits-table
-#doc-table(
-  columns: (
-    (id: "criterion", title: [Criterion]),
-    (id: "limit", title: [Limit], kind: "math"),
-    (id: "load_case", title: [Load case (SIA 260, Table 4)]),
-  ),
-  hidden: (),
-  rows: (
-    (criterion: [Fittings with brittle behaviour], limit: [$u <= h \/ 500$], load_case: [occasional (20)]),
-    (criterion: [Fittings with ductile behaviour], limit: [$u <= h \/ 200$], load_case: [frequent (21)]),
-    (criterion: [Use and operation], limit: [$u <= H \/ 300$], load_case: [frequent (21)]),
-    (criterion: [Appearance], limit: [$u <= h \/ 250$], load_case: [quasi-permanent (22)]),
+// woodcore:object table horizontal-limits-table
+#figure(
+  table(
+    columns: (auto, auto, auto),
+    align: (left, center, left),
+    table.hline(stroke: 1pt),
+    table.header([*Criterion*], [*Limit*], [*Load case (SIA 260, Table 4)*]),
+    table.hline(stroke: 0.5pt),
+    [Fittings with brittle behaviour], [$u <= h \/ 500$], [occasional (20)],
+    [Fittings with ductile behaviour], [$u <= h \/ 200$], [frequent (21)],
+    [Use and operation], [$u <= H \/ 300$], [frequent (21)],
+    [Appearance], [$u <= h \/ 250$], [quasi-permanent (22)],
+    table.hline(stroke: 1pt),
   ),
   caption: [Permissible horizontal displacements],
 )

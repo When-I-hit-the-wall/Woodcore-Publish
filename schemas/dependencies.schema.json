@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dependencies",
+  "description": "data/dependencies.json -- the graph of the project's objects and of what each reads, written at every export (spec docs/requirements/completed/2026-10-21-graphe-dependances.md, issue #71; calc/domains/dependency_graph.py, docs/domain/dependencies.md). Read by the «Dépendances» tab and by the next export, which says what changed since; Typst never reads it. A function of the sources alone: the same bytes when nothing changed.",
+  "type": "object",
+  "required": ["schema_version", "nodes", "edges"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "-- pinned: a graph written at another version is not compared, the export then saying nothing changed (CON-002)."
+    },
+    "nodes": {
+      "type": "object",
+      "description": "Every object, by its key `<kind>:<id>` -- `position:T001`, `load:snow-load/SL`, `section:rs/Sections/004-einwirkungen.typ`.",
+      "propertyNames": {"pattern": "^(position|load|script|formula|check|steel|profile|connector|connection|schema|statics|plan|document|fire|extract|section):.+$"},
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$", "description": "The SHA-256 of the object's record without its presentation keys (dependency_graph.PRESENTATION): what tells the next export it changed. None on a section, a profile, a document."},
+          "file": {"type": "string", "description": "The object's source, from the project's folder: what the tab opens and compares with the export's time."},
+          "enabled": {"type": "boolean", "description": "A section: whether its document prints it."},
+          "unresolved": {"type": "integer", "minimum": 1, "description": "A section: how many of its calls name an object Woodcore cannot place -- a document's own registry, a domain it does not know."}
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "description": "`from` reads `to` through `field`: sorted, each once. `to` `<kind>:*` is every object of that kind (a section's loop, a list of them).",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "field"],
+        "additionalProperties": false,
+        "properties": {
+          "from": {"type": "string"},
+          "to": {"type": "string"},
+          "field": {"type": "string", "description": "The field or the command it is read through: `position`, `members[0].position`, `/links/N`, `show-calc`."},
+          "variable": {"type": "string", "description": "The variable read, `<domain>/<instance>/<var>`, where it is one."},
+          "previous": {"type": "boolean", "description": "Read in the last export rather than in this one: a script's value() of a connector or a polar moment."},
+          "line": {"type": "integer", "minimum": 1, "description": "A section: the line of the call."}
+        }
+      }
+    }
+  }
+}

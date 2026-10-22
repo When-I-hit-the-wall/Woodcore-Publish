@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, Anhang A, Tabelle 46 -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 96, read off a render of the page (the formulas are set as graphics).",
+  "_source": "SIA 265:2021, Anhang A, Tabelle 46 -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 96, read off a render of the page (the formulas are set as graphics).",
   "_note": "base = sqrt(f_u,k / f_h,k) · d^t_exponent. Every corner is (t_1, k_1, t_2, k_2) with t_i = factor · base; a lower corner at the origin is written 0. `k_2_root` means k_2 = sqrt(value), the table's own «√2». The two conditions are printed above equations (130) and (131): wenn t_2 >= t2_over_t1 · t_1 gilt, wenn t_1 >= t1_over_t2 · t_2 gilt.",
   "edition": "SIA 265:2021",
   "table_46": {

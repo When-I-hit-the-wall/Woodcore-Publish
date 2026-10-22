@@ -9,18 +9,17 @@
 Die Auflasten umfassen Bodenaufbauten, nicht tragende Wände sowie abgehängte Decken [sowie Installationen und Fassade]. Die folgenden Werte sind charakteristische Werte und massgebend für die Bemessung.
 // woodcore:/object p1
 
-// woodcore:object dead-load-table superimposed-table
-#dead-load-table(
-  columns: (
-    (id: "zone"),
-    (id: "storey"),
-    (id: "buildup"),
-    (id: "load"),
-  ),
-  hidden: (),
-  rows: (
-    (zone: [[…]], storey: [[…]], buildup: [[Bodenaufbau, nichttragende Wände, abgehängte Decken]], load: [[…]]),
-    (zone: [[…]], storey: [[Dach]], buildup: [[Dachaufbau, Begrünung, Photovoltaikanlage]], load: [[…]]),
+// woodcore:object table superimposed-table
+#figure(
+  table(
+    columns: (auto, auto, 1fr, auto),
+    align: (left, left, left, right),
+    table.hline(stroke: 1pt),
+    table.header([*Teilbereich*], [*Geschoss*], [*Nutzung / Aufbau*], [*Auflast*]),
+    table.hline(stroke: 0.5pt),
+    [[…]], [[…]], [[Bodenaufbau, nichttragende Wände, abgehängte Decken]], [[…]],
+    [[…]], [[Dach]], [[Dachaufbau, Begrünung, Photovoltaikanlage]], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Auflasten nach Teilbereich und Geschoss],
 )

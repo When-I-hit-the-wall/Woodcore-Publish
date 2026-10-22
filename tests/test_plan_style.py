@@ -21,8 +21,9 @@ from conftest import ROOT
 from domains import figure_style
 from domains import plan
 from domains import plan_svg
+import project
 
-PLANS = ROOT / "tests" / "projet-exemple" / "Woodcore-Datei" / "plans"
+PLANS = project.Project.load(ROOT / "tests" / "projet-exemple" / "Exemple.woodcore").plans_dir   # 000-Woodcore/sources/ since the layout by folders (issue #64)
 TOOLS = ROOT / "calc" / "tools"
 
 # The SVG of a plan carrying every kind of entry whose sizes the drawing reads, rendered **before** v0.99 touched
@@ -39,14 +40,15 @@ TOOLS = ROOT / "calc" / "tools"
 # markers `show-plan(lengths: false)` takes out -- `_rich` states `show_lengths`. Checked by rendering it with the
 # plan_svg.py of commit b462466: it gave d1bee5b5… (the hash before), and the two drawings hold the same lines, the
 # new one adding the two markers and nothing else -- the length lines only moved.
-FROZEN = "390c41a78bc905f084cbd853505557444075d15adc0c852ecf709e5fff1bfe44"
+# ⚠️ Taken again at v0.120 for one reason: the palette merged (lib/figure-palette.json, D5) -- with the old colours mapped onto the new, the figure before is this one byte for byte, checked first.
+FROZEN = "4b77721cc087d11d132d3ce1ff1e89cb11f34fea5f743c25365f6aec8d65cca2"
 
 # Likewise for the example project's own four plans, one of them a 1.0 source (Pavillon).
 FROZEN_EXAMPLE = {
-    "Fluchttreppe.json": "38051bd9ccb1e17b4ad3788bf7931507ae5843265bc0ba61e110c37a181b8c45",
-    "Geratehaus.json": "79a0700c18433dfd5859211ee94e976a7ddd3985025f0f31fb47fb52ac7498bf",
-    "Pavillon.json": "4c35d494d4388cbce15cdd855f26975bb22ffb9498a68b1a3aae81b63f24020e",
-    "Velo-Unterstand.json": "84266bbecd96aba48e7f78227849ff0bf7ecbf8defe2074808c2f53453420039",
+    "Fluchttreppe.json": "3478b1d6a147eeb890bd457516902f034f8a2e32080e3f0d7fb4968c8a35c805",
+    "Geratehaus.json": "74397bfd7ce2c444f6672ef4a70f293a052efd40aa2873309ebd865ef26145d8",
+    "Pavillon.json": "56bc37df492ea32ab1e6649b10fe505e495f1966cfd11dac606d2c0f55c2aa17",
+    "Velo-Unterstand.json": "68843be150c6d4210416afe2950a45ec98084ca1b3d2a2d2ed85ab696e25d287",
 }
 
 SHEET = (1000.0, 700.0)
@@ -132,8 +134,9 @@ def test_the_export_of_a_plan_that_states_no_factor_is_unchanged():
     # lib/sheet.typ's sheet-plan-title) -- the record with `name` popped hashes to 5e74341c… exactly, checked first.
     # ⚠️ Taken again at v0.117 for one reason: a legend line carries its `quantity` (the «métrés», REQ-020) -- the record
     # with every `quantity` popped hashes to a06f3b4b… exactly, checked first.
+    # ⚠️ Taken again at v0.120 for one reason: the palette merged (D5) -- the legend's swatches are drawn in its colours; with the old colours mapped onto the new, the record before is this one exactly, checked first.
     assert _digest(json.dumps(record, sort_keys=True, ensure_ascii=False)) == \
-        "56288d6e9481ad93d0ac983e87f299d09d914ad4606062028c371261380f4d0f", "the exported record moved"
+        "4c7a5fad2ebbd7ddc54363dafd3b29d192925cbab443a4543ae7fbe86fef9895", "the exported record moved"
 
 
 # --- what a factor does, and to what --------------------------------------------------------

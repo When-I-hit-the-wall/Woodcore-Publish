@@ -32,7 +32,7 @@
         "2.1",
         "2.2"
       ],
-      "description": "-- accepted: 2.0. A 1.0 or 1.1 file carries its own geometry and is converted by calc/tools/migrate_to_schemas.py, which writes that geometry out as a schema of its own; reading one here is refused rather than guessed at. 2.1 (issue #42): 2.0 with `links`, written only where a field follows a variable. 2.2 (spec 2026-10-12-audit-issues-47-48-49, D-14): 2.1 with `plate`, written only by a Stahl-Holz connector that states one."
+      "description": "-- accepted: 2.0. A 1.0 or 1.1 file carries its own geometry and was converted by calc/tools/migrate_to_schemas.py until v0.119 (no longer read since v0.120), which wrote that geometry out as a schema of its own; reading one here is refused rather than guessed at. 2.1 (issue #42): 2.0 with `links`, written only where a field follows a variable. 2.2 (spec 2026-10-12-audit-issues-47-48-49, D-14): 2.1 with `plate`, written only by a Stahl-Holz connector that states one."
     },
     "group": {
       "type": "string",

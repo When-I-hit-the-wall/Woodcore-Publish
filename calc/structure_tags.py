@@ -42,8 +42,8 @@ def _strip(line):
 KINDS = ("structure", "object", "shared")
 
 
-# The calls a `woodcore:object` tag may name, and the two objects whose body is markup and no call -- a heading, a paragraph (calc/typst_objects.py) --, and the six objects of an export sheet (lib/sheet.typ, v0.114), which a document's section does not hold. `check_tags` takes another list, or None for none.
-OBJECT_TYPES = ("doc-table", "live-load-table", "dead-load-table", "doc-field", "doc-checklist", "doc-choice", "doc-image", "doc-plan", "doc-fire-plan", "doc-extract", "doc-annexes", "doc-signatures", "show-norm-list", "heading", "text",
+# The calls a `woodcore:object` tag may name -- the list of the norms alone since the parametric commands of lib/document.typ were written in raw Typst (spec 2026-10-21-commandes-typst-refonte, REQ-019) --, and the objects whose body is markup and no call -- a heading, a paragraph, a table written in raw Typst (calc/typst_objects.py, calc/typst_raw_table.py) --, and the six objects of an export sheet (lib/sheet.typ, v0.114), which a document's section does not hold. `check_tags` takes another list, or None for none.
+OBJECT_TYPES = ("show-norm-list", "heading", "text", "table",
                 "sheet-page", "sheet-text", "sheet-viewport", "sheet-section", "sheet-legend", "sheet-fire-viewport", "sheet-fire-legend", "sheet-position-list", "sheet-quantities", "sheet-titleblock")
 
 

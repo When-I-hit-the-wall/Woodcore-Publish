@@ -4,23 +4,21 @@
 == Structural and analytical model
 // woodcore:/object title
 
-// woodcore:object doc-table structural-model-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Item]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Software and analytical model], text: [[Analysis software, type of model (beam, finite element), level of detail.]]),
-    (item: [Static system and supports], text: [[…]]),
-    (item: [Stiffnesses assumed], text: [[Stiffness of the ground, of connections (slip moduli), of composite members, cracking.]]),
-    (item: [Second-order effects], text: [[…]]),
-    (item: [Ground-structure interaction], text: [[…]]),
-    (item: [Moisture and load duration (timber)], text: [[…]]),
-    (item: [Plausibility check], text: [[The results of the structural analysis are checked for plausibility (SIA 260, 3.1.4).]]),
+// woodcore:object table structural-model-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Software and analytical model], [[Analysis software, type of model (beam, finite element), level of detail.]],
+    [Static system and supports], [[…]],
+    [Stiffnesses assumed], [[Stiffness of the ground, of connections (slip moduli), of composite members, cracking.]],
+    [Second-order effects], [[…]],
+    [Ground-structure interaction], [[…]],
+    [Moisture and load duration (timber)], [[…]],
+    [Plausibility check], [[The results of the structural analysis are checked for plausibility (SIA 260, 3.1.4).]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Modelling assumptions],
-  header: false,
 )
 // woodcore:/object structural-model-table

@@ -204,12 +204,6 @@ class PageAreaRenderMixin:
         best = min(found, key=lambda item: item[:2])
         return best[2], best[3], set(best[4]), best[5]
 
-    def frame_page(self, plan):
-        """The page the frame of `plan` is drawn on, or None."""
-        for page, items in self.crops.items():
-            if any(item.get("plan") == plan and not item.get("other") for item in items):
-                return page
-        return None
 
     def set_frames(self, plans, emit=True):
         """The frames of `plans` chosen -- the last in focus -- and said (`frameSelected`) where that changed."""

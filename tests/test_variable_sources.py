@@ -15,17 +15,20 @@ writes a fifth kind would otherwise be shown as «unknown» provenance without a
 all, into a document's registry.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import subprocess
 import sys
 
 import conftest
+import line_levels
 from conftest import ROOT
 
 import variable_sources as sources
 import variables as model
 
-# the cache sits in the user's cache folder, which calc/tools/usersettings.py names (as tests/test_variables.py does)
+# the cache sits in the user's cache folder, which calc/usersettings.py names (as tests/test_variables.py does)
 sys.path.insert(0, str(ROOT / "calc" / "tools")) if str(ROOT / "calc" / "tools") not in sys.path else None
 
 
@@ -94,7 +97,7 @@ def test_no_variable_of_the_loads_tab_is_missing():
                 assert var.value == v["value"], (key, var.value)
                 assert var.unit == (v.get("unit") or ""), (key, var.unit)
                 assert var.label == (v.get("label") or ""), (key, var.label)
-                assert var.level == v.get("level"), (key, var.level)
+                assert var.level == line_levels.level(calc_id, key, own=v.get("level")), (key, var.level)   # the table's since v0.120 (UI-002)
                 checked += 1
             assert domain.results == tuple(instance.get("results") or ()), domain.name
     assert checked > 100, f"only {checked} variables checked: the example should carry its loads"

@@ -4,18 +4,16 @@
 == Ventilation et protection thermique estivale
 // woodcore:/object title
 
-// woodcore:object doc-table ventilation-table
-#doc-table(
-  columns: (
-    (id: "item", title: [Élément]),
-    (id: "text", title: [Description], kind: "wide"),
-  ),
-  hidden: (),
-  rows: (
-    (item: [Ventilation], text: [[Type de ventilation, climatisation.]]),
-    (item: [Protection thermique estivale], text: [[Protections solaires, masse thermique, ventilation nocturne …]]),
+// woodcore:object table ventilation-table
+#figure(
+  table(
+    columns: (auto, 1fr),
+    align: (left, left),
+    table.hline(stroke: 1pt),
+    [Ventilation], [[Type de ventilation, climatisation.]],
+    [Protection thermique estivale], [[Protections solaires, masse thermique, ventilation nocturne …]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Ventilation et protection thermique estivale],
-  header: false,
 )
 // woodcore:/object ventilation-table

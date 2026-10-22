@@ -5,6 +5,8 @@ This is the one calculation in the project with a published answer to check agai
 Everything else here is an invariant rather than a reference value: the forces must be statically equivalent to the actions they were distributed from, whatever the geometry. That is the check a wrong sign would fail and a wrong magnitude would not, and it needs no published answer.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import math
 
 import conftest

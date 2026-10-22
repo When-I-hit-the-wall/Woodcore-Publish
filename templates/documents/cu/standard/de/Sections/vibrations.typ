@@ -13,17 +13,17 @@ Schwingungen dürfen weder die Funktionstüchtigkeit des Bauwerks einschränken 
 Schwingungserzeugende Geräte sind schwimmend gemäss den Angaben der Bauphysik zu lagern. [Erschütterungen infolge Bahn- oder Strassenverkehr: durch die Bauherrschaft abzuklären.]
 // woodcore:/object p2
 
-// woodcore:object doc-table vibrations-table
-#doc-table(
-  columns: (
-    (id: "use", title: [Nutzung], kind: "wide"),
-    (id: "f", title: [Mindest-Eigenfrequenz $f$], unit: "Hz", kind: "number"),
-    (id: "basis", title: [Grundlage]),
-  ),
-  hidden: (),
-  rows: (
-    (use: [Turn- und Sporthallen], f: [> 8.0], basis: [SIA 260, Tab. 5]),
-    (use: [Tanzlokale und Konzertsäle], f: [> 7.0], basis: [SIA 260, Tab. 5]),
+// woodcore:object table vibrations-table
+#figure(
+  table(
+    columns: (1fr, auto, auto),
+    align: (left, right, left),
+    table.hline(stroke: 1pt),
+    table.header([*Nutzung*], [*Mindest-Eigenfrequenz $f$*], [*Grundlage*]),
+    table.hline(stroke: 0.5pt),
+    [Turn- und Sporthallen], [> 8.0], [SIA 260, Tab. 5],
+    [Tanzlokale und Konzertsäle], [> 7.0], [SIA 260, Tab. 5],
+    table.hline(stroke: 1pt),
   ),
   caption: [Mindest-Eigenfrequenzen],
 )

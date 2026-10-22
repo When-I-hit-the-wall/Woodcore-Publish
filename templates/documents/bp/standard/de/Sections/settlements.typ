@@ -9,17 +9,17 @@
 Setzungen sollen keine schädlichen Auswirkungen auf das Gebäude und die Umgebung (angrenzende Bauten, Leitungen, Strassen usw.) haben. Um dies zu gewährleisten, werden folgende zulässige Grenzwerte für das Setzungsverhalten festgelegt:
 // woodcore:/object p1
 
-// woodcore:object doc-table settlements-table
-#doc-table(
-  columns: (
-    (id: "kind", title: [Setzung]),
-    (id: "limit", title: [Grenzwert], unit: "mm", kind: "number"),
-    (id: "basis", title: [Bezug / Gültigkeit]),
-  ),
-  hidden: (),
-  rows: (
-    (kind: [Absolute Setzung], limit: [[…]], basis: [[ab Fertigstellung der Decke Untergeschoss]]),
-    (kind: [Differentielle Setzung], limit: [[…]], basis: [[bezogen auf eine Länge von … m]]),
+// woodcore:object table settlements-table
+#figure(
+  table(
+    columns: (auto, auto, auto),
+    align: (left, right, left),
+    table.hline(stroke: 1pt),
+    table.header([*Setzung*], [*Grenzwert*], [*Bezug / Gültigkeit*]),
+    table.hline(stroke: 0.5pt),
+    [Absolute Setzung], [[…]], [[ab Fertigstellung der Decke Untergeschoss]],
+    [Differentielle Setzung], [[…]], [[bezogen auf eine Länge von … m]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Grenzwerte der Setzungen],
 )

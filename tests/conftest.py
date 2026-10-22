@@ -113,8 +113,17 @@ WORK = ROOT / "tests" / f".project-{os.getpid()}"
 def _session_project():
     import shutil
     _wipe(WORK)
-    # the engine a sync wrote, the stamps a compile wrote and the archives a run on the committed example left are not the example's (all gitignored)
-    shutil.copytree(SAMPLE.parent, WORK, ignore=shutil.ignore_patterns("lib", "VERSION", "stamps", "_Archiv"))
+    # the engine a sync wrote, the stamps a compile wrote and the archives a run on the committed example left are not the example's (all gitignored) -- in the export's folder, `_woodcore/` or 000-Woodcore/ since the layout by folders (issue #64), which holds the archives too
+    top = SAMPLE.parent.resolve()
+
+    def ignore(directory, names):
+        here = Path(directory).resolve()
+        if here == top:
+            return {n for n in names if n in ("_Archiv",) or n.startswith(".woodcore-") or n.endswith(".lock")}
+        if here.parent == top and here.name in ("_woodcore", project.WOODCORE_FOLDER):
+            return {n for n in names if n in ("lib", "calc", "VERSION", "stamps", "archives", "out", ".preview")}
+        return set()
+    shutil.copytree(SAMPLE.parent, WORK, ignore=ignore)
     here = project.use(WORK / SAMPLE.name)
     project.sync_engine(here)
     # a subprocess a test starts -- an export, a probe of project.current() -- works on the same copy
@@ -155,6 +164,23 @@ def real_project():
     return project.Project.load(file)
 
 
+def engine_source():
+    """The text of the report engine's display layer: lib/calc-engine.typ and the parts it was cut into by subject (spec 2026-10-19-base-saine-nettoyage, G9), in the order they import one another -- what a test that reads the engine's text reads, so that a binding moved from one part to another is still found."""
+    lib = ROOT / "lib"
+    parts = [lib / "calc-engine.typ"] + [lib / f"calc-engine-{name}.typ" for name in ("core", "drawings", "display", "records", "connections")]
+    return "\n".join(path.read_text(encoding="utf-8") for path in parts if path.is_file())
+
+
+# The reference library -- the PDFs of the norms' editions the JSON of calc/norms/ were read off -- named on a machine that has it (spec 2026-10-19-base-saine-nettoyage, REQ-004). No path of the engineer's machine is written in the repository: the JSON name the edition and its file, not where the file lies.
+NORMS_ENV = "WOODCORE_NORMS_LIBRARY"
+
+
+def norms_library():
+    """The folder of the norms' PDFs `WOODCORE_NORMS_LIBRARY` names, or a folder that does not exist where it names none -- a test that needs a page skips, saying which variable to set."""
+    named = os.environ.get(NORMS_ENV)
+    return Path(named) if named else ROOT / ".no-reference-library"
+
+
 def project_copy(name, data=True):
     """A copy of the current project in this process's own temp folder, laid out as the real one, as a `calc/project.py` Project -- for a test to work on with `project.using(...)`.
 
@@ -174,9 +200,15 @@ def project_copy(name, data=True):
         else:
             target.mkdir(parents=True)
     # the project's positions, Woodcore's own file since v0.114 (calc/positions_store.py): a source like the folders above, and what every tab and the export read the positions from
-    positions = real.sources_dir / "positions.json"
+    positions = real.positions_dir / "positions.json"
     if positions.is_file():
-        shutil.copy2(positions, copied.sources_dir / "positions.json")
+        copied.positions_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(positions, copied.positions_dir / "positions.json")
+    # the scripts, which a project laid out by folders keeps in Scripts/ rather than in its sources (issue #64) -- the scripts and not their stubs, as no domain's .typ is copied
+    if real.has_folders and real.domain_dir("script").is_dir():
+        copied.domain_dir("script").mkdir(parents=True, exist_ok=True)
+        for path in real.domain_dir("script").glob("*.py"):
+            shutil.copy2(path, copied.domain_dir("script") / path.name)
     # the order of the window's lists, Woodcore's own file since issue #15 (calc/list_order.py)
     if real.lists_file.is_file():
         shutil.copy2(real.lists_file, copied.lists_file)
@@ -186,8 +218,20 @@ def project_copy(name, data=True):
     if data and real.data_dir.is_dir():
         shutil.copytree(real.data_dir, copied.data_dir)
     copied.typst_root.mkdir(parents=True, exist_ok=True)
+    # each document's entry file, and that alone: a document is made where its entry is there (Project.created_modes, issue #90), and a copy without them would be a project none of whose documents is made yet -- every tab greyed but «Projet»
+    for mode in real.created_modes:
+        entry = copied.document_typ(mode)
+        entry.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(real.document_typ(mode), entry)
     copied.file.write_text(json.dumps(real.data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return project.Project.load(copied.file)
+
+
+def legacy_modes_layout(lang="de"):
+    """The layout of a project in three documents as Woodcore wrote one before the project laid out by folders (0.111 to 0.118, issue #64): the documents in `1_…`, `2_…`, `3_…` named in the project's language, config.typ and commands.typ at the top of the project, `_woodcore/`, `Woodcore-Datei/`, `_Archiv/`, and no `layout.config` -- what a project made then still states until it is migrated (calc/documents.py `legacy_modes_layout`)."""
+    import documents
+    lang = documents.language_of(lang)
+    return documents.legacy_modes_layout(documents.LEGACY_MODE_FOLDERS[lang], documents.ENTRY_NAMES[lang])
 
 
 @contextlib.contextmanager
@@ -264,3 +308,9 @@ def dispose(window):
     window.deleteLater()
     QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
 
+
+
+def figure(here, name):
+    """The file of a figure as an export's JSON names it -- from the Typst root in a project laid out by folders (`/Plans/Position-plan/Exports/Figures/P01.svg`), under data/ before (`plans/P01.svg`): calc/engine.py `Figures.path`, the one reader (issue #64)."""
+    import engine
+    return engine.Figures(here.data_dir, "plan", here).path(name)

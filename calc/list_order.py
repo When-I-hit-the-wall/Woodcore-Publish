@@ -74,7 +74,7 @@ def write(here, data):
         return
     target.parent.mkdir(parents=True, exist_ok=True)
     staged = target.with_name(target.name + ".new")
-    staged.write_text(text, encoding="utf-8")
+    staged.write_text(text, encoding="utf-8", newline="\n")
     positions_store._replace(staged, target)
 
 

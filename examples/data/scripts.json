@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "scripts": {
     "dreigelenk": {
       "id": "dreigelenk",
@@ -14,10 +14,10 @@
           "unit": "kN",
           "symbol": "H_\"d\"",
           "label": "Horizontalkraft am Fusspunkt",
-          "level": 1,
           "source": "python:scripts/dreigelenk.py",
           "norm": "",
           "norm_ref": "",
+          "line": 26,
           "description": "Dreigelenkrahmen unter Gleichlast, H = q L² / (8 f)"
         },
         "V_d": {
@@ -25,10 +25,10 @@
           "unit": "kN",
           "symbol": "V_\"d\"",
           "label": "Vertikalkraft am Fusspunkt",
-          "level": 1,
           "source": "python:scripts/dreigelenk.py",
           "norm": "",
-          "norm_ref": ""
+          "norm_ref": "",
+          "line": 28
         }
       },
       "steps": [],

@@ -1,5 +1,5 @@
 {
-  "_source": "SIA 265:2021, Tabelle 25 (clause 6.2.1.4) -- transcribed by hand from the German edition, ExternalFiles/000-Normes/SIA265-2021-DE.pdf p. 66.",
+  "_source": "SIA 265:2021, Tabelle 25 (clause 6.2.1.4) -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 66.",
   "_note": "K_ser = c · rho_k^0.5 · d^1.7 per dowel and shear plane, in N/mm with d in mm and rho_k in kg/m3. Only the coefficient c is tabulated; the two exponents belong to the formula and are written beside it. The values hold for Feuchteklasse 1 and short-term loading -- another moisture class multiplies them by eta_w for stiffness (Tabelle 4), which is a separate table.",
   "edition": "SIA 265:2021",
   "table_25": {

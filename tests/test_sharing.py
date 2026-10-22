@@ -19,14 +19,16 @@ import validation
 
 TITLES = {"fr": "Sondes", "de": "Sonden", "en": "Probes"}
 PROBE = "shared-probe"
-# The section's body after its heading: prose, a parametric object -- which may stand inside a shared block -- and a sub-heading, which the tree gives an id of its own.
+# The section's body after its heading: prose, a parametric object -- a list of norms with free lines (spec 2026-10-21-commandes-typst-refonte, REQ-019), which may stand inside a shared block -- and a sub-heading, which the tree gives an id of its own.
 BODY = (
     "Sondentext im gemeinsamen Block.\n"
     "\n"
-    "// woodcore:object doc-field probe-use\n"
-    "#doc-field(\n"
-    "  label: [Nutzung],\n"
-    "  value: [Büro],\n"
+    "// woodcore:object show-norm-list probe-use\n"
+    "#show-norm-list(\n"
+    "  keys: (\n"
+    "    [Nutzung],\n"
+    "    [Büro],\n"
+    "  ),\n"
     ")\n"
     "// woodcore:/object probe-use\n"
     "\n"
@@ -351,7 +353,7 @@ def test_stop_sharing_between_two_copies_unshares_both():
     for path in (cu, bp):
         text = _text(path)
         assert "woodcore:shared" not in text and inside in text, "the tags off, what was between them kept"
-        assert "// woodcore:object doc-field probe-use" in text, "the object's own tags stay"
+        assert "// woodcore:object show-norm-list probe-use" in text, "the object's own tags stay"
     for mode in ("cu", "bp"):
         assert "shared_with" not in _leaf(here, mode, PROBE)[0]
         assert _node(here, mode, PROBE).shared_with == ()

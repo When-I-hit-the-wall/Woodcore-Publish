@@ -13,12 +13,13 @@ The PDF is rendered by QtPdf **from its bytes**, never from its file: a document
 The tab lives in its own module, which woodcore_gui.py lists in its TABS and whose STRINGS it merges into its own: the keys carry an `ax_` prefix of their own, and the warnings of calc/domains/annex.py a `warn_annex_` one, which `woodcore_gui.note_text` reads.
 """
 
+import source_editor  # Ctrl+S bound the one way (source_editor.save_shortcut)
 import shutil
 import threading
 from pathlib import Path
 
 from PySide6.QtCore import QBuffer, QByteArray, QIODevice, QObject, QRectF, QSize, QSizeF, Qt, Signal
-from PySide6.QtGui import QColor, QImage, QKeySequence, QPainter, QPen, QShortcut
+from PySide6.QtGui import QColor
 from PySide6.QtPdf import QPdfDocument
 from PySide6.QtWidgets import (
     QAbstractItemView, QAbstractScrollArea, QButtonGroup, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QInputDialog, QLabel, QMessageBox,
@@ -68,8 +69,11 @@ class AnnexList(QTreeWidget):
         return next((item for item, k in self.rows() if k == key), None)
 
 
-class AnnexTab(QWidget):
+class AnnexTab(source_editor.SourceEditorTab, QWidget):
     """Lists the annexes' sources and excerpts, edits one at a time, and writes them through calc/domains/annex.py."""
+    WORDS = "ax"   # the prefix of its words for the question about unsaved changes (source_editor.SourceEditorTab)
+    def current_label(self):
+        return (self.draft or {}).get("id") or self.t("ax_new_item")
 
     def __init__(self, app):
         super().__init__()
@@ -102,9 +106,7 @@ class AnnexTab(QWidget):
         self.splitter.setStretchFactor(2, 0)
         self.sized = False      # the panes' widths are set the first time the tab is shown, when the splitter knows its own
         layout.addWidget(self.splitter, 1)
-        shortcut = QShortcut(QKeySequence(QKeySequence.StandardKey.Save), self)
-        shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        shortcut.activated.connect(self.save)
+        source_editor.save_shortcut(self)   # Ctrl+S
         self.restore(app.views.get("tab_annexes"))
 
     # -- building ---------------------------------------------------------------------
@@ -649,8 +651,10 @@ class AnnexTab(QWidget):
                 item.widget().deleteLater()
         calls = []
         if self.kind == EXCERPTS and self.draft and self.draft.get("id"):
-            calls += [ref.call_show_extract(self.draft["id"]), ref.call_show_extract(self.draft["id"], width="60%")]
-        calls += [ref.call_extract_loop(), ref.call_show_annexes(), ref.import_line()]
+            # the excerpt as an image in a figure of the report's own (spec 2026-10-21-commandes-typst-refonte, REQ-014, ARCH-012), its label the caption
+            caption = self.draft.get("label") or self.draft["id"]
+            calls += [ref.call_image_figure("image-extract", self.draft["id"], caption), ref.call_image_figure("image-extract", self.draft["id"], caption, width="60%")]
+        calls += [ref.call_figure_loop("image-extract", "extract"), ref.call_show_annexes(), ref.import_line()]
         for text in calls:
             row = QHBoxLayout()
             row.addWidget(richtext.CodeField(text, self.app.mono_font), 1)
@@ -912,9 +916,6 @@ class AnnexTab(QWidget):
 
     # -- the actions -----------------------------------------------------------------------
 
-    def confirm_leave(self):
-        return autosave.confirm(self.app, self, self.t("ax_unsaved_title"), self.t("ax_unsaved", id=(self.draft or {}).get("id") or self.t("ax_new_item")))   # saved without a question where it can be, else the one question (autosave.py, v0.117)
-
     def fail(self, message):
         return autosave.refuse(self, self.t("ax_refused_title"), message)
 
@@ -942,13 +943,10 @@ class AnnexTab(QWidget):
             return False
         path = Path(chosen)
         sid = self.unique(path.stem, self.sources)
-        target = model.pdf_path(self.here(), sid)
         try:
             model.reader(path)   # refused here, before anything is copied, where it is not a PDF
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(path, target)
-            source = model.new_source(sid, path.stem, "", path.name)
-            source["sha256"] = model.file_hash(target)
+            # copied into Appendix/ under its own name in a project laid out by folders (issue #64, D-11), beside its record as <id>.pdf before
+            source = model.copy_pdf(self.here(), model.new_source(sid, path.stem, "", path.name), path)
             model.write_source(self.here(), source)
             self.export()
         except (OSError, validation.ValidationError) as exc:
@@ -974,14 +972,13 @@ class AnnexTab(QWidget):
         if ask and QMessageBox.question(self, self.t("ax_replace_title"),
                                         self.t("ax_replace_ask", file=path.name, name=name, count=len(mine))) != QMessageBox.StandardButton.Yes:
             return False
-        target = model.pdf_path(self.here(), sid)
         try:
             model.reader(path)
             known = self.pdfs.pop(sid, None)
             if known is not None:
                 known.close()
-            shutil.copyfile(path, target)
-            source = dict(self.sources[sid], sha256=model.file_hash(target), original=path.name)
+            # written over its own PDF, which keeps its name in Appendix/ (issue #64)
+            source = model.copy_pdf(self.here(), self.sources[sid], path)
             model.write_source(self.here(), source)
             self.export()
         except (OSError, validation.ValidationError) as exc:
@@ -1097,7 +1094,8 @@ class AnnexTab(QWidget):
         known = self.pdfs.pop(old, None)
         if known is not None:
             known.close()
-        model.pdf_path(here, old).rename(model.pdf_path(here, new))
+        if model.appendix_dir(here) is None:   # laid out by folders, the PDF is named by its file in Appendix/ and not by its id: it stays
+            model.pdf_path(here, old).rename(model.pdf_path(here, new))
         (model.sources_dir(here) / f"{old}.json").unlink(missing_ok=True)
         for excerpt in self.excerpts.values():
             if excerpt["source"] == old:
@@ -1140,7 +1138,9 @@ class AnnexTab(QWidget):
         return True
 
     def on_shown(self):
-        """Brought to the front: the annexes read again, the form kept where it holds unsaved changes."""
+        """Brought to the front: a PDF written over in Appendix/ by a file of the same name read again (issue #64, D-11) -- not in a project open read-only --, the annexes read again, the form kept where it holds unsaved changes."""
+        if not getattr(self.app, "read_only", False):
+            self.write_refresh_sources()
         self.read_all()
         if self.dirty:
             self.fill_list()
@@ -1148,6 +1148,16 @@ class AnnexTab(QWidget):
             self.load(self.kind, self.current)
         else:
             self.load_first()
+
+    def write_refresh_sources(self):
+        """annex.refresh_sources: a source whose PDF in Appendix/ was written over from outside Woodcore has its SHA-256 brought up to date, said in the status bar. A writer, guarded as the others (woodcore_gui.WRITERS); `on_shown` calls it only on a project open for writing. Returns the ids read again."""
+        try:
+            changed, _notes = model.refresh_sources(self.here())
+        except (OSError, validation.ValidationError):
+            return []   # read_all, right after, says what cannot be read
+        if changed:
+            self.app.set_status(self.t("ax_pdf_refreshed", ids=", ".join(changed)))
+        return changed
 
     # -- surviving a rebuild ---------------------------------------------------------------
 

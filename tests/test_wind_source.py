@@ -7,6 +7,8 @@ What is held:
 * a coefficient the norm computes directly («*») named and not computed; a malformed source refused naming the field; the export beside a workbook's sheets.
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import math
 
@@ -185,3 +187,18 @@ def test_the_export_carries_a_wind_source():
     assert instance["source_file"] == "loads/wind/WI-01.json" and math.isfinite(instance["vars"]["qp"]["value"])
     validation.validate_structure(data, "calculations")
     validation.validate_calculations_business(data)
+
+
+def test_the_workbook_path_takes_the_terrain_from_the_norm_and_stops_on_a_table_that_disagrees():
+    """REQ-003 (spec 2026-10-19-base-saine-nettoyage, lot 8): wind.py reads the workbook's own words for a terrain category and SIA 261 Tableau 4's z_g and alpha_r from calc/norms/; a workbook row that says another number stops the import, naming its cell."""
+    from domains import wind
+    rows = [(91, {"kat": "II Seeufer", "zg": 300, "ar": 0.16}), (92, {"kat": "IV grossflächige Stadtgebiete", "zg": 526, "ar": 0.3}), (93, {"kat": None, "zg": None, "ar": None})]
+    held = wind._terrain(rows)
+    assert [r["kat"] for _, r in held] == ["II Seeufer", "IV grossflächige Stadtgebiete"]
+    assert held[1][1]["zg"] == sia261_wind.terrain("IV")["z_g"] and held[1][1]["ar"] == sia261_wind.terrain("IV")["alpha_r"]
+    try:
+        wind._terrain([(92, {"kat": "IV grossflächige Stadtgebiete", "zg": 500, "ar": 0.3})])
+    except validation.ValidationError as exc:
+        assert "Dropdowns!C92" in str(exc) and "526" in str(exc), exc
+    else:
+        raise AssertionError("a workbook's z_g other than the norm's was read")

@@ -1,6 +1,6 @@
 """The values of SIA 260:2013 this project reads, out of the JSON files beside this module in `calc/norms/` (docs/architecture/layout.md §11).
 
-`calc/norms/` is the one source of every value taken from a norm for a calculation made in Python: the numbers live in the JSON, once, and the code that needs them reads them through here. Every number was transcribed by hand from `ExternalFiles/000-Normes/SIA260-2013-DE.pdf`, and the file's `_source` says at which page (section 2 rule 13).
+`calc/norms/` is the one source of every value taken from a norm for a calculation made in Python: the numbers live in the JSON, once, and the code that needs them reads them through here. Every number was transcribed by hand from `SIA260-2013-DE.pdf`, and the file's `_source` says at which page (section 2 rule 13).
 
 One file per table, named `<norm>-<year>-<table>-<designation>.json`:
 
@@ -13,11 +13,11 @@ What a Reduktionsbeiwert is, in the norm's own words (1.2.4, p. 18; 3.2.3.2 to 3
 The file is hand-written -- the one place in the pipeline where a number is transcribed rather than read -- so it is checked here before anything is built from it: a factor outside 0 to 1, a ψ that grows from ψ0 to ψ2 (the rare value is never the smaller), a category missing, a formula whose constant disagrees with the text beside it. A norm table that contradicts itself must stop the export naming the line, exactly as a defective workbook cell does.
 """
 
-import json
 import re
 from pathlib import Path
 
 import validation
+from norms import _loader  # how every reader of calc/norms/ opens its files (G3)
 
 HERE = Path(__file__).resolve().parent
 
@@ -41,8 +41,7 @@ CATEGORY = re.compile(r"^([A-Z])\d*$")
 _cache = {}
 
 
-def _fail(name, what):
-    raise validation.ValidationError("calc/norms/%s.json: %s" % (name, what))
+_fail = _loader.fail   # calc/norms/<name>.json: <what> (G3)
 
 
 def _read(name, check):
@@ -50,15 +49,8 @@ def _read(name, check):
     if name in _cache:
         return _cache[name]
     path = HERE / (name + ".json")
-    try:
-        with path.open(encoding="utf-8") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        _fail(name, "not found at %s -- the values of SIA 260 live in calc/norms/" % path)
-    except json.JSONDecodeError as exc:
-        _fail(name, "is not valid JSON: %s" % exc)
-    if data.get("edition") != EDITION:
-        _fail(name, "edition is %r -- expected %r" % (data.get("edition"), EDITION))
+    data = _loader.load(path)
+    _loader.edition(name, data, EDITION)
     check(name, data)
     _cache[name] = data
     return data

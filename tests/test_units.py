@@ -8,6 +8,8 @@ The «Formule» tab computes at once in Python (calc/units.py) what `#eq` and `#
 * the Greek names a key is printed with are one list (calc/greek.py, formula.typ's `greek-names`).
 """
 
+TIER = "fast"  # tests/run_tests.py --fast
+
 import json
 import re
 import subprocess
@@ -33,7 +35,7 @@ CORPUS = (
     ('(12 "N") / (3000 "mm")', "N/mm"), ('F + 500 "N"', None), ('max(F, 10 "kN")', None), ("min(a, b)", None),
     ("abs(-F)", None), ("sin(t)", None), ("n * F", None), ("eta * f", None), ("F * l", "Nmm"), ("s_k * l", None),
     ("1.35 * q + 1.5 * q", None), ("F / A", None), ("M / a", "N"), ("pi * a^2 / 4", None), ("a / b", None),
-    ("F * l", "kN"), ("rho * A", None), ('2.5 "kN/m²" * 4 "m"', "kN/m"), ("exp(eta) * ln(n)", None),
+    ("F * l", "kN"), ("eta", "%"), ("eta", "%%"), ("eta", "‰"), ("rho * A", None), ('2.5 "kN/m²" * 4 "m"', "kN/m"), ("exp(eta) * ln(n)", None),
     # keys named after Greek letters, as the «Formule» tab makes them from σ_(m,d) or γ_M
     ("f / gamma_M", None), ("sigma_m_d / (f / gamma_M)", None), ("sigma_m_d * b * h^2 / 6", "kNm"),
 )
@@ -56,7 +58,7 @@ def _registry(source, name):
     import variables
     d = conftest.probe_dir(name)
     probe = d / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n' + source, encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n' + source, encoding="utf-8")
     out = subprocess.run(["typst", "eval", "--in", str(probe), "--root", str(TYPST_ROOT), "--format", "json", variables.expression()],
                          capture_output=True, text=True, encoding="utf-8", errors="replace")
     return out
@@ -80,7 +82,7 @@ def test_the_units_are_written_once_and_copied_with_the_engine():
 
 
 def test_python_and_typst_give_one_value_and_one_unit():
-    source = '#var-domain("U")[\n'
+    source = '#domain("U")[\n'
     source += "".join(f'#var("{k}", {v}, "{u}", level: 0)\n' if u else f'#var("{k}", {v}, level: 0)\n' for k, v, u in VARIABLES)
     for i, (formula, want) in enumerate(CORPUS):
         source += f'#eq("r{i}", `{formula}`' + (f', unit: "{want}"' if want else "") + ", level: 0)\n"
@@ -116,7 +118,7 @@ def test_numbers_are_printed_as_the_report_prints_them():
 
 
 def test_the_greek_names_are_the_engine_s():
-    source = (ROOT / "lib" / "formula.typ").read_text(encoding="utf-8")
+    source = (ROOT / "lib" / "subscript.typ").read_text(encoding="utf-8")
     block = source[source.index("#let greek-names = ("):]
     block = block[:block.index(")\n")]
     names = tuple(re.findall(r'"([A-Za-z]+)"', block))

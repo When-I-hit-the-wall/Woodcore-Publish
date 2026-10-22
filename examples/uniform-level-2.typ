@@ -9,4 +9,4 @@
 #number-digits.update(3)
 
 #uniform-level.update(none)
-#show-input("snow-load", "SL", "ce", level: 3)
+#var("ce", domain: ("snow-load", "SL"), level: 3)

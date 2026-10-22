@@ -12,18 +12,17 @@ Holz ist ein natürlich wachsender Rohstoff: An der Oberfläche kommen Äste, Ha
 Mit zunehmender Dauer verändert sich die Holzoberfläche: Der Witterung direkt ausgesetzte Bauteile vergrauen, was kein Mangel, sondern eine optische Veränderung darstellt; Holzoberflächen in witterungsgeschützten Bereichen dunkeln durch UV-Einstrahlung nach. In Folge wechselnder Luftfeuchtigkeit quillt und schwindet Holz, was zu vereinzelten Rissen in linearen Bauteilen (Stützen, Träger) führen kann.
 // woodcore:/object p2
 
-// woodcore:object doc-table appearance-classes-table
-#doc-table(
-  columns: (
-    (id: "member", title: [Bauteil]),
-    (id: "product", title: [Produkt]),
-    (id: "class", title: [Erscheinungsklasse]),
-    (id: "remark", title: [Bemerkung]),
-  ),
-  hidden: ("remark",),
-  rows: (
-    (member: [[Sichtbare Stützen und Träger]], product: [Voll- und Brettschichtholz], class: [N: Normalqualität (Bauholz)], remark: []),
-    (member: [[Nicht sichtbare Bauteile]], product: [Voll- und Brettschichtholz], class: [I: Industriequalität, ohne Anforderungen an das Aussehen], remark: []),
+// woodcore:object table appearance-classes-table
+#figure(
+  table(
+    columns: (auto, auto, auto),
+    align: (left, left, left),
+    table.hline(stroke: 1pt),
+    table.header([*Bauteil*], [*Produkt*], [*Erscheinungsklasse*]),  // woodcore:hidden 4=[Bemerkung]
+    table.hline(stroke: 0.5pt),
+    [[Sichtbare Stützen und Träger]], [Voll- und Brettschichtholz], [N: Normalqualität (Bauholz)],  // woodcore:hidden 4=[]
+    [[Nicht sichtbare Bauteile]], [Voll- und Brettschichtholz], [I: Industriequalität, ohne Anforderungen an das Aussehen],  // woodcore:hidden 4=[]
+    table.hline(stroke: 1pt),
   ),
   caption: [Erscheinungsklassen nach Bauteil],
 )

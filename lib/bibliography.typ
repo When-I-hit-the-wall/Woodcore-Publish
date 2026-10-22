@@ -20,7 +20,7 @@
 // ⚠️ `state.final()` is what lets the list be printed anywhere and still hold what the whole document cited -- one convergence pass more, which Typst carries.
 
 // It imports from calc-engine.typ and from nothing else, which is what keeps the chain calc-engine -> bibliography -> distance -> formula acyclic: formula.typ imports this file's two commands by name, as it imports `distance` and the member checks (docs/typst/api-conventions.md §10bis point 3).
-#import "calc-engine.typ": norm-text, report-lang, t-str
+#import "calc-engine.typ": cite-text, norm-text, print-level, report-lang, t-str
 
 // --- What the report has cited ---------------------------------------------
 
@@ -355,8 +355,9 @@
 /// - project (str, none): the project's own `references.bib`, as a path from the Typst root -- the project's top folder, where the project's documents share one -- `"references.bib"`. `none` reads none, which is why a project without one compiles.
 /// - blocks (array, auto): which blocks to print, in order: `"norm"`, `"literature"`, `"other"`. `auto` prints the three.
 /// - heading (int, none): `none` names each block in bold on a line of its own, which keeps the outline the engineer's (section 4bis); an integer sets the names as headings of that level.
+/// - level (auto, int): 1 the entries alone, without the names of their blocks; 2 with them (what a document prints by default); 3 the same as 2, a bibliography being its own citation. auto follows the document.
 /// -> content
-#let show-bibliography(data: true, project: none, blocks: auto, heading: none) = {
+#let show-bibliography(data: true, project: none, blocks: auto, heading: none, level: auto) = {
   assert(type(data) == bool, message: "show-bibliography: data: is true or false, got " + repr(data))
   assert(project == none or type(project) == str,
     message: "show-bibliography: project: names the project's references.bib as a path from the Typst root -- the project's top folder (\"references.bib\"), got " + repr(project))
@@ -378,7 +379,9 @@
       let here = items.filter(i => (if i.entry == none { "other" } else { i.entry.kind }) == kind)
       if here.len() == 0 { continue }
       let name = t-str("bibliography." + kind)
-      if heading == none {
+      // the level (spec 2026-10-20-indices-et-niveaux, UI-003): the blocks' names from level 2
+      if print-level("show-bibliography", level) < 2 {
+      } else if heading == none {
         block(above: 1.2em, below: 0.6em, strong(name))
       } else {
         std.heading(level: heading, name)
@@ -413,5 +416,5 @@
     message: "cite-norm: write the document it cites, #cite-norm(norm: \"SIA 265\", norm-ref: \"4.2.2.1\") -- got " + repr(norm))
   assert(type(norm-ref) == str,
     message: "cite-norm: norm-ref: is the clause as a string, without its §, or \"\" for the document as a whole -- got " + repr(norm-ref))
-  bib-note(norm) + context norm-text((norm: norm.trim(), norm_ref: norm-ref.trim()))
+  bib-note(norm) + context cite-text(norm-text((norm: norm.trim(), norm_ref: norm-ref.trim())), size: auto)
 }

@@ -9,18 +9,17 @@
 Les charges superposées comprennent les compositions de sol, les cloisons non porteuses et les plafonds suspendus [ainsi que les installations et la façade]. Les valeurs suivantes sont des valeurs caractéristiques, déterminantes pour le dimensionnement.
 // woodcore:/object p1
 
-// woodcore:object dead-load-table superimposed-table
-#dead-load-table(
-  columns: (
-    (id: "zone"),
-    (id: "storey"),
-    (id: "buildup"),
-    (id: "load"),
-  ),
-  hidden: (),
-  rows: (
-    (zone: [[…]], storey: [[…]], buildup: [[Composition du sol, cloisons non porteuses, plafonds suspendus]], load: [[…]]),
-    (zone: [[…]], storey: [[Toiture]], buildup: [[Composition de toiture, végétalisation, installation photovoltaïque]], load: [[…]]),
+// woodcore:object table superimposed-table
+#figure(
+  table(
+    columns: (auto, auto, 1fr, auto),
+    align: (left, left, left, right),
+    table.hline(stroke: 1pt),
+    table.header([*Zone*], [*Niveau*], [*Utilisation / composition*], [*Poids propre non-structural*]),
+    table.hline(stroke: 0.5pt),
+    [[…]], [[…]], [[Composition du sol, cloisons non porteuses, plafonds suspendus]], [[…]],
+    [[…]], [[Toiture]], [[Composition de toiture, végétalisation, installation photovoltaïque]], [[…]],
+    table.hline(stroke: 1pt),
   ),
   caption: [Charges superposées par zone et par niveau],
 )

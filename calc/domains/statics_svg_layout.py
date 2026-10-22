@@ -6,10 +6,12 @@ import re
 from domains import figure_style
 from domains import figure_text
 from domains import statics as model
+from domains import svg_draw
+from domains import dimension  # one unit vector and one label box (ARCH-004)
 from i18n import strings
 
 
-UNRESOLVED = "#9aa4ac"
+UNRESOLVED = svg_draw.colour("aid")
 
 
 # The figure's own span: whatever the model measures, its longer side is drawn this many units wide.
@@ -78,6 +80,7 @@ from domains.svg_text import (  # noqa: E402
     _ARIAL_GROUPS, ARIAL_DEFAULT, ARIAL_WIDTHS, SUB_SCALE, SUBSCRIPT, TIMES, TYPED_TIMES, text_runs, text_width,
     advance as _advance,
 )
+from domains.dimension import _local  # plane geometry written once (D4)
 
 
 # The notes under the drawing are set smaller than a label, as the report sets a table's note smaller than its cells.
@@ -96,9 +99,7 @@ def _to_figure(p, k):
     return (p[0] * k, p[1] * k)
 
 
-def _unit(a, b):
-    d = math.dist(a, b) or 1.0
-    return ((b[0] - a[0]) / d, (b[1] - a[1]) / d)
+_unit = dimension.unit   # (ARCH-004: one copy, D-15)
 
 
 def _add(p, u, t):
@@ -228,25 +229,13 @@ def _frame(lines, home, sz, angle=0.0, along=(1.0, 0.0), offset=(0.0, 0.0)):
     }
 
 
-def _local(frame, point):
-    """`point` in the frame of a label's box: from its centre, x along its text, y across it."""
-    a = math.radians(frame["angle"])
-    dx, dy = point[0] - frame["at"][0], point[1] - frame["at"][1]
-    return (dx * math.cos(a) + dy * math.sin(a), -dx * math.sin(a) + dy * math.cos(a))
-
-
 def on_label(frame, point, margin=0.0):
     """Whether `point` lies on a label's box, or within `margin` of it."""
     x, y = _local(frame, point)
     return abs(x) <= frame["hw"] + margin and abs(y) <= frame["hh"] + margin
 
 
-def label_corners(frame, margin=0.0):
-    """The four corners of a label's box, `margin` beyond its edges, turned with its text."""
-    a = math.radians(frame["angle"])
-    c, s = math.cos(a), math.sin(a)
-    (x, y), hw, hh = frame["at"], frame["hw"] + margin, frame["hh"] + margin
-    return [(x + u * c - v * s, y + u * s + v * c) for u, v in ((-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh))]
+label_corners = dimension.box_corners   # (ARCH-004: one copy)
 
 
 def _readable(angle):

@@ -7,7 +7,7 @@
   },
   "_sources": {
     "de": "The German the engine printed before it spoke three languages: the source text, and the key of the `terms` block.",
-    "fr": "SIA 261:2020, French edition (ExternalFiles/000-Normes/SIA261-2020-FR.pdf, the reference library beside the program -- docs/architecture/reference-library.md §11bis): 1.2 for the names of the symbols, 5 and 6 for snow and wind, table 4 (p. 31) for the four terrain categories and table 8 (p. 38) word for word, annex H table 80 for the terms of chapter 1. SIA 265:2021 French edition for timber and connections -- above all its **annexe G, «Index des termes» (tableau 51, pp. 110-111)**, which is the trilingual index and therefore the norm's own French AND English for «Broche», «Résistance à la pression latérale», «Densité» and «Classe de résistance»; tableaux 45 and 46 (pp. 96-97) for the names of the four configurations, and p. 97 for «tôles latérales» (table 3 for the moisture class, 6.4 for 'prepercé'). SIA 260:2013 French edition for 'convention d'utilisation' and 'base du projet'. STE Compact 02 French for the plan legend. The member checks of SIA 265 chapter 4.2 (lib/timber.typ): SIA 265:2021 French edition, 4.2.1 to 4.2.9 (pp. 31-37) word for word for the kinds of stress («traction biaise par rapport au fil», «côté tendu», «effort tranchant», «cisaillement», «flambage», «déversement», «stabilisations latérales», «élancement géométrique» and its two guide values), table 8 (p. 25) for «en général», «avec un avant-bois», «appui d’extrémité», «rigidité», «valeurs de dimensionnement» and its note 6 for «pièces avec moelle»; SIA 260:2013 for «sécurité structurale». The fire-protection plans (calc/domains/fire.py): the AEAI sheet of symbols «pictogrammes PI.pdf», page 1, dated 16.12.2016, word for word -- the French of the VKF's «BS-Symbole.pdf», whose German is the key. Its group 2.2 «Fermetures» gives the four doors. The legend's title and the two doors without a fire resistance (engine keys fire.*) are in no sheet: they are the engine's own words, the engineer's to correct.",
+    "fr": "SIA 261:2020, French edition (SIA261-2020-FR.pdf, the reference library beside the program -- docs/architecture/reference-library.md §11bis): 1.2 for the names of the symbols, 5 and 6 for snow and wind, table 4 (p. 31) for the four terrain categories and table 8 (p. 38) word for word, annex H table 80 for the terms of chapter 1. SIA 265:2021 French edition for timber and connections -- above all its **annexe G, «Index des termes» (tableau 51, pp. 110-111)**, which is the trilingual index and therefore the norm's own French AND English for «Broche», «Résistance à la pression latérale», «Densité» and «Classe de résistance»; tableaux 45 and 46 (pp. 96-97) for the names of the four configurations, and p. 97 for «tôles latérales» (table 3 for the moisture class, 6.4 for 'prepercé'). SIA 260:2013 French edition for 'convention d'utilisation' and 'base du projet'. STE Compact 02 French for the plan legend. The member checks of SIA 265 chapter 4.2 (lib/timber.typ): SIA 265:2021 French edition, 4.2.1 to 4.2.9 (pp. 31-37) word for word for the kinds of stress («traction biaise par rapport au fil», «côté tendu», «effort tranchant», «cisaillement», «flambage», «déversement», «stabilisations latérales», «élancement géométrique» and its two guide values), table 8 (p. 25) for «en général», «avec un avant-bois», «appui d’extrémité», «rigidité», «valeurs de dimensionnement» and its note 6 for «pièces avec moelle»; SIA 260:2013 for «sécurité structurale». The fire-protection plans (calc/domains/fire.py): the AEAI sheet of symbols «pictogrammes PI.pdf», page 1, dated 16.12.2016, word for word -- the French of the VKF's «BS-Symbole.pdf», whose German is the key. Its group 2.2 «Fermetures» gives the four doors. The legend's title and the two doors without a fire resistance (engine keys fire.*) are in no sheet: they are the engine's own words, the engineer's to correct.",
     "en": "SIA 260:2013 English edition, and SIA 261 annex H table 80, which gives the SIA's own English (Nutzlast = live load, Auflasten = non-structural self-weight); EN 1995-1-1 for the timber and connection terms those do not cover. There is no English edition of SIA 261 and no EN 1991-1-4 in the library, so the terrain categories of its table 4 are a translation, not a quotation. SIA 265:2021's annexe G (tableau 51) gives the SIA's own English for the timber and connection terms of its chapter 1 -- dowel-type fastener, embedment strength, bulk density, strength class. The names of the four connection configurations are a translation: no English edition in the library gives them. The member checks of SIA 265 chapter 4.2 (lib/timber.typ): SIA 260:2013 English edition, p. 15, for «structural safety» (Tragsicherheit); the rest is a translation in EN 1995-1-1's English vocabulary (tension/compression parallel, perpendicular or at an angle to the grain, combined bending and axial tension, lateral torsional buckling) -- the library's EN-1995-1-1-2004.pdf is the French edition, so none of it is a quotation. The fire-protection plans: the VKF / AEAI sheets of symbols exist in German and French only, so every English word of theirs is a translation, not a quotation.",
     "_review": "Where a norm gives the word, the word is quoted. Everything else is a translation, and the wording is the engineer's to correct -- here, and nowhere else."
   },
@@ -572,6 +572,21 @@
       "fr": "Niveau de reprise des charges",
       "en": "Load transfer level"
     },
+    "plan.legend.Steifigkeitszentrum": {
+      "de": "Steifigkeitszentrum",
+      "fr": "Centre de rigidité",
+      "en": "Stiffness centre"
+    },
+    "plan.legend.Massenzentrum": {
+      "de": "Massenzentrum",
+      "fr": "Centre de masse",
+      "en": "Mass centre"
+    },
+    "plan.legend.Umriss": {
+      "de": "Gebäudeumriss",
+      "fr": "Contour du bâtiment",
+      "en": "Building outline"
+    },
     "plan.load_level": {
       "de": "Lastübergabeniveau",
       "fr": "Niveau de reprise des charges",
@@ -661,6 +676,46 @@
       "de": "Hauptergebnisse",
       "fr": "Résultats principaux",
       "en": "Main results"
+    },
+    "var_table.descr": {
+      "de": "Beschreibung",
+      "fr": "Description",
+      "en": "Description"
+    },
+    "var_table.label": {
+      "de": "Bezeichnung",
+      "fr": "Désignation",
+      "en": "Designation"
+    },
+    "var_table.symbol": {
+      "de": "Symbol",
+      "fr": "Symbole",
+      "en": "Symbol"
+    },
+    "var_table.value": {
+      "de": "Wert",
+      "fr": "Valeur",
+      "en": "Value"
+    },
+    "var_table.unit": {
+      "de": "Einheit",
+      "fr": "Unité",
+      "en": "Unit"
+    },
+    "var_table.norm": {
+      "de": "Norm",
+      "fr": "Norme",
+      "en": "Norm"
+    },
+    "var_table.norm-section": {
+      "de": "Ziffer",
+      "fr": "Article",
+      "en": "Clause"
+    },
+    "var_table.empty": {
+      "de": "Keine Variable dieser Rolle.",
+      "fr": "Aucune variable de ce rôle.",
+      "en": "No variable of this role."
     },
     "summary.checks": {
       "de": "Nachweisübersicht",
@@ -874,6 +929,11 @@
     }
   },
   "templates": {
+    "script.line": {
+      "de": "Skript {file}, Z. {line}",
+      "fr": "script {file}, l. {line}",
+      "en": "script {file}, l. {line}"
+    },
     "annex.caption": {
       "de": "Auszug aus {source}, S. {page}",
       "fr": "Extrait de {source}, p. {page}",
@@ -1018,6 +1078,26 @@
       "de": "Die verlangte Einheit {wanted} passt nicht zu den Einheiten der Operanden — das Ergebnis steht in {natural}.",
       "fr": "L’unité demandée {wanted} ne correspond pas aux unités des opérandes — le résultat est donné en {natural}.",
       "en": "The requested unit {wanted} does not match the operands’ units — the result is given in {natural}."
+    },
+    "formula.stale": {
+      "de": "veraltet: {value} im Export",
+      "fr": "périmé : {value} dans l’export",
+      "en": "stale: {value} in the export"
+    },
+    "formula.unfold_mismatch": {
+      "de": "Diese Berechnung entspricht nicht mehr den Daten ({have} statt {want}) — in Woodcore neu erzeugen.",
+      "fr": "Ce calcul ne correspond plus aux données ({have} au lieu de {want}) — régénérer dans Woodcore.",
+      "en": "This calculation no longer matches the data ({have} instead of {want}) — regenerate it in Woodcore."
+    },
+    "formula.unfold_missing": {
+      "de": "Der Nachweis {id} ist im Export nicht mehr vorhanden.",
+      "fr": "La vérification {id} n’est plus dans l’export.",
+      "en": "The check {id} is no longer in the export."
+    },
+    "formula.unfold_lines": {
+      "de": "Nicht übernommene Zeilen der Erzeugung: {lines} — in Woodcore übernehmen oder neu erzeugen.",
+      "fr": "Lignes de la génération non appliquées : {lines} — les reprendre ou régénérer dans Woodcore.",
+      "en": "Lines of the writing not applied: {lines} — take them in or regenerate in Woodcore."
     },
     "formula.unit_override": {
       "de": "Die Einheit ist für die Darstellung überschrieben: der Wert steht in {shown} statt in {have}.",
@@ -1637,6 +1717,10 @@
     "Bezeichnung": {
       "fr": "Désignation",
       "en": "Designation"
+    },
+    "Norm": {
+      "fr": "Norme",
+      "en": "Standard"
     },
     "Bezugsfläche": {
       "fr": "Surface de référence",

@@ -214,7 +214,7 @@ def test_the_preview_document_carries_the_reports_own_setup():
 
     Its width is A4 less the report's two 2.5 cm margins, so the line breaking and the right-hand citation column are the printed page's; `conf` gives it the report's font; and the level, the language and the decimals are stated in the file rather than passed as --input, those two flags being read by Statischer Rapport.typ and not by the engine.
     """
-    text = preview.document('#show-calc("snow-load", "SL")', 3, "fr")
+    text = preview.document('#var("s_k", domain: ("snow-load", "SL"))', 3, "fr")
     for expected in ('#import "/config.typ": conf',
                      '#import "/commands.typ": *',
                      "#show: conf", "width: 16cm", "height: auto",
@@ -290,13 +290,13 @@ def test_the_dangling_check_catches_a_planted_one():
 
     ⚠️ It could not pass for as long as the snapshot was stale (B25): other ids were reported beside the planted one, and `fmt-2`, which it expected, went with `fmt` in v0.80. Both were found when the snapshot was re-frozen from the example project (v0.86).
     """
-    instance = "EL+AL-Wand"  # named by show-calc's second example
+    instance = "SL"  # named by report-level's first example, among others
     fake = conftest.tmpdir("dangling")
     (fake / "data").mkdir()
     for path in examples.example_data_dir().glob("*.json"):
         shutil.copy2(path, fake / "data" / path.name)
     calculations = json.loads((fake / "data" / "calculations.json").read_text(encoding="utf-8"))
-    sheets = calculations["domains"]["dead-load"]["instances"]
+    sheets = calculations["domains"]["snow-load"]["instances"]
     if instance not in sheets:
         raise Skip(f"{instance} is no longer in the export -- pick another to plant against")
     del sheets[instance]
@@ -305,7 +305,7 @@ def test_the_dangling_check_catches_a_planted_one():
     hits = examples.dangling(data_dir=fake / "data")
     assert hits, f"removing {instance!r} from the export was not noticed"
     assert all(name == instance for _stem, name in hits), hits
-    assert {stem for stem, _name in hits} >= {"show-calc-2"}, hits
+    assert {stem for stem, _name in hits} >= {"report-level-1"}, hits
 
 
 def test_every_frozen_example_imports_a_file_that_is_there():
@@ -340,18 +340,18 @@ def test_a_preview_writes_nothing_but_its_page():
     for gone in ("write_document", "preview_dir", "preview_typ", "import_prefix", "typst_root"):
         assert not hasattr(preview, gone), f"command_preview.{gone} is back: a preview writes a file again"
     if conftest.have_typst() and (examples.EXAMPLES / "commands.typ").exists():
-        png, error = preview.render_blocking('#val(1.5, unit: "kN")', use_cache=False)
+        png, error = preview.render_blocking('#var("x", 1.5, "kN")', use_cache=False)
         assert error is None and png.exists(), error
 
 
 
 def test_the_calls_the_commands_tab_copies_compile():
-    """Every «Copier» of the commands tab, compiled as pasted, one document each (docs/typst/command-docs.md §10sexies). Five read the report's language and need `context`, which their calls did not carry (periodic audit 260916, AUD-5-5). show-check has nothing to name (section 14); var-unit, eq, val and verify name variables a report declares first (AUD-5-7, the engineer's decision)."""
+    """Every «Copier» of the commands tab, compiled as pasted, one document each (docs/typst/command-docs.md §10sexies). Five read the report's language and need `context`, which their calls did not carry (periodic audit 260916, AUD-5-5). eq and verify name variables a report declares first (AUD-5-7, the engineer's decision)."""
     if not conftest.have_typst():
         raise Skip("typst is not on PATH")
     import subprocess
     samples = ref.sample_arguments(project.current().data_dir)
-    exempt = {"show-check", "var-unit", "eq", "val", "verify"}
+    exempt = {"eq", "verify"}
     probe = conftest.probe_dir("copied_calls")
     root = conftest.TYPST_ROOT
     failures = []
@@ -360,7 +360,7 @@ def test_the_calls_the_commands_tab_copies_compile():
             continue
         for kind, call in (("complete", ref.call_complete(record, samples)), ("minimal", ref.call_minimal(record, samples))):
             doc = probe / f"{record['name']}-{kind}.typ"
-            doc.write_text('#import "/commands.typ": *\n' + call + "\n", encoding="utf-8")
+            doc.write_text('#import "/000-Typst-Config/commands.typ": *\n' + call + "\n", encoding="utf-8")
             r = subprocess.run(["typst", "compile", "--root", str(root), str(doc), str(doc.with_suffix(".pdf"))],
                                capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300)
             if r.returncode != 0:
@@ -464,9 +464,9 @@ def test_one_function_decides_which_levels_an_example_is_shown_at():
                 assert levels == tuple(preview.LEVELS), record["name"]
             else:
                 assert levels == (preview.DEFAULT_LEVEL,), record["name"]
-    assert docs.takes_level(BY_NAME["show-calc"], block(BY_NAME["show-calc"])) and not docs.takes_level(BY_NAME["get-value"], block(BY_NAME["get-value"]))
-    pinned = {"render": True, "code": '#show-calc("snow-load", "SL", level: 3)'}
-    assert docs.example_levels(BY_NAME["show-calc"], block(BY_NAME["show-calc"]), pinned) == (preview.DEFAULT_LEVEL,)
+    assert docs.takes_level(BY_NAME["distance"], block(BY_NAME["distance"])) and not docs.takes_level(BY_NAME["get"], block(BY_NAME["get"]))
+    pinned = {"render": True, "code": '#distance(8, "dowel", level: 3)'}
+    assert docs.example_levels(BY_NAME["distance"], block(BY_NAME["distance"]), pinned) == (preview.DEFAULT_LEVEL,)
     generated = {(c, i, lvl) for c, i, lvl, _code in examples.examples_of(ROOT)}
     decided = {(r["name"], i, lvl) for r in PUBLIC for i, e in enumerate(block(r)["examples"]) for lvl in docs.example_levels(r, block(r), e)}
     assert generated == decided, sorted(generated ^ decided)[:10]
@@ -483,7 +483,7 @@ def test_a_level_0_pins_no_page():
     pinned = '#var("F", 2, "kN", level: 0)\n#eq("M", `F dot l`, level: 2)'
     assert preview.fixes_level(pinned) == "2"
     assert docs.example_levels(record, parsed, {"render": True, "code": pinned}) == (preview.DEFAULT_LEVEL,)
-    assert preview.fixes_level('#member("S", level: 0)\n#verify-compression("S", N: -40, level: 3)') == "3"
+    assert preview.fixes_level('#var("S", 1, level: 0)\n#eq("T", `S`, level: 3)') == "3"
     assert preview.fixes_level('#var("x", 1, level: auto)') is None and preview.fixes_level('#var("x", 1, level: 1)') == "1"
     # every committed example that declares at 0 and nothing else is shown at the three levels, and its three pages are there
     manifest = examples.index()
@@ -497,12 +497,12 @@ def test_a_level_0_pins_no_page():
                 for level in preview.LEVELS:
                     path, state = examples.page(rec["name"], i, level, example["code"], manifest)
                     assert path is not None and state == "fresh", (rec["name"], i, level, state)
-    assert {"var", "var-unit", "eq", "val", "var-line", "verify", "member"} <= set(zeros), sorted(set(zeros))
+    assert {"var", "eq", "verify"} <= set(zeros), sorted(set(zeros))
 
 
 def test_an_example_is_rendered_in_the_window_s_language():
     """The committed pages are German; a French or English page is compiled on demand, against the frozen snapshot, into the cache -- the document the website compiles its pages in three languages from: the engine's words by `set-report-language`, Typst's own by `set text(lang:)`."""
-    french = preview.document('#show-calc("snow-load", "SL")', 2, "fr", document_language=True)
+    french = preview.document('#var("s_k", domain: ("snow-load", "SL"))', 2, "fr", document_language=True)
     assert '#set text(lang: "fr", region: "CH")' in french and '#set-report-language("fr")' in french
     assert "#set text(" not in preview.document("#x", 2, "de"), "the committed German pages are left as they were"
     assert preview.cache_key("#x", 2, "fr", "t") != preview.cache_key("#x", 2, "fr", "t", document_language=True)
@@ -516,7 +516,7 @@ def test_an_example_is_rendered_in_the_window_s_language():
         raise AssertionError("a language the report does not have was rendered")
     if not conftest.have_typst() or not (examples.EXAMPLES / "commands.typ").exists():
         raise Skip("typst is not on PATH, or examples/ has no engine copy -- run build_examples.py")
-    code = '#show-calc("snow-load", "SL")'
+    code = '#var("s_k", domain: ("snow-load", "SL"))'
     pages = {}
     for lang in ("fr", "en"):
         png, error = preview.render_localised(code, 3, lang, use_cache=False)
@@ -635,10 +635,10 @@ def test_the_tree_is_the_reference_s_categories_in_its_order_and_words():
         assert (header.text(0), header.text(1)) == (docs.word("command", lang), docs.word("arguments", lang))
         assert not [key for key in commands_tab.STRINGS[lang] if key.startswith("ref_cat_")]
     tab = _tab("fr", quiet=True)
-    record = tab.record("show-calc")
+    record = tab.record("distance")
     for words in (record["paragraphs"][0], record["english"]["paragraphs"][0]):
         tab.search.setText(words[:30])
-        assert "cmd|show-calc" in tab.nodes, f"the search does not find show-calc by {words[:30]!r}"
+        assert "cmd|distance" in tab.nodes, f"the search does not find distance by {words[:30]!r}"
     tab.search.setText("")
 
 
@@ -647,7 +647,7 @@ def test_the_detail_pane_is_laid_out_as_the_site_s_command_page():
     import richtext
     for lang in ("de", "fr"):
         tab = _tab(lang, quiet=True)
-        record = _select(tab, "show-calc")
+        record = _select(tab, "distance")
         calls = docs.calls(record, tab.samples)
         expected = (["eyebrow", "title", "signature"] + ["paragraph"] * len(record["paragraphs"])
                     + (["untranslated"] if record["untranslated"] else [])
@@ -657,10 +657,10 @@ def test_the_detail_pane_is_laid_out_as_the_site_s_command_page():
         names = [name for name, _widget in tab.parts]
         assert names == expected, names
         parts = dict(tab.parts)
-        assert parts["eyebrow"].text() == f"{docs.word('commands', lang)} › {docs.category_label('display', lang)}"
-        assert parts["title"].text() == "show-calc"
-        assert parts["signature"].objectName() == "code" and "show-calc" in parts["signature"].text()
-        assert docs.signature(record, record).startswith("#show-calc(domain, instance") and docs.signature(record, record).endswith("-> content")
+        assert parts["eyebrow"].text() == f"{docs.word('commands', lang)} › {docs.category_label('formula', lang)}"
+        assert parts["title"].text() == "distance"
+        assert parts["signature"].objectName() == "code" and "distance" in parts["signature"].text()
+        assert docs.signature(record, record).startswith("#distance(d, connector") and docs.signature(record, record).endswith("-> content")
         assert parts["arguments"].text() == docs.word("arguments", lang)
         grid = parts["argument_table"].layout()
         assert grid.rowCount() == len(record["bullets"]) + 2 and grid.columnCount() == 4
@@ -671,7 +671,7 @@ def test_the_detail_pane_is_laid_out_as_the_site_s_command_page():
             assert grid.itemAtPosition(row, 0).widget().text() == arg["name"]
             assert grid.itemAtPosition(row, 2).widget().text() == (arg["default"] if arg["default"] is not None else "—")
             assert all(kind in grid.itemAtPosition(row, 1).widget().text() for kind in arg["types"])
-        assert [r["name"] for r in rows[:2]] == ["domain", "instance"] and rows[0]["default"] is None
+        assert [r["name"] for r in rows[:2]] == ["d", "connector"] and rows[0]["default"] is None
         assert parts["returns"].text() == f"{docs.word('returns', lang)} content"
         fields = [w for w in tab.detail.findChildren(richtext.CodeField)]
         assert [f.text() for f in fields[:len(calls)]] == [call for _key, call in calls]
@@ -708,13 +708,13 @@ def test_the_level_selector_stands_exactly_where_example_levels_says():
             else:
                 assert box.fixed_note is None, (record["name"], box.index)
     assert checked > 20, checked
-    assert commands_tab.pinned_level('#member("S", level: 0)\n#verify-compression("S", N: -40, level: 3)') == "3", "a `level: 0` declares and prints nothing: the rule names the level that prints"
+    assert commands_tab.pinned_level('#var("S", 1, level: 0)\n#eq("T", `S`, level: 3)') == "3", "a `level: 0` declares and prints nothing: the rule names the level that prints"
     assert commands_tab.pinned_level('#var("F", 2, "kN", level: 0)\n#eq("M", `F dot l`)') is None
 
 
 def test_a_french_or_english_example_is_compiled_in_that_language():
     """A French or English window shows each example in its own language: compiled by command_preview.render_localised in a thread of its own, «Compilation…» standing in the box meanwhile, and a level chosen compiled at that level. German shows the committed page, compiling nothing. Where Typst is on the PATH, one real compile: the page comes from the cache, not from examples/out."""
-    german = examples.OUT / "show-calc-1.png"
+    german = examples.OUT / "distance-1.png"
     seen = []
 
     def render(code, level, lang, *_args, **_kwargs):
@@ -723,7 +723,7 @@ def test_a_french_or_english_example_is_compiled_in_that_language():
 
     with _Stubs(render_localised=render, cached_png=lambda _key: None, have_typst=lambda: True):
         tab = _tab("fr")
-        record = _select(tab, "show-calc")
+        record = _select(tab, "distance")
         first = tab.boxes[0]
         assert first.status.text() == tab.t("ref_rendering") and first.preview.path is None, "no placeholder while the page compiles"
         _settle(tab)
@@ -734,9 +734,9 @@ def test_a_french_or_english_example_is_compiled_in_that_language():
         _settle(tab)
         assert seen == [(first.code, 3, "fr")], seen
         german_tab = _tab("de")
-        _select(german_tab, "show-calc")
+        _select(german_tab, "distance")
         assert german_tab.job is None and not german_tab.queue and seen == [(first.code, 3, "fr")], "a German window compiles a committed page"
-        assert german_tab.boxes[0].preview.path == examples.page("show-calc", 0, 2, first.code)[0]
+        assert german_tab.boxes[0].preview.path == examples.page("distance", 0, 2, first.code)[0]
     if not conftest.have_typst() or not (examples.EXAMPLES / "commands.typ").exists():
         raise Skip("typst is not on PATH, or examples/ has no engine copy -- run build_examples.py")
     with _Stubs(cached_png=lambda _key: None):   # nothing from the cache: render_localised compiles for real
@@ -755,16 +755,16 @@ def test_a_page_that_cannot_be_compiled_shows_the_german_one_and_says_why():
 
     with _Stubs(render_localised=failing, cached_png=lambda _key: None, have_typst=lambda: True):
         tab = _tab("fr")
-        record = _select(tab, "show-calc")
+        record = _select(tab, "distance")
         _settle(tab)
         for box, example in zip(tab.boxes, record["examples"]):
-            page = examples.page("show-calc", box.index, box.level, example["code"])[0]
+            page = examples.page("distance", box.index, box.level, example["code"])[0]
             assert box.preview.path == page, (box.index, box.preview.path)
             assert box.status.text() == tab.t("ref_german_page", reason="error: unknown variable: foo"), box.status.text()
     calls = []
     with _Stubs(render_localised=lambda *a, **k: calls.append(a) or (None, None), cached_png=lambda _key: None, have_typst=lambda: False):
         tab = _tab("en")
-        _select(tab, "val")
+        _select(tab, "var")
         assert not calls and tab.job is None and not tab.queue, "nothing is compiled without typst"
         shown = [box for box in tab.boxes if box.renderable]
         assert shown and all(box.preview.path is not None and box.status.text() == tab.t("ref_german_page", reason=tab.t("ref_no_typst")) for box in shown)

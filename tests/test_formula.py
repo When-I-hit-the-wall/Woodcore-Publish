@@ -28,7 +28,7 @@ def _run(body, tag="out"):
         raise Skip("typst is not on the path")
     d = conftest.probe_dir("formula")
     probe = d / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n' + body + "\n", encoding="utf-8")
     out = subprocess.run(
         ["typst", "query", "--root", str(TYPST_ROOT), str(probe), f"<{tag}>", "--field", "value", "--one"],
         capture_output=True, text=True, encoding="utf-8",
@@ -100,10 +100,6 @@ def test_a_caret_in_a_hand_written_unit_is_stored_as_a_real_exponent():
     assert _value('#metadata(written-unit("mm^4")) <out>') == "mm⁴"
     assert _value('#metadata(written-unit("kN/m²")) <out>') == "kN/m²"     # already right, untouched
     assert _stored('#var("f_y", 235, "N/mm^2", level: 0)', "f_y", "unit") == "N/mm²"
-    assert _stored('#var("s", var-of("snow-load", "SL", "s_k"), "kN/m^2", level: 0)', "s", "unit") == "kN/m²"
-    assert _stored('#var("s", var-of("snow-load", "SL", "s_k"), "kN/m^2", level: 0)', "s", "warning") is None
-    assert _stored('#var("A", 0.12, "m^2", level: 0)\n#var-unit("A", "mm^2", level: 0)', "A", "unit") == "mm²"
-    assert abs(_stored('#var("A", 0.12, "m^2", level: 0)\n#var-unit("A", "mm^2", level: 0)', "A") - 120000) < 1e-6
     body = '#var("F", 2, "kN", level: 0)\n#var("A", 400, "mm^2", level: 0)\n#eq("s", `F / A`, unit: "N/mm^2", level: 0)'
     assert _stored(body, "s", "unit") == "N/mm²"
     assert abs(_stored(body, "s") - 5) < 1e-9
@@ -112,8 +108,8 @@ def test_a_caret_in_a_hand_written_unit_is_stored_as_a_real_exponent():
 
 
 def test_a_caret_in_a_hand_written_unit_is_printed_as_an_exponent():
-    """What the engineer saw: `#var("f_y", 235, "N/mm^2")` printed `N/mm^2` on the page. `val`'s `unit:` is the fifth door, and is display only, so it is read back from the page."""
-    text = _printed('A #var("f_y", 235, "N/mm^2", level: 1)\nB #val(7, unit: "kN/m^2")', "caret_units")
+    """What the engineer saw: `#var("f_y", 235, "N/mm^2")` printed `N/mm^2` on the page. A value printed alone, `display: "value-unit"`, is read back from the page too."""
+    text = _printed('A #var("f_y", 235, "N/mm^2", level: 1)\nB #var("p", 7, "kN/m^2", display: "value-unit")', "caret_units")
     assert "^" not in text, text
     assert "235 N/mm²" in text, text
     assert "7 kN/m²" in text, text
@@ -257,14 +253,14 @@ def test_the_snow_load_of_the_project():
 
     # q_k, with the sheet's own coefficients and its own branch (the sliding is hindered, so mu is floored at 0.8)
     got = _stored(
-        f'#var("mu_11", {v["mu_11"]["value"]})\n'
+        f'#var("mu_1", {v["mu_1"]["value"]})\n'
         f'#var("C_e", {v["ce"]["value"]})\n'
         f'#var("C_T", {v["ct"]["value"]})\n'
         f'#var("s_k", {s_k}, "kN/m²")\n'
-        f'#eq("q_k", `max(mu_11, 0.8) dot C_e dot C_T dot s_k`, unit: "kN/m²")',
+        f'#eq("q_k", `max(mu_1, 0.8) dot C_e dot C_T dot s_k`, unit: "kN/m²")',
         "q_k")
-    assert abs(got - v["q_k11"]["value"]) < 1e-9, (
-        f"eq gives q_k = {got}, the export's SL sheet gives {v['q_k11']['value']}"
+    assert abs(got - v["q_k1"]["value"]) < 1e-9, (
+        f"eq gives q_k = {got}, the export's SL sheet gives {v['q_k1']['value']}"
     )
 
 
@@ -348,7 +344,7 @@ def test_a_value_of_the_export_can_be_written_into_the_registry():
     if "SL" not in sheets:
         raise Skip("the SL sheet is not in this export")
     v = sheets["SL"]["vars"]["s_k"]
-    body = '#var("s_k", var-of("snow-load", "SL", "s_k"))'
+    body = '#var("s_k", domain: ("snow-load", "SL"))'
     assert abs(_stored(body, "s_k") - v["value"]) < 1e-9
     assert _stored(body, "s_k", "unit") == v["unit"]
     assert _stored(body, "s_k", "symbol") == v["symbol"]
@@ -443,55 +439,8 @@ def test_a_dimension_the_table_does_not_name_falls_back_to_base_units():
     assert _stored(body, "M", "unit") == "N²", _stored(body, "M", "unit")
     assert abs(_stored(body, "M") - 1e6) < 1e-6
 
-    printed = _value(body + '\n#context [#metadata(fmt-magnitude(var-lookup(var-registry.get(), "M").value, 3)) <out>]')
+    printed = _value(body + '\n#context [#metadata(display-number(var-lookup(var-registry.get(), "M").value)) <out>]')
     assert printed == "1 · 10⁶", printed
-
-
-def test_var_unit_converts_a_variable_and_the_lines_below_see_it():
-    body = '#var("R", 7, "kN")\n#var-unit("R", "N")'
-    assert _stored(body, "R", "unit") == "N"
-    assert abs(_stored(body, "R") - 7000.0) < 1e-9
-
-    # a formula below reads the converted variable, and the physics is unchanged
-    chained = body + '\n#var("n", 2)\n#eq("R_1", `R / n`)'
-    assert _stored(chained, "R_1", "unit") == "kN"
-    assert abs(_stored(chained, "R_1") - 3.5) < 1e-9
-
-
-def test_var_unit_leaves_a_variable_alone_when_the_unit_is_of_another_dimension():
-    """A conversion nobody can perform is a disagreement to read, not a build to stop."""
-    body = '#var("S", 5, "kN")\n#var-unit("S", "mm")'
-    assert _stored(body, "S", "unit") == "kN"
-    assert abs(_stored(body, "S") - 5) < 1e-12
-    assert _stored(body, "S", "warning")["wanted"] == "mm"
-
-    # a name and a unit are a different matter: neither is a disagreement, both are typos
-    #
-    # ⚠️ The name is checked in `var-unit`'s `context`, not in its `state.update`: the function of an update runs only where something reads that state, so a panic written there is silent in a document that never looks the registry up again -- which is precisely the document a mistyped name produces (v0.63).
-    assert "no variable named" in _error('#var-unit("nope", "N")')
-    assert "Zork" in _error('#var("R", 7, "kN")\n#var-unit("R", "Zork")')
-
-
-def test_var_unit_takes_label_descr_norm_and_norm_ref():
-    """«#var-unit prend label: et descr:» -- as `#var`, `#eq` and `#val` do, with `norm:` and `norm-ref:`, which it lacked too. Given, each overrides what the variable carries and is stored with it, so a line below reads it; what is not given is kept; `norm-ref:` alone replaces the clause and keeps the norm (var's v0.86 rule). They print by `#var`'s scale -- the label from level 2, the description and the citation from level 3 -- in the one footnote, or on the line with `note: "line"`."""
-    declared = '#var("F", 7, "kN", label: "Alt", descr: "Alte Begruendung", norm: "SIA 261", norm-ref: "1.1", level: 0)\n'
-    body = declared + '#var-unit("F", "N", label: "Zugkraft", descr: "Aus der Tabelle", norm: "SIA 265", norm-ref: "6.2", level: 0)'
-    for field, want in (("label", "Zugkraft"), ("description", "Aus der Tabelle"), ("norm", "SIA 265"), ("norm_ref", "6.2"), ("unit", "N")):
-        assert _stored(body, "F", field) == want, field
-    # what is not given is kept, and a clause alone keeps its norm
-    kept = declared + '#var-unit("F", "N", norm-ref: "5.3", level: 0)'
-    assert _stored(kept, "F", "label") == "Alt"
-    assert _stored(kept, "F", "description") == "Alte Begruendung"
-    assert _stored(kept, "F", "norm") == "SIA 261" and _stored(kept, "F", "norm_ref") == "5.3"
-    # printed by the one scale, and read by the lines below
-    printed = declared + '#var-unit("F", "N", label: "Zugkraft", descr: "Aus der Tabelle", norm: "SIA 265", norm-ref: "6.2")\nX #val("F", level: 2) Y'
-    three = _printed("#report-level.update(3)\n" + printed, "var_unit_extras_3")
-    assert "Zugkraft; Aus der Tabelle; SIA 265 §6.2" in three, three
-    two = _printed("#report-level.update(2)\n" + printed, "var_unit_extras_2")
-    assert "Zugkraft" in two and "Aus der Tabelle" not in two and "SIA 265" not in two, two
-    assert "Alt" not in two, two
-    line = _printed('#report-level.update(3)\n' + declared + '#var-unit("F", "N", label: "Zugkraft", norm: "SIA 265", norm-ref: "6.2", note: "line")', "var_unit_extras_line")
-    assert "— Zugkraft" in line and "SIA 265 §6.2" in line, line
 
 
 def test_a_variable_inline_is_one_word_of_its_sentence():
@@ -499,8 +448,6 @@ def test_a_variable_inline_is_one_word_of_its_sentence():
     for call in ('var("a", 2, "m")', 'var("M2", 5, "kNm")'):
         one, narrow = _value(f'#context [#metadata((measure(block({call})).height / 1pt, measure(block(width: 3mm, {call})).height / 1pt)) <out>]')
         assert abs(narrow - one) < 0.01, f"{call} breaks inside itself: {narrow} pt in a narrow block against {one} pt on one line"
-    one, narrow = _value('#var("a", 2, "m", level: 0)\n#context [#metadata((measure(block(val("a", type: "expression", level: 1))).height / 1pt, measure(block(width: 3mm, val("a", type: "expression", level: 1))).height / 1pt)) <out>]')
-    assert abs(narrow - one) < 0.01, f"val's expression breaks inside itself: {narrow} pt against {one} pt"
 
 
 def test_a_unit_beside_a_value_that_has_one_converts_it():
@@ -519,19 +466,19 @@ def test_a_unit_beside_a_value_that_has_one_converts_it():
 
 
 def test_a_big_number_is_printed_as_a_power_of_ten():
-    """Past 99 999 a number is unreadable written out; below it, nothing changes."""
+    """Past 99 999 a number is unreadable written out; below it, nothing changes -- and a small one that three decimals would not write whole takes a power of ten too (lib/number.typ, the one rule since v0.120: Q-005)."""
     got = _value(
-        "#metadata((fmt-magnitude(99999, 3), fmt-magnitude(100000, 3), fmt-magnitude(1234567, 3), "
-        "fmt-magnitude(999999.9, 3), fmt-magnitude(-2500000, 3), fmt-magnitude(1.729, 3), "
-        "fmt-magnitude(0.0000123, 3))) <out>"
+        "#metadata((display-number(99999), display-number(100000), display-number(1234567), "
+        "display-number(999999.9), display-number(-2500000), display-number(1.729), "
+        "display-number(0.0000123))) <out>"
     )
     assert got[0] == "99999"                    # the threshold itself stays plain
     assert got[1] == "1 · 10⁵"
     assert got[2] == "1.235 · 10⁶"
     assert got[3] == "1 · 10⁶"                  # the rounding carries the mantissa to 10
-    assert got[4] == "-2.5 · 10⁶"
+    assert got[4] == "−2.5 · 10⁶"               # a printed number carries a minus sign
     assert got[5] == "1.729"
-    assert got[6] == "0"                        # small numbers are left as they were
+    assert got[6] == "1.23 · 10⁻⁵"              # three decimals would print 0: the first three significant digits are kept (Q-005)
 
 
 def test_the_scientific_notation_does_not_reach_the_rest_of_the_report():
@@ -559,8 +506,8 @@ def test_two_domains_keep_their_own_variables_and_both_survive():
     A domain is a key in the registry, not a stack frame -- only the *current* domain is pushed and popped, never what it holds.
     """
     body = """
-#var-domain("left")[#var("F", 0.55, "kN") #var("l", 0.5, "m") #eq("M", `F dot l`)]
-#var-domain("right")[#var("F", 1, "kN") #var("l", 0.5, "m") #eq("M", `F dot l/2`)]
+#domain("left")[#var("F", 0.55, "kN") #var("l", 0.5, "m") #eq("M", `F dot l`)]
+#domain("right")[#var("F", 1, "kN") #var("l", 0.5, "m") #eq("M", `F dot l/2`)]
 #context [#metadata((
   left: var-registry.get().domains.at("left").M.value,
   right: var-registry.get().domains.at("right").M.value,
@@ -575,30 +522,10 @@ def test_a_domain_sees_what_was_declared_outside_it():
     """R_d, declared at the level of a section, must be nameable inside every column of a grid."""
     got = _value("""
 #var("R_d", 2.655, "kN")
-#var-domain("a-column")[#var("F_Ed", 2.037, "kN") #eq("eta", `F_Ed / R_d`)]
+#domain("a-column")[#var("F_Ed", 2.037, "kN") #eq("eta", `F_Ed / R_d`)]
 #context [#metadata(var-registry.get().domains.at("a-column").eta.value) <out>]
 """)
     assert abs(got - 2.037 / 2.655) < 1e-9, got
-
-
-def test_val_reads_a_variable_back_by_its_domain():
-    got = _value("""
-#var-domain("left")[#var("M", 0.275, "kNm")]
-#var-domain("right")[#var("M", 0.25, "kNm")]
-#metadata("placeholder") <out>
-""")
-    assert got == "placeholder"
-    # and the two are told apart on the page
-    body = """
-#var-domain("left")[#var("M", 0.275, "kNm")]
-#var-domain("right")[#var("M", 0.25, "kNm")]
-#context [#metadata((
-  left: var-registry.get().domains.at("left").M.value,
-  right: var-registry.get().domains.at("right").M.value,
-)) <out>]
-"""
-    pair = _value(body)
-    assert abs(pair["left"] - 0.275) < 1e-9 and abs(pair["right"] - 0.25) < 1e-9, pair
 
 
 # --- verify -----------------------------------------------------------------
@@ -701,10 +628,10 @@ def test_a_substituted_operand_is_one_math_atom():
     Found in v0.60.1, writing `F_"Ed" = M / a` in `Sections/005`. Substituted as `0.275 "kNm" / 135 "mm"` the line printed as 0.275 · (kNm/135) · mm -- a formula that does not state what was computed, which is the one thing `eq` exists to prevent. A value with a unit is therefore quoted whole, so it is a single atom; one without is a bare number, parenthesised where it is negative so that `a - b` never reads `a - -b`.
     """
     got = _value('#metadata((\n'
-                 '  unit: substituted(0.275, "kNm", 3),\n'
-                 '  bare: substituted(135, "", 3),\n'
-                 '  negative: substituted(-2.5, "", 3),\n'
-                 '  negative-unit: substituted(-2.5, "kN", 3),\n'
+                 '  unit: substituted(0.275, "kNm"),\n'
+                 '  bare: substituted(135, ""),\n'
+                 '  negative: substituted(-2.5, ""),\n'
+                 '  negative-unit: substituted(-2.5, "kN"),\n'
                  ')) <out>')
     assert got["unit"] == '"0.275 kNm"', got["unit"]
     assert got["bare"] == "135", got["bare"]
@@ -726,7 +653,7 @@ def _printed(body, name="formula_print"):
         raise Skip("typst is not on the path")
     d = conftest.probe_dir(name)
     probe = d / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n' + body + "\n", encoding="utf-8")
     out = subprocess.run(["typst", "compile", "--root", str(TYPST_ROOT), str(probe), str(d / "probe.pdf")],
                          capture_output=True, text=True, encoding="utf-8")
     assert out.returncode == 0, out.stderr
@@ -735,137 +662,15 @@ def _printed(body, name="formula_print"):
     return re.sub(r"\s+", " ", raw)
 
 
-def test_val_prints_its_four_parts():
-    """`val`, `unit`, `val+unit` and `expression` -- the names the engineer chose in v0.80, in place of fmt's `number` / `number+unit`."""
-    text = _printed('#var("R_d", 4.969, "kN", level: 0)\n'
-                    'A #val("R_d", type: "val") B #val("R_d", type: "unit") '
-                    'C #val("R_d") D #val("R_d", type: "expression")', "val_parts")
-    assert "A 4.969 B kN C 4.969 kN D" in text, text
-    assert "= 4.969 kN" in text, text          # the expression form prints the symbol with the value
-
-
-def test_val_reads_the_registry_a_domain_and_the_export():
-    """Three sources, one command: the report's own variables, one `var-domain` of them, and a calculation of the export -- which is what `domain:` names, a string for the one and a pair for the other (the engineer's own spelling)."""
-    data = json.loads((conftest.PROJECT.data_dir / "calculations.json").read_text(encoding="utf-8"))
-    s_k = data["domains"]["snow-load"]["instances"]["SL"]["vars"]["s_k"]["value"]
-    text = _printed('#var("R_d", 4.969, "kN", level: 0)\n'
-                    '#var-domain("Ende")[#var("M", 1.32, "kNm", level: 0)]\n'
-                    'A #val("R_d") B #val("M", domain: "Ende") '
-                    'C #val("s_k", domain: ("snow-load", "SL"))', "val_sources")
-    assert "A 4.969 kN B 1.32 kNm C" in text, text
-    assert str(round(s_k, 3)) in text, (s_k, text)
-
-
-def test_val_takes_a_var_object_and_a_number_written_here():
-    """`fmt`'s two jobs: a var object read with `var-of`, and a bare number -- which takes its unit, its symbol, its label and its citation from the call, carrying none of its own."""
-    text = _printed('A #val(var-of("snow-load", "SL", "s_k"), type: "expression") '
-                    'B #val(7, unit: "kN", symbol: "R_k", type: "expression", label: "Kapazitat Sherpa XS", '
-                    'norm: "Sherpa", norm-ref: "ETA-12/0197", level: 3)', "val_object")
-    assert "= 7 kN" in text, text
-    assert "Kapazitat Sherpa XS" in text, text      # the label, in the footnote
-    assert "Sherpa" in text and "ETA-12/0197" in text, text      # the citation, at level 3
-
-
-def test_a_unit_written_over_is_said_on_the_page_and_changes_nothing():
-    """`unit:` is display only (the engineer's request): the value printed is converted, the variable keeps the unit it was declared with, and the page says so in the orange Woodcore writes an overridden value in -- the footnote's marker included."""
-    text = _printed('#var("R", 7, "kN", level: 0)\nA #val("R", unit: "N") B #val("R")', "val_override")
+def test_a_unit_written_over_changes_nothing():
+    """`unit:` is display only (the engineer's request, Q-011 of the spec 2026-10-21-commandes-typst-refonte): the value printed is converted, the variable keeps the unit it was declared with."""
+    text = _printed('#var("R", 7, "kN", level: 0)\nA #var("R", unit: "N", display: "value-unit") B #var("R", display: "value-unit")', "val_override")
     # the footnote's marker stands between the two, which is the point of it
     assert "A 7000 N" in text and "B 7 kN" in text, text
-    assert "berschrieben" in text, text              # «Die Einheit ist fuer die Darstellung ueberschrieben»
-    assert _stored('#var("R", 7, "kN", level: 0)\n#val("R", unit: "N")', "R", "unit") == "kN"
-    # the same unit given again has overwritten nothing, so nothing is said
-    assert "berschrieben" not in _printed('#var("R", 7, "kN", level: 0)\n#val("R", unit: "kN")', "val_same_unit")
-
-
-def test_val_refuses_what_it_cannot_do():
-    """Each fired on purpose. A unit of another dimension is refused rather than printed in red: nothing was computed here, so it is a typo at the call site and not a formula disagreeing with its declared unit (v0.63's rule, which this is the other side of)."""
-    assert "not the same dimension" in _error('#var("R", 7, "kN")\n#val("R", unit: "kNm")')
-    assert "has no symbol" in _error('#val(7, unit: "kN", type: "expression")')
-    assert "needs a value that carries one" in _error('#val(7, type: "unit")')
-    assert "invalid type" in _error('#var("R", 7, "kN")\n#val("R", type: "number+unit")')
-    assert "no variable named" in _error('#val("nothing")')
-    # the v0.61 form, refused with the rewrite rather than read two ways
-    # ⚠️ A panicked message reaches this test with its quotes escaped, so the rewrite is matched without them.
-    refusal = _error('#var-domain("Ende")[#var("M", 1, "kNm")]\n#val("Ende", "M")')
-    assert "the domain is a named argument" in refusal, refusal
-    assert "domain: " in refusal and "Ende" in refusal, refusal
+    assert _stored('#var("R", 7, "kN", level: 0)\n#var("R", unit: "N")', "R", "unit") == "kN"
 
 
 # --- var-line: a row of declarations (v0.80) --------------------------------
-
-
-def test_a_row_joins_its_values_with_the_engines_own_semicolon():
-    """What the engineer asked for: several declarations on one line rather than one line each, joined the way show-calc joins the vars of a group."""
-    text = _printed('#report-level.update(2)\n#var-line[\n  #var("R_k", 7, "kN")\n  #var("k_dens", 0.806)\n'
-                    '  #var("eta_w", 0.8)\n]', "row_join")
-    assert "= 7 kN; " in text and "= 0.806; " in text and "= 0.8" in text, text
-
-
-def test_a_hidden_value_takes_its_separator_with_it():
-    """The whole reason a row is a container and not an `inline: true` flag on each command: a value the level hides leaves no separator behind, where a hand-typed one would."""
-    text = _printed('#report-level.update(2)\n#var-line[\n  #var("b", 100, "mm")\n'
-                    '  #var("h", 200, "mm", level: 0)\n  #var("t", 24, "mm")\n]', "row_hidden")
-    assert "= 100 mm; " in text and "= 24 mm" in text, text
-    assert ";;" not in text and "; ;" not in text, text
-    assert "200" not in text, text
-
-
-def test_sep_separates_values_printed_inline_without_a_row():
-    """`sep:` on `#var`, `#eq` and `#var-unit` (spec 2026-10-11-argument-sep-var, the engineer: «l'option ... serait un argument de var»): the separator `#var(...) ;` was typed for, written as an argument, glued to its value and hidden with it by its level -- what a `var-line` was needed for until then."""
-    text = _printed('#report-level.update(2)\n'
-                    'A #var("b", 208, "mm", sep: ";")\n#var("t", 8.5, "mm", sep: ";")\n#var("e", 124) Z\n\n'
-                    'B #var("a", 145, "mm", sep: ";")\n#var("k", 3, level: 0, sep: ";")\n#var("r", 27, "mm", sep: ",")\n'
-                    '#eq("c", `a - r`, sep: ";")\n#var-unit("a", "m", sep: ";")\n#var("z", 1) Y', "sep_inline")
-    assert re.search(r"A \S+ = 208 mm; \S+ = 8\.5 mm; \S+ = 124 Z", text), text
-    assert re.search(r"B \S+ = 145 mm; \S+ = 27 mm, .*= 118 mm; \S+ = 0\.145 m; \S+ = 1 Y", text), text
-    assert ";;" not in text and "; ;" not in text and "= 3" not in text, text   # k, hidden, took its separator with it
-    plain = _printed('#var("b", 208, "mm")\n#var("t", 8.5, "mm")', "sep_none")
-    assert ";" not in plain and "," not in plain, plain                        # no sep: nothing changes
-
-
-def test_sep_is_refused_where_there_is_nothing_to_separate():
-    for body, said in (('#var("b", 1, note: "line", sep: ";")', 'note: "line"'),
-                       ('#eq("c", `2`, note: "line", sep: ";")', 'note: "line"'),
-                       ('#var("b", 1, sep: 3)', "a string"),
-                       ('#var-line[#var("b", 1, sep: ";") #var("c", 2)]', "inside a var-line"),
-                       ('#var("a", 1, "m")\n#var-line[#var-unit("a", "mm", sep: ";")]', "inside a var-line")):
-        message = _error(body)
-        assert "sep:" in message and said in message, (body, message)
-
-
-def test_a_row_carries_a_label_a_citation_and_its_own_separator():
-    """A row names itself the way a var's `group_label` does, cites once in the right-hand column, and joins with whatever `sep:` says.
-
-    The row's citation follows its items' (v0.85.1): the right-hand column from level 3 and nothing below it, so a row of partial factors reads as the factors alone in a client report.
-    """
-    body = ('#var-line(label: "Teilsicherheitsbeiwerte", norm: "SIA 265", norm-ref: "2.2.5")[\n'
-            '  #var("gamma_M", 1.7)\n  #var("eta_M", 1)\n]\n'
-            '#var-line(sep: ",")[\n  #var("b", 100, "mm")\n  #var("h", 200, "mm")\n]')
-    text = _printed('#report-level.update(3)\n' + body, "row_label")
-    assert "Teilsicherheitsbeiwerte:" in text, text
-    assert "SIA 265 " in text, text
-    assert "= 100 mm, " in text, text
-    # the label and the separator are the row's at every level; the citation is not
-    lower = _printed('#report-level.update(2)\n' + body, "row_label_2")
-    assert "Teilsicherheitsbeiwerte:" in lower and "= 100 mm, " in lower, lower
-    assert "SIA 265" not in lower, lower
-
-
-def test_a_row_may_be_hidden_and_still_declares_its_variables():
-    """`level: 0` on the row overrides each item's own level: nothing is printed -- not even the space of an empty line -- and every variable is still in the registry, which is what makes a row usable for the inputs of a level-3 calculation."""
-    text = _printed('#report-level.update(3)\n#var-line(level: 0)[\n  #var("R_k", 7, "kN")\n]\nENDE', "row_hidden_all")
-    assert "7 kN" not in text and "ENDE" in text, text
-    assert _stored('#var-line(level: 0)[\n  #var("R_k", 7, "kN")\n]', "R_k") == 7
-
-
-def test_a_label_and_a_citation_become_one_footnote_in_a_row():
-    """In a row there is no em dash to hang a label on and no column for a citation, so both go into the one footnote the item carries (section 9's rule for a description and its choices)."""
-    text = _printed('#report-level.update(3)\n#var-line[\n'
-                    '  #var("a", 135, "mm", label: "Abstand", norm: "SIA 265", norm-ref: "6.2.1")\n]',
-                    "row_footnote")
-    assert "Abstand" in text, text
-    assert "SIA 265 " in text, text
-    assert "— Abstand" not in text and "-- Abstand" not in text, text
 
 
 # --- the levels: 0 prints nothing, every other level prints something (v0.85)
@@ -878,9 +683,7 @@ _LEVELS_PROBE = (
     '#var("R_k", 7, "kN", level: {lv})\n'
     '#eq("R_d", `R_k / 2`, level: {lv})\n'
     '#verify(`R_d <= R_k`, level: {lv})\n'
-    'A #val("R_d", level: {lv}) B\n'
-    '#var-line(level: {lv})[ #var("b", 100, "mm") ]\n'
-    '#var-unit("b", "cm", level: {lv})\n'
+    'A #var("R_d", level: {lv}) B\n'
     'ENDE'
 )
 
@@ -888,7 +691,7 @@ _LEVELS_PROBE = (
 def test_level_0_prints_nothing_at_all():
     """The engineer's rule, in his own words: «au level 0, il ne doit pas y avoir d'affichage».
 
-    Asserted on the *whole* page rather than value by value, which is what catches a command that leaves a mark of itself behind -- a separator, an empty grid row, a footnote marker, the ✔ of a relation. What is left is the prose around the calls: `val` printed nothing between A and B, and the sentence closed over it.
+    Asserted on the *whole* page rather than value by value, which is what catches a command that leaves a mark of itself behind -- a separator, an empty grid row, a footnote marker, the ✔ of a relation. What is left is the prose around the calls: the value printed alone left nothing between A and B, and the sentence closed over it.
     """
     text = _printed(_LEVELS_PROBE.format(lv=0), "level_0")
     assert text.strip() == "A B ENDE", text
@@ -897,13 +700,10 @@ def test_level_0_prints_nothing_at_all():
 def test_level_0_still_declares_computes_and_converts():
     """What "prints nothing" must not mean: does nothing. A variable hidden today is read by a formula tomorrow, so every command does its whole work at level 0 and holds back only the emission."""
     assert _stored('#var("R_k", 7, "kN", level: 0)', "R_k") == 7
-    assert _stored('#var("R_k", 7, "kN")\n#var-unit("R_k", "N", level: 0)', "R_k") == 7000
     assert _stored('#var("R_k", 7, "kN", level: 0)\n#eq("R_d", `R_k / 2`, level: 0)', "R_d") == 3.5
-    assert _stored('#var-line(level: 0)[\n  #var("R_k", 7, "kN")\n]', "R_k") == 7
     # and the refusals still fire, at the level that prints nothing: a line hidden today is a line
     # printed in the next report, and it must not be the report that finds the mistake
     assert "cannot add" in _error('#var("a", 1, "kN")\n#var("b", 2, "m")\n#eq("x", `a + b`, level: 0)')
-    assert "no variable named" in _error('#var-unit("nothing", "N", level: 0)')
     assert "same dimensions" in _error('#var("a", 1, "kN")\n#var("b", 2, "m")\n#verify(`a <= b`, level: 0)')
 
 
@@ -917,19 +717,14 @@ def test_every_level_but_0_prints_something():
         assert "= 7 kN" in text, (lv, text)             # var
         assert "= 3.5 kN" in text, (lv, text)           # eq, the answer at every level
         assert "⩽" in text and "✔" in text, (lv, text)  # verify, its relation and its mark
-        assert "A 3.5 kN B" in text, (lv, text)         # val, in the sentence
-        assert "= 100 mm" in text, (lv, text)           # the row
-        assert "= 10 cm" in text, (lv, text)            # var-unit
+        assert "3.5 kN B" in text, (lv, text)           # a variable printed again, in the sentence
 
 
 def test_a_level_outside_0_to_3_is_refused_by_every_command():
     """Fired on purpose, once per command. Until v0.85 none of these five checked at all: `level: 4` behaved as 3, and `level: 0` as 1 -- so the level the engineer has just been given would have been read as "nothing special" by the four commands that did not gate on it."""
     for call in ('#var("a", 1, "kN", level: 4)',
-                 '#var("a", 1, "kN")\n#var-unit("a", "N", level: 4)',
                  '#var("a", 1, "kN")\n#eq("x", `a`, level: 4)',
-                 '#var("a", 1, "kN")\n#val("a", level: 4)',
-                 '#var("a", 1, "kN")\n#verify(`a <= a`, level: 4)',
-                 '#var-line(level: 4)[ #var("a", 1, "kN") ]'):
+                 '#var("a", 1, "kN")\n#verify(`a <= a`, level: 4)'):
         message = _error(call)
         assert "invalid level" in message, (call, message)
         assert "0 (nothing printed)" in message, (call, message)
@@ -943,17 +738,17 @@ def test_a_var_of_the_export_keeps_its_label_and_its_description():
 
     In the data the two are different fields (sections 3.1, 9): `label` is what the variable *is* -- «Expositionsbeiwert» -- and `description` is why this value was chosen, which carries the `choices` with it. `var-record` stored `#var`'s `label:` under `description`, a leftover from v0.80 renaming `descr:` to `label:` without renaming the field, so a var object read out of the export had its label **dropped** and printed its choices sentence in its place. Invisible for five versions because nothing put a var of the export and a var of the report in one column until `find` did.
     """
-    carried = '#var("ce", var-of("snow-load", "SL", "ce"))'
-    assert _stored(carried, "ce", "label") == "Expositionsbeiwert"
-    assert "Windexposition" in _stored(carried, "ce", "description")
+    carried = '#var("korrektur", domain: ("snow-load", "SL"))'
+    assert _stored(carried, "korrektur", "label") == "Korrektur Wert"
+    assert "Anhang D" in _stored(carried, "korrektur", "description")
     # written down here, `label:` is the label and there is no description at all
     assert _stored('#var("a", 135, "mm", label: "Abstand")', "a", "label") == "Abstand"
     assert _stored('#var("a", 135, "mm", label: "Abstand")', "a", "description") is None
     # the call's own label still wins over the one the value carries
-    assert _stored('#var("ce", var-of("snow-load", "SL", "ce"), label: "Eigene")', "ce", "label") == "Eigene"
+    assert _stored('#var("korrektur", domain: ("snow-load", "SL"), label: "Eigene")', "korrektur", "label") == "Eigene"
     # and it is the label that reaches the page, where until v0.85.1 the description did
     text = _printed('#report-level.update(2)\n' + carried, "carried_label")
-    assert "Expositionsbeiwert" in text, text
+    assert "Korrektur Wert" in text, text
 
 
 def test_var_val_and_eq_share_one_level_scheme():
@@ -963,7 +758,7 @@ def test_var_val_and_eq_share_one_level_scheme():
     """
     body = ('#var("R_k", 7, "kN", label: "Kapazitaet", norm: "Sherpa", norm-ref: "ETA-12/0197")\n'
             '#eq("R_d", `R_k / 2`, label: "Bemessungswert", norm: "SIA 265", norm-ref: "2.2.5")\n'
-            'A #val("R_k") B')
+            'A #var("R_k") B')
     at = {lv: _printed('#report-level.update(%d)\n' % lv + body, "scheme_%d" % lv) for lv in (1, 2, 3)}
 
     # 1: the value and nothing else
@@ -987,11 +782,6 @@ def test_eq_carries_a_label_of_its_own():
                     '#eq("F", `M / a`, label: "Schraubenkraft")', "eq_label")
     assert "Schraubenkraft" in text, text
     assert "0.275 kNm" in text, text      # the numbers line is still there at level 3
-    # and in a row it becomes the item's footnote, there being no em dash inside a line
-    row = _printed('#report-level.update(2)\n#var("M", 0.275, "kNm", level: 0)\n'
-                   '#var("a", 135, "mm", level: 0)\n'
-                   '#var-line[ #eq("F", `M / a`, label: "Schraubenkraft") ]', "eq_label_row")
-    assert "Schraubenkraft" in row, row
 
 
 def test_level_3_is_complete_label_description_norm_and_norm_ref():
@@ -1002,7 +792,7 @@ def test_level_3_is_complete_label_description_norm_and_norm_ref():
     body = ('#var("R_k", 7, "kN", label: "Kapazitaet", descr: "Aus dem Katalog",'
             ' norm: "Sherpa", norm-ref: "ETA-12/0197")\n'
             '#eq("R_d", `R_k / 2`, label: "Bemessungswert", descr: "Haelfte", norm: "SIA 265", norm-ref: "2.2.5")\n'
-            'A #val("R_k") B')
+            'A #var("R_k") B')
     three = _printed('#report-level.update(3)\n' + body, "complete_3")
     for word in ("Kapazitaet", "Aus dem Katalog", "Sherpa", "ETA-12/0197",
                  "Bemessungswert", "Haelfte", "SIA 265", "2.2.5"):
@@ -1027,19 +817,19 @@ def test_var_val_and_eq_all_take_label_descr_norm_and_norm_ref():
     assert _stored('#eq("x", `1 + 1`, label: "L", descr: "D")', "x", "description") == "D"
 
     # and overriding what a var of the export brought with it
-    carried = '#var("ce", var-of("snow-load", "SL", "ce"), label: "Eigene", descr: "Eigener Grund")'
+    carried = '#var("ce", domain: ("snow-load", "SL"), label: "Eigene", descr: "Eigener Grund")'
     assert _stored(carried, "ce", "label") == "Eigene"
     assert _stored(carried, "ce", "description") == "Eigener Grund"
     assert _stored(carried, "ce", "norm") == "SIA 261"          # what is not overridden is kept
-    over = '#var("ce", var-of("snow-load", "SL", "ce"), norm: "SIA 265", norm-ref: "3.1")'
+    over = '#var("ce", domain: ("snow-load", "SL"), norm: "SIA 265", norm-ref: "3.1")'
     assert _stored(over, "ce", "norm") == "SIA 265"
     assert _stored(over, "ce", "norm_ref") == "3.1"
 
-    # `val` states its own four for a value that carries none, and overrides those a var does carry
-    text = _printed('#report-level.update(3)\nA #val(7, unit: "kN", symbol: "R_k", label: "L", descr: "D",'
+    # a value written here states its own four, and overrides those a var does carry
+    text = _printed('#report-level.update(3)\nA #var("R_k", 7, "kN", label: "L", descr: "D",'
                     ' norm: "Sherpa", norm-ref: "ETA-1") B', "val_four")
     assert "L; D; Sherpa" in text, text
-    quoted = _printed('#report-level.update(3)\nA #val("s_k", domain: ("snow-load", "SL"),'
+    quoted = _printed('#report-level.update(3)\nA #var("s_k", domain: ("snow-load", "SL"),'
                       ' label: "Enger", descr: "Nur hier") B', "val_override_four")
     assert "Enger; Nur hier" in quoted, quoted
 
@@ -1058,7 +848,7 @@ def _lines(body, name):
         raise Skip("typst is not on the path")
     d = conftest.probe_dir(name)
     probe = d / "probe.typ"
-    probe.write_text('#import "/commands.typ": *\n' + body + "\n", encoding="utf-8")
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n' + body + "\n", encoding="utf-8")
     out = subprocess.run(["typst", "compile", "--root", str(TYPST_ROOT), str(probe), str(d / "probe.pdf")],
                          capture_output=True, text=True, encoding="utf-8")
     assert out.returncode == 0, out.stderr
@@ -1092,13 +882,13 @@ def test_verify_prints_a_formula_side_in_letters_numbers_and_value_at_level_3():
 def test_a_negative_number_is_printed_with_a_minus_sign():
     """«un nombre négatif doit afficher un vrai signe moins» (v0.86): U+2212, never the hyphen `fmt-decimals` writes.
 
-    Converted where a number is printed and nowhere earlier: the registry keeps the number, and `fmt-magnitude`, which builds math source, keeps its hyphen -- math sets that as a minus by itself.
+    Converted where a number is printed and nowhere earlier: the registry keeps the number, and `fmt-decimals`, which builds math source, keeps its hyphen -- math sets that as a minus by itself.
     """
-    text = _printed('#report-level.update(3)\n#var("M", -2.5, "kNm")\nA #val("M") B #val("M", type: "val") C\n'
+    text = _printed('#report-level.update(3)\n#var("M", -2.5, "kNm")\nA #var("M") B #var("M", display: "value") C\n'
                     '#eq("M_2", `M * 2`)\n#verify(`M <= 0 "kNm"`)\n#find(object: "variable")', "minus_sign")
     assert "-2.5" not in text and "-5" not in text, text
     assert "−2.5 kNm" in text and "B −2.5 C" in text and "−5 kNm" in text, text
-    assert _value('#metadata(fmt-magnitude(-2.5, 3)) <out>') == "-2.5"      # the primitive is untouched
+    assert _value('#metadata(fmt-decimals(-2.5, 3)) <out>') == "-2.5"       # the primitive is untouched
     assert _value('#metadata(signed-text("EL+AL-Dach")) <out>') == "EL+AL-Dach"   # a word is not a number
 
 
@@ -1140,7 +930,7 @@ def test_a_word_math_does_not_know_is_quoted_in_a_symbol():
     assert _stored('#var("g_k", 1.2, "kN/m²")\n#eq("G_2_Ed", "G_(2,Ed)", `1.35 dot g_k`)', "G_2_Ed", "symbol") == 'G_(2,"Ed")'
     text = _printed('#report-level.update(3)\n#var("W_y", "W_(y,erf)", 12.5, "cm³")\n#var("g_k", 1.2, "kN/m²")\n'
                     '#eq("G_Ed", "G_(1,Ed)", `1.35 dot G_1 dot g_k`, value: 0)\n'
-                    'A #val(5, symbol: "M_(Ed,max)", unit: "kNm", type: "expression") B', "unquoted_words")
+                    'A #var("M_Ed_max", "M_(Ed,max)", 5, "kNm") B', "unquoted_words")
     assert "erf" in text and "Ed" in text and "max" in text, text
 
 
@@ -1159,9 +949,9 @@ def test_a_star_is_a_product_printed_as_a_dot():
 
 
 def test_var_label_and_descr_everywhere_it_may_stand():
-    """«#eq, #var and #val should be able to take "label" and "descr" as an argument» -- they do, and here at every level and inside a row, where each item's own label, description and citation are its one footnote."""
-    row = ('#var-line[\n  #var("a", 1, "kN", label: "La", descr: "Da")\n'
-           '  #eq("b", `a dot 2`, label: "Lb", descr: "Db")\n  #val("a", label: "Lc", descr: "Dc")\n]')
+    """«#eq, #var and #val should be able to take "label" and "descr" as an argument» -- they do, `#var` and `#eq` (`#val` was merged into `#var`, spec 2026-10-21-commandes-typst-refonte, REQ-009), at every level, each line's own label, description and citation its one footnote."""
+    row = ('#var("a", 1, "kN", label: "La", descr: "Da")\n'
+           '#eq("b", `a dot 2`, label: "Lb", descr: "Db")\n#var("a", label: "Lc", descr: "Dc")')
     three = _printed('#report-level.update(3)\n' + row, "row_label_descr_3")
     for word in ("La; Da", "Lb; Db", "Lc; Dc"):
         assert word in three, (word, three)
@@ -1182,35 +972,6 @@ def test_var_is_inline_and_runs_on_in_one_paragraph():
     assert "Hoehe" in text and "— Hoehe" not in text, text
     same = _value('#context [#metadata(measure([A #var("x", 1, level: 0) B]).width == measure([A B]).width) <out>]')
     assert same is True
-    # `#var-unit` follows `#var`
-    assert any("7 kN" in line and "7000 N" in line for line in _lines('#var("F", 7, "kN")\n#var-unit("F", "N")', "var_unit_inline")), "var-unit is not inline"
-
-
-def test_note_line_sets_the_extras_on_the_line():
-    """`note:` (v0.86, the engineer: «un argument permet de régler si la note vient en ligne ou en note de bas de page», on `#var`, `#val` and `#eq`).
-
-    `#var` and `#var-unit` default to `"footnote"` and take `"line"` for the block row they printed until v0.86 -- the label after an em dash, the citation in the right-hand column; `#eq` defaults to `"footnote"` since v0.117 (issue #19) -- inline, as `#var`, its extras in one footnote -- and takes `"line"` for a line of its own with the label after an em dash; `#val` defaults to `"footnote"` and sets its label after an em dash with the description and the citation in parentheses with `"line"`. Any other value is refused naming the two.
-    """
-    extras = 'label: "Kapazitaet", descr: "Katalogwert", norm: "Sherpa", norm-ref: "ETA-12/0197"'
-    on_line = _printed(f'#report-level.update(3)\n#var("R_k", 7, "kN", {extras}, note: "line")', "note_var_line")
-    assert "— Kapazitaet" in on_line and "Katalogwert" in on_line and "Sherpa §ETA-12/0197" in on_line, on_line
-    in_note = _printed(f'#report-level.update(3)\n#var("R_k", 7, "kN", {extras})', "note_var_footnote")
-    assert "— Kapazitaet" not in in_note and "Kapazitaet; Katalogwert; Sherpa §ETA-12/0197" in in_note, in_note
-    unit = _printed(f'#report-level.update(2)\n#var("R", 7, "kN", {extras}, level: 0)\n#var-unit("R", "N", note: "line")', "note_var_unit")
-    assert "— Kapazitaet" in unit, unit
-    eq_line = _printed(f'#report-level.update(3)\n#var("R_k", 7, "kN", level: 0)\n#eq("R_d", `R_k / 2`, {extras}, note: "line")', "note_eq_line")
-    assert "— Kapazitaet" in eq_line, eq_line
-    eq_note = _printed(f'#report-level.update(3)\n#var("R_k", 7, "kN", level: 0)\n#eq("R_d", `R_k / 2`, {extras})', "note_eq_footnote")
-    assert "— Kapazitaet" not in eq_note and "Kapazitaet; Katalogwert; Sherpa §ETA-12/0197" in eq_note, eq_note
-    val_line = _printed(f'#report-level.update(3)\nA #val(7, unit: "kN", symbol: "R_k", type: "expression", {extras}, note: "line") B', "note_val_line")
-    assert "— Kapazitaet (Katalogwert; Sherpa §ETA-12/0197) B" in val_line, val_line
-    # in a row the argument changes nothing: one footnote per item
-    row = _printed(f'#report-level.update(3)\n#var-line[ #var("R_k", 7, "kN", {extras}, note: "line") ]', "note_in_row")
-    assert "— Kapazitaet" not in row and "Kapazitaet; Katalogwert" in row, row
-    for call in ('#var("a", 1, note: "margin")', '#var("a", 1)\n#var-unit("a", "", note: 1)',
-                 '#eq("x", `1 + 1`, note: "side")', '#val(1, note: "inline")'):
-        message = _error(call)
-        assert "invalid note" in message and "footnote" in message and "line" in message, (call, message)
 
 
 def test_eq_is_inline_by_default_and_follows_a_var_on_its_line():
@@ -1221,7 +982,7 @@ def test_eq_is_inline_by_default_and_follows_a_var_on_its_line():
     def lines(body, name):
         d = conftest.probe_dir(name)
         probe = d / "probe.typ"
-        probe.write_text('#import "/commands.typ": *\n#set page(width: 16cm, height: auto)\n' + body + "\n", encoding="utf-8")
+        probe.write_text('#import "/000-Typst-Config/commands.typ": *\n#set page(width: 16cm, height: auto)\n' + body + "\n", encoding="utf-8")
         out = subprocess.run(["typst", "compile", "--root", str(TYPST_ROOT), str(probe), str(d / "probe.pdf")], capture_output=True, text=True, encoding="utf-8")
         assert out.returncode == 0, out.stderr
         from pypdf import PdfReader
@@ -1230,7 +991,7 @@ def test_eq_is_inline_by_default_and_follows_a_var_on_its_line():
     sentence = 'Kraft #var("F", 5, "kN", level: 1) und #eq("M", `F * 2`, unit: "kN", level: 1%s) danach.'
     inline = lines(sentence % "", "eq_inline_lines")
     assert any("Kraft" in l and "danach" in l for l in inline), inline
-    apart = lines(sentence % ', note: "line"', "eq_apart_lines")
+    apart = lines('#calc-defaults(presets: "block", scope: "next")\n' + sentence % "", "eq_apart_lines")   # the block presets set the line apart (Q-014: note: "line" until then)
     assert not any("Kraft" in l and "danach" in l for l in apart), apart
     text = _printed('#report-level.update(3)\nKraft #var("F", 5, "kN") und #eq("M", `F * 2`, unit: "kN") danach.', "eq_inline")
     assert re.search(r"und \S+ = .* = 10\s*kN danach", text), text
@@ -1265,13 +1026,12 @@ def test_a_style_leaves_the_value_alone():
 
 
 def test_every_style_compiles_on_every_command_that_takes_one():
-    """`style:` is on `var`, `var-unit`, `eq` and `val` -- and on neither `var-line` nor `verify`, which carry no line of their own to set apart. Each is compiled, because `apply-style` evals a name into math and a command that passed its body the wrong way would fail only here."""
+    """`style:` is on `var` and `eq` -- and not on `verify`, which carry no line of their own to set apart. Each is compiled, because `apply-style` evals a name into math and a command that passed its body the wrong way would fail only here."""
     for style in ('"bold"', '"underline"', '"double"'):
         for body in (
             f'#var("R_k", 7, "kN", style: {style})',
-            f'#var("F", 7, "kN", level: 0)\n#var-unit("F", "N", style: {style})',
             f'#var("a", 2, "m", level: 0)\n#var("b", 3, "m", level: 0)\n#eq("A", `a dot b`, style: {style})',
-            f'#var("R_d", 5, "kN", level: 0)\n#val("R_d", style: {style})',
+            f'#var("R_d", 5, "kN", level: 0)\n#var("R_d", style: {style})',
         ):
             kind, got = _run(body + '\n#metadata(1) <out>')
             assert kind == "ok", f"style {style} on {body.splitlines()[-1]}: {got}"
@@ -1288,3 +1048,64 @@ def test_a_style_that_is_no_math_function_is_refused_naming_it():
     """`style:` is a math function's name -- `#eq`'s contract since v0.85, which is why it is not kept to a list -- so an unknown one is refused by Typst itself, and what matters is that the message names what was asked for rather than failing somewhere unrecognisable."""
     message = _error('#var("R_k", 7, "kN", style: "zork")')
     assert "zork" in message, message
+
+
+# --- a literal checked by domain:, own:, verify's id:, var-domain's gen: (spec 2026-10-15-calculs-deplies-balises-figures-natives) ---
+
+def test_a_value_beside_a_pair_is_the_one_stored_and_keeps_the_export_s_provenance():
+    """REQ-001: `#var(key, value, unit, domain: pair)` was refused until 2026-10-15; it is now a literal checked by the export. The value written is the one stored -- the engineer reads it in the file -- and the export's symbol, label, citation and `source` stay with it."""
+    rec = _stored('#var("s_k", 1.5, "kN/m²", domain: ("snow-load", "SL"))', "s_k", field="source")
+    assert rec == "python:domains/snow_source.py", rec   # computed by Woodcore from the sheet's inputs since v0.120 (spec 2026-10-21-restes-issue-69)
+    assert _stored('#var("s_k", 1.5, "kN/m²", domain: ("snow-load", "SL"))', "s_k") == 1.5
+    assert _stored('#var("s_k", 1.5, "kN/m²", domain: ("snow-load", "SL"))', "s_k", field="norm") == "SIA 261"
+
+
+def test_a_literal_agreeing_with_the_export_is_not_stale_and_one_that_differs_is():
+    """REQ-001: the comparison is made after converting the export's value into the written unit, at a relative 1e-6 (`literal-tolerance`), or within half the last decimal written where that stays under a relative 1e-3 (`literal-rounding`) -- found on the first build, whose documentation example printed «1.394 kN/m² (stale: 1.394 kN/m²)» for an export of 1.39411547558108; a value of another dimension is stale in its own unit."""
+    assert _value('#metadata(literal-stale((value: 7000, unit: "N"), (value: 7, unit: "kN"))) <out>') is None
+    assert _value('#metadata(literal-stale((value: 25, unit: "kN"), (value: 28, unit: "kN"))) <out>') == {"value": 28, "unit": "kN"}
+    assert _value('#metadata(literal-stale((value: 25, unit: "kN"), (value: 28, unit: "kNm"))) <out>') == {"value": 28, "unit": "kNm"}
+    exact = _value('#metadata(find-calculation("t", "snow-load", "SL").vars.s_k.value) <out>')
+    assert _value(f'#metadata(literal-stale((value: {exact!r}, unit: "kN/m²"), find-calculation("t", "snow-load", "SL").vars.s_k)) <out>') is None
+    assert _value('#metadata(literal-stale((value: 1.5, unit: "kN/m²"), find-calculation("t", "snow-load", "SL").vars.s_k)) <out>') is not None
+    # a value typed to the decimals it is printed at agrees (`literal-rounding`), half a unit on a whole number does not
+    assert _value('#metadata(literal-stale((value: 1.394, unit: "kN/m²"), find-calculation("t", "snow-load", "SL").vars.s_k)) <out>') is None
+    assert _value('#metadata(literal-stale((value: 25, unit: "kN"), (value: 25.4, unit: "kN"))) <out>') == {"value": 25.4, "unit": "kN"}
+
+
+def test_a_literal_beside_a_var_domain_is_checked_against_what_the_domain_held():
+    """REQ-001, the string form of `domain:`: the value the var-domain holds is read before the literal is stored, and a name it does not declare is refused as before."""
+    assert _stored('#domain("A")[#var("F", 7, "kN")]\n#var("F", 7000, "N", domain: "A")', "F") == 7000
+    assert _stored('#domain("A")[#var("F", 7, "kN")]\n#var("F", 8, "kN", domain: "A")', "F", field="checked_against.value") == 7
+    assert "declares no" in _error('#domain("A")[#var("F", 7, "kN")]\n#var("G", 8, "kN", domain: "A")')
+
+
+def test_a_stale_value_compiles_in_the_three_languages():
+    """UI-004: the red «stale» note is the glossary's (`formula.stale`) in each language; the page compiles inline and set apart by the block presets."""
+    for lang in ("de", "fr", "en"):
+        assert _value(f'#set text(lang: "{lang}")\n#var("s_k", 1.5, "kN/m²", domain: ("snow-load", "SL"))\n'
+                      '#calc-defaults(presets: "block", scope: "next")\n'
+                      '#var("s_k", 1.5, "kN/m²", domain: ("snow-load", "SL"))\n#metadata(1) <out>') == 1
+
+
+def test_a_verify_id_is_once_per_domain():
+    """REQ-005: `#verify(..., id:)` names a relation; the same id twice in one domain stops the compile, the same id in two domains does not."""
+    assert _value('#var("a", 1)\n#domain("X")[#verify(`a <= 2`, id: "v")]#domain("Y")[#verify(`a <= 2`, id: "v")]\n#metadata(1) <out>') == 1
+    message = _error('#var("a", 1)\n#domain("X")[#verify(`a <= 2`, id: "v")#verify(`a <= 3`, id: "v")]')
+    assert '"v"' in message and '"X"' in message, message
+    assert "non-empty" in _error('#var("a", 1)\n#verify(`a <= 2`, id: "")')
+
+
+def test_a_citation_is_grey_and_takes_no_section_sign():
+    """The engineer, 20.10.2026: «Les normes affichées en ligne doivent être écrites en gris, afin de moins attirer le regard. Il ne doit pas y avoir de "§" avant le norm-ref» (spec 2026-10-21-commandes-typst-refonte, UI-001).
+
+    The grey is the palette's `ink-soft`, read from lib/figure-palette.json and written nowhere else; the column, a citation on its line and one in a sentence (`cite-norm`) take it alike.
+    """
+    palette = json.loads((ROOT / "lib" / "figure-palette.json").read_text(encoding="utf-8"))
+    grey = palette["colours"]["ink-soft"]
+    # the fill the clause is set in: read by a show rule, since a style is not in a value's repr
+    probe = '#show text.where(text: "4.2.1"): it => context [#metadata(repr(text.fill)) <out>]\n'
+    for call in ('note-cell((norm: "SIA 265", norm_ref: "4.2.1"))', 'note-on-line((norm: "SIA 265", norm_ref: "4.2.1"))', 'cite-norm(norm: "SIA 265", norm-ref: "4.2.1")'):
+        assert _value(probe + "#" + call) == f'rgb("{grey}")', call
+        shown = _value(f'#metadata(repr({call})) <out>')
+        assert "§" not in shown, (call, shown)

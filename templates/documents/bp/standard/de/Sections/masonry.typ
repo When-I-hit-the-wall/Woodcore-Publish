@@ -4,17 +4,16 @@
 == Mauerwerk
 // woodcore:/object title
 
-// woodcore:object doc-table masonry-table
-#doc-table(
-  columns: (
-    (id: "designation", title: [Bezeichnung]),
-    (id: "fxd", title: [Bemessungswert der Druckfestigkeit $f_"xd"$], unit: "N/mm²", kind: "number"),
-    (id: "Exd", title: [Bemessungswert des Elastizitätsmoduls $E_"xd"$], unit: "N/mm²", kind: "number"),
-    (id: "remark", title: [Weitere Kennwerte]),
-  ),
-  hidden: ("remark",),
-  rows: (
-    (designation: [[…]], fxd: [[…]], Exd: [[…]], remark: []),
+// woodcore:object table masonry-table
+#figure(
+  table(
+    columns: (auto, auto, auto),
+    align: (left, right, right),
+    table.hline(stroke: 1pt),
+    table.header([*Bezeichnung*], [*Bemessungswert der Druckfestigkeit $f_"xd"$*], [*Bemessungswert des Elastizitätsmoduls $E_"xd"$*]),  // woodcore:hidden 4=[Weitere Kennwerte]
+    table.hline(stroke: 0.5pt),
+    [[…]], [[…]], [[…]],  // woodcore:hidden 4=[]
+    table.hline(stroke: 1pt),
   ),
   caption: [Mauerwerk (SIA 266)],
 )

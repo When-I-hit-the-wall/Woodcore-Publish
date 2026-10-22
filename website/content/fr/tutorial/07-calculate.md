@@ -8,7 +8,7 @@ Tout ne vient pas de l'export : une valeur tirée d'une fiche de fabricant, une 
 
 {{example eq-2}}
 
-Une variable garde son nom pour toute la suite du document : la ligne suivante peut la nommer à son tour. Plusieurs déclarations tiennent sur une ligne avec `#var-line`, et `level: 0` déclare une valeur sans l'imprimer.
+Une variable garde son nom pour toute la suite du document : la ligne suivante peut la nommer à son tour. Plusieurs `#var` écrits dans une phrase s'impriment dans cette phrase, et `level: 0` déclare une valeur sans l'imprimer.
 
 ## Une vérification
 
@@ -18,11 +18,13 @@ Une variable garde son nom pour toute la suite du document : la ligne suivante p
 
 ## Vérifier un élément en bois
 
-Les vérifications de la SIA 265, chapitre 4.2, se font en deux temps : `#member` décrit l'élément une fois — section, classe de résistance et classe d'humidité, lues de sa position —, puis une commande `verify-…` le vérifie pour chaque action.
+Les vérifications de la SIA 265, chapitre 4.2, se font dans les onglets de la fenêtre — Traction, Compression, Flexion, Cisaillement, Flambage, Déversement : Woodcore écrit chacune en entier dans un fichier à elle, chaque valeur contrôlée contre l'export, et la section l'inclut :
 
-{{example verify-compression-1}}
+```typ
+#include domain-file("check", "ZT-01")
+```
 
-`verify-tension`, `verify-compression`, `verify-bending`, `verify-bending-normal`, `verify-shear` et les autres suivent la même forme ; l'effort normal est signé, la traction positive.
+Ce que vous changez dans ce fichier avec VS Code est repris par Woodcore ligne par ligne ; une valeur que l'export ne dit plus s'affiche en rouge.
 
 > [!note]
 > Ce qui est calculé dans le rapport n'est pas tracé dans l'export : le texte autour doit dire d'où viennent les valeurs saisies à la main.

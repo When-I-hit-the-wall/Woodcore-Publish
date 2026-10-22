@@ -3,6 +3,30 @@
   "schema_version": "1.0",
   "releases": [
     {
+      "version": "0.122.0",
+      "notes": {
+        "fr": "La palette de commandes Ctrl+K : un onglet, une action, une position, une vérification et son η, une variable, une norme ou un avertissement en quelques lettres ; l'onglet Projet en tête de la navigation, où Woodcore s'ouvre et où se règlent la page de titre, la forme et le template de fond de chaque document ; un nouveau projet ne demande plus que son nom, son emplacement et sa langue, chaque document se créant ensuite ; le zoom de l'interface (Ctrl+, Ctrl−, Ctrl+0, menu Affichage) ; les aperçus Typst à la largeur du volet et zoomés par Ctrl+molette ; un onglet s'ouvre toujours sur sa vue de travail. Avec la 0.121 : les commandes Typst refondues — un fichier par calcul, les dessins en figures natives, `#unit` valant pour la valeur suivante seulement.",
+        "de": "Die Befehlspalette Ctrl+K: ein Register, eine Aktion, eine Position, ein Nachweis und sein η, eine Variable, eine Norm oder eine Warnung in wenigen Buchstaben; das Register Projekt an der Spitze der Navigation, in dem Woodcore sich öffnet und in dem Titelseite, Form und Inhaltsvorlage jedes Dokuments eingestellt werden; ein neues Projekt fragt nur noch nach Name, Ort und Sprache, jedes Dokument wird danach erstellt; der Zoom der Oberfläche (Ctrl+, Ctrl−, Ctrl+0, Menü Ansicht); die Typst-Vorschauen in der Breite des Bereichs und mit Ctrl+Mausrad gezoomt; ein Register öffnet sich immer in seiner Arbeitsansicht. Mit 0.121: die Typst-Befehle neu aufgebaut — eine Datei pro Berechnung, die Zeichnungen als native Abbildungen, `#unit` gilt nur noch für den nächsten Wert.",
+        "en": "The Ctrl+K command palette: a tab, an action, a position, a check and its η, a variable, a norm or a warning in a few letters; the Project tab first in the navigation, where Woodcore opens and where the title page, the form and each document's content template are set; a new project asks only its name, place and language, each document created afterwards; the interface's zoom (Ctrl+, Ctrl−, Ctrl+0, View menu); the Typst previews at the pane's width and zoomed by Ctrl+wheel; a tab always opens in its working view. With 0.121: the Typst commands rebuilt — one file per calculation, the drawings as native figures, `#unit` holding for the next value only."
+      },
+      "installer": {
+        "file": "Woodcore-0.122.0-setup.exe",
+        "size": 96381579,
+        "sha256": "b50eaba513fc1ebe0e2697558e54c6c37c6a7786dfc8f75d9b90f10a3262161b",
+        "hosted": "github",
+        "url": "https://github.com/When-I-hit-the-wall/woodcore-releases/releases/download/v0.122.0/Woodcore-0.122.0-setup.exe"
+      },
+      "date": "2026-10-22"
+    },
+    {
+      "version": "0.120.0",
+      "notes": {
+        "fr": "Un projet rangé par dossiers (000-Typst-Config, 000-Woodcore, un dossier par document, Domains/) et migré à son ouverture ; l'onglet «Formules» devient «Domaines» ; les figures de l'export dans Exports/Figures/ de leur onglet, les plans importés dans Imported Plans/, les annexes dans Appendix/ ; un calcul de traction déplié en domaine, contrôlé contre l'export ; des commandes de calcul écrites au milieu d'une ligne ; plusieurs objets sélectionnés et copiés d'un plan de positions à un autre. Woodcore s'ouvre de nouveau sur un projet qui contient un domaine, et l'export s'écrit en LF sous Windows.",
+        "de": "Ein Projekt in Ordnern (000-Typst-Config, 000-Woodcore, ein Ordner pro Dokument, Domains/), beim Öffnen migriert; das Register «Formeln» heisst «Domänen»; die Abbildungen des Exports in Exports/Figures/ ihres Registers, die importierten Pläne in Imported Plans/, die Anhänge in Appendix/; ein Zugnachweis als Domäne ausgeschrieben und gegen den Export geprüft; Berechnungsbefehle mitten in einer Zeile; mehrere Objekte gewählt und von einem Positionsplan in einen anderen kopiert. Woodcore öffnet wieder ein Projekt mit einer Domäne, und der Export wird unter Windows mit LF geschrieben.",
+        "en": "A project laid out by folders (000-Typst-Config, 000-Woodcore, one folder per document, Domains/), migrated as it opens; the «Formulas» tab becomes «Domains»; the export's figures in their tab's Exports/Figures/, imported plans in Imported Plans/, annexes in Appendix/; a tension check unfolded into a domain and checked against the export; calculation commands written inside a line; several objects selected and copied from one position plan to another. Woodcore opens a project holding a domain again, and the export is written in LF on Windows."
+      }
+    },
+    {
       "version": "0.118.0",
       "notes": {
         "fr": "Woodcore devient un logiciel libre, sous licence GNU GPL v3 ou ultérieure, et son code source est publié sur GitHub. Un onglet «Résistance au feu» vérifie une barre en bois dans la situation incendie de la SIA 265 (4.5.2), la durée exigée tirée de la directive AEAI 15-15 ; une section «Acier» (SIA 263:2013) avec les profilés de la SZS C5 et des profilés libres ; l'acier de la broche et la pression diamétrale des tôles dans «Moyens d’assemblage» ; le niveau −1 «Sélection manuelle» dans les trois onglets de charges et pour le verdict d'une vérification ; la neige au-dessus de 2000 m calculée et signalée ; le vent oblique, le décrochement de toiture, la moelle et le déversement selon la norme.",

@@ -16,7 +16,6 @@ from object_panes_fields import (  # split out of this module (issue #30): every
     CellField,
     DEBOUNCE_MS,
     ListBox,
-    OverrideField,
     Pane,
     Switch,
     Text,
@@ -27,7 +26,6 @@ from object_panes_fields import (  # split out of this module (issue #30): every
     _unescape,
     as_context,
     call_of,
-    make_combo,
     parse_number,
     plain,
     show_number,
@@ -421,82 +419,57 @@ class TablePane(Pane):
         self.do(self.model.set_header, bool(on))
 
 
-class LiveLoadPane(TablePane):
-    """The live loads' table: as the table, and for each row a drop-down of the categories of SIA 261 Tabelle 8 -- named in the window's language -- and q_k and Q_k in fields that show the export's value and take the engineer's own: orange, with «Reprendre»."""
-    KINDS = ("live-load-table",)
-    SUMMARY_SKIP = LOAD_VALUES
+class RawTablePane(TablePane):
+    """A table written in raw Typst, `#table(…)` (spec 2026-10-21-commandes-typst-refonte, ARCH-004, REQ-019): the same cards as a `doc-table`'s -- its rows, the fields of the chosen one, its columns printed or hidden and their titles, the caption of the figure it stands in, its header -- and the alignment of the chosen column (Q-012); no notes, which a raw table has none of. The model is calc/typst_raw_table.py's, `current()` the body to write: a cell rewritten in its brackets alone, the table's arguments once its shape changed. A table out of the subset Woodcore edits is shown read only and never rewritten."""
+    KINDS = ("table",)
+    ALIGNS = ((None, "op_align_auto"), ("left", "op_align_left"), ("center", "op_align_center"), ("right", "op_align_right"))
 
-    def field_label(self, column):
-        return self.t("op_category") if column.id == "category" else super().field_label(column)
+    def subject_in(self, subject):
+        from typst_objects import Object, model_for_body
+        if isinstance(subject, str):
+            body = subject
+        elif isinstance(subject, Object):
+            body = subject.written
+        else:
+            body = subject.to_body()
+        self.model = model_for_body("table", body)
 
-    def make_cell_field(self, row, column):
-        if column.id == "category":
-            return self.category_combo(row)
-        if column.id in LOAD_VALUES:
-            return self.value_field(row, column.id)
-        return super().make_cell_field(row, column)
+    def current(self):
+        return None if self.model is None else self.model.to_body()
 
-    def category_combo(self, row):
-        combo = make_combo()
-        combo.addItem(self.t("op_choose"), None)
-        known = set()
-        for category in self.context.categories():
-            combo.addItem(category.label, category.id)
-            known.add(category.id)
-            tip = " — ".join(part for part in (category.example,) if part)
-            if tip:
-                combo.setItemData(combo.count() - 1, tip, Qt.ItemDataRole.ToolTipRole)
-        current = self.model.cell(row, "category")
-        shown = plain(current) if not isinstance(current, Expr) else None
-        if shown and shown not in known:
-            combo.addItem(self.t("op_unknown", id=shown), shown)
-        at = combo.findData(shown) if shown else 0
-        combo.setCurrentIndex(max(at, 0))
-        combo.currentIndexChanged.connect(lambda _i, c=combo: self.category_chosen(c))
-        return combo
+    def build(self, layout):
+        super().build(layout)
+        card = cards.card(self.t("op_col_align"))
+        form = cards.form(card)
+        self.align_box = QComboBox()
+        for align, key in self.ALIGNS:
+            self.align_box.addItem(self.t(key), align)
+        self.align_box.currentIndexChanged.connect(self.align_chosen)
+        form.addRow(QLabel(self.t("op_col_align")), self.align_box)
+        layout.addWidget(card)
 
-    def category_chosen(self, combo):
-        if self._loading:
+    def refresh(self):
+        super().refresh()
+        self.notes_edit.setVisible(False)
+        self.header_check.setVisible(True)
+        self.header_check.set(self.model.get("header"))
+        self.caption_edit.setEnabled(self.model.caption_span is not None)
+
+    def after_column_chosen(self):
+        super().after_column_chosen()
+        box = getattr(self, "align_box", None)
+        if box is None:
             return
-        row = self.row_index()
-        if row is None:
+        column_id = self.column_id()
+        align = self.model.column(column_id).align if column_id is not None else None
+        was = box.blockSignals(True)
+        box.setCurrentIndex(max(box.findData(align), 0))
+        box.setEnabled(column_id is not None and not self.model.is_hidden(column_id))
+        box.blockSignals(was)
+
+    def align_chosen(self, _index):
+        if self._loading or not self.ready():
             return
-        ok, _ = self.do(self.model.set_category, row, combo.currentData())
-        if not ok:
-            return
-        self.update_row_item(row)
-        for column_id in LOAD_VALUES:
-            field = self.cell_fields.get(column_id)
-            if isinstance(field, OverrideField):
-                self.show_value(row, column_id, field)
-
-    def auto_value(self, row, column_id):
-        """The norm's value of the row's category, or None where it gives none."""
-        category = self.context.category(plain(self.model.cell(row, "category")) or "") if "category" in self.model.column_ids() else None
-        return None if category is None else getattr(category, column_id)
-
-    def show_value(self, row, column_id, field):
-        stated = self.model.cell(row, column_id)
-        written = stated if isinstance(stated, (int, float)) and not isinstance(stated, bool) else None
-        field.set_state(self.auto_value(row, column_id), written, enabled=stated is None or stated is AUTO or written is not None)
-
-    def value_field(self, row, column_id):
-        field = OverrideField(self.lang)
-        self.show_value(row, column_id, field)
-        field.overridden.connect(lambda number, c=column_id: self.value_written(c, number))
-        field.reverted.connect(lambda c=column_id: self.value_reverted(c))
-        return field
-
-    def value_written(self, column_id, number):
-        if self._loading:
-            return
-        row = self.row_index()
-        if row is not None:
-            self.do(self.model.override, row, column_id, number, immediate=False)
-
-    def value_reverted(self, column_id):
-        if self._loading:
-            return
-        row = self.row_index()
-        if row is not None:
-            ok, _ = self.do(self.model.clear_override, row, column_id)
+        column_id = self.column_id()
+        if column_id is not None:
+            self.do(self.model.set_align, column_id, self.align_box.currentData())

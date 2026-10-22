@@ -2,9 +2,9 @@
 
 ⚠️ Since v0.74 the pieces are **not drawn here**. `schema_svg.body()` draws them, from the schema's own source, and this module adds the layers that belong to a fastener group: the numbered dots, the members' axes, the centre, the pair of axes, the moment's arc, the legend and the arrows. That is what makes one joint one drawing (section 2, rule 1) -- and it is also what `connector_svg.pattern_of` now goes through, so the connector's pattern and the connection's figure are the same detail with different layers on it.
 
-One drawing serves both places it is seen. Woodcore's window shows it live while a connection is edited, and export writes it to data/connections/<id>.svg, which show-polar-moment sets in the report -- so the figure the engineer placed the fasteners on is the figure the checker reads. That is why it is built as plain text here, with no Qt: export_all.py draws it too, without a window.
+One drawing serves both places it is seen. Woodcore's window shows it live while a connection is edited, and export writes it to data/connections/<id>.svg (Connections/Exports/Figures/ in a project laid out by folders, issue #64), which `#image-polar-moment` sets in the report, the arrows of its forces drawn on it (spec 2026-10-22-image-polar-moment) -- so the figure the engineer placed the fasteners on is the figure the checker reads. That is why it is built as plain text here, with no Qt: export_all.py draws it too, without a window.
 
-The forces are the one part not known here: N, V and M are given in the report. So the exported figure carries a marker, FORCES_MARK, where lib/calc-engine.typ inserts the arrows for the forces of its call, from the placement data meta() exports with the connection, and a second one, NOTE_MARK, in the legend's last line, where it says which of N/n and V/n had to be drawn longer than their scale; Woodcore inserts its preview's arrows and note at the same places, by force_arrows() and share_note() below. The two draw by the same rules -- a line, a polygon head, the resultant's label, the shares' minimum length -- and a change to one is a change to make to the other.
+The forces are the one part not known here: N, V and M are given in the report. So the exported figure carries a marker, FORCES_MARK, where lib/calc-engine-connections.typ (`#image-polar-moment`) inserts the arrows for the forces of its call, from the placement data meta() exports with the connection, and a second one, NOTE_MARK, in the legend's last line, where it says which of N/n and V/n had to be drawn longer than their scale; Woodcore inserts its preview's arrows and note at the same places, by force_arrows() and share_note() below. The two draw by the same rules -- a line, a polygon head, the resultant's label, the shares' minimum length -- and a change to one is a change to make to the other.
 
 It is kept to what both renderers read alike. QtSvg implements SVG Tiny 1.2, which has no <marker> and no arc command, and reads no CSS: arrowheads are polygons, the moment's arc is a polyline, and every colour and stroke is a presentation attribute. Coordinates are the SVG's own, y down, in mm: a point of the connection (x, z) sits at x·e_x + z·e_z, e_x being the reference member's direction on the drawing and e_z that direction turned a quarter clockwise.
 """
@@ -12,23 +12,24 @@ It is kept to what both renderers read alike. QtSvg implements SVG Tiny 1.2, whi
 import math
 from xml.sax.saxutils import escape
 
+from domains import svg_draw  # the one writer of an SVG number and text (D6)
 from domains import connection, schema_svg
 from i18n import strings
 
-# The detail's own ink, so that the pieces the schema draws and the layers drawn over them are one figure.
-MEMBER_FILLS = schema_svg.ELEMENT_FILLS
-MEMBER_OPACITY = schema_svg.ELEMENT_OPACITY
 MEMBER_STROKE = schema_svg.ELEMENT_STROKE
 FASTENER_FILL = schema_svg.CONNECTOR_FILL
 TEXT_COLOR = schema_svg.TEXT_COLOR
 MUTED = schema_svg.MUTED
-AXIS_COLOR = "#333333"
-HIGHLIGHT = "#e67e22"
-COLOR_N = "#1f5fbf"
-COLOR_V = "#c0392b"
-COLOR_M = "#2e8b57"
-COLOR_F = "#f2c200"
-COLOR_F_EDGE = "#6b5200"
+AXIS_COLOR = svg_draw.colour("axis")
+HIGHLIGHT = svg_draw.colour("orange")
+COLOR_N = svg_draw.colour("blue")
+COLOR_V = svg_draw.colour("red")
+COLOR_M = svg_draw.colour("green")
+COLOR_F = svg_draw.colour("yellow")
+COLOR_F_EDGE = svg_draw.colour("ochre-dark")
+GROUND = svg_draw.colour("ground")
+INK = svg_draw.colour("ink")
+FONT = svg_draw.FONT
 
 # Where the arrows of the forces go: the report's (lib/calc-engine.typ) or Woodcore's preview (force_arrows).
 FORCES_MARK = "<!-- forces -->"
@@ -63,16 +64,7 @@ MOMENT_MAX = 0.95
 PAPER_MM = 160.0
 
 
-def _f(value):
-    """A coordinate as short SVG text: two decimals at most, trailing zeros dropped."""
-    text = f"{value:.2f}".rstrip("0").rstrip(".")
-    return "0" if text in ("-0", "") else text
-
-
-def _over_white(colour, opacity):
-    """A fill as it comes out on the white page, once its opacity is applied -- what a halo drawn behind a label on that band must be."""
-    channels = (int(colour[i:i + 2], 16) for i in (1, 3, 5))
-    return "#" + "".join(f"{round(opacity * c + (1 - opacity) * 255):02x}" for c in channels)
+_f = svg_draw.number_at(2)   # a coordinate at 2 decimals (svg_draw.py, D6)
 
 
 def _pt(point):
@@ -91,11 +83,6 @@ def _add(p, q, k=1.0):
 
 def _dot(p, q):
     return p[0] * q[0] + p[1] * q[1]
-
-
-def _quarter(u):
-    """A direction turned a quarter clockwise on the drawing: e_x to e_z."""
-    return (-u[1], u[0])
 
 
 def _placed(point, ex, ez):
@@ -268,7 +255,7 @@ def _member_lines(source, detail):
 def meta(drawing):
     """What the report needs to draw the forces on the exported figure: the fasteners' positions in its coordinates, the directions of x and z there, the length of the longest arrow and the sizes of a head, a stroke and a label -- stored with the connection in data/connections.json.
 
-    ⚠️ Its shape has not changed since v0.32, and deliberately: `lib/calc-engine.typ`'s `fastener-arrows` reads exactly these keys, and `tests/test_arrows.py` compares what it draws with what `force_arrows` below draws, element by element. The move to a schema changed where the coordinates come from and nothing about what they are -- x and z are now the schema's own, so `ex` and `ez` are the unit vectors rather than the reference member's direction on a turned page.
+    ⚠️ Its shape has not changed since v0.32, and deliberately: `lib/calc-engine-connections.typ`'s `fastener-arrows` reads exactly these keys, and `tests/test_arrows.py` compares what it draws with what `force_arrows` below draws, element by element. The move to a schema changed where the coordinates come from and nothing about what they are -- x and z are now the schema's own, so `ex` and `ez` are the unit vectors rather than the reference member's direction on a turned page.
     """
     def r4(v):
         return round(v, 4) + 0.0
@@ -285,7 +272,7 @@ def meta(drawing):
 
 
 # --- Arrows ---------------------------------------------------------------------
-# The same rules as lib/calc-engine.typ's fastener-arrows, which draws the report's.
+# The same rules as lib/calc-engine-connections.typ's fastener-arrows, which draws the report's (#image-polar-moment).
 
 def _arrow(p, q, color, width, head, edge=None):
     """A straight arrow from p to q: a line and a polygon head. `edge` outlines it -- the yellow resultant needs one on white."""
@@ -348,7 +335,7 @@ def force_arrows(figure, rows, n_share, v_share):
         if length > 1e-9:
             ux, uy = (q[0] - p[0]) / length, (q[1] - p[1]) / length
             at = (q[0] + 0.6 * font * ux, q[1] + 0.6 * font * uy + 0.22 * font)
-            labels.append(f'<text x="{_f(at[0])}" y="{_f(at[1])}" font-family="Arial" font-size="{_f(0.62 * font)}" font-weight="bold" fill="{COLOR_F_EDGE}" text-anchor="middle">F{row["nr"]}</text>')
+            labels.append(f'<text x="{_f(at[0])}" y="{_f(at[1])}" font-family="{FONT}" font-size="{_f(0.62 * font)}" font-weight="bold" fill="{COLOR_F_EDGE}" text-anchor="middle">F{row["nr"]}</text>')
     for p, moment in zip(figure["points"], _moment_parts(rows, n_share, v_share)):
         parts.append(_arrow(p, _add(p, step(moment, k)), COLOR_M, ACTION_WIDTH * stroke, SHARE_HEAD * head))
     for share in shares:
@@ -435,14 +422,14 @@ def overlay(base, points, lang=strings.SOURCE_LANGUAGE, highlight=None, mark=Non
     out = [
         f'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="{_f(left)} {_f(top)} {_f(view_w)} {_f(view_h)}" '
         f'width="{_f(view_w * scale)}mm" height="{_f(view_h * scale)}mm">',
-        f'<rect x="{_f(left)}" y="{_f(top)}" width="{_f(view_w)}" height="{_f(view_h)}" fill="#ffffff"/>',
+        f'<rect x="{_f(left)}" y="{_f(top)}" width="{_f(view_w)}" height="{_f(view_h)}" fill="{GROUND}"/>',
     ]
 
     def text(point, content, size_, color=TEXT_COLOR, anchor="start", bold=False, rotate=None, raw=False, halo=None):
         weight = ' font-weight="bold"' if bold else ""
         transform = f' transform="rotate({_f(rotate)} {_f(point[0])} {_f(point[1])})"' if rotate is not None else ""
         body = content if raw else escape(content)
-        common = f'x="{_f(point[0])}" y="{_f(point[1])}" font-family="Arial" font-size="{_f(size_)}" text-anchor="{anchor}"{weight}{transform}'
+        common = f'x="{_f(point[0])}" y="{_f(point[1])}" font-family="{FONT}" font-size="{_f(size_)}" text-anchor="{anchor}"{weight}{transform}'
         # SVG Tiny has no paint-order, so a halo is the text drawn once more underneath, stroked in the colour of its ground -- plan_svg.py does the same over the architect's plan.
         if halo is not None:
             out.append(f'<text {common} fill="{halo[0]}" stroke="{halo[0]}" stroke-width="{_f(halo[1])}" stroke-linejoin="round">{body}</text>')
@@ -486,7 +473,7 @@ def overlay(base, points, lang=strings.SOURCE_LANGUAGE, highlight=None, mark=Non
     for i, (x, y) in enumerate(points):
         if highlight == i:
             out.append(f'<circle cx="{_f(x)}" cy="{_f(y)}" r="{_f(2.0 * radius)}" fill="none" stroke="{HIGHLIGHT}" stroke-width="{_f(3 * stroke)}"/>')
-        out.append(f'<circle cx="{_f(x)}" cy="{_f(y)}" r="{_f(radius)}" fill="{FASTENER_FILL}" stroke="#ffffff" stroke-width="{_f(0.6 * stroke)}"/>')
+        out.append(f'<circle cx="{_f(x)}" cy="{_f(y)}" r="{_f(radius)}" fill="{FASTENER_FILL}" stroke="{GROUND}" stroke-width="{_f(0.6 * stroke)}"/>')
         text((x + 1.15 * radius, y - 1.15 * radius), str(i + 1), 0.62 * font, TEXT_COLOR)
 
     # The rotation centre, the centroid beside it when the engineer fixed a different point.
@@ -496,9 +483,9 @@ def overlay(base, points, lang=strings.SOURCE_LANGUAGE, highlight=None, mark=Non
             line((centroid[0] - g, centroid[1] - g), (centroid[0] + g, centroid[1] + g), MUTED, 1.5 * stroke)
             line((centroid[0] - g, centroid[1] + g), (centroid[0] + g, centroid[1] - g), MUTED, 1.5 * stroke)
         rc = max(1.7 * radius, 0.45 * font)
-        out.append(f'<circle cx="{_f(center[0])}" cy="{_f(center[1])}" r="{_f(rc)}" fill="#ffffff" fill-opacity="0.8" stroke="#000000" stroke-width="{_f(1.6 * stroke)}"/>')
-        line((center[0] - rc, center[1]), (center[0] + rc, center[1]), "#000000", 1.2 * stroke)
-        line((center[0], center[1] - rc), (center[0], center[1] + rc), "#000000", 1.2 * stroke)
+        out.append(f'<circle cx="{_f(center[0])}" cy="{_f(center[1])}" r="{_f(rc)}" fill="{GROUND}" fill-opacity="0.8" stroke="{INK}" stroke-width="{_f(1.6 * stroke)}"/>')
+        line((center[0] - rc, center[1]), (center[0] + rc, center[1]), INK, 1.2 * stroke)
+        line((center[0], center[1] - rc), (center[0], center[1] + rc), INK, 1.2 * stroke)
 
     # The forces: Woodcore's trial ones here, the report's inserted at the marker -- and with them the legend's note, at its own marker.
     forces_note = None

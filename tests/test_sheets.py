@@ -111,10 +111,12 @@ def _colours(reader):
 
 def test_a_sheet_lives_in_plans_at_the_typst_root_and_is_numbered_b01_b02():
     here = _project("sheets_where", calibrate=False)
-    assert sheets.folder(here) == here.typst_root / "Plans"
+    # Plans/ at the Typst root in a project laid out before, the exports of the position plan's folder laid out by folders (issue #64)
+    expected = here.drawing_dir("plan") / project.EXPORTS_FOLDER if here.has_folders else here.typst_root / "Plans"
+    assert sheets.folder(here) == expected
     assert sheets.list_sheets(here) == [] and sheets.new_id(here) == "B01"
     first = sheets.new_sheet(here)
-    assert first == here.typst_root / "Plans" / "B01.typ" and first.is_file()
+    assert first == expected / "B01.typ" and first.is_file()
     assert sheets.new_id(here) == "B02"
     sheets.new_sheet(here, "Dach")
     assert sheets.list_sheets(here) == ["B01", "Dach"]
@@ -145,7 +147,7 @@ def test_a_new_sheet_is_canonical_and_says_its_paper():
     assert [o.type for o in found] == ["sheet-page", "sheet-text", "sheet-text", "sheet-titleblock"]
     assert all(o.state == "canonical" for o in found), [(o.id, o.state, o.diff()) for o in found]
     assert '#show: sheet.with(\n  format: "A4",\n  landscape: false,\n  margin: 10mm,\n  kind: "position",\n)' in text
-    assert text.startswith("// Export sheet") and '#import "/commands.typ": *' in text
+    assert text.startswith("// Export sheet") and '#import "/000-Typst-Config/commands.typ": *' in text
     page = sheets.page(here, "B01")
     assert page.size() == (210, 297)
     # the remark stands above the title block on a sheet too narrow to put it beside
@@ -215,7 +217,7 @@ def test_a_plan_on_a_sheet_shows_its_dimensions_and_lengths_unless_told_not_to()
     """Issue #9 (REQ-011, REQ-012): `dimensions: false` and `lengths: false` take out what the drawing writes between their markers -- the view «Export» says it per sheet, as `axes:`."""
     _need_typst()
     here = _project("sheets_dimensions")
-    overlay = here.data_dir / json.loads((here.data_dir / "plans.json").read_text(encoding="utf-8"))["plans"]["Pavillon"]["overlay"]
+    overlay = conftest.figure(here, json.loads((here.data_dir / "plans.json").read_text(encoding="utf-8"))["plans"]["Pavillon"]["overlay"])
     svg = overlay.read_text(encoding="utf-8")
     marks = ('<!-- dimensions --><text x="20" y="40" font-size="30">DIMTEXT</text><!-- /dimensions -->'
              '<!-- lengths --><text x="20" y="90" font-size="30">LENTEXT</text><!-- /lengths -->')
@@ -228,9 +230,40 @@ def test_a_plan_on_a_sheet_shows_its_dimensions_and_lengths_unless_told_not_to()
     model.set_dimensions(False)
     model.set_lengths(False)
     sheets.set_object(here, "B01", oid, model)
-    assert "dimensions: false" in sheets.read(here, "B01") and "lengths: false" in sheets.read(here, "B01")
+    assert 'detail-figure: ("axes", "centres")' in sheets.read(here, "B01")   # the dimensions and the lengths left out of what is drawn (Q-015)
     text = _compile(here, "B01").pages[0].extract_text()
     assert "DIMTEXT" not in text and "LENTEXT" not in text, text
+
+
+def test_a_plan_on_a_sheet_shows_its_centres_unless_told_not_to():
+    """Issue #54 (UI-007): `centres: false` takes out the stiffness centre, the mass centre and the outline, which the drawing writes between two pairs of markers -- the outline under the symbols, the centres over the numbers --, and the sheet's plan view says it as it says `dimensions:`."""
+    _need_typst()
+    here = _project("sheets_centres")
+    overlay = conftest.figure(here, json.loads((here.data_dir / "plans.json").read_text(encoding="utf-8"))["plans"]["Pavillon"]["overlay"])
+    svg = overlay.read_text(encoding="utf-8")
+    from domains import plan_svg
+    marks = (f'{plan_svg.CENTRES_OPEN}<text x="20" y="40" font-size="30">OUTLINETEXT</text>{plan_svg.CENTRES_CLOSE}'
+             f'<text x="20" y="140" font-size="30">KEPTTEXT</text>'
+             f'{plan_svg.CENTRES_OPEN}<text x="20" y="90" font-size="30">CENTRETEXT</text>{plan_svg.CENTRES_CLOSE}')
+    overlay.write_text(svg.replace("</svg>", marks + "</svg>"), encoding="utf-8")
+    sheets.new_sheet(here)
+    oid = sheets.add_viewport(here, "B01", "Pavillon", 20, 35, scale=100)
+    assert "detail-figure" not in sheets.read(here, "B01"), "the default is written nowhere: every word of what is drawn"
+    text = _compile(here, "B01").pages[0].extract_text()
+    assert "OUTLINETEXT" in text and "CENTRETEXT" in text and "KEPTTEXT" in text, text
+    model = sheets.model(here, "B01", oid)
+    model.set_centres(False)
+    sheets.set_object(here, "B01", oid, model)
+    assert 'detail-figure: ("length", "axes", "dimensions")' in sheets.read(here, "B01")   # the centres left out of what is drawn (Q-015)
+    text = _compile(here, "B01").pages[0].extract_text()
+    assert "OUTLINETEXT" not in text and "CENTRETEXT" not in text and "KEPTTEXT" in text, text
+    # the editor's switch reaches the same setter (sheet_editor.set_flag), and anything but true or false is refused
+    try:
+        model.set_centres("no")
+    except Exception as exc:   # typst_objects' own refusal
+        assert "centres" in str(exc)
+    else:
+        raise AssertionError("centres: \"no\" was accepted")
 
 
 def test_a_scale_needs_a_calibration_and_one_size_only():
@@ -242,7 +275,7 @@ def test_a_scale_needs_a_calibration_and_one_size_only():
     assert not ok and "Geratehaus" in conftest.panic_message(message) and "calibrate" in message, message
     sheets.set_width(here, "B01", oid, 120)
     assert sheets.compile(here, "B01")[0]
-    text = sheets.read(here, "B01").replace("  width: 120mm,\n", "  scale: 50,\n  width: 120mm,\n")
+    text = sheets.read(here, "B01").replace("width: 120mm,", "scale: 50, width: 120mm,")
     sheets.write(here, "B01", text)
     ok, message = sheets.compile(here, "B01")
     assert not ok and "not both" in conftest.panic_message(message), message
@@ -316,13 +349,14 @@ def test_a_hand_edit_in_the_file_is_read_back_and_not_overwritten_unasked():
     sheets.new_sheet(here)
     oid = sheets.add_viewport(here, "B01", "Pavillon", 20, 35, width=100)
     text = sheets.read(here, "B01")
-    # as VS Code saves it: another place, in the canonical form -- read back as it stands
-    sheets.write(here, "B01", text.replace("  x: 20mm,\n  y: 35mm,\n  width: 100mm,", "  x: 2.5cm,\n  y: 35mm,\n  width: 100mm,").replace("\n", "\r\n"))
+    # as VS Code saves it: another place, in the canonical form -- read back as it stands (a raw #place since the spec 2026-10-21-commandes-typst-refonte, Q-015)
+    assert "#place(top + left, dx: 20mm, dy: 35mm," in text, text
+    sheets.write(here, "B01", text.replace("#place(top + left, dx: 20mm, dy: 35mm,", "#place(top + left, dx: 2.5cm, dy: 35mm,").replace("\n", "\r\n"))
     m = sheets.model(here, "B01", oid)
     assert m.position() == (25.0, 35.0)
     assert sheets.find(here, "B01", oid).state == "canonical"
     # a comment is no part of Woodcore's form: the object is hand-edited, and written over only once that is said
-    text = sheets.read(here, "B01").replace("  y: 35mm,\r\n", "  y: 35mm, // under the title\r\n")
+    text = sheets.read(here, "B01").replace("dy: 35mm,\r\n", "dy: 35mm, // under the title\r\n")
     sheets.write(here, "B01", text)
     assert sheets.find(here, "B01", oid).state == "hand_edited"
     try:
@@ -392,10 +426,11 @@ def test_lib_sheet_and_its_logo_travel_with_the_engine_byte_for_byte():
     sys.path.insert(0, str(ROOT / "calc" / "tools"))
     import build_reference as ref
     assert "sheet.typ" in ref.LIB_FILES
-    names = dict(ref.CATEGORIES)["sheets"]
-    assert set(names) == {"sheet", "sheet-text", "sheet-viewport", "sheet-fire-viewport", "sheet-section", "sheet-legend", "sheet-fire-legend", "sheet-titleblock", "sheet-position-list", "sheet-quantities"}
+    # an export sheet's objects are raw `#place` since the spec 2026-10-21-commandes-typst-refonte (Q-015): the page's show rule and the three images a sheet places are what lib/sheet.typ gives
+    names = dict(ref.CATEGORIES)["display"]
+    assert {"image-section", "image-legend", "image-titleblock"} <= set(names), names
     formula = (ROOT / "lib" / "formula.typ").read_text(encoding="utf-8")
-    assert re.search(r'#import "sheet\.typ": sheet, sheet-fire-legend, sheet-fire-viewport, sheet-legend, sheet-position-list, sheet-quantities, sheet-section, sheet-text, sheet-titleblock, sheet-viewport', formula)   # relative on purpose: lib/formula.typ's own import of its sibling, read and never written
+    assert re.search(r'#import "sheet\.typ": sheet, image-legend, image-section, image-titleblock\n', formula)   # relative on purpose: lib/formula.typ's own import of its sibling, read and never written
 
 
 def test_the_title_block_and_the_legend_speak_the_reports_language():
@@ -525,7 +560,7 @@ def test_a_bundle_is_exported_as_one_pdf_its_sheets_pages_in_its_order_each_shee
     assert ok, message
     assert sheets.pdf(here, "B01").is_file() and sheets.pdf(here, "B02").is_file(), "each sheet keeps its own PDF"
     merged = PdfReader(str(sheets.bundle_pdf(here, "Dossier")))
-    assert sheets.bundle_pdf(here, "Dossier") == here.typst_root / "Plans" / "Dossier.pdf"
+    assert sheets.bundle_pdf(here, "Dossier") == sheets.folder(here, "position") / "Dossier.pdf", "beside the sheets of its kind"
     assert len(merged.pages) == 2
     assert "Zweite Seite" in merged.pages[0].extract_text() and "Erste Seite" in merged.pages[1].extract_text()
     assert abs(float(merged.pages[0].mediabox.width) - 210 / 25.4 * 72) < 0.5, "the A4 portrait sheet first, as the bundle orders them"
@@ -581,3 +616,44 @@ def test_a_bundle_states_its_id_description_and_storey_or_takes_them_from_its_fi
     path.write_text(json.dumps(data), encoding="utf-8")
     assert sheets.list_bundles(here)[0]["name"] == "Dossier"
     assert json.loads(path.read_text(encoding="utf-8"))["schema_version"] == "1.0", "read, never written"
+
+
+def test_laid_out_by_folders_a_sheet_lies_in_the_exports_of_its_kind():
+    """Issue #64 (D-06, D-17): a sheet of position plans in `Plans/Position-plan/Exports/`, a sheet of fire-protection plans in `Plans/Fire-plan/Exports/` -- its id still one for the whole project, its archive beside it, the PDF bundles of both kinds in `Plans/bundles.json` and each bundle's PDF beside the sheets of its kind."""
+    import documents
+    here = project.write(conftest.tmpdir("sheets_folders") / "P.woodcore", "P", documents.layout_for("fr"))
+    first = sheets.new_sheet(here, kind="position")
+    second = sheets.new_sheet(here, kind="fire")
+    assert first == here.root / "Plans" / "Position-plan" / "Exports" / "B01.typ"
+    assert second == here.root / "Plans" / "Fire-plan" / "Exports" / "B02.typ", "an id is one for the whole project"
+    assert sheets.list_sheets(here) == ["B01", "B02"]
+    assert sheets.list_sheets(here, kind="fire") == ["B02"] and sheets.path(here, "B02") == second
+    assert first.read_text(encoding="utf-8").splitlines()[1] == '#import "/000-Typst-Config/commands.typ": *'
+    sheets.create_bundle(here, "Feu", kind="fire", sheets=["B02"])
+    assert sheets.bundles_path(here) == here.root / "Plans" / "bundles.json"
+    assert sheets.bundle_pdf(here, "Feu").parent == second.parent
+    archived = sheets.archive(here, "B02")
+    assert archived.parent == second.parent / "archives" and not second.exists()
+
+
+def test_a_sheet_is_written_in_raw_typst_and_one_written_before_is_carried_over_at_its_next_change():
+    """Spec 2026-10-21-commandes-typst-refonte, REQ-019, Q-015: each object Woodcore writes on a sheet is a raw `#place(…) <kind>` holding an image command, a text or an included list -- no `#sheet-*` call but the page's show rule --; it compiles and its frame stands where it is placed; an object written before as `#sheet-viewport(…)` is read as it is and written back as a `#place` at its next change."""
+    _need_typst()
+    import re
+    here = _project("sheets_raw")
+    sheets.new_sheet(here)
+    oid = sheets.add_viewport(here, "B01", "Pavillon", 20, 35, scale=100)
+    sheets.add_position_list(here, "B01", 250, 40)
+    text = sheets.read(here, "B01")
+    calls = set(re.findall(r"#(sheet-[a-z-]+)\(", text))
+    assert not calls, calls
+    assert '#place(top + left, dx: 20mm, dy: 35mm,\n  image-positions-plan("Pavillon", scale: 100, detail-legend: "none", title: auto)) <sheet-viewport>' in text, text
+    assert '#include "/Positions/position-list.typ"' in text and "#place(bottom + right, dx: -10mm, dy: -10mm," in text
+    assert sheets.compile(here, "B01")[0]
+    # written before: the call of lib/sheet.typ, read as it is, rewritten as a #place at its next change
+    body = sheets.find(here, "B01", oid).body
+    old = "#sheet-viewport(\n  plan: \"Pavillon\",\n  x: 20mm,\n  y: 35mm,\n  scale: 100,\n)"
+    sheets.write(here, "B01", sheets.read(here, "B01").replace(body, old))
+    assert sheets.find(here, "B01", oid).state == "canonical" and sheets.model(here, "B01", oid).position() == (20.0, 35.0)
+    sheets.move(here, "B01", oid, 30, 40)
+    assert "#place(top + left, dx: 30mm, dy: 40mm," in sheets.read(here, "B01") and "#sheet-viewport(" not in sheets.read(here, "B01")

@@ -14,20 +14,17 @@ Für die Gebrauchstauglichkeit wird $E_d$ im Allgemeinen mit $γ_F$ = $γ_m$ = 1
 - quasi-ständige Lastfälle: alle veränderlichen Einwirkungen mit ψ₂.
 // woodcore:/object p2
 
-// woodcore:object doc-table sls-load-cases-table
-#doc-table(
-  columns: (
-    (id: "element", title: [Bauteil]),
-    (id: "case", title: [Lastfall]),
-    (id: "permanent", title: [Eigengewicht und ständige Lasten], kind: "number"),
-    (id: "live", title: [Nutzlast [Kategorie]], kind: "number"),
-    (id: "snow", title: [Schnee], kind: "number"),
-    (id: "wind", title: [Wind], kind: "math"),
-  ),
-  hidden: (),
-  rows: (
-    (element: [[Dach]], case: [CC 1], permanent: 1.0, live: [–], snow: 1.0, wind: [$ψ_0$]),
-    (element: [[Regelgeschoss]], case: [CC 2], permanent: 1.0, live: 1.0, snow: [–], wind: [$ψ_0$]),
+// woodcore:object table sls-load-cases-table
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto, auto),
+    align: (left, left, right, right, right, center),
+    table.hline(stroke: 1pt),
+    table.header([*Bauteil*], [*Lastfall*], [*Eigengewicht und ständige Lasten*], [*Nutzlast [Kategorie]*], [*Schnee*], [*Wind*]),
+    table.hline(stroke: 0.5pt),
+    [[Dach]], [CC 1], [1.0], [–], [1.0], [$ψ_0$],
+    [[Regelgeschoss]], [CC 2], [1.0], [1.0], [–], [$ψ_0$],
+    table.hline(stroke: 1pt),
   ),
   caption: [Lastfälle: Gebrauchstauglichkeit],
 )

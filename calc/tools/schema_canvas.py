@@ -26,6 +26,8 @@ from domains import schema as model
 from domains import schema_svg as drawing_svg
 from schema_canvas_place import ANGLE_STEP, CONNECTOR_TOOLS, TOOLS, _round, SchemaCanvasPlaceMixin  # split out of this module (issue #30): every name it had is still importable from it
 from schema_canvas_input import MAX_ZOOM, MIN_ZOOM, SELECT_COLOUR, _cosmetic, SchemaCanvasInputMixin  # split out of this module (issue #30): every name it had is still importable from it
+from canvas_items import SvgLayer  # the canvases' layer, written once (D2); the schema's renders once per view
+from canvas_base import CanvasBase  # what the four canvases share, written once (D1)
 
 # How near the pointer has to be, in screen pixels, to take hold of something.
 PICK_PX = 9
@@ -61,73 +63,24 @@ AREA_MODES = ("diagonal", "edge", "typed")
 # land on (move, duplicate), as a direction from the first (rotate), or as the far end of an axis (mirror).
 MODIFY_VERBS = ("move", "duplicate", "rotate", "mirror")
 
-TOOL_ORDER = (
-    ("elements", ("linear", "area")),
-    ("connectors", tuple(f"connector:{k}" for k in CONNECTOR_TOOLS)),
-    ("aids", ("aid-centre", "aid-point", "aid-vertical", "aid-horizontal",
-              "aid-point-angle", "aid-perpendicular", "aid-parallel", "aid-two-points")),
-    ("dimensions", ("dimension-horizontal", "dimension-vertical",
-                    "dimension-parallel", "dimension-angle")),
-    ("modify", MODIFY_VERBS),
-)
 
 
 # Half the arm of a named point's green cross, in screen pixels (v0.77).
 POINT_CROSS_PX = 8.0
 
 
-class SvgLayer(QGraphicsItem):
-    """An SVG drawn over an exact rectangle of the scene -- statics_canvas's and plan_canvas's own: QGraphicsSvgItem sizes itself by the SVG's whole-pixel default size, which lands a symbol visibly beside what it marks.
-
-    ⚠️ **Rendered once per view, not once per paint.** Every movement of the mouse repaints the whole viewport (the snap marker, the tracking ray, the preview all move), and `QSvgRenderer.render` costs what the figure's text costs to set: measured at a device pixel ratio of 2 on a 1900 x 1000 view, **about 300 ms a paint** -- Qt's DeviceCoordinateCache was not reused between paints -- so the tab stalled for seconds under a moving pointer, which is the freeze the engineer met. The figure is rendered into an image the size of the view and blitted; it is rendered again only when the SVG, the transform, the view's size or its pixel ratio change.
-    """
-
-    def __init__(self, renderer, rect):
-        super().__init__()
-        self.renderer = renderer
-        self.rect = QRectF(rect)
-        self.generation = 0      # bumped whenever the renderer is given a new SVG
-        self._image = None
-        self._key = None
-
-    def set_rect(self, rect):
-        self.prepareGeometryChange()
-        self.rect = QRectF(rect)
-        self.generation += 1
-        self.update()
-
-    def boundingRect(self):
-        return self.rect
-
-    def paint(self, painter, _option, widget=None):
-        if not self.renderer.isValid():
-            return
-        device = painter.device()
-        if widget is None or device is None:
-            self.renderer.render(painter, self.rect)
-            return
-        ratio = device.devicePixelRatioF() or 1.0
-        width, height = widget.width(), widget.height()
-        xf = painter.worldTransform()
-        key = (self.generation, xf.m11(), xf.m12(), xf.m21(), xf.m22(), round(xf.dx(), 4), round(xf.dy(), 4), width, height, ratio)
-        if key != self._key:
-            image = QImage(max(1, math.ceil(width * ratio)), max(1, math.ceil(height * ratio)), QImage.Format.Format_ARGB32_Premultiplied)
-            image.setDevicePixelRatio(ratio)
-            image.fill(Qt.GlobalColor.transparent)
-            inner = QPainter(image)
-            inner.setRenderHints(painter.renderHints())
-            inner.setTransform(xf)
-            self.renderer.render(inner, self.rect)
-            inner.end()
-            self._image, self._key = image, key
-        painter.save()
-        painter.resetTransform()
-        painter.drawImage(QPointF(0, 0), self._image)
-        painter.restore()
-
-
-class SchemaCanvas(SchemaCanvasInputMixin, SchemaCanvasPlaceMixin, QGraphicsView):
+class SchemaCanvas(SchemaCanvasInputMixin, SchemaCanvasPlaceMixin, CanvasBase, QGraphicsView):
     """Draws a detail schema and lets it be drawn. Everything it computes is schema.py's; what it holds is the tool, what is half-drawn, and where the tracking has got to."""
+
+    # what CanvasBase reads of this canvas (D1)
+    MODEL = model
+    TOOLS = TOOLS
+    ROUND = staticmethod(_round)
+    MIN_ZOOM = MIN_ZOOM
+    MAX_ZOOM = MAX_ZOOM
+    GRID_STEPS = GRID_STEPS
+    GRID_MIN_PX = GRID_MIN_PX
+    SELECT_COLOUR = SELECT_COLOUR
 
     about_to_change = Signal()
     changed = Signal()
@@ -192,7 +145,7 @@ class SchemaCanvas(SchemaCanvasInputMixin, SchemaCanvasPlaceMixin, QGraphicsView
         self._readout = ""
 
         self.renderer = QSvgRenderer()
-        self.overlay = SvgLayer(self.renderer, QRectF(0, 0, 1, 1))
+        self.overlay = SvgLayer(self.renderer, QRectF(0, 0, 1, 1), per_view=True)
         self.overlay.setZValue(10)
         self.scene().addItem(self.overlay)
         self.select_item = QGraphicsPathItem()
@@ -324,30 +277,10 @@ class SchemaCanvas(SchemaCanvasInputMixin, SchemaCanvasPlaceMixin, QGraphicsView
         self.clamp_zoom()
         self.update_helpers()
 
-    def clamp_zoom(self):
-        scale = self.scale_px()
-        if scale < MIN_ZOOM:
-            self.scale(MIN_ZOOM / scale, MIN_ZOOM / scale)
-        elif scale > MAX_ZOOM:
-            self.scale(MAX_ZOOM / scale, MAX_ZOOM / scale)
-
     # -- the grid ---------------------------------------------------------------
 
     def scale_px(self):
         return max(self.transform().m11(), 1e-9)
-
-    def grid_step(self):
-        if self.grid_mode != "auto":
-            step = float(self.grid_mode)
-            for candidate, heavy in GRID_STEPS:
-                if abs(candidate - step) < 1e-9:
-                    return candidate, heavy
-            return step, step * 5
-        scale = self.scale_px()
-        for step, heavy in reversed(GRID_STEPS):
-            if step * scale >= GRID_MIN_PX:
-                return step, heavy
-        return GRID_STEPS[0]
 
     def snap_step(self):
         return self.grid_step()[0] if self.snap_on else None
@@ -520,15 +453,6 @@ class SchemaCanvas(SchemaCanvasInputMixin, SchemaCanvasPlaceMixin, QGraphicsView
             self.cursor = None
             self.update_helpers()
 
-    def restore_cursor(self):
-        self._over_label = False
-        if self.tool == "pan" or self.space_down:
-            self.viewport().setCursor(Qt.CursorShape.OpenHandCursor)
-        elif self.tool == "select":
-            self.viewport().setCursor(Qt.CursorShape.ArrowCursor)
-        else:
-            self.viewport().setCursor(Qt.CursorShape.CrossCursor)
-
     def tolerance(self):
         return PICK_PX / self.scale_px()
 
@@ -585,13 +509,6 @@ class SchemaCanvas(SchemaCanvasInputMixin, SchemaCanvasPlaceMixin, QGraphicsView
             if entry is not None:
                 out.append((collection, entry))
         return out
-
-    def selected(self):
-        """The (collection, entry) focused, or (None, None)."""
-        if not self.selection:
-            return None, None
-        collection, eid = self.selection
-        return collection, model.entry_of(self.source, collection, eid)
 
     def begin_change(self):
         self.about_to_change.emit()
