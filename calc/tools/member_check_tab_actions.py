@@ -18,7 +18,6 @@ import structure_preview  # the lines every snippet starts with: the project's c
 import validation
 import engine
 from domains import connector, member_check
-import display_options  # the level -1 «Sélection manuelle» (issue #20)
 from member_check_tab_words import STRINGS, _check_strings  # split out of this module (issue #30): every name it had is still importable from it
 
 

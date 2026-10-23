@@ -462,6 +462,37 @@ def test_the_example_projects_unfolded_checks_are_written_byte_for_byte_as_held(
     assert seen >= 2, "the example project unfolds fewer checks than it did -- the test would hold nothing"
 
 
+def test_a_domain_that_keeps_a_line_the_writer_no_longer_writes_is_in_step():
+    """Spec 2026-10-22-retrait-niveau-manuel, REQ-007, CON-001, D-4: a compression along the grain written before the writer stopped writing its `eta_s` row keeps that line, inert -- its form still matches, no line is missing or in conflict, an export refreshes nothing and says nothing in red; `regenerate` -- «Régénérer», which the window offers only once the form changes -- takes the line out since he did not change it."""
+    import json
+    import project
+    from domains import member_check
+    here = conftest.project_copy("unfold_stale_line")
+    with project.using(here):
+        member_check.export(here)   # the copy holds no domain's file: the export writes them
+        record = json.loads((here.data_dir / member_check.EXPORT_FILE).read_text(encoding="utf-8"))["checks"]["DR-02"]
+        path = unfold.domain_path(here, "DR-02", record)
+        text = path.read_text(encoding="utf-8")
+        assert 'id: "eta_s"' not in text, "the writer no longer writes the line"
+        # the file as a Woodcore before this spec wrote it: the section's verdict once more before the check, recorded in the base
+        text = text.replace("  #verify(", '  #eq("eta_s", `sigma_c_0_d / f_c_0_d`, id: "eta_s")\n  #verify(', 1)
+        path.write_text(text, encoding="utf-8")
+        base = unfold.read_base(here)
+        digest = unfold.line_digests(text)["eq:eta_s"]
+        base["domains"]["DR-02"]["lines"]["eq:eta_s"] = [digest, digest]
+        unfold.write_base(here, base)
+        st = unfold.status(here, "DR-02")
+        assert st.unfolded and st.matches and not st.of("missing") and not st.of("conflict"), st
+        assert unfold.refresh(here, "DR-02") == []
+        data = member_check.export(here)
+        entry = unfold.domain_state(here, data, "de")["domains"]["DR-02"]
+        assert entry["matches"] is True and entry["missing"] == [] and entry["conflict"] == [], entry
+        assert path.read_text(encoding="utf-8") == text, "the export does not touch the file"
+        assert unfold.regenerate(here, "DR-02") == {"conflicts": []}
+        after = path.read_text(encoding="utf-8")
+        assert 'id: "eta_s"' not in after and 'id: "eta"' in after, after
+
+
 def test_a_domain_that_no_longer_matches_its_data_says_so_in_red_and_is_not_rewritten():
     """Spec 2026-10-21-commandes-typst-refonte, REQ-012, ARCH-007, ARCH-008: α moved to 30° in the check's source -- its domain was written for (6) and its data now asks for (8)/(9). The export computes where the domain stands (`domain_state`: the two forms, `matches` false), lists its file (`domain_files`), and `#domain` prints the red line at its head from data/domain-state.json, included by `domain-file("check", id)`; the file, the engineer's, is not rewritten for it."""
     import json
@@ -557,8 +588,8 @@ def _polar_of_the_old_form(here):
     entry = held["domains"]["VU-MP-1"]
     entry["gen"]["form"] = entry["gen"]["form"].removesuffix("-a")
     entry["lines"].pop("label:VU-MP-1-polar-figure")
-    digest = unfold.line_digests(text)["label:VU-MP-1-figure"]
-    entry["lines"]["label:VU-MP-1-figure"] = [digest, digest]
+    digest = unfold.line_digests(text)["figure:VU-MP-1-de.svg"]   # a figure of an image is found by its file since the spec 2026-10-22-onglet-neige-type (D-29)
+    entry["lines"]["figure:VU-MP-1-de.svg"] = [digest, digest]
     where.write_text(json.dumps(held, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     return path
 
@@ -601,7 +632,7 @@ def test_a_polar_moment_of_the_old_form_is_regenerated_with_its_figure_after_the
     assert not any(l.strip().startswith(('#var("N", 0', '#var("V", 0', '#var("M", 0')) for l in lines), "the writing's #var doubled the engineer's #eq"
     assert unfold.status(here, "VU-MP-1", "de", kind="connection").matches
     recorded = unfold.read_base(here, "connection")["domains"]["VU-MP-1"]["lines"]
-    assert {"label:VU-MP-1-member", "label:VU-MP-1-forces", "label:VU-MP-1-table-1-note", "label:VU-MP-1-polar-figure"} <= set(recorded) and "label:VU-MP-1-figure" not in recorded, sorted(recorded)
+    assert {"label:VU-MP-1-member", "label:VU-MP-1-forces", "label:VU-MP-1-table-1-note", "label:VU-MP-1-polar-figure"} <= set(recorded) and "figure:VU-MP-1-de.svg" not in recorded, sorted(recorded)
     text = base._text(here, forces, "unfold_polar_new")
     # numbered as a figure, and drawn from the file's N = N_Ed = 7.5 kN: its share N/n too small to make out, named in the legend's note (UI-001)
     assert "Abbildung 1: Anschluss VU-MP-1" in text and "Zu klein zum Erkennen: N/n = 1.88 kN" in text, text[:1600]

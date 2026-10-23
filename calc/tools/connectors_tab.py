@@ -31,7 +31,6 @@ import theme  # the colours this tab states itself: the orange of a value writte
 import richtext  # symbols as mathematics, the calls coloured as the site's code, «✓» once copied (richtext.py, v0.92)
 import cards  # the form and what is read off it in cards, after the website (cards.py)
 import display_view  # the «Affichage» view: the command, its options, the call and the page (display_view.py, v0.117)
-import shown_variables  # the variables -1 «Sélection manuelle» offers: the connector's own, read off the export (issue #20)
 import views  # the views the top bar's switch chooses between (views.py, v0.117)
 import autosave  # saving without a question, and what is never saved without the engineer (autosave.py, v0.117)
 import validation

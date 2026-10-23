@@ -187,6 +187,10 @@
 
 ### The window and its tabs
 
+- *[in force]* «A tab of calculation is described by its domain and drawn by one base, `calc_tab.Declared…»
+- *[in force]* ««Affichage» of a tab of calculation sets the case's file line by line and shows, read onl…»
+- *[in force]* «The right pane of a tab of calculation is made of modules, reordered by drag and drop, th…»
+- *[in force]* «The level of detail -1, «Sélection manuelle», leaves the window too, with calc/shown_…»
 - *[in force]* «The command palette reads everything at its source each time it opens, the actions off th…»
 - *[in force]* «Every Typst page follows its pane's width and zooms by Ctrl+wheel through one view, settl…»
 - *[in force]* «The interface zooms from 70 to 200 % by steps of ten, kept in the user's settings; a «Vie…»
@@ -363,6 +367,7 @@
 
 ### Connectors, polar moments and member checks
 
+- *[in force]* «A simple compression and a simple bending print their verdict once: their `eta_s` row…»
 - *[in force]* «A value the engineer enters cites the norm and the clause it serves, and steel builds it…»
 - *[in force]* «A member check is printed unfolded, its calculation written out as a domain of the «Formul…»
 - *[retired in v0.120]* «A check's verdict is a key of -1, named by its utilisation, and printed only where named, settled (issue #58, 14.10.2026).»
@@ -389,7 +394,7 @@
 - *[superseded in v0.76]* «A polar-moment calculation belongs to a connector and is named after it, settled (v0.33).»
 - *[in force]* «A force coefficient's c_red follows the row's wind direction, settled (issue #47, 12.10.2026).»
 - *[partly superseded in v0.118]* «The snow's 2000 m limit reads the site's altitude, and a height step and a cornice are said and not computed, settled (issue #47, 12.10.2026).»
-- *[in force]* «A snow site above 2000 m is computed and warned of in the tab only, and the report prints no drawing of the snow, settled (issue #56, 14.10.2026).»
+- *[partly superseded in v0.124]* «A snow site above 2000 m is computed and warned of in the tab only, and the report prints no drawing of the snow, settled (issue #56, 14.10.2026).»
 - *[in force]* «The three load tabs offer show-calc's level -1, settled (issues #56, #57, 14.10.2026).»
 - *[in force]* «Four aluminium entries of the Belastungsannahmen library carry the norm's value, settled (issue #47, 12.10.2026).»
 - *[in force]* «A Stabdübel's f_u,k is its steel grade's of SIA 263 Tabelle 1, S355 by default, settled (issue #48, 12.10.2026), superseding v0.77 and v0.99.»
@@ -400,6 +405,7 @@
 
 ### Formulas, variables and the Typst commands
 
+- *[in force]* «The arguments of a line's display are the engineer's: compared without them and kept by e…»
 - *[in force]* «The report's Typst is a uniform core, one file per domain written out by Woodcore, the dr…»
 - *[in force]* «`#unit` and `#calc-defaults` hold for the next line unless a scope says otherwise, settle…»
 - *[in force]* «The force arrows on a polar moment's figure come back as a sixth image command, `#image-p…»
@@ -501,6 +507,8 @@
 
 ### Data, norms and the export
 
+- *[in force]* «The norms are shipped with Woodcore in norm-library/, and the window shows and cuts their…»
+- *[in force]* «The snow's file carries the column of Figur 3 of its roof at its head, drawn without a wo…»
 - *[in force]* «A project's graph of dependencies is built at every export, written to data/dependencies.json, and wh…»
 - *[in force]* «A load workbook's snow and wind sheets give their inputs; Woodcore computes them, settled…»
 - *[in force]* «A timber member check's lines are engine vars, settled (v0.120, issue #69, spec `docs/req…»

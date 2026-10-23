@@ -107,6 +107,7 @@ CATEGORIES = (
         "set-report-language", "report-language", "report-lang", "woodcore-document", "caption-rules", "doc-tables",
         "t", "tl", "t-str", "tl-str", "t-label", "t-pattern", "t-of", "tl-of",
         "report-level", "uniform-level",   # number-digits left them in v0.120: one display rule, lib/number.typ
+        "show-masked",   # the preview of «Affichage» shows what the report hides (spec 2026-10-22-onglet-neige-type, UI-011)
     )),
 )
 
@@ -127,7 +128,7 @@ NO_LEVEL = {
                                     "fmt-number", "fmt-value", "fmt-decimals", "render-symbol", "render-formula", "render-prose",
                                     "t", "tl", "t-str", "tl-str", "t-label", "t-pattern", "t-of", "tl-of")},
     "cite-norm": "a citation in a sentence: the norm follows what is cited, not a level (docs/decisions.md, «the norm follows the record»)",
-    **{name: _DOCUMENT for name in ("set-report-language", "report-language", "report-lang", "woodcore-document", "caption-rules", "doc-tables", "report-level", "uniform-level")},
+    **{name: _DOCUMENT for name in ("set-report-language", "report-language", "report-lang", "woodcore-document", "caption-rules", "doc-tables", "report-level", "uniform-level", "show-masked")},
 }
 
 # The commands whose levels print the same thing, which ones, and why (UI-003, D-07): a figure or a table that has no source and no citation to add prints at 3 what it prints at 2; a command that accepts `level:` for the sections written before and has nothing to leave out prints the same at all three. Every other command taking `level:` prints something different at each. tests/test_command_levels.py compiles each at 1, 2 and 3 and holds it to this.

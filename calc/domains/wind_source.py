@@ -101,6 +101,12 @@ def warnings(src):
     return out
 
 
+def messages(src):
+    """`warnings(src)` as the calculation tabs' messages (contracts.Message, spec 2026-10-22-onglet-neige-type, ARCH-RISK-D04): each an info about the building as a whole -- what the wind's own tab will draw when it is built on calc/tools/calc_tab.py."""
+    from domains.contracts import Message
+    return [Message(code, None, "info", params) for code, params in warnings(src)]
+
+
 def notes_of(src, where):
     """`warnings(src)` as the export's warnings (engine.Note), `where` the file or the sheet they are of."""
     import engine

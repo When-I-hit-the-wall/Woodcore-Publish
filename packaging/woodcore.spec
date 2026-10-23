@@ -61,7 +61,8 @@ def tree(folder):
     return out
 
 
-datas = tree("calc") + tree("lib") + tree("schemas") + tree("examples") + tree("templates") + tree("legal") + [
+# the norms shipped with Woodcore (spec 2026-10-22-onglet-neige-type, D-24): beside calc/, where calc/norms/library.py finds them through project.APP_ROOT
+datas = tree("calc") + tree("lib") + tree("schemas") + tree("examples") + tree("templates") + tree("legal") + tree("norm-library") + [
     (str(ROOT / "requirements.txt"), "."),
     (str(WORK / "build-info.json"), "."),
     (str(WORK / "typst.exe"), "."),

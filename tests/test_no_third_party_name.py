@@ -43,6 +43,12 @@ def test_no_file_names_a_third_party():
         path = ROOT / name
         if not path.is_file():
             continue
+        if name.lower().endswith(".pdf"):
+            # a norm's PDF shipped with Woodcore (norm-library/, spec 2026-10-22-onglet-neige-type, D-24): ~170 MB of the publishers' own bytes, whose words are not this project's to choose -- its name is read, its content is not
+            if _named(name.encode("utf-8")):
+                found.append(name)
+            continue
+
         data = path.read_bytes()
         if _named(name.encode("utf-8")) or _named(data):
             found.append(name)

@@ -79,7 +79,6 @@ import proc  # noqa: E402  -- every child process starts through it: no console 
 import documents  # noqa: E402  -- the three documents a project is written as, and the one spelling of a document's compile (30.09.2026)
 import stamps  # noqa: E402  -- whether a document's Typst changed since its PDF: an unchanged one is neither compiled nor archived
 import project_lock  # noqa: E402  -- the lock a window holds on its project (v0.83)
-import shown_variables  # noqa: E402  -- what the level of detail -1 offers to tick (issue #20, v0.117)
 import usersettings  # noqa: E402  -- Woodcore's own preferences, %APPDATA%\Woodcore (v0.83)
 import busy  # noqa: E402  -- the card shown while the window works, its input held (v0.113)
 import home_page  # noqa: E402  -- the start page, the project dialog, the File menu's words (v0.83)

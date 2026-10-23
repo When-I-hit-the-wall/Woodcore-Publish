@@ -23,7 +23,6 @@ _Tragsicherheit_ <FE-01-part>
 
   #var("M_y_d", "M_(y,d)", 2, "kNm", domain: ("check", "FE-01"), id: "M_y_d")
   #eq("sigma_m_y_d", "sigma_(m,y,d)", `M_y_d / W_y`, unit: "N/mm²", id: "sigma_m_y_d")
-  #eq("eta_s", `sigma_m_y_d / f_m_y_d`, id: "eta_s")
   #verify(`sigma_m_y_d / f_m_y_d <= 1`, id: "v-14")
   #eq("eta", `sigma_m_y_d / f_m_y_d`, unit: "%", id: "eta")
 ]

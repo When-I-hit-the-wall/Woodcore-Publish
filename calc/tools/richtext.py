@@ -51,6 +51,20 @@ def subscripts(text):
     return "<br>".join(lines)
 
 
+# The subscripts Unicode has, for a symbol drawn by a QPainter where no rich text is set (a chart's labels, calc_tab.ChartWidget)
+_UNICODE_SUB = str.maketrans("0123456789aeoxhklmnpst", "₀₁₂₃₄₅₆₇₈₉ₐₑₒₓₕₖₗₘₙₚₛₜ")
+
+
+def plain_math(source):
+    """`μ_1`, `μ_(2m)`, `α_0` as μ₁, μ₂ₘ, α₀ -- a symbol in plain text, its subscript in Unicode's where every character has one, as it is written otherwise."""
+    def sub(match):
+        body = match.group(2).strip("()")
+        if all(c in "0123456789aeoxhklmnpst" for c in body):
+            return match.group(1) + body.translate(_UNICODE_SUB)
+        return match.group(0)
+    return SUBSCRIPT.sub(sub, str(source))
+
+
 def results_html(rows):
     """Results as the connectors tab sets them: one row each, the symbol as mathematics, `=`, the value right-aligned; `rows` is [(symbol source, value text, bold), ...]."""
     body = []

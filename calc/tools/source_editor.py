@@ -122,12 +122,22 @@ class SourceEditorTab:
             self.load(self.ids[0])
             self.reload_list(self.ids[0])
         else:
-            self.new()
+            self.blank()
+
+    def blank(self):
+        """The form once its source is gone and nothing is left to open: a new source, as an empty tab shows at the start, with no dot -- nobody asked for it. «Nouveau»'s draft carries the dot, and here it was saved by itself as soon as the engineer looked elsewhere, an empty `SN-01.json` that «Supprimer» replaced by the next one (issue #97). Typed into, it is a draft like any other."""
+        self.source = self.make_source()
+        self.current_id = None
+        self.after_new()
+        self.fill_form()
+        self.dirty = False
+        self.refresh()
+        self.reload_list()
 
     def _after_archive(self):
-        """The source the form showed was archived: a new one opens, as deleting always did."""
+        """The source the form showed was archived: a new one opens, as deleting always did -- with no dot (`blank`)."""
         self.reload_list()
-        self.new()
+        self.blank()
 
     def fail_title(self):
         return self.t(self.KEY)

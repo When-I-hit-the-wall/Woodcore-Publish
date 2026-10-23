@@ -134,6 +134,6 @@ Before anything is exported to `data/`, **three levels of validation** must be i
 
 👉 A fourth value exists and is **not** a report: **`level: 0` on a call prints nothing at all** (§10quinquies, v0.85). It is how a report declares a variable it does not want on the page — a coefficient a formula below will name — and it is per call only. The three above are the levels a *document* is compiled at.
 
-👉 A fifth value, **`level: -1` with `shown: (A: 2, W_y: 1)`** (v0.117, issue #20), is not a report either: it prints the variables `shown:` names, each at its own level, and is per call only — the keys a command may name are `lib/shown-variables.json`'s (docs/typst/report-engine.md §4).
+👉 A fifth value, `level: -1` with `shown:` (v0.117, issue #20), was retired with the commands that took it (spec 2026-10-21-commandes-typst-refonte) and left the window with the spec 2026-10-22-retrait-niveau-manuel: a level is 0 to 3, or `auto`.
 
 ---

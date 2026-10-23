@@ -25,7 +25,7 @@ import proc
 import validation
 
 # The program's version: what a project's engine copy and its export record, and what lets a program refuse a project a newer one wrote.
-VERSION = "0.122.0"
+VERSION = "0.124.0"
 
 EXTENSION = ".woodcore"
 FORMAT = "woodcore-project"
@@ -150,7 +150,9 @@ FIGURES_FOLDER = "Figures"
 # The documents the report draws on from outside -- the annexes' PDFs -- and the excerpts the export cuts from them, in its Exports/ (D-11, D-19).
 APPENDIX_FOLDER = "Appendix"
 # Each kind of figure the export draws, by the tab or the domain whose Exports/Figures/ holds it in a project laid out by folders (D-10, D-17), and the sub-folder of data/ it lay in until 0.119 -- where a project laid out before still has it written, and the name an old record is still read by (lib/calc-engine.typ `figure-path`).
-FIGURE_KINDS = {"plan": "plans", "fire": "fire", "statics": "statics", "details": "schemas", "connection": "connections", "connector": "connectors", "dead-load": "calculations", "annex": "annexes"}
+FIGURE_KINDS = {"plan": "plans", "fire": "fire", "statics": "statics", "details": "schemas", "connection": "connections", "connector": "connectors", "dead-load": "calculations", "snow-load": "calculations", "annex": "annexes"}
+# The loads whose cases are drawn by the export (registry.write_files): a permanent load's build-up, a snow load's column of SIA 261 Figur 3 (spec 2026-10-22-onglet-neige-type, D-32). In a project laid out before both lie in data/calculations/, written at once.
+LOAD_FIGURE_KINDS = ("dead-load", "snow-load")
 
 
 def tab_folder(kind):

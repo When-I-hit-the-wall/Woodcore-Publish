@@ -20,10 +20,6 @@
           "9b798dfc3b74595a",
           "9b798dfc3b74595a"
         ],
-        "eq:eta_s": [
-          "f957d51571934b6c",
-          "f957d51571934b6c"
-        ],
         "eq:sigma_m_y_d": [
           "64f6d75bc68355fb",
           "64f6d75bc68355fb"
@@ -101,10 +97,6 @@
         "eq:eta": [
           "f9d0fcbb32daa0d8",
           "f9d0fcbb32daa0d8"
-        ],
-        "eq:eta_s": [
-          "f1c13f2737ddc634",
-          "f1c13f2737ddc634"
         ],
         "eq:f_c_0_d": [
           "1abec8b4ecb7f2e9",
@@ -384,10 +376,6 @@
           "b0b461a92e5ce230",
           "b0b461a92e5ce230"
         ],
-        "eq:eta_s": [
-          "767e671fc6061e10",
-          "767e671fc6061e10"
-        ],
         "eq:f_c_0_d": [
           "ffb2174deed87ef3",
           "ffb2174deed87ef3"
@@ -465,10 +453,6 @@
         "eq:eta": [
           "e9eda09ea01ed3bf",
           "e9eda09ea01ed3bf"
-        ],
-        "eq:eta_s": [
-          "8cf0dc377d022262",
-          "8cf0dc377d022262"
         ],
         "eq:h": [
           "0ec6f7317b0ff89e",

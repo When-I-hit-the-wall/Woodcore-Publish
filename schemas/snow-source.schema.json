@@ -17,11 +17,12 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "description": "-- pinned. 1.1 (issue #42): 1.0 with `links`, written only where a field follows a variable. 1.2 (spec 2026-10-12-audit-issues-47-48-49, D-19): 1.1 with `height_step`, written only where the roof has a height step -- a superset of 1.1, links allowed.",
+      "description": "-- pinned. 1.1 (issue #42): 1.0 with `links`, written only where a field follows a variable. 1.2 (spec 2026-10-12-audit-issues-47-48-49, D-19): 1.1 with `height_step`, written only where the roof has a height step -- a superset of 1.1, links allowed. 1.3 (spec 2026-10-22-onglet-neige-type, REQ-021): 1.2 with a free C_e, `exposure` \"custom\" and its number `c_e`, written only where the engineer types one -- the versions are floors, a source written at the highest one a field asks.",
       "enum": [
         "1.0",
         "1.1",
-        "1.2"
+        "1.2",
+        "1.3"
       ]
     },
     "id": {
@@ -54,9 +55,15 @@
       "enum": [
         "normal",
         "exposed",
-        "sheltered"
+        "sheltered",
+        "custom"
       ],
-      "description": "SIA 261 5.2.4: C_e 1.0, 0.8 or 1.2."
+      "description": "SIA 261 5.2.4: C_e 1.0, 0.8 or 1.2 -- or `custom`, a C_e of the engineer's own in `c_e` (schema 1.3)."
+    },
+    "c_e": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "A C_e of the engineer's own, above 0, with `exposure` \"custom\" only (schema 1.3): taken as it is, without a message (spec 2026-10-22-onglet-neige-type, D-10)."
     },
     "c_t": {
       "type": "number",
@@ -78,14 +85,14 @@
         "number",
         "null"
       ],
-      "description": "A flat roof: its length, m (Figur 4 where both length and width exceed 20 m)."
+      "description": "The building's length, m: entered for every roof, read by a flat roof only (Figur 4 where both length and width exceed 20 m, 5.3.5)."
     },
     "width": {
       "type": [
         "number",
         "null"
       ],
-      "description": "A flat roof: its width, m."
+      "description": "The building's width, m: entered for every roof, read by a flat roof only."
     },
     "alpha_1": {
       "type": [

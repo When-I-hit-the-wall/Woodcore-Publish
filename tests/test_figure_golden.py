@@ -25,6 +25,7 @@ UPDATE = os.environ.get("WOODCORE_UPDATE_GOLDEN") == "1"
 
 # Why a figure's bytes changed on purpose: {figure: "version -- reason"}, "every figure" for a change that touched them all.
 CHANGES = {
+    "<snow SN-01 …>": "v0.124 -- the snow's drawing redrawn as the column of SIA 261 Figur 3 for the case's roof, black and white, the structure under the roof, the slopes and the values written (spec 2026-10-22-onglet-neige-type, REQ-016, UI-009, D-31): the coloured sketch of issue #36 is gone, and the figure is the export's as well as the tab's.",
     "every figure": "v0.120 -- the palette merged (D5, Q-015): some sixty colours of the drawing engines became the 22 of lib/figure-palette.json (five blacks into one ink; the blues, greens, reds, oranges and greys each into one; the muted grey a neutral one, which the superposition's «grey» must be). Checked figure by figure against the commit before: with the old colours mapped onto the new, all 33 figures are the same text, byte for byte -- nothing but a colour changed.",
 }
 

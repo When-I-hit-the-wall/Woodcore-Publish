@@ -41,6 +41,21 @@
 /// -> state
 #let uniform-level = state("uniform-level", none)
 
+/// Whether a line a domain hides is printed all the same, pale and marked «masked» -- what the «Affichage» view of a domain's file sets in its preview, so that the engineer sees every line of the file and which of them the report leaves out (spec 2026-10-22-onglet-neige-type, UI-011). A line whose display shows nothing -- `level: 0`, `display: "none"`, both displays of an `#eq` at `"none"` -- is then printed at level 3's preset. `false`, the report's, leaves it out.
+///
+/// ```typ
+/// #show-masked.update(true)
+/// #var("h_0", 850, "m", level: 0)
+/// ```
+///
+/// ```typ
+/// #show-masked.update(false)
+/// #var("h_0", 850, "m", level: 0)
+/// ```
+///
+/// -> state
+#let show-masked = state("show-masked", false)
+
 /// The level a show-* call actually renders at (docs/typst/report-engine.md §4). Three sources, in order: the uniform level if one is forced, else the call's own `level:` when it states one, else the global report level. Call inside `context` -- it reads two states.
 /// - level (int, auto): the `level:` the calling show-* function was given.
 /// -> int

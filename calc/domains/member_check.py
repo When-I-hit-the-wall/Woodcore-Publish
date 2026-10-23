@@ -22,7 +22,6 @@ from pathlib import Path
 
 import engine
 import project
-import shown_variables
 import validation
 from domains._common import fail as _fail, is_number as _number  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import line_keys, links      # line_keys: what tells a row's formula computes its value (_with_keys)
@@ -57,8 +56,6 @@ FIRE_KINDS = ("tension", "compression", "bending", "shear", "buckling")
 # The keys of `fire` in a source, and the default of a new one: the three faces of a beam under a slab (SIA 265 Figur 13a), the duration following VKF 15-15
 FIRE_KEYS = ("duration", "sides", "wood", "top_level")
 FIRE_DEFAULT = {"duration": None, "sides": {"bottom": True, "top": False, "left": True, "right": True}, "wood": None, "top_level": False}
-# The keys #member publishes in the fire situation alone (lib/shown-variables.json `member`), which the window offers for such a check only
-FIRE_MEMBER_KEYS = ("t_fi", "beta_n", "d_char_n", "d_red", "d_ef", "b", "h", "k_fi")
 # The project's building, which VKF 15-15 reads a duration off (project.building_file)
 BUILDING_SCHEMA = "fire-building"
 BUILDING_SCHEMA_VERSION = "1.0"
@@ -692,30 +689,6 @@ def compute(record):
     return result
 
 
-# The member's keys a round section does not print: one value about either axis, said once, and no Saint-Venant coefficient (lib/timber.typ, `member`)
-_NOT_ROUND = ("W_z", "I_z", "i_z", "k_tor", "f_m_z_d", "k_h_z")
-
-
-def shown_keys(record):
-    """The keys the window offers for `record` at the level of detail -1 (issue #20, spec D-15): the member's that its section prints, then those of the check of its kind that this check computes (`_compute`'s rows, in lib/shown-variables.json's order) -- a subset of what `#show-check-member` accepts (shown_variables.check_member_keys), the engineer never offered a box for a line the page would not print. Empty for a check that cannot be calculated."""
-    if not record.get("calculable") or record.get("kind") not in IMPLEMENTED:
-        return []
-    command = shown_variables.check_command(record)
-    rows = {row["key"] for row in (_compute(record) or {}).get("rows", ())}
-    own = shown_variables.keys(command)
-    round_ = record.get("section", {}).get("type") == "cir"
-    fire = bool(record.get("fire"))
-    member = [key for key in shown_variables.keys("member") if key not in own and not (round_ and key in _NOT_ROUND)
-              and (fire or key not in FIRE_MEMBER_KEYS) and not (fire and key in ("k_h_y", "k_h_z"))]
-    return member + [key for key in own if key in rows]
-
-
-def shown_choices(record):
-    """`shown_keys(record)` as the window's switches take them, [(key, words, math)]: a verdict -- the key of its utilisation, `eta`, `eta_s`, `eta_y`… (issue #58) -- by the symbol its row has in the results («η_c,y»), every other key by its own name (shown_variables.key_math)."""
-    rows = {row["key"]: row for row in (_compute(record) or {}).get("rows", ())}
-    return [(key, None, rows[key]["symbol"] if key.startswith("eta") and key in rows else None) for key in shown_keys(record)]
-
-
 def governing_ratio(rows):
     """The formula of the ratio a check's verdict prints, from its rows: the `eta` row's, unless that row is the larger of the two sides' utilisations (`max(…)`), then the formula of the side's row that is larger -- the first of the two on a tie, as `_compute` chooses its relation."""
     by_key = {row["key"]: row for row in rows}
@@ -914,9 +887,6 @@ def _compute_section(record, k_fi=1.0):
     eta = sigma / f
     stress = rows[-1].symbol
     ratio = "%s / %s" % (stress, ("f" + stress[len("sigma"):]))
-    if shown_variables.check_command(record) == "verify-compression":
-        # verify-compression prints the section's verdict as eta_s and stores eta = eta_s (lib/timber.typ): the row the window offers at -1 (issue #58)
-        rows.append(_row("eta_s", "eta_s", eta, "", ratio))
     rows.append(_row("eta", "eta", eta, "", ratio, keys=out["relation"].replace(" <= ", " / ")))
     return {"kind": kind, "equation": out["equation"], "clause": out["clause"], "rows": rows,
             "eta": eta, "ok": eta <= 1 + 1e-9, "relation": out["relation"]}
@@ -1011,8 +981,6 @@ def _compute_bending(record, row, area, area_row, factors, design, at_angle, fac
         out = ({"equation": "(14)", "clause": "4.2.3.1"} if normal == 0 else
                {"equation": "(21)", "clause": "4.2.4.1"} if tension else {"equation": "(22)", "clause": "4.2.4.2"})
         relation = " + ".join(relation_terms) + " <= 1"
-        # verify-bending and verify-bending-normal print the section's verdict as eta_s and store eta = eta_s (lib/timber.typ): the row the window offers at -1 (issue #58)
-        rows.append(_row("eta_s", "eta_s", eta, "", " + ".join(shown_terms)))
         rows.append(_row("eta", "eta", eta, "", " + ".join(shown_terms)))
         return {"kind": "bending", "equation": out["equation"], "clause": out["clause"], "rows": rows, "eta": eta, "ok": eta <= 1 + 1e-9, "relation": relation}
 

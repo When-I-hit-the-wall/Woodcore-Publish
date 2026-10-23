@@ -21,7 +21,7 @@ META_LABEL = "woodcore-var"
 LITERAL_TOLERANCE = 1e-6
 LITERAL_ROUNDING = 1e-3
 TIMEOUT_S = 60
-# The version of the writer of an unfolded check: kept in the base and in the export's `gen`, so that a file written by an older writer says it no longer matches (REQ-003, REQ-010). 2 since the spec 2026-10-21-commandes-typst-refonte (REQ-012, Q-006, Q-014): `#domain(id, label:)` and no `gen:` in the file, `#calc-defaults(presets: "block", scope: "domain")` at its head, an `id:` on every line -- what Woodcore finds a line by, a line without one being the engineer's.
+# The version of the writer of an unfolded check: kept in the base and in the export's `gen`, so that a file written by an older writer says it no longer matches (REQ-003, REQ-010). 2 since the spec 2026-10-21-commandes-typst-refonte (REQ-012, Q-006, Q-014): `#domain(id, label:)` and no `gen:` in the file, `#calc-defaults(presets: "block", scope: "domain")` at its head, an `id:` on every line -- what Woodcore finds a line by, a line without one being the engineer's. A line the writer stops writing without the form changing (the `eta_s` of a simple compression or bending, spec 2026-10-22-retrait-niveau-manuel D-4) keeps the version: a domain written before keeps the line, inert, so two domains of one `gen` need not hold the same lines.
 GENERATOR_VERSION = 2
 # The kinds of check printed unfolded (D-11): every kind member_check computes, in the fire situation too, since the spec 2026-10-21-commandes-typst-refonte (REQ-017) -- member_check.IMPLEMENTED, held equal by tests/test_unfold.py
 UNFOLDED_KINDS = ("tension", "compression", "bending", "shear", "buckling", "lateral-torsional")
@@ -62,7 +62,15 @@ def _module(kind):
         module = member_check if kind == "check" else steel_check
         return _Kind(module.EXPORT_FILE, lambda data: (data or {}).get("checks", {}), module.is_unfolded, module.form_of)
     if kind in LOAD_KINDS:
-        return _Kind("calculations.json", _instances(kind), lambda record: bool(record.get("vars")), _calc_form(kind))
+        form_of = _calc_form(kind)
+        if kind == "snow-load":
+            # the snow's file since the spec 2026-10-22-onglet-neige-type (D-18, ARCH-RISK-F05): the column of Figur 3 at its head, s_k an `#eq` of equation (10), no cornice -- the last "-fig3" says a file written before it is of another form, which «Régénérer» writes again line by line, never in place; GENERATOR_VERSION, every kind's, stays
+            plain = form_of
+
+            def form_of(record):
+                found = plain(record)
+                return None if found is None else dict(found, form=found["form"] + "-fig3")
+        return _Kind("calculations.json", _instances(kind), lambda record: bool(record.get("vars")), form_of)
     if kind == "connector":
         # a connector the export calculated (data/connectors.json): one that cannot be is said by its reason, and written out by nothing
         return _Kind("connectors.json", lambda data: {rid: dict(r, id=rid) for rid, r in (data or {}).get("connectors", {}).items()},
@@ -288,17 +296,28 @@ def _calc_body(record, lang, where):
     def words(text):
         return strings.translate(text, lang) if text else None   # a term or a template of the glossary, as tl-str reads the export
 
+    def section(ref):
+        """A clause named by a word of its edition -- «Figur 3», «Anhang D», «Tabelle 8» -- in the report's language, its number as it is (REQ-019 of spec 2026-10-22-onglet-neige-type: «Figur 3» was printed in a French report)."""
+        found = re.match(r"^(Figur|Anhang|Tabelle)\s+(.+)$", ref or "")
+        if not found:
+            return ref
+        word = strings.translate(found.group(1), lang)
+        return word[:1].upper() + word[1:] + " " + found.group(2)
+
     def cite(line):
         if not line.get("norm"):
             if line.get("line") is not None:
                 # a script's result that names no norm is cited by its call -- «script beam.py, l. 12» (spec 2026-10-20-indices-et-niveaux, REQ-002), its file the last part of its source
                 return {"norm": strings.template("script.line", lang, file=str(line.get("source") or "").split("/")[-1], line=str(line["line"]))}
             return {}
-        return {"norm": line["norm"], **({"norm_section": line["norm_ref"]} if line.get("norm_ref") else {})}
+        return {"norm": line["norm"], **({"norm_section": section(line["norm_ref"])} if line.get("norm_ref") else {})}
 
     body = []
     for line in line_keys.calc_lines(record):
-        head = [line["key"]] + ([line["symbol"]] if line["symbol"] != line["key"] else [])
+        symbol = line["symbol"]
+        if len(symbol) > 2 and symbol[0] == symbol[-1] == '"':
+            symbol = '"' + strings.translate(symbol[1:-1], lang) + '"'   # a symbol written as a word -- «Dachform» -- is a word of the report's language (REQ-019)
+        head = [line["key"]] + ([symbol] if line["symbol"] != line["key"] else [])
         unit = line.get("unit") or ""
         shown = {"label": words(line.get("label")), "descr": words(line.get("description"))}
         shown = {k: v for k, v in shown.items() if v}
@@ -306,7 +325,9 @@ def _calc_body(record, lang, where):
             body.append("  " + ref.call_command("eq", *head, ref.Raw("`" + line["keys"] + "`"), **({"unit": unit} if unit else {}), **shown, **cite(line), id=line["key"]))
         elif isinstance(line["value"], str):
             # a text of the export (a roof's form, a category): read from it by `domain:` -- #var takes no text as a value, and a reading never ages
-            body.append("  " + ref.call_command("var", line["key"], domain=where, **shown, **cite(line), id=line["key"]))
+            # a symbol written as a word (`"Dachform"`) is printed in the report's language, written here by name -- read off the export it would be the German one (REQ-019)
+            visible = {"name_visible": symbol} if symbol != line["symbol"] else {}
+            body.append("  " + ref.call_command("var", line["key"], domain=where, **visible, **shown, **cite(line), id=line["key"]))
         else:
             body.append("  " + ref.call_command("var", *head, line["value"], *([unit] if unit else []), domain=where, **shown, **cite(line), id=line["key"]))
     # each table of the calculation (the walls of a section's class, a connector's spacings): its lines labelled, what the export says of it taken again where it changes and the file does not (REQ-008)
@@ -338,6 +359,13 @@ def _calc_file(rid, title, what, body, tail):
     return "\n".join(lines)
 
 
+def figure_line(file, caption, label, width="80%", written=None):
+    """A figure of a domain's file, on one labelled line: `#figure(image("<file>", width: 80%), caption: [<caption>]) <label>` -- the line a load's drawing, a connector's, a steel section's are written with, and what «Affichage» changes the width, the caption and the label of (spec 2026-10-22-onglet-neige-type, ARCH-RISK-F07)."""
+    # `written`: a caption as the file already holds it, written back as it stands -- never escaped twice
+    caption_part = ", caption: [" + written + "]" if written else ", caption: [" + _cell(caption) + "]" if caption else ""
+    return "#figure(image(" + _typst_string(file) + ", width: " + width + ")" + caption_part + ") <" + label + ">"
+
+
 def _generate_load(record, lang="de"):
     """The whole file of a load written out (spec 2026-10-21-commandes-typst-refonte, REQ-017): a case of data/calculations.json -- a permanent load, a snow load, a wind load, a live load, a workbook's sheet or a tab's source --, its title its domain's and its id, its drawings, each value as the export worked it out (`_calc_body`), literals checked by `domain: (<kind>, id)`. Written from the export alone (ARCH-002). Pure."""
     from i18n import strings
@@ -347,8 +375,7 @@ def _generate_load(record, lang="de"):
     # its drawings -- a permanent load's build-up, entered in Woodcore --, each a figure on a labelled line with its caption, as #show-calc printed them (a load is written out in a project laid out by folders only, where a figure's file is named from the Typst root)
     head = []
     for i, figure in enumerate(record.get("figures") or [], 1):
-        caption = ", caption: [" + _cell(strings.translate(figure["title"], lang)) + "]" if figure.get("title") else ""
-        head += ["#figure(image(" + _typst_string(figure["file"]) + ", width: 80%)" + caption + ") " + _label(rid, f"figure-{i}"), ""]
+        head += [figure_line(figure["file"], strings.translate(figure["title"], lang) if figure.get("title") else "", _label(rid, f"figure-{i}")[1:-1]), ""]
     return _calc_file(rid, title, None, head + _calc_body(record, lang, [kind, rid]), [])
 
 
@@ -633,6 +660,55 @@ def line_name(c, legacy):
     return None
 
 
+FIGURE_IMAGE = re.compile(r'#figure\(\s*image\(\s*"([^"]+)"')
+
+
+def text_lines(raw):
+    """[(line id, its line)] of a text item of a domain's file: a figure by its image -- `figure:<file name>`, so that its label may be changed in «Affichage» and the line stay Woodcore's (D-29) --, every other labelled line by its label, `label:<label>`. A figure commented out, `// #figure(…)`, is the same line, masked (D-23)."""
+    out = []
+    for line in raw.split("\n"):
+        image = FIGURE_IMAGE.search(line)
+        if image:
+            out.append(("figure:" + image.group(1).rsplit("/", 1)[-1], line))
+            continue
+        for found in re.finditer(r"<([A-Za-z0-9_.:-]+)>", line):
+            out.append(("label:" + found.group(1), line))
+    return out
+
+
+def is_masked(line):
+    """Whether a figure's line is commented out -- masked in «Affichage» (D-23)."""
+    return line.lstrip().startswith("//")
+
+
+def _display_free(item):
+    """`item` without the arguments its display is set by (calc/line_display.py): what the base compares and the export writes (D-17)."""
+    import line_display
+    from domains import formula_domain as fd
+    if item.is_text:
+        return item
+    args = set(line_display.display_args(item.kind))
+    if not args & set(item.options):
+        return item
+    return fd.replace(item, options={k: v for k, v in item.options.items() if k not in args})
+
+
+def comparable_text(item):
+    """The text a command of a domain's file is compared by -- what the base records and the states read, everywhere the same (ARCH-RISK-F02): its call as Woodcore writes it, without the arguments its display is set by, which are the engineer's (D-17)."""
+    from domains import formula_domain as fd
+    return fd.to_call(_display_free(item)).strip()
+
+
+def _with_display(fresh_item, old):
+    """The writing's line `fresh_item` with the display the file's `old` was given -- its arguments of `line_display.display_args` --, written over the file's lines as they stand: what an export keeps of a line set in «Affichage» (D-17)."""
+    import line_display
+    from domains import formula_domain as fd
+    args = set(line_display.display_args(fresh_item.kind))
+    options = {k: v for k, v in fresh_item.options.items() if k not in args}
+    options.update({k: v for k, v in old.options.items() if k in args})
+    return fd.replace(fresh_item, options=options, written=old.written, read_call=old.read_call)
+
+
 def line_digests(text):
     """{line id: digest} of an unfolded domain's file: each command by its `id:` -- by its key in a file written before --, each line of text the writer owns by its label, as written. What the base records and the states compare (REQ-007)."""
     import re
@@ -647,13 +723,12 @@ def line_digests(text):
     _declared, _title, items, gen, _header = fd.parse_domain(body)
     for c in items:
         if c.is_text:
-            for found in re.finditer(r"<([A-Za-z0-9_.:-]+)>", c.raw):
-                line = next(l for l in c.raw.split("\n") if found.group(0) in l)
-                out["label:" + found.group(1)] = sync.digest(line.strip())
+            for line_id, line in text_lines(c.raw):
+                out[line_id] = sync.digest(line.strip())
             continue
         name = line_name(c, gen is not None)
         if name:
-            out[f"{c.kind}:{name}"] = sync.digest(fd.to_call(c).strip())
+            out[f"{c.kind}:{name}"] = sync.digest(comparable_text(c))
     return out
 
 
@@ -706,7 +781,7 @@ def unfold_domains(here, kind, data, lang=None, notes=None):
 #
 # Each line Woodcore wrote -- a command by its kind and key or `id:`, a line of text by its label -- is compared three ways (sync.three_way, the rule of calc/sync.py): the line in the file (`mine`), the line a new writing from the export gives (`fresh`), and what Woodcore last wrote or took of it, a pair recorded in the base -- `own`, the file's line then, and `seen`, the writing's line then. In step where the two are the same; else `mine` changed and not the writing: **local**, written in VS Code or in the tab; the writing changed and not the file: **data**, the export moved; both: **conflict**. A line of the writing the file no longer holds is **missing** (REQ-006); one written `own: true` is the engineer's (D-13) and in step. A line of the file that is no line of the writing -- a sentence, a command added by hand -- is the engineer's own and never compared.
 
-STATES = ("in_sync", "own", "data", "local", "conflict", "missing")
+STATES = ("in_sync", "own", "data", "local", "conflict", "missing", "masked")   # masked: a figure commented out in «Affichage» (D-23), the engineer's choice, never written over
 
 
 @dataclass
@@ -735,8 +810,8 @@ def _items_by_line(items, legacy=False):
     out = {}
     for i, c in enumerate(items):
         if c.is_text:
-            for found in re.finditer(r"<([A-Za-z0-9_.:-]+)>", c.raw):
-                out["label:" + found.group(1)] = (i, c)
+            for line_id, _line in text_lines(c.raw):
+                out[line_id] = (i, c)
             continue
         name = line_name(c, legacy)
         if name:
@@ -744,7 +819,7 @@ def _items_by_line(items, legacy=False):
     return out
 
 
-def _own_line(items, line_id):
+def _own_line(items, line_id, ours=None):
     """(index, item) of the engineer's own line in place of the writing's `line_id` -- the same command and key, its `id:` taken away (Q-006: a value kept against the export), or the line written again by the other of `#var` and `#eq` under the writing's `id:` (`#var("N", 0, …, id: "N")` made `#eq("N", `N_Ed`, …, id: "N")`, a polar moment's force read from the report; spec 2026-10-22-image-polar-moment) --, or None."""
     kind, _, name = line_id.partition(":")
     for i, c in enumerate(items):
@@ -753,6 +828,12 @@ def _own_line(items, line_id):
         if c.kind == kind and "id" not in c.options and c.key == name:
             return i, c
         if {c.kind, kind} == {"var", "eq"} and c.options.get("id") == name:
+            # a line Woodcore wrote and the engineer left as it was is no line of his: the writing now gives the other command for it (s_k a `#var` before the spec 2026-10-22-onglet-neige-type, an `#eq` since), which «Régénérer» writes in its place (ARCH-RISK-F01)
+            written = (ours or {}).get(f"{c.kind}:{name}")
+            if written is not None:
+                import sync
+                if sync.digest(comparable_text(c)) == _pair(written)[0]:
+                    continue
             return i, c
     return None
 
@@ -763,12 +844,10 @@ def _legacy(domain):
 
 
 def _line_text(line_id, item):
-    """The text a line is compared by: a command as Woodcore writes its call -- so that a form of the engineer's own, arguments over two lines or a comment after the call, is no change of it --, a label's own line of its text."""
-    from domains import formula_domain as fd
+    """The text a line is compared by: a command as Woodcore writes its call, without the arguments of its display (`comparable_text`, D-17) -- so that a form of the engineer's own, arguments over two lines or a comment after the call, is no change of it --, a labelled line or a figure its own line of its text."""
     if item.is_text:
-        label = "<" + line_id[len("label:"):] + ">"
-        return next(l for l in item.raw.split("\n") if label in l).strip()
-    return fd.to_call(item).strip()
+        return next(line for lid, line in text_lines(item.raw) if lid == line_id).strip()
+    return comparable_text(item)
 
 
 # The stubs an earlier Woodcore wrote into a domain's file before it was written out (calc/domains/domain_file.py until the spec 2026-10-21-commandes-typst-refonte): the call each kind was printed by, its id in `{id}`. Recognised byte for byte -- the engine's import above it -- and written over by the domain, the commands they call being retired; never written any more.
@@ -872,7 +951,7 @@ def status(here, rid, lang=None, kind=None):
         fresh = _line_text(line_id, item)
         held = mine_items.get(line_id)
         if held is None:
-            own = None if _legacy(domain) else _own_line(domain.commands, line_id)
+            own = None if _legacy(domain) else _own_line(domain.commands, line_id, entry["lines"])
             if own is not None:
                 # the line with its `id:` taken away: the engineer's value, kept against the export (Q-006)
                 out.lines.append(LineState(line_id, "own", _line_text(line_id, own[1]), fresh))
@@ -883,10 +962,30 @@ def status(here, rid, lang=None, kind=None):
         if not held[1].is_text and held[1].options.get("own") is True:
             out.lines.append(LineState(line_id, "own", mine, fresh))
             continue
-        own, seen = _pair(entry["lines"].get(line_id))
+        if line_id.startswith("figure:") and is_masked(mine):
+            out.lines.append(LineState(line_id, "masked", mine, fresh))
+            continue
+        recorded = entry["lines"].get(line_id)
+        if recorded is None and line_id.startswith("figure:"):
+            # a figure an earlier Woodcore recorded by its label (D-29 finds it by its image since)
+            label = re.search(r"<([A-Za-z0-9_.:-]+)>", mine)
+            recorded = entry["lines"].get("label:" + label.group(1)) if label else None
+        own, seen = _normalised(recorded, held[1], item)
         state = sync.three_way(sync.digest(mine), sync.digest(fresh), own, seen)
         out.lines.append(LineState(line_id, {"incoming": "data"}.get(state, state), mine, fresh))
     return out
+
+
+def _normalised(recorded, mine, fresh):
+    """(own, seen) of a line, read the way the base records it since D-17: a digest written before, of the whole call with the arguments of its display (a member's `level: 0`, a polar moment's), is taken as the digest of the call without them, so that a base written by an earlier Woodcore reads no false conflict (ARCH-RISK-F04). The next write records the new digests."""
+    import sync
+    from domains import formula_domain as fd
+    own, seen = _pair(recorded)
+    if not mine.is_text and own is not None and own == sync.digest(fd.to_call(mine).strip()):
+        own = sync.digest(comparable_text(mine))
+    if not fresh.is_text and seen is not None and seen == sync.digest(fd.to_call(fresh).strip()):
+        seen = sync.digest(comparable_text(fresh))
+    return own, seen
 
 
 def _pair(recorded):
@@ -925,20 +1024,19 @@ def _entry(record, base, rid, kind="check"):
 
 
 def _replace_line(items, index, line_id, fresh_item):
-    """`items` with the line `line_id` of item `index` replaced by the writing's: a command's arguments that differ, written over its lines as they stand, the labelled line of a text alone (the rest of the text is the engineer's)."""
+    """`items` with the line `line_id` of item `index` replaced by the writing's: a command's arguments that differ, written over its lines as they stand, the arguments of its display kept (D-17); the labelled line of a text, or its figure, alone (the rest of the text is the engineer's)."""
     items = list(items)
     old = items[index]
     if old.is_text:
-        label = "<" + line_id[len("label:"):] + ">"
         new_line = _line_text(line_id, fresh_item)
         lines = old.raw.split("\n")
-        lines = [(l[:len(l) - len(l.lstrip())] + new_line) if label in l else l for l in lines]
+        lines = [(l[:len(l) - len(l.lstrip())] + new_line) if any(lid == line_id for lid, _l in text_lines(l)) else l for l in lines]
         from domains import formula_domain as fd
         items[index] = fd.Command(old.kind, raw="\n".join(lines))
     else:
         from domains import formula_domain as fd
         # the file's lines kept with it: formula_domain writes only the arguments the writing changed (ARCH-003)
-        items[index] = fd.replace(fresh_item, written=old.written, read_call=old.read_call) if old.kind == fresh_item.kind else fresh_item
+        items[index] = _with_display(fresh_item, old) if old.kind == fresh_item.kind else fresh_item
     return items
 
 
@@ -1079,7 +1177,7 @@ def _forget(entry, line_id, domain, mine, fresh_text):
     import sync
     from domains import formula_domain as fd
     if _legacy(domain):
-        entry["lines"][line_id] = [sync.digest(fd.to_call(mine).strip()), sync.digest(fresh_text)]
+        entry["lines"][line_id] = [sync.digest(comparable_text(mine)), sync.digest(fresh_text)]
     else:
         entry["lines"].pop(line_id, None)
 
@@ -1169,7 +1267,7 @@ def regenerate(here, rid, choices=None, lang=None, kind=None):
     owned = {}
     if not _legacy(domain):
         for lid in fresh:
-            own = None if lid in held else _own_line(domain.commands, lid)
+            own = None if lid in held else _own_line(domain.commands, lid, ours)
             if own is not None:
                 owned[lid] = own[1]
     owner = {id(item): lid for lid, item in owned.items()}
@@ -1201,7 +1299,8 @@ def regenerate(here, rid, choices=None, lang=None, kind=None):
             digest = sync.digest(_line_text(lid, c))
             entry["lines"][lid] = [digest, digest]
         else:
-            items.append(c)
+            # a line the engineer left as it was takes the writing's, the display he gave it kept (D-17, ARCH-RISK-F02)
+            items.append(_with_display(c, held[lid][1]) if lid in held and not c.is_text and not held[lid][1].is_text and held[lid][1].kind == c.kind else c)
             # every line of the writing it holds -- a text carries several labels, each a line of its own (spec 2026-10-22-image-polar-moment: the first alone was recorded)
             for each in ids:
                 digest = sync.digest(_line_text(each, c))

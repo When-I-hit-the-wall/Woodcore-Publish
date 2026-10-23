@@ -652,6 +652,38 @@ def test_a_failing_snippet_says_typst_s_own_words_and_leaves_the_page_shown_and_
         pane.deleteLater()
 
 
+def test_a_failure_in_a_project_whose_engine_is_older_says_so_under_typst_s_words():
+    """Issue #98: a project made by Woodcore 0.122 and opened with a later one, «Plus tard» answered to the question of its engine (woodcore_gui_export.check_engine), kept 0.122's copy -- and the «Neige» tab's file, written in the later engine's commands, failed with Typst's «unknown variable: show-masked» and nothing more. The banner says under Typst's words that the engine is older, and how it is brought up to date; it says nothing of the kind where the engine is the program's."""
+    import stat
+    import project
+    app = _qt()
+    here = _tiny("pdf_pane_engine_older", "= Dokument\n")
+    pane = _pane(app, "pdf_pane_engine_older")
+    try:
+        pane.here, pane.mode = here, "cu"
+        pane.last_error = "error: unknown variable: show-masked"
+        project.sync_engine(here)
+        pane._show_error()
+        assert "show-masked" in pane.error_banner.text() and "0.1.0" not in pane.error_banner.text(), pane.error_banner.text()
+        assert project.VERSION not in pane.error_banner.text(), "a current engine is named in the banner"
+        # the copy an older Woodcore wrote: one file other than the program's, recorded as written, under an older version
+        units = here.generated_dir / "lib" / "units.json"
+        units.chmod(stat.S_IREAD | stat.S_IWRITE)
+        units.write_text(units.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+        stamp_file = here.generated_dir / project.ENGINE_STAMP
+        stamp = json.loads(stamp_file.read_text(encoding="utf-8"))
+        stamp["version"] = "0.1.0"
+        stamp["files"]["lib/units.json"] = project._sha(units.read_bytes())
+        stamp_file.write_text(json.dumps(stamp), encoding="utf-8")
+        assert project.engine_state(here) == ("older", "0.1.0")
+        pane._show_error()
+        text = pane.error_banner.text()
+        assert "show-masked" in text and "0.1.0" in text and project.VERSION in text, text
+    finally:
+        pane.stop()
+        pane.deleteLater()
+
+
 def test_a_snippet_is_never_stale_and_the_document_asked_for_again_gives_the_page_back():
     app = _qt()
     here = _tiny("pdf_pane_snippet_stale", "= Dokument\n")

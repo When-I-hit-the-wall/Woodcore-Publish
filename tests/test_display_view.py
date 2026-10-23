@@ -79,7 +79,7 @@ def test_the_words_are_in_three_languages_and_every_key_a_panel_names_exists():
 
 
 # What each kind of option is set to, away from its default, for a call that must still compile.
-CHANGED = {"bool": None, "width": ref.Raw("60%"), "level": 2, "detail": 2, "title": "Titre", "caption": "Légende", "number": 1.5, "switch": False}   # a switch left at its auto, changed: off (UI-003)
+CHANGED = {"bool": None, "width": ref.Raw("60%"), "level": 2, "title": "Titre", "caption": "Légende", "number": 1.5, "switch": False}   # a switch left at its auto, changed: off (UI-003)
 TEXTS = {"storey": "0", "unit": "kN/m^2", "label": "Libellé", "descr": "Pourquoi", "norm": "SIA 265", "norm-ref": "2.2.5"}
 # An option changed together with the one it makes count: a list of the positions of one storey names the storey.
 TOGETHER = {}
@@ -130,7 +130,7 @@ def test_a_call_with_each_option_changed_compiles():
 
 
 def test_every_level_a_panel_offers_compiles():
-    """ARCH-008 (issue #20): a panel offers a command the levels it accepts and no other -- 0 was offered to show-calc, show-input, show-live-load, show-connector-resistance and show-polar-moment, which refuse it, and their preview failed --, and -1 where its signature takes `shown:`, written with an empty choice as `shown: (:)`."""
+    """ARCH-008 (issue #20): a panel offers a command the levels it accepts and no other -- 0 was offered to show-calc, show-input, show-live-load, show-connector-resistance and show-polar-moment, which refuse it, and their preview failed --, and never -1, the «Sélection manuelle» the engine no longer has (spec 2026-10-22-retrait-niveau-manuel, REQ-001)."""
     if not conftest.have_typst():
         raise Skip("typst is not on PATH")
     _qt()
@@ -143,17 +143,15 @@ def test_every_level_a_panel_offers_compiles():
             continue
         panel = display_view.SpecPanel(spec, lambda key, **kw: opts.STRINGS["en"].get(key, key))
         for option_name, (option, control) in panel.controls.items():
-            if option.kind not in ("level", "detail"):
+            if option.kind != "level":
                 continue
-            combo = control.combo if option.kind == "detail" else control
-            offered = [combo.itemData(i) for i in range(combo.count())]
-            assert ("-1" in offered) == ("shown" in ref.signature_defaults(name)), (name, offered)
+            offered = [control.itemData(i) for i in range(control.count())]
+            assert "-1" not in offered, (name, offered)
             calls = []
             for value in offered:
                 if value in ("auto", "none"):
                     continue
-                extra = {"shown": {}} if value == "-1" else {}
-                calls.append(ref.call_command(name, *[samples[p] for p in spec.positional], **{option_name: int(value)}, **extra))
+                calls.append(ref.call_command(name, *[samples[p] for p in spec.positional], **{option_name: int(value)}))
             doc = probe / f"{name}.typ"
             doc.write_text('#import "/000-Typst-Config/commands.typ": *\n' + "\n\n".join(calls) + "\n", encoding="utf-8")
             r = subprocess.run(["typst", "compile", "--root", str(conftest.TYPST_ROOT), str(doc), str(doc.with_suffix(".pdf"))],
@@ -164,45 +162,17 @@ def test_every_level_a_panel_offers_compiles():
     assert not failures, "levels offered that do not compile:\n  " + "\n  ".join(failures)
 
 
-def test_no_line_of_minus_one_is_locked_and_a_symbol_handed_over_is_shown():
-    """UI-001, UI-002, UI-003 (issue #58): no key of -1 is locked any more -- `set_keys` takes the keys alone, every switch `0 | 1 | 2 | 3` --, a key handed over with its math (a verdict's row symbol) is shown by it, and no tip says the verdict is always printed."""
-    _qt()
-    import inspect
-    import display_view
-    from PySide6.QtWidgets import QLabel
-    assert list(inspect.signature(display_view.LevelControl.set_keys).parameters) == ["self", "keys"]
-    control = display_view.LevelControl(["auto", "1", "2", "3", "-1"], lambda key, **kw: opts.STRINGS["en"].get(key, key))
-    control.set_keys([("eta_y", None, "eta_(c,y)"), "sigma_c_0_d"])
-    assert all(switch.keys == ["0", "1", "2", "3"] for switch in control.rows.values())
-    label = control.rows["eta_y"].parentWidget().findChild(QLabel)
-    assert label.toolTip() == "eta_y" and "c" in label.text() and "eta_y" not in label.text(), label.text()
-    for lang in ("fr", "de", "en"):
-        assert "ds_shown_locked" not in opts.STRINGS[lang], lang
-    assert "verdict" not in opts.STRINGS["en"]["ds_shown_tip"].split(";")[0], opts.STRINGS["en"]["ds_shown_tip"]
-    control.deleteLater()
-
-
-def test_minus_one_sets_its_variables_side_by_side_as_the_width_allows():
-    """REQ-006 (issue #41): the variables of -1 flow -- several on a row where the pane is wide, one a row where it is narrow -- and each level switch is the soft segmented one, its button down lightly set apart (UI-002)."""
-    _qt()
-    import display_view
-    control = display_view.LevelControl(["auto", "1", "2", "3", "-1"], lambda key, **kw: opts.STRINGS["en"].get(key, key))
-    control.set_keys(["a", "b", "c", "d", "e", "f"])
-    control.combo.setCurrentIndex(control.combo.findData("-1"))
-    from PySide6.QtWidgets import QApplication
-    rows = lambda: {control.rows[k].parentWidget().y() for k in control.rows}
-    control.show()
-    control.resize(600, 400)
-    QApplication.processEvents()
-    wide = rows()
-    control.resize(200, 400)
-    QApplication.processEvents()
-    narrow = rows()
-    assert len(wide) < 6, f"several variables on a row at 600 px: {wide}"
-    assert len(narrow) == 6, f"one a row at 200 px: {narrow}"
-    assert control.listing.height() >= control.listing.layout().heightForWidth(control.listing.width()), "the rows wrapped are all shown"
-    assert control.rows["a"].button("0").property("soft") is True
-    control.deleteLater()
+def test_the_manual_selection_is_gone_from_the_window():
+    """Spec 2026-10-22-retrait-niveau-manuel, REQ-001 to REQ-005 (issue #93): the level of detail -1 «Sélection manuelle» left the engine with the Typst overhaul, and the window keeps nothing of it -- no kind of control that offers it, no -1 in any panel's levels, no word of it in any language, no module that reads what it could name (calc/shown_variables.py, lib/shown-variables.json), and no file of calc/ that imports it."""
+    import re
+    assert "detail" not in opts.KINDS and not hasattr(opts, "SELECTION") and not hasattr(opts, "LEVELS_SHOWN")
+    assert all(o.kind in opts.KINDS for spec in opts.SPECS.values() for o in spec.options)
+    assert all("-1" not in (o.choices or ()) for spec in opts.SPECS.values() for o in spec.options if o.kind == "level")
+    for lang, words in opts.STRINGS.items():
+        assert not [k for k in words if k == "ds_level_manual" or re.match(r"ds_shown(_|$)", k)], lang
+    assert not (ROOT / "calc" / "shown_variables.py").exists() and not (ROOT / "lib" / "shown-variables.json").exists()
+    readers = [str(p.relative_to(ROOT)) for p in (ROOT / "calc").rglob("*.py") if re.search(r"\bshown_variables\b|shown-variables\.json|\bLevelControl\b", p.read_text(encoding="utf-8"))]
+    assert not readers, readers
 
 
 def test_a_command_the_formules_tab_writes_has_one_declaration_and_two_views():

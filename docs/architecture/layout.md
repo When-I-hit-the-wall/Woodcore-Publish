@@ -51,6 +51,7 @@ Woodcore/
 ├── prompt-audit.md                the periodic audit prompt: calculations against the reference workbooks, translations of the report and Woodcore, every button, dead commands and duplicates, CLAUDE.md against the code -- run it every few days
 ├── 000-Audits/                    one report per run of prompt-audit.md, AAMMJJ-HHhMM-audit.md -- versioned, since each audit is compared with the one before it
 ├── calc/                          the pipeline, detailed below
+├── norm-library/                  the norms shipped with Woodcore: the PDFs of the engineer's `norms` repository but its Litteratur/ and the SZS C4/C5 tables, frozen into the installer beside calc/, never copied into a project (§11bis, v0.124, issue #94)
 ├── lib/i18n.typ                   the report's language, and the glossary every word the engine prints comes out of (§4bis)
 ├── lib/calc-engine.typ            the engine's display layer, split by subject into calc-engine-core.typ (the `get` and `ids` abstraction, the data loaders, `domain-file`, `doc-tables`), -records, -display, -drawings (the five `image-*` and the drawing primitives), -connections: each importing the one before, calc-engine.typ re-exporting them, imported whole by formula.typ (§10bis)
 ├── lib/formula.typ                var/eq/verify/domain/unit/calc-defaults/var-table/find/sync: the variables a report writes, the unit algebra that computes with them, the fine display arguments and their presets (lib/display-presets.json), the unit each dimension is printed in -- and the hub that imports every other file of the engine (spec 2026-10-21-commandes-typst-refonte: `val`, `var-unit`, `var-line`, `var-domain` merged or retired)
@@ -58,7 +59,6 @@ Woodcore/
 ├── lib/number.typ                 how a number is printed: `display-number`, the one rule of every display (3 decimals, powers of ten past 99 999 and below 0.1 where needed), and `fmt-decimals`, the pure rounding it is built on -- calc/number_text.py is its Python twin (v0.120, UI-002, UI-003)
 ├── lib/subscript.typ              how a subscript is printed: `normalize-subscripts` (every subscript of letters, digits, Greek names, commas and spaces one upright quoted block, `N_(R d)` → `N_"Rd"`) and `math-eval`, the one door every symbol and formula is evaluated through -- calc/typst_math.py's `normalise` is its twin (v0.120, UI-001)
 ├── lib/figure-palette.json       the figures' colours and font, by token -- calc/domains/svg_draw.py and lib/calc-engine-core.typ (`figure-colour`) read it: one palette for the drawing engines and the report (v0.120, D5)
-├── lib/shown-variables.json       what `level: -1, shown:` named, command by command, until the spec 2026-10-21-commandes-typst-refonte retired the commands that read it: kept for calc/shown_variables.py and the window's option panels, which still read it
 ├── lib/line-levels.json           the level each line of a calculation is printed from, domain by domain (lines, kinds, patterns, `*`): read by calc/line_levels.py and the export, which give each line of a calculation its level
 ├── lib/distance.typ               #distance: SIA 265's minimum distances and timber thicknesses in mm for a diameter, read from calc/norms/ (§10bis, v0.87) -- imported by name into formula.typ
 ├── lib/bibliography.typ         #show-bibliography and #cite-norm: every norm the report cites, named in full at the end -- read from calc/norms/norms.json and from the project's own references.bib (§10, v0.99) -- imported by name into formula.typ
@@ -197,6 +197,8 @@ calc/
 │   ├── vkf.py, vkf-2016-symbole-brandschutzplan.json   # the AEAI/VKF sheet of symbols of the fire-protection plan: its fire resistances, escape-route marks, doors and their colours (§3.3vicies, v0.115)
 │   ├── szs_c5.py, szs-c5-2018-edv-kurzbezeichnungen.json   # SZS C5:2018's 24 families of steel sections, codes and names only -- no profile table (§7, v0.94)
 │   ├── norms.py, norms.json    # the documents the engine can name in full: designation, full title, edition, publisher and `kind` per entry, each read off the edition's own title page in  (§10, §11bis, v0.99) -- a catalogue and not a list to print
+│   ├── library.py              # where a shipped norm's PDF is: norm-library/ beside the program (project.APP_ROOT), or WOODCORE_NORMS_LIBRARY (§11bis, v0.124)
+│   ├── excerpts.py             # the excerpts a tab of calculation shows: per edition the file and the chapter, per excerpt its page, box and words, German the fallback (v0.124, issue #94)
 │   ├── sn_en_14592.py          # SN EN 14592+A1:2012 -- f_u,k of a Stabdübel, S355, 510 N/mm² (the engineer's value;
 │   └── sn-en-14592-2012-fu-k-stabduebel.json   # the edition is not in the library, so no page is cited yet)
 ├── domains/                     # one module per calculation topic; a load domain
@@ -260,6 +262,7 @@ calc/
 │   ├── svg_text.py               # the one text engine of the figures (D-19): Arial's widths, a subscript cut and set, a text measured and drawn -- the static models', the schemas' and the texts'
 │   ├── svg_draw.py               # how every drawing engine writes SVG: a coordinate (`number_at`), a text escaped, a colour of lib/figure-palette.json (`colour`, `colours`, `FONT`) (v0.120, D5, D6)
 │   ├── contracts.py              # SourceDomain and ExportDomain: what a domain offers, as two Protocols, held by tests/test_domain_contracts.py (v0.120, C5)
+│   ├── unfold_display.py         # «Affichage» of a domain's file: its elements, a line's display, the figure, the domain's level written into the file (v0.124, issue #94)
 │   ├── timber_calc.py            # the lines of a member check, each an engine var (and step), and their projection as compute()'s rows (§3.3undecies, v0.120)
 │   ├── member_check.py           # a member check from checks/<id>.json: read and checked, resolved against the positions (what it follows, whether it can be calculated and why not), the Typst of a draft, data/checks.json -- and `compute`, the instant calculation of the window's results, which the report does not read (§3.3unvicies, v0.117)
 │   ├── fire.py                   # a fire-protection plan from fire/<id>.json: its checks, the upgrade of a 1.0 source, its frame (own or following a position plan), detach, rotate_source, measuring and hit tests, and data/fire.json with its figures per language and its legend lines (§3.3vicies, v0.115)
@@ -286,7 +289,7 @@ calc/
 ├── number_text.py                # lib/number.typ's twin: `display` (the report's rule) and `trimmed`/`exact`, the one copy of the number trimming the domains wrote four times (v0.120, UI-003)
 ├── units.py                      # the unit algebra of lib/formula.typ in Python, read off lib/units.json, held equal to Typst by tests/test_units.py: what the «Formules» tab computes at once (v0.117)
 ├── line_levels.py                # lib/line-levels.json read for Python: `level(domain, key, role, kind, own)`, the rule Typst's `line-level` follows (v0.120, UI-002)
-├── shown_variables.py            # what the level of detail -1 may name (v0.117, issue #20): lib/shown-variables.json read for the window's boxes, a show-calc instance's own keys out of the export, show-check-member's one list for the member and its check -- no Qt
+├── line_display.py               # the arguments a line of a domain's file is displayed by -- fine-keys, style, role, level --, read from lib/display-presets.json where lib/formula.typ reads them: what «Affichage» sets and the base of a file's lines keeps through an export (v0.124, D-17)
 ├── greek.py                      # the Greek names math knows and their letters: formula.typ's `greek-names`, read by richtext and the domain modules (v0.117)
 ├── typst_math.py                 # a symbol in Typst's math source read once and set two ways: HTML for the window (richtext.math_html) and the subscripts of a figure's text (issue #43); `normalise`, lib/subscript.typ's twin, which both read through (v0.120, UI-001)
 ├── journal.py                    # the report's revision journal: read, checked, sorted newest first and exported (§3.3terdecies, v0.99)
@@ -370,6 +373,15 @@ calc/
 │   ├── notices_ui.py             # the activity chip, the octagon and the triangle at the top right and their panel; tell, inline_error, install_hooks (§10quater, v0.117)
 │   ├── tasks.py                  # long work in the pool, its result on the window's thread; the activity said by the chip (§10quater, v0.117)
 │   ├── layout_store.py           # the panes' sizes by tab, view and set of screens, in the user's settings (§10quater, v0.117)
+│   ├── calc_tab.py               # the common base of the tabs of calculation: DeclaredTabMixin, its modules, «Affichage» of the case's file (docs/ui/calc-tab.md, v0.124, issue #94)
+│   ├── calc_fields.py            # the fields a domain's declaration names: number, buttons with a free value, tiles, checkbox, select, custom, each with its ⓘ
+│   ├── calc_tab_words.py         # the base's words, prefixed ct_
+│   ├── module_pane.py            # the right pane of modules: drag and drop, fold, unpin, ⧉ a window zoomed by Ctrl+wheel, the order kept per tab on this machine
+│   ├── norm_bubble.py            # the norm under a datum: the ⓘ, the bubble (place), the excerpt's words then its image
+│   ├── norm_reader.py            # Woodcore's reader of a norm: the chapter at the clause, framed (FramedPdfView, page_rect_in_view)
+│   ├── excerpt_image.py          # an excerpt cut out of the shipped PDF by QtPdf, kept in Woodcore's cache
+│   ├── domain_file_display.py    # «Affichage» of a tab of calculation: the case's file compiled, what the report hides pale, «Éléments du fichier»
+│   ├── snow_tab.py, snow_tab_words.py  # «Neige», the first tab built on calc_tab (docs/ui/tab-snow.md), words sn_
 │   ├── bundle_view.py            # an export document's pages and its id, name, description and storey (§10quater, v0.117)
 │   ├── views.py                  # the views of a tab -- Import · Dessin · Typst · Export, Calcul · Affichage, … -- their words, and the user's setting that keeps each tab's (§10quater, v0.117)
 │   ├── autosave.py               # saving without a question when a tab, a view, a document or the window is left; what is never saved without the engineer (§10quater, v0.117)
@@ -422,7 +434,7 @@ calc/
 │   ├── sheet_list.py             # the export list of the plan tabs, a GroupedList whose folders are PDF bundles and whose sheets are dragged into, within and out of them (§10quater, v0.116)
 │   ├── journal_tab.py            # its journal tab: the report's revisions, written by hand (§10quater, v0.99)
 │   ├── action_tabs.py            # the words of the six empty tabs of «Actions» and their two sections -- Poids propre, Surcharge | Charge utile, Neige, Vent, Séisme (v0.117; `FutureTab` carries them, `woodcore_gui.NAV_SECTIONS` places the sub-titles)
-│   ├── load_tab.py               # the loads entered in Woodcore: «Poids propre et surcharge», «Neige», «Vent» on one base, LoadTab (list | form in cards | the instant result and the drawing), issues #35-#37
+│   ├── load_tab.py               # the loads entered in Woodcore: «Poids propre et surcharge», «Vent» on one base, LoadTab (list | form in cards | the instant result and the drawing), issues #35-#37 -- the frame «Neige» is built on since v0.124 (calc_tab.py)
 │   ├── linkable_spin.py          # the button 𝑥 beside a field that may follow a variable, its linked state, factor, offset, «Délier» and «Introuvable» (issue #42, §3.3duovicies)
 │   ├── text_pane.py              # the right pane of a text placed with the Text tool, the same in the four drawing engines: content, «Insérer une variable», a card per variable (issue #43)
 │   ├── member_check_tab.py       # the member checks' two navigation groups: the «Traction» and «Compression» tabs on one base (list | form in cards | the instant results and the call, then the command's options and the Typst page of the draft, both collapsible) and the seven placeholders of the other modules (§10quater, v0.117)

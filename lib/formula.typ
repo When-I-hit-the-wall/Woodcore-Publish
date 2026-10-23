@@ -15,7 +15,7 @@
 // ⚠️ Still untraced, like everything computed in Typst (section 1): no `source`, nothing in `data/`, nothing catalogued. What it guarantees is that the printed formula, the printed numbers and the printed answer are one statement. A value a checker must re-derive from the data belongs in a Python domain.
 
 // The display helpers this file prints through. The dependency runs one way only -- calc-engine.typ knows nothing of this file -- and commands.typ imports both, which is how section 10bis says a second library file joins the report.
-#import "calc-engine.typ": cite-text, uniform-level, sync-depth, note-column, note-gutter, load-domain-state, annotated-rows, chain-leading, chain-line, colon-str, connection-domain, connector-domain, ids, find-calculation, formula-chain, get, norm-text, render-prose, render-symbol, render-table, resolve-level, semicolon-str, source-label, t-str, test-aliases, test-nok, test-ok, test-relations, tl-str, value-type, var-current, var-lookup, var-names, var-registry, var-store, display-number, display-quantity, display-source, sup, superscript-digits, math-eval, greek-names
+#import "calc-engine.typ": cite-text, uniform-level, show-masked, sync-depth, note-column, note-gutter, load-domain-state, annotated-rows, chain-leading, chain-line, colon-str, connection-domain, connector-domain, ids, find-calculation, formula-chain, get, norm-text, render-prose, render-symbol, render-table, resolve-level, semicolon-str, source-label, t-str, test-aliases, test-nok, test-ok, test-relations, tl-str, value-type, var-current, var-lookup, var-names, var-registry, var-store, display-number, display-quantity, display-source, sup, superscript-digits, math-eval, greek-names
 // The minimum distances of SIA 265 computed with a diameter (lib/distance.typ, v0.87): imported here by name, so commands.typ, which re-exports this file at the wildcard, gives every section `distance` and none of its helpers.
 #import "distance.typ": distance
 // The bibliography (lib/bibliography.typ, v0.99): its two commands by name, on distance.typ's arrangement, and `bib-note` -- which every command below that takes a `norm:` emits **before its context**, so that the document it cites is listed at the end (docs/typst/api-conventions.md §10bis).
@@ -939,26 +939,12 @@
 // The families of presets (Q-014, 21.10.2026): `inline`, the default, and `block` -- the same visibility at each level, the label after the line and the citation in the right-hand column, the line set apart, what `note: "line"` printed. A domain chooses one with `#calc-defaults(presets: "block", scope: "domain")`; a line written `note: "line"` is printed with `block`.
 #let display-families = (inline: display-presets, block: json("display-presets.json").block)
 
-// The values each fine argument takes: what the engineer listed (20.10.2026), refused otherwise naming the argument and the values (REQ-001).
-#let display-values = ("none", "variable", "value", "value-unit", "variable-value-unit")
-#let fine-values = (
-  "display": display-values,
-  "display-formula": display-values,
-  "display-equation": display-values,
-  "label-position": ("none", "before", "after", "footnote"),
-  "descr-position": ("none", "after", "footnote"),
-  "norm-position": ("none", "in-line", "line-right", "footnote"),
-  "style": ("normal", "bold", "underline", "double"),
-  "role": ("data", "compute", "result"),
-)
+// The values each fine argument takes: what the engineer listed (20.10.2026), refused otherwise naming the argument and the values (REQ-001). Read from display-presets.json since the spec 2026-10-22-onglet-neige-type (D-17), where Python reads them too (calc/line_display.py): one list for the two.
+#let fine-values = json("display-presets.json").at("fine-values")
+#let display-values = fine-values.at("display")
 
-// The fine arguments each command takes: `#verify` has no `display: "value"` -- the engineer's list for it --, and no `style:`, its double rule saying whether the relation holds.
-#let fine-keys = (
-  "var": ("display", "label-position", "descr-position", "norm-position"),
-  "eq": ("display-formula", "display-equation", "label-position", "descr-position", "norm-position"),
-  "verify": ("display", "label-position", "descr-position", "norm-position"),
-  "domain": ("label-position", "descr-position", "norm-position"),
-)
+// The fine arguments each command takes: `#verify` has no `display: "value"` -- the engineer's list for it --, and no `style:`, its double rule saying whether the relation holds. From display-presets.json too.
+#let fine-keys = json("display-presets.json").at("fine-keys")
 
 // The role a line has where nothing states one (D-9): a `#var` writes a datum down, an `#eq` computes, a `#verify` concludes.
 #let default-roles = ("var": "data", "eq": "compute", "verify": "result")
@@ -1068,7 +1054,21 @@
     lv = forced
     settings = preset(command, forced)
   }
-  (settings: settings, lv: lv, family: family)
+  // the preview of «Affichage» (`show-masked`, spec 2026-10-22-onglet-neige-type, UI-011): a line that would show nothing is printed at level 3's preset, `masked` saying so to the command, which prints it pale
+  let masked = false
+  if show-masked.get() and (if command == "eq" { settings.at("display-formula") == "none" and settings.at("display-equation") == "none" } else { settings.at("display", default: none) == "none" }) {
+    masked = true
+    settings = preset(command, 3)
+  }
+  (settings: settings, lv: lv, family: family, masked: masked)
+}
+
+// A line the report hides, printed by the preview of «Affichage» (`show-masked`): pale, and marked so after it.
+#let masked-line(body) = if body == none { none } else {
+  set text(fill: luma(150))
+  body
+  h(0.3em)
+  text(size: 0.75em, style: "italic")[(#t-str("formula.masked"))]
 }
 
 // `level: 0` and `display: "none"` are one thing since the fine arguments (REQ-007): nothing of the line is printed.
@@ -1258,7 +1258,7 @@
   let warning = unit-warning(held.at("warning", default: none))
   let rd = resolve-display("var", written, level, d)
   let s = rd.settings
-  if not shows-nothing("var", s) {
+  let shown-line = if not shows-nothing("var", s) {
     let number = marked(formula-number(held.value, held.unit))
     let shown = if s.display == "variable" { math-eval(symbol) }
       else if s.display == "value" { marked(formula-number(held.value, "")) }
@@ -1278,6 +1278,7 @@
       inline-item([#x.before#value#x.after], x.footnote, warning)
     }
   }
+  if rd.masked { masked-line(shown-line) } else { shown-line }
 }
 
 /// Writes one variable down: it is stored under its name, where every formula below can name it, and printed -- **inline**, `symbol = value unit`, like a word of the sentence it stands in, so that several written one after the other run on in one paragraph and a blank line starts a new one.
@@ -1754,7 +1755,7 @@
     let warning = unit-warning(r.at("warning", default: none))
     // ⚠️ Everything above is computed at **every** level, level 0 included, and only the emission is held back: the registry is read, the operands are resolved and the units are checked, so a formula naming a variable that does not exist is refused whatever the level -- a line hidden today is a line printed in the next report, and it must not be the report that finds the mistake.
     let said = (label: label, description: descr, norm: norm, norm_ref: norm-ref, symbol: symbol)
-    if parts.len() > 0 {
+    let emitted = if parts.len() > 0 {
       let x = placed-extras(said, s)
       if blocked or x.right != none {
         // The label follows the answer as `#var`'s follows its value, and for the same reason: what the result *is* is read with it, not at the foot of the page.
@@ -1766,6 +1767,7 @@
         inline-item([#x.before#body#x.after], x.footnote, warning)
       }
     }
+    if rd.masked { masked-line(emitted) } else { emitted }
   }
 }
 
@@ -2345,7 +2347,9 @@
     mark(lift: below + outer + inner)
   })))
   }
-  meta + render()
+  // the preview of «Affichage» prints a relation the report hides pale, marked so (`show-masked`): known from the same layers render() reads
+  let masked = written != none and resolve-display("verify", written, level, d).masked
+  meta + (if masked { masked-line(render()) } else { render() })
 }
 
 /// States a relation between the report's variables, **performs it**, and marks the answer: double-ruled in green with a ✔ where it holds, in red with a ✘ where it does not.

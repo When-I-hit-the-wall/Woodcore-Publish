@@ -19,7 +19,6 @@ _Tragsicherheit_ <BI-01-part>
   #var("M_z_d", "M_(z,d)", 0.3, "kNm", domain: ("check", "BI-01"), id: "M_z_d")
   #eq("sigma_m_y_d", "sigma_(m,y,d)", `M_y_d / W_y`, unit: "N/mm²", id: "sigma_m_y_d")
   #eq("sigma_m_z_d", "sigma_(m,z,d)", `M_z_d / W_z`, unit: "N/mm²", id: "sigma_m_z_d")
-  #eq("eta_s", `sigma_m_y_d / f_m_y_d + sigma_m_z_d / f_m_z_d`, id: "eta_s")
   #verify(`sigma_m_y_d / f_m_y_d + sigma_m_z_d / f_m_z_d <= 1`, id: "v-14")
   #eq("eta", `sigma_m_y_d / f_m_y_d + sigma_m_z_d / f_m_z_d`, unit: "%", id: "eta")
 ]

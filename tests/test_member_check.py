@@ -649,8 +649,8 @@ ORACLE_RECORDS = {
     "bb-bending-p72": ("bending", "C24", _rec(100, 240), {"M_y": _kNm(5.87)}, {"W_y": "W_y", "sigma_m_y_d": "sigma_m_y_d", "f_m_y_d": "f_m_y_d"}),
     # k_h_y is in f_m_y_d, which the rows carry
     "bb-bending-p87": ("bending", "GL24h", _rec(140, 280), {"M_y": _kNm(25.8)}, {"sigma_m_y_d": "sigma_m_y_d", "f_m_y_d": "f_m_y_d"}),
-    "bb-bending-biaxial-p166": ("bending", "C24", _rec(120, 220), {"M_y": _kNm(6.82), "M_z": _kNm(2.1)}, {"sigma_m_y_d": "sigma_m_y_d", "sigma_m_z_d": "sigma_m_z_d", "eta_s": "eta_s"}),
-    "bb-bending-biaxial-p167": ("bending", "C24", _rec(100, 220), {"M_y": _kNm(5.86), "M_z": _kNm(1.81)}, {"sigma_m_y_d": "sigma_m_y_d", "sigma_m_z_d": "sigma_m_z_d", "eta_s": "eta_s"}),
+    "bb-bending-biaxial-p166": ("bending", "C24", _rec(120, 220), {"M_y": _kNm(6.82), "M_z": _kNm(2.1)}, {"sigma_m_y_d": "sigma_m_y_d", "sigma_m_z_d": "sigma_m_z_d", "eta": "eta_s"}),
+    "bb-bending-biaxial-p167": ("bending", "C24", _rec(100, 220), {"M_y": _kNm(5.86), "M_z": _kNm(1.81)}, {"sigma_m_y_d": "sigma_m_y_d", "sigma_m_z_d": "sigma_m_z_d", "eta": "eta_s"}),
     "bb-lateral-buckling-p143": ("lateral-torsional", "GL28c", _rec(180, 1440), {"M_y": _kNm(1035), "a": 5000},
                                  {"sigma_m_y_d": "sigma_m_y_d", "lambda_rel_m": "lambda_rel_m", "k_m": "k_m", "f_m_y_d": "f_m_y_d"}),
     "bb-buckling-p122": ("buckling", "C24", _rec(120, 120), {"N": _kN(40), "l_y": 3950, "l_z": 3950},
@@ -658,8 +658,8 @@ ORACLE_RECORDS = {
     "bb-buckling-p125": ("buckling", "C24", _rec(80, 140), {"N": _kN(25.1), "l_y": 5200, "l_z": 0}, {"sigma_c_0_d": "sigma_c_0_d", "lambda_rel_y": "lambda_rel_y", "k_c_y": "k_c_y"}),
     "bb-compression-perp-p263": ("compression", "C24", _rec(120, 300), {"N": _kN(30), "alpha": 90, "l": 160, "case": "mit_vorholz"}, {"f_c_90_d": "f_c_90_d", "A_c": "A_c"}),
     "bb-compression-perp-p265": ("compression", "D30", _rec(120, 300), {"N": _kN(30), "alpha": 90, "l": 160, "case": "mit_vorholz"}, {"f_c_90_d": "f_c_90_d"}),
-    "tpl-unterzug-c24-100x1120": ("bending", "C24", _rec(100, 1120), {"M_y": _kNm(294.006)}, {"W_y": "W_y", "eta_s": "eta_s"}),
-    "tpl-unterzug-c24-120x1000": ("bending", "C24", _rec(120, 1000), {"M_y": _kNm(294.006)}, {"eta_s": "eta_s"}),
+    "tpl-unterzug-c24-100x1120": ("bending", "C24", _rec(100, 1120), {"M_y": _kNm(294.006)}, {"W_y": "W_y", "eta": "eta_s"}),
+    "tpl-unterzug-c24-120x1000": ("bending", "C24", _rec(120, 1000), {"M_y": _kNm(294.006)}, {"eta": "eta_s"}),
     # the stresses alone: the template takes E_0,05 = 2/3 E_0,mean (7333 N/mm² for C24), SIA 265 Anhang B gives 7400 -- the norm's is the export's (lambda_rel 0.339 against 0.341)
     "tpl-rundstuetze-c24-d200": ("lateral-torsional", "C24", {"type": "cir", "d": 200}, {"N": _kN(-386), "M_y": _kNm(0.0625), "a": 1000, "l_y": 1000, "l_z": 1000},
                                  {"sigma_c_0_d": "sigma_c_0_d", "sigma_m_y_d": "sigma_m_y_d"}),
@@ -810,6 +810,25 @@ def test_the_worked_examples_of_the_oracles():
             if abs(rows[ours] - want) > tol * max(1.0, abs(want)):
                 failures.append(f"{case['id']} {ours}: {rows[ours]} against {want} ({case['source']})")
     assert not failures, "\n  ".join(failures)
+
+
+def test_a_simple_compression_and_a_simple_bending_have_no_eta_s_row():
+    """Spec 2026-10-22-retrait-niveau-manuel, REQ-007: the `eta_s` row a compression along the grain and a bending carried for the level of detail -1 (issue #58), the verdict printed twice, is gone -- at normal temperature and in the fire situation; a buckling and a lateral torsional buckling keep theirs, a verdict among several that `eta` is the largest of."""
+    def keys(kind, section, fields):
+        return [row["key"] for row in member_check.compute(member_check.resolve(dict(member_check.new_source("X-1", kind), position=None, grade="C24", section=section, moisture_class=1, **fields), {}))["rows"]]
+    for kind, section, fields in (("compression", _rec(120, 120), {"N": _kN(40), "alpha": 0}),
+                                  ("compression", _rec(120, 300), {"N": _kN(30), "alpha": 90, "l": 160, "case": "mit_vorholz"}),
+                                  ("bending", _rec(100, 240), {"M_y": _kNm(5.87)}),
+                                  ("bending", _rec(120, 220), {"M_y": _kNm(6.82), "M_z": _kNm(2.1)}),
+                                  ("bending", _rec(120, 220), {"M_y": _kNm(3), "N": _kN(20)}),
+                                  ("bending", _rec(120, 220), {"M_y": _kNm(3), "N": _kN(-20)})):
+        rows = keys(kind, section, fields)
+        assert "eta_s" not in rows and rows[-1] == "eta", (kind, fields, rows)
+    assert "eta_s" in keys("buckling", _rec(120, 120), {"N": _kN(40), "l_y": 3950, "l_z": 3950})
+    assert "eta_s" in keys("lateral-torsional", _rec(180, 1440), {"M_y": _kNm(1035), "a": 5000})
+    fire = {rec["kind"]: [row["key"] for row in member_check.compute(rec)["rows"]] for rec in reversed(_synthetic_fire())}
+    assert "eta_s" not in fire["compression"] and "eta_s" not in fire["bending"], fire
+    assert "eta_s" in fire["buckling"]
 
 
 def test_the_buckling_tables_of_the_holzbautabellen():

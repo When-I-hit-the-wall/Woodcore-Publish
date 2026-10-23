@@ -3,6 +3,22 @@
   "schema_version": "1.0",
   "releases": [
     {
+      "version": "0.124.0",
+      "notes": {
+        "fr": "L'onglet Neige repensé, premier onglet de calcul type : la norme sous chaque donnée (survol : le texte de la SIA 261 puis l'extrait ; clic : l'épingler ; Ctrl+clic : le chapitre dans le lecteur de Woodcore, ou la carte de 261.sia.ch pour Δh), les normes livrées avec Woodcore, un volet droit fait de modules (état du calcul, résultats, figure 3, figure 2 interactive, extraits), la section Bâtiment, C_e libre, les toitures dessinées comme la figure 3, et l'Affichage ligne par ligne du fichier du cas, dont les réglages restent à l'export. Le fichier d'un cas de neige imprime la figure 3 de sa toiture et s_k selon l'équation (10). Avec la 0.123 : la « Sélection manuelle » retirée de la fenêtre, une compression ou une flexion simple imprimant son verdict une fois.",
+        "de": "Das Register Schnee neu gedacht, erstes Muster-Berechnungsregister: die Norm unter jeder Angabe (Darüberfahren: der Text der SIA 261, dann der Auszug; Klick: anheften; Strg+Klick: das Kapitel im Leser von Woodcore, oder die Karte von 261.sia.ch für Δh), die Normen mit Woodcore geliefert, ein rechter Bereich aus Modulen (Stand der Berechnung, Ergebnisse, Figur 3, interaktive Figur 2, Auszüge), der Abschnitt Gebäude, ein freies C_e, die Dächer gezeichnet wie die Figur 3, und die Darstellung der Datei des Falls Zeile für Zeile, deren Einstellungen beim Export bleiben. Die Datei eines Schneefalls druckt die Figur 3 ihres Dachs und s_k nach Gleichung (10). Mit 0.123: die «Manuelle Auswahl» aus dem Fenster entfernt, ein einfacher Druck oder eine einfache Biegung druckt ihren Nachweis einmal.",
+        "en": "The snow tab rethought, the first model tab of calculation: the norm under each datum (hover: SIA 261's words, then the excerpt; click: pin it; Ctrl+click: the chapter in Woodcore's reader, or 261.sia.ch's map for Δh), the norms shipped with Woodcore, a right pane made of modules (calculation state, results, Figure 3, interactive Figure 2, excerpts), the Building section, a free C_e, the roofs drawn as Figure 3, and «Affichage» of the case's file line by line, whose settings stay at the export. A snow case's file prints the Figure 3 of its roof and s_k by equation (10). With 0.123: the «manual selection» taken out of the window, a simple compression or bending printing its verdict once."
+      },
+      "installer": {
+        "file": "Woodcore-0.124.0-setup.exe",
+        "size": 246009478,
+        "sha256": "b738df65f1836d833b2edded475981c01ee752754aad5db2af5c3afb0eba59a0",
+        "hosted": "github",
+        "url": "https://github.com/When-I-hit-the-wall/woodcore-releases/releases/download/v0.124.0/Woodcore-0.124.0-setup.exe"
+      },
+      "date": "2026-10-22"
+    },
+    {
       "version": "0.122.0",
       "notes": {
         "fr": "La palette de commandes Ctrl+K : un onglet, une action, une position, une vérification et son η, une variable, une norme ou un avertissement en quelques lettres ; l'onglet Projet en tête de la navigation, où Woodcore s'ouvre et où se règlent la page de titre, la forme et le template de fond de chaque document ; un nouveau projet ne demande plus que son nom, son emplacement et sa langue, chaque document se créant ensuite ; le zoom de l'interface (Ctrl+, Ctrl−, Ctrl+0, menu Affichage) ; les aperçus Typst à la largeur du volet et zoomés par Ctrl+molette ; un onglet s'ouvre toujours sur sa vue de travail. Avec la 0.121 : les commandes Typst refondues — un fichier par calcul, les dessins en figures natives, `#unit` valant pour la valeur suivante seulement.",

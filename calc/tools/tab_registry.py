@@ -18,6 +18,7 @@ import formula_tab
 import journal_tab
 import metre_tab
 import load_tab
+import snow_tab
 import member_check_tab
 import plan_tab
 import positions_tab
@@ -68,7 +69,7 @@ SPECS = (
     # «Actions» (action_tabs.py, v0.117): the permanent actions, then the variable ones, then the combinations below a line. Three are reserved for a calculation to come (D-04).
     TabSpec("tab_ac_selfweight", load_tab.DeadLoadTab, "nav_actions", section="nav_permanent"),
     TabSpec("tab_ac_imposed", lambda app: reserved_tab.future(app, "tab_ac_imposed", action_tabs.SOON["tab_ac_imposed"], "tab_ac_imposed"), "nav_actions", section="nav_variable"),
-    TabSpec("tab_ac_snow", load_tab.SnowTab, "nav_actions"),
+    TabSpec("tab_ac_snow", snow_tab.SnowTab, "nav_actions"),
     TabSpec("tab_ac_wind", load_tab.WindTab, "nav_actions"),
     TabSpec("tab_ac_seismic", lambda app: reserved_tab.future(app, "tab_ac_seismic", action_tabs.SOON["tab_ac_seismic"], "tab_ac_seismic"), "nav_actions"),
     TabSpec("tab_combinations", lambda app: reserved_tab.future(app, "tab_combinations", "future_combinations"), "nav_actions", section=""),

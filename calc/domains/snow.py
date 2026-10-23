@@ -107,6 +107,9 @@ def read_instance(cells, sheet, notes=None):
     """One SL-* sheet, one instance of the snow-load domain (docs/domain/calculation-domains.md §3.3): its inputs read (`read_source`), computed by `snow_source.build_instance`, compared with what the sheet computed (D-07)."""
     src, inputs = read_source(cells, sheet, notes)
     instance = snow_source.build_instance(src, inputs=inputs)
+    # a sheet's case is printed without the figure a case entered in Woodcore carries: the export writes the drawings of the sources alone (registry._build_source), as for a permanent load's sheet
+    instance.pop("_files", None)
+    instance.pop("figures", None)
     sheet_differences(cells, sheet, SNOW_COMPARED.get(src["roof"], ()), instance["vars"], notes)
     if notes is not None:
         notes.extend(snow_source.notes_of(src, cells.address(sheet, CELLS["h_0"])))

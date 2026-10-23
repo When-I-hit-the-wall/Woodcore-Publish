@@ -45,7 +45,9 @@ def test_a_snow_sheet_is_the_source_computed_from_its_inputs():
         notes = []
         instance = snow.read_instance(cells, sheet, notes)
         src, inputs = snow.read_source(cells, sheet)
-        assert instance == {"sheet": sheet, **snow_source.build_instance(src, inputs=inputs)}, sheet
+        built = snow_source.build_instance(src, inputs=inputs)
+        built.pop("_files"), built.pop("figures")   # a sheet's case carries no figure: the export draws the sources' alone (snow.read_instance)
+        assert instance == {"sheet": sheet, **built}, sheet
         assert instance["vars"]["h_0"]["source"] == "excel:%s" % cells.address(sheet, "H10"), sheet
         assert instance["vars"]["s_k"]["source"] == snow_source.SOURCE, sheet
         # what the sheets computed is Woodcore's: nothing to say

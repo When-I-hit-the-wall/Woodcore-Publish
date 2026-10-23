@@ -20,7 +20,6 @@ _Tragsicherheit_ <BI-02-part>
   #var("N_c_d", "N_(c,d)", 40, "kN", domain: ("check", "BI-02"), id: "N_c_d")
   #eq("sigma_c_0_d", "sigma_(c,0,d)", `N_c_d / A`, unit: "N/mm²", id: "sigma_c_0_d")
   #eq("sigma_m_y_d", "sigma_(m,y,d)", `M_y_d / W_y`, unit: "N/mm²", id: "sigma_m_y_d")
-  #eq("eta_s", `(sigma_c_0_d / f_c_0_d)^2 + sigma_m_y_d / f_m_y_d`, id: "eta_s")
   #verify(`(sigma_c_0_d / f_c_0_d)^2 + sigma_m_y_d / f_m_y_d <= 1`, id: "v-22")
   #eq("eta", `(sigma_c_0_d / f_c_0_d)^2 + sigma_m_y_d / f_m_y_d`, unit: "%", id: "eta")
 ]

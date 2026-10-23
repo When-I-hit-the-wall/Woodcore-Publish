@@ -14,7 +14,6 @@ import richtext  # the call coloured as the site's code, «Copié ✓» once cop
 import theme  # the orange of a value written over (theme.py)
 from domains import connector, member_check
 from norms import sia265
-import display_options  # the level -1 «Sélection manuelle» (issue #20)
 
 
 KEEP = object()   # fill_positions: keep the position the combo has chosen

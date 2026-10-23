@@ -202,6 +202,7 @@ TRAILING_BODY = "body"  # a content block, written after the parentheses: #calc-
 WRITTEN_CALLS = {
     "report-level": ("#report-level.update(2)",) * 2,
     "uniform-level": ("#uniform-level.update(2)",) * 2,
+    "show-masked": ("#show-masked.update(true)",) * 2,
     "report-language": ("#context report-language.get()",) * 2,
     # a show rule is applied, never called: its one argument is the document it is handed (v0.82)
     "woodcore-document": ("#show: woodcore-document",) * 2,

@@ -17,9 +17,7 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBo
 
 import build_reference as ref
 import cards
-import chrome
 import display_options as opts
-import flowbar
 import pdf_pane
 import project
 import richtext
@@ -119,113 +117,6 @@ class ColumnsControl(QWidget):
         self._guard()
 
 
-class LevelControl(QWidget):
-    """The level of a command that takes `shown:` (issue #20, v0.117, display_options kind `detail`): a drop-down of the levels the command accepts and, where it takes `shown:`, -1 «Sélection manuelle» -- under which every variable the command can print stands with its level, **four buttons joined into one, `0 | 1 | 2 | 3`** (chrome.SegmentedSwitch, issue #41), the one down lightly set apart; 0 leaves the variable out of `shown:`, where until issue #41 a box was unticked beside a drop-down. The variables **flow side by side as the pane's width allows** (flowbar.FlowLayout, issue #41), one a row only where the pane is narrow. The engineer never types a name (T7): the variables are what the tab hands over (`set_keys`, `context["shown"]`, calc/shown_variables.py), a level chosen staying where its key is still there. A key that is the command's result (issue #39) is printed always: it offers `1 | 2 | 3` only, its 0 left out (the engineer's answer to issue #41). A class of the module and not a piece of SpecPanel, so that a tab's own panel -- the member checks' -- shows the same control (rule 16)."""
-
-    changed = Signal()
-
-    def __init__(self, levels, t, parent=None):
-        super().__init__(parent)
-        self.t = t
-        self.quiet = False
-        self.rows = {}           # key -> its switch, `0 | 1 | 2 | 3`
-        self.wanted = {}         # {key: level} given back before the keys are known
-        v = QVBoxLayout(self)
-        v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(4)
-        self.combo = QComboBox()
-        for value in levels:
-            words = t("ds_level_auto") if value == "auto" else t("ds_level_manual") if value == opts.SELECTION else value
-            self.combo.addItem(words, value)
-        self.combo.currentIndexChanged.connect(self._edited)
-        v.addWidget(self.combo)
-        self.listing = flowbar.FlowWidget()
-        self.listing.setToolTip(t("ds_shown_tip"))
-        self.grid = flowbar.FlowLayout(self.listing, margin=0, spacing=8)
-        self.grid.setContentsMargins(8, 2, 0, 2)
-        v.addWidget(self.listing)
-        self.empty = QLabel(t("ds_shown_none"))
-        self.empty.setObjectName("meta")
-        self.empty.setWordWrap(True)
-        v.addWidget(self.empty)
-        self._show()
-
-    def level(self):
-        return self.combo.currentData()
-
-    @staticmethod
-    def _value(switch):
-        return int(switch.current_key() or 0)
-
-    def picked(self):
-        """{key: level} of the variables printed -- a level above 0 --, in the order they stand."""
-        return {key: self._value(switch) for key, switch in self.rows.items() if self._value(switch)}
-
-    def set_keys(self, keys):
-        """The variables offered, as [key], [(key, words)] or [(key, words, math)]: words -- a table's title, display_options' own `ds_shown_<key>` -- are set as prose, `$…$` as math; a key without words by its math, the export's symbol or else shown_variables.key_math. Every key, a check's verdict included, goes from 0 to 3 (issue #58, which retired the locked result of issue #39). A key the new list lacks keeps its level, and comes back with it where a later list holds it again -- a draft a moment not calculable, or an angle changed, clears no choice (ARCH-RISK-206); the same list rebuilds nothing."""
-        import shown_variables
-        items = [(tuple(item) + (None, None))[:3] if isinstance(item, (tuple, list)) else (item, None, None) for item in keys or ()]
-        if [item[0] for item in items] == list(self.rows):
-            return
-        kept = {**self.wanted, **self.picked()}
-        for switch in self.rows.values():
-            row = switch.parentWidget()
-            self.grid.removeWidget(row)
-            row.deleteLater()
-        self.rows = {}
-        self.quiet = True
-        try:
-            for key, words, math in items:
-                row = QWidget()
-                h = QHBoxLayout(row)
-                h.setContentsMargins(0, 0, 0, 0)
-                h.setSpacing(4)
-                label = QLabel()
-                label.setTextFormat(Qt.TextFormat.RichText)
-                if words is None and f"ds_shown_{key}" in opts.STRINGS["en"]:
-                    words = self.t(f"ds_shown_{key}")
-                label.setText(richtext.prose_html(words) if words is not None else richtext.math_html(math or shown_variables.key_math(key)))
-                label.setToolTip(key)
-                n = int(kept.get(key, 0) or 0)
-                switch = chrome.SegmentedSwitch([(str(m), str(m), "") for m in (0, 1, 2, 3)], str(n), soft=True)
-                switch.changed.connect(self._edited)
-                h.addWidget(label)
-                h.addWidget(switch)
-                self.grid.addWidget(row)
-                self.rows[key] = switch
-            self.wanted = {key: n for key, n in kept.items() if key not in self.rows}
-        finally:
-            self.quiet = False
-        self.listing.updateGeometry()
-        self._show()
-
-    def set_state(self, value):
-        """(level, {key: level}), or a level alone."""
-        level, picked = value if isinstance(value, tuple) else (value, {})
-        self.quiet = True
-        try:
-            self.combo.setCurrentIndex(max(self.combo.findData(str(level)), 0))
-            for key, switch in self.rows.items():
-                switch.set_current(str(int((picked or {}).get(key, 0) or 0)))
-            self.wanted = {key: n for key, n in (picked or {}).items() if key not in self.rows}
-        finally:
-            self.quiet = False
-        self._show()
-
-    def state(self):
-        return (self.level(), {**self.wanted, **self.picked()})
-
-    def _show(self):
-        manual = self.level() == opts.SELECTION
-        self.listing.setVisible(manual and bool(self.rows))
-        self.empty.setVisible(manual and not self.rows)
-
-    def _edited(self, *_args):
-        self._show()
-        if not self.quiet:
-            self.changed.emit()
-
-
 class SpecPanel(QWidget):
     """The panel of one command, drawn from its declaration (display_options.Spec) in cards. `values()` are the keyword arguments of `build_reference.call_command` -- only what is set, a default left at its own state being dropped there. `changed(dict)` is emitted at every change the engineer makes, never at what the tab says (`set_context`, `set_values`)."""
 
@@ -323,12 +214,6 @@ class SpecPanel(QWidget):
             listing.itemChanged.connect(self._edited)
             self.controls[option.name] = (option, listing)
             return (label, listing)
-        if kind == "detail":
-            levels = tuple(option.choices or opts.LEVELS_SHOWN) + ((opts.SELECTION,) if "shown" in self.defaults else ())   # -1 where the command takes `shown:`, read off its signature (ARCH-008)
-            control = LevelControl(levels, t)
-            control.changed.connect(self._edited)
-            self.controls[option.name] = (option, control)
-            return (label, control)
         if kind == "columns":
             columns = ColumnsControl(option.choices, t)
             columns.setToolTip(t("ds_opt_columns_tip"))
@@ -376,8 +261,6 @@ class SpecPanel(QWidget):
         elif kind == "columns":
             ticked, widths = value if isinstance(value, tuple) and len(value) == 2 else (value or (), {})
             control.set_state(ticked, widths)
-        elif kind == "detail":
-            control.set_state(value)
         else:
             control.setText(str(value or ""))
 
@@ -399,9 +282,6 @@ class SpecPanel(QWidget):
         self.quiet = True
         try:
             for name, (option, control) in self.controls.items():
-                if option.kind == "detail":
-                    control.set_keys(self.context.get(option.also[0], ()))
-                    continue
                 if option.kind != "ids":
                     continue
                 kept = set(self._ids(control)) | self.wanted.pop(name, set())
@@ -464,13 +344,6 @@ class SpecPanel(QWidget):
                 ticked = self._ids(control)
                 if ticked:
                     out[name] = tuple(ticked) if len(ticked) > 1 else ticked[0]
-            elif kind == "detail":
-                value = control.level()
-                if value == opts.SELECTION:
-                    out[name] = int(value)
-                    out[option.also[0]] = control.picked()      # empty is `(:)`: the title and the verdict alone (D-09)
-                elif value != "auto":
-                    out[name] = int(value)
             elif kind == "columns":
                 ticked, widths = control.state()
                 start = opts.initial(option, self.defaults.get(name))[0]   # the command's own default, read off its signature: nothing written where it is what is ticked
@@ -504,8 +377,6 @@ class SpecPanel(QWidget):
             elif kind == "columns":
                 ticked, _widths = control.state()
                 out[name] = (ticked, {key: control.rows[key][1].text() for key in ticked})
-            elif kind == "detail":
-                out[name] = control.state()
             else:
                 out[name] = control.text()
         return out
@@ -539,7 +410,7 @@ class SpecPanel(QWidget):
             return True
         other, needed = self.controls[name]
         if wanted:
-            return (needed.currentData() == wanted if other.kind in ("choice", "level") else needed.level() == wanted if other.kind == "detail" else False)
+            return (needed.currentData() == wanted if other.kind in ("choice", "level") else False)
         return needed.isChecked() if other.kind == "bool" else bool(self._ids(needed)) if other.kind == "ids" else True
 
 

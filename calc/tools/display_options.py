@@ -10,7 +10,6 @@ The engineer's answer of 07.10.2026 to Q-001 of the spec `docs/requirements/acti
 
 **One declaration, two views** (v0.117, issue #19, spec 2026-10-10-issues-github-19-20-21 ARCH-RISK-W01): the «Formules» tab writes a variable or an equation in «Calcul» -- its label, its description, its citation -- and sets how it is printed in «Affichage» -- its level, its display type, its style. An option says which view it belongs to (`Option.view`), and `Spec.for_view` gives the panel of one view; a command shown in one view only, every other tab's, leaves it empty.
 
-**The level of detail -1** (issue #20): a `detail` control is the level with -1, «Sélection manuelle», where the command takes `shown:` -- read off its signature, never listed here -- and under it a box and a level 1, 2, 3 for every variable the command can print (`Entry.context["shown"]`, calc/shown_variables.py's keys): the engineer never types a name.
 """
 
 import re
@@ -28,8 +27,7 @@ from dataclasses import dataclass, field
 #   ids     the ids the tab hands over (`context[name]`), ticked: none ticked is the default
 #   columns the columns of a table (`choices`, by name), each ticked or not and given a width -- mm or % --: it writes the argument itself (the ticked ones, left out where all are) and, in `also`, the one that holds the widths
 #   switch  a part of a figure the level decides -- auto (by the level, the default, not written) · yes · no -- for an argument whose default is `auto` (spec 2026-10-20-indices-et-niveaux, UI-003, ARCH-RISK-609)
-#   detail  the level of a command that takes `shown:` (issue #20): auto, 1, 2, 3 -- or the subset `choices` names -- and -1, under which a box and a level for every variable the tab hands over (`context["shown"]`); it writes `level` and, at -1, `also`'s `shown`
-KINDS = ("bool", "width", "level", "title", "caption", "choice", "number", "text", "ids", "columns", "detail", "switch")
+KINDS = ("bool", "width", "level", "title", "caption", "choice", "number", "text", "ids", "columns", "switch")
 
 
 @dataclass(frozen=True)
@@ -40,7 +38,7 @@ class Option:
     choices: tuple = ()  # a choice's values, a level's subset, a number's (minimum, maximum, step)
     needs: str = ""      # what this one has an effect only with: another option on (a bool) or not empty (ids) -- `name`; another option at one value -- `name=value`; or something the object chosen carries -- `@flag`, from the tab's context
     needs_tip: str = ""  # the key of the words that say why it is greyed
-    also: tuple = ()     # the other named arguments the control writes with its own (a `columns` control: the widths; a `detail` control: `shown`) -- offered by it, not to be dismissed (tests/test_display_view.py)
+    also: tuple = ()     # the other named arguments the control writes with its own (a `columns` control: the widths) -- offered by it, not to be dismissed (tests/test_display_view.py)
     view: str = ""       # the view it is offered in, where a command is shown in two (the «Formules» tab): "calc", "display", or "" for both
 
 
@@ -75,15 +73,9 @@ def column_width(text):
     return number + (match.group(2) or "mm")
 
 LEVELS = ("auto", "0", "1", "2", "3")
-# The levels of a command that refuses 0 -- the show-* commands print something or are not called (docs/typst/report-engine.md §4): offering it made the preview fail
-LEVELS_SHOWN = ("auto", "1", "2", "3")
-# The level that lists the variables printed (calc/shown_variables.SELECTION_LEVEL), offered where the command takes `shown:`
-SELECTION = "-1"
 
 TITLE = lambda key="ds_opt_title": Option("title", "title", key)   # noqa: E731 -- one line per command that has a title
 LEVEL = Option("level", "level", "ds_opt_level")
-LEVEL_SHOWN = Option("level", "level", "ds_opt_level", choices=LEVELS_SHOWN)
-DETAIL = Option("level", "detail", "ds_opt_level", also=("shown",))
 WIDTH = Option("width", "width", "ds_opt_width")
 CAPTION = Option("caption", "caption", "ds_opt_caption")
 
@@ -297,18 +289,6 @@ STRINGS = {
         "ds_opt_norm": "Norme",
         "ds_opt_norm_ref": "Article",
         "ds_choice_none": "Aucune",
-        "ds_level_manual": "Sélection manuelle",
-        "ds_shown": "Variables imprimées",
-        "ds_shown_tip": "Choisissez le niveau de détail de chaque variable : 0 ne l'imprime pas, 1 à 3 l'imprime. Le titre s'imprime toujours ; le verdict d'une vérification est une ligne comme les autres.",
-        "ds_shown_none": "Aucune variable à choisir pour cet objet.",
-        "ds_shown_positions": "Positions des moyens d'assemblage",
-        "ds_shown_centre": "Centre de rotation",
-        "ds_shown_theta": "Angles entre les éléments",
-        "ds_shown_forces": "Efforts intérieurs N, V, M",
-        "ds_shown_components": "Composantes de N et V",
-        "ds_shown_beta": "Angles force-fil",
-        "ds_shown_forces_table": "Tableau des efforts",
-        "ds_shown_worst_table": "Tableau de la superposition défavorable",
     },
     "de": {
         "ds_command": "Befehl",
@@ -413,18 +393,6 @@ STRINGS = {
         "ds_opt_norm": "Norm",
         "ds_opt_norm_ref": "Ziffer",
         "ds_choice_none": "Keine",
-        "ds_level_manual": "Manuelle Auswahl",
-        "ds_shown": "Ausgegebene Variablen",
-        "ds_shown_tip": "Wählen Sie die Detailstufe jeder Variable: 0 gibt sie nicht aus, 1 bis 3 gibt sie aus. Der Titel wird immer ausgegeben; das Nachweisergebnis ist eine Zeile wie die anderen.",
-        "ds_shown_none": "Für dieses Objekt gibt es keine Variable zu wählen.",
-        "ds_shown_positions": "Lage der Verbindungsmittel",
-        "ds_shown_centre": "Drehpunkt",
-        "ds_shown_theta": "Winkel zwischen den Elementen",
-        "ds_shown_forces": "Schnittkräfte N, V, M",
-        "ds_shown_components": "Komponenten von N und V",
-        "ds_shown_beta": "Kraft-Faser-Winkel",
-        "ds_shown_forces_table": "Tabelle der Kräfte",
-        "ds_shown_worst_table": "Tabelle der ungünstigsten Überlagerung",
     },
     "en": {
         "ds_command": "Command",
@@ -529,18 +497,6 @@ STRINGS = {
         "ds_opt_norm": "Norm",
         "ds_opt_norm_ref": "Clause",
         "ds_choice_none": "None",
-        "ds_level_manual": "Manual selection",
-        "ds_shown": "Variables printed",
-        "ds_shown_tip": "Choose the level of detail of each variable: 0 leaves it out, 1 to 3 prints it. The title is always printed; a check's verdict is a line like the others.",
-        "ds_shown_none": "No variable to choose for this object.",
-        "ds_shown_positions": "Positions of the fasteners",
-        "ds_shown_centre": "Rotation centre",
-        "ds_shown_theta": "Angles between the members",
-        "ds_shown_forces": "Internal forces N, V, M",
-        "ds_shown_components": "Components of N and V",
-        "ds_shown_beta": "Force-grain angles",
-        "ds_shown_forces_table": "Table of the forces",
-        "ds_shown_worst_table": "Table of the most unfavourable superposition",
     },
 }
 
@@ -579,9 +535,6 @@ def initial(option, default):
             return 0.0
     if kind in ("level",):
         return unquoted if unquoted in (option.choices or LEVELS) else (option.choices or LEVELS)[0]
-    if kind == "detail":
-        # (the level, {key: its level}): nothing chosen until the engineer ticks
-        return (unquoted if unquoted in (option.choices or LEVELS_SHOWN) else "auto", {})
     if kind in ("title", "caption"):
         return ("none", "") if text == "none" else ("auto", "") if text in ("auto", "") else ("custom", unquoted)
     if kind == "choice":

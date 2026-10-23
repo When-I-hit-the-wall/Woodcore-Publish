@@ -45,6 +45,20 @@
    "hash": "51ed72513d636024"
   },
   {
+   "command": "show-masked",
+   "index": 0,
+   "level": 2,
+   "stem": "show-masked-1",
+   "hash": "1a9459943d1b8b09"
+  },
+  {
+   "command": "show-masked",
+   "index": 1,
+   "level": 2,
+   "stem": "show-masked-2",
+   "hash": "594503fda18859c2"
+  },
+  {
    "command": "project-info",
    "index": 0,
    "level": 2,

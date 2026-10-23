@@ -377,6 +377,11 @@ def _window_strings_named():
                     for name, value in zip(target.elts, node.value.elts):
                         if getattr(name, "id", None) == "WORDS" and isinstance(value, ast.Constant) and value.value:
                             literals.update(f"{value.value}_{suffix}" for suffix in suffixes)
+    # a tab of calculation names its domain's words by the prefix the domain declares (calc/domains/contracts.py `Declaration.prefix`), composed by the base -- `<prefix>f_<key>`, `<prefix>msg_<code>` (spec 2026-10-22-onglet-neige-type, ARCH-002)
+    for path in sorted((ROOT / "calc" / "domains").glob("*.py")):
+        for node in ast.parse(path.read_text(encoding="utf-8")).body:
+            if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "PREFIX" for t in node.targets) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+                prefixes.add(node.value.value)
     dead = sorted((module, key) for key, module in defined.items()
                   if key not in literals and not any(len(p) >= 3 and key.startswith(p) for p in prefixes))
     return defined, dead
@@ -563,3 +568,23 @@ def _walk(node):
         for key, value in node.items():
             yield key, value
             yield from _walk(value)
+
+
+def test_the_words_of_a_calculation_tab_take_no_key_of_another_module():
+    """ARCH-RISK-W07 of spec 2026-10-22-onglet-neige-type: woodcore_gui_words merges every module's STRINGS by `update`, the last one winning without a word -- the calculation tabs' base (ct_) and the snow's (sn_), and every tab built on the base after them, take no key another module of the window already has."""
+    import importlib
+    tools = ROOT / "calc" / "tools"
+    if str(tools) not in sys.path:
+        sys.path.insert(0, str(tools))
+    source = (tools / "woodcore_gui_words.py").read_text(encoding="utf-8")
+    names = {n for n in re.findall(r"for _lang, _texts in (\w+)\.STRINGS\.items\(\)", source) if not n.startswith("_")}   # a loop's own variable is no module
+    for group in re.findall(r"for _module in \(([^)]*)\)", source):
+        names |= {n.strip() for n in group.split(",") if n.strip()}
+    new = {"calc_tab_words", "snow_tab_words"}
+    assert new <= names, names
+    words = importlib.import_module("woodcore_gui_words")
+    own = {name: set(getattr(words, name).STRINGS["fr"]) for name in names if hasattr(getattr(words, name, None), "STRINGS")}   # each as woodcore_gui_words names it
+    base = set(words.STRINGS["fr"]) - set().union(*own.values())
+    for name in new:
+        others = base.union(*(keys for other, keys in own.items() if other != name))
+        assert not own[name] & others, (name, sorted(own[name] & others))

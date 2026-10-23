@@ -388,9 +388,11 @@ def validate_calculations_business(data):
                 for field in ("workbook", "sheet"):
                     if instance.get(field):
                         raise ValidationError(f"{path}: computed from {instance['source_file']} and names a {field} ({instance[field]!r}) as well")
+                # a load's drawing lies in its own Exports/Figures/ -- the build-up's under Permanent-loads/, the snow's column of Figur 3 under Variable-loads/Snow/ (spec 2026-10-22-onglet-neige-type, D-32) -- or in data/calculations/ in a project laid out before
+                import project
                 for figure in instance.get("figures") or ():
-                    if not _starts_figure(str(figure.get("file", "")), "dead-load", ""):
-                        raise ValidationError(f"{path}: a figure's file {figure.get('file')!r} is not under data/calculations/ nor {figure_names('dead-load', '')[1]}")
+                    if not any(_starts_figure(str(figure.get("file", "")), kind, "") for kind in project.LOAD_FIGURE_KINDS):
+                        raise ValidationError(f"{path}: a figure's file {figure.get('file')!r} is not under data/calculations/ nor " + " nor ".join(figure_names(kind, '')[1] for kind in project.LOAD_FIGURE_KINDS))
             elif instance.get("engine") not in (None, domain["engine"]):
                 raise ValidationError(f"{path}: engine {instance['engine']!r} and no source_file -- an instance of another engine than its domain's names the source it was computed from")
             for field in (() if instance.get("source_file") else ("workbook", "sheet")):

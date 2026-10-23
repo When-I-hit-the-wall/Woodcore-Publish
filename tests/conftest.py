@@ -171,14 +171,14 @@ def engine_source():
     return "\n".join(path.read_text(encoding="utf-8") for path in parts if path.is_file())
 
 
-# The reference library -- the PDFs of the norms' editions the JSON of calc/norms/ were read off -- named on a machine that has it (spec 2026-10-19-base-saine-nettoyage, REQ-004). No path of the engineer's machine is written in the repository: the JSON name the edition and its file, not where the file lies.
+# The norms' PDFs the JSON of calc/norms/ were read off: shipped with Woodcore in `norm-library/` since the spec 2026-10-22-onglet-neige-type (D-24), `WOODCORE_NORMS_LIBRARY` naming another folder where it is set (spec 2026-10-19-base-saine-nettoyage, REQ-004). No path of the engineer's machine is written in the repository.
 NORMS_ENV = "WOODCORE_NORMS_LIBRARY"
 
 
 def norms_library():
-    """The folder of the norms' PDFs `WOODCORE_NORMS_LIBRARY` names, or a folder that does not exist where it names none -- a test that needs a page skips, saying which variable to set."""
+    """The folder of the norms' PDFs: `WOODCORE_NORMS_LIBRARY` where it is set, else the shipped `norm-library/` -- a test that needs a page skips, naming it, on a clone that lacks it."""
     named = os.environ.get(NORMS_ENV)
-    return Path(named) if named else ROOT / ".no-reference-library"
+    return Path(named) if named else ROOT / "norm-library"
 
 
 def project_copy(name, data=True):

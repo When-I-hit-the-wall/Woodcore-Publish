@@ -18,6 +18,8 @@ import action_tabs  # the words of the six empty tabs of «Actions» (v0.117, do
 import load_tab  # the loads entered in Woodcore: «Poids propre et surcharge», «Neige», «Vent» (issues #35-#37, docs/domain/loads.md)  # noqa: E402
 import fire_check_tab_words  # the words of the «Résistance au feu» tab (issue #46)  # noqa: E402
 import steel_tab_words  # the words of the «Acier» tabs (issues #50-#52)  # noqa: E402
+import calc_tab_words  # the calculation tabs' base (spec 2026-10-22-onglet-neige-type)  # noqa: E402
+import snow_tab_words  # the «Neige» tab (issue #94)  # noqa: E402
 import member_check_tab  # the member checks of SIA 265 chapter 4 -- «Traction» and the placeholders of the two navigation groups «Sécurité structurale» and «Aptitude au service» (docs/domain/member-checks.md §3.3undecies, docs/ui/window.md §10quater)  # noqa: E402
 import journal_tab  # the journal tab (v0.99): the report's revisions, written by hand (docs/domain/journal.md §3.3terdecies)  # noqa: E402
 import annex_tab  # the annexes tab (v0.115): the documents the report draws on, and the excerpts it shows of them (docs/domain/annexes.md §3.3undevicies)  # noqa: E402
@@ -211,7 +213,7 @@ STRINGS = {
         "warn_sheet_value_differs": "{cell} : la feuille donne {name} = {excel}, Woodcore calcule {woodcore} à partir de ses entrées ; le rapport imprime la valeur de Woodcore.",
         "warn_sheet_slope_empty": "{cell} : la deuxième pente du toit est vide ; calculée à 0°, comme le fait la feuille.",
         "warn_sheet_direction_unknown": "{cell} : la direction du vent {direction} n’est pas une de celles du tableau {table} ; ses coefficients ne sont pas comparés.",
-        "warn_snow_above_limit": "{where} : h_0 = {h_0} m dépasse les {limit} m de la SIA 261 {ref} ; ses dispositions ne s’y appliquent pas, la charge est calculée quand même.",
+        "warn_snow_above_limit": "{where} : h_0 = {h_0} m dépasse les {limit} m de la SIA 261 {ref} ; ses dispositions ne s’y appliquent pas.",
         "warn_wind_c_red_outside": "{where} : la surface de référence {area} a h = {h} m et β = {beta}, que la SIA 261 {ref} ne trace pas ; c_red est lu au bout de la courbe la plus proche.",
         "warn_plan_wrong_type": "Plan {plan}\u202f: {label} est dessiné avec le symbole {type} ({name}).",
         "warn_plan_outside": "Plan {plan}\u202f: {label} est hors du cadrage et n’apparaîtra pas dans le rapport.",
@@ -433,7 +435,7 @@ STRINGS = {
         "warn_sheet_value_differs": "{cell}: das Blatt gibt {name} = {excel}, Woodcore berechnet aus seinen Eingaben {woodcore}; der Bericht druckt den Wert von Woodcore.",
         "warn_sheet_slope_empty": "{cell}: die zweite Dachneigung ist leer; mit 0° gerechnet, wie es das Blatt tut.",
         "warn_sheet_direction_unknown": "{cell}: die Windrichtung {direction} ist keine der Tabelle {table}; ihre Beiwerte werden nicht verglichen.",
-        "warn_snow_above_limit": "{where}: h_0 = {h_0} m liegt über den {limit} m der SIA 261 {ref}; ihre Bestimmungen gelten dort nicht, die Last wird trotzdem berechnet.",
+        "warn_snow_above_limit": "{where}: h_0 = {h_0} m liegt über den {limit} m der SIA 261 {ref}; ihre Bestimmungen gelten dort nicht.",
         "warn_wind_c_red_outside": "{where}: die Bezugsfläche {area} hat h = {h} m und β = {beta}, was SIA 261 {ref} nicht zeichnet; c_red wird am Ende der nächsten Kurve abgelesen.",
         "warn_plan_wrong_type": "Plan {plan}: {label} ist mit dem Symbol {type} ({name}) gezeichnet.",
         "warn_plan_outside": "Plan {plan}: {label} liegt ausserhalb des Ausschnitts und erscheint nicht im Bericht.",
@@ -655,7 +657,7 @@ STRINGS = {
         "warn_sheet_value_differs": "{cell}: the sheet gives {name} = {excel}, Woodcore computes {woodcore} from its inputs; the report prints Woodcore’s value.",
         "warn_sheet_slope_empty": "{cell}: the second roof slope is empty; computed at 0°, as the sheet does.",
         "warn_sheet_direction_unknown": "{cell}: the wind direction {direction} is not one of table {table}; its coefficients are not compared.",
-        "warn_snow_above_limit": "{where}: h_0 = {h_0} m is above the {limit} m of SIA 261 {ref}; its provisions do not apply there, the load is computed all the same.",
+        "warn_snow_above_limit": "{where}: h_0 = {h_0} m is above the {limit} m of SIA 261 {ref}; its provisions do not apply there.",
         "warn_wind_c_red_outside": "{where}: the reference area {area} has h = {h} m and β = {beta}, which SIA 261 {ref} does not draw; c_red is read at the end of the nearest curve.",
         "warn_plan_wrong_type": "Plan {plan}: {label} is drawn with the symbol {type} ({name}).",
         "warn_plan_outside": "Plan {plan}: {label} lies outside the crop and will not be seen in the report.",
@@ -753,6 +755,11 @@ for _lang, _texts in steel_tab_words.STRINGS.items():
 # The tabs of loads entered in Woodcore, likewise, prefixed ld_ (calc/tools/load_tab.py, issues #35-#37).
 for _lang, _texts in load_tab.STRINGS.items():
     STRINGS[_lang].update(_texts)
+
+# The calculation tabs' common base, prefixed ct_, and the «Neige» tab built on it, prefixed sn_ (calc/tools/calc_tab_words.py, calc/tools/snow_tab_words.py; spec 2026-10-22-onglet-neige-type).
+for _module in (calc_tab_words, snow_tab_words):
+    for _lang, _texts in _module.STRINGS.items():
+        STRINGS[_lang].update(_texts)
 
 
 # The six tabs of «Actions» and its two sections, likewise: the names and what each will hold, prefixed ac_ (calc/tools/action_tabs.py, v0.117).

@@ -77,7 +77,7 @@ def _query(body, tag="out"):
 def test_every_level_presets_every_fine_argument_of_its_command():
     """lib/display-presets.json: four levels for each command, each giving every fine argument the command takes a value it accepts (ARCH-001)."""
     data = json.loads(PRESETS.read_text(encoding="utf-8"))
-    assert data["schema_version"] == "1.1"
+    assert data["schema_version"] == "1.2"   # 1.2: fine-values and fine-keys moved here from lib/formula.typ (spec 2026-10-22-onglet-neige-type, D-17)
     keys = {
         "var": {"display", "label-position", "descr-position", "norm-position"},
         "eq": {"display-formula", "display-equation", "label-position", "descr-position", "norm-position"},
@@ -331,3 +331,18 @@ def test_a_domain_chooses_the_block_family_and_its_lines_keep_their_levels():
     three = _text("block_3", body.replace("{lv}", "3"))
     assert "50 kN — Zugkraft" in three and "SIA 265 4.2.1" in three, three
     assert "family of presets" in _refused("presets_unknown", '#calc-defaults(presets: "wide")')
+
+
+# --- the preview of «Affichage»: what the report hides, shown pale (spec 2026-10-22-onglet-neige-type, UI-011) -----------
+
+def test_show_masked_prints_every_hidden_line_pale_and_marked():
+    """`show-masked` (lib/calc-engine-core.typ), set by the preview of a domain's file: a `#var` at level 0, an `#eq` whose two displays are none and a `#verify` at level 0 are printed at level 3's preset, each marked «ausgeblendet»; a line the report prints is not marked; without the state nothing hidden is printed."""
+    body = '''#var("h_0", 850, "m", level: 0)
+#eq("h_r", `h_0 + 1 "m"`, display-formula: "none", display-equation: "none")
+#verify(`h_r >= h_0`, level: 0)
+#var("b", 3, "m")'''
+    shown = _text("masked_on", "#show-masked.update(true)\n" + body)
+    assert shown.count("ausgeblendet") == 3, shown
+    assert "h0 = 850 m (ausgeblendet)" in shown and shown.endswith("b = 3 m"), shown
+    hidden = _text("masked_off", body)
+    assert hidden.strip() == "b = 3 m", hidden

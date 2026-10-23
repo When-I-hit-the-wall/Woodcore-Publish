@@ -264,12 +264,23 @@ def _formula_values(here, calculations):
 
 
 def write_files(files, data_dir, previous=None):
-    """The drawings of the instances, under the names their records give them -- Permanent-loads/Exports/Figures/ in a project laid out by folders, `data/calculations/` otherwise (engine.Figures) --, LF whatever the platform, and those of a case renamed or deleted removed: only what the last export wrote (`previous`, the calculations.json it wrote, read here when not given -- give it when the new one is written first), never a file of the engineer's."""
+    """The drawings of the instances, under the names their records give them -- each load's Exports/Figures/ in a project laid out by folders (Permanent-loads/, Variable-loads/Snow/: project.LOAD_FIGURE_KINDS), `data/calculations/` otherwise (engine.Figures) --, LF whatever the platform, and those of a case renamed or deleted removed: only what the last export wrote (`previous`, the calculations.json it wrote, read here when not given -- give it when the new one is written first), never a file of the engineer's. One write per folder: in a project laid out before, the kinds share data/calculations/, which one write empties of what it did not write."""
     import engine
+    import project
     data_dir = Path(data_dir)
     if previous is None:
         previous = engine.previous_json(data_dir / "calculations.json")
-    engine.figures(data_dir, "dead-load").write(files, previous)
+    places = {}
+    for kind in project.LOAD_FIGURE_KINDS:
+        place = engine.figures(data_dir, kind)
+        places.setdefault(str(place.folder.resolve()), (place, {}))
+    for name, content in files.items():
+        held = next((own for place, own in places.values() if place.rel(name) is not None), None)
+        if held is None:
+            raise ValueError(f"{name!r} lies in no folder of the loads' figures")
+        held[name] = content
+    for place, own in places.values():
+        place.write(own, previous)
 
 
 def export(here):

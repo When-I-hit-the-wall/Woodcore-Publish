@@ -25,6 +25,8 @@ WRITERS = ("save", "delete", "on_moved", "create_plans", "delete_document", "del
            "write_display",
            # issue #16: the annexes' excerpts made by a frame drawn, a range of pages or a frame found (annex_tab.AnnexTab)
            "extract_annex_pages", "extract_annex_rects", "write_extracted",
+           # issue #94: a line of a case's file, its figure and its domain's level set in «Affichage» (calc_tab.DeclaredTabMixin, spec 2026-10-22-onglet-neige-type, ARCH-RISK-W06)
+           "write_line_display", "write_figure", "write_domain_level",
            # issues #35-#37: the project's own materials saved (load_tab.DeadLoadTab)
            "save_project_library",
            # issue #46: the project's building for VKF 15-15, saved from the «Résistance au feu» tab (fire_check_tab.FireCheckTab)

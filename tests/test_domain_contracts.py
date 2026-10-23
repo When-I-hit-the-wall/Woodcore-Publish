@@ -37,6 +37,17 @@ def test_every_source_domain_is_one():
         assert isinstance(module.SOURCE_SCHEMA_VERSION, str)
 
 
+# The domains a calculation tab is built on (spec 2026-10-22-onglet-neige-type, ARCH-002): the snow first, the wind next
+CALC_TAB_DOMAINS = ("snow_source",)
+
+
+def test_every_calculation_tab_domain_is_one():
+    for name in CALC_TAB_DOMAINS:
+        module = importlib.import_module("domains." + name)
+        assert isinstance(module, contracts.CalcTabDomain), f"domains.{name} lacks declaration, visible_fields, messages or results"
+        assert isinstance(module.declaration(), contracts.Declaration)
+
+
 def test_every_export_domain_is_one():
     for name in EXPORT_DOMAINS:
         module = importlib.import_module(name)
@@ -157,6 +168,9 @@ def test_no_domain_prints_what_it_has_to_say():
                     # "snow_" + code: a source's notes_of, the codes its warnings() gives
                     source = path.read_text(encoding="utf-8")
                     codes.update(first.left.value + c for pair in re.findall(r'out\.append\(\("(\w+)"|return \[\("(\w+)"', source) for c in pair if c)
+                    # or the codes it names in EXPORT_CODES, where warnings() is the export's share of messages() (snow_source, spec 2026-10-22-onglet-neige-type)
+                    for listed in re.findall(r"EXPORT_CODES = \(([^)]*)\)", source):
+                        codes.update(first.left.value + c for c in re.findall(r'"(\w+)"', listed))
     assert {"registry_no_sheet", "sheet_value_differs", "snow_above_limit", "wind_c_red_outside"} <= codes, codes
     for code in sorted(codes):
         assert words.count('"warn_%s":' % code) == 3, code

@@ -140,6 +140,7 @@ def test_what_the_build_writes_stays_out_of_the_repository():
     assert ignored.stdout.split() == ["dist/Woodcore-0.83.0-setup.exe", "build/x", "packaging/build/x"], ignored.stdout
     spec = (PACKAGING / "woodcore.spec").read_text(encoding="utf-8")
     assert "typst.exe" in spec and "build-info.json" in spec and 'tree("templates")' in spec
+    assert 'tree("norm-library")' in spec, "the shipped norms are frozen beside calc/ (spec 2026-10-22-onglet-neige-type, D-24)"
 
 
 # Inno Setup 6, "Registry section": the whole set, and there is no `uninsneveruninstall` in it -- a registry

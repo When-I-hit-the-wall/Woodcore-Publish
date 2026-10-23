@@ -40,7 +40,6 @@ from source_editor import SourceEditorTab  # the left pane every editor tab shar
 import autosave  # saving without a question, and what is never saved without the engineer (autosave.py, v0.117)
 import grouped_list
 import display_view  # the «Affichage» view: the options, the call and the compiled page (display_view.py, v0.117)
-import display_options  # the level -1 «Sélection manuelle» (issue #20)
 import identity  # Nom · Description · ID (identity.py)
 import views  # the two views the top bar's switch chooses between (views.py, v0.117)
 import project  # where the project this tab works on is (calc/project.py)

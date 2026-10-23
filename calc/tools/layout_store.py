@@ -127,6 +127,30 @@ def bind(splitter, key, store=None):
     return Binding(splitter, key, store or Store())
 
 
+# What a calculation tab keeps of its pane of modules on this machine (spec 2026-10-22-onglet-neige-type, REQ-010, D-26): the order of its modules and which are folded, by tab -- not by the screens' signature, an order having no reason to change with a screen plugged in.
+MODULES = "modules"
+
+
+def get_state(tab, store=None):
+    """The state a calculation tab's pane of modules was left in on this machine -- {"order": [...], "folded": [...]} -- or {} where none was kept."""
+    store = store or Store()
+    node = store.read().get(MODULES)
+    node = node.get(tab) if isinstance(node, dict) else None
+    if not isinstance(node, dict):
+        return {}
+    return {key: [str(v) for v in node[key] if isinstance(v, str)] for key in ("order", "folded") if isinstance(node.get(key), list)}
+
+
+def put_state(tab, state, store=None):
+    """`state` ({"order", "folded"}, lists of module ids) kept for `tab` on this machine."""
+    store = store or Store()
+    settings = store.read()
+    table = dict(settings.get(MODULES) or {}) if isinstance(settings.get(MODULES), dict) else {}
+    table[tab] = {key: [str(v) for v in state.get(key, [])] for key in ("order", "folded")}
+    settings[MODULES] = table
+    store.write(settings)
+
+
 def put_value(name, value, store=None):
     """A single value kept for these screens (the navigation's width): under (name,)."""
     (store or Store()).put(("window", name), [value])

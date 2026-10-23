@@ -1079,6 +1079,11 @@
       "fr": "L’unité demandée {wanted} ne correspond pas aux unités des opérandes — le résultat est donné en {natural}.",
       "en": "The requested unit {wanted} does not match the operands’ units — the result is given in {natural}."
     },
+    "formula.masked": {
+      "de": "ausgeblendet",
+      "fr": "masquée",
+      "en": "hidden"
+    },
     "formula.stale": {
       "de": "veraltet: {value} im Export",
       "fr": "périmé : {value} dans l’export",
@@ -3326,8 +3331,8 @@
       "fr": "charge supplémentaire selon la figure 5",
       "en": "extra load to Figure 5"
     },
-    "Bei abgestuften Dächern oder bei einem Dach, das an ein höheres Bauwerk angrenzt, ist auf der unteren Dachfläche eine dreieckförmige Zusatzlast nach Figur 5 anzusetzen (Verdoppelung von mu_1 auf der Seite des Höhensprungs, Einflusslänge l_s = 2 h). Sie ist hier nicht berechnet.": {
-      "fr": "Pour un toit étagé ou un toit proche d’un ouvrage plus élevé, une charge supplémentaire de répartition triangulaire selon la figure 5 s’applique sur la surface de toiture inférieure (doublement de mu_1 le long du décrochement, longueur d’influence l_s = 2 h). Elle n’est pas calculée ici.",
+    "Bei abgestuften Dächern oder bei einem Dach, das an ein höheres Bauwerk angrenzt, ist auf der unteren Dachfläche eine dreieckförmige Zusatzlast nach Figur 5 anzusetzen (Verdoppelung von μ₁ auf der Seite des Höhensprungs, Einflusslänge l_s = 2 h). Sie ist hier nicht berechnet.": {
+      "fr": "Pour un toit étagé ou un toit proche d’un ouvrage plus élevé, une charge supplémentaire de répartition triangulaire selon la figure 5 s’applique sur la surface de toiture inférieure (doublement de μ₁ le long du décrochement, longueur d’influence l_s = 2 h). Elle n’est pas calculée ici.",
       "en": "For a stepped roof, or a roof adjoining a taller building, a triangular extra load to Figure 5 applies on the lower roof (mu_1 doubled along the step, length of influence l_s = 2 h). It is not computed here."
     },
     "Schneeüberhang": {
@@ -3354,9 +3359,9 @@
       "fr": "endroit protégé du vent",
       "en": "site sheltered from wind"
     },
-    "Ist das Abgleiten behindert oder erschwert, wird der Dachformbeiwert mu_1 mit 0.8 angesetzt (SIA 261, Ziffer 5.3.4).": {
-      "fr": "Si le glissement est empêché ou rendu difficile, le coefficient de forme de toiture mu_1 est admis à 0.8 (SIA 261, chiffre 5.3.4).",
-      "en": "Where the sliding is hindered or made difficult, the roof shape coefficient mu_1 is taken as 0.8 (SIA 261, clause 5.3.4)."
+    "Ist das Abgleiten behindert oder erschwert, wird der Dachformbeiwert μ₁ mit 0.8 angesetzt (SIA 261, Ziffer 5.3.4).": {
+      "fr": "Si le glissement est empêché ou rendu difficile, le coefficient de forme de toiture μ₁ est admis à 0.8 (SIA 261, chiffre 5.3.4).",
+      "en": "Where the sliding is hindered or made difficult, the roof shape coefficient μ₁ is taken as 0.8 (SIA 261, clause 5.3.4)."
     },
     "Tabelle der Druckbeiwerte": {
       "fr": "Tableau des coefficients de pression",
@@ -3369,6 +3374,34 @@
     "netto": {
       "fr": "net",
       "en": "net"
+    },
+    "Schneelastanordnung, Lastmodelle 1 und 2 (SIA 261, Figur 3)": {
+      "fr": "Disposition de la charge de neige, modèles de charge 1 et 2 (SIA 261, figure 3)",
+      "en": "Snow load arrangement, load models 1 and 2 (SIA 261, Figure 3)"
+    },
+    "Schneelastanordnung (SIA 261, Figur 3)": {
+      "fr": "Disposition de la charge de neige (SIA 261, figure 3)",
+      "en": "Snow load arrangement (SIA 261, Figure 3)"
+    },
+    "Lastmodell 1": {
+      "fr": "Modèle de charge 1",
+      "en": "Load model 1"
+    },
+    "Lastmodell 2": {
+      "fr": "Modèle de charge 2",
+      "en": "Load model 2"
+    },
+    "Beim Flachdach nur ein Lastmodell": {
+      "fr": "Un seul modèle de charge pour un toit plat",
+      "en": "A flat roof has one load model only"
+    },
+    "Figur": {
+      "fr": "Figure",
+      "en": "Figure"
+    },
+    "Dachform": {
+      "fr": "Forme de la toiture",
+      "en": "Roof form"
     }
   }
 }

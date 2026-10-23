@@ -92,6 +92,8 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`ui/tab-dependencies.md`](ui/tab-dependencies.md) | §10quater | The dependencies tab: the graph of the project's objects, «dépend de» and «utilisé par». | 2 KB |
 | [`ui/tab-project.md`](ui/tab-project.md) | §10quater | The «Projet» tab: the title page, the language, the form, the documents made one by one and their content templates, the preview of the templates. | 8 KB |
 | [`ui/command-palette.md`](ui/command-palette.md) | §10quater | The command palette, Ctrl+K: what it finds, where it reads it, and how it is used with the mouse. | 6 KB |
+| [`ui/calc-tab.md`](ui/calc-tab.md) | §10quater | Building a tab of calculation on the common base: what the base does once, what a domain declares, the snow as the complete example, what the wind, the permanent loads, the seismic action and the member checks will bring. | 8 KB |
+| [`ui/tab-snow.md`](ui/tab-snow.md) | §10quater | The «Neige» tab: the building, the site, the roof among five tiles, the norm under each datum, the modules of the right pane, «Affichage» of the case's file. | 4 KB |
 
 ## Decisions and open questions
 
@@ -113,6 +115,9 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`history/typst-retired-commands.md`](history/typst-retired-commands.md) | §10bis | The reference rows of the commands the Typst commands' overhaul retired (spec 2026-10-21-commandes-typst-refonte, lot 19), moved verbatim from `typst/api-conventions.md` on 2026-10-22; what each becomes is `calc/renamed-commands.json`. | 42 KB |
 | [`history/formulas-retired-commands.md`](history/formulas-retired-commands.md) | §10quinquies | The sections of `typst/formulas.md` on `#val`, `#var-line`, `#var-unit`, `#var-domain` and the arguments `note:`, `sep:`, `summary:`, retired by the Typst commands' overhaul (spec 2026-10-21-commandes-typst-refonte, lot 19), moved verbatim on 2026-10-22. | 16 KB |
 | [`history/report-engine-retired-commands.md`](history/report-engine-retired-commands.md) | §5, §9 | The sections of `typst/report-engine.md` on `#calc-block`, `#show-input` and the levels the retired commands printed their lines at, retired by the Typst commands' overhaul (spec 2026-10-21-commandes-typst-refonte, lot 19), moved verbatim on 2026-10-22. | 7 KB |
+| [`history/2026-10-22-niveau-manuel.md`](history/2026-10-22-niveau-manuel.md) | §10quater, §4 | The paragraphs that described the level of detail -1 «Sélection manuelle» as current -- the window, the member checks, report-engine §4, the data contracts --, moved verbatim when the spec 2026-10-22-retrait-niveau-manuel took it out of the window (issue #93). | 7 KB |
+| [`history/2026-10-22-onglet-neige-type-journal-lots-1-8.md`](history/2026-10-22-onglet-neige-type-journal-lots-1-8.md) | — | The progress journal of lots 1 to 8 of the snow tab rebuilt as the first tab of calculation (spec 2026-10-22-onglet-neige-type, §16), moved verbatim on 2026-10-22 to keep the spec under 100 KB. | 6 KB |
+| [`history/2026-10-22-onglet-neige-type-risques-revue.md`](history/2026-10-22-onglet-neige-type-risques-revue.md) | — | The risks of the three architecture reviews of the snow tab rebuilt as the first tab of calculation and what the spec made of each (spec 2026-10-22-onglet-neige-type, §13.3), moved verbatim on 2026-10-22 to keep the spec under 100 KB. | 10 KB |
 | [`history/open-questions-closed.md`](history/open-questions-closed.md) | §14 | The open points that were closed or settled, moved verbatim from `open-questions.md`. | 3 KB |
 
 ## Section → file

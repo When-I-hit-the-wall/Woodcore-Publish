@@ -63,6 +63,8 @@ STRINGS = {
         "pp_timeout": "Arrêtée après {minutes} min sans réponse de Typst.",
         "pp_empty": "Pas encore d'aperçu",
         "pp_fit": "Ajuster à la largeur",
+        "pp_engine_older": "Le moteur Typst de ce projet date de Woodcore {version} ; ce programme est la version {ours}, dont les commandes peuvent manquer à ce moteur. Répondez « Mettre à jour » à la question du moteur, à l'ouverture du projet ou à l'export.",
+        "pp_engine_other": "La copie du moteur Typst de ce projet n'est pas celle de Woodcore {ours} (modifiée à la main, ou d'une version qu'aucun VERSION ne nomme). Répondez « Mettre à jour » à la question du moteur, à l'ouverture du projet ou à l'export.",
     },
     "de": {
         "pp_stale": "Nicht kompilierte Änderungen",
@@ -72,6 +74,8 @@ STRINGS = {
         "pp_timeout": "Nach {minutes} min ohne Antwort von Typst abgebrochen.",
         "pp_empty": "Noch keine Vorschau",
         "pp_fit": "An Breite anpassen",
+        "pp_engine_older": "Die Typst-Engine dieses Projekts stammt von Woodcore {version}; dieses Programm ist Version {ours}, deren Befehle dieser Engine fehlen können. Beantworten Sie die Frage zur Engine beim Öffnen des Projekts oder beim Export mit «Aktualisieren».",
+        "pp_engine_other": "Die Kopie der Typst-Engine dieses Projekts ist nicht die von Woodcore {ours} (von Hand geändert, oder von einer Version, die keine VERSION nennt). Beantworten Sie die Frage zur Engine beim Öffnen des Projekts oder beim Export mit «Aktualisieren».",
     },
     "en": {
         "pp_stale": "Uncompiled changes",
@@ -81,6 +85,8 @@ STRINGS = {
         "pp_timeout": "Stopped after {minutes} min without an answer from Typst.",
         "pp_empty": "No preview yet",
         "pp_fit": "Fit to width",
+        "pp_engine_older": "This project's Typst engine was written by Woodcore {version}; this program is version {ours}, whose commands this engine may lack. Answer «Update» to the engine's question, when the project opens or at an export.",
+        "pp_engine_other": "This project's copy of the Typst engine is not Woodcore {ours}'s (edited by hand, or from a version no VERSION names). Answer «Update» to the engine's question, when the project opens or at an export.",
     },
 }
 
@@ -535,8 +541,23 @@ class PdfPane(QWidget):
         shown = lines[:MESSAGE_LINES]
         if len(lines) > MESSAGE_LINES:
             shown.append(self.t("pp_more", n=len(lines) - MESSAGE_LINES))
-        self.error_banner.setText(self.t("pp_failed") + "\n" + "\n".join(shown))
+        note = self._engine_note()
+        self.error_banner.setText(self.t("pp_failed") + "\n" + "\n".join(shown) + ("\n\n" + note if note else ""))
         self.error_banner.setHidden(False)
+
+    def _engine_note(self):
+        """Under Typst's words, where the project's copy of the engine is not the program's -- an older Woodcore's, kept by «Plus tard» at the opening, edited by hand or named by no VERSION (project.engine_state) --: that it is, and how it is brought up to date. A file written in this program's commands then fails with an «unknown variable» and nothing more (issue #98). Read at each failure, never at a success: the copy is updated by the window, not here."""
+        if self.here is None:
+            return ""
+        try:
+            state, detail = project.engine_state(self.here)
+        except OSError:
+            return ""
+        if state == "older":
+            return self.t("pp_engine_older", version=detail, ours=project.VERSION)
+        if state in ("edited", "unknown"):
+            return self.t("pp_engine_other", ours=project.VERSION)
+        return ""
 
     # --- compiling -------------------------------------------------------------------------
 

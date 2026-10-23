@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-"""The loads entered in Woodcore (issues #35, #36, #37): «Poids propre et surcharge», «Neige» and «Vent» in the group «Actions» (docs/ui/window.md §10quater, docs/domain/loads.md).
+"""The loads entered in Woodcore (issues #35, #36, #37): «Poids propre et surcharge» and «Vent» in the group «Actions», and the base «Neige» is built on (docs/ui/window.md §10quater, docs/domain/loads.md).
 
 Each tab lists the cases of one load domain that the project's own sources hold -- `Woodcore-Datei/loads/<kind>/<id>.json` --, edits one in cards, and shows at once what Python computes from it, the drawing included: the domain modules compute (`domains/dead_load_source.py`, `snow_source.py`, `wind_source.py`), the tab shows, edits and calls them and never computes (docs/architecture/principles.md). Saving writes the source and rebuilds `data/calculations.json` beside the sheets of the load workbooks (`registry.export`, decision D-04), so the report's `show-calc` prints the case. «Affichage» shows that call and its page.
 
 **One base, `LoadTab`** -- the list in folders (`grouped_list`), «Supprimer» into «Archives» (`source_archive`), Nom · Description · ID (`identity`), the cards (`cards`), the two views (`views`, `display_view`) -- and a subclass per domain building its own cards (`build_inputs`, `fill_inputs`, `draft_inputs`). The arrangement is the member checks' (member_check_tab.MemberCheckTab), without what a member check reads of a position: a load belongs to no position (docs/domain/loads.md §8).
+
+**The calculation tabs' base** (spec 2026-10-22-onglet-neige-type, D-2, D-25): a tab that mixes `calc_tab.DeclaredTabMixin` in before this class -- «Neige» since issue #94, snow_tab.py -- is drawn from its domain's declaration, its right pane made of modules; «Poids propre et surcharge» and «Vent» keep the frame below until their own issues.
 """
 
 import copy
@@ -27,17 +29,15 @@ import linkable_spin  # the button beside a number that may follow a variable (s
 import project
 import registry
 import richtext
-import shown_variables
 import source_archive
 import theme
 import validation
 import views
 import engine
-from domains import dead_load_source, links, materials, snow_source, wind_source
+from domains import dead_load_source, links, materials, wind_source
 from i18n import strings
-from member_check_tab import next_free_id
-from source_editor import NEW_ROW, SourceEditorTab  # the left pane every editor tab shares (spec 2026-10-19-base-saine-nettoyage, ARCH-001)
-from norms import sia261_snow, sia261_wind
+from source_editor import NEW_ROW, SourceEditorTab, next_free_id  # the left pane every editor tab shares (spec 2026-10-19-base-saine-nettoyage, ARCH-001)
+from norms import sia261_wind
 
 OPTION_DELAY_MS = 150
 
@@ -65,7 +65,6 @@ STRINGS = {
         "ld_none": "—",
         "ld_link_circle": "Refusé : ce lien fermerait une boucle de charges ({chain}).",
         "ld_save_first": "Enregistrez pour que le rapport imprime ce cas : l’appel nomme ce que le dernier export contient.",
-        "ld_warn_above_limit": "Altitude h_0 = {h_0} m : la norme SIA 261 n’autorise pas ce calcul au-dessus de {limit} m ({ref}). La charge est calculée quand même ; le rapport n’en dit rien.",
         "ld_box_layers": "Couches, de haut en bas",
         "ld_col_kind": "Type",
         "ld_col_library": "Bibliothèque",
@@ -112,23 +111,7 @@ STRINGS = {
         "ld_table": "Coefficients (annexe C, tableau)",
         "ld_cd": "Facteur dynamique c_d",
         "ld_wind_hint": "c_red est calculé d’après la figure 9 pour b·h et d·h, 1.0 pour la toiture (6.3.2). c_d = 1.0 pour les bâtiments jusqu’à 15 m et les bâtiments à parois ou cadres porteurs de moins de 100 m (6.3.5), sinon selon la SIA 261/1.",
-        "ld_list_snow": "Toitures",
-        "ld_empty_snow": "Aucune toiture pour l’instant : « Nouveau » en crée une.",
-        "ld_figure_snow": "Disposition de la charge (figure 3)",
         "ld_box_site": "Lieu",
-        "ld_h0": "Altitude h_0",
-        "ld_correction": "Correction Δh (annexe D)",
-        "ld_exposure": "Exposition au vent",
-        "ld_ct": "Coefficient thermique C_T",
-        "ld_box_roof": "Toiture",
-        "ld_roof": "Forme de la toiture",
-        "ld_length": "Longueur",
-        "ld_width": "Largeur",
-        "ld_alpha1": "Inclinaison α_1",
-        "ld_alpha2": "Inclinaison α_2",
-        "ld_sliding": "Glissement de la neige",
-        "ld_roof_hint": "SIA 261 figure 3 : modèle de charge 1 et 2 ; un toit à un pan est la moitié d’un toit symétrique (5.3.2) ; une toiture cylindrique lit μ_3(α) de la figure 2, α étant l’angle de la corde jusqu’au point de pente 60°. Glissement empêché (arrêts de neige, acrotère) : μ_1 = 0.8 (5.3.4). Au-dessus de 800 m d’altitude, le rapport rappelle la corniche des porte-à-faux (5.3.7).",
-        "ld_height_step": "Décrochement : toit étagé ou proche d’un ouvrage plus élevé (5.3.6, figure 5 ; rappelé au rapport, non calculé)",
     },
     "de": {
         "ld_list_dead": "Aufbauten",
@@ -153,7 +136,6 @@ STRINGS = {
         "ld_none": "—",
         "ld_link_circle": "Abgelehnt: Diese Verknüpfung schlösse einen Kreis von Lasten ({chain}).",
         "ld_save_first": "Speichern Sie, damit der Bericht diesen Fall ausgibt: der Aufruf nennt, was der letzte Export enthält.",
-        "ld_warn_above_limit": "Höhe h_0 = {h_0} m: die Norm SIA 261 lässt diese Berechnung über {limit} m nicht zu ({ref}). Die Last wird trotzdem berechnet; der Bericht sagt nichts davon.",
         "ld_box_layers": "Schichten, von oben nach unten",
         "ld_col_kind": "Typ",
         "ld_col_library": "Bibliothek",
@@ -200,23 +182,7 @@ STRINGS = {
         "ld_table": "Beiwerte (Anhang C, Tabelle)",
         "ld_cd": "Dynamischer Faktor c_d",
         "ld_wind_hint": "c_red wird nach Figur 9 für b·h und d·h berechnet, 1.0 für das Dach (6.3.2). c_d = 1.0 für Gebäude bis 15 m und Gebäude mit tragenden Wänden oder Rahmen unter 100 m (6.3.5), sonst nach SIA 261/1.",
-        "ld_list_snow": "Dächer",
-        "ld_empty_snow": "Noch kein Dach: «Neu» legt eines an.",
-        "ld_figure_snow": "Lastanordnung (Figur 3)",
         "ld_box_site": "Standort",
-        "ld_h0": "Höhe h_0",
-        "ld_correction": "Korrektur Δh (Anhang D)",
-        "ld_exposure": "Windexposition",
-        "ld_ct": "Thermischer Beiwert C_T",
-        "ld_box_roof": "Dach",
-        "ld_roof": "Dachform",
-        "ld_length": "Länge",
-        "ld_width": "Breite",
-        "ld_alpha1": "Neigung α_1",
-        "ld_alpha2": "Neigung α_2",
-        "ld_sliding": "Abgleiten des Schnees",
-        "ld_roof_hint": "SIA 261 Figur 3: Lastmodell 1 und 2; ein Pultdach ist die Hälfte eines symmetrischen Dachs (5.3.2); ein Tonnendach liest μ_3(α) aus Figur 2, α der Winkel der Sehne bis zum Punkt der Neigung 60°. Abgleiten behindert (Schneefang, Brüstung): μ_1 = 0.8 (5.3.4). Über 800 m Meereshöhe erinnert der Bericht an den Schneeüberhang auskragender Dachteile (5.3.7).",
-        "ld_height_step": "Höhensprung: abgestuftes Dach oder an ein höheres Bauwerk angrenzend (5.3.6, Figur 5; im Bericht genannt, nicht berechnet)",
     },
     "en": {
         "ld_list_dead": "Build-ups",
@@ -241,7 +207,6 @@ STRINGS = {
         "ld_none": "—",
         "ld_link_circle": "Refused: this link would close a circle of loads ({chain}).",
         "ld_save_first": "Save so that the report prints this case: the call names what the last export holds.",
-        "ld_warn_above_limit": "Altitude h_0 = {h_0} m: the standard SIA 261 does not allow this calculation above {limit} m ({ref}). The load is computed all the same; the report says nothing of it.",
         "ld_box_layers": "Layers, top to bottom",
         "ld_col_kind": "Type",
         "ld_col_library": "Library",
@@ -288,23 +253,7 @@ STRINGS = {
         "ld_table": "Coefficients (Annex C, table)",
         "ld_cd": "Dynamic factor c_d",
         "ld_wind_hint": "c_red is computed from Figure 9 for b·h and d·h, 1.0 for the roof (6.3.2). c_d = 1.0 for buildings up to 15 m and buildings with load-bearing walls or frames under 100 m (6.3.5), else from SIA 261/1.",
-        "ld_list_snow": "Roofs",
-        "ld_empty_snow": "No roof yet: “New” makes one.",
-        "ld_figure_snow": "Load arrangement (Figur 3)",
         "ld_box_site": "Site",
-        "ld_h0": "Altitude h_0",
-        "ld_correction": "Correction Δh (Annex D)",
-        "ld_exposure": "Wind exposure",
-        "ld_ct": "Thermal coefficient C_T",
-        "ld_box_roof": "Roof",
-        "ld_roof": "Roof form",
-        "ld_length": "Length",
-        "ld_width": "Width",
-        "ld_alpha1": "Slope α_1",
-        "ld_alpha2": "Slope α_2",
-        "ld_sliding": "Sliding of the snow",
-        "ld_roof_hint": "SIA 261 Figur 3: load models 1 and 2; a mono-pitch roof is half a symmetric roof (5.3.2); a curved roof reads μ_3(α) of Figur 2, α the angle of the chord up to the point of slope 60°. Sliding hindered (snow guards, a parapet): μ_1 = 0.8 (5.3.4). Above 800 m altitude the report recalls the cornice of overhanging roof parts (5.3.7).",
-        "ld_height_step": "Height step: a stepped roof, or one adjoining a taller building (5.3.6, Figur 5; named in the report, not computed)",
     },
 }
 
@@ -613,18 +562,6 @@ class LoadTab(SourceEditorTab, display_view.DisplayTab, QWidget):
                 traceback.print_exc()
 
     # --- «Affichage» --------------------------------------------------------------
-
-    def shown_choices(self, cid):
-        """What the level -1 offers to tick: the case's vars, tables and drawings as the last export holds them (shown_variables.export_choices) -- read again only when the export changed, not at every keystroke (ARCH-RISK-002 of spec 2026-10-14-neige-vent-affichage-altitude)."""
-        data = project.current().data_dir
-        try:
-            stamp = (data / "calculations.json").stat().st_mtime_ns
-        except OSError:
-            stamp = None
-        key = (str(data), cid, stamp)
-        if getattr(self, "_choices", (None, None))[0] != key:
-            self._choices = (key, shown_variables.export_choices(data, self.MODULE.DOMAIN, cid) if cid else [])
-        return self._choices[1]
 
     def display_entries(self):
         """The load's file, written out by the export and included where a section prints it -- `#include domain-file(kind, id)` (spec 2026-10-21-commandes-typst-refonte, REQ-017, UI-002) --, for the three loads alike: what it prints is the file's, which the engineer edits."""
@@ -983,102 +920,6 @@ class DeadLoadTab(LoadTab):
         self.app.set_status(self.t("ld_materials_saved"))
         self.refresh()
         return True
-
-
-# --- «Neige» ---------------------------------------------------------------------
-
-
-class SnowTab(LoadTab):
-    """Neige (issue #36): the site, the exposure, the roof of Figur 3 and whether the snow can slide off; the loads of the two models computed at once (snow_source), and their sketch, shown here and never printed (snow_source.sketch, spec 2026-10-14-neige-vent-affichage-altitude, D-03); a site above 5.1.4's limit is warned of in the callout (REQ-004). The curved roof is the third column of Figur 3 (D-01)."""
-
-    KEY = "tab_ac_snow"
-    MODULE = snow_source
-    ID_PREFIX = "SN-"
-    LIST_KEY = "ld_list_snow"
-    EMPTY_KEY = "ld_empty_snow"
-    FIGURE_KEY = "ld_figure_snow"
-
-    def build_inputs(self):
-        c = sia261_snow.clause()
-        box = cards.card(self.t("ld_box_site"))
-        form = cards.form(box)
-        self.h0_spin = self.spin(0.0, 3000.0, 0, 10.0, " m")
-        self.h0_spin.valueChanged.connect(self.touch)
-        form.addRow(self.t("ld_h0"), self.linked(self.h0_spin, "h_0", "m", "h_0"))
-        self.correction_box = QComboBox()
-        for value in c["corrections"]["values"]:
-            self.correction_box.addItem("± 0 m" if value == 0 else "%+g m" % value, value)
-        self.correction_box.currentIndexChanged.connect(self.touch)
-        form.addRow(self.t("ld_correction"), self.correction_box)
-        self.exposure_box = QComboBox()
-        for e in c["exposure"]["choices"]:
-            self.exposure_box.addItem("%s — C_e = %s" % (self.tl(e["label"]), _n(e["value"])), e["id"])
-        self.exposure_box.currentIndexChanged.connect(self.touch)
-        form.addRow(self.t("ld_exposure"), self.exposure_box)
-        self.ct_spin = self.spin(0.1, 1.0, 2, 0.05)
-        self.ct_spin.valueChanged.connect(self.touch)
-        form.addRow(self.t("ld_ct"), self.linked(self.ct_spin, "c_t", "", "C_t"))
-        self.form.addWidget(box)
-        box = cards.card(self.t("ld_box_roof"))
-        self.roof_form = cards.form(box)
-        self.roof_box = QComboBox()
-        for roof in snow_source.ROOFS:
-            self.roof_box.addItem(self.tl(snow_source.ROOF_WORDS[roof]), roof)
-        self.roof_box.currentIndexChanged.connect(self.on_roof)
-        self.roof_form.addRow(self.t("ld_roof"), self.roof_box)
-        self.length_spin = self.spin(0.1, 1000.0, 1, 1.0, " m")
-        self.width_spin = self.spin(0.1, 1000.0, 1, 1.0, " m")
-        self.alpha1_spin = self.spin(0.0, 90.0, 1, 1.0, " °")
-        self.alpha2_spin = self.spin(0.0, 90.0, 1, 1.0, " °")
-        for key, spin, field, unit in (("ld_length", self.length_spin, "length", "m"), ("ld_width", self.width_spin, "width", "m"),
-                                       ("ld_alpha1", self.alpha1_spin, "alpha_1", "°"), ("ld_alpha2", self.alpha2_spin, "alpha_2", "°")):
-            spin.valueChanged.connect(self.touch)
-            self.roof_form.addRow(self.t(key), self.linked(spin, field, unit, field))
-        self.sliding_box = QComboBox()
-        for sliding in snow_source.SLIDING:
-            self.sliding_box.addItem(self.tl(snow_source.SLIDING_WORDS[sliding]), sliding)
-        self.sliding_box.currentIndexChanged.connect(self.touch)
-        self.roof_form.addRow(self.t("ld_sliding"), self.sliding_box)
-        # SIA 261 5.3.6: a stepped roof -- said by the report, not computed (spec 2026-10-12-audit-issues-47-48-49, D-04)
-        self.step_box = QCheckBox(self.t("ld_height_step"))
-        self.step_box.toggled.connect(self.touch)
-        self.roof_form.addRow("", self.step_box)
-        self.roof_form.addRow("", cards.note(self.t("ld_roof_hint")))
-        self.form.addWidget(box)
-
-    def on_roof(self, *_args):
-        self.update_roof_rows()
-        self.touch()
-
-    def update_roof_rows(self):
-        fields = snow_source.ROOF_FIELDS[self.roof_box.currentData() or "duo"]
-        for key, spin in (("length", self.length_spin), ("width", self.width_spin), ("alpha_1", self.alpha1_spin), ("alpha_2", self.alpha2_spin)):
-            self.roof_form.setRowVisible(self.row_of(spin), key in fields)
-
-    def fill_inputs(self, s):
-        self.h0_spin.setValue(float(s.get("h_0") or 0))
-        self.correction_box.setCurrentIndex(max(self.correction_box.findData(s.get("correction")), 0))
-        self.exposure_box.setCurrentIndex(max(self.exposure_box.findData(s.get("exposure")), 0))
-        self.ct_spin.setValue(float(s.get("c_t") or 1.0))
-        self.roof_box.setCurrentIndex(max(self.roof_box.findData(s.get("roof")), 0))
-        for key, spin, default in (("length", self.length_spin, 10.0), ("width", self.width_spin, 10.0), ("alpha_1", self.alpha1_spin, 0.0), ("alpha_2", self.alpha2_spin, 0.0)):
-            spin.setValue(float(s.get(key) if s.get(key) is not None else default))
-        self.sliding_box.setCurrentIndex(max(self.sliding_box.findData(s.get("sliding")), 0))
-        self.step_box.setChecked(bool(s.get("height_step")))
-        self.update_roof_rows()
-
-    def draft_inputs(self, s):
-        roof = self.roof_box.currentData()
-        fields = snow_source.ROOF_FIELDS[roof]
-        s.update(h_0=self.h0_spin.value(), correction=self.correction_box.currentData(), exposure=self.exposure_box.currentData(),
-                 c_t=self.ct_spin.value(), roof=roof, sliding=self.sliding_box.currentData())
-        for key, spin in (("length", self.length_spin), ("width", self.width_spin), ("alpha_1", self.alpha1_spin), ("alpha_2", self.alpha2_spin)):
-            s[key] = spin.value() if key in fields else None
-        # written only when true (D-19): a roof without a step keeps its file and its schema 1.0 / 1.1
-        if self.step_box.isChecked():
-            s["height_step"] = True
-        else:
-            s.pop("height_step", None)
 
 
 # --- «Vent» ----------------------------------------------------------------------

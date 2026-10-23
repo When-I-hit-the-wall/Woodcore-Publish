@@ -16,7 +16,6 @@ _Tragsicherheit_ <DR-02-part>
 
   #var("N_c_d", "N_(c,d)", 60, "kN", domain: ("check", "DR-02"), id: "N_c_d")
   #eq("sigma_c_0_d", "sigma_(c,0,d)", `N_c_d / A`, unit: "N/mm²", id: "sigma_c_0_d")
-  #eq("eta_s", `sigma_c_0_d / f_c_0_d`, id: "eta_s")
   #verify(`sigma_c_0_d <= f_c_0_d`, id: "v-10")
   #eq("eta", `sigma_c_0_d / f_c_0_d`, unit: "%", id: "eta")
 ]

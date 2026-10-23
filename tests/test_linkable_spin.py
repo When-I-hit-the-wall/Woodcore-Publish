@@ -389,17 +389,17 @@ def test_a_load_s_field_follows_another_load_and_a_circle_is_refused_as_it_is_ch
         base["b"] = 12
         (folder / "WI-01.json").write_text(json.dumps(base, indent=2), encoding="utf-8")
         registry.export(here)
-        snow = next(t for t in window.tabs if isinstance(t, load_tab.SnowTab))
+        snow = next(t for t in window.tabs if getattr(t, "KEY", None) == "tab_ac_snow")   # snow_tab.SnowTab since the spec 2026-10-22-onglet-neige-type
         _tension, listing = _tabs(window)
         window.tab_widget.setCurrentWidget(snow)
         snow.new()
-        assert {"h_0", "c_t", "length", "width", "alpha_1", "alpha_2"} == set(snow.linkables)
+        assert {"h_0", "c_t", "length", "width", "alpha_1", "alpha_2", "c_e"} == set(snow.linkables)   # c_e: a free C_e (spec 2026-10-22-onglet-neige-type)
         snow.linkables["h_0"].button.click()
         listed = _listed_domains(listing)
         assert not any((listing.domains[k].address or ("",))[0] in ("script", "connection", "connector") for k in listed), listed
         listing.end_pick(None)
         _pick(window, listing, snow.linkables["h_0"], ("wind-load", "WI-01"), "b")
-        assert window.tab_widget.currentWidget() is snow and snow.h0_spin.value() == 12
+        assert window.tab_widget.currentWidget() is snow and snow.fields["h_0"].spin.value() == 12
         draft = snow.draft()
         assert draft["links"]["h_0"]["domain"] == "wind-load" and draft["schema_version"] == snow_source.LINKED_SCHEMA_VERSION
         # a wind load on the disk that follows this snow load: linking back to it closes a circle
@@ -467,7 +467,7 @@ def test_every_number_of_the_joints_and_loads_tabs_has_its_button_and_no_list_ha
             dead.add_layer()
         check(dead, "dead load")
         dead.dirty = False
-        snow = next(t for t in window.tabs if isinstance(t, load_tab.SnowTab))
+        snow = next(t for t in window.tabs if getattr(t, "KEY", None) == "tab_ac_snow")   # snow_tab.SnowTab since the spec 2026-10-22-onglet-neige-type
         check(snow, "snow")
         wind = next(t for t in window.tabs if isinstance(t, load_tab.WindTab))
         check(wind, "wind")

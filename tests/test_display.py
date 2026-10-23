@@ -361,6 +361,3 @@ def test_a_relation_too_wide_for_its_line_is_stacked_and_one_that_fits_stays_in_
     runs = _runs(root, '#var("F_Ed", 2.037, "kN", level: 0) #var("R_d", 2.655, "kN", level: 0)\nDer Nachweis #verify(`F_Ed <= R_d`, level: 3) ist erfüllt.', "display_verify_sentence")
     lines = {round(r[0]) for r in runs if r[2].startswith(("Der", "ist erfüllt"))}
     assert len(lines) == 1, f"a relation that fits left its sentence: {runs}"
-
-
-# --- the level of detail -1 (issue #20, v0.117): show-calc, show-connector-resistance, show-polar-moment --------------------
