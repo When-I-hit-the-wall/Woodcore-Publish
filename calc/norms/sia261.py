@@ -177,6 +177,11 @@ def _check_annex(name, data):
                 continue
             else:
                 _number(name, where, column, value)
+        # issue #111 (P11): a roofing weighed with its battens says so, as its heading does -- and only there
+        if "includes_battens" in line and line["includes_battens"] is not True:
+            _fail(name, "%s: includes_battens is %r -- true, or absent" % (where, line["includes_battens"]))
+        if bool(line.get("includes_battens")) != ("inkl. Lattung" in (line.get("group") or "")):
+            _fail(name, "%s: includes_battens goes with a heading «… inkl. Lattung», and only with one" % where)
 
 
 def table_28():

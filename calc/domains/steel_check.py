@@ -15,6 +15,7 @@ import engine
 import project
 import validation
 from domains._common import fail as _fail, is_number as _number  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
+from domains._common import RESULT_KEY  # noqa: F401  -- η, the key of the check's result, which the «Variables» tab reads here (spec 2026-10-24-onglet-variables-groupes, ARCH-012)
 from domains import links, profile as free_profile, section as position_section, steel_resistance, steel_section
 from norms import sia263
 

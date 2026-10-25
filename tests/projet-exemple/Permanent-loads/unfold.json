@@ -1,89 +1,5 @@
 {
   "domains": {
-    "EL+AL-Dach mit Wasser": {
-      "check": "EL+AL-Dach mit Wasser",
-      "gen": {
-        "form": "62e8eb",
-        "kind": "dead-load",
-        "version": 2
-      },
-      "lines": {
-        "label:EL-AL-Dach-mit-Wasser-presets": [
-          "e8714be54bb71b0e",
-          "e8714be54bb71b0e"
-        ],
-        "label:EL-AL-Dach-mit-Wasser-table-1": [
-          "c68cfc915c10ca0a",
-          "c68cfc915c10ca0a"
-        ],
-        "label:EL-AL-Dach-mit-Wasser-table-1-note": [
-          "0d1d42bcea1e60ad",
-          "0d1d42bcea1e60ad"
-        ],
-        "label:EL-AL-Dach-mit-Wasser-table-1-title": [
-          "abbb6f87608a1e00",
-          "abbb6f87608a1e00"
-        ],
-        "var:ak": [
-          "2b4e1655bf047fb2",
-          "2b4e1655bf047fb2"
-        ],
-        "var:gk": [
-          "4758cf3f272c1c38",
-          "4758cf3f272c1c38"
-        ],
-        "var:gk_ak": [
-          "676468649c3e9972",
-          "676468649c3e9972"
-        ],
-        "var:gk_ak_gew": [
-          "5f3edc1c0d4396f1",
-          "5f3edc1c0d4396f1"
-        ]
-      }
-    },
-    "EL+AL-Dach ohne Wasser": {
-      "check": "EL+AL-Dach ohne Wasser",
-      "gen": {
-        "form": "62e8eb",
-        "kind": "dead-load",
-        "version": 2
-      },
-      "lines": {
-        "label:EL-AL-Dach-ohne-Wasser-presets": [
-          "1ba6792541164409",
-          "1ba6792541164409"
-        ],
-        "label:EL-AL-Dach-ohne-Wasser-table-1": [
-          "a35949a90bad11b4",
-          "a35949a90bad11b4"
-        ],
-        "label:EL-AL-Dach-ohne-Wasser-table-1-note": [
-          "275b11c459144406",
-          "275b11c459144406"
-        ],
-        "label:EL-AL-Dach-ohne-Wasser-table-1-title": [
-          "a2482c9718faba6a",
-          "a2482c9718faba6a"
-        ],
-        "var:ak": [
-          "b6b06a3fc11f275d",
-          "b6b06a3fc11f275d"
-        ],
-        "var:gk": [
-          "a07da2846f50478d",
-          "a07da2846f50478d"
-        ],
-        "var:gk_ak": [
-          "e9aa2b54643b61f2",
-          "e9aa2b54643b61f2"
-        ],
-        "var:gk_ak_gew": [
-          "fd0f8c09ac96e3f2",
-          "fd0f8c09ac96e3f2"
-        ]
-      }
-    },
     "EL+AL-DachRand": {
       "check": "EL+AL-DachRand",
       "gen": {
@@ -97,16 +13,16 @@
           "cff582019906603f"
         ],
         "label:EL-AL-DachRand-table-1": [
-          "8beab4fdc47d2272",
-          "8beab4fdc47d2272"
+          "bdf3273328519799",
+          "bdf3273328519799"
         ],
         "label:EL-AL-DachRand-table-1-note": [
-          "5704ac8765674ed2",
-          "5704ac8765674ed2"
+          "2b31b880046ece32",
+          "2b31b880046ece32"
         ],
         "label:EL-AL-DachRand-table-1-title": [
-          "af04dd15730056ea",
-          "af04dd15730056ea"
+          "3c55cd6d9ab5ede2",
+          "3c55cd6d9ab5ede2"
         ],
         "var:ak": [
           "98185864ab38c2d5",
@@ -121,8 +37,100 @@
           "7652b8332868c8a3"
         ],
         "var:gk_ak_gew": [
-          "f6b9b84526caf28e",
-          "f6b9b84526caf28e"
+          "902b02a8b6d234c3",
+          "902b02a8b6d234c3"
+        ]
+      }
+    },
+    "EL+AL-Dach_mit_Wasser": {
+      "check": "EL+AL-Dach_mit_Wasser",
+      "gen": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "lines": {
+        "figure:dead-load-EL+AL-Dach_mit_Wasser.svg": [
+          "b2502880913db0d8",
+          "b2502880913db0d8"
+        ],
+        "label:EL-AL-Dach_mit_Wasser-presets": [
+          "2dca1c3eddd0dfab",
+          "2dca1c3eddd0dfab"
+        ],
+        "label:EL-AL-Dach_mit_Wasser-table-1": [
+          "c6f73a36d278c8d5",
+          "c6f73a36d278c8d5"
+        ],
+        "label:EL-AL-Dach_mit_Wasser-table-1-note": [
+          "d52ec5abfbe80428",
+          "d52ec5abfbe80428"
+        ],
+        "label:EL-AL-Dach_mit_Wasser-table-1-title": [
+          "e0ceb71d1e9fc145",
+          "e0ceb71d1e9fc145"
+        ],
+        "var:ak": [
+          "4d2af7e5983c7bc4",
+          "4d2af7e5983c7bc4"
+        ],
+        "var:gk": [
+          "b3e4a0e07124b40f",
+          "b3e4a0e07124b40f"
+        ],
+        "var:gk_ak": [
+          "701f429534fb3f56",
+          "701f429534fb3f56"
+        ],
+        "var:gk_ak_gew": [
+          "9121c8aec3d2bdde",
+          "9121c8aec3d2bdde"
+        ]
+      }
+    },
+    "EL+AL-Dach_ohne_Wasser": {
+      "check": "EL+AL-Dach_ohne_Wasser",
+      "gen": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "lines": {
+        "figure:dead-load-EL+AL-Dach_ohne_Wasser.svg": [
+          "4e511f415fdbc311",
+          "4e511f415fdbc311"
+        ],
+        "label:EL-AL-Dach_ohne_Wasser-presets": [
+          "5812c010437de270",
+          "5812c010437de270"
+        ],
+        "label:EL-AL-Dach_ohne_Wasser-table-1": [
+          "606b0d710d219e72",
+          "606b0d710d219e72"
+        ],
+        "label:EL-AL-Dach_ohne_Wasser-table-1-note": [
+          "9dd4ad4f6586a7e1",
+          "9dd4ad4f6586a7e1"
+        ],
+        "label:EL-AL-Dach_ohne_Wasser-table-1-title": [
+          "ac7796551d0c9321",
+          "ac7796551d0c9321"
+        ],
+        "var:ak": [
+          "903ed0d2169b2715",
+          "903ed0d2169b2715"
+        ],
+        "var:gk": [
+          "1b3f72aad2e10d8b",
+          "1b3f72aad2e10d8b"
+        ],
+        "var:gk_ak": [
+          "a42f521da0769f2f",
+          "a42f521da0769f2f"
+        ],
+        "var:gk_ak_gew": [
+          "f02cad7943a38691",
+          "f02cad7943a38691"
         ]
       }
     },
@@ -139,16 +147,16 @@
           "07b09a3f290babd4"
         ],
         "label:EL-AL-Wand-table-1": [
-          "77a6710a2eee8074",
-          "77a6710a2eee8074"
+          "86807dc6af931708",
+          "86807dc6af931708"
         ],
         "label:EL-AL-Wand-table-1-note": [
-          "9617b38f39146f6a",
-          "9617b38f39146f6a"
+          "8a9f53baf29d0834",
+          "8a9f53baf29d0834"
         ],
         "label:EL-AL-Wand-table-1-title": [
-          "3787630cadb05f84",
-          "3787630cadb05f84"
+          "c0f225ba6599beb7",
+          "c0f225ba6599beb7"
         ],
         "var:ak": [
           "531f94ac180dfb6a",
@@ -163,8 +171,8 @@
           "b9a87eefe3d71760"
         ],
         "var:gk_ak_gew": [
-          "bcfd49b7c719f942",
-          "bcfd49b7c719f942"
+          "7df24cadc7cc3f09",
+          "7df24cadc7cc3f09"
         ]
       }
     }

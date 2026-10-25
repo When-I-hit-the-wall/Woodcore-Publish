@@ -15,11 +15,13 @@ import positions_tab
 import metre_tab  # the «Métré» tab under «Positions» (spec 2026-10-21-commandes-typst-refonte, UI-003)  # noqa: E402
 import list_file_card  # the card of a list written once in raw Typst (spec 2026-10-21-commandes-typst-refonte, Q-008)  # noqa: E402
 import action_tabs  # the words of the six empty tabs of «Actions» (v0.117, docs/ui/window.md §10quater)  # noqa: E402
-import load_tab  # the loads entered in Woodcore: «Poids propre et surcharge», «Neige», «Vent» (issues #35-#37, docs/domain/loads.md)  # noqa: E402
+import load_words  # the loads entered in Woodcore: the list's words of «Poids propre et surcharge», «Neige», «Vent» (issues #35-#37; load_tab.py's until spec 2026-10-23-onglet-vent-briques)  # noqa: E402
 import fire_check_tab_words  # the words of the «Résistance au feu» tab (issue #46)  # noqa: E402
 import steel_tab_words  # the words of the «Acier» tabs (issues #50-#52)  # noqa: E402
 import calc_tab_words  # the calculation tabs' base (spec 2026-10-22-onglet-neige-type)  # noqa: E402
 import snow_tab_words  # the «Neige» tab (issue #94)  # noqa: E402
+import wind_tab_words  # the «Vent» tab (issue #100)  # noqa: E402
+import materials_tab_words  # the «Matériaux» tab (issue #110)  # noqa: E402
 import member_check_tab  # the member checks of SIA 265 chapter 4 -- «Traction» and the placeholders of the two navigation groups «Sécurité structurale» and «Aptitude au service» (docs/domain/member-checks.md §3.3undecies, docs/ui/window.md §10quater)  # noqa: E402
 import journal_tab  # the journal tab (v0.99): the report's revisions, written by hand (docs/domain/journal.md §3.3terdecies)  # noqa: E402
 import annex_tab  # the annexes tab (v0.115): the documents the report draws on, and the excerpts it shows of them (docs/domain/annexes.md §3.3undevicies)  # noqa: E402
@@ -28,7 +30,7 @@ import python_tab  # the Python tab (v0.100): the engineer writes Python, runs i
 import formula_tab  # the «Formule» tab (v0.117): calculation domains written as blocks of var, eq, verify, val, one Formules/<id>.typ each (calc/domains/formula_domain.py)  # noqa: E402
 import linkable_spin  # the button beside a field that may follow a variable, and its linked state (spec 2026-10-11-variables-liees-champs-et-textes)
 import text_pane  # the right pane of a text placed with the Text tool (issue #43)
-import variables_tab  # the «Variables» tab: every value the report itself computes, read back out of a compiled report (calc/variables.py)  # noqa: E402
+import variables_words  # the «Variables» tab's words (spec 2026-10-24-onglet-variables-groupes, ARCH-006)  # noqa: E402
 import command_palette  # the command palette, Ctrl+K (issue #83)  # noqa: E402
 import project_tab  # the «Projet» tab: the project's basic data, its templates and its documents (issues #87, #88, #90)  # noqa: E402
 import dependencies_tab  # the «Dépendances» tab: the graph of the project's objects (issue #71)  # noqa: E402
@@ -42,9 +44,13 @@ import bundle_view  # noqa: E402
 # Every piece of text the window itself prints, in its three languages. The labels of the values stay those of the data (German, as in the workbook): they are the engineer's, not the window's.
 STRINGS = {
     "fr": {
+        "open_tab_picking": "Un champ attend une valeur : terminez d'abord le choix (« Importer » ou « Annuler »).",
+        "open_tab_not_shown": "L'onglet {tab} n'est pas dans « {document} » : choisissez le document qui le montre.",
+        "open_tab_not_made": "« {document} » n'est pas encore fait : seul l'onglet Projet s'ouvre.",
+        "open_tab_reserved": "L'onglet {tab} est réservé à un calcul à venir.",
         "language": "Langue",
         "reexport": "Import données",
-        "reexport_what": "Excel et les dessins de Woodcore",
+        "reexport_what": "les cas et les dessins de Woodcore",
         "export_pdf": "Exporter PDF",
         "pdf_as_written": "Tel qu'écrit (document)",
         "pdf_base_level": "Niveau de détail de base",
@@ -64,6 +70,7 @@ STRINGS = {
         "nav_structure": "Structure",
         "nav_connections": "Assemblages",
         "nav_reference": "Référence",
+        "nav_others": "Autres",   # the engineer's own files, not the project's: the «Matériaux» tab (issue #110)
         "nav_collapse": "Réduire le menu à ses icônes",
         "nav_expand": "Déplier le menu",
         "pdf_chip_tip": "Le prochain PDF sera compilé ainsi. Cliquer pour changer.",
@@ -137,10 +144,8 @@ STRINGS = {
         "search": "Recherche",
         "commands": "Commandes Typst",
         "copy": "Copier",
-        "import_label": "Import, en tête de la section :",
         "copied": "Copié : {text}",
         "copied_short": "Copié ✓",
-        "stale": "⚠ {files} a été modifié après le dernier export — cliquer « Import données » pour mettre les valeurs à jour.",
         "exporting": "Export en cours…",
         "busy_loading": "Chargement…",
         "busy_opening": "Ouverture de « {name} »…",
@@ -188,8 +193,9 @@ STRINGS = {
         # the warnings of the editors, by the code a domain module's engine.Note carries (periodic audit 260916, AUD-4-11)
         "warn_plan_no_number": "Plan {plan}\u202f: l’élément {i} ({type}) n’a pas de numéro de position.",
         "warn_plan_unknown": "Plan {plan}\u202f: {label} n’est pas une position du projet — ajoutez-la dans l’onglet Positions.",
-        "warn_registry_no_sheet": "Aucune feuille «\u202f{prefix}…\u202f» dans {workbooks}\u202f: le domaine {domain} reste vide, et #var(…, domain: (\"{domain}\", …)) n’y trouvera rien.",
         "warn_formula_misnamed": "{file} : le domaine déclare un autre nom que son fichier ({domain}) ; il est exporté tel quel, et l’onglet « Domaines » réécrit son id à la prochaine sauvegarde.",
+        "warn_load_workbook_not_read": "Un classeur de charges est présent dans le dossier du projet ({files}) : Woodcore ne le lit plus. Les cas de vent, de neige et de charges permanentes se saisissent dans les onglets « Vent », « Neige » et « Poids propre et surcharge ».",
+        "warn_calculations_old_export": "data/calculations.json a été écrit par une version antérieure de Woodcore (schéma {version}, celle-ci écrit {current}) : le rapport ne compile pas tant que « Import données » ne l'a pas réécrit une fois.",
         "warn_sync_stale": "{file}, ligne {line} : #sync(\"{id}\") écrit {written}, et l'export tient {held} -- rafraîchir la valeur, ou retirer #sync pour la garder telle quelle.",
         "warn_plan_dimensions_no_scale": "Plan {plan} : {count} cote(s) mesurent des longueurs et le plan n’a pas d’échelle ; calibrez-le, sinon elles ne sont pas dessinées.",
         "warn_dep_changed": "{node} a changé depuis le dernier export ; en dépendent, {kind} : {ids}.",
@@ -210,11 +216,9 @@ STRINGS = {
         "warn_dep_kind_fire": "plans de protection incendie",
         "warn_dep_kind_extract": "extraits",
         "warn_dep_kind_section": "sections du rapport",
-        "warn_sheet_value_differs": "{cell} : la feuille donne {name} = {excel}, Woodcore calcule {woodcore} à partir de ses entrées ; le rapport imprime la valeur de Woodcore.",
-        "warn_sheet_slope_empty": "{cell} : la deuxième pente du toit est vide ; calculée à 0°, comme le fait la feuille.",
-        "warn_sheet_direction_unknown": "{cell} : la direction du vent {direction} n’est pas une de celles du tableau {table} ; ses coefficients ne sont pas comparés.",
         "warn_snow_above_limit": "{where} : h_0 = {h_0} m dépasse les {limit} m de la SIA 261 {ref} ; ses dispositions ne s’y appliquent pas.",
         "warn_wind_c_red_outside": "{where} : la surface de référence {area} a h = {h} m et β = {beta}, que la SIA 261 {ref} ne trace pas ; c_red est lu au bout de la courbe la plus proche.",
+        "warn_wind_no_library": "{where} : la figure du tableau {table} de la SIA 261 n’est pas découpée, {files} n’est pas dans norm-library/ ; le fichier s’écrit sans elle.",
         "warn_plan_wrong_type": "Plan {plan}\u202f: {label} est dessiné avec le symbole {type} ({name}).",
         "warn_plan_outside": "Plan {plan}\u202f: {label} est hors du cadrage et n’apparaîtra pas dans le rapport.",
         "warn_script_failed": "Le script {script}\u202f: {reason}",
@@ -264,9 +268,13 @@ STRINGS = {
         "warn_polar_centre_lost": "{connection}\u202f: le schéma {schema} ne porte plus le centre {centre} — le centre de gravité des moyens d’assemblage le remplace.",
     },
     "de": {
+        "open_tab_picking": "Ein Feld wartet auf einen Wert: beenden Sie zuerst die Auswahl («Importieren» oder «Abbrechen»).",
+        "open_tab_not_shown": "Der Reiter {tab} gehört nicht zu «{document}»: wählen Sie das Dokument, das ihn zeigt.",
+        "open_tab_not_made": "«{document}» ist noch nicht angelegt: nur der Reiter Projekt lässt sich öffnen.",
+        "open_tab_reserved": "Der Reiter {tab} ist für eine künftige Berechnung reserviert.",
         "language": "Sprache",
         "reexport": "Daten importieren",
-        "reexport_what": "Excel und die Zeichnungen aus Woodcore",
+        "reexport_what": "die Fälle und die Zeichnungen aus Woodcore",
         "export_pdf": "PDF exportieren",
         "pdf_as_written": "Wie im Dokument",
         "pdf_base_level": "Basis-Detailstufe",
@@ -286,6 +294,7 @@ STRINGS = {
         "nav_structure": "Tragwerk",
         "nav_connections": "Verbindungen",
         "nav_reference": "Referenz",
+        "nav_others": "Weitere",
         "nav_collapse": "Menü auf seine Symbole einklappen",
         "nav_expand": "Menü ausklappen",
         "pdf_chip_tip": "Das nächste PDF wird so kompiliert. Klicken, um es zu ändern.",
@@ -359,10 +368,8 @@ STRINGS = {
         "search": "Suche",
         "commands": "Typst-Befehle",
         "copy": "Kopieren",
-        "import_label": "Import, am Anfang des Abschnitts:",
         "copied": "Kopiert: {text}",
         "copied_short": "Kopiert ✓",
-        "stale": "⚠ {files} wurde nach dem letzten Export geändert – »Daten importieren« klicken, um die Werte zu aktualisieren.",
         "exporting": "Export läuft…",
         "busy_loading": "Wird geladen…",
         "busy_opening": "«{name}» wird geöffnet…",
@@ -410,8 +417,9 @@ STRINGS = {
         # the warnings of the editors, by the code a domain module's engine.Note carries (periodic audit 260916, AUD-4-11)
         "warn_plan_no_number": "Plan {plan}: Element {i} ({type}) hat keine Positionsnummer.",
         "warn_plan_unknown": "Plan {plan}: {label} ist keine Position des Projekts – ergänzen Sie sie im Register Positionen.",
-        "warn_registry_no_sheet": "Kein Blatt «{prefix}…» in {workbooks}: die Domäne {domain} bleibt leer, und #var(…, domain: (\"{domain}\", …)) findet darin nichts.",
         "warn_formula_misnamed": "{file}: der Bereich nennt sich anders als seine Datei ({domain}); er wird so exportiert, und der Reiter «Domaines» schreibt seine ID beim nächsten Speichern zurück.",
+        "warn_load_workbook_not_read": "Im Projektordner liegt eine Lastannahmen-Arbeitsmappe ({files}): Woodcore liest sie nicht mehr. Die Fälle von Wind, Schnee und ständigen Lasten werden in den Registern «Wind», «Schnee» und «Eigen- und Auflasten» erfasst.",
+        "warn_calculations_old_export": "data/calculations.json wurde von einer früheren Version von Woodcore geschrieben (Schema {version}, diese schreibt {current}): der Bericht kompiliert nicht, bis «Daten importieren» die Datei einmal neu geschrieben hat.",
         "warn_sync_stale": "{file}, Zeile {line}: #sync(\"{id}\") schreibt {written}, und der Export hält {held} -- den Wert auffrischen oder #sync entfernen, um ihn so zu behalten.",
         "warn_plan_dimensions_no_scale": "Plan {plan}: {count} Kote(n) messen Längen und der Plan hat keinen Massstab; kalibrieren Sie ihn, sonst werden sie nicht gezeichnet.",
         "warn_dep_changed": "{node} hat sich seit dem letzten Export geändert; davon hängen ab, {kind}: {ids}.",
@@ -432,11 +440,9 @@ STRINGS = {
         "warn_dep_kind_fire": "Brandschutzpläne",
         "warn_dep_kind_extract": "Auszüge",
         "warn_dep_kind_section": "Abschnitte des Berichts",
-        "warn_sheet_value_differs": "{cell}: das Blatt gibt {name} = {excel}, Woodcore berechnet aus seinen Eingaben {woodcore}; der Bericht druckt den Wert von Woodcore.",
-        "warn_sheet_slope_empty": "{cell}: die zweite Dachneigung ist leer; mit 0° gerechnet, wie es das Blatt tut.",
-        "warn_sheet_direction_unknown": "{cell}: die Windrichtung {direction} ist keine der Tabelle {table}; ihre Beiwerte werden nicht verglichen.",
         "warn_snow_above_limit": "{where}: h_0 = {h_0} m liegt über den {limit} m der SIA 261 {ref}; ihre Bestimmungen gelten dort nicht.",
         "warn_wind_c_red_outside": "{where}: die Bezugsfläche {area} hat h = {h} m und β = {beta}, was SIA 261 {ref} nicht zeichnet; c_red wird am Ende der nächsten Kurve abgelesen.",
+        "warn_wind_no_library": "{where}: Die Figur der Tabelle {table} der SIA 261 ist nicht ausgeschnitten, {files} liegt nicht in norm-library/; die Datei wird ohne sie geschrieben.",
         "warn_plan_wrong_type": "Plan {plan}: {label} ist mit dem Symbol {type} ({name}) gezeichnet.",
         "warn_plan_outside": "Plan {plan}: {label} liegt ausserhalb des Ausschnitts und erscheint nicht im Bericht.",
         "warn_script_failed": "Das Skript {script}: {reason}",
@@ -486,9 +492,13 @@ STRINGS = {
         "warn_polar_centre_lost": "{connection}: Das Schema {schema} trägt das Zentrum {centre} nicht mehr – der Schwerpunkt der Verbindungsmittel wird verwendet.",
     },
     "en": {
+        "open_tab_picking": "A field is waiting for a value: end the choice first («Import» or «Cancel»).",
+        "open_tab_not_shown": "The {tab} tab is not in “{document}”: choose the document that shows it.",
+        "open_tab_not_made": "“{document}” is not made yet: only the Project tab opens.",
+        "open_tab_reserved": "The {tab} tab is reserved for a calculation to come.",
         "language": "Language",
         "reexport": "Import data",
-        "reexport_what": "Excel and what Woodcore drew",
+        "reexport_what": "the cases and drawings of Woodcore",
         "export_pdf": "Export PDF",
         "pdf_as_written": "As written (document)",
         "pdf_base_level": "Base level of detail",
@@ -508,6 +518,7 @@ STRINGS = {
         "nav_structure": "Structure",
         "nav_connections": "Connections",
         "nav_reference": "Reference",
+        "nav_others": "Others",
         "nav_collapse": "Fold the menu to its icons",
         "nav_expand": "Unfold the menu",
         "pdf_chip_tip": "The next PDF will be compiled this way. Click to change it.",
@@ -581,10 +592,8 @@ STRINGS = {
         "search": "Search",
         "commands": "Typst commands",
         "copy": "Copy",
-        "import_label": "Import, at the top of the section:",
         "copied": "Copied: {text}",
         "copied_short": "Copied ✓",
-        "stale": "⚠ {files} was modified after the last export – click “Import data” to update the values.",
         "exporting": "Exporting…",
         "busy_loading": "Loading…",
         "busy_opening": "Opening “{name}”…",
@@ -632,8 +641,9 @@ STRINGS = {
         # the warnings of the editors, by the code a domain module's engine.Note carries (periodic audit 260916, AUD-4-11)
         "warn_plan_no_number": "Plan {plan}: element {i} ({type}) has no position number.",
         "warn_plan_unknown": "Plan {plan}: {label} is not a position of the project — add it in the Positions tab.",
-        "warn_registry_no_sheet": "No sheet named «{prefix}…» in {workbooks}: the domain {domain} stays empty, and #var(…, domain: (\"{domain}\", …)) will find nothing in it.",
         "warn_formula_misnamed": "{file}: the domain declares another name than its file ({domain}); it is exported as it stands, and the «Domaines» tab writes its own id back at the next save.",
+        "warn_load_workbook_not_read": "A load workbook is in the project folder ({files}): Woodcore no longer reads it. The cases of wind, snow and permanent loads are entered in the tabs “Wind”, “Snow” and “Self-weight and superimposed load”.",
+        "warn_calculations_old_export": "data/calculations.json was written by an earlier version of Woodcore (schema {version}, this one writes {current}): the report does not compile until “Import data” has written it again once.",
         "warn_sync_stale": "{file}, line {line}: #sync(\"{id}\") writes {written}, and the export holds {held} -- refresh the value, or take #sync away to keep it as it is.",
         "warn_plan_dimensions_no_scale": "Plan {plan}: {count} dimension(s) measure lengths and the plan has no scale; calibrate it, or they are not drawn.",
         "warn_dep_changed": "{node} changed since the last export; depending on it, {kind}: {ids}.",
@@ -654,11 +664,9 @@ STRINGS = {
         "warn_dep_kind_fire": "fire plans",
         "warn_dep_kind_extract": "excerpts",
         "warn_dep_kind_section": "report sections",
-        "warn_sheet_value_differs": "{cell}: the sheet gives {name} = {excel}, Woodcore computes {woodcore} from its inputs; the report prints Woodcore’s value.",
-        "warn_sheet_slope_empty": "{cell}: the second roof slope is empty; computed at 0°, as the sheet does.",
-        "warn_sheet_direction_unknown": "{cell}: the wind direction {direction} is not one of table {table}; its coefficients are not compared.",
         "warn_snow_above_limit": "{where}: h_0 = {h_0} m is above the {limit} m of SIA 261 {ref}; its provisions do not apply there.",
         "warn_wind_c_red_outside": "{where}: the reference area {area} has h = {h} m and β = {beta}, which SIA 261 {ref} does not draw; c_red is read at the end of the nearest curve.",
+        "warn_wind_no_library": "{where}: Table {table}'s figure of SIA 261 is not cut, {files} is not in norm-library/; the file is written without it.",
         "warn_plan_wrong_type": "Plan {plan}: {label} is drawn with the symbol {type} ({name}).",
         "warn_plan_outside": "Plan {plan}: {label} lies outside the crop and will not be seen in the report.",
         "warn_script_failed": "The script {script}: {reason}",
@@ -752,12 +760,14 @@ for _lang, _texts in fire_check_tab_words.STRINGS.items():
 for _lang, _texts in steel_tab_words.STRINGS.items():
     STRINGS[_lang].update(_texts)
 
-# The tabs of loads entered in Woodcore, likewise, prefixed ld_ (calc/tools/load_tab.py, issues #35-#37).
-for _lang, _texts in load_tab.STRINGS.items():
+# The tabs of loads entered in Woodcore, likewise, prefixed ld_ (calc/tools/load_words.py, issues #35-#37).
+for _lang, _texts in load_words.STRINGS.items():
     STRINGS[_lang].update(_texts)
 
-# The calculation tabs' common base, prefixed ct_, and the «Neige» tab built on it, prefixed sn_ (calc/tools/calc_tab_words.py, calc/tools/snow_tab_words.py; spec 2026-10-22-onglet-neige-type).
-for _module in (calc_tab_words, snow_tab_words):
+# The words of the services of the tabs built on a type, a module for a set of services -- each service names its own (`WORDS_MODULE`, tab_host.Service) and tests/test_tab_services.py holds every one listed here: the services of the type «Calcul», prefixed ct_ (spec 2026-10-23-onglets-types-et-services, ARCH-008).
+SERVICE_WORDS = (calc_tab_words,)
+# Those, the «Neige» tab's, prefixed sn_, and the «Vent» tab's, wi_ (calc/tools/calc_tab_words.py, snow_tab_words.py, wind_tab_words.py; specs 2026-10-22-onglet-neige-type, 2026-10-23-onglet-vent-briques).
+for _module in (*SERVICE_WORDS, snow_tab_words, wind_tab_words, materials_tab_words):   # and the «Matériaux» tab's, mat_ (issue #110)
     for _lang, _texts in _module.STRINGS.items():
         STRINGS[_lang].update(_texts)
 
@@ -816,8 +826,8 @@ for _lang, _texts in formula_tab.STRINGS.items():
     STRINGS[_lang].update(_texts)
 
 
-# The «Variables» tab's, likewise, prefixed vr_.
-for _lang, _texts in variables_tab.STRINGS.items():
+# The «Variables» tab's, likewise, prefixed vr_ -- in a module of their own since issue #114 (ARCH-006).
+for _lang, _texts in variables_words.STRINGS.items():
     STRINGS[_lang].update(_texts)
 
 

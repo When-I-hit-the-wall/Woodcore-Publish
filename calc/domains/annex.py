@@ -808,7 +808,7 @@ def previous_export(data_dir):
 
 
 def export(here):
-    """prepare + write, and the warnings -- what Woodcore runs when a source or an excerpt is saved, so the report sees it without the load workbooks being read again."""
+    """prepare + write, and the warnings -- what Woodcore runs when a source or an excerpt is saved, so the report sees it without the whole export being run again."""
     data, files, notes = prepare(here, previous_export(here.data_dir))
     write(data, files, here.data_dir)
     return notes

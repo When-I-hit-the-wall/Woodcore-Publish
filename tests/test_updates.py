@@ -391,6 +391,45 @@ def test_the_question_links_to_what_the_version_changes():
         QMessageBox.exec = real_exec
 
 
+def _windowless_progress():
+    """A stand-in for the `QProgressDialog` that `update_gui.install` shows, without a window (issue #108, REQ-008): what the test reads of it -- shown, its value moved, closed by `finished` -- and nothing native. A full run of 24.10.2026 hung over an hour with the main thread in `finished`, at the dialog's `close()` on a window-modal dialog over a shown parent, and its process could not even be killed; 232 runs of this file under load (16 at once, then 12 beside 8 busy cores) did not hang again, so the cause was not reproduced -- the test no longer goes through the native modal dialog, which it never checked, and the runner now stops such a test within its limit and the grace whatever the cause."""
+    from PySide6.QtCore import QObject, Signal
+
+    class Progress(QObject):
+        canceled = Signal()
+        made = []
+
+        def __init__(self, label, cancel, low, high, parent=None):
+            super().__init__()
+            self.label, self.values, self.shown, self.closed = label, [], False, False
+            Progress.made.append(self)
+
+        def setWindowTitle(self, title):
+            self.title = title
+
+        def setWindowModality(self, modality):
+            self.modality = modality
+
+        def setMinimumDuration(self, ms):
+            pass
+
+        def setAutoClose(self, on):
+            pass
+
+        def setAutoReset(self, on):
+            pass
+
+        def setValue(self, value):
+            self.values.append(value)
+
+        def show(self):
+            self.shown = True
+
+        def close(self):
+            self.closed = True
+    return Progress
+
+
 def test_skip_and_later_are_remembered_and_install_downloads_then_starts():
     app = _qt()
     import update_gui
@@ -401,6 +440,8 @@ def test_skip_and_later_are_remembered_and_install_downloads_then_starts():
     parent = QWidget()
     parent.show()
     real_ask, real_info, real_warn = update_gui.ask, QMessageBox.information, QMessageBox.warning
+    real_progress = update_gui.QProgressDialog
+    progress = update_gui.QProgressDialog = _windowless_progress()
     said = []
     try:
         root = conftest.tmpdir("updates_gui_root")
@@ -435,6 +476,8 @@ def test_skip_and_later_are_remembered_and_install_downloads_then_starts():
         QTimer.singleShot(5000, loop.quit)
         loop.exec()
         assert launched == [Path("setup.exe")]
+        dialog = progress.made[-1]
+        assert dialog.shown and dialog.closed and 500 in dialog.values and "9.3.0" in dialog.label, vars(dialog)
         assert said_last() is not None and said_last()[0] == "info" and "9.3.0" in said_last()[1]
 
         def refused(m, progress, cancelled):
@@ -449,6 +492,7 @@ def test_skip_and_later_are_remembered_and_install_downloads_then_starts():
         if "listening" in locals():
             listening.__exit__(None, None, None)
         update_gui.ask, updates.offer = real_ask, real_offer
+        update_gui.QProgressDialog = real_progress
         QMessageBox.information, QMessageBox.warning = real_info, real_warn
         import notifications
         notifications.STORE.clear()

@@ -118,37 +118,44 @@ def test_the_sweep_removes_a_record_whose_row_is_gone():
         assert (folder / f"{pid}.json").exists(), f"the sweep removed {pid}, which the index names"
 
 
+def _example_copy(name):
+    """A whole copy of the project the tests work on -- its sources, its sections, its export and its engine --, for a test that runs the export on it in a subprocess."""
+    import project
+    d = conftest.tmpdir(name)
+    shutil.copytree(conftest.PROJECT.root, d / "P", ignore=shutil.ignore_patterns(".probe", "*.lock", ".woodcore-*"))
+    return project.Project.load(d / "P" / conftest.PROJECT.file.name)
+
+
+def _export(here, *more):
+    return subprocess.run(
+        [sys.executable, str(ROOT / "calc" / "export_all.py"), "--project", str(here.file), *more],
+        capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=str(ROOT),
+        env={k: v for k, v in dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8").items() if k != "WOODCORE_PROJECT"},   # the child prints «Übung», «Stütze»: in the console's code page otherwise, which a UTF-8 reader fails on
+    )
+
+
 def test_the_export_is_reproducible():
-    """Run twice, data/ comes out byte for byte the same.
+    """Run twice, data/ comes out byte for byte the same -- on a copy of the example project, whose loads are cases entered in Woodcore since issue #109 (the engineer's own workbook was needed until then, and the test skipped without it).
 
-    Slow (it reads the workbooks), and skipped where they are not there. It is what makes a `git diff` on data/ readable: a value that changed shows as a value that changed, not inside a wall of reordered keys and redrawn figures.
+    It is what makes a `git diff` on data/ readable: a value that changed shows as a value that changed, not inside a wall of reordered keys and redrawn figures. The first export is run over a data/calculations.json of an earlier Woodcore (1.8): it is not stopped by it, and writes 1.9 (REQ-007, C-1).
     """
-    real = conftest.real_project()   # the engineer's own: the example project carries no workbook to export from
-    import positions_store
-    # ⚠️ An export migrates a project made before v0.114 -- its Positionen.xlsx imported into positions.json and moved into _Archiv (calc/positions_store.py) -- and a test never migrates the engineer's own project: it is his to open, and Woodcore migrates it then.
-    if not positions_store.path(real).exists():
-        raise Skip("the project has no positions.json yet -- an export would migrate it, which a test does not do to the engineer's project")
-    data = real.data_dir
-    if not data.is_dir():
-        raise Skip("data/ is not there -- run the export first")
-
-    d = conftest.tmpdir("export")
+    here = _example_copy("export")
+    data = here.data_dir
+    calculations = data / "calculations.json"
+    old = json.loads(calculations.read_text(encoding="utf-8"))
+    old["schema_version"] = "1.8"
+    calculations.write_text(json.dumps(old), encoding="utf-8")
+    out = _export(here)
+    assert out.returncode == 0, out.stderr or out.stdout
+    assert json.loads(calculations.read_text(encoding="utf-8"))["schema_version"] == "1.9", "the export over an old file writes the current one"
+    d = conftest.tmpdir("export_before")
     before = d / "before"
     shutil.copytree(data, before)
     # The reference workbook too: openpyxl stamps the time of every save into docProps/core.xml, so it was rewritten by every export and every run of this very test left the committed file modified (periodic audit 260916, AUD-1-3).
-    reference = real.docs_dir / "typst-reference.xlsx"
+    reference = here.docs_dir / "typst-reference.xlsx"
     reference_before = reference.read_bytes() if reference.exists() else None
-    out = subprocess.run(
-        [sys.executable, str(ROOT / "calc" / "export_all.py"), "--project", str(real.file)],
-        capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=str(ROOT),
-        env=dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8"),   # the child prints «Übung», «Stütze»: in the console's code page otherwise, which a UTF-8 reader fails on
-    )
-    if out.returncode != 0:
-        raise Skip(
-            "the export does not currently pass, so it cannot be run twice: "
-            + (out.stderr or out.stdout).strip().splitlines()[0]
-        )
-
+    out = _export(here)
+    assert out.returncode == 0, out.stderr or out.stdout
     differences = []
     for p in sorted(data.rglob("*")):
         if p.is_dir():
@@ -164,6 +171,50 @@ def test_the_export_is_reproducible():
     assert not differences, "a second export changed data/:\n" + "\n".join(differences)
     if reference_before is not None:
         assert reference.read_bytes() == reference_before, "a second export rewrote docs/typst-reference.xlsx although data/ did not change"
+
+
+def test_an_export_of_an_earlier_woodcore_stops_the_compile_and_check_says_what_to_do():
+    """Issue #109, REQ-007, C-1: a data/calculations.json at 1.8 -- the load workbooks' cases -- stops the report's compile, saying «Import données» (lib/calc-engine-core.typ, `load-calculations`, the version the export writes); `woodcore-cli check`, which writes nothing, says it too and is not stopped by it."""
+    import registry
+    engine_text = (ROOT / "lib" / "calc-engine-core.typ").read_text(encoding="utf-8")
+    assert '#let calculations-version = "%s"' % registry.SCHEMA_VERSION in engine_text, "the engine reads the version the export writes"
+    here = _example_copy("old_export")
+    calculations = here.data_dir / "calculations.json"
+    old = json.loads(calculations.read_text(encoding="utf-8"))
+    old["schema_version"] = "1.8"
+    calculations.write_text(json.dumps(old), encoding="utf-8")
+    note = registry.old_export_note(here.data_dir)
+    assert note is not None and note.code == "calculations_old_export" and note.args == {"version": "1.8", "current": registry.SCHEMA_VERSION}
+    check = subprocess.run([sys.executable, str(ROOT / "calc" / "cli.py"), "check", "--project", str(here.file)],
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=str(ROOT),
+                           env={k: v for k, v in dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8").items() if k != "WOODCORE_PROJECT"})
+    assert check.returncode == 0 and "earlier version of Woodcore" in check.stderr and "Import données" in check.stderr, check.stdout + check.stderr
+    assert json.loads(calculations.read_text(encoding="utf-8"))["schema_version"] == "1.8", "check writes nothing"
+    if not conftest.have_typst():
+        raise Skip("typst is not on the path")
+    probe = here.typst_root / "probe-old.typ"
+    probe.write_text('#import "/000-Typst-Config/commands.typ": *\n#var("q_k1", domain: ("snow-load", "SL"))\n', encoding="utf-8")
+    run = subprocess.run(["typst", "compile", "--root", str(here.typst_root), str(probe), str(probe.with_suffix(".pdf"))],
+                         capture_output=True, text=True, encoding="utf-8", errors="replace")
+    message = conftest.panic_message(run.stderr) or run.stderr
+    assert run.returncode != 0 and "earlier version of Woodcore" in message and "Import données" in message and '"1.8"' in message, message
+
+
+def test_every_case_a_section_of_the_example_cites_is_exported():
+    """Issue #109, REQ-004: each `domain-file(kind, id)` of a load that the example's sections and the report's 004-einwirkungen.typ include names a case of data/calculations.json -- the three ids corrected (WL-Fluchttreppe+Geraete, EL+AL-Dach_mit_Wasser, EL+AL-Dach_ohne_Wasser) among them -- and each case is a source of Woodcore-Datei/loads/."""
+    here = conftest.PROJECT
+    calculations = json.loads((here.data_dir / "calculations.json").read_text(encoding="utf-8"))["domains"]
+    cited = set()
+    for path in here.root.rglob("*.typ"):
+        if any(part.startswith((".", "000-Woodcore")) for part in path.relative_to(here.root).parts):
+            continue
+        cited |= set(re.findall(r'domain-file\("((?:dead|snow|wind)-load)", "([^"]+)"\)', path.read_text(encoding="utf-8")))
+    assert {("dead-load", "EL+AL-Dach_mit_Wasser"), ("dead-load", "EL+AL-Dach_ohne_Wasser"), ("wind-load", "WL-Fluchttreppe+Geraete"), ("snow-load", "SL")} <= cited, cited
+    missing = sorted(c for c in cited if c[1] not in calculations[c[0]]["instances"])
+    assert not missing, missing
+    for kind in ("dead-load", "snow-load", "wind-load"):
+        for case, instance in calculations[kind]["instances"].items():
+            assert instance.get("source_file", "").startswith("loads/") and (here.sources_dir / instance["source_file"]).is_file(), (kind, case)
 
 
 # --- the strength class, its own field ------------------------------------------------

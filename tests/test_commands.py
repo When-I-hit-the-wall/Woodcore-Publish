@@ -391,6 +391,22 @@ def test_every_public_command_is_translated():
     assert not lines, "calc/i18n/commands.json does not follow the /// blocks:\n  " + "\n  ".join(lines)
 
 
+# What a /// block and its translation no longer carry (spec 2026-10-24-onglet-commandes-pages, REQ-010, D-6): the internal references -- a spec, a requirement, a question, a decision, a version in brackets -- which say nothing to a reader of Tinymist or of the commands tab, kept as // comments above the block instead.
+INTERNAL_REFERENCE = re.compile(r"spec 20|Spezifikation 20|\bREQ-|\bARCH-|\bQ-0|\bD-\d|\(v0\.", re.I)
+
+
+def test_no_doc_block_carries_an_internal_reference():
+    """REQ-010: no `spec 20…`, `REQ-`, `ARCH-`, `Q-0`, `D-` or `(v0.` in the /// block of a public command, nor in its French and German in calc/i18n/commands.json."""
+    found = [f"{r['name']}: {line[:100]}" for r in PUBLIC for line in r["doc_lines"] if INTERNAL_REFERENCE.search(line)]
+    assert not found, "internal references in /// blocks (move them to a // comment above the block):\n  " + "\n  ".join(found)
+    table = docs.load()
+    translated = [f"{name} ({lang})" for name, entry in table["commands"].items()
+                  for unit in list(entry.get("paragraphs") or []) + list((entry.get("arguments") or {}).values())
+                  for lang in ("en", "fr", "de") if INTERNAL_REFERENCE.search(unit.get(lang) or "")]
+    assert not translated, f"internal references in calc/i18n/commands.json: {sorted(set(translated))}"
+    assert INTERNAL_REFERENCE.search("prints a variable (spec 2026-10-21-commandes-typst-refonte, REQ-002)"), "the pattern catches a planted reference"
+
+
 def test_a_translation_keeps_the_code_it_quotes():
     """What stands between backticks is code -- a call, an argument, a value -- and is the same in all three languages. A translator who translated `\"val+unit\"` would send the reader to type a value the command refuses."""
     bad = docs.code_spans_kept()
@@ -570,20 +586,30 @@ class _App:
         self.copied = text
 
 
-def _tab(lang, quiet=False):
-    """The commands tab in `lang`, off-screen. `quiet` shows no page at all: what is checked then is the layout, not the pages."""
+def _tab(lang, quiet=False, views=None):
+    """The commands tab in `lang`, off-screen, built with the states `views` a rebuilt window carries. `quiet` shows no page at all: what is checked then is the layout, not the pages."""
     _qt()
     import commands_tab
-    tab = commands_tab.CommandsTab(_App(lang))
     if quiet:
-        tab.show_page = lambda _box: None
+        import command_examples
+        saved = command_examples.ExampleRenderer.show_page
+        command_examples.ExampleRenderer.show_page = lambda self, _box: None
+    try:
+        app = _App(lang)
+        app.views = dict(views or {})
+        tab = commands_tab.CommandsTab(app)
+    finally:
+        if quiet:
+            command_examples.ExampleRenderer.show_page = saved
+    if quiet:
+        tab.service("browser").page.renderer.show_page = lambda _box: None
     tab.resize(1400, 900)
     return tab
 
 
 def _select(tab, name):
-    tab.tree.setCurrentItem(tab.nodes[f"cmd|{name}"])
-    return tab.record(name)
+    tab.service("browser").list.select(f"cmd|{name}")
+    return tab.service("browser").record(name)
 
 
 def _settle(tab, seconds=90):
@@ -591,11 +617,12 @@ def _settle(tab, seconds=90):
     import time
     app = _qt()
     deadline = time.time() + seconds
-    while (tab.job is not None or tab.queue) and time.time() < deadline:
+    renderer = tab.service("browser").page.renderer
+    while (renderer.job is not None or renderer.queue) and time.time() < deadline:
         app.processEvents()
         time.sleep(0.02)
     app.processEvents()
-    assert tab.job is None and not tab.queue, "an example is still compiling"
+    assert renderer.job is None and not renderer.queue, "an example is still compiling"
 
 
 class _Stubs:
@@ -615,105 +642,159 @@ class _Stubs:
             setattr(preview, name, value)
 
 
-def test_the_tree_is_the_reference_s_categories_in_its_order_and_words():
-    """The categories in build_reference.CATEGORIES' order -- calculating in the report first -- named and introduced by calc/i18n/reference.json in each of the window's languages, Internes last and folded; the tree's headings the file's words; and the search still finding a command by the words of either language."""
+
+
+def test_the_tree_is_the_reference_s_categories_by_task_with_each_lead():
+    """UI-002, REQ-009: the categories in build_reference.CATEGORIES' order -- by task, calculating in the report first, writing a template last --, named by calc/i18n/reference.json with the number of their commands, Internes last and folded; each command's row carries its lead for its second line (command_page.lead)."""
     from PySide6.QtCore import Qt
+    import command_list
+    import command_page
     import commands_tab
     public_keys = [key for key, _names in ref.CATEGORIES]
+    assert public_keys == ["formula", "display", "data", "document", "format"]
     for lang in ("fr", "de", "en"):
         tab = _tab(lang, quiet=True)
-        tops = [tab.tree.topLevelItem(i) for i in range(tab.tree.topLevelItemCount())]
+        tops = [tab.service("browser").tree.topLevelItem(i) for i in range(tab.service("browser").tree.topLevelItemCount())]
         keys = [item.data(0, Qt.ItemDataRole.UserRole)[4:] for item in tops]
         assert keys == public_keys + [ref.INTERNAL] == commands_tab.CATEGORY_ORDER, keys
         for key, item in zip(keys, tops):
-            assert item.text(0).startswith(docs.category_label(key, lang)), (lang, key, item.text(0))
+            assert item.text(0) == f"{docs.category_label(key, lang)}  ({item.childCount()})", (lang, key, item.text(0))
             if key != ref.INTERNAL:
-                assert item.text(tab.SUMMARY) == docs.category_lead(key, lang), (lang, key)
-                assert [item.child(i).text(0) for i in range(item.childCount())] == list(dict(ref.CATEGORIES)[key])
+                names = [item.child(i).text(0) for i in range(item.childCount())]
+                assert names == list(dict(ref.CATEGORIES)[key])
+                for i in range(item.childCount()):
+                    assert item.child(i).data(0, command_list.LEAD_ROLE) == command_page.lead(tab.service("browser").record(names[i]), lang)
         assert not tops[-1].isExpanded(), "Internes is folded"
-        header = tab.tree.headerItem()
-        assert (header.text(0), header.text(1)) == (docs.word("command", lang), docs.word("arguments", lang))
-        assert not [key for key in commands_tab.STRINGS[lang] if key.startswith("ref_cat_")]
+        assert tab.service("browser").search.placeholderText() == docs.word("search", lang)
+
+
+def test_the_search_reads_the_name_and_the_lead_in_the_window_s_language():
+    """REQ-011: a word of a lead finds its command, a name of an argument alone finds nothing, and the lead of another language is not read."""
+    import command_pages
     tab = _tab("fr", quiet=True)
-    record = tab.record("distance")
-    for words in (record["paragraphs"][0], record["english"]["paragraphs"][0]):
-        tab.search.setText(words[:30])
-        assert "cmd|distance" in tab.nodes, f"the search does not find distance by {words[:30]!r}"
-    tab.search.setText("")
+    lead = command_pages.entry("distance")["lead"]["fr"]
+    tab.service("browser").search.setText("épaisseurs minimales")
+    assert "épaisseurs minimales" in lead and "cmd|distance" in tab.service("browser").nodes
+    tab.service("browser").search.setText("label-position")
+    assert not [iid for iid in tab.service("browser").nodes if iid.startswith("cmd|") and tab.service("browser").record(iid[4:])["category"] != ref.INTERNAL], "an argument's name is not searched"
+    tab.service("browser").search.setText(command_pages.entry("distance")["lead"]["de"][:25])
+    assert "cmd|distance" not in tab.service("browser").nodes, "the German lead is not searched in a French window"
+    tab.service("browser").search.setText("")
 
 
-def test_the_detail_pane_is_laid_out_as_the_site_s_command_page():
-    """Selected, a command is shown as the website's page shows it (website/build.py's page_command), in this order: the category, the name, the signature coloured, the paragraphs in the window's language, the arguments as a table -- name, type, default, what it does --, what it returns, the minimal and the complete call each copied by its button, the examples, the import line and where it is defined. The words are reference.json's; the signature, the rows and the calls command_docs'."""
-    import richtext
-    for lang in ("de", "fr"):
+def test_one_view_three_panes_no_state_and_no_norm_bubble():
+    """UI-001: the list, the page and the right-hand pane side by side; no switch of views, no module of state, no ⓘ of a norm."""
+    import norm_bubble
+    tab = _tab("fr", quiet=True)
+    _select(tab, "var")
+    assert [tab.splitter.widget(i) for i in range(3)] == [tab.service("browser").list, tab.service("browser").page, tab.service("browser").side]
+    assert not tab.findChildren(norm_bubble.InfoMark)
+    assert not hasattr(tab, "views") and not hasattr(tab, "dirty")
+
+
+def test_the_page_of_var_is_the_condensed_page():
+    """UI-003 to UI-005: the head, the lead, the line of the command -- the model's, its names links --, the hint, «L'essentiel», the arguments in groups, the examples; in each language its own lead."""
+    import command_page
+    for lang in ("fr", "de"):
         tab = _tab(lang, quiet=True)
-        record = _select(tab, "distance")
-        calls = docs.calls(record, tab.samples)
-        expected = (["eyebrow", "title", "signature"] + ["paragraph"] * len(record["paragraphs"])
-                    + (["untranslated"] if record["untranslated"] else [])
-                    + ["arguments", "argument_table", "returns"]
-                    + [part for key, _call in calls for part in (key, key + "_code")]
-                    + ["example"] * len(record["examples"]) + ["import", "defined"])
-        names = [name for name, _widget in tab.parts]
-        assert names == expected, names
-        parts = dict(tab.parts)
-        assert parts["eyebrow"].text() == f"{docs.word('commands', lang)} › {docs.category_label('formula', lang)}"
-        assert parts["title"].text() == "distance"
-        assert parts["signature"].objectName() == "code" and "distance" in parts["signature"].text()
-        assert docs.signature(record, record).startswith("#distance(d, connector") and docs.signature(record, record).endswith("-> content")
-        assert parts["arguments"].text() == docs.word("arguments", lang)
-        grid = parts["argument_table"].layout()
-        assert grid.rowCount() == len(record["bullets"]) + 2 and grid.columnCount() == 4
-        headers = [grid.itemAtPosition(0, column).widget().text() for column in range(4)]
-        assert headers == [tab.t(key) for key in ("ref_col_name", "ref_col_type", "ref_col_default", "ref_col_summary")]
-        rows = docs.arguments(record, record)
-        for row, arg in enumerate(rows, start=2):
-            assert grid.itemAtPosition(row, 0).widget().text() == arg["name"]
-            assert grid.itemAtPosition(row, 2).widget().text() == (arg["default"] if arg["default"] is not None else "—")
-            assert all(kind in grid.itemAtPosition(row, 1).widget().text() for kind in arg["types"])
-        assert [r["name"] for r in rows[:2]] == ["d", "connector"] and rows[0]["default"] is None
-        assert parts["returns"].text() == f"{docs.word('returns', lang)} content"
-        fields = [w for w in tab.detail.findChildren(richtext.CodeField)]
-        assert [f.text() for f in fields[:len(calls)]] == [call for _key, call in calls]
-        for key, _call in calls:
-            assert parts[key].text() == docs.word(key, lang)
-        boxes = tab.boxes
-        assert [box.heading.text() for box in boxes] == [docs.word("example", lang, n=i + 1) for i in range(len(record["examples"]))]
-        assert parts["defined"].text() == f"{docs.word('defined_in', lang)} lib/{record['file']}:{record['line']}"
-    assert docs.calls(BY_NAME["report-level"], {}) == [("call_minimal", "#report-level.update(2)")], "a call identical in both forms is offered once, as on the site"
-    values = [r for r in BINDINGS if r["kind"] != "function" and r["name"] not in ref.WRITTEN_CALLS]
-    assert not values or docs.calls(values[0], {}) == [], "a binding the reference writes no call for is offered none"
+        record = _select(tab, "var")
+        names = [name for name, _widget in tab.service("browser").page.parts]
+        assert names[:8] == ["head", "lead", "line", "hint", "essentials", "keys", "arguments", "argument_table"], names
+        assert names.count("example") == len(record["examples"]) and names[-1] == "defined"
+        view = command_page.view(record, lang)
+        parts = dict(tab.service("browser").page.parts)
+        assert view["lead"] in parts["lead"].text()
+        assert tab.service("browser").page.line.text_plain == command_page.line_text(view["line"])
+        assert 'href="arg:key"' in tab.service("browser").page.line.toHtml() and 'href="val:display"' in tab.service("browser").page.line.toHtml()
+        assert parts["hint"].text() == docs.word("line_hint", lang)
+        assert tab.service("browser").page.table_rows == [row["name"] for group in view["groups"] for row in group["rows"]]
+        assert tab.service("browser").page.named_row == ["..rest", "name-calc", "name-visible", "norm-ref"]
+    assert command_page.view(record, "fr")["lead"] != command_page.view(record, "de")["lead"]
 
 
-def test_the_level_selector_stands_exactly_where_example_levels_says():
-    """The 1 · 2 · 3 buttons stand under an example where command_docs.example_levels gives three levels -- the site's decision, which build_examples.py renders the pages by -- and nowhere else; where the command takes a level and the example writes its own, the rule is said in their place, with the level the example prints at."""
+def test_the_bubbles_open_from_the_page_and_need_no_typst():
+    """UI-006, UI-007, REQ-012: an argument's bubble says its sentence; a value's lists the values and shows the print of the current one, cut out of the committed sheet -- with Typst absent, nothing compiled."""
+    calls = []
+    with _Stubs(have_typst=lambda: False, render_localised=lambda *a, **k: calls.append(a) or (None, None), render_blocking=lambda *a, **k: calls.append(a) or (None, None)):
+        tab = _tab("fr")
+        _select(tab, "var")
+        tab.service("browser").page.open_bubble("arg:display", tab.service("browser").page.cursor_rect())
+        kind, data = tab.service("browser").page.last_bubble
+        assert kind == "arg" and data["status"] == "optionnel · par défaut auto" and tab.service("browser").page.bubble.is_open()
+        tab.service("browser").page.open_bubble("val:display", tab.service("browser").page.cursor_rect(), pin=True)
+        kind, data = tab.service("browser").page.last_bubble
+        assert kind == "val" and [v["value"] for v in data["values"]][:2] == ["auto", '"none"']
+        assert tab.service("browser").page.shown_value == "auto" and tab.service("browser").page.shown_print[0] == "fr-var.png"
+        tab.service("browser").page.bubble.close()
+        assert not calls, "a page and its bubbles compile nothing"
+
+
+def test_the_right_hand_pane_offers_the_calls_the_examples_and_the_project_s_own():
+    """UI-010: the two lines to copy are command_docs.calls'; the examples listed by their first line, a click flashing the example on the page; «Dans ce projet» the calls of the open project, twelve at most."""
+    import command_usage
+    tab = _tab("fr", quiet=True)
+    record = _select(tab, "var")
+    assert tab.service("browser").side.calls_shown == docs.calls(record, tab.service("browser").samples)
+    assert len(tab.service("browser").side.example_buttons) == len(record["examples"])
+    tab.service("browser").side.example_buttons[2].click()
+    assert tab.service("browser").page.flashed == 2
+    assert 0 < len(tab.service("browser").side.usage_rows) <= command_usage.LIMIT
+    assert all("#var(" in text.replace(" (", "(") for _f, _l, text in tab.service("browser").side.usage_rows)
+
+
+def test_each_pane_is_built_alone():
+    """ARCH-007: the list, the page and the right-hand pane are built on the context alone, without CommandsTab, and no module of the tab imports tab_host."""
+    _qt()
+    import command_list
+    import command_page_view
+    import command_side
+    import commands_tab
+    ctx = commands_tab.context(_App("en"))
+    listing = command_list.CommandList(ctx)
+    listing.refill()
+    assert "cmd|var" in listing.nodes and set(listing.state()) == {"search", "open", "selection"}
+    page = command_page_view.CommandPage(ctx)
+    page.set_selection("cmd|eq", next(r for r in ctx.records if r["name"] == "eq"))
+    assert page.line is not None and page.state() == {"levels": {}}
+    side = command_side.CommandSide(ctx)
+    side.set_command(next(r for r in ctx.records if r["name"] == "eq"))
+    assert side.calls_shown
+    for name in ("commands_tab.py", "command_list.py", "command_page_view.py", "command_side.py", "command_examples.py", "command_page.py", "command_pages.py"):
+        assert "tab_host" not in (ROOT / "calc" / "tools" / name).read_text(encoding="utf-8"), name
+
+
+def test_the_level_selector_stands_where_the_levels_differ():
+    """UI-009, REQ-008: the 1 · 2 · 3 buttons where command_docs.example_levels gives three and the levels were not all measured alike; one page and its note where they are; where the command takes a level and the example writes its own, the rule said in their place."""
+    import command_examples
+    import command_page
     import commands_tab
     tab = _tab("de", quiet=True)
-    checked = 0
-    for record in (r for r in tab.records if r["category"] != ref.INTERNAL and r["examples"]):
+    checked = noted = 0
+    for record in (r for r in tab.service("browser").records if r["category"] != ref.INTERNAL and r["examples"]):
         _select(tab, record["name"])
-        assert len(tab.boxes) == len(record["examples"]), record["name"]
-        for box, example in zip(tab.boxes, record["examples"]):
+        assert len(tab.service("browser").boxes) == len(record["examples"]), record["name"]
+        for box, example in zip(tab.service("browser").boxes, record["examples"]):
             levels = docs.example_levels(record, record["english"], example)
-            assert box.levels == levels, (record["name"], box.index)
-            if len(levels) > 1:
-                assert box.group is not None and sorted(box.group.id(b) for b in box.group.buttons()) == list(levels), (record["name"], box.index)
-                assert box.group.checkedId() == box.level == preview.DEFAULT_LEVEL
+            shown = command_page.shown_levels(record["name"], box.index, levels, tab.service("browser").page.renderer.manifest)
+            assert box.levels == shown, (record["name"], box.index)
+            if len(shown) > 1:
+                assert sorted(box.group.id(b) for b in box.group.buttons()) == list(shown)
                 checked += 1
             else:
-                assert box.group is None, (record["name"], box.index)
-            pinned = commands_tab.pinned_level(example["code"])
+                assert box.group is None
+            if box.levels_note:
+                noted += 1
+                assert box.note_label is not None and box.note_label.text() == box.levels_note
+            pinned = command_examples.pinned_level(example["code"])
             if example["render"] and len(levels) == 1 and docs.takes_level(record, record["english"]) and pinned is not None:
-                assert box.fixed_note is not None and tab.t("ref_level_fixed", level=pinned) in box.fixed_note.text(), (record["name"], box.index)
-            else:
-                assert box.fixed_note is None, (record["name"], box.index)
-    assert checked > 20, checked
-    assert commands_tab.pinned_level('#var("S", 1, level: 0)\n#eq("T", `S`, level: 3)') == "3", "a `level: 0` declares and prints nothing: the rule names the level that prints"
+                assert box.fixed_note is not None and tab.t("ref_level_fixed", level=pinned) in box.fixed_note.text()
+    assert checked > 10 and noted > 5, (checked, noted)
+    assert commands_tab.pinned_level('#var("S", 1, level: 0)\n#eq("T", `S`, level: 3)') == "3"
     assert commands_tab.pinned_level('#var("F", 2, "kN", level: 0)\n#eq("M", `F dot l`)') is None
 
 
 def test_a_french_or_english_example_is_compiled_in_that_language():
-    """A French or English window shows each example in its own language: compiled by command_preview.render_localised in a thread of its own, «Compilation…» standing in the box meanwhile, and a level chosen compiled at that level. German shows the committed page, compiling nothing. Where Typst is on the PATH, one real compile: the page comes from the cache, not from examples/out."""
+    """A French or English window shows each example in its own language, compiled by command_preview.render_localised in a thread of its own; German shows the committed page, compiling nothing."""
     german = examples.OUT / "distance-1.png"
     seen = []
 
@@ -724,47 +805,60 @@ def test_a_french_or_english_example_is_compiled_in_that_language():
     with _Stubs(render_localised=render, cached_png=lambda _key: None, have_typst=lambda: True):
         tab = _tab("fr")
         record = _select(tab, "distance")
-        first = tab.boxes[0]
-        assert first.status.text() == tab.t("ref_rendering") and first.preview.path is None, "no placeholder while the page compiles"
+        first = tab.service("browser").boxes[0]
+        assert first.status.text() == tab.t("ref_rendering") and first.preview.path is None
         _settle(tab)
         assert [(level, lang) for _code, level, lang in seen] == [(preview.DEFAULT_LEVEL, "fr")] * len(record["examples"]), seen
-        assert all(box.preview.path == german and not box.status.isVisibleTo(box) for box in tab.boxes)
+        assert all(box.preview.path == german for box in tab.service("browser").boxes)
         seen.clear()
         first.group.button(3).click()
         _settle(tab)
         assert seen == [(first.code, 3, "fr")], seen
         german_tab = _tab("de")
         _select(german_tab, "distance")
-        assert german_tab.job is None and not german_tab.queue and seen == [(first.code, 3, "fr")], "a German window compiles a committed page"
-        assert german_tab.boxes[0].preview.path == examples.page("distance", 0, 2, first.code)[0]
-    if not conftest.have_typst() or not (examples.EXAMPLES / "commands.typ").exists():
-        raise Skip("typst is not on PATH, or examples/ has no engine copy -- run build_examples.py")
-    with _Stubs(cached_png=lambda _key: None):   # nothing from the cache: render_localised compiles for real
-        tab = _tab("en")
-        _select(tab, "fmt-decimals")
-        _settle(tab)
-        for box in tab.boxes:
-            assert box.preview.path is not None and preview.CACHE_DIR in box.preview.path.parents, (box.index, box.preview.path, box.status.text())
-            assert not box.status.isVisibleTo(box), box.status.text()
+        assert german_tab.service("browser").page.renderer.job is None and not german_tab.service("browser").page.renderer.queue
+        assert german_tab.service("browser").boxes[0].preview.path == examples.page("distance", 0, 2, first.code)[0]
 
 
 def test_a_page_that_cannot_be_compiled_shows_the_german_one_and_says_why():
-    """Where the compile fails, or Typst is not there at all, a French or English window shows the committed German page with one line saying why -- Typst's first line, or that Typst is missing -- rather than an empty box or a wall of error."""
+    """Where the compile fails, or Typst is not there at all, a French or English window shows the committed German page with one line saying why."""
     def failing(*_args, **_kwargs):
-        return None, "error: unknown variable: foo\n  ┌─ example line 1"
+        return None, "error: unknown variable: foo\n  example line 1"
 
     with _Stubs(render_localised=failing, cached_png=lambda _key: None, have_typst=lambda: True):
         tab = _tab("fr")
         record = _select(tab, "distance")
         _settle(tab)
-        for box, example in zip(tab.boxes, record["examples"]):
-            page = examples.page("distance", box.index, box.level, example["code"])[0]
-            assert box.preview.path == page, (box.index, box.preview.path)
-            assert box.status.text() == tab.t("ref_german_page", reason="error: unknown variable: foo"), box.status.text()
-    calls = []
-    with _Stubs(render_localised=lambda *a, **k: calls.append(a) or (None, None), cached_png=lambda _key: None, have_typst=lambda: False):
+        for box, example in zip(tab.service("browser").boxes, record["examples"]):
+            assert box.preview.path == examples.page("distance", box.index, box.level, example["code"])[0]
+            assert box.status.text() == tab.t("ref_german_page", reason="error: unknown variable: foo")
+    with _Stubs(render_localised=lambda *a, **k: (None, None), cached_png=lambda _key: None, have_typst=lambda: False):
         tab = _tab("en")
         _select(tab, "var")
-        assert not calls and tab.job is None and not tab.queue, "nothing is compiled without typst"
-        shown = [box for box in tab.boxes if box.renderable]
+        shown = [box for box in tab.service("browser").boxes if box.renderable]
         assert shown and all(box.preview.path is not None and box.status.text() == tab.t("ref_german_page", reason=tab.t("ref_no_typst")) for box in shown)
+
+
+def test_a_rebuild_keeps_the_search_the_open_rows_and_the_choice_and_fills_the_tree_once():
+    """Issue #106 (ARCH-008 of the spec 2026-10-24-type-donnees): the tab on the type «Données» carries its browser's state through a rebuilt window -- the search, the rows open, the command chosen, the splitter -- and its tree is filled once as it is built, with that state (`ctx.kept`), not filled and then filled again."""
+    import command_list
+    import commands_tab
+    tab = _tab("fr", quiet=True)
+    b = tab.service("browser")
+    b.search.setText("distance")
+    b.list.select("cmd|distance")
+    kept = tab.view_state()
+    assert kept["services"]["browser"]["search"] == "distance" and kept["services"]["browser"]["selection"] == "cmd|distance"
+    fills = []
+    real = command_list.CommandList.refill
+    command_list.CommandList.refill = lambda self: (fills.append(1), real(self))[1]
+    try:
+        again = _tab("fr", quiet=True, views={"tab_commands": kept})
+    finally:
+        command_list.CommandList.refill = real
+    b2 = again.service("browser")
+    assert fills == [1], "the tree is filled once as the tab is built"
+    assert b2.search.text() == "distance" and b2.list.selected_iid() == "cmd|distance"
+    assert b2.list.state()["open"] == kept["services"]["browser"]["open"]
+    assert isinstance(again, commands_tab.CommandsTab) and again.search is b2.search, "the palette's search exposed on the tab (EXPOSES)"
+    assert again.splitter is b2.splitter and again.splitter.count() == 3

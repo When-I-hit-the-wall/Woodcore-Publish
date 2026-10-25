@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.2",
+  "id": "WL-Velo",
+  "name": "",
+  "label": "",
+  "group": "",
+  "q_p0": 0.9,
+  "terrain": "IV",
+  "b": 17.5,
+  "d": 4.25,
+  "h": 2.95,
+  "z": null,
+  "table": "31",
+  "c_d": 1,
+  "openings": "rep"
+}

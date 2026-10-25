@@ -81,3 +81,10 @@ def test_the_window_imports_with_calc_tools_alone_on_the_path():
     done = subprocess.run([sys.executable, "-"], input=f"import sys; sys.path.insert(0, {str(ROOT / 'calc' / 'tools')!r})\nimport woodcore_gui\nprint('ok')\n",
                           capture_output=True, text=True, encoding="utf-8", timeout=600, env=dict(os.environ, QT_QPA_PLATFORM="offscreen"))
     assert done.returncode == 0 and done.stdout.strip().endswith("ok"), done.stderr[-2000:]
+
+
+def test_the_models_of_the_variables_tab_import_alone_without_qt():
+    """Spec 2026-10-24-onglet-variables-groupes, ARCH-001, ARCH-008: the four models of the «Variables» tab, under calc/ and not calc/domains/, each imported alone in an interpreter of its own with PySide6 out of reach."""
+    for name in ("variable_calc", "variable_query", "variable_select", "variable_card"):
+        done = _run(f"sys.modules['PySide6'] = None\nimport {name}\nassert not [m for m in sys.modules if m.startswith('PySide6') and sys.modules[m] is not None]")
+        assert done.returncode == 0, f"{name} needs Qt:\n{done.stderr[-2000:]}"

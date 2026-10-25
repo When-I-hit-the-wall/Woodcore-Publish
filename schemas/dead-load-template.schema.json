@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dead load template",
+  "description": "A template of a build-up of permanent loads (calc/domains/dead_load_templates.py, issue #111, REQ-010): one of the eight Woodcore ships in calc/libraries/dead-load-templates.json (`templates`), or one of the engineer's own, «Mes modèles», a file each in %APPDATA%\\Woodcore\\dead-load-templates\\. Its layers are a build-up's, dead-load-source 2.0, checked as one (dead_load_source.check_source); «Créer depuis ce modèle» copies them into a source of the project.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "names",
+    "layers"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "-- pinned.",
+      "enum": [
+        "1.0"
+      ]
+    },
+    "id": {
+      "type": "string",
+      "description": "Woodcore's: lignum-<chapter>-<table or figure>; the engineer's: t-<8 digits>, the file's name."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "roof",
+        "flat",
+        "wall",
+        "floor",
+        "other"
+      ],
+      "description": "What the build-up is, for the cards' grouping."
+    },
+    "names": {
+      "type": "object",
+      "description": "Its name by language (fr, de, en): Woodcore's in the three, the engineer's in the one he wrote it in.",
+      "patternProperties": {
+        ".*": {
+          "type": "string"
+        }
+      }
+    },
+    "reference": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Where it is read: the book, the table or figure, the page.",
+      "properties": {
+        "book": {
+          "type": "string"
+        },
+        "where": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer"
+        }
+      }
+    },
+    "assumptions": {
+      "type": "object",
+      "description": "What the template supposes that its source does not give, by language.",
+      "patternProperties": {
+        ".*": {
+          "type": "string"
+        }
+      }
+    },
+    "book_weight": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The weight of the whole build-up its source gives, shown beside the sum as a check; null where it gives none.",
+      "required": [
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "kg/m²",
+            "kN/m²"
+          ]
+        }
+      }
+    },
+    "layers": {
+      "type": "array",
+      "description": "The layers top to bottom, as dead-load-source 2.0 writes them.",
+      "items": {
+        "type": "object"
+      }
+    },
+    "chosen": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "The retained value the build-up carried when the engineer kept it as a template; null for the tenth above the sum."
+    }
+  }
+}

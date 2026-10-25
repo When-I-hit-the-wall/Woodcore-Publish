@@ -173,7 +173,7 @@ def test_the_export_carries_a_snow_source_and_its_figure():
     folder.mkdir(parents=True, exist_ok=True)
     (folder / "SN-01.json").write_text(json.dumps(_src(roof="curved", alpha_1=25)), encoding="utf-8")
     files = {}
-    data = registry.build_calculations([], here, files)
+    data = registry.build_calculations(here, files)
     instance = data["domains"]["snow-load"]["instances"]["SN-01"]
     src = _src(roof="curved", alpha_1=25)
     assert instance["source_file"] == "loads/snow/SN-01.json" and "_files" not in instance
@@ -231,23 +231,6 @@ def test_the_written_out_snow_prints_its_figure_and_compiles_above_2000_m():
         (here.data_dir / "calculations.json").write_bytes(kept)
 
 
-def test_the_workbook_path_takes_c_e_and_the_corrections_from_the_norm_and_stops_on_a_table_that_disagrees():
-    """REQ-003 (spec 2026-10-19-base-saine-nettoyage, lot 8): snow.py keeps the workbook's own labels and prints SIA 261's numbers, read from calc/norms/; a workbook table that says another number stops the import, naming the table."""
-    import validation
-    from domains import snow
-    from norms import sia261_snow
-    norm = sia261_snow.clause()
-    pairs = [("normale Windexposition", 1), ("dem Wind stark ausgesetzte Lage", 0.8), ("vor Wind geschützte Lage", 1.2)]
-    held = snow._held(pairs, [c["value"] for c in norm["exposure"]["choices"]], snow.EXPOSURE_TABLE, "5.2.4")
-    assert [label for label, _ in held] == [label for label, _ in pairs] and [v for _, v in held] == [1.0, 0.8, 1.2]
-    try:
-        snow._held([("+300", 300)], norm["corrections"]["values"], snow.CORRECTION_TABLE, "Anhang D")
-    except validation.ValidationError as exc:
-        assert str(exc).startswith("Dropdowns!B30:C34: '+300' gives 300") and "Anhang D" in str(exc), exc
-    else:
-        raise AssertionError("a correction SIA 261 Anhang D does not give was read")
-
-
 # --- spec 2026-10-22-onglet-neige-type, lot 3: the free C_e, the messages, the declaration -------------------------------
 
 
@@ -274,6 +257,35 @@ def test_a_free_c_e_is_schema_1_3_and_is_computed_without_a_message():
             assert field in str(exc), (change, str(exc))
         else:
             raise AssertionError(change)
+
+
+def test_a_free_delta_h_is_schema_1_4_and_is_computed_without_the_map_s_choices():
+    """REQ-004, D-5 of the spec 2026-10-23-neige-correctifs-issues-96-99: `correction: "custom"` and `delta_h` -- written at 1.4, above a free C_e's 1.3; h_ref = h₀ + Δh, s_k following, the report's Δh without the five corrections beside it; a negative Δh too; back to a button, the number is not written and the version falls back; a source of 1.0 to 1.3 is read as before; a Δh beside a correction of the map, or at 1.3, is refused naming it, and the messages say it on the field «correction»."""
+    src = snow_source.stamp_version(_src(correction="custom", delta_h=150, exposure="custom", c_e=0.95))
+    assert src["schema_version"] == "1.4"
+    validation.validate_structure(src, snow_source.SOURCE_SCHEMA)
+    snow_source.check_source(src)
+    values, instance = _loads(src)
+    assert values["korrektur"] == 150 and values["h_ref"] == src["h_0"] + 150 and "choices" not in instance["vars"]["korrektur"]
+    base = _loads(_src(correction=0))[0]
+    assert values["s_k"] > base["s_k"]
+    low = _loads(snow_source.stamp_version(_src(correction="custom", delta_h=-150)))[0]
+    assert low["h_ref"] == _src()["h_0"] - 150
+    assert [m for m in snow_source.messages(src) if m.field == "correction"] == []
+    src = snow_source.stamp_version(dict(src, correction=200))
+    assert "delta_h" not in src and src["schema_version"] == "1.3"
+    assert snow_source.stamp_version(_src())["schema_version"] == "1.0" and "delta_h" not in snow_source.stamp_version(_src())
+    for change, said in (({"correction": "custom", "delta_h": 100, "schema_version": "1.3"}, "1.4"), ({"delta_h": 100, "schema_version": "1.4"}, "delta_h"),
+                         ({"correction": "custom", "delta_h": "x", "schema_version": "1.4"}, "delta_h")):
+        try:
+            snow_source.check_source(_src(**change))
+        except validation.ValidationError as exc:
+            assert said in str(exc), (change, str(exc))
+        else:
+            raise AssertionError(change)
+    assert [(m.code, m.field) for m in snow_source.messages(_src(delta_h=100, schema_version="1.4"))] == [("delta_h_unused", "correction")]
+    field = snow_source.declaration().field("correction")
+    assert field.free_id == "custom" and field.free_key == "delta_h" and field.minimum < 0
 
 
 def test_the_messages_name_their_field_and_say_red_or_orange():

@@ -11,7 +11,7 @@ the loads tab printed.
 writes a fifth kind would otherwise be shown as «unknown» provenance without anyone deciding it -- the
 `woodcore:` prefix of the connectors' inputs was found that way, by the architecture review.
 
-⚠️ **A registry's variable is Typst's whatever its `source` says**: `#var` copies an export's var, `excel:` and
+⚠️ **A registry's variable is Typst's whatever its `source` says**: `#var` copies an export's var, `entered:` and
 all, into a document's registry.
 """
 
@@ -43,7 +43,9 @@ def _by_address(found):
 # ---------------------------------------------------------------- provenance
 
 def test_a_source_prefix_means_one_provenance():
-    assert model.provenance_of("excel:Belastungsannahmen.xlsm!SL!H10") == model.EXCEL
+    assert model.provenance_of("entered:loads/snow/SL.json") == model.WOODCORE
+    assert model.provenance_of("excel:Belastungsannahmen.xlsm!SL!H10") == model.UNKNOWN, "a workbook's cell: a kind no export writes since issue #109"
+    assert not hasattr(model, "EXCEL")
     assert model.provenance_of("python:domains/dead_load.py") == model.WOODCORE
     assert model.provenance_of("norm:SIA 261:2020, Tabelle 8") == model.WOODCORE
     assert model.provenance_of("woodcore:connectors/SD-10.json") == model.WOODCORE
@@ -52,18 +54,31 @@ def test_a_source_prefix_means_one_provenance():
     assert model.provenance_of("rfem:model.xlsx") == model.UNKNOWN
 
 
-def test_parse_source_reads_a_cell_and_leaves_the_rest_whole():
-    assert model.parse_source("excel:Belastungsannahmen.xlsm!WL-Velo!J6") == ("excel", "Belastungsannahmen.xlsm", "WL-Velo", "J6")
-    assert model.parse_source("excel:B.xlsm!Sheet!With!Bang!A1") == ("excel", "B.xlsm", "Sheet!With!Bang", "A1")
-    assert model.parse_source("norm:SIA 261:2020, Tabelle 8") == ("norm", "", "", "SIA 261:2020, Tabelle 8")
-    assert model.parse_source(None) == ("", "", "", "")
+def test_parse_source_takes_the_kind_and_leaves_the_rest_whole():
+    assert model.parse_source("norm:SIA 261:2020, Tabelle 8") == ("norm", "SIA 261:2020, Tabelle 8")
+    assert model.parse_source("entered:loads/wind/WL-Velo.json") == ("entered", "loads/wind/WL-Velo.json")
+    assert model.parse_source(None) == ("", "")
 
 
 def test_a_registry_variable_is_typst_whatever_its_source_says():
-    copied = model.Variable(key="s_k", domain="", value=1.2, unit="kN/m²", symbol="s_k", source="excel:B.xlsm!SL!H40")
+    copied = model.Variable(key="s_k", domain="", value=1.2, unit="kN/m²", symbol="s_k", source="entered:loads/snow/SL.json")
     assert sources.provenance(copied, "rs") == model.TYPST
     assert sources.provenance(copied, "cu") == model.TYPST
-    assert sources.provenance(copied, sources.EXPORT) == model.EXCEL
+    assert sources.provenance(copied, sources.EXPORT) == model.WOODCORE
+
+
+def test_an_export_of_an_earlier_woodcore_is_refused_saying_what_to_do():
+    """Issue #109, REQ-007, C-1: a calculations.json at 1.8 -- the load workbooks' cases, `sheet_prefix`, `excel:` -- is refused where the tab reads it, an `old_export` naming the file and `schema_version` and saying «Import données»; the other files are read all the same."""
+    import json
+    here = conftest.project_copy("old_calculations")
+    path = here.data_dir / sources.CALCULATIONS_FILE
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["schema_version"] = "1.8"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    found = sources.read_export(here)
+    old = [e for e in found.errors if e.code == "old_export"]
+    assert len(old) == 1 and old[0].detail["file"] == sources.CALCULATIONS_FILE and "schema_version" in old[0].detail["field"] and "Import données" in old[0].detail["field"], [(e.code, e.detail) for e in found.errors]
+    assert not any(d.file == sources.CALCULATIONS_FILE for d in found.domains) and any(d.file == "connectors.json" for d in found.domains), "the other files are read"
 
 
 def test_every_source_of_the_example_has_a_known_provenance():
@@ -74,7 +89,7 @@ def test_every_source_of_the_example_has_a_known_provenance():
                if model.parse_source(var.source)[0] not in model.PROVENANCE]
     assert not unknown, f"a source prefix variables.PROVENANCE does not name: {unknown[:5]}"
     seen = {model.parse_source(var.source)[0] for domain in found.domains for var in domain.variables}
-    assert {"excel", "python", "norm", "woodcore"} <= seen, seen
+    assert {"python", "norm", "woodcore", "entered"} <= seen, seen
 
 
 # ---------------------------------------------------------------- what is read
@@ -114,7 +129,7 @@ def test_the_order_is_the_export_own():
 def test_a_loads_variable_carries_its_traceability():
     found = _by_address(_export())
     snow = found[("snow-load", "SL")]
-    assert snow.workbook and snow.sheet == "SL", (snow.workbook, snow.sheet)
+    assert not hasattr(snow, "workbook") and not hasattr(snow, "sheet"), "a case of the snow tab names no workbook (issue #109)"
     assert snow.label == "Schneelast"
     assert snow.formulas.get("h_ref") == 'h_"ref" = h_0 + Delta h'
     live = found[("live-load", "A1")]
@@ -143,8 +158,27 @@ def test_a_registry_becomes_domains_marked_with_its_document():
         "S001-verify-bending": [model.Variable(key="eta", domain="S001-verify-bending", value=0.5, unit="", symbol="eta")],
     })
     domains = sources.registry_domains("bp", registry)
-    assert [(d.name, d.origin, d.kind, d.address) for d in domains] == [("", "bp", "report", None), ("S001-verify-bending", "bp", "check", None)]
+    # the root domain of a document is no longer listed (spec 2026-10-24-onglet-variables-groupes, REQ-005): the named one alone
+    assert [(d.name, d.origin, d.kind, d.address) for d in domains] == [("S001-verify-bending", "bp", "check", None)]
     assert sources.registry_domains("rs", None) == []
+    assert sources.registry_domains("rs", model.Registry(domains={"": [model.Variable(key="a", domain="", value=1, unit="", symbol="a")]})) == []
+
+
+def test_a_domain_is_still_built_as_before_and_carries_no_tab_until_assembled():
+    """ARCH-003: the new fields have defaults -- formula_domain.variable_domains and the old calls build a domain without them."""
+    domain = sources.Domain(name="T001", origin="rs")
+    assert domain.tab is None and domain.calc is None and domain.variables == []
+
+
+def test_the_export_carries_the_index_of_the_calculations():
+    """ARCH-003: domain-files.json, checks.json and steel.json read beside the sources and never counted among them; formulas.json's ids kept from its own reading."""
+    found = _export()
+    assert not found.errors, [str(e) for e in found.errors]
+    assert found.index["domain-files"]["snow-load"]["SL"].endswith("/SL.typ")
+    assert found.index["checks"]["FE-01"]["kind"] == "bending" and found.index["checks"]["FE-01"].get("fire")
+    assert found.index["steel"]["ST-01"]["kind"] == "bending"
+    assert found.index["formulas"]["poutre-p1"]["file"] == "Domains/poutre-p1.typ"
+    assert not set(name for _k, name, _s, _r in sources.INDEX_FILES) & set(name for name, _s, _r in sources.FILE_SOURCES)
 
 
 # ---------------------------------------------------------------- what is not there, what is broken
@@ -154,6 +188,20 @@ def test_a_project_not_exported_is_missing_and_never_an_error():
     found = sources.read_export(here)
     assert found.domains == [] and found.errors == []
     assert sorted(found.missing) == sorted(name for name, _schema, _reader in sources.FILE_SOURCES)
+    # «pas encore exporté» stays what it was: the index files are not counted among the missing (ARCH-003)
+    assert len(found.missing) == len(sources.FILE_SOURCES)
+    assert found.index == {"domain-files": {}, "checks": {}, "steel": {}, "formulas": {}}
+
+
+def test_an_index_that_cannot_be_read_is_named_and_empties_nothing_else():
+    here = conftest.project_copy("vs_bad_index")
+    path = here.data_dir / "checks.json"
+    path.write_text("{ not json", encoding="utf-8")
+    found = sources.read_export(here)
+    assert [e.detail["file"] for e in found.errors] == ["checks.json"], [str(e) for e in found.errors]
+    assert found.errors[0].code == "bad_file"
+    assert found.index["checks"] == {} and found.index["domain-files"], "the other index files are read"
+    assert any(d.address == ("snow-load", "SL") for d in found.domains), "the loads are still read"
 
 
 def test_a_broken_file_is_named_and_the_others_are_read_all_the_same():

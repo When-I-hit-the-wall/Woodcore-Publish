@@ -6,7 +6,7 @@ The engineer's request of 08.10.2026: in the left pane, under «Actions», two s
 
 **The names come from the norms, not from memory** (docs/architecture/principles.md): SIA 260:2013 writes «Actions permanentes» and «Actions variables» in French, «Ständige Einwirkungen» and «Veränderliche Einwirkungen» in German, `Permanent actions` and `Variable actions` in English; SIA 260 and 261 «Charges utiles», «Séisme» and «Neige» / «Nutzlasten», «Erdbeben» and «Schnee» (SIA 261:2020 §«Eigenlast» for the self-weight, «Auflast» for what the glossary calls «Poids propre non-structural» -- `document.superimposed`, whose English words this follows). «Surcharge» is the engineer's own word for the permanent load that is not the structure's (D-013).
 
-**«Poids propre» and «Surcharge» became one tab, «Poids propre et surcharge»** (issue #35, D-08, calc/tools/load_tab.py), which is no longer here. **Each tab and the domain it will hold are listed by the Variables tab meanwhile** (calc/domains/dead_load.py, live_load.py, snow.py, wind.py), the Loads tab having been retired into it in v0.117 (issue 13): until the tabs have their content they do not duplicate it (docs/decisions.md).
+**«Poids propre» and «Surcharge» became one tab, «Poids propre et surcharge»** (issue #35, D-08, calc/tools/dead_load_tab.py), which is no longer here. **Each tab and the domain it will hold are listed by the Variables tab meanwhile** (calc/domains/dead_load.py, live_load.py, snow.py, wind.py), the Loads tab having been retired into it in v0.117 (issue 13): until the tabs have their content they do not duplicate it (docs/decisions.md).
 """
 
 # Tab key -> (the key of what the tab will hold). The keys are literals on purpose: tests/test_i18n.py finds a key by the code that names it.

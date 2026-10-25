@@ -1,8 +1,8 @@
 """Live loads (Nutzlasten), read from Tabelle 8 of SIA 261 (docs/domain/loads.md §3.3septies).
 
-The first domain whose instances are not workbook sheets. A live load is not calculated and not entered: it is *looked up*, by the category of Nutzfläche the surface belongs to -- A1 Wohnflächen, A3 Treppen, B Büroflächen, ... H nicht begehbare Dächer -- and the norm's own table gives the two characteristic values, the Flächenlast q_k and the Einzellast Q_k. So the instances of this domain are the rows of that table, one per category, and the report addresses one by its category: `show-live-load("A1")`.
+A live load is not calculated and not entered: it is *looked up*, by the category of Nutzfläche the surface belongs to -- A1 Wohnflächen, A3 Treppen, B Büroflächen, ... H nicht begehbare Dächer -- and the norm's own table gives the two characteristic values, the Flächenlast q_k and the Einzellast Q_k. So the instances of this domain are the rows of that table, one per category, and the report addresses one by its category: `show-live-load("A1")`.
 
-Which makes this domain's `ENGINE` neither `excel` nor `python` but **`norm`**: nothing here computes a value and nothing reads a cell. The numbers come from `calc/norms/sia261-2020-tab08-nutzlasten.json`, read through `norms/sia261.py`, the one place in the project they are written down (docs/architecture/layout.md §11), and every var's `source` says so, with the edition they belong to: `norm:SIA 261:2020, Tabelle 8`.
+Which makes this domain's `ENGINE` not `python` but **`norm`**: nothing here computes a value. The numbers come from `calc/norms/sia261-2020-tab08-nutzlasten.json`, read through `norms/sia261.py`, the one place in the project they are written down (docs/architecture/layout.md §11), and every var's `source` says so, with the edition they belong to: `norm:SIA 261:2020, Tabelle 8`.
 
 Two things the table itself decides, and this module only carries:
 
@@ -19,10 +19,8 @@ from norms import sia261
 
 DOMAIN = "live-load"
 LABEL = "Nutzlasten"
-# Neither entered in Excel nor calculated here: read from a norm table (docs/domain/calculation-domains.md §3.3).
+# Neither entered nor calculated here: read from a norm table (docs/domain/calculation-domains.md §3.3).
 ENGINE = "norm"
-# This domain reads no workbook sheet at all, which is what None says to the registry.
-SHEET_PREFIX = None
 ACTION = "variable"  # SIA 260: a variable action (Q) -- SIA 261 8.1.1 calls the Nutzlasten free variable actions
 NORM = "SIA 261"
 # Tabelle 8 holds the characteristic values (8.2.1); the categorisation of the Nutzflächen is 8.1.2, and the values a project must fix itself 8.2.2.
@@ -142,7 +140,7 @@ def _instance(row, index):
 
 
 def build_instances():
-    """Every category of Tabelle 8, in the norm's own order, keyed by its id -- the counterpart of the sheet domains' `read_instances(cells, sheets)`, for a domain that reads no workbook (registry.py)."""
+    """Every category of Tabelle 8, in the norm's own order, keyed by its id -- what the registry asks of a domain read from a norm table, in place of a source module's cases (registry.py)."""
     table = sia261.table_8()
     return {
         row["id"]: _instance(row, index)

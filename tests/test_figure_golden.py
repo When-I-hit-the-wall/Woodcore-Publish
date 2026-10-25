@@ -25,6 +25,8 @@ UPDATE = os.environ.get("WOODCORE_UPDATE_GOLDEN") == "1"
 
 # Why a figure's bytes changed on purpose: {figure: "version -- reason"}, "every figure" for a change that touched them all.
 CHANGES = {
+    "<the example's loads>": "v0.125 -- the example's eight load cases entered in Woodcore (issue #109, REQ-004): their drawings -- the four build-ups, the snow's column of Figur 3, the three wind tables' figures -- are now the export's own, and held here for the first time.",
+    "<dead-load DA-01>": "v0.125 -- the section of a build-up drawn at its true proportion (spec 2026-10-24-poids-propre-repense, REQ-009, issue #111): one metre at the scale of the heights, no minimum band, the rafters at their spacing and the insulation filling between them from the bottom, the names in a column joined by fanned lines, «1000» under the strip; the fixture at dead-load-source 2.0",
     "<snow SN-01 …>": "v0.124 -- the snow's drawing redrawn as the column of SIA 261 Figur 3 for the case's roof, black and white, the structure under the roof, the slopes and the values written (spec 2026-10-22-onglet-neige-type, REQ-016, UI-009, D-31): the coloured sketch of issue #36 is gone, and the figure is the export's as well as the tab's.",
     "every figure": "v0.120 -- the palette merged (D5, Q-015): some sixty colours of the drawing engines became the 22 of lib/figure-palette.json (five blacks into one ink; the blues, greens, reds, oranges and greys each into one; the muted grey a neutral one, which the superposition's «grey» must be). Checked figure by figure against the commit before: with the old colours mapped onto the new, all 33 figures are the same text, byte for byte -- nothing but a colour changed.",
 }
@@ -43,7 +45,7 @@ def _figures():
         folder = here.exports_dir(kind)
         for path in sorted(folder.rglob("*.svg")) if folder.is_dir() else ():
             out[path.relative_to(here.root).as_posix()] = _digest(path.read_text(encoding="utf-8"))
-    out["<dead-load DA-01>"] = _digest(dead_load_svg.render(dead_load_source.layer_rows(_roof(), None)))
+    out["<dead-load DA-01>"] = _digest(dead_load_svg.render(dead_load_source.layers_of(dead_load_source.layer_rows(_roof(), None))))   # the model of layers since issue #95, the same digest
     snow = snow_source.new_source("SN-01")
     out["<snow SN-01 default>"] = _digest(snow_source.sketch(snow))
     for roof in ("flat", "mono", "duo", "curved"):

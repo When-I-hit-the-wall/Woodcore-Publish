@@ -21,16 +21,16 @@
       "ST-02": "/Steel-checks/Shear/ST-02.typ"
     },
     "dead-load": {
-      "EL+AL-Dach mit Wasser": "/Permanent-loads/EL+AL-Dach mit Wasser.typ",
-      "EL+AL-Dach ohne Wasser": "/Permanent-loads/EL+AL-Dach ohne Wasser.typ",
       "EL+AL-DachRand": "/Permanent-loads/EL+AL-DachRand.typ",
+      "EL+AL-Dach_mit_Wasser": "/Permanent-loads/EL+AL-Dach_mit_Wasser.typ",
+      "EL+AL-Dach_ohne_Wasser": "/Permanent-loads/EL+AL-Dach_ohne_Wasser.typ",
       "EL+AL-Wand": "/Permanent-loads/EL+AL-Wand.typ"
     },
     "snow-load": {
       "SL": "/Variable-loads/Snow/SL.typ"
     },
     "wind-load": {
-      "WL-Fluchttreppe+Geräte": "/Variable-loads/Wind/WL-Fluchttreppe+Geräte.typ",
+      "WL-Fluchttreppe+Geraete": "/Variable-loads/Wind/WL-Fluchttreppe+Geraete.typ",
       "WL-Pavillon": "/Variable-loads/Wind/WL-Pavillon.typ",
       "WL-Velo": "/Variable-loads/Wind/WL-Velo.typ"
     },

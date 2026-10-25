@@ -1,0 +1,58 @@
+{
+ "_source": "SIA 261:2020 -- the clauses the «Domaines» tab's example domains cite (issue #113, REQ-014): their page and box relevé in the prototype «Domaines de calcul» v2 off the editions shipped in norm-library/, their words copied from them and held to the PDF by tests/test_norm_excerpts.py.",
+ "_note": "Found by a citation of a domain's line (`norm:`, `norm-section:`) through norms.excerpts.for_citation; a clause cited that no file lists has no bubble.",
+ "edition": "SIA 261:2020",
+ "editions": {
+  "fr": {
+   "file": "SIA261-2020-FR.pdf",
+   "chapter": [
+    17,
+    17
+   ]
+  },
+  "de": {
+   "file": "SIA261-2020-DE.pdf",
+   "chapter": [
+    16,
+    16
+   ]
+  }
+ },
+ "excerpts": {
+  "2.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "2.1",
+     "page": 17,
+     "box": [
+      58,
+      130,
+      542,
+      227
+     ],
+     "text": "2.1 Généralités\n2.1.1 Le poids propre de la structure porteuse et des éléments non-structuraux sont à considérer comme des actions permanentes.\n2.1.2 Les poids propres de la structure porteuse ne doivent pas être placés avec des facteurs de charge différents selon les zones d’influence, mais considérés dans leur ensemble à l’aide de valeurs de dimensionnement supérieures ou inférieures selon que l’effet global des actions est défavorable ou favorable.",
+     "chapter": [
+      17,
+      17
+     ]
+    },
+    "de": {
+     "ref": "2.1",
+     "page": 16,
+     "box": [
+      52,
+      116,
+      537,
+      201
+     ],
+     "text": "2.1 Allgemeines\n2.1.1 Eigenlasten und Auflasten sind als ständige Einwirkungen zu behandeln.\n2.1.2 Eigenlasten sind nicht nach Einflusszonen mit unterschiedlichen Lastbeiwerten anzuordnen, sondern gesamthaft mit oberen oder unteren Bemessungswerten zu berücksichtigen, je nachdem, ob die Gesamtauswirkung ungünstig oder günstig ist.",
+     "chapter": [
+      16,
+      16
+     ]
+    }
+   }
+  }
+ }
+}

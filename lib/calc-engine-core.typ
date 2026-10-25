@@ -41,7 +41,8 @@
 /// -> state
 #let uniform-level = state("uniform-level", none)
 
-/// Whether a line a domain hides is printed all the same, pale and marked «masked» -- what the «Affichage» view of a domain's file sets in its preview, so that the engineer sees every line of the file and which of them the report leaves out (spec 2026-10-22-onglet-neige-type, UI-011). A line whose display shows nothing -- `level: 0`, `display: "none"`, both displays of an `#eq` at `"none"` -- is then printed at level 3's preset. `false`, the report's, leaves it out.
+// References of the block below (moved out of it, issue #115): spec 2026-10-22-onglet-neige-type, UI-011.
+/// Whether a line a domain hides is printed all the same, pale and marked «masked» -- what the «Affichage» view of a domain's file sets in its preview, so that the engineer sees every line of the file and which of them the report leaves out. A line whose display shows nothing -- `level: 0`, `display: "none"`, both displays of an `#eq` at `"none"` -- is then printed at level 3's preset. `false`, the report's, leaves it out.
 ///
 /// ```typ
 /// #show-masked.update(true)
@@ -172,14 +173,23 @@
 
 // --- Data access (docs/architecture/principles.md §2) ------------------------------------
 #let load-position(id) = json("../data/positions/" + id + ".json")
-#let load-calculations() = json("../data/calculations.json")
+// The version of data/calculations.json this engine reads (calc/registry.py SCHEMA_VERSION, held equal by tests/test_export.py): an export written by an earlier Woodcore -- 1.8 and before, which still carried the load workbooks' cases (issue #109) -- stops the compile, saying what to do. The export that replaces it never reads it against this.
+#let calculations-version = "1.9"
+#let load-calculations() = {
+  let found = json("../data/calculations.json")
+  let version = found.at("schema_version", default: none)
+  if version != calculations-version {
+    panic("calculations: data/calculations.json was written by an earlier version of Woodcore (schema " + repr(version) + ", this engine reads " + repr(calculations-version) + ") -- run «Import données» once to write it again")
+  }
+  found
+}
 
 // The positions deleted with their values kept («Copier les valeurs», issue #9, calc/renumbering.py): «S110-old», which a call may still name and no list of the project's positions shows. A project exported before has none.
 #let archived-position-ids() = json("../data/positions-index.json").at("archived", default: ())
 // Every id a call may name: the project's positions, and the old ones whose values were kept.
 #let known-position-ids() = json("../data/positions-index.json").positions + archived-position-ids()
 
-/// The project as its `.woodcore` file describes it, and what produced this export: `name`, `number`, `client`, `address`, `company`, `author`, `checker` -- each "" where the file leaves it out -- and `woodcore` (its `version` and git `revision`), `typst` and the `workbooks` read with their SHA-256 (data/project.json, docs/architecture/layout.md §11, v0.82). Data access, not a display function: what a title page is written from, so the project's name is typed once, in its file.
+/// The project as its `.woodcore` file describes it, and what produced this export: `name`, `number`, `client`, `address`, `company`, `author`, `checker` -- each "" where the file leaves it out -- and `woodcore` (its `version` and git `revision`), and `typst` (data/project.json 1.1, docs/architecture/layout.md §11, v0.82; the `workbooks` read and their SHA-256 until issue #109). Data access, not a display function: what a title page is written from, so the project's name is typed once, in its file.
 ///
 /// ```typ
 /// #project-info().name
@@ -220,7 +230,8 @@
   json("../data/" + journal-files.at(id))
 }
 
-/// The captions of a document, the engineer's way (v0.117): «Tableau 1 — Les documents de référence», «Figure 1 — Système statique» -- the word of its kind in the report's language (`figure.supplement_table`, `figure.supplement_image`), its number, a long dash, its title. `woodcore-document` applies it to every document of a project, so the engine's tables and figures and the author's own read alike; a project's `config.typ` saying otherwise is overridden, the format being the office's.
+// References of the block below (moved out of it, issue #115): v0.117.
+/// The captions of a document, the engineer's way: «Tableau 1 — Les documents de référence», «Figure 1 — Système statique» -- the word of its kind in the report's language (`figure.supplement_table`, `figure.supplement_image`), its number, a long dash, its title. `woodcore-document` applies it to every document of a project, so the engine's tables and figures and the author's own read alike; a project's `config.typ` saying otherwise is overridden, the format being the office's.
 ///
 /// ```typ
 /// #show: caption-rules
@@ -241,7 +252,8 @@
   doc
 }
 
-/// The tables of a document written in raw Typst, the engine's way (spec 2026-10-21-commandes-typst-refonte, REQ-019): no rule but those the table writes -- the three of a report, thick above the header, thin under it, thick under the last row, `table.hline` in the table itself --, cells padded as the engine's own tables are, the caption above the table and the table set from the left. `woodcore-document` applies it to every document, so a `#table` written by hand and one Woodcore wrote read alike.
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, REQ-019.
+/// The tables of a document written in raw Typst, the engine's way: no rule but those the table writes -- the three of a report, thick above the header, thin under it, thick under the last row, `table.hline` in the table itself --, cells padded as the engine's own tables are, the caption above the table and the table set from the left. `woodcore-document` applies it to every document, so a `#table` written by hand and one Woodcore wrote read alike.
 ///
 /// ```typ
 /// #show: doc-tables
@@ -356,7 +368,8 @@
 #let load-domain-state() = json("../data/domain-state.json").domains
 #let load-domain-files() = json("../data/domain-files.json").files
 
-/// The file of a calculation domain Woodcore wrote from its data, from the Typst root -- what a section includes it by, `#include domain-file("check", id)`, so that no path to it is ever written by hand (spec 2026-10-21-commandes-typst-refonte, ARCH-008). A domain the export does not list stops the compile, naming the ones it lists.
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, ARCH-008.
+/// The file of a calculation domain Woodcore wrote from its data, from the Typst root -- what a section includes it by, `#include domain-file("check", id)`, so that no path to it is ever written by hand. A domain the export does not list stops the compile, naming the ones it lists.
 ///
 /// ```typ
 /// #for id in load-domain-files().at("check", default: (:)).keys() [#id: #raw(domain-file("check", id)) \ ]
@@ -393,7 +406,8 @@
 // The kinds `ids` takes besides a calculation domain's id, in the order its refusal lists them.
 #let ids-kinds = ("position", "domain", "connection", "connector", "script", "plan", "fire-plan", "static-model", "schema", "extract", "annex", "check-member", "check-steel")
 
-/// **The ids of every object of one kind the export carries** -- one command for the thirteen `*-ids` of before v0.120 (spec docs/requirements/active/2026-10-19-base-saine-nettoyage.md, REQ-002). Typst cannot list a folder, which is why `calc/export_all.py` writes the files this reads. A section that called an old name is rewritten when its project is opened (calc/renamed-commands.json).
+// References of the block below (moved out of it, issue #115): spec docs/requirements/active/2026-10-19-base-saine-nettoyage.md, REQ-002.
+/// **The ids of every object of one kind the export carries** -- one command for the thirteen `*-ids` of before v0.120. Typst cannot list a folder, which is why `calc/export_all.py` writes the files this reads. A section that called an old name is rewritten when its project is opened (calc/renamed-commands.json).
 ///
 /// ```typ
 /// #ids("position")
@@ -431,7 +445,8 @@
 // How many `#sync` hold the line being printed: inside one, `resolve-display` leaves the uniform level out (lib/formula.typ).
 #let sync-depth = state("woodcore-sync-depth", 0)
 
-/// A value Woodcore keeps in step with its project, in a document written in raw Typst -- a cell of a table, an item of a list, a word of a sentence: it prints its content and nothing else, and Woodcore finds it by its id, reads the content and rewrites it, and nothing around it (spec 2026-10-21-commandes-typst-refonte, REQ-011, calc/typst_sync.py). Taking the tag away, the content kept, ends the keeping: the value is the engineer's from then on.
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, REQ-011, calc/typst_sync.py; Q-007.
+/// A value Woodcore keeps in step with its project, in a document written in raw Typst -- a cell of a table, an item of a list, a word of a sentence: it prints its content and nothing else, and Woodcore finds it by its id, reads the content and rewrites it, and nothing around it (calc/typst_sync.py). Taking the tag away, the content kept, ends the keeping: the value is the engineer's from then on.
 ///
 /// ```typ
 /// #table(columns: 3,
@@ -439,7 +454,7 @@
 /// )
 /// ```
 ///
-/// What the export holds is best **read** inside it, as the last cell reads it: the value printed is then the export's at every compile and never ages (Q-007). A literal is compared with the export when the project is exported, and a gap is said, never overwritten:
+/// What the export holds is best **read** inside it, as the last cell reads it: the value printed is then the export's at every compile and never ages. A literal is compared with the export when the project is exported, and a gap is said, never overwritten:
 ///
 /// ```typ
 /// Die Nutzlast der Kategorie #sync("live-load/A1/category")[A1] beträgt #sync("live-load/A1/q_k")[3 kN/m²].
@@ -457,7 +472,8 @@
 }
 
 
-/// **One field of a variable already read** (`find`, a record's `vars`, or one the report declared, by its name) -- one command for the eight `get-*` of before v0.120 (spec 2026-10-19-base-saine-nettoyage, REQ-002). The rest of the engine reads a variable's fields through it, never `.value` or `.unit` directly, so a change of the variable's shape touches this one place (docs/typst/report-engine.md §6).
+// References of the block below (moved out of it, issue #115): spec 2026-10-19-base-saine-nettoyage, REQ-002; spec 2026-10-21-commandes-typst-refonte, REQ-009.
+/// **One field of a variable already read** (`find`, a record's `vars`, or one the report declared, by its name) -- one command for the eight `get-*` of before v0.120. The rest of the engine reads a variable's fields through it, never `.value` or `.unit` directly, so a change of the variable's shape touches this one place (docs/typst/report-engine.md §6).
 ///
 /// ```typ
 /// #get((value: 1.394, unit: "kN/m²", symbol: "s_k"), "value")
@@ -468,7 +484,7 @@
 /// #context fmt-number(get("q_k", "value") * 0.7, get("q_k", "unit"))
 /// ```
 ///
-/// A variable the report declared is named by its name, read in the registry where the call stands -- a state, so in a `context` (spec 2026-10-21-commandes-typst-refonte, REQ-009): a sentence that depends on a result.
+/// A variable the report declared is named by its name, read in the registry where the call stands -- a state, so in a `context`: a sentence that depends on a result.
 ///
 /// ```typ
 /// #var("eta", 0.75, level: 0)
@@ -494,7 +510,7 @@
   v.at(field)
 }
 
-// Every show-* function reads the same {vars, steps, checks} record, addressed the same way: (domain, instance). An instance is a workbook sheet for a calculation domain, or a position id for a domain carried by a position. Resolved here once so all three functions fail the same actionable way (docs/typst/api-conventions.md §10bis).
+// Every show-* function reads the same {vars, steps, checks} record, addressed the same way: (domain, instance). An instance is a case entered in Woodcore for a calculation domain, or a position id for a domain carried by a position. Resolved here once so all three functions fail the same actionable way (docs/typst/api-conventions.md §10bis).
 
 // Human-readable name of what a show-* call is reading, for error messages.
 #let source-label(domain, instance) = {
@@ -505,7 +521,7 @@
 #let find-calculation(fn-name, domain, instance) = {
   let doms = load-calculations().domains
   if domain in doms {
-    // A calculation domain's instance is a workbook sheet, which belongs to no position (docs/domain/loads.md §8), so the calc-block scope guard deliberately does not apply to this branch.
+    // A calculation domain's instance is a case of a load, which belongs to no position (docs/domain/loads.md §8), so the calc-block scope guard deliberately does not apply to this branch.
     let insts = doms.at(domain).instances
     assert(instance in insts,
       message: fn-name + ": domain '" + domain + "' has no instance '" + instance + "' -- valid instances: " + insts.keys().join(", "))

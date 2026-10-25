@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Project materials",
-  "description": "Woodcore-Datei/materials.json -- the weights the engineer adds to the libraries Woodcore carries (SIA 261 Anhang A, Woodcore's materials library), for the build-ups of permanent loads (calc/domains/materials.py, issue #35, D-07).",
+  "description": "Woodcore-Datei/materials.json. 2.0 (issue #110): the copy a project keeps of every material of the engineer's library one of its cases names -- its names, its values, its source --, so that it computes alike on another computer, and the engineer is told when his library has changed since (calc/domains/materials_project.py). A material's shape is calc/domains/materials_contract.py's, the same as user-materials.schema.json's. 1.0 (issue #35, D-07, until v0.125): the weights the engineer typed for this project alone, still read, poured into his library when the project is opened (calc/domains/materials_migrate.py).",
   "type": "object",
   "required": [
     "schema_version",
@@ -11,32 +11,218 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.0",
-      "description": "-- pinned."
+      "enum": [
+        "1.0",
+        "2.0"
+      ],
+      "description": "1.0 read, 2.0 written."
     },
     "materials": {
       "type": "array",
       "items": {
         "type": "object",
         "required": [
-          "id",
-          "name",
-          "value",
-          "unit"
+          "id"
         ],
         "additionalProperties": false,
         "properties": {
           "id": {
             "type": "string",
-            "description": "What a layer names, unique in the file."
+            "description": "2.0: the id of the engineer's material this is a copy of (u-<8 hex>). 1.0: what a layer names, unique in the file."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "member",
+              "panel",
+              "other"
+            ]
+          },
+          "names": {
+            "type": "object",
+            "description": "The name in fr, de, en -- one at least.",
+            "patternProperties": {
+              "^(fr|de|en)$": {
+                "type": "string"
+              }
+            }
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "wood",
+              "board",
+              "ins",
+              "tile",
+              "memb",
+              "gyps",
+              "conc",
+              "metal",
+              "floor",
+              "fill",
+              "direct"
+            ]
+          },
+          "comment": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "object",
+            "required": [
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "value": {
+                "type": "number",
+                "description": "Above 0."
+              },
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "kN/m³",
+                  "kN/m²"
+                ]
+              },
+              "ref": {
+                "type": "string",
+                "description": "Where the weight comes from."
+              }
+            }
+          },
+          "source": {
+            "type": [
+              "object",
+              "string"
+            ],
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "url",
+                  "pdf",
+                  "norm",
+                  "book"
+                ]
+              },
+              "url": {
+                "type": "string"
+              },
+              "file": {
+                "type": "string",
+                "description": "A PDF's copy, relative to the library's folder: sources/<name>.pdf."
+              },
+              "ref": {
+                "type": "string"
+              }
+            },
+            "description": "2.0: where the material comes from, as the library states it. 1.0: a text -- a manufacturer, a datasheet."
+          },
+          "family": {
+            "type": "string",
+            "enum": [
+              "softwood",
+              "hardwood",
+              "glulam"
+            ],
+            "description": "A member's: what gives γ_M/η_M and the design values the norm sets."
+          },
+          "values": {
+            "type": "object",
+            "description": "A member's strengths f_<s>_k and f_<s>_d, its moduli and ρ_k -- N/mm², kg/m³.",
+            "patternProperties": {
+              "^.*$": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            }
+          },
+          "product": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A panel's: its row of SIA 265/1 Tabelle 9, what gives γ_M and η_mod; null for a panel of one's own whose product is not named (no design value deduced)."
+          },
+          "isotropic": {
+            "type": "boolean",
+            "description": "A panel with one value for both directions (particle and fibre boards)."
+          },
+          "columns": {
+            "type": "array",
+            "description": "A panel's ranges of thickness, one column each; empty for one column.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "t_min": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "t_max": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "thickness": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "A panel's thickness in mm, optional: empty, the values hold for any."
+          },
+          "rho_k": {
+            "type": "array",
+            "items": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          },
+          "grid": {
+            "type": "object",
+            "description": "A panel's values: {plate|shear|axial: {key: {par|perp|all: [one per column]}}}.",
+            "patternProperties": {
+              "^.*$": {
+                "type": "object",
+                "patternProperties": {
+                  "^.*$": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^.*$": {
+                        "type": "array",
+                        "items": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "name": {
             "type": "string",
-            "description": "The words the table prints."
+            "description": "1.0 only: the words the table prints."
           },
           "value": {
             "type": "number",
-            "description": "The weight, above 0."
+            "description": "1.0 only: the weight, above 0."
           },
           "unit": {
             "type": "string",
@@ -45,11 +231,12 @@
               "kN/m³",
               "kg/m²",
               "kN/m²"
-            ]
+            ],
+            "description": "1.0 only."
           },
-          "source": {
+          "kept_fingerprint": {
             "type": "string",
-            "description": "Where the weight comes from: a manufacturer, a datasheet."
+            "description": "2.0: the SHA-256 of the library's version the engineer chose not to take («Garder la copie»), so that the warning is not said again until the library changes once more."
           }
         }
       }

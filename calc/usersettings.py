@@ -45,6 +45,34 @@ def templates_dir():
     return _appdata() / NAME / "templates"
 
 
+MATERIALS_ENV = "WOODCORE_MATERIALS"
+
+
+def materials_dir():
+    """The engineer's own library of materials (calc/domains/materials_user.py, issue #110): `%APPDATA%\\Woodcore\\materials\\` -- `materials.json` and the PDFs of its sources in `sources\\` --, beside the settings and outside the installation, so that it outlives every update; or `WOODCORE_MATERIALS`'s folder; or, where only `WOODCORE_SETTINGS` is set -- a test run -- a folder beside the settings file it names, so that a test never writes the engineer's own (as `templates_dir`)."""
+    named = os.environ.get(MATERIALS_ENV)
+    if named:
+        return Path(named)
+    settings = os.environ.get(ENV)
+    if settings:
+        return Path(settings).with_name(Path(settings).stem + "-materials")
+    return _appdata() / NAME / "materials"
+
+
+DEAD_LOAD_TEMPLATES_ENV = "WOODCORE_DEAD_LOAD_TEMPLATES"
+
+
+def dead_load_templates_dir():
+    """The engineer's own build-ups of permanent loads kept as templates, «Mes modèles» (calc/domains/dead_load_templates.py, issue #111, D-08): `%APPDATA%\\Woodcore\\dead-load-templates\\`, one JSON each, beside the settings and outside the installation; or `WOODCORE_DEAD_LOAD_TEMPLATES`'s folder; or, where only `WOODCORE_SETTINGS` is set -- a test run -- a folder beside the settings file it names (as `materials_dir`)."""
+    named = os.environ.get(DEAD_LOAD_TEMPLATES_ENV)
+    if named:
+        return Path(named)
+    settings = os.environ.get(ENV)
+    if settings:
+        return Path(settings).with_name(Path(settings).stem + "-dead-load-templates")
+    return _appdata() / NAME / "dead-load-templates"
+
+
 def cache_dir(*parts):
     """A folder of Woodcore's caches: `renders` for a plan's rendered pages, `examples` for the commands tab's, the stall log at the top. Outside the project, which NextCloud syncs; deleting it costs a render."""
     return _localappdata().joinpath(NAME, *parts)

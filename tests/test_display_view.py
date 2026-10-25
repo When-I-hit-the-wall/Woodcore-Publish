@@ -176,14 +176,14 @@ def test_the_manual_selection_is_gone_from_the_window():
 
 
 def test_a_command_the_formules_tab_writes_has_one_declaration_and_two_views():
-    """Issue #19 (ARCH-RISK-W01): «Calcul» offers what a line is -- label, description, norm, clause --, «Affichage» how it is printed -- level, display type, style, summary --; the two views of var, eq, val and var-unit together are the whole declaration and share no option, and the words of «Type d'affichage» are the engineer's."""
-    for command in ("var", "eq"):
-        spec = opts.spec(command)
-        calc = {o.name for o in spec.for_view("calc").options}
-        display = {o.name for o in spec.for_view("display").options}
-        assert calc | display == {o.name for o in spec.options} and not calc & display, command
-        assert calc == {"label", "descr", "norm", "norm-ref"}, (command, calc)
-        assert {"level", "style"} <= display, (command, display)
+    """Issue #19 (ARCH-RISK-W01): «Calcul» offers what a line is -- label, description, norm, clause --, «Affichage» how it is printed -- level, display type, style, summary --; the two views of var together are the whole declaration and share no option. Since issue #113 the clause is `norm-section:` (REQ-008), and `eq` and `verify`, which only the retired panel of the «Domaines» tab read, have no declaration (calc/domains/formula_args.py offers their arguments)."""
+    spec = opts.spec("var")
+    calc = {o.name for o in spec.for_view("calc").options}
+    display = {o.name for o in spec.for_view("display").options}
+    assert calc | display == {o.name for o in spec.options} and not calc & display
+    assert calc == {"label", "descr", "norm", "norm-section"}, calc
+    assert {"level", "style"} <= display, display
+    assert "eq" not in opts.SPECS and "verify" not in opts.SPECS
 
 
 def test_the_view_compiles_nothing_it_does_not_show_and_each_tab_has_its_own_folder():

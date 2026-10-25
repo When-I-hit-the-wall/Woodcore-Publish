@@ -1,0 +1,3051 @@
+{
+ "_source": "SIA 261:2020, Einwirkungen auf Tragwerke / Actions sur les structures porteuses -- chapter 6 and Annexes C and E; the editions shipped in norm-library/",
+ "_note": "The excerpts of the wind alone: its values are the files sia261-2020-6.2-wind.json and sia261-2020-tabNN-wind.json, its buildings sia261-2020-annexc-wind-geometry.json.",
+ "edition": "SIA 261:2020",
+ "editions": {
+  "_note": "The file of each edition shipped in norm-library/ (calc/norms/library.py), and the pages of chapter 6 Ctrl+click opens; an excerpt of an annex names its own (`chapter`). An edition not listed (English) falls back on German (UI-005).",
+  "fr": {
+   "file": "SIA261-2020-FR.pdf",
+   "chapter": [
+    30,
+    35
+   ]
+  },
+  "de": {
+   "file": "SIA261-2020-DE.pdf",
+   "chapter": [
+    29,
+    34
+   ]
+  }
+ },
+ "excerpts": {
+  "_note": "The excerpts of SIA 261:2020 the wind's tab shows under each datum and each building (spec docs/requirements/completed/2026-10-23-onglet-vent-briques.md, REQ-011, REQ-012, ARCH-012): chapter 6's clauses, each of Annexe C's 37 buildings twice -- `tab<n>` its whole table, what its bubble shows, `fig<n>` its figure alone, what the file prints at level 3 --, and Annexe E with 261.sia.ch's map. Copied once from the prototype's table N, read off SIA261-2020-FR.pdf and -DE.pdf, and held to them by tests/test_norm_excerpts.py. An excerpt of Annexe C opens its annex at Ctrl+click (`chapter`), every other chapter 6.",
+  "6.2.1.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.2.1.1",
+     "page": 30,
+     "box": [
+      40,
+      647.5,
+      548,
+      694
+     ],
+     "text": "La pression dynamique q_p dépend de la nature du vent, de la rugosité du sol, de la morphologie du terrain et de la hauteur de référence. Elle est déterminée comme suit:\nq_p = c_h · q_p0   (11)"
+    },
+    "de": {
+     "ref": "6.2.1.1",
+     "page": 29,
+     "box": [
+      40,
+      659.5,
+      548,
+      706
+     ],
+     "text": "Der Staudruck q_p hängt vom Windklima, der Bodenrauigkeit, der Form der Erdoberfläche und der Bezugshöhe ab. Er wird wie folgt bestimmt:\nq_p = c_h · q_p0   (11)"
+    }
+   }
+  },
+  "6.2.1.2": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.2.1.2",
+     "page": 30,
+     "box": [
+      40,
+      695.5,
+      548,
+      772
+     ],
+     "text": "Le coefficient du profil de répartition du vent c_h tient compte du profil des vitesses du vent, en fonction de la hauteur sur sol z et de la rugosité du sol due à la présence de constructions et de végétation. Il est illustré à la figure 6 en fonction de la hauteur z et peut être calculé au moyen de l’équation suivante:\nc_h = 1,6 · [(z / z_g)^α_r + 0,375]²   (12)\nLa hauteur du gradient z_g et l’exposant de la rugosité du sol α_r sont définis dans le tableau 4. Pour les catégories de terrain II, IIa, III et pour des hauteurs z inférieures à 5 m, on introduira z = 5 m dans l’éq. (12). Pour la catégorie de terrain IV et pour des hauteurs z inférieures à 10 m, on introduira la valeur z = 10 m. Pour des hauteurs z supérieures à 30 m, on utilisera le profil de la catégorie de terrain III pour la catégorie IV."
+    },
+    "de": {
+     "ref": "6.2.1.2",
+     "page": 29,
+     "box": [
+      40,
+      707.5,
+      548,
+      772
+     ],
+     "text": "Der Profilbeiwert c_h berücksichtigt das Windgeschwindigkeitsprofil in Funktion der Höhe z über dem Boden sowie die durch Bebauung und Bewuchs erzeugte Bodenrauigkeit. Er ist in Figur 6 in Abhängigkeit der Höhe z angegeben und kann wie folgt bestimmt werden:\nc_h = 1,6 · [(z / z_g)^α_r + 0,375]²   (12)\nDie Gradientenhöhe z_g und der Exponent der Bodenrauigkeit α_r sind gemäss Tabelle 4 anzunehmen. In Gl. (12) ist für die Geländekategorien II, IIa und III für Höhen z unter 5 m z = 5 m einzusetzen; für die Geländekategorie IV ist für Höhen z unter 10 m z = 10 m einzusetzen. Für Höhen z über 30 m ist für die Geländekategorie IV das Profil der Kategorie III anzuwenden."
+    }
+   }
+  },
+  "tab4": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 4",
+     "page": 31,
+     "box": [
+      40,
+      456,
+      548,
+      587
+     ],
+     "text": "Tableau 4   Hauteur du gradient z_g et exposant de la rugosité du sol α_r\nII   rive lacustre   300   0,16\nIIa   grande plaine   380   0,19\nIII   localité, milieu rural   450   0,23\nIV   zone urbaine étendue   526   0,30"
+    },
+    "de": {
+     "ref": "Tabelle 4",
+     "page": 30,
+     "box": [
+      40,
+      444,
+      548,
+      575
+     ],
+     "text": "Tabelle 4   Gradientenhöhe z_g und Exponent der Bodenrauigkeit α_r\nII   Seeufer   300   0,16\nIIa   grosse Ebene   380   0,19\nIII   Ortschaften, freies Feld   450   0,23\nIV   grossflächige Stadtgebiete   526   0,30"
+    }
+   }
+  },
+  "6.2.1.3": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.2.1.3",
+     "page": 31,
+     "box": [
+      40,
+      588,
+      548,
+      628
+     ],
+     "text": "La valeur de référence de la pression dynamique q_p0 sera définie selon l’annexe E. Elle correspond à la vitesse de pointe (rafales de vent de quelques secondes) pour z = 10 m et pour la catégorie de terrain III. Sa période de retour est de 50 ans."
+    },
+    "de": {
+     "ref": "6.2.1.3",
+     "page": 30,
+     "box": [
+      40,
+      576,
+      548,
+      616
+     ],
+     "text": "Der Referenzwert des Staudrucks q_p0 ist gemäss Anhang E in Rechnung zu stellen. Er entspricht der Spitzengeschwindigkeit (Böen von wenigen Sekunden) für z = 10 m und Geländekategorie III. Seine Wiederkehrperiode beträgt 50 Jahre."
+    }
+   }
+  },
+  "6.2.2.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.2.2.1",
+     "page": 32,
+     "box": [
+      40,
+      89.5,
+      548,
+      154
+     ],
+     "text": "Les valeurs caractéristiques des pressions exercées par le vent sur des surfaces extérieures et intérieures, respectivement, seront déterminées comme suit:\nq_ek = c_pe · q_p   (13)\nq_ik = c_pi · q_p   (14)"
+    },
+    "de": {
+     "ref": "6.2.2.1",
+     "page": 31,
+     "box": [
+      40,
+      89.5,
+      548,
+      154
+     ],
+     "text": "Die charakteristischen Werte der Winddrücke auf äussere bzw. innere Oberflächen sind wie folgt zu ermitteln:\nq_ek = c_pe · q_p   (13)\nq_ik = c_pi · q_p   (14)"
+    }
+   }
+  },
+  "6.2.2.3": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.2.2.3",
+     "page": 32,
+     "box": [
+      40,
+      209.5,
+      548,
+      238
+     ],
+     "text": "Sans autre indication de l’annexe C, la pression dynamique q_p sera déterminée au point le plus élevé de l’ouvrage et sa distribution admise constante sur la hauteur de celui-ci."
+    },
+    "de": {
+     "ref": "6.2.2.3",
+     "page": 31,
+     "box": [
+      40,
+      209.5,
+      548,
+      238
+     ],
+     "text": "Sofern in Anhang C nicht anders festgelegt, ist der Staudruck q_p für den höchsten Punkt des Bauwerks zu ermitteln und über die Bauwerkshöhe als konstant anzunehmen."
+    }
+   }
+  },
+  "6.2.2.5": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.2.2.5",
+     "page": 32,
+     "box": [
+      40,
+      281.5,
+      548,
+      521
+     ],
+     "text": "La convention appliquée pour les signes des pressions exercées par le vent est indiquée à la figure 7: la pression (positive) engendre une force dirigée vers la surface, la succion (négative) une force s’éloignant de la surface.\nFigure 7   Pressions exercées par le vent sur des surfaces: (a) perméabilité prépondérante de la surface exposée au vent; (b) perméabilité prépondérante de la surface située sous le vent"
+    },
+    "de": {
+     "ref": "6.2.2.5",
+     "page": 31,
+     "box": [
+      40,
+      281.5,
+      548,
+      506
+     ],
+     "text": "Die Vorzeichenregelung des Winddrucks ist in Figur 7 festgelegt: Druck (positiv) bewirkt eine gegen die Oberfläche hin gerichtete Kraft, Sog (negativ) bewirkt eine von der Oberfläche weg gerichtete Kraft.\nFigur 7   Winddrücke auf Oberflächen: (a) Undichtigkeit auf der dem Wind zugewandten Seite vorherrschend; (b) Undichtigkeit auf der dem Wind abgewandten Seite vorherrschend"
+    }
+   }
+  },
+  "6.2.3.2": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.2.3.2",
+     "page": 32,
+     "box": [
+      40,
+      589,
+      548,
+      782
+     ],
+     "text": "La valeur caractéristique de la force globale due au vent agissant sur un ouvrage ou un élément de construction est déterminée directement par:\nQ_k = c_red · c_d · c_f · q_p · A_ref   (15)\nou de manière indirecte par la sommation vectorielle des forces dues au vent agissant sur les différents éléments de construction de la façon suivante:\nQ_k = c_red · c_d · ∑ c_fi · q_pi · A_refi   (16)\nLe coefficient de force c_f, la pression dynamique q_p et la surface de référence A_ref sont rapportés à l’ensemble de l’élément de construction ou de l’ouvrage dans l’équation (15), respectivement à l’élément de construction i considéré dans l’équation (16). Le facteur de réduction c_red, le facteur dynamique c_d et les coefficients de force c_f ou c_fi, sont définis selon le chiffre 6.3 ou selon l’annexe C."
+    },
+    "de": {
+     "ref": "6.2.3.2",
+     "page": 31,
+     "box": [
+      40,
+      573.3,
+      548,
+      692
+     ],
+     "text": "Der charakteristische Wert der auf ein Bauteil oder Bauwerk wirkenden, globalen Windkraft ist direkt durch\nQ_k = c_red · c_d · c_f · q_p · A_ref   (15)\noder indirekt durch vektorielle Summation der auf die einzelnen Bauteile wirkenden Windkräfte zu ermitteln:\nQ_k = c_red · c_d · ∑ c_fi · q_pi · A_refi   (16)\nDer Kraftbeiwert c_f, der Staudruck q_p und die Bezugsfläche A_ref sind in Gleichung (15) auf das gesamte Bauteil oder Bauwerk, in Gleichung (16) auf das betrachtete Bauteil i zu beziehen. Der Reduktionsfaktor c_red, der dynamische Faktor c_d und die Kraftbeiwerte c_f respektive c_fi sind gemäss 6.3 bzw. Anhang C festzulegen."
+    }
+   }
+  },
+  "6.2.3.3": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.2.3.3",
+     "page": 33,
+     "box": [
+      40,
+      65.5,
+      548,
+      202
+     ],
+     "text": "Lorsque la force exercée par le vent sur un élément de construction est déterminée par intégration des pressions locales, on utilisera les valeurs caractéristiques suivantes pour les forces extérieures, intérieures et de frottement agissant sur ses surfaces:\nQ_ek = c_d · q_ek · A_ref   (17)\nQ_ik = q_ik · A_ref   (18)\nQ_frk = c_fr · q_p · A_ref   (19)\nLes pressions exercées par le vent q_ek et q_ik, la pression dynamique q_p, le coefficient de frottement c_fr et la surface de référence A_ref se rapportent ici à la surface de l’élément considérée. Le facteur dynamique c_d et le coefficient de frottement c_fr sont respectivement définis selon le chiffre 6.3 et l’annexe C."
+    },
+    "de": {
+     "ref": "6.2.3.3",
+     "page": 31,
+     "box": [
+      40,
+      693.3,
+      548,
+      772
+     ],
+     "text": "Wenn die Windkraft auf ein Bauteil durch Integration der lokalen Drücke bestimmt wird, sind die folgenden charakteristischen Werte der Aussen-, Innen- und Reibungskräfte auf seinen Oberflächen zu verwenden:\nQ_ek = c_d · q_ek · A_ref   (17)\nQ_ik = q_ik · A_ref   (18)\nQ_frk = c_fr · q_p · A_ref   (19)\nDie Winddrücke q_ek und q_ik, der Staudruck q_p, der Reibungsbeiwert c_fr und die Bezugsfläche A_ref sind dabei auf die betrachtete Oberfläche zu beziehen. Der dynamische Faktor c_d sowie der Reibungsbeiwert c_fr sind gemäss 6.3 bzw. Anhang C festzulegen."
+    }
+   }
+  },
+  "6.3.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.3.1",
+     "page": 33,
+     "box": [
+      40,
+      502.8,
+      548,
+      531
+     ],
+     "text": "Le facteur de réduction c_red est applicable aux forces dues au vent qui agissent sur l’ensemble de l’ouvrage. Il prend en compte l’influence de la répartition spatiale des pressions exercées par le vent."
+    },
+    "de": {
+     "ref": "6.3.1",
+     "page": 32,
+     "box": [
+      40,
+      404.8,
+      548,
+      433
+     ],
+     "text": "Der Reduktionsfaktor c_red gilt für Windkräfte, die sich auf das gesamte Bauwerk beziehen. Er berücksichtigt den Einfluss der räumlichen Verteilung der Winddrücke."
+    }
+   }
+  },
+  "6.3.2": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.3.2",
+     "page": 33,
+     "box": [
+      40,
+      532.8,
+      548,
+      549
+     ],
+     "text": "Pour les surfaces de toiture et la superstructure des ponts, le facteur de réduction c_red est égal à 1,0."
+    },
+    "de": {
+     "ref": "6.3.2",
+     "page": 32,
+     "box": [
+      40,
+      434.8,
+      548,
+      451
+     ],
+     "text": "Für Dachflächen und Brückenüberbauten ist der Reduktionsfaktor c_red gleich 1,0 zu setzen."
+    }
+   }
+  },
+  "6.3.3": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.3.3",
+     "page": 33,
+     "box": [
+      40,
+      550.8,
+      548,
+      603
+     ],
+     "text": "Le facteur de réduction c_red sera déterminé selon la figure 9 pour deux surfaces de référence orthogonales entre elles. Les deux valeurs ainsi obtenues s’appliquent à des directions du vent qui s’écartent de moins de 15° des directions de référence. La plus défavorable de ces deux valeurs sera utilisée pour toutes les autres directions du vent."
+    },
+    "de": {
+     "ref": "6.3.3",
+     "page": 32,
+     "box": [
+      40,
+      452.8,
+      548,
+      493
+     ],
+     "text": "Der Reduktionsfaktor c_red ist gemäss Figur 9 für zwei zueinander orthogonale Bezugsflächen zu ermitteln. Die beiden so ermittelten Werte gelten für Windrichtungen, die von den Bezugsrichtungen um weniger als 15° abweichen. Für alle anderen Windrichtungen ist der ungünstigere der beiden Werte zu verwenden."
+    }
+   }
+  },
+  "6.3.5": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.3.5",
+     "page": 33,
+     "box": [
+      40,
+      646.8,
+      548,
+      765
+     ],
+     "text": "Le facteur dynamique c_d sera généralement déterminé selon la norme SIA 261/1. Il prend la valeur 1,0 dans les cas suivants:\n– bâtiments jusqu’à une hauteur de 15 m,\n– bâtiments comportant des parois ou des cadres porteurs, dont la hauteur est inférieure à 100 m et ne dépasse pas quatre fois leur dimension dans la direction du vent,\n– cheminées dont la hauteur est inférieure à 60 m et ne dépasse pas 6,5 fois leur diamètre,\n– éléments de façade et de toiture dont la fréquence propre de vibration est supérieure à 5 Hz."
+    },
+    "de": {
+     "ref": "6.3.5",
+     "page": 32,
+     "box": [
+      40,
+      536.8,
+      548,
+      655
+     ],
+     "text": "Der dynamische Faktor c_d ist im Allgemeinen gemäss SIA 261/1 zu ermitteln. In folgenden Fällen ist er gleich 1,0 zu setzen:\n– bei Gebäuden mit einer Höhe bis 15 m,\n– bei Gebäuden mit tragenden Wänden oder Rahmentragwerk mit einer Höhe, die 100 m und die vierfache Gebäudelänge in Windrichtung nicht übersteigt,\n– bei Kaminen mit einer Höhe, die 60 m und den sechseinhalbfachen Kamindurchmesser nicht übersteigt,\n– bei Fassaden- und Dachelementen mit Eigenfrequenzen über 5 Hz."
+    }
+   }
+  },
+  "fig9": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Figure 9",
+     "page": 34,
+     "box": [
+      40,
+      65,
+      548,
+      520
+     ],
+     "text": "Figure 9   Facteur de réduction c_red en fonction des dimensions de l’ouvrage"
+    },
+    "de": {
+     "ref": "Figur 9",
+     "page": 33,
+     "box": [
+      40,
+      65,
+      548,
+      520
+     ],
+     "text": "Figur 9   Reduktionsfaktor c_red in Abhängigkeit von den Bauwerksabmessungen"
+    }
+   }
+  },
+  "fig22": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Figure 22",
+     "page": 81,
+     "box": [
+      40,
+      135,
+      560,
+      612
+     ],
+     "text": "Figure 22   Définition des coefficients de pression, des surfaces des bâtiments et des directions des forces\nSurfaces localisées m, n, o   Surfaces soumises à une sollicitation locale élevée. Les forces agissant sur elles ne doivent pas être superposées aux forces agissant sur les grandes surfaces.\nĉ_pe\nCoefficients pour le calcul des pressions maximales qui peuvent agir pendant une courte durée sur des zones sensibles d’un ouvrage (vitres, tuiles et leur fixation)."
+    },
+    "de": {
+     "ref": "Figur 22",
+     "page": 81,
+     "box": [
+      40,
+      135,
+      560,
+      612
+     ],
+     "text": "Figur 22   Definition der Druckbeiwerte, Gebäudeflächen und Richtungen der Kräfte\nTeilflächen m, n, o   Lokal höher beanspruchte Teilflächen. Ihre Kräfte sind nicht mit den Kräften der grossen Flächen zu überlagern.\nĉ_pe\nBeiwerte zur Berechnung von Maximaldrücken, die an ungünstigen Stellen kurzfristig auftreten können (Glasscheiben, Dachziegel und deren Befestigung)."
+    }
+   }
+  },
+  "annexE": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Annexe E",
+     "page": 117,
+     "text": "Annexe E (normative)   Valeur de référence de la pression dynamique",
+     "chapter": [
+      116,
+      117
+     ]
+    },
+    "de": {
+     "ref": "Anhang E",
+     "page": 117,
+     "text": "Anhang E (normativ)   Referenzwert des Staudrucks",
+     "chapter": [
+      116,
+      117
+     ]
+    }
+   },
+   "map": {
+    "url": "https://261.sia.ch/?lang={lang}&layer=wind",
+    "langs": {
+     "fr": "fr",
+     "de": "de",
+     "en": "de"
+    }
+   }
+  },
+  "tab31": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 31",
+     "page": 82,
+     "box": [
+      40,
+      248,
+      560,
+      792
+     ],
+     "text": "Tableau 31   Coefficients pour h : b : d = 0,3 : 1 : 1 à 0,05 : 1 : 1, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 31",
+     "page": 82,
+     "box": [
+      40,
+      248,
+      560,
+      792
+     ],
+     "text": "Tabelle 31   Beiwerte für h : b : d = 0,3 : 1 : 1 bis 0,05 : 1 : 1 , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig31": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 31",
+     "page": 82,
+     "box": [
+      40,
+      30,
+      330,
+      250
+     ],
+     "text": "Tableau 31   Coefficients pour h : b : d = 0,3 : 1 : 1 à 0,05 : 1 : 1, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 31",
+     "page": 82,
+     "box": [
+      40,
+      30,
+      330,
+      250
+     ],
+     "text": "Tabelle 31   Beiwerte für h : b : d = 0,3 : 1 : 1 bis 0,05 : 1 : 1 , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab32": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 32",
+     "page": 83,
+     "box": [
+      40,
+      292,
+      560,
+      531
+     ],
+     "text": "Tableau 32   Coefficients pour h : b : d = 1 : 1 : 1, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 32",
+     "page": 83,
+     "box": [
+      40,
+      292,
+      560,
+      531
+     ],
+     "text": "Tabelle 32   Beiwerte für h : b : d = 1 : 1 : 1 , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig32": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 32",
+     "page": 83,
+     "box": [
+      40,
+      30,
+      300,
+      294
+     ],
+     "text": "Tableau 32   Coefficients pour h : b : d = 1 : 1 : 1, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 32",
+     "page": 83,
+     "box": [
+      40,
+      30,
+      300,
+      294
+     ],
+     "text": "Tabelle 32   Beiwerte für h : b : d = 1 : 1 : 1 , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab33": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 33",
+     "page": 83,
+     "box": [
+      40,
+      533,
+      560,
+      792
+     ],
+     "text": "Tableau 33   Coefficients pour h : b : d = 1 : 1 : 1, pente du toit 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 33",
+     "page": 83,
+     "box": [
+      40,
+      533,
+      560,
+      792
+     ],
+     "text": "Tabelle 33   Beiwerte für h : b : d = 1 : 1 : 1 , Dachneigung 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig33": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 33",
+     "page": 83,
+     "box": [
+      300,
+      30,
+      560,
+      294
+     ],
+     "text": "Tableau 33   Coefficients pour h : b : d = 1 : 1 : 1, pente du toit 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 33",
+     "page": 83,
+     "box": [
+      300,
+      30,
+      560,
+      294
+     ],
+     "text": "Tabelle 33   Beiwerte für h : b : d = 1 : 1 : 1 , Dachneigung 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab34": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 34",
+     "page": 84,
+     "box": [
+      40,
+      333,
+      560,
+      558
+     ],
+     "text": "Tableau 34   Coefficients pour h : b : d = 2,5 : 1 : 1, pente du toit 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 34",
+     "page": 84,
+     "box": [
+      40,
+      333,
+      560,
+      558
+     ],
+     "text": "Tabelle 34   Beiwerte für h : b : d = 2,5 : 1 : 1 , Dachneigung 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig34": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 34",
+     "page": 84,
+     "box": [
+      40,
+      30,
+      300,
+      335
+     ],
+     "text": "Tableau 34   Coefficients pour h : b : d = 2,5 : 1 : 1, pente du toit 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 34",
+     "page": 84,
+     "box": [
+      40,
+      30,
+      300,
+      335
+     ],
+     "text": "Tabelle 34   Beiwerte für h : b : d = 2,5 : 1 : 1 , Dachneigung 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab35": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 35",
+     "page": 84,
+     "box": [
+      40,
+      560,
+      560,
+      792
+     ],
+     "text": "Tableau 35   Coefficients pour h : b : d = 1,5 : 2 : 1, pente du toit 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 35",
+     "page": 84,
+     "box": [
+      40,
+      560,
+      560,
+      792
+     ],
+     "text": "Tabelle 35   Beiwerte für h : b : d = 1,5 : 2 : 1 , Dachneigung 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig35": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 35",
+     "page": 84,
+     "box": [
+      300,
+      30,
+      560,
+      335
+     ],
+     "text": "Tableau 35   Coefficients pour h : b : d = 1,5 : 2 : 1, pente du toit 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 35",
+     "page": 84,
+     "box": [
+      300,
+      30,
+      560,
+      335
+     ],
+     "text": "Tabelle 35   Beiwerte für h : b : d = 1,5 : 2 : 1 , Dachneigung 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab36": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 36",
+     "page": 85,
+     "box": [
+      40,
+      333,
+      560,
+      558
+     ],
+     "text": "Tableau 36   Coefficients pour h : b : d = 0,5 : 2 : 1, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 36",
+     "page": 85,
+     "box": [
+      40,
+      333,
+      560,
+      558
+     ],
+     "text": "Tabelle 36   Beiwerte für h : b : d = 0,5 : 2 : 1 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig36": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 36",
+     "page": 85,
+     "box": [
+      40,
+      30,
+      300,
+      335
+     ],
+     "text": "Tableau 36   Coefficients pour h : b : d = 0,5 : 2 : 1, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 36",
+     "page": 85,
+     "box": [
+      40,
+      30,
+      300,
+      335
+     ],
+     "text": "Tabelle 36   Beiwerte für h : b : d = 0,5 : 2 : 1 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab37": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 37",
+     "page": 85,
+     "box": [
+      40,
+      560,
+      560,
+      792
+     ],
+     "text": "Tableau 37   Coefficients pour h : b : d = 2,5 : 2 : 1, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 37",
+     "page": 85,
+     "box": [
+      40,
+      560,
+      560,
+      792
+     ],
+     "text": "Tabelle 37   Beiwerte für h : b : d = 2,5 : 2 : 1 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig37": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 37",
+     "page": 85,
+     "box": [
+      300,
+      30,
+      560,
+      335
+     ],
+     "text": "Tableau 37   Coefficients pour h : b : d = 2,5 : 2 : 1, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 37",
+     "page": 85,
+     "box": [
+      300,
+      30,
+      560,
+      335
+     ],
+     "text": "Tabelle 37   Beiwerte für h : b : d = 2,5 : 2 : 1 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab38": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 38",
+     "page": 86,
+     "box": [
+      40,
+      333,
+      560,
+      557
+     ],
+     "text": "Tableau 38   Coefficients pour h : b : d = 2 : 2,5 : 1, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 38",
+     "page": 86,
+     "box": [
+      40,
+      333,
+      560,
+      557
+     ],
+     "text": "Tabelle 38   Beiwerte für h : b : d = 2 : 2,5 : 1 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig38": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 38",
+     "page": 86,
+     "box": [
+      40,
+      18,
+      300,
+      335
+     ],
+     "text": "Tableau 38   Coefficients pour h : b : d = 2 : 2,5 : 1, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 38",
+     "page": 86,
+     "box": [
+      40,
+      18,
+      300,
+      335
+     ],
+     "text": "Tabelle 38   Beiwerte für h : b : d = 2 : 2,5 : 1 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab39": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 39",
+     "page": 86,
+     "box": [
+      40,
+      559,
+      560,
+      792
+     ],
+     "text": "Tableau 39   Coefficients pour h : b : d = 2 : 2 : 1, pente du toit 50°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 39",
+     "page": 86,
+     "box": [
+      40,
+      559,
+      560,
+      792
+     ],
+     "text": "Tabelle 39   Beiwerte für h : b : d = 2 : 2 : 1 , Dachneigung 50°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig39": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 39",
+     "page": 86,
+     "box": [
+      300,
+      18,
+      560,
+      335
+     ],
+     "text": "Tableau 39   Coefficients pour h : b : d = 2 : 2 : 1, pente du toit 50°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 39",
+     "page": 86,
+     "box": [
+      300,
+      18,
+      560,
+      335
+     ],
+     "text": "Tabelle 39   Beiwerte für h : b : d = 2 : 2 : 1 , Dachneigung 50°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab40": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 40",
+     "page": 87,
+     "box": [
+      40,
+      315,
+      560,
+      539
+     ],
+     "text": "Tableau 40   Coefficients pour h : b : d = 1 : 4 : 1, pente du pan de toiture 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 40",
+     "page": 87,
+     "box": [
+      40,
+      315,
+      560,
+      539
+     ],
+     "text": "Tabelle 40   Beiwerte für h : b : d = 1 : 4 : 1 , Pultdach 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig40": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 40",
+     "page": 87,
+     "box": [
+      40,
+      18,
+      300,
+      317
+     ],
+     "text": "Tableau 40   Coefficients pour h : b : d = 1 : 4 : 1, pente du pan de toiture 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 40",
+     "page": 87,
+     "box": [
+      40,
+      18,
+      300,
+      317
+     ],
+     "text": "Tabelle 40   Beiwerte für h : b : d = 1 : 4 : 1 , Pultdach 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab41": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 41",
+     "page": 87,
+     "box": [
+      40,
+      541,
+      560,
+      792
+     ],
+     "text": "Tableau 41   Coefficients pour h : b : d = 1,5 : 4 : 1, toiture asymétrique de pente 60° et 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 41",
+     "page": 87,
+     "box": [
+      40,
+      541,
+      560,
+      792
+     ],
+     "text": "Tabelle 41   Beiwerte für h : b : d = 1,5 : 4 : 1 , Dachneigung 60° und 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig41": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 41",
+     "page": 87,
+     "box": [
+      300,
+      18,
+      560,
+      317
+     ],
+     "text": "Tableau 41   Coefficients pour h : b : d = 1,5 : 4 : 1, toiture asymétrique de pente 60° et 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 41",
+     "page": 87,
+     "box": [
+      300,
+      18,
+      560,
+      317
+     ],
+     "text": "Tabelle 41   Beiwerte für h : b : d = 1,5 : 4 : 1 , Dachneigung 60° und 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab42": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 42",
+     "page": 88,
+     "box": [
+      40,
+      298,
+      560,
+      535
+     ],
+     "text": "Tableau 42   Coefficients pour bâtiments avec toiture en sheds h : b : d = 2 : 7 : 6, pentes du toit selon figure",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 42",
+     "page": 88,
+     "box": [
+      40,
+      298,
+      560,
+      535
+     ],
+     "text": "Tabelle 42   Beiwerte für Sheddach-Reihe h : b : d = 2 : 7 : 6 , Dachneigung gemäss Figur",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig42": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 42",
+     "page": 88,
+     "box": [
+      40,
+      30,
+      252,
+      300
+     ],
+     "text": "Tableau 42   Coefficients pour bâtiments avec toiture en sheds h : b : d = 2 : 7 : 6, pentes du toit selon figure",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 42",
+     "page": 88,
+     "box": [
+      40,
+      30,
+      252,
+      300
+     ],
+     "text": "Tabelle 42   Beiwerte für Sheddach-Reihe h : b : d = 2 : 7 : 6 , Dachneigung gemäss Figur",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab43": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 43",
+     "page": 88,
+     "box": [
+      40,
+      537,
+      560,
+      792
+     ],
+     "text": "Tableau 43   Coefficients pour bâtiments avec toiture en sheds h : b : d = 1 : 20 : 10, pentes du toit selon figure",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 43",
+     "page": 88,
+     "box": [
+      40,
+      537,
+      560,
+      792
+     ],
+     "text": "Tabelle 43   Beiwerte für Sheddach-Reihe h : b : d = 1 : 20 : 10 , Dachneigung gemäss Figur",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig43": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 43",
+     "page": 88,
+     "box": [
+      245,
+      30,
+      562,
+      300
+     ],
+     "text": "Tableau 43   Coefficients pour bâtiments avec toiture en sheds h : b : d = 1 : 20 : 10, pentes du toit selon figure",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 43",
+     "page": 88,
+     "box": [
+      245,
+      30,
+      562,
+      300
+     ],
+     "text": "Tabelle 43   Beiwerte für Sheddach-Reihe h : b : d = 1 : 20 : 10 , Dachneigung gemäss Figur",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab44": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 44",
+     "page": 89,
+     "box": [
+      40,
+      305,
+      560,
+      542
+     ],
+     "text": "Tableau 44   Coefficients pour bâtiments avec toiture à pans coupés h : b : d = 2 : 6 : 5, pente des pans 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 44",
+     "page": 89,
+     "box": [
+      40,
+      305,
+      560,
+      542
+     ],
+     "text": "Tabelle 44   Beiwerte für Gebäude mit gebrochenem Dach h : b : d = 2 : 6 : 5 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig44": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 44",
+     "page": 89,
+     "box": [
+      40,
+      30,
+      300,
+      307
+     ],
+     "text": "Tableau 44   Coefficients pour bâtiments avec toiture à pans coupés h : b : d = 2 : 6 : 5, pente des pans 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 44",
+     "page": 89,
+     "box": [
+      40,
+      30,
+      300,
+      307
+     ],
+     "text": "Tabelle 44   Beiwerte für Gebäude mit gebrochenem Dach h : b : d = 2 : 6 : 5 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab45": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 45",
+     "page": 89,
+     "box": [
+      40,
+      544,
+      560,
+      792
+     ],
+     "text": "Tableau 45   Coefficients pour bâtiments avec aération sur toiture h : b : d = 2 : 7 : 4, pente du toit 20°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 45",
+     "page": 89,
+     "box": [
+      40,
+      544,
+      560,
+      792
+     ],
+     "text": "Tabelle 45   Beiwerte für Gebäude mit Dachlüftung h : b : d = 2 : 7 : 4 , Dachneigung 20°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig45": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 45",
+     "page": 89,
+     "box": [
+      300,
+      30,
+      560,
+      307
+     ],
+     "text": "Tableau 45   Coefficients pour bâtiments avec aération sur toiture h : b : d = 2 : 7 : 4, pente du toit 20°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 45",
+     "page": 89,
+     "box": [
+      300,
+      30,
+      560,
+      307
+     ],
+     "text": "Tabelle 45   Beiwerte für Gebäude mit Dachlüftung h : b : d = 2 : 7 : 4 , Dachneigung 20°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab46": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 46",
+     "page": 90,
+     "box": [
+      40,
+      305,
+      560,
+      544
+     ],
+     "text": "Tableau 46   Coefficients pour bâtiments ouverts d'un seul côté h : b : d = 1 : 2,5 : 1,5, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 46",
+     "page": 90,
+     "box": [
+      40,
+      305,
+      560,
+      544
+     ],
+     "text": "Tabelle 46   Beiwerte für einseitig offenes Gebäude h : b : d = 1 : 2,5 : 1,5 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig46": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 46",
+     "page": 90,
+     "box": [
+      40,
+      30,
+      300,
+      307
+     ],
+     "text": "Tableau 46   Coefficients pour bâtiments ouverts d'un seul côté h : b : d = 1 : 2,5 : 1,5, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 46",
+     "page": 90,
+     "box": [
+      40,
+      30,
+      300,
+      307
+     ],
+     "text": "Tabelle 46   Beiwerte für einseitig offenes Gebäude h : b : d = 1 : 2,5 : 1,5 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab47": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 47",
+     "page": 90,
+     "box": [
+      40,
+      546,
+      560,
+      792
+     ],
+     "text": "Tableau 47   Coefficients pour bâtiments ouverts sur deux côtés opposés h : b : d = 1 : 2,5 : 1,5, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 47",
+     "page": 90,
+     "box": [
+      40,
+      546,
+      560,
+      792
+     ],
+     "text": "Tabelle 47   Beiwerte für zweiseitig offenes Gebäude h : b : d = 1 : 2,5 : 1,5 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig47": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 47",
+     "page": 90,
+     "box": [
+      300,
+      30,
+      560,
+      307
+     ],
+     "text": "Tableau 47   Coefficients pour bâtiments ouverts sur deux côtés opposés h : b : d = 1 : 2,5 : 1,5, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 47",
+     "page": 90,
+     "box": [
+      300,
+      30,
+      560,
+      307
+     ],
+     "text": "Tabelle 47   Beiwerte für zweiseitig offenes Gebäude h : b : d = 1 : 2,5 : 1,5 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab48": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 48",
+     "page": 91,
+     "box": [
+      40,
+      305,
+      560,
+      544
+     ],
+     "text": "Tableau 48   Coefficients pour bâtiments ouverts d'un seul côté h : b : d = 1 : 2,5 : 1,5, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 48",
+     "page": 91,
+     "box": [
+      40,
+      305,
+      560,
+      544
+     ],
+     "text": "Tabelle 48   Beiwerte für einseitig offenes Gebäude h : b : d = 1 : 2,5 : 1,5 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig48": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 48",
+     "page": 91,
+     "box": [
+      40,
+      30,
+      300,
+      307
+     ],
+     "text": "Tableau 48   Coefficients pour bâtiments ouverts d'un seul côté h : b : d = 1 : 2,5 : 1,5, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 48",
+     "page": 91,
+     "box": [
+      40,
+      30,
+      300,
+      307
+     ],
+     "text": "Tabelle 48   Beiwerte für einseitig offenes Gebäude h : b : d = 1 : 2,5 : 1,5 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab49": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 49",
+     "page": 91,
+     "box": [
+      40,
+      546,
+      560,
+      792
+     ],
+     "text": "Tableau 49   Coefficients pour bâtiments ouverts sur deux côtés opposés h : b : d = 1 : 2,5 : 1,5, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 49",
+     "page": 91,
+     "box": [
+      40,
+      546,
+      560,
+      792
+     ],
+     "text": "Tabelle 49   Beiwerte für zweiseitig offenes Gebäude h : b : d = 1 : 2,5 : 1,5 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig49": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 49",
+     "page": 91,
+     "box": [
+      300,
+      30,
+      560,
+      307
+     ],
+     "text": "Tableau 49   Coefficients pour bâtiments ouverts sur deux côtés opposés h : b : d = 1 : 2,5 : 1,5, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 49",
+     "page": 91,
+     "box": [
+      300,
+      30,
+      560,
+      307
+     ],
+     "text": "Tabelle 49   Beiwerte für zweiseitig offenes Gebäude h : b : d = 1 : 2,5 : 1,5 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab50": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 50",
+     "page": 92,
+     "box": [
+      40,
+      358,
+      560,
+      610
+     ],
+     "text": "Tableau 50   Coefficients pour tribune ouverte sur trois côtés",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 50",
+     "page": 92,
+     "box": [
+      40,
+      358,
+      560,
+      610
+     ],
+     "text": "Tabelle 50   Beiwerte für dreiseitig offene Tribüne",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig50": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 50",
+     "page": 92,
+     "box": [
+      40,
+      30,
+      330,
+      360
+     ],
+     "text": "Tableau 50   Coefficients pour tribune ouverte sur trois côtés",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 50",
+     "page": 92,
+     "box": [
+      40,
+      30,
+      330,
+      360
+     ],
+     "text": "Tabelle 50   Beiwerte für dreiseitig offene Tribüne",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab51": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 51",
+     "page": 93,
+     "box": [
+      40,
+      329,
+      560,
+      530
+     ],
+     "text": "Tableau 51   Coefficients pour marquises de quai h : b : d = 0,75 : 5 : 1, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 51",
+     "page": 93,
+     "box": [
+      40,
+      329,
+      560,
+      530
+     ],
+     "text": "Tabelle 51   Beiwerte für Perrondach h : b : d = 0,75 : 5 : 1 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig51": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 51",
+     "page": 93,
+     "box": [
+      40,
+      30,
+      300,
+      331
+     ],
+     "text": "Tableau 51   Coefficients pour marquises de quai h : b : d = 0,75 : 5 : 1, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 51",
+     "page": 93,
+     "box": [
+      40,
+      30,
+      300,
+      331
+     ],
+     "text": "Tabelle 51   Beiwerte für Perrondach h : b : d = 0,75 : 5 : 1 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab52": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 52",
+     "page": 93,
+     "box": [
+      40,
+      532,
+      560,
+      792
+     ],
+     "text": "Tableau 52   Coefficients pour marquises de quai en présence d'un convoi h : b : d = 0,75 : 5 : 1, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 52",
+     "page": 93,
+     "box": [
+      40,
+      532,
+      560,
+      792
+     ],
+     "text": "Tabelle 52   Beiwerte für Perrondach mit Zug h : b : d = 0,75 : 5 : 1 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig52": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 52",
+     "page": 93,
+     "box": [
+      300,
+      30,
+      560,
+      331
+     ],
+     "text": "Tableau 52   Coefficients pour marquises de quai en présence d'un convoi h : b : d = 0,75 : 5 : 1, pente du toit 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 52",
+     "page": 93,
+     "box": [
+      300,
+      30,
+      560,
+      331
+     ],
+     "text": "Tabelle 52   Beiwerte für Perrondach mit Zug h : b : d = 0,75 : 5 : 1 , Dachneigung 30°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab53": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 53",
+     "page": 94,
+     "box": [
+      40,
+      329,
+      560,
+      530
+     ],
+     "text": "Tableau 53   Coefficients pour marquises de quai h : b : d = 0,6 : 5 : 1, pente du toit 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 53",
+     "page": 94,
+     "box": [
+      40,
+      306,
+      560,
+      527
+     ],
+     "text": "Tabelle 53   Beiwerte für Perrondach h : b : d = 0,6 : 5 : 1 , Dachneigung 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig53": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 53",
+     "page": 94,
+     "box": [
+      40,
+      30,
+      300,
+      331
+     ],
+     "text": "Tableau 53   Coefficients pour marquises de quai h : b : d = 0,6 : 5 : 1, pente du toit 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 53",
+     "page": 94,
+     "box": [
+      40,
+      18,
+      300,
+      307
+     ],
+     "text": "Tabelle 53   Beiwerte für Perrondach h : b : d = 0,6 : 5 : 1 , Dachneigung 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab54": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 54",
+     "page": 94,
+     "box": [
+      40,
+      532,
+      560,
+      792
+     ],
+     "text": "Tableau 54   Coefficients pour marquises de quai en présence d'un convoi h : b : d = 0,6 : 5 : 1, pente du toit 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 54",
+     "page": 94,
+     "box": [
+      40,
+      529,
+      560,
+      792
+     ],
+     "text": "Tabelle 54   Beiwerte für Perrondach mit Zug h : b : d = 0,6 : 5 : 1 , Dachneigung 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig54": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 54",
+     "page": 94,
+     "box": [
+      300,
+      30,
+      560,
+      331
+     ],
+     "text": "Tableau 54   Coefficients pour marquises de quai en présence d'un convoi h : b : d = 0,6 : 5 : 1, pente du toit 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 54",
+     "page": 94,
+     "box": [
+      300,
+      18,
+      560,
+      307
+     ],
+     "text": "Tabelle 54   Beiwerte für Perrondach mit Zug h : b : d = 0,6 : 5 : 1 , Dachneigung 10°",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab55": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 55",
+     "page": 95,
+     "box": [
+      40,
+      308,
+      560,
+      530
+     ],
+     "text": "Tableau 55   Coefficients pour marquises de quai h : b : d = 0,6 : 5 : 1, pente du toit −10° vers l'intérieur",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 55",
+     "page": 95,
+     "box": [
+      40,
+      308,
+      560,
+      527
+     ],
+     "text": "Tabelle 55   Beiwerte für Perrondach h : b : d = 0,6 : 5 : 1 , Dachneigung –10° nach innen",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig55": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 55",
+     "page": 95,
+     "box": [
+      40,
+      30,
+      300,
+      310
+     ],
+     "text": "Tableau 55   Coefficients pour marquises de quai h : b : d = 0,6 : 5 : 1, pente du toit −10° vers l'intérieur",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 55",
+     "page": 95,
+     "box": [
+      40,
+      30,
+      300,
+      310
+     ],
+     "text": "Tabelle 55   Beiwerte für Perrondach h : b : d = 0,6 : 5 : 1 , Dachneigung –10° nach innen",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab56": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 56",
+     "page": 95,
+     "box": [
+      40,
+      532,
+      560,
+      792
+     ],
+     "text": "Tableau 56   Coefficients pour marquises de quai en présence d'un convoi h : b : d = 0,6 : 5 : 1, pente du toit −10° vers l'intérieur",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 56",
+     "page": 95,
+     "box": [
+      40,
+      529,
+      560,
+      792
+     ],
+     "text": "Tabelle 56   Beiwerte für Perrondach mit Zug h : b : d = 0,6 : 5 : 1 , Dachneigung –10° nach innen",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig56": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 56",
+     "page": 95,
+     "box": [
+      300,
+      30,
+      560,
+      310
+     ],
+     "text": "Tableau 56   Coefficients pour marquises de quai en présence d'un convoi h : b : d = 0,6 : 5 : 1, pente du toit −10° vers l'intérieur",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 56",
+     "page": 95,
+     "box": [
+      300,
+      30,
+      560,
+      310
+     ],
+     "text": "Tabelle 56   Beiwerte für Perrondach mit Zug h : b : d = 0,6 : 5 : 1 , Dachneigung –10° nach innen",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab57a": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 57a",
+     "page": 96,
+     "box": [
+      40,
+      316,
+      560,
+      522
+     ],
+     "text": "Tableau 57a   Coefficients pour avant-toits, h1/d1 = 0,875, h1/h = 0,33 à 0,50",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 57a",
+     "page": 96,
+     "box": [
+      40,
+      316,
+      560,
+      522
+     ],
+     "text": "Tabelle 57a   Beiwerte für Vordächer, h1/d1 = 0,875, h1/h = 0,33–0,50",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig57a": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 57a",
+     "page": 96,
+     "box": [
+      40,
+      30,
+      560,
+      318
+     ],
+     "text": "Tableau 57a   Coefficients pour avant-toits, h1/d1 = 0,875, h1/h = 0,33 à 0,50",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 57a",
+     "page": 96,
+     "box": [
+      40,
+      30,
+      560,
+      318
+     ],
+     "text": "Tabelle 57a   Beiwerte für Vordächer, h1/d1 = 0,875, h1/h = 0,33–0,50",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab57b": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 57b",
+     "page": 96,
+     "box": [
+      40,
+      524,
+      560,
+      792
+     ],
+     "text": "Tableau 57b   Coefficients pour avant-toits, h1/d1 = 1,625, h1/h = 0,48 à 0,65",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 57b",
+     "page": 96,
+     "box": [
+      40,
+      524,
+      560,
+      792
+     ],
+     "text": "Tabelle 57b   Beiwerte für Vordächer, h1/d1 = 1,625, h1/h = 0,48–0,65",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig57b": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 57b",
+     "page": 96,
+     "box": [
+      40,
+      30,
+      560,
+      318
+     ],
+     "text": "Tableau 57b   Coefficients pour avant-toits, h1/d1 = 1,625, h1/h = 0,48 à 0,65",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 57b",
+     "page": 96,
+     "box": [
+      40,
+      30,
+      560,
+      318
+     ],
+     "text": "Tabelle 57b   Beiwerte für Vordächer, h1/d1 = 1,625, h1/h = 0,48–0,65",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab57c": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 57c",
+     "page": 97,
+     "box": [
+      40,
+      316,
+      560,
+      522
+     ],
+     "text": "Tableau 57c   Coefficients pour avant-toits, h1/d1 = 2,125, h1/h = 0,55 à 0,71",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 57c",
+     "page": 97,
+     "box": [
+      40,
+      316,
+      560,
+      522
+     ],
+     "text": "Tabelle 57c   Beiwerte für Vordächer, h1/d1 = 2,125, h1/h = 0,55–0,71",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig57c": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 57c",
+     "page": 96,
+     "box": [
+      40,
+      30,
+      560,
+      318
+     ],
+     "text": "Tableau 57c   Coefficients pour avant-toits, h1/d1 = 2,125, h1/h = 0,55 à 0,71",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 57c",
+     "page": 96,
+     "box": [
+      40,
+      30,
+      560,
+      318
+     ],
+     "text": "Tabelle 57c   Beiwerte für Vordächer, h1/d1 = 2,125, h1/h = 0,55–0,71",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab57d": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 57d",
+     "page": 97,
+     "box": [
+      40,
+      524,
+      560,
+      792
+     ],
+     "text": "Tableau 57d   Coefficients pour avant-toits, h1/d1 = 2,675, h1/h = 0,61 à 0,75",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 57d",
+     "page": 97,
+     "box": [
+      40,
+      524,
+      560,
+      792
+     ],
+     "text": "Tabelle 57d   Beiwerte für Vordächer, h1/d1 = 2,675, h1/h = 0,61–0,75",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig57d": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 57d",
+     "page": 96,
+     "box": [
+      40,
+      30,
+      560,
+      318
+     ],
+     "text": "Tableau 57d   Coefficients pour avant-toits, h1/d1 = 2,675, h1/h = 0,61 à 0,75",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 57d",
+     "page": 96,
+     "box": [
+      40,
+      30,
+      560,
+      318
+     ],
+     "text": "Tabelle 57d   Beiwerte für Vordächer, h1/d1 = 2,675, h1/h = 0,61–0,75",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab58": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 58",
+     "page": 99,
+     "box": [
+      40,
+      65,
+      560,
+      327
+     ],
+     "text": "Tableau 58   Coefficients pour h : b : d = 0,2 : 0,6 : 1,0 ou 1,0 : 3,0 : 5,0 pour h ≈ 8,00 m, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 58",
+     "page": 99,
+     "box": [
+      40,
+      65,
+      560,
+      327
+     ],
+     "text": "Tabelle 58   Beiwerte für h : b : d = 0,2 : 0,6 : 1,0 oder 1,0 : 3,0 : 5,0 für h ≈ 8,00 m , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig58": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 58",
+     "page": 98,
+     "box": [
+      40,
+      55,
+      280,
+      292
+     ],
+     "text": "Tableau 58   Coefficients pour h : b : d = 0,2 : 0,6 : 1,0 ou 1,0 : 3,0 : 5,0 pour h ≈ 8,00 m, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 58",
+     "page": 98,
+     "box": [
+      40,
+      55,
+      280,
+      292
+     ],
+     "text": "Tabelle 58   Beiwerte für h : b : d = 0,2 : 0,6 : 1,0 oder 1,0 : 3,0 : 5,0 für h ≈ 8,00 m , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab59a": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 59a",
+     "page": 99,
+     "box": [
+      40,
+      329,
+      560,
+      558
+     ],
+     "text": "Tableau 59a   Coefficients pour h : b : d = 1 : 2 : 5 pour h ≈ 8,00 m, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 59a",
+     "page": 99,
+     "box": [
+      40,
+      329,
+      560,
+      558
+     ],
+     "text": "Tabelle 59a   Beiwerte für h : b : d = 1 : 2 : 5 für h ≈ 8,00 m , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig59a": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 59a",
+     "page": 98,
+     "box": [
+      300,
+      318,
+      560,
+      525
+     ],
+     "text": "Tableau 59a   Coefficients pour h : b : d = 1 : 2 : 5 pour h ≈ 8,00 m, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 59a",
+     "page": 98,
+     "box": [
+      300,
+      318,
+      560,
+      525
+     ],
+     "text": "Tabelle 59a   Beiwerte für h : b : d = 1 : 2 : 5 für h ≈ 8,00 m , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab59b": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 59b",
+     "page": 99,
+     "box": [
+      40,
+      560,
+      560,
+      792
+     ],
+     "text": "Tableau 59b   Coefficients pour h : b : d = 1 : 2 : 5 pour h ≈ 16,00 m, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 59b",
+     "page": 99,
+     "box": [
+      40,
+      560,
+      560,
+      792
+     ],
+     "text": "Tabelle 59b   Beiwerte für h : b : d = 1 : 2 : 5 für h ≈ 16,00 m , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig59b": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 59b",
+     "page": 98,
+     "box": [
+      300,
+      318,
+      560,
+      525
+     ],
+     "text": "Tableau 59b   Coefficients pour h : b : d = 1 : 2 : 5 pour h ≈ 16,00 m, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 59b",
+     "page": 98,
+     "box": [
+      300,
+      318,
+      560,
+      525
+     ],
+     "text": "Tabelle 59b   Beiwerte für h : b : d = 1 : 2 : 5 für h ≈ 16,00 m , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab60a": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 60a",
+     "page": 100,
+     "box": [
+      40,
+      378,
+      560,
+      592
+     ],
+     "text": "Tableau 60a   Coefficients pour bâtiments élevés h : b : d = 5 : 5 : 1 à 5 : 10 : 1, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 60a",
+     "page": 100,
+     "box": [
+      40,
+      378,
+      560,
+      592
+     ],
+     "text": "Tabelle 60a   Beiwerte für Hochhaus h : b : d = 5 : 5 : 1 bis 5 : 10 : 1 , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig60a": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 60a",
+     "page": 100,
+     "box": [
+      40,
+      30,
+      300,
+      380
+     ],
+     "text": "Tableau 60a   Coefficients pour bâtiments élevés h : b : d = 5 : 5 : 1 à 5 : 10 : 1, toit plat",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 60a",
+     "page": 100,
+     "box": [
+      40,
+      30,
+      300,
+      380
+     ],
+     "text": "Tabelle 60a   Beiwerte für Hochhaus h : b : d = 5 : 5 : 1 bis 5 : 10 : 1 , Flachdach",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab60b": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 60b",
+     "page": 100,
+     "box": [
+      40,
+      594,
+      560,
+      720
+     ],
+     "text": "Tableau 60b   Coefficients pour bâtiments élevés h : b : d = 5 : 1 : 1",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 60b",
+     "page": 100,
+     "box": [
+      40,
+      594,
+      560,
+      720
+     ],
+     "text": "Tabelle 60b   Beiwerte für Hochhaus h : b : d = 5 : 1 : 1",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig60b": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 60b",
+     "page": 100,
+     "box": [
+      300,
+      30,
+      560,
+      380
+     ],
+     "text": "Tableau 60b   Coefficients pour bâtiments élevés h : b : d = 5 : 1 : 1",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 60b",
+     "page": 100,
+     "box": [
+      300,
+      30,
+      560,
+      380
+     ],
+     "text": "Tabelle 60b   Beiwerte für Hochhaus h : b : d = 5 : 1 : 1",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab63": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 63",
+     "page": 104,
+     "box": [
+      40,
+      539,
+      560,
+      792
+     ],
+     "text": "Tableau 63   Coefficients pour hémisphères",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 63",
+     "page": 104,
+     "box": [
+      40,
+      539,
+      560,
+      792
+     ],
+     "text": "Tabelle 63   Beiwerte für Halbkugeln",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig63": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 63",
+     "page": 104,
+     "box": [
+      40,
+      290,
+      560,
+      543
+     ],
+     "text": "Tableau 63   Coefficients pour hémisphères",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 63",
+     "page": 104,
+     "box": [
+      40,
+      290,
+      560,
+      543
+     ],
+     "text": "Tabelle 63   Beiwerte für Halbkugeln",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "tab64": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 64",
+     "page": 105,
+     "box": [
+      40,
+      539,
+      560,
+      792
+     ],
+     "text": "Tableau 64   Coefficients pour toits en forme semi-cylindrique",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 64",
+     "page": 105,
+     "box": [
+      40,
+      539,
+      560,
+      792
+     ],
+     "text": "Tabelle 64   Beiwerte für halbzylindrische Dachformen",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  },
+  "fig64": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 64",
+     "page": 105,
+     "box": [
+      40,
+      280,
+      560,
+      543
+     ],
+     "text": "Tableau 64   Coefficients pour toits en forme semi-cylindrique",
+     "chapter": [
+      81,
+      114
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 64",
+     "page": 105,
+     "box": [
+      40,
+      280,
+      560,
+      543
+     ],
+     "text": "Tabelle 64   Beiwerte für halbzylindrische Dachformen",
+     "chapter": [
+      81,
+      114
+     ]
+    }
+   }
+  }
+ }
+}

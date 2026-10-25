@@ -20,6 +20,6 @@ The engineer chose a list over a drawing (D-05).
 - Any other object opens in the tab whose `GRAPH_KIND` is its kind and which lists it (`SourceEditorTab.lists_object`, `graph_id`). The draft open there is left as choosing another row leaves it (`open_object`, `confirm_leave`). The plans open by `open_plan`.
 - A case read from a workbook has no tab, and the status bar says so.
 
-**A browser, like «Variables».** It writes nothing and has no `dirty`, so it defines no method `tab_guard.WRITERS` names (`tests/test_dependency_tab.py`). A banner says:
+**A browser, like «Variables».** It writes nothing and has no `dirty`, so it defines no method `tab_guard.WRITERS` names (`tests/test_dependency_tab.py`). Since issue #106 it is a class of parameters on the type «Données» (`data_tab.DataTab`, [`building-a-tab.md`](building-a-tab.md)): `KEY`, `MODULE = dependency_graph` and its `SERVICES`, the type's banner and `DependenciesBrowser`, one whole service (`tab.service("browser")`) that holds the filter, the splitter and the lists, keeps the filter and the object chosen through a rebuild of the window and tells the banner. The banner says:
 - when the graph has not been exported yet (`dg_not_exported`);
 - when it is older than the last change of one of its objects' sources (`dependency_graph.newer_sources`, by the time of the files the nodes name). The next export draws it again.

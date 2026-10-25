@@ -1281,6 +1281,7 @@
   if rd.masked { masked-line(shown-line) } else { shown-line }
 }
 
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, REQ-002, Q-011; REQ-001.
 /// Writes one variable down: it is stored under its name, where every formula below can name it, and printed -- **inline**, `symbol = value unit`, like a word of the sentence it stands in, so that several written one after the other run on in one paragraph and a blank line starts a new one.
 ///
 /// ```typ
@@ -1299,7 +1300,7 @@
 /// #var("s_k", domain: ("snow-load", "SL"))
 /// ```
 ///
-/// **Without a value it prints a variable already declared** -- with everything it was declared with, its label, its citation and how it was shown, the level and the id aside -- and `unit:` shows it in another unit of the same dimension, for that line alone: the variable keeps its own, and the formulas below compute with it (spec 2026-10-21-commandes-typst-refonte, REQ-002, Q-011). `#val` and `#var-unit` were this until then.
+/// **Without a value it prints a variable already declared** -- with everything it was declared with, its label, its citation and how it was shown, the level and the id aside -- and `unit:` shows it in another unit of the same dimension, for that line alone: the variable keeps its own, and the formulas below compute with it. `#val` and `#var-unit` were this until then.
 ///
 /// ```typ
 /// #var("R_d", 5, "kN", norm: "SIA 265", norm-section: "6.5.5.2", level: 0)
@@ -1325,7 +1326,7 @@
 /// #var("s_k", 1.394, "kN/m²", domain: ("snow-load", "SL"))
 /// ```
 ///
-/// **What is printed, and where** (REQ-001): `display` says what of the line itself -- `"variable"`, `"value"`, `"value-unit"`, `"variable-value-unit"` or `"none"` --, and `label-position`, `descr-position` and `norm-position` where its label, its description and its citation go: `"before"` and `"after"` on the line, `"footnote"` in its one footnote, `"in-line"` after it in grey, `"line-right"` in the right-hand column, which sets the line apart. A level is a preset of them, and an argument written wins over it (`lib/display-presets.json`):
+/// **What is printed, and where**: `display` says what of the line itself -- `"variable"`, `"value"`, `"value-unit"`, `"variable-value-unit"` or `"none"` --, and `label-position`, `descr-position` and `norm-position` where its label, its description and its citation go: `"before"` and `"after"` on the line, `"footnote"` in its one footnote, `"in-line"` after it in grey, `"line-right"` in the right-hand column, which sets the line apart. A level is a preset of them, and an argument written wins over it (`lib/display-presets.json`):
 ///
 /// ```typ
 /// #var("R_k", 7, "kN", label: "Kapazität Sherpa XS", descr: "Aus dem Katalog des Herstellers", norm: "Sherpa", norm-section: "ETA-12/0197", label-position: "after", norm-position: "line-right", level: 3)
@@ -1360,7 +1361,7 @@
 /// - key (str): the name a formula cites -- the first positional, or `name-calc:`. Letters, digits and `_`; never a `-`, which a formula would read as a subtraction, nor a word a formula reads as an operation -- `dot`, `max`, `sqrt`. Where no symbol is given it is printed as a symbol written by hand would be: `k_dens` as k with the subscript "dens", `M2` as M and 2, `FEd` as one word.
 /// - symbol (str): optional second positional argument, or `name-visible:`, the math source that is *printed* -- `"q_(k,11)"`. A word math does not know may be written without its quotes, `"W_(y,erf)"`. Left out, the key itself is printed, requoted by `key-symbol`.
 /// - name-calc (str, none): the name, written by name rather than first -- `#var(name-calc: "l_1", name-visible: "l", value: 5, unit: "m")`.
-/// - name-visible (str, none): the printed symbol, written by name.
+/// - name-visible (str, none): the printed symbol, written by name. Beside `domain:` it is the symbol printed over the one read, never a value.
 /// - value (int, float, dictionary, none): the value, written by name -- the number, or a var object which brings its own unit and description. Left out with every positional value, the line prints a variable already declared.
 /// - unit (str, none): the value's unit, written by name; on a line that prints a variable already declared, the unit to show it in, for that line alone (same dimension, else the line says so in red).
 /// - domain (none, str, array): where the value is read. A **pair** is a calculation of the export and its instance -- `("snow-load", "SL")`, `("connector", "SD-10")` -- and falls back to the domain named after that instance for a name the export does not carry; a **string** is a `#domain` of the report, and the variable is copied out of it into wherever this line stands. Either way the var of this same name is what is taken, with its unit, its symbol, its description and its citation -- `label:`, `norm:` and `norm-section:` still override what it carries.
@@ -1447,7 +1448,9 @@
     //
     // ⚠️ The two shapes are read in different places, and that is why a string runs a path of its own below. A **pair** is the export: a plain json read, so it can be made here and turned into a positional like any other value. A **string** is a domain of the report, which lives in the registry -- a state, which nothing outside a context may read -- so its record is built **inside the update**, which is handed the dictionary itself, exactly as `#eq` computes its answer there; the line then prints what it reads back.
     // ⚠️ A value written **beside** `domain:` is a literal checked by it (spec 2026-10-15-calculs-deplies-balises-figures-natives, REQ-001): the value written is the one printed and computed with, and the one `domain:` reads is compared with it -- the same, nothing more; another, the value printed in red with the one the export now holds. `own: true` says the value is the engineer's own over the one `domain:` names: printed in orange, never stale.
-    let controlled = domain != none and tail.len() > 0
+    // ⚠️ Only a written **value** makes the line a controlled literal: a symbol alone -- `name-visible:`, or a string in second place -- names what `domain:` reads (spec 2026-10-23-neige-correctifs-issues-96-99, REQ-001). Counting the symbol made `#var("dachform", domain: ("snow-load", "SL"), name-visible: "\"Forme de la toiture\"")` a literal without its value, and every new snow case of a French project stopped the compile.
+    let controlled = domain != none and has-value
+    let written-symbol = if tail.len() > 0 and type(tail.first()) == str { tail.first() } else { none }
     let pair = domain != none and value-type(domain) == array
     if domain != none and not pair and value-type(domain) != str {
       panic("var: domain: is a domain of the report (\"Gelenkige Verbindung\") or a calculation and its instance ((\"snow-load\", \"SL\")) -- got " + repr(domain))
@@ -1462,7 +1465,8 @@
     let from-domain = named-domain and not controlled
     let checked-domain = named-domain and controlled
     let source-domain = if pair { domain.at(1) } else { domain }
-    let pos = if domain == none or from-domain or controlled { tail } else { (exported.at(key),) }
+    // the value the export carries, after the symbol written where one is: var-record prints that symbol over the export's
+    let pos = if domain == none or from-domain or controlled { tail } else { (if written-symbol == none { () } else { (written-symbol,) }) + (exported.at(key),) }
     let record = if from-domain { none } else {
       // The first of them is the printed symbol when it is a string: a *value* is a number or a var object, never a string, so the two can never be confused. `none` here means "not stated", and var-record then takes the symbol the value brought with it, or the key.
       let has-symbol = type(pos.at(0)) == str
@@ -1494,7 +1498,7 @@
     if from-domain {
       var-registry.update(d => {
         let src = d.domains.at(source-domain, default: (:))
-        let d = if key in src { var-store(d, key, with-role(d, var-record(key, none, src.at(key), none, label, descr, norm, norm-ref))) } else { d }
+        let d = if key in src { var-store(d, key, with-role(d, var-record(key, written-symbol, src.at(key), none, label, descr, norm, norm-ref))) } else { d }
         count-line-id(take-next(d), id)
       })
     } else if checked-domain {
@@ -1552,6 +1556,7 @@
   coded
 }
 
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, Q-001; REQ-003; Q-004.
 /// A calculation written by hand: the formula in letters, the same formula with the numbers and their units put in, and the answer -- **computed from the formula**, with its units checked. The result is stored under its name, so the next line names it without redeclaring anything.
 ///
 /// ```typ
@@ -1570,7 +1575,7 @@
 /// #eq("F", `M_Ed / a`, style: "double")
 /// ```
 ///
-/// **What is printed** is two fine arguments (spec 2026-10-21-commandes-typst-refonte, Q-001): `display-equation` the name and the answer -- `"variable"` the symbol, `"value"` the bare number, `"value-unit"` the number and its unit, `"variable-value-unit"` both --, `display-formula` the formula between them -- `"variable"` in letters, `"value"` with the numbers put in, `"value-unit"` with the numbers and their units, `"variable-value-unit"` the letters then the numbers. The line is `name = formula = answer`, every part left out skipped:
+/// **What is printed** is two fine arguments: `display-equation` the name and the answer -- `"variable"` the symbol, `"value"` the bare number, `"value-unit"` the number and its unit, `"variable-value-unit"` both --, `display-formula` the formula between them -- `"variable"` in letters, `"value"` with the numbers put in, `"value-unit"` with the numbers and their units, `"variable-value-unit"` the letters then the numbers. The line is `name = formula = answer`, every part left out skipped:
 ///
 /// ```typ
 /// #var("N_d", 50, "kN", level: 0)
@@ -1589,7 +1594,7 @@
 /// #eq("sigma", `N / A`)
 /// ```
 ///
-/// `unit:` converts the answer into another unit of its dimension; `as-unit:` gives the answer **another unit without converting it** -- the number kept, the unit replaced, as the engineer asked for a factor whose unit the formula cannot carry (REQ-003): Woodcore says so beside the domain in its window (Q-004).
+/// `unit:` converts the answer into another unit of its dimension; `as-unit:` gives the answer **another unit without converting it** -- the number kept, the unit replaced, as the engineer asked for a factor whose unit the formula cannot carry: Woodcore says so beside the domain in its window.
 ///
 /// ```typ
 /// #var("M_d", 4.2, "kNm", level: 0)
@@ -1771,7 +1776,8 @@
   }
 }
 
-/// Sets the unit **computed** results of one dimension are printed in: for the next one (the default), for the rest of the domain, or for the rest of the document (spec 2026-10-21-commandes-typst-refonte, REQ-005).
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, REQ-005.
+/// Sets the unit **computed** results of one dimension are printed in: for the next one (the default), for the rest of the domain, or for the rest of the document.
 ///
 /// ```typ
 /// #var("F", 12, "kN")
@@ -1815,7 +1821,8 @@
 // What `#calc-defaults` may set: every fine argument the lines take, their level, and a unit.
 #let calc-default-names = ("display", "display-formula", "display-equation", "label-position", "descr-position", "norm-position", "style", "role", "level", "unit", "presets")
 
-/// Sets the fine arguments of the lines that follow -- the next one (the default), the rest of the domain, or the rest of the document -- where they write none of their own: what to show of them, where their labels, descriptions and citations go, their style, their role, their level, and the unit of a dimension (spec 2026-10-21-commandes-typst-refonte, REQ-006). A line's own argument still wins, then its own `level:`, then these (REQ-007).
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, REQ-006; REQ-007.
+/// Sets the fine arguments of the lines that follow -- the next one (the default), the rest of the domain, or the rest of the document -- where they write none of their own: what to show of them, where their labels, descriptions and citations go, their style, their role, their level, and the unit of a dimension. A line's own argument still wins, then its own `level:`, then these.
 ///
 /// ```typ
 /// #calc-defaults(norm-position: "line-right", scope: "document")
@@ -1889,7 +1896,8 @@
   if notes != none { place(hide[#footnote(notes)#mark]) }
 }
 
-/// A calculation domain: keeps one set of variables apart from another, **without losing it** -- what is declared inside belongs to `id`, and stays readable further down the document through `#var(key, domain: id)` --, prints its label as a heading, and sets a level for every line it holds (spec 2026-10-21-commandes-typst-refonte, REQ-008). `var-domain` was it until then.
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, REQ-008; REQ-007.
+/// A calculation domain: keeps one set of variables apart from another, **without losing it** -- what is declared inside belongs to `id`, and stays readable further down the document through `#var(key, domain: id)` --, prints its label as a heading, and sets a level for every line it holds. `var-domain` was it until then.
 ///
 /// ```typ
 /// #var("l", 2.4, "m")
@@ -1910,9 +1918,9 @@
 ///
 /// Without it the second `F` would quietly replace the first, the registry being one dictionary for the whole document. A name is looked up in the innermost domain first and then in the default one, so what a section declares outside every domain -- R_d, a partial factor -- is readable inside all of them.
 ///
-/// **Its level** is the level of every line inside that states none of its own: a line's own `level:`, or a fine argument it writes, wins (REQ-007). `#calc-defaults(scope: "domain")` sets the defaults of its lines, and a `#unit(scope: "domain")` the unit of a dimension -- both gone when the domain closes.
+/// **Its level** is the level of every line inside that states none of its own: a line's own `level:`, or a fine argument it writes, wins. `#calc-defaults(scope: "domain")` sets the defaults of its lines, and a `#unit(scope: "domain")` the unit of a dimension -- both gone when the domain closes.
 ///
-/// 👉 A *domain* here is a set of names in the report. It has nothing to do with a calculation domain of the Excel workbooks (docs/domain/calculation-domains.md §3.3), which is a kind of calculation -- `snow-load`, `dead-load` -- whose instances are Excel sheets.
+/// 👉 A *domain* here is a set of names in the report. It has nothing to do with a calculation domain of the export (docs/domain/calculation-domains.md §3.3), which is a kind of calculation -- `snow-load`, `dead-load` -- whose instances are the cases entered in Woodcore's tabs.
 /// - id (str): the domain's name -- what `#var(key, domain: id)` reads, and what Woodcore finds the domain by.
 /// - label (str, none): its title.
 /// - label-position (str, auto): `"none"`, `"before"` (a heading before the domain, one level below the heading above it), `"after"` (the same heading after it), `"footnote"`. auto leaves it to the level -- before, from level 1.
@@ -1988,10 +1996,44 @@
   }
 }
 
+// References of the block below (moved out of it, issue #115): spec 2026-10-23-onglet-vent-briques, D-29.
+/// Prints what it holds **from a level on**: at the level the place stands at -- the innermost `#domain` that states one, else the report's, the uniform level over both -- or above, and nothing below it. What a domain's file writes a figure in that only its most detailed print shows: the figure of the norm of a wind load, printed at level 3 alone. The figure keeps its own line, its width, its caption and its label, which «Affichage» sets; the preview of «Affichage» prints it pale where the report would hide it.
+///
+/// ```typ
+/// #domain("WL-01", label: "Charge de vent", level: 3)[
+///   #from-level(3)[#figure(rect(width: 3cm, height: 1cm), caption: [Printed at level 3]) <wl-figure>]
+/// ]
+/// ```
+///
+/// At level 2 it prints nothing:
+///
+/// ```typ
+/// #domain("WL-02", label: "Charge de vent", level: 2)[
+///   #from-level(3)[#figure(rect(width: 3cm, height: 1cm), caption: [Not printed at level 2])]
+///   #var("q_p", 0.98, "kN/m²")
+/// ]
+/// ```
+///
+/// - lowest (int): 1, 2 or 3 -- the lowest level what it holds is printed at.
+/// - body (content): what it holds, a figure on its line.
+/// -> content
+#let from-level(lowest, body) = {
+  if not (lowest in (1, 2, 3)) { panic("from-level: the lowest level is 1, 2 or 3, got " + repr(lowest)) }
+  context {
+    let forced = uniform-level.get()
+    let at = if forced != none { forced } else {
+      let own = var-registry.get().at("frames", default: ()).rev().find(f => f.level != auto)
+      if own != none { own.level } else { resolve-level(auto) }
+    }
+    if at >= lowest { body } else if show-masked.get() { masked-line(body) }
+  }
+}
+
 // The columns `#var-table` may show, in the order they stand in when named: what the engineer listed (T3: «colonne descr, norm, norm-section, label, etc.»).
 #let var-table-columns = ("label", "descr", "symbol", "value", "unit", "norm", "norm-section")
 
-/// A table of the variables of one role -- the data, the computed values or the results -- of a domain, of several, or of the whole document, **read from the registry and never copied**: the values are those the lines declare, wherever they stand, so a table at the head of a domain lists what is declared below it (spec 2026-10-21-commandes-typst-refonte, REQ-010).
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, REQ-010; Q-009.
+/// A table of the variables of one role -- the data, the computed values or the results -- of a domain, of several, or of the whole document, **read from the registry and never copied**: the values are those the lines declare, wherever they stand, so a table at the head of a domain lists what is declared below it.
 ///
 /// ```typ
 /// #domain("p1", label: "Poutre P1")[
@@ -2002,7 +2044,7 @@
 /// ]
 /// ```
 ///
-/// Over every domain and filtered by unit, it is the summary of the loads or of the results -- what `show-load-summary` and `show-result-summary` printed (Q-009):
+/// Over every domain and filtered by unit, it is the summary of the loads or of the results -- what `show-load-summary` and `show-result-summary` printed:
 ///
 /// ```typ
 /// #var("g_k", 1.2, "kN/m²", label: "Eigengewicht", level: 0)
@@ -2071,7 +2113,8 @@
 // The four parts `val` prints, and the name to type into a call -- which is what one comes here for. Built from `val-types` rather than restated, so that the two cannot come to offer different words.
 #let find-types = ("name",) + val-types
 
-/// **What there is to name in a call**: every domain with its keys, or the variables one of them holds (v0.85). A command for *writing* a report rather than for the finished page -- one calls it, reads it, and deletes the call -- and the only thing that answers "which variables does this connector carry?": the catalog window's loads tab reads `data/calculations.json` alone, so a connector's own vars and a polar moment's are listed nowhere else.
+// References of the block below (moved out of it, issue #115): v0.85.
+/// **What there is to name in a call**: every domain with its keys, or the variables one of them holds. A command for *writing* a report rather than for the finished page -- one calls it, reads it, and deletes the call -- and the only thing that answers "which variables does this connector carry?": the catalog window's loads tab reads `data/calculations.json` alone, so a connector's own vars and a polar moment's are listed nowhere else.
 ///
 /// ```typ
 /// #find(object: "domain")
@@ -2352,6 +2395,7 @@
   meta + (if masked { masked-line(render()) } else { render() })
 }
 
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, REQ-004, D-12.
 /// States a relation between the report's variables, **performs it**, and marks the answer: double-ruled in green with a ✔ where it holds, in red with a ✘ where it does not.
 ///
 /// ```typ
@@ -2376,7 +2420,7 @@
 /// #verify(`F_Ed / R_d <= 1`, display: "variable-value-unit")
 /// ```
 ///
-/// **Its utilisation, named** (spec 2026-10-21-commandes-typst-refonte, REQ-004, D-12): `name-calc:` keeps the ratio of the two sides -- the left over the right for `<=` and `<`, the right over the left for `>=` and `>` -- under that name, for a line below; `name-visible:` prints the relation as that ratio against 1, under that name -- `η = σ/f = … ⩽ 1`:
+/// **Its utilisation, named**: `name-calc:` keeps the ratio of the two sides -- the left over the right for `<=` and `<`, the right over the left for `>=` and `>` -- under that name, for a line below; `name-visible:` prints the relation as that ratio against 1, under that name -- `η = σ/f = … ⩽ 1`:
 ///
 /// ```typ
 /// #var("sigma_t_d", 0.893, "N/mm²", level: 0)

@@ -61,7 +61,7 @@ class WindowExportMixin:
     def import_button_widget(self):
         """«Import données»: a split button whose own click runs the export, and whose arrow opens a menu holding that same single action, named by what it takes in.
 
-        It was «Import données» until the RFEM import (v0.98, retired in 0.117), and the rename is the engineer's: the one action reads the load workbooks, `Positionen.xlsx` and everything Woodcore drew, so a name that says «Excel» says less than the button does. ⚠️ There is still **one** way to import, which is why the menu still holds one entry: a second entry per source would suggest that a source can be imported on its own, and the export is one pass over all of them -- a plan's labels are checked against the positions the same pass read.
+        It was «Import données» until the RFEM import (v0.98, retired in 0.117), and the rename is the engineer's: the one action reads everything entered and drawn in Woodcore -- the load workbooks and `Positionen.xlsx` too until issue #109 and v0.114 --, so a name that says «Excel» says less than the button does. ⚠️ There is still **one** way to import, which is why the menu still holds one entry: a second entry per source would suggest that a source can be imported on its own, and the export is one pass over all of them -- a plan's labels are checked against the positions the same pass read.
         """
         button = QToolButton()
         button.setText(self.t("reexport"))

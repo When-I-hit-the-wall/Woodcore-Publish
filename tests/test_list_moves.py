@@ -17,7 +17,7 @@ from test_autosave import _boxes, _edit_identity, _qt
 
 _STATE = {}
 
-TABS = ("tab_schema", "tab_statics", "tab_plan", "tab_fire", "tab_polar", "tab_mc_tension")
+TABS = ("tab_schema", "tab_statics", "tab_plan", "tab_fire", "tab_polar", "tab_mc_fire")
 
 
 def _edit_label(tab, text):
@@ -25,7 +25,7 @@ def _edit_label(tab, text):
     tab.label_edit.editingFinished.emit()
 
 
-EDITS = {"tab_schema": _edit_identity, "tab_statics": _edit_identity, "tab_mc_tension": _edit_identity, "tab_plan": _edit_label, "tab_fire": _edit_label, "tab_polar": _edit_label}
+EDITS = {"tab_schema": _edit_identity, "tab_statics": _edit_identity, "tab_mc_fire": _edit_identity, "tab_plan": _edit_label, "tab_fire": _edit_label, "tab_polar": _edit_label}
 
 
 def _window():

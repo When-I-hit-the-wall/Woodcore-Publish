@@ -58,7 +58,7 @@ COMMAND_REFERENCES = {
 FILE_KINDS = {"check": "check", "steel": "steel", "connector": "connector", "connection": "connection", "script": "script"}
 # The public commands that name no object of the project: they format, compute what they are given, or lay out a page
 NO_REFERENCE = frozenset((
-    "calc-defaults", "caption-rules", "cite-norm", "distance", "doc-tables", "domain", "eq", "fmt-decimals", "fmt-number", "fmt-value", "get",
+    "calc-defaults", "caption-rules", "cite-norm", "from-level", "distance", "doc-tables", "domain", "eq", "fmt-decimals", "fmt-number", "fmt-value", "get",
     "image-titleblock", "journal-entries", "project-info", "render-formula", "render-prose", "render-symbol", "report-lang", "set-report-language",
     "show-bibliography", "show-norm-list", "sync", "t", "t-label", "t-of", "t-pattern", "t-str", "tl", "tl-of", "tl-str", "unit", "var-table",
     "verify", "woodcore-document",

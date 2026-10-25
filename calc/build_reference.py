@@ -2,7 +2,7 @@
 
 Since v0.64 it reads **all three files commands.typ re-exports** -- calc-engine.typ, formula.typ and i18n.typ -- and every top-level `#let` in them, not only the ones whose name is followed by a parenthesis. Before that it read calc-engine.typ alone and could not see a binding like `#let report-level = state(...)`, so var, eq, verify, val, unit, var-domain, var-unit, the ten commands of i18n.typ and the four settings of the document were in no catalog at all. It also carries the categories Woodcore's commands tab lists them under, and the worked examples of each (section 10sexies) -- so the workbook, the window and Tinymist's hover all read the same text.
 
-Every show-* call is addressed the same way -- `(domain, instance)`, then whatever it looks up inside -- so every sheet below leads with those two columns. An instance is a workbook sheet for a calculation domain (data/calculations.json), a position id for a domain attached to a position (data/positions/<id>.json), or a connection's id under the domain "connection" (data/connections.json); one `iter_sources()` enumerates all three, so no sheet can list one kind and forget another. The Connections sheet adds the call no other kind has, show-polar-moment, and names the schema each is drawn on; the Connectors sheet lists the connectors (data/connectors.json), the polar-moment calculations drawn on the same schema as each, and the show-connector call that prints it.
+Every show-* call is addressed the same way -- `(domain, instance)`, then whatever it looks up inside -- so every sheet below leads with those two columns. An instance is a case entered in Woodcore for a calculation domain (data/calculations.json), a position id for a domain attached to a position (data/positions/<id>.json), or a connection's id under the domain "connection" (data/connections.json); one `iter_sources()` enumerates all three, so no sheet can list one kind and forget another. The Connections sheet adds the call no other kind has, show-polar-moment, and names the schema each is drawn on; the Connectors sheet lists the connectors (data/connectors.json), the polar-moment calculations drawn on the same schema as each, and the show-connector call that prints it.
 
 Like everything under data/, this workbook is generated and must never be hand-edited -- calc/export_all.py regenerates it on every run. Can also be run standalone right after editing a /// block, without rerunning the whole data pipeline.
 """
@@ -49,7 +49,6 @@ from build_reference_calls import (  # split out of this module (issue #30): eve
     _signatures,
     call_command,
     call_expression,
-    call_find,
     call_journal_entries,
     call_show_annexes,
     call_image,
@@ -93,7 +92,7 @@ def load_positions(data_dir):
 # The domain a connection's record is read under (docs/domain/connections.md §3.3quinquies): `show-calc("connection", "VU-MP-1")`.
 CONNECTION_DOMAIN = "connection"
 
-# The domain read from a norm table rather than from a workbook, and the engine that says so (docs/domain/loads.md §3.3septies): the Nutzlasten of SIA 261's Tabelle 8, whose instances are its categories and which has two calls of its own.
+# The domain read from a norm table rather than entered in Woodcore, and the engine that says so (docs/domain/loads.md §3.3septies): the Nutzlasten of SIA 261's Tabelle 8, whose instances are its categories and which has two calls of its own.
 LIVE_LOAD_DOMAIN = "live-load"
 NORM_ENGINE = "norm"
 
@@ -203,6 +202,8 @@ WRITTEN_CALLS = {
     "report-level": ("#report-level.update(2)",) * 2,
     "uniform-level": ("#uniform-level.update(2)",) * 2,
     "show-masked": ("#show-masked.update(true)",) * 2,
+    # what it holds is the call: a figure, printed from the level its first argument names (spec 2026-10-23-onglet-vent-briques, D-29)
+    "from-level": ("#from-level(3)[#figure(rect(width: 2cm, height: 1cm), caption: [Figure])]",) * 2,
     "report-language": ("#context report-language.get()",) * 2,
     # a show rule is applied, never called: its one argument is the document it is handed (v0.82)
     "woodcore-document": ("#show: woodcore-document",) * 2,
@@ -482,12 +483,12 @@ def build_example_rows(records):
 def iter_sources(positions, calculations, connections=None):
     """Every {vars, steps, checks} record a show-* call can read, with the two arguments that select it: (domain, instance).
 
-    Yields (source_type, domain, instance, engine, data) -- `sheet` for an instance read from a workbook, `norm` for one read from a norm table (a category of SIA 261's Tabelle 8, section 3.3septies), `position` for a domain carried by a position, `connection` for a connection saved in Woodcore (domain "connection", its id as the instance).
+    Yields (source_type, domain, instance, engine, data) -- `source` for a case entered in Woodcore (a `sheet` of a load workbook until issue #109), `norm` for one read from a norm table (a category of SIA 261's Tabelle 8, section 3.3septies), `position` for a domain carried by a position, `connection` for a connection saved in Woodcore (domain "connection", its id as the instance).
     """
     for domain, d in calculations["domains"].items():
-        source_type = NORM_ENGINE if d["engine"] == NORM_ENGINE else "sheet"
-        for sheet, instance in d["instances"].items():
-            yield (source_type, domain, sheet, d["engine"], instance)
+        source_type = NORM_ENGINE if d["engine"] == NORM_ENGINE else "source"
+        for case, instance in d["instances"].items():
+            yield (source_type, domain, case, d["engine"], instance)
     for p in positions:
         for domain, data in p["domains"].items():
             yield ("position", domain, p["position"], "python", data)
@@ -564,7 +565,7 @@ def build_connections_rows(connections):
 
 
 def build_calculations_rows(positions, calculations, connections=None):
-    """One row per instance. `workbook` says which load workbook a sheet was read from -- several may be, so the sheet name alone does not -- and is empty for a position's domain and for one read from a norm table, as is `action` for a position's (permanent or variable, a property of a load domain, docs/domain/calculation-domains.md §3.3)."""
+    """One row per instance; `action` is empty for a position's (permanent or variable, a property of a load domain, docs/domain/calculation-domains.md §3.3)."""
     def action(domain):
         return calculations["domains"].get(domain, {}).get("action", "")
 
@@ -578,7 +579,7 @@ def build_calculations_rows(positions, calculations, connections=None):
 
     return [
         (
-            source_type, domain, instance, d.get("workbook", ""),
+            source_type, domain, instance,
             action(domain), engine,
             len(d["vars"]), len(d["steps"]), len(d.get("results", [])),
             len(d["checks"]), len(d.get("tables", [])),
@@ -653,7 +654,7 @@ SHEET_SPECS = [
     ("Examples", ["category", "function", "example_no", "compiled", "source"], "Examples"),
     (
         "Calculations",
-        ["source_type", "domain", "instance", "workbook", "action", "engine", "num_vars", "num_steps",
+        ["source_type", "domain", "instance", "action", "engine", "num_vars", "num_steps",
          "num_results", "num_checks", "num_tables", "example_call"],
         "Calculations",
     ),

@@ -1,9 +1,9 @@
 {
   "domains": {
-    "WL-Fluchttreppe+Geräte": {
-      "check": "WL-Fluchttreppe+Geräte",
+    "WL-Fluchttreppe+Geraete": {
+      "check": "WL-Fluchttreppe+Geraete",
       "gen": {
-        "form": "82a6cf",
+        "form": "968859",
         "kind": "wind-load",
         "version": 2
       },
@@ -12,120 +12,148 @@
           "28cbd842133c307d",
           "28cbd842133c307d"
         ],
-        "label:WL-Fluchttreppe-Ger-te-presets": [
-          "4217e84157cbaa97",
-          "4217e84157cbaa97"
+        "figure:WL-Fluchttreppe+Geraete-fig-de.pdf": [
+          "a69a52c0ea0ed163",
+          "a69a52c0ea0ed163"
         ],
-        "label:WL-Fluchttreppe-Ger-te-table-1": [
-          "dd5e4b2b50bf2e59",
-          "dd5e4b2b50bf2e59"
+        "label:WL-Fluchttreppe-Geraete-presets": [
+          "83a5c8013b472608",
+          "83a5c8013b472608"
         ],
-        "label:WL-Fluchttreppe-Ger-te-table-1-note": [
-          "9d914673bb61b865",
-          "9d914673bb61b865"
+        "label:WL-Fluchttreppe-Geraete-table-1": [
+          "bed6cdcfe89a2219",
+          "bed6cdcfe89a2219"
         ],
-        "label:WL-Fluchttreppe-Ger-te-table-1-title": [
-          "99995e0d1eb98946",
-          "99995e0d1eb98946"
+        "label:WL-Fluchttreppe-Geraete-table-1-note": [
+          "0c04c6dac0595fae",
+          "0c04c6dac0595fae"
         ],
-        "label:WL-Fluchttreppe-Ger-te-table-2": [
-          "1e573e94ee3bcccc",
-          "1e573e94ee3bcccc"
+        "label:WL-Fluchttreppe-Geraete-table-1-title": [
+          "66c86ad87c8436c4",
+          "66c86ad87c8436c4"
         ],
-        "label:WL-Fluchttreppe-Ger-te-table-2-note": [
-          "0b02b75fbf7c4dd2",
-          "0b02b75fbf7c4dd2"
+        "label:WL-Fluchttreppe-Geraete-table-2": [
+          "fcdfdd3eda4e9c0c",
+          "fcdfdd3eda4e9c0c"
         ],
-        "label:WL-Fluchttreppe-Ger-te-table-2-title": [
-          "915808b97260d855",
-          "915808b97260d855"
+        "label:WL-Fluchttreppe-Geraete-table-2-note": [
+          "93c6681ca5735123",
+          "93c6681ca5735123"
+        ],
+        "label:WL-Fluchttreppe-Geraete-table-2-title": [
+          "d62c6c12976f8c25",
+          "d62c6c12976f8c25"
+        ],
+        "var:Qk_max_cf1": [
+          "05e8a2a41f064774",
+          "05e8a2a41f064774"
+        ],
+        "var:Qk_max_cf2": [
+          "06583b278a99e8a8",
+          "06583b278a99e8a8"
+        ],
+        "var:Qk_max_cf3": [
+          "0a3c72f448462485",
+          "0a3c72f448462485"
+        ],
+        "var:Qk_min_cf1": [
+          "fded92cf247201ed",
+          "fded92cf247201ed"
+        ],
+        "var:Qk_min_cf2": [
+          "af5f61a02abe1c96",
+          "af5f61a02abe1c96"
+        ],
+        "var:Qk_min_cf3": [
+          "cd3e6ece14c48c58",
+          "cd3e6ece14c48c58"
         ],
         "var:alpha_r": [
-          "0b94a3c50b1f2671",
-          "0b94a3c50b1f2671"
+          "0750ef6c7e9fe93e",
+          "0750ef6c7e9fe93e"
         ],
         "var:b": [
-          "662d09d48d863ec5",
-          "662d09d48d863ec5"
+          "cb42d5f0e07bafee",
+          "cb42d5f0e07bafee"
         ],
         "var:cd": [
-          "1d1ead6eeb1948d3",
-          "1d1ead6eeb1948d3"
+          "4feb91d9d791201a",
+          "4feb91d9d791201a"
         ],
         "var:ch": [
-          "989a26e0cfe1c6b7",
-          "989a26e0cfe1c6b7"
+          "e1aa6e8ad92623e5",
+          "e1aa6e8ad92623e5"
         ],
         "var:cred_bh": [
-          "2a5e20525b09bd97",
-          "2a5e20525b09bd97"
+          "4af21561db45858a",
+          "4af21561db45858a"
         ],
         "var:cred_dh": [
-          "a147ee6106d1648a",
-          "a147ee6106d1648a"
+          "24101c237080446a",
+          "24101c237080446a"
         ],
         "var:cred_max": [
-          "5b63261401a77ca1",
-          "5b63261401a77ca1"
+          "6a2eec4baf32428d",
+          "6a2eec4baf32428d"
         ],
         "var:d": [
-          "6074dae1fa3ec315",
-          "6074dae1fa3ec315"
+          "2090ca02925b91e9",
+          "2090ca02925b91e9"
         ],
         "var:gelaendekategorie": [
-          "1ebbcfeaf7be20b3",
-          "1ebbcfeaf7be20b3"
+          "fd82893af7f195e9",
+          "fd82893af7f195e9"
         ],
         "var:h": [
-          "af6f3c66dd5bb487",
-          "af6f3c66dd5bb487"
+          "18b14b769f437851",
+          "18b14b769f437851"
         ],
         "var:qk_max_cf1": [
-          "71bbcd558023eff5",
-          "71bbcd558023eff5"
+          "1509e21f410579f7",
+          "1509e21f410579f7"
         ],
         "var:qk_max_cf2": [
-          "3195a40d6bf3b392",
-          "3195a40d6bf3b392"
+          "9c243d5c57a79ebd",
+          "9c243d5c57a79ebd"
         ],
         "var:qk_max_cf3": [
-          "9e6c75ff52acccc6",
-          "9e6c75ff52acccc6"
+          "21caa4f1e6433456",
+          "21caa4f1e6433456"
         ],
         "var:qk_min_cf1": [
-          "757a2546d3db8cb8",
-          "757a2546d3db8cb8"
+          "ba5b96aee254883b",
+          "ba5b96aee254883b"
         ],
         "var:qk_min_cf2": [
-          "a458ef1ad072e6de",
-          "a458ef1ad072e6de"
+          "16d64466fb9c1337",
+          "16d64466fb9c1337"
         ],
         "var:qk_min_cf3": [
-          "4adb6754f11db3f1",
-          "4adb6754f11db3f1"
+          "ffa8d56f17742d60",
+          "ffa8d56f17742d60"
         ],
         "var:qp0": [
-          "38d878deec2c74d6",
-          "38d878deec2c74d6"
+          "7d8785be3975607e",
+          "7d8785be3975607e"
         ],
         "var:tabelle": [
-          "c0f40f0952200592",
-          "c0f40f0952200592"
+          "88bb344ce9478050",
+          "88bb344ce9478050"
         ],
         "var:z": [
-          "f63130ad88782cb3",
-          "f63130ad88782cb3"
+          "82a44f46eb82ec87",
+          "82a44f46eb82ec87"
         ],
         "var:zg": [
-          "c37591e74dbba5c0",
-          "c37591e74dbba5c0"
+          "9470c10922ccc32a",
+          "9470c10922ccc32a"
         ]
       }
     },
     "WL-Pavillon": {
       "check": "WL-Pavillon",
       "gen": {
-        "form": "82a6cf",
+        "form": "968859",
         "kind": "wind-load",
         "version": 2
       },
@@ -134,33 +162,61 @@
           "28cbd842133c307d",
           "28cbd842133c307d"
         ],
+        "figure:WL-Pavillon-fig-de.pdf": [
+          "bc75a615d4104248",
+          "bc75a615d4104248"
+        ],
         "label:WL-Pavillon-presets": [
           "c21b60cc7871c487",
           "c21b60cc7871c487"
         ],
         "label:WL-Pavillon-table-1": [
-          "8c924929d03113a0",
-          "8c924929d03113a0"
+          "51256ea26c573dc7",
+          "51256ea26c573dc7"
         ],
         "label:WL-Pavillon-table-1-note": [
-          "04014be5e324169a",
-          "04014be5e324169a"
+          "6af42f5beb6e0975",
+          "6af42f5beb6e0975"
         ],
         "label:WL-Pavillon-table-1-title": [
           "a2f5ee3c3674aaa7",
           "a2f5ee3c3674aaa7"
         ],
         "label:WL-Pavillon-table-2": [
-          "4ae562d7c31bf790",
-          "4ae562d7c31bf790"
+          "2d5da325100bfe8a",
+          "2d5da325100bfe8a"
         ],
         "label:WL-Pavillon-table-2-note": [
-          "2d46b9bb857137e6",
-          "2d46b9bb857137e6"
+          "750938e855b0afdd",
+          "750938e855b0afdd"
         ],
         "label:WL-Pavillon-table-2-title": [
           "bd8c428a9db88c70",
           "bd8c428a9db88c70"
+        ],
+        "var:Qk_max_cf1": [
+          "87c01bd9388e9a06",
+          "87c01bd9388e9a06"
+        ],
+        "var:Qk_max_cf2": [
+          "7e66ed412411194a",
+          "7e66ed412411194a"
+        ],
+        "var:Qk_max_cf3": [
+          "d7ec15261a4fa11d",
+          "d7ec15261a4fa11d"
+        ],
+        "var:Qk_min_cf1": [
+          "f53279df4dc860c0",
+          "f53279df4dc860c0"
+        ],
+        "var:Qk_min_cf2": [
+          "da36391505ca4cc9",
+          "da36391505ca4cc9"
+        ],
+        "var:Qk_min_cf3": [
+          "536d08a649fea4d2",
+          "536d08a649fea4d2"
         ],
         "var:alpha_r": [
           "e149c5ad550ab63e",
@@ -203,28 +259,28 @@
           "599b237d171d541a"
         ],
         "var:qk_max_cf1": [
-          "a3e2f8d016a5f4ce",
-          "a3e2f8d016a5f4ce"
+          "cf691a7086fbd1fe",
+          "cf691a7086fbd1fe"
         ],
         "var:qk_max_cf2": [
-          "85afcdc6e75522cb",
-          "85afcdc6e75522cb"
+          "7e670edc181ba1b5",
+          "7e670edc181ba1b5"
         ],
         "var:qk_max_cf3": [
-          "9e7b1dd27679e2e6",
-          "9e7b1dd27679e2e6"
+          "3fd0dd12be75e8a6",
+          "3fd0dd12be75e8a6"
         ],
         "var:qk_min_cf1": [
-          "f1f6bb409323283c",
-          "f1f6bb409323283c"
+          "96afbe445c8af7f8",
+          "96afbe445c8af7f8"
         ],
         "var:qk_min_cf2": [
-          "0e8e6c9d50def136",
-          "0e8e6c9d50def136"
+          "17a337669224fffd",
+          "17a337669224fffd"
         ],
         "var:qk_min_cf3": [
-          "78bdb1eadbc1c71b",
-          "78bdb1eadbc1c71b"
+          "633f5b125ef5b681",
+          "633f5b125ef5b681"
         ],
         "var:qp0": [
           "e7793ae83eb714aa",
@@ -247,7 +303,7 @@
     "WL-Velo": {
       "check": "WL-Velo",
       "gen": {
-        "form": "82a6cf",
+        "form": "968859",
         "kind": "wind-load",
         "version": 2
       },
@@ -256,33 +312,61 @@
           "28cbd842133c307d",
           "28cbd842133c307d"
         ],
+        "figure:WL-Velo-fig-de.pdf": [
+          "0b7bb18fbd96607e",
+          "0b7bb18fbd96607e"
+        ],
         "label:WL-Velo-presets": [
           "efb2a4c8f36b7efc",
           "efb2a4c8f36b7efc"
         ],
         "label:WL-Velo-table-1": [
-          "5f9ca791f5a20c60",
-          "5f9ca791f5a20c60"
+          "d55ccf376eaebac4",
+          "d55ccf376eaebac4"
         ],
         "label:WL-Velo-table-1-note": [
-          "45f4d5b117493409",
-          "45f4d5b117493409"
+          "508c72a2379546b9",
+          "508c72a2379546b9"
         ],
         "label:WL-Velo-table-1-title": [
           "4f1c444bdb14eff3",
           "4f1c444bdb14eff3"
         ],
         "label:WL-Velo-table-2": [
-          "7475ca1cc0f167dd",
-          "7475ca1cc0f167dd"
+          "cebfe7a4561e4834",
+          "cebfe7a4561e4834"
         ],
         "label:WL-Velo-table-2-note": [
-          "1f7a7d6b76697d02",
-          "1f7a7d6b76697d02"
+          "86491cc13c9a5237",
+          "86491cc13c9a5237"
         ],
         "label:WL-Velo-table-2-title": [
           "4f02016994cb1197",
           "4f02016994cb1197"
+        ],
+        "var:Qk_max_cf1": [
+          "156e522fb8607d2a",
+          "156e522fb8607d2a"
+        ],
+        "var:Qk_max_cf2": [
+          "10c8159e5bb2c1fa",
+          "10c8159e5bb2c1fa"
+        ],
+        "var:Qk_max_cf3": [
+          "bf20515938e92122",
+          "bf20515938e92122"
+        ],
+        "var:Qk_min_cf1": [
+          "bb146d98271586d0",
+          "bb146d98271586d0"
+        ],
+        "var:Qk_min_cf2": [
+          "7aa3474675163c49",
+          "7aa3474675163c49"
+        ],
+        "var:Qk_min_cf3": [
+          "98554a1817cfee33",
+          "98554a1817cfee33"
         ],
         "var:alpha_r": [
           "658f5d1a540ffdd8",
@@ -325,28 +409,28 @@
           "84390f4a307795cd"
         ],
         "var:qk_max_cf1": [
-          "634008295d1c24bf",
-          "634008295d1c24bf"
+          "f2470566e36be650",
+          "f2470566e36be650"
         ],
         "var:qk_max_cf2": [
-          "f8b285a60859ea26",
-          "f8b285a60859ea26"
+          "7fcae6f67ea12c8e",
+          "7fcae6f67ea12c8e"
         ],
         "var:qk_max_cf3": [
-          "c3bf9a2300933916",
-          "c3bf9a2300933916"
+          "f724525ac631de80",
+          "f724525ac631de80"
         ],
         "var:qk_min_cf1": [
-          "4560a1cb473e7088",
-          "4560a1cb473e7088"
+          "a55f199273de3af2",
+          "a55f199273de3af2"
         ],
         "var:qk_min_cf2": [
-          "3f8ff7bd51bd2c01",
-          "3f8ff7bd51bd2c01"
+          "f9a3a3d212067005",
+          "f9a3a3d212067005"
         ],
         "var:qk_min_cf3": [
-          "72cf81c682619d8e",
-          "72cf81c682619d8e"
+          "e806f6ceb4a317b3",
+          "e806f6ceb4a317b3"
         ],
         "var:qp0": [
           "977f17f33933206f",

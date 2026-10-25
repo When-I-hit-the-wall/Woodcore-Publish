@@ -1,10 +1,10 @@
-"""Woodcore's window (the Typst-Katalog until v0.83, the Katalog until v0.96): a window listing every value the report can quote -- the loads, split into permanent and variable actions, each with the workbook, sheet and cell it comes from -- and copying the exact Typst call that prints it (docs/ui/window.md §10quater). Its editor tabs are where a position plan, a static model, a detail schema, a connector and a polar-moment calculation are defined; its «Moments polaires» tab names a detail schema, the markers or points ticked on it, the rotation centre and the directions of N and V, with the fastener group's polar moment of inertia (section 3.3quinquies).
+"""Woodcore's window (the Typst-Katalog until v0.83, the Katalog until v0.96): a window listing every value the report can quote -- the loads, split into permanent and variable actions, each with where it comes from -- and copying the exact Typst call that prints it (docs/ui/window.md §10quater). Its editor tabs are where a position plan, a static model, a detail schema, a connector and a polar-moment calculation are defined; its «Moments polaires» tab names a detail schema, the markers or points ticked on it, the rotation centre and the directions of N and V, with the fastener group's polar moment of inertia (section 3.3quinquies).
 
 The loads come from data/calculations.json, the validated export Typst itself reads, so a call copied here is one that compiles. Every call is built by build_reference's call_* functions, the same ones behind docs/typst-reference.xlsx's example_call columns, so the window and the workbook cannot spell a call two ways. Nothing here computes or rewrites a load: the window only shows what the pipeline exported, and reruns that pipeline (calc/export_all.py) on request.
 
 A project written as three documents -- the convention d'utilisation, the base de projet and the report, which is simply the third (the engineer's request of 30.09.2026) -- is shown one document at a time, chosen in a drop-down at the top of the navigation: each shows its own modules (MODE_TABS), its own journal, and «Exporter PDF» exports it -- «Exporter les trois» the three -- compiling only a document whose Typst changed since its PDF (calc/stamps.py). A project still laid out as one report is offered its migration as it opens (migrate_dialog.py).
 
-A polar-moment calculation is saved as its source, connections/<id>.json, its id made from its name (connection.id_from_name) and naming no connector since v0.76, and exported at once by the same code export_all.py runs (calc/domains/connection.py) -- data/connections.json and the figures, without the load workbooks being read again.
+A polar-moment calculation is saved as its source, connections/<id>.json, its id made from its name (connection.id_from_name) and naming no connector since v0.76, and exported at once by the same code export_all.py runs (calc/domains/connection.py) -- data/connections.json and the figures, without the rest of the export run again.
 
 Launched by Woodcore.bat beside the code, by Woodcore.exe once installed, or `python calc/tools/woodcore_gui.py [--project <file>.woodcore] [--home]` -- `catalog_gui.py` until v0.96 (its shim, for the launchers of 0.83 to 0.90, removed in v0.120). Started without a project it opens on the start page (home_page.py, v0.83); a project is opened in its own process, one project per window, and the *Fichier* menu opens another in a process of its own. A PySide6 (Qt) window since v0.30 -- standard-library tkinter before it -- carrying its own icon, woodcore.svg beside this file (typst-katalog.svg until v0.83), in its title bar and on the taskbar (docs/decisions.md §13).
 """
@@ -71,7 +71,7 @@ from polar_tab import (  # split out of this module (issue #30): every name it h
     next_free_name,
     plain_label,
 )
-from woodcore_gui_menus import MARK_PX, _QT_TRANSLATOR, config_stamp, data_file, install_qt_translation, mark_icon, one_line, read_settings, stale_workbooks, vscode_executable, write_settings, WindowMenusMixin  # split out of this module (issue #30): every name it had is still importable from it
+from woodcore_gui_menus import MARK_PX, _QT_TRANSLATOR, config_stamp, data_file, install_qt_translation, mark_icon, one_line, read_settings, vscode_executable, write_settings, WindowMenusMixin  # split out of this module (issue #30): every name it had is still importable from it
 from woodcore_gui_export import EXPORT_TIMEOUT_MS, LANGUAGES, cli_command, console_python, WindowExportMixin  # split out of this module (issue #30): every name it had is still importable from it
 
 import project  # noqa: E402  -- where the program is, and where the project it works on is
@@ -100,7 +100,6 @@ import notifications  # noqa: E402  -- every error, warning and information, gat
 import notices_ui  # noqa: E402  -- the red octagon and the orange triangle at the top right, and their panel (v0.117)
 import list_order  # noqa: E402  -- the order of the window's lists and the «Formules» tab's folders, Woodcore-Datei/lists.json (issue #15)
 import layout_store  # noqa: E402  -- the panes' sizes by tab, by view and by the screens plugged in (v0.117)
-import variable_sources  # every variable of a project and where it comes from; instance_workbook (calc/variable_sources.py, v0.117)
 import display_options  # the option panels of the «Affichage» views, one per command (display_options.py, v0.117)
 import display_view  # the «Affichage» view a tab shows its commands in (display_view.py, v0.117)
 import richtext  # symbols as mathematics, Typst calls coloured, «Copié ✓» (richtext.py, v0.92)
@@ -125,7 +124,7 @@ import fire_tab  # noqa: E402  -- the fire protection plan tab (v0.115), the pos
 import positions_tab
 import reserved_tab  # the one class of a tab to come: the six reserved tabs (spec 2026-10-19-base-saine-nettoyage, ARCH-001)  # noqa: E402
 import action_tabs  # the words of the six empty tabs of «Actions» (v0.117, docs/ui/window.md §10quater)  # noqa: E402
-import load_tab  # the loads entered in Woodcore: «Poids propre et surcharge», «Neige», «Vent» (issues #35-#37, docs/domain/loads.md)  # noqa: E402
+import wind_tab  # the loads entered in Woodcore: «Poids propre et surcharge», «Neige», «Vent» on the type «Calcul» (issues #35-#37, #95, #100; docs/domain/loads.md)  # noqa: E402
 import fire_check_tab  # the «Résistance au feu» tab: the member checks in the design situation fire, SIA 265 4.5.2, and VKF 15-15 (issue #46)  # noqa: E402
 import steel_tab  # the «Acier» tabs: the steel checks of SIA 263 (issues #50-#52, docs/ui/tab-steel.md)  # noqa: E402
 import profile_tab  # the «Profilés» tab of «Acier»: the SZS C5 library and the free profiles (issue #50)  # noqa: E402
@@ -178,7 +177,7 @@ def load_data(path=None):
 
 
 # Every tab, declared once in tab_registry.SPECS (spec 2026-10-19-base-saine-nettoyage, ARCH-001): the lists the window reads are derived from it, under the names it always read -- TABS, the side navigation's groups and sub-titles, which documents show which tab, the tabs bound to one document.
-from tab_registry import DOCUMENT_TABS, GUARDED_TABS, MODE_BOUND, MODE_TABS, NAV_GROUPS, NAV_SECTIONS, SPECS, TABS  # noqa: E402,F401
+from tab_registry import DOCUMENT_TABS, GUARDED_TABS, MODE_BOUND, MODE_TABS, NAV_GROUPS, NAV_SECTIONS, PROJECT_FREE, SPECS, TABS  # noqa: E402,F401
 
 
 def mode_tabs(mode):
@@ -251,7 +250,6 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWin
         self.quiet_export = False  # the export running was started by a save without a question: its warnings go to the status line
         self.light_export = False  # the export running was started by a position saved: the window is not built again after it, the tab in front is (refresh_lightly, v0.117)
         self.stale_tabs = set()    # the keys of the tabs that hold what an export has since replaced: each is built again when it is next shown (refresh_tab)
-        self.stale_banner = None   # the banner of workbooks changed since the export, which a light refresh takes off
         self.autosave_pending = False  # a save put off while an export or a compilation ran, made when it ends
         # The window left for another application -- VS Code, Excel -- saves what can be saved (the engineer's answer of 07.10.2026); the application's state and not the window's, which a box of Woodcore's own would also take the focus from (review A03).
         QGuiApplication.instance().applicationStateChanged.connect(self.on_application_state)
@@ -352,7 +350,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWin
 
     def available(self, key):
         """Whether tab `key` can be opened in the document shown: every tab of a document that is made, and the «Projet» tab alone in one that is not yet (issue #90: «tout est grisé sauf l'onglet Projet»)."""
-        return key == "tab_project" or project.current().is_created(self.current_document())
+        return key == "tab_project" or key in PROJECT_FREE or project.current().is_created(self.current_document())   # the «Matériaux» tab is the engineer's, not the document's (issue #110)
 
     def project_changed(self):
         """The project file rewritten by the «Projet» tab: its name where the window shows it -- the top bar, the title -- and what the tabs that show a compiled page read (issue #87: the name in the top bar was never refreshed)."""
@@ -433,7 +431,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWin
         layout = QVBoxLayout(main)
         layout.setContentsMargins(8, 8, 8, 0)
 
-        # The top bar, after the site's (v0.91): the project's name as the site sets its brand, what the export holds beside it in grey; at the right what a forced level or language will do to the next PDF, the language, and the three actions -- the PDF the primary one.
+        # The top bar, after the site's (v0.91): the project's name as the site sets its brand, what the export holds beside it in grey, then «Rechercher… Ctrl K» (issue #99: «en haut à gauche, juste à droite du texte 58 valeurs, export du…»); at the right what a forced level or language will do to the next PDF, the language, and the three actions -- the PDF the primary one.
         top = QHBoxLayout()
         top.setSpacing(8)
         brand = QLabel(project.current().name)
@@ -446,6 +444,8 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWin
         self.meta = plain_label(self.meta_text())
         self.meta.setObjectName("meta")
         top.addWidget(self.meta)
+        top.addSpacing(8)
+        self.bind_palette(top)   # «Rechercher… Ctrl K», and Ctrl+K (issue #83), right of what the export holds (issue #99)
         top.addStretch(1)
         self.pdf_chip = QToolButton()
         self.pdf_chip.setProperty("chip", True)
@@ -468,7 +468,6 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWin
         self.language.setToolTip(self.t("language"))
         self.language.currentIndexChanged.connect(self.on_language)
         top.addWidget(self.language)
-        self.bind_palette(top)   # «Rechercher… Ctrl K», and Ctrl+K (issue #83)
         top.addSpacing(8)
         reload_button = QPushButton(self.t("reload"))
         reload_button.clicked.connect(self.reload)
@@ -499,15 +498,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWin
             row.addWidget(button)
             layout.addLayout(row)
 
-        stale = self.stale_text()
-        self.stale_banner = None
-        if stale:
-            banner = plain_label(stale, wrap=True)
-            banner.setProperty("callout", "warning")
-            layout.addWidget(banner)
-            self.stale_banner = banner
-
-        # A newer version of a dependency is an offer and never a warning: the report was verified with the versions pinned in requirements.txt, and updating is a decision with a rebuild behind it. So it sits in a quieter blue than the stale-data banner above, and carries the button rather than a modal.
+        # A newer version of a dependency is an offer and never a warning: the report was verified with the versions pinned in requirements.txt, and updating is a decision with a rebuild behind it. So it sits in a quieter blue than a warning, and carries the button rather than a modal.
         if self.dependency_updates:
             detail = ", ".join(
                 self.t("deps_update_one", name=name, pinned=pinned, available=available)
@@ -660,6 +651,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWin
         self.refresh_if_stale(index)
         self.sync_view_switch()
         self.on_tab_shown(index)
+        self.update_title()
 
     # -- after a position saved: what is looked at is built again, the rest when it is looked at (v0.117) --
 
@@ -698,14 +690,10 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWin
         return new
 
     def refresh_lightly(self):
-        """A position saved and the export that follows it done (the engineer, 08.10.2026: after a save «rafraîchir que les onglets qui les lisent», 12 to 15 s on the example project, two thirds of them the window built again on its own thread): the window's data read again, what stands beside the project's name, the banner of workbooks changed since the export taken off, and **every tab marked stale** but the Positions tab -- which holds what it has just written --, the one in front built again at once and each other when it is next shown (`refresh_if_stale`). No list of the tabs that read positions to keep in step with the code: a tab that reads them, or anything an export wrote, is rebuilt before it is seen, as a full rebuild would have built it, and the ones nobody looks at cost nothing. A tab that holds unsaved work keeps it through `view_state`, as through a rebuild."""
+        """A position saved and the export that follows it done (the engineer, 08.10.2026: after a save «rafraîchir que les onglets qui les lisent», 12 to 15 s on the example project, two thirds of them the window built again on its own thread): the window's data read again, what stands beside the project's name, and **every tab marked stale** but the Positions tab -- which holds what it has just written --, the one in front built again at once and each other when it is next shown (`refresh_if_stale`). No list of the tabs that read positions to keep in step with the code: a tab that reads them, or anything an export wrote, is rebuilt before it is seen, as a full rebuild would have built it, and the ones nobody looks at cost nothing. A tab that holds unsaved work keeps it through `view_state`, as through a rebuild."""
         self.load()
         self.meta.setText(self.meta_text())
-        if self.stale_banner is not None:
-            text = self.stale_text()
-            self.stale_banner.setText(text)
-            self.stale_banner.setVisible(bool(text))
-        self.stale_tabs = {key for key, _factory in TABS if key != "tab_positions"}
+        self.stale_tabs = {key for key, _factory in TABS if key != "tab_positions" and key not in PROJECT_FREE}   # a tab of the engineer's own files reads nothing an export writes (issue #110)
         self.refresh_if_stale(self.tab_widget.currentIndex())
         self.export_button.setEnabled(True)
         self.pdf_button.setEnabled(True)
@@ -787,7 +775,7 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWin
     # -- an object of the graph of dependencies opened where it is edited (issue #71, spec 2026-10-21-graphe-dependances, UI-001) --
 
     def open_object(self, node, file=None):
-        """`node` (`check:ZT-01`, `section:rs/Sections/004-einwirkungen.typ`) opened where it is edited: a section in the editor, any other object in the tab that lists it -- the one whose `GRAPH_KIND` is its kind and which `lists_object` it --, the draft there left as every change of source leaves it (`open_object`). False where no tab lists it: a case read from a workbook, a document."""
+        """`node` (`check:ZT-01`, `section:rs/Sections/004-einwirkungen.typ`) opened where it is edited: a section in the editor, any other object in the tab that lists it -- the one whose `GRAPH_KIND` is its kind and which `lists_object` it --, the draft there left as every change of source leaves it (`open_object`). False where no tab lists it: a document."""
         kind, ident = node.split(":", 1)
         if kind == "section":
             return bool(file) and open_in_editor(project.current().root / file)
@@ -797,6 +785,34 @@ class MainWindow(WindowExportMixin, WindowMenusMixin, command_palette.PaletteWin
                 tab.open_object(ident)
                 return True
         return False
+
+    # -- a tab brought forward by another one: «Ouvrir l'onglet» of the «Variables» tab (spec 2026-10-24-onglet-variables-groupes, REQ-009, ARCH-010) --
+
+    def can_open_tab(self, key):
+        """Whether tab `key` can be brought forward now: (True, None), or (False, the key of the window's words saying why) -- a field waiting for a value (`picking`, the navigation being off), a tab the document shown does not show (`MODE_TABS`), a document not made yet (`available`), a tab reserved for a calculation to come."""
+        if self.picking:
+            return False, "open_tab_picking"
+        if key not in mode_tabs(self.current_document()):
+            return False, "open_tab_not_shown"
+        if not self.available(key):
+            return False, "open_tab_not_made"
+        tab = next((t for (k, _factory), t in zip(TABS, self.tabs) if k == key), None)
+        if tab is None or isinstance(tab, reserved_tab.ReservedTab):
+            return False, "open_tab_reserved"
+        return True, None
+
+    def show_tab(self, key, node=None):
+        """Tab `key` brought forward by the road the navigation takes (its index, which the navigation follows), then -- `node` given (`load:snow-load/SL`) and the tab listing it -- that object opened there (`open_object`, the graph's own road, issue #71). False where `can_open_tab` refuses; a tab that cannot open a case (no `GRAPH_KIND`) is brought forward alone (Q-002, A)."""
+        if not self.can_open_tab(key)[0]:
+            return False
+        index = next(i for i, (k, _factory) in enumerate(TABS) if k == key)
+        self.tab_widget.setCurrentIndex(index)
+        tab = self.tabs[index]
+        if node:
+            kind, ident = node.split(":", 1)
+            if getattr(tab, "GRAPH_KIND", None) == kind and tab.lists_object(ident):
+                tab.open_object(ident)
+        return True
 
     # -- a variable chosen in «Variables» for the «Formule» tab (v0.117, spec 2026-10-08-onglet-formule-domaines REQ-015, UI-007) --
 
@@ -1045,6 +1061,13 @@ def open_project(app, file, parent=None, quiet=False, migrate=False):
                 print(f"woodcore: {here.rel(change.path)} migrated: " + "; ".join(change.notes))
         except Exception:  # broad: a file the migration could not rewrite is left as it was, and the export names it
             traceback.print_exc()
+    # The materials a project typed by hand before issue #110 (materials.json 1.0) poured into the engineer's library, once -- even read only, the library being his and not the project's; the project itself rewritten only where it is writable, each file saved first into the archives (calc/domains/materials_migrate.py, REQ-015, D-15).
+    try:
+        from domains import materials_migrate
+        import notices_ui
+        notices_ui.tell_materials_moved(materials_migrate.migrate(here, read_only=read_only))
+    except Exception:  # broad: a library or a file that cannot be written keeps no project from opening -- its layers still read the 1.0 file
+        traceback.print_exc()
     if not read_only:
         # A project whose data/ lacks a file its report reads -- one «Nouveau projet» made before v0.86.1 wrote them -- gets it, empty, so its report compiles in Tinymist before its first export (export_all.seed); a file already there is never touched, and a failure here keeps no project from opening.
         try:

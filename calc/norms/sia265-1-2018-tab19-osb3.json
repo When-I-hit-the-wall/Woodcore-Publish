@@ -1,0 +1,278 @@
+{
+  "_source": "SIA 265/1:2018, Tableau 19a and 19b -- transcribed from the French edition, SIA265-1-2018-FR.pdf p. 42: the numbers taken from the page's text layer and every row checked on a render of the page (issue #110). The only copy of these values in the project.",
+  "_note": "Footnote 1 of a: the properties hold at hygroscopic equilibrium, 65 % relative humidity and 20 °C. Footnote 2 of a: the 5 % fractile of a modulus is 0,85 times its mean. The b table gives the design values for moisture class 1 and medium load duration (KLED moyenne); for any other, 6.1.2.1 (f_d = η_mod · f_k / γ_M, Tableaux 6 and 9). A cell the norm marks «valeurs non disponibles» is null and listed in the product's `unavailable`. Columns: (t_min, t_max] in mm, `from_inclusive` where the norm writes «≥».",
+  "edition": "SIA 265/1:2018",
+  "table_19": {
+    "number": "19",
+    "title": "Propriétés caractéristiques des panneaux OSB de la classe technique OSB/3",
+    "title_b": "Valeurs de calcul (classe d'humidité 1 et KLED moyenne) pour les panneaux OSB de la classe technique OSB/3",
+    "norm": "SIA 265/1",
+    "page": 42,
+    "fractile": "0,85",
+    "products": [
+      {
+        "id": "osb3",
+        "product": "osb3",
+        "label": "Panneau OSB/3",
+        "isotropic": false,
+        "columns": [
+          {
+            "t_min": 6,
+            "t_max": 10,
+            "from_inclusive": true
+          },
+          {
+            "t_min": 10,
+            "t_max": 18
+          },
+          {
+            "t_min": 18,
+            "t_max": 25
+          }
+        ],
+        "rho_k": [
+          550,
+          550,
+          550
+        ],
+        "grid": {
+          "plate": {
+            "f_m_k": {
+              "par": [
+                18.0,
+                16.4,
+                14.8
+              ],
+              "perp": [
+                9.0,
+                8.2,
+                7.4
+              ]
+            },
+            "f_c_90_k": {
+              "par": [
+                10.0,
+                10.0,
+                10.0
+              ],
+              "perp": [
+                10.0,
+                10.0,
+                10.0
+              ]
+            },
+            "f_v_k": {
+              "par": [
+                1.0,
+                1.0,
+                1.0
+              ],
+              "perp": [
+                1.0,
+                1.0,
+                1.0
+              ]
+            },
+            "E_m_mean": {
+              "par": [
+                4930,
+                4930,
+                4930
+              ],
+              "perp": [
+                1980,
+                1980,
+                1980
+              ]
+            },
+            "G_mean": {
+              "par": [
+                50,
+                50,
+                50
+              ],
+              "perp": [
+                50,
+                50,
+                50
+              ]
+            },
+            "f_m_d": {
+              "par": [
+                10.5,
+                9.6,
+                8.6
+              ],
+              "perp": [
+                5.3,
+                4.8,
+                4.3
+              ]
+            },
+            "f_c_90_d": {
+              "par": [
+                5.8,
+                5.8,
+                5.8
+              ],
+              "perp": [
+                5.8,
+                5.8,
+                5.8
+              ]
+            },
+            "f_v_d": {
+              "par": [
+                0.6,
+                0.6,
+                0.6
+              ],
+              "perp": [
+                0.6,
+                0.6,
+                0.6
+              ]
+            }
+          },
+          "shear": {
+            "f_m_k": {
+              "par": [
+                9.9,
+                9.4,
+                9.0
+              ],
+              "perp": [
+                7.2,
+                7.0,
+                6.8
+              ]
+            },
+            "f_v_k": {
+              "par": [
+                6.8,
+                6.8,
+                6.8
+              ],
+              "perp": [
+                6.8,
+                6.8,
+                6.8
+              ]
+            },
+            "E_m_mean": {
+              "par": [
+                3800,
+                3800,
+                3800
+              ],
+              "perp": [
+                3000,
+                3000,
+                3000
+              ]
+            },
+            "G_mean": {
+              "par": [
+                1080,
+                1080,
+                1080
+              ],
+              "perp": [
+                1080,
+                1080,
+                1080
+              ]
+            },
+            "f_m_d": {
+              "par": [
+                5.8,
+                5.5,
+                5.3
+              ],
+              "perp": [
+                4.2,
+                4.1,
+                4.0
+              ]
+            },
+            "f_v_d": {
+              "par": [
+                4.0,
+                4.0,
+                4.0
+              ],
+              "perp": [
+                4.0,
+                4.0,
+                4.0
+              ]
+            }
+          },
+          "axial": {
+            "f_t_k": {
+              "par": [
+                9.9,
+                9.4,
+                9.0
+              ],
+              "perp": [
+                7.2,
+                7.0,
+                6.8
+              ]
+            },
+            "f_c_k": {
+              "par": [
+                15.9,
+                15.4,
+                14.8
+              ],
+              "perp": [
+                12.9,
+                12.7,
+                12.4
+              ]
+            },
+            "E_tc_mean": {
+              "par": [
+                3800,
+                3800,
+                3800
+              ],
+              "perp": [
+                3000,
+                3000,
+                3000
+              ]
+            },
+            "f_t_d": {
+              "par": [
+                5.8,
+                5.5,
+                5.3
+              ],
+              "perp": [
+                4.2,
+                4.1,
+                4.0
+              ]
+            },
+            "f_c_d": {
+              "par": [
+                9.3,
+                9.0,
+                8.6
+              ],
+              "perp": [
+                7.5,
+                7.4,
+                7.2
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "notes": {}
+  }
+}

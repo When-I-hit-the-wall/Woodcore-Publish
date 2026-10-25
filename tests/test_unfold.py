@@ -643,3 +643,163 @@ def test_a_polar_moment_of_the_old_form_is_regenerated_with_its_figure_after_the
     again = path.read_text(encoding="utf-8").split("\n")
     assert m < again.index(lines[figure]) < next(i for i, l in enumerate(again) if l.strip().startswith('#eq("N_x"')), again[m:nx + 2]
     assert states()["label:VU-MP-1-polar-figure"] == "in_sync"
+
+
+# --- the wind's file (spec 2026-10-23-onglet-vent-briques, V1: REQ-013 to REQ-016, REQ-020, ARCH-013)
+
+# German words the French and English files must not print: the clauses' and the domain's words of always (REQ-016), matched as words and with their case -- the var ids «gelaendekategorie» and «tabelle», which sections cite, are no words of the page
+GERMAN = ("Geländekategorie", "Tabelle", "Anhang", "Figur", "Windkraft", "Windlast", "Bezugsfläche", "Öffnung", "gleichmässig", "Sog", "Staudruck", "Gebäude", "lokale", "Fläche")
+
+
+def _wind_case(name, lang, **change):
+    """A new project in `lang` with one wind case, `WL-01` -- Tableau 36's hall, b 24, d 12, h 6 m --, exported as the window does: (project, the case's file)."""
+    import json
+    import export_all
+    import project
+    import project_template
+    from domains import wind_source
+    here = project_template.create(conftest.tmpdir(name) / "Halle", "Halle", document_language=lang, report_language=lang)
+    src = wind_source.new_source("WL-01")
+    src.update(table="36", b=24.0, d=12.0, h=6.0, **change)
+    path = wind_source.folder(here) / "WL-01.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(src, indent=2) + "\n", encoding="utf-8")
+    with project.using(here):
+        export_all.run()
+    return here, here.root / "Variable-loads" / "Wind" / "WL-01.typ"
+
+
+def test_the_wind_file_prints_the_forces_in_kn_and_the_openings_chosen_transposed_in_french_alone():
+    """REQ-013, REQ-014, REQ-016: Tableau 36's hall written in a French project -- the global forces' table in Q_k [kN] with the numbers the window shows (103.5 kN on b·h), never a variable's name, no load per m² called a force; the q_k per m² kept as lines; the local pressures of the openings chosen alone, a column a surface, `(auto,) + (1fr,) * 11`; no German word; and the report compiles."""
+    import subprocess
+    import documents
+    import project
+    here, file = _wind_case("wind_file_fr", "fr")
+    text = file.read_text(encoding="utf-8")
+    forces = next(l for l in text.split("\n") if l.endswith("<WL-01-table-1>"))
+    assert "[*Force globale du vent [kN]*]" in forces and "[103.5]" in forces and "[−121.1]" in forces and "qk_" not in forces and "Qk_" not in forces
+    assert '#var("qk_max_cf1"' in text and all("Force globale du vent" not in l for l in text.split("\n") if "kN/m²" in l and "#var(" in l)
+    local = next(l for l in text.split("\n") if l.endswith("<WL-01-table-2>"))
+    assert local.startswith("#table(columns: (auto,) + (1fr,) * 11,") and "Ouvertures réparties de façon homogène" in local and "prépondérante" not in local
+    assert "[*max*], [0.685]" in local, "wall A's largest pressure, the prototype's"
+    for word in GERMAN:
+        assert not re.search(r"(?<![\w-])" + word + r"(?![\w-])", text), (word, [l for l in text.split("\n") if word in l][:2])
+    if conftest.have_typst():
+        run = subprocess.run([project.typst_executable(), *documents.compile_args(here, "rs")], capture_output=True, text=True, encoding="utf-8", errors="replace")
+        assert run.returncode == 0, run.stderr[-2000:]
+
+
+def test_the_wind_file_is_in_its_projects_language_and_follows_its_case():
+    """REQ-016, ARCH-013: the same hall in German and in English, each in its words; `wind-load` follows its case (AUTO_REGENERATE) -- another openings' case written again at the next export, c_d 1.2 in the pressures of the file as in the window (REQ-015)."""
+    import json
+    import export_all
+    import project
+    from domains import wind_forces, wind_source
+    assert "wind-load" in unfold.AUTO_REGENERATE
+    _here, de = _wind_case("wind_file_de", "de")
+    assert "Globale Windkraft [kN]" in de.read_text(encoding="utf-8") and "Öffnungen gleichmässig verteilt" in de.read_text(encoding="utf-8")
+    here, en = _wind_case("wind_file_en", "en")
+    text = en.read_text(encoding="utf-8")
+    assert "Global wind force [kN]" in text and "Openings distributed uniformly" in text
+    for word in GERMAN:
+        assert not re.search(r"(?<![\w-])" + word + r"(?![\w-])", text), word
+    path = wind_source.folder(here) / "WL-01.json"
+    src = json.loads(path.read_text(encoding="utf-8"))
+    src.update(openings="C", c_d=1.2)
+    path.write_text(json.dumps(src, indent=2) + "\n", encoding="utf-8")
+    with project.using(here):
+        export_all.run()
+    local = next(l for l in en.read_text(encoding="utf-8").split("\n") if l.endswith("<WL-01-table-2>"))
+    assert "Dominant opening in wall C" in local and "uniformly" not in local
+    wall_a = next(s for s in wind_forces.analysis(src)["local"] if s["surface"] == "A")
+    assert "[*max*], [" + unfold._number(round(wall_a["max"]["q"], 3)).replace("-", "−") + "]" in local, "c_d in the file's numbers, the window's"
+
+
+def test_a_wide_building_s_pressures_are_cut_into_balanced_blocks_of_at_most_twelve():
+    """REQ-014, REQ-020 (ARCH-RISK-009, ARCH-RISK-016): ⌈surfaces / 12⌉ blocks, as equal as can be -- 12 surfaces one block, 13 two (7 and 6, Tableau 43), Tableau 60a's 29 three (10, 10, 9) --, each a table of the instance, the title over the first, the note under the last."""
+    from domains import wind_source
+    assert [len(b) for b in wind_source.surface_blocks(list(range(12)))] == [12] and [len(b) for b in wind_source.surface_blocks(list(range(13)))] == [7, 6]
+    for number, sizes in (("43", [7, 6]), ("60a", [10, 10, 9]), ("36", [11])):
+        src = wind_source.new_source("WL-01")
+        src["table"] = number
+        local = wind_source.build_instance(src)["tables"][1:]
+        assert [len(t["columns"]) - 1 for t in local] == sizes, number
+        assert [bool(t["title"]) for t in local] == [True] + [False] * (len(sizes) - 1) and ["note" in t for t in local] == [False] * (len(sizes) - 1) + [True], number
+        assert all(len(t["rows"]) == 2 for t in local), "wide and low: a row max, a row min"
+
+
+def test_every_building_s_file_is_low_and_a_canopy_s_french_carries_no_german():
+    """REQ-014, REQ-016, REQ-020 (the verification of V1): every one of the 37 tables -- no block of more than twelve surfaces, two rows each --; a canopy of the platforms (Tableau 51, a «*» force) and its file in French without a German word, c_d among its values (REQ-015)."""
+    from domains import wind_source
+    for number in wind_source.sia261_wind.NUMBERS:
+        src = wind_source.new_source("WL-01")
+        src["table"] = number
+        for table in wind_source.build_instance(src)["tables"][1:]:
+            assert len(table["columns"]) - 1 <= wind_source.BLOCK_SURFACES and len(table["rows"]) == 2, number
+    src = wind_source.new_source("WL-01")
+    src.update(table="51", b=24, d=12, h=6)
+    text = unfold.generate(dict(wind_source.build_instance(src), id="WL-01", kind="wind-load", domain_label="Windlast"), "fr", "wind-load")
+    assert '#var("cd"' in text
+    for word in GERMAN:
+        assert not re.search(r"(?<![\w-])" + word + r"(?![\w-])", text), (word, [l for l in text.split(chr(10)) if word in l][:2])
+
+
+# --- «Affichage» completed for every tab (spec 2026-10-23-onglet-vent-briques, V2: ARCH-008, UI-024, UI-025, D-26, D-29)
+
+def test_a_figure_from_level_three_is_printed_at_three_alone_and_its_line_read_back():
+    """D-29: `#from-level(3)[#figure(…) <label>]` prints its figure in a domain at level 3 and nothing at level 2 -- the uniform level over the domain's, the preview of «Affichage» printing it pale --; its line is written by `figure_line(level=3)` and read back, width, caption, label and level kept by `set_figure`'s reading (UI-025: the figure's setting is every domain's)."""
+    from domains import unfold_display
+    line = unfold.figure_line("/Variable-loads/Wind/Exports/Figures/WL-01.png", "Tableau 36", "WL-01-figure-1", "50%", level=3)
+    assert line == '#from-level(3)[#figure(image("/Variable-loads/Wind/Exports/Figures/WL-01.png", width: 50%), caption: [Tableau 36]) <WL-01-figure-1>]'
+    parts = unfold_display.figure_parts(line)
+    assert parts["level"] == 3 and parts["width"] == "50%" and parts["caption"] == "Tableau 36" and not parts["masked"]
+    assert unfold_display.figure_parts("// " + line)["masked"] and unfold_display.figure_parts(unfold.figure_line("/a.png", "", "x"))["level"] is None
+    assert unfold.text_lines(line) == [("figure:WL-01.png", line)], "found by its image, as every figure"
+    _need_typst()
+    figure = '#from-level(3)[#figure(rect(width: 1cm, height: 1cm), caption: [F]) <f-probe>]'
+    count = '\n#context [#metadata(query(figure).len()) <out>]'
+    for level, wanted in ((3, 1), (2, 0), (1, 0)):
+        kind, got = _probe('#domain("probe-%d", level: %d)[%s]' % (level, level, figure) + count)
+        assert (kind, got) == ("ok", wanted), (level, kind, got)
+    assert _probe('#uniform-level.update(3)\n#domain("probe-u", level: 1)[%s]' % figure + count) == ("ok", 1), "the uniform level over the domain's"
+    assert _probe('#show-masked.update(true)\n#domain("probe-m", level: 2)[%s]' % figure + count) == ("ok", 1), "pale in the preview of «Affichage»"
+
+
+def test_a_table_is_an_element_shown_or_not_with_or_without_its_title_and_note_and_kept_so():
+    """UI-024, ARCH-008: the wind's two tables are elements of its file -- shown, a title and a note each, no level --; the note of the second masked, then the whole first, written into the file as commented lines; an export keeps them masked and takes a masked table's numbers again where they change, so that shown again it says what the export says."""
+    import json
+    import export_all
+    import project
+    from domains import unfold_display, wind_source
+    here, file = _wind_case("wind_tables", "fr")
+    found = [e for e in unfold_display.elements(here, "WL-01", "wind-load") if e["kind"] == "table"]
+    assert [e["id"] for e in found] == ["table:1", "table:2"] and all(e["shown"] and e["title"] and e["note"] for e in found)
+    assert found[0]["label"] == "Forces globales du vent" and "level" not in found[0]
+    with project.using(here):
+        unfold_display.set_table(here, "WL-01", "2", "wind-load", note=False)
+        unfold_display.set_table(here, "WL-01", "1", "wind-load", shown=False)
+    text = file.read_text(encoding="utf-8")
+    assert "\n// Valeur la plus grande" in text and "\n// #table(columns: 5," in text and "\n_Forces globales du vent_" in text
+    second = next(e for e in unfold_display.elements(here, "WL-01", "wind-load") if e["id"] == "table:2")
+    assert second["shown"] and second["title"] and second["note"] is False
+    path = wind_source.folder(here) / "WL-01.json"
+    src = json.loads(path.read_text(encoding="utf-8"))
+    src["q_p0"] = 1.3
+    path.write_text(json.dumps(src, indent=2) + "\n", encoding="utf-8")
+    with project.using(here):
+        export_all.run()
+    text = file.read_text(encoding="utf-8")
+    assert "\n// Valeur la plus grande" in text, "the note stays masked"
+    masked = next(l for l in text.split("\n") if l.endswith("<WL-01-table-1>"))
+    assert masked.startswith("// #table(") and "[103.5]" not in masked, "the masked table's numbers taken again: q_p0 1.3"
+    with project.using(here):
+        unfold_display.set_table(here, "WL-01", "1", "wind-load", shown=True)
+        assert unfold.status(here, "WL-01", kind="wind-load").matches
+    shown = next(l for l in file.read_text(encoding="utf-8").split("\n") if l.endswith("<WL-01-table-1>"))
+    assert shown.startswith("#table(") and shown == unfold.unmasked(masked)
+    try:
+        unfold_display.set_table(here, "WL-01", "9", "wind-load", shown=False)
+    except unfold.UnfoldError as exc:
+        assert exc.code == "no_line"
+    else:
+        raise AssertionError("a table the file does not hold was set")

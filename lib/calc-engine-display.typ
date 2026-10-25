@@ -61,7 +61,7 @@
     let printed = fmt-number(get(vars.at(cell), "value"), "")
     if cell in results { text(weight: "bold", printed) } else { printed }
   } else {
-    // A text cell is a word of the table -- "Wand A", "Total" -- or a material's name out of the workbook. The glossary decides which: it carries the first and not the second.
+    // A text cell is a word of the table -- "Wand A", "Total" -- or a material's name out of the library. The glossary decides which: it carries the first and not the second.
     // One carrying a dollar is prose with its symbols between dollars, set as math (render-prose, section 4bis): a connector's «$K_("ser","Verb")$» and «$7 d$» (v0.77). A material's name carries none, and an unpaired dollar is left as written.
     // A number is printed by fmt-number, its sign a minus; a word goes through render-prose, which sets a sign the same way where the word carries one («-5 °C») and leaves every other hyphen as typed.
     // ⚠️ **Content passes through untouched** (v0.99), as a column's own `label` already does: it is how a caller says «these are not the engine's words, do not look them up». The journal's label and its two descriptions are free text the engineer typed, and free text is the one case where the glossary's own rule -- translate it if the glossary carries it -- can go wrong: a template matches on the literal segments around its holes, so a revision labelled «Element 3 ergänzt» matches «Element {n}» and a French report would print «élément 3 ergänzt» (section 3.3terdecies; the risk section 14 records for `tl-of`). A string still goes through the glossary, which is what every table read from the data needs.
@@ -331,6 +331,6 @@
 // Every calculated value is printed twice over: the formula in letters, then the same formula with the numbers put in their place. The second line is *derived* from the first rather than authored beside it -- its operands are the step's own `uses` -- so a number can never drift out of sync with the symbol it stands in for, the way a hand-typed substitution would.
 
 // --- Calculation display (docs/typst/report-engine.md §4, §5, docs/typst/citations.md §10) --------------------
-// (domain, instance) select one whole calculation -- an instance of a calculation domain (a workbook sheet), or one domain of a position. There is deliberately no step-name argument: show-calc renders the calculation entire, ending on its result, and show-input is what picks a single intermediate value out. level: auto reads the global report-level. Position/axes headers are the job of the enclosing calc-block, not of each individual call.
+// (domain, instance) select one whole calculation -- an instance of a calculation domain (a case of a load), or one domain of a position. There is deliberately no step-name argument: show-calc renders the calculation entire, ending on its result, and show-input is what picks a single intermediate value out. level: auto reads the global report-level. Position/axes headers are the job of the enclosing calc-block, not of each individual call.
 
 // --- Check display (docs/typst/citations.md §10) ---------------------------------

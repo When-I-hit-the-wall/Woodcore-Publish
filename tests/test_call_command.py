@@ -18,7 +18,6 @@ UNCHANGED = [
     (lambda: ref.call_var_registry("M", "S10"), '#var("M", domain: "S10")'),
     (lambda: ref.call_var_registry("x", "T001", level=2), '#var("x", domain: "T001", level: 2)'),
     (lambda: ref.call_var_domain("snow-load", "SL", "s_k"), '#var("s_k", domain: ("snow-load", "SL"))'),
-    (lambda: ref.call_find("T001", "name"), '#find(object: "variable", domain: "T001", type: "name")'),
     (lambda: ref.call_include_domain("check", "ZT-01"), '#include domain-file("check", "ZT-01")'),
     (lambda: ref.call_domain_loop("snow-load"), '#for id in ids("snow-load") {\n  include domain-file("snow-load", id)\n}'),
     (lambda: ref.call_domain_loop("check", "check-member"), '#for id in ids("check-member") {\n  include domain-file("check", id)\n}'),

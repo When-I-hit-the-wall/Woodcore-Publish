@@ -78,7 +78,8 @@ def test_the_tab_is_the_first_row_in_every_document_and_the_group_projet_is_donn
         assert set(project_tab.STRINGS[lang]) == set(project_tab.STRINGS["fr"]), lang
         titles = [strings[title] for title, _members in woodcore_gui.NAV_GROUPS]
         assert strings["tab_project"] not in titles, f"{lang}: a group of the navigation is still called {strings['tab_project']!r}"
-    assert {"write_apply_form", "write_create_document"} <= set(woodcore_gui.WRITERS)
+    import project_services   # the tab's acts are its service's writers since issue #107, guarded where they are defined (tab_guard.guard_service)
+    assert {"write_apply_form", "write_create_document"} <= set(project_services.ProjectActions.WRITERS) and not {"write_apply_form", "write_create_document"} & set(woodcore_gui.WRITERS)
 
 
 def test_the_window_opens_on_it_compiles_nothing_and_ctrl_1_is_it():
@@ -99,26 +100,26 @@ def test_each_card_reads_what_the_project_files_say():
     import templates
     here = conftest.project_copy("project_tab_cards")
     with _window(here) as (window, tab):
-        assert tab.fields["name"].text() == here.name and tab.fields["client"].text() == here.detail("client")
-        assert tab.language.currentData() == templates.project_language(here) and not tab.language.isEnabled(), "the language is shown greyed"
+        assert tab.service("details").fields["name"].text() == here.name and tab.service("details").fields["client"].text() == here.detail("client")
+        assert tab.service("details").language.currentData() == templates.project_language(here) and not tab.service("details").language.isEnabled(), "the language is shown greyed"
         current = forms.current(here)
-        assert tab.form_combo.currentData() == (current.ref if current is not None else forms.default_ref())
+        assert tab.service("details").form_combo.currentData() == (current.ref if current is not None else forms.default_ref())
         for mode in here.created_modes:
-            text = tab.document_rows[mode]["template"].text()
-            expected = tab._content_name(mode, here.content_template(mode))
+            text = tab.service("details").document_rows[mode]["template"].text()
+            expected = tab.service("actions").content_name(mode, here.content_template(mode))
             assert expected in text and (here.content_template(mode) or window.t("pj_unknown") in text), (mode, text)
-            assert tab.document_rows[mode]["combo"].isHidden() and tab.document_rows[mode]["folder"].text() == here.rel(here.document_dir(mode))
+            assert tab.service("details").document_rows[mode]["combo"].isHidden() and tab.service("details").document_rows[mode]["folder"].text() == here.rel(here.document_dir(mode))
         when, _engine = project.last_export(here)
-        assert (when is None) == (tab.export_label.text() == window.t("pj_export_none"))
+        assert (when is None) == (tab.service("details").export_label.text() == window.t("pj_export_none"))
 
 
 def test_a_title_page_saved_writes_what_changed_reports_into_the_export_and_names_the_project_again():
     here = conftest.project_copy("project_tab_save")
     with _window(here) as (window, tab):
         before = json.loads(here.file.read_text(encoding="utf-8"))
-        tab.fields["client"].setText("Commune de Test")
-        tab.fields["name"].setText("Hangar renommé")
-        tab.mark_dirty()
+        tab.service("details").fields["client"].setText("Commune de Test")
+        tab.service("details").fields["name"].setText("Hangar renommé")
+        tab.service("details").mark_dirty()
         assert tab.dirty
         assert tab.save() is True and not tab.dirty
         after = json.loads(here.file.read_text(encoding="utf-8"))
@@ -127,56 +128,58 @@ def test_a_title_page_saved_writes_what_changed_reports_into_the_export_and_name
         info = json.loads((here.data_dir / "project.json").read_text(encoding="utf-8"))
         assert info["client"] == "Commune de Test" and info["name"] == "Hangar renommé"
         assert window.brand.text() == "Hangar renommé" and "Hangar renommé" in window.windowTitle()
-        tab.fields["name"].setText("  ")
-        tab.mark_dirty()
+        tab.service("details").fields["name"].setText("  ")
+        tab.service("details").mark_dirty()
         import notices_ui
         with _patched(notices_ui, tell=lambda *a, **k: None):
             assert not tab.save()
         assert json.loads(here.file.read_text(encoding="utf-8"))["name"] == "Hangar renommé", "an empty name was written"
         tab.discard()
-        assert tab.fields["name"].text() == "Hangar renommé" and not tab.dirty
+        assert tab.service("details").fields["name"].text() == "Hangar renommé" and not tab.dirty
 
 
 def test_read_only_shows_the_tab_and_writes_nothing():
     here = conftest.project_copy("project_tab_read_only")
     with _window(here) as (window, tab):
         window.read_only = True
-        tab.lock()
-        assert not any(field.isEnabled() for field in tab.fields.values())
-        assert not tab.save_button.isEnabled() and not tab.form_apply.isEnabled() and not tab.version.isEnabled()
+        tab.phase("lock")
+        assert not any(field.isEnabled() for field in tab.service("details").fields.values())
+        assert not tab.service("details").save_button.isEnabled() and not tab.service("details").form_apply.isEnabled() and not tab.service("details").version.isEnabled()
         before = here.file.read_bytes()
-        tab.fields["client"].setText("Ne s'écrit pas")
+        tab.service("details").fields["client"].setText("Ne s'écrit pas")
         tab.dirty = True
         import notices_ui
         with _patched(notices_ui, tell=lambda *a, **k: None):
             tab.save()
-            tab.write_apply_form("builtin:bfh")
+            tab.service("actions").write_apply_form("builtin:bfh")
         assert here.file.read_bytes() == before, "a project opened read-only was written"
         window.read_only = False
 
 
 def test_a_document_not_made_greys_every_other_tab_and_is_made_from_the_tab():
     _qt()
+    import woodcore_gui
     import busy
     from PySide6.QtWidgets import QMessageBox
     here = _skeleton("project_tab_skeleton")
     with _window(here) as (window, tab):
         assert window.mode == "rs" and window.tab_widget.currentIndex() == window.project_index()
-        assert window.nav.order() == [window.project_index()], "a tab of a document not made is reachable by Ctrl+n"
+        free = [i for i, (key, _f) in enumerate(woodcore_gui.TABS) if key in woodcore_gui.PROJECT_FREE]   # «Matériaux», the engineer's and not the document's (issue #110)
+        assert window.nav.order() == [window.project_index()] + free, "a tab of a document not made is reachable by Ctrl+n"
         assert not window.pdf_button.isEnabled()
         window.tab_widget.setCurrentIndex(window.project_index() + 1)
         assert window.tab_widget.currentIndex() == window.project_index(), "a door other than the navigation opened a tab of a document not made"
-        assert all(row["template"].text() == window.t("pj_not_made") for row in tab.document_rows.values())
-        row = tab.document_rows["rs"]
+        assert all(row["template"].text() == window.t("pj_not_made") for row in tab.service("details").document_rows.values())
+        row = tab.service("details").document_rows["rs"]
         assert not row["combo"].isHidden() and row["create"].isEnabled()
         with _patched(QMessageBox, question=staticmethod(lambda *a, **k: QMessageBox.StandardButton.Yes)), \
                 _patched(busy, run_in_thread=lambda _window, _text, work, detail="": work()):
-            assert tab.write_create_document("rs", row["combo"].currentData())
+            assert tab.service("actions").write_create_document("rs", row["combo"].currentData())
         assert project.current().is_created("rs") and project.current().content_template("rs") == row["combo"].currentData()
         assert len(window.nav.order()) > 9 and window.pdf_button.isEnabled()
         assert window.tab_widget.currentIndex() == window.project_index()
         tab = window.tabs[window.project_index()]
-        assert window.t("pj_content") in tab.document_rows["rs"]["template"].text() and tab.document_rows["rs"]["create"].isHidden()
+        assert window.t("pj_content") in tab.service("details").document_rows["rs"]["template"].text() and tab.service("details").document_rows["rs"]["create"].isHidden()
 
 
 def test_the_templates_view_previews_a_document_in_the_cache_and_nothing_in_the_project():
@@ -190,20 +193,20 @@ def test_the_templates_view_previews_a_document_in_the_cache_and_nothing_in_the_
         with _window(here) as (window, tab):
             window.show()
             tab.set_view("templates", enter=False)
-            assert not tab.workers, "the preview was built while the view was only set"
+            assert not tab.service("templates").workers, "the preview was built while the view was only set"
             tab.set_view("details", enter=False)
             before = sorted(p.relative_to(here.root).as_posix() for p in here.root.rglob("*"))
-            tab.preview_document.setCurrentIndex(tab.preview_document.findData("cu"))
+            tab.service("templates").preview_document.setCurrentIndex(tab.service("templates").preview_document.findData("cu"))
             window.on_view_chosen("templates")
             end = time.monotonic() + 120
             while time.monotonic() < end and not asked:
                 QApplication.processEvents()
                 time.sleep(0.05)
-            assert asked, f"no preview was asked for: {tab.preview_banner.text()} {tab.preview_banner.toolTip()} visible={tab.isVisible()} view={tab.view} workers={len(tab.workers)}"
+            assert asked, f"no preview was asked for: {tab.service('templates').preview_banner.text()} {tab.service('templates').preview_banner.toolTip()} visible={tab.isVisible()} view={tab.view} workers={len(tab.service('templates').workers)}"
             shown, mode = asked[-1]
             assert mode == "cu" and project._is_within(shown.root, template_preview.folder_for(here)) and shown.is_created("cu")
             assert sorted(p.relative_to(here.root).as_posix() for p in here.root.rglob("*")) == before, "the preview wrote into the project"
-            for worker in list(tab.workers):
+            for worker in list(tab.service("templates").workers):
                 worker.wait(60000)
 
 
@@ -239,7 +242,7 @@ def test_an_existing_project_is_written_nothing_by_opening_and_by_the_tab():
     with _window(here) as (window, tab):
         window.tab_widget.setCurrentIndex(window.project_index())
         tab.on_shown()
-        assert all(window.t("pj_unknown") in tab.document_rows[mode]["template"].text() for mode in here.created_modes if not here.content_template(mode))
+        assert all(window.t("pj_unknown") in tab.service("details").document_rows[mode]["template"].text() for mode in here.created_modes if not here.content_template(mode))
         tab.on_mode(window.mode)
     assert {str(p): p.read_bytes() for p in files if p.is_file()} == before, "opening an existing project rewrote it"
 
@@ -256,25 +259,73 @@ def test_a_document_not_made_is_out_of_reach_in_its_mode_and_read_only_makes_non
     with _window(here) as (window, tab):
         with _patched(QMessageBox, question=staticmethod(lambda *a, **k: QMessageBox.StandardButton.Yes)), \
                 _patched(busy, run_in_thread=lambda _window, _text, work, detail="": work()):
-            assert tab.write_create_document("rs", tab.document_rows["rs"]["combo"].currentData())
+            assert tab.service("actions").write_create_document("rs", tab.service("details").document_rows["rs"]["combo"].currentData())
         here = project.current()
         assert here.document_typ("rs") == here.root / documents.MODE_FOLDERS["rs"] / documents.RS_ENTRY and here.document_typ("rs").is_file()
         tab = window.tabs[window.project_index()]
-        assert tab.document_rows["cu"]["template"].text() == window.t("pj_not_made")
+        assert tab.service("details").document_rows["cu"]["template"].text() == window.t("pj_not_made")
         select = window.nav.mode_select
         select.setCurrentIndex(select.findData("cu"))
-        assert window.mode == "cu" and window.nav.order() == [window.project_index()]
+        free = [i for i, (key, _f) in enumerate(woodcore_gui.TABS) if key in woodcore_gui.PROJECT_FREE]
+        assert window.mode == "cu" and window.nav.order() == [window.project_index()] + free
         other = next(index for index, item in window.nav.rows.items() if index != window.project_index() and not item.isHidden())
         assert window.nav.rows[other].toolTip() == window.t("pj_not_made_tip") and window.nav.rows[other].data(chrome.OFF)
         assert not window.pdf_button.isEnabled()
         assert not any(a.text() == window.t("pdf_all") for a in window.pdf_button.menu().actions()), "«Exporter les trois» offered with one document made"
         window.read_only = True
         tab = window.tabs[window.project_index()]
-        tab.lock()
-        assert not tab.document_rows["cu"]["create"].isEnabled() and not tab.preview_create.isEnabled()
+        tab.phase("lock")
+        assert not tab.service("details").document_rows["cu"]["create"].isEnabled() and not tab.service("templates").preview_create.isEnabled()
         import notices_ui
         with _patched(notices_ui, tell=lambda *a, **k: None), _patched(QMessageBox, question=staticmethod(lambda *a, **k: QMessageBox.StandardButton.Yes)), \
                 _patched(busy, run_in_thread=lambda _window, _text, work, detail="": work()):
-            tab.write_create_document("cu", tab.document_rows["cu"]["combo"].currentData())
+            tab.service("actions").write_create_document("cu", tab.service("details").document_rows["cu"]["combo"].currentData())
         assert not project.current().is_created("cu"), "a document was made in a project opened read-only"
         window.read_only = False
+
+
+def test_the_autosave_leaves_a_draft_of_projet_as_before_the_type():
+    """ARCH-007 of the spec 2026-10-24-type-document (issue #107): the tab has no `current_id`, so its draft is one never saved -- kept while the engineer only looks elsewhere (`tab`, `focus`), saved when it is replaced -- the answers recorded before the tab stood on the type."""
+    import autosave
+    import document_tab
+    with _window(conftest.project_copy("project_tab_autosave")) as (window, tab):
+        assert isinstance(tab, document_tab.DocumentTab) and not hasattr(tab, "current_id") and not hasattr(tab, "id_edit")
+        before = {"clean/tab": (True, False), "clean/focus": (True, False), "clean/replace": (True, False),
+                  "dirty/tab": (False, False), "dirty/focus": (False, False), "dirty/replace": (True, True)}
+        details = tab.service("details")
+        saved = []
+        original = details.save
+        details.save = lambda: saved.append(1) or True
+        try:
+            for key, expected in before.items():
+                state, reason = key.split("/")
+                saved.clear()
+                tab.dirty = state == "dirty"
+                assert (autosave.leave(window, tab, reason), bool(saved)) == expected, key
+                tab.dirty = False
+        finally:
+            details.save = original
+
+
+def test_a_title_page_typed_and_not_saved_survives_a_rebuilt_window():
+    """REQ-007 of the spec 2026-10-24-type-document (issue #107): what «Informations» holds unsaved -- the title page, the version -- and the document «Templates» looks at are carried by the services' state through a rebuild, the draft still unsaved."""
+    _qt()
+    import project_tab
+    here = conftest.project_copy("project_tab_rebuild")
+    with _window(here) as (window, tab):
+        before = here.file.read_bytes()
+        tab.service("details").fields["client"].setText("Tapé, pas enregistré")
+        tab.service("details").mark_dirty()
+        tab.service("templates").preview_document.setCurrentIndex(tab.service("templates").preview_document.findData("bp"))
+        state = tab.view_state()
+        assert state["services"]["details"]["draft"]["client"] == "Tapé, pas enregistré" and state["services"]["templates"]["document"] == "bp"
+        window.views[project_tab.KEY] = state
+        again = project_tab.ProjectTab(window)
+        try:
+            assert again.dirty and again.service("details").fields["client"].text() == "Tapé, pas enregistré"
+            assert again.service("templates").preview_document.currentData() == "bp"
+            assert here.file.read_bytes() == before, "a rebuild wrote the draft"
+        finally:
+            again.dirty = False
+            again.deleteLater()
+            window.views.pop(project_tab.KEY, None)

@@ -79,7 +79,8 @@
         "zg": 3
       },
       "patterns": {
-        "^qk_(max|min)_(cfs?[0-9]+|bh|dh|db)$": 1
+        "^qk_(max|min)_(cfs?[0-9]+|bh|dh|db)$": 1,
+        "^Qk_(max|min)_cfs?[0-9]+$": 1
       }
     },
     "steel": {

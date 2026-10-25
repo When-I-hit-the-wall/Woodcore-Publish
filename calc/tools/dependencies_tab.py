@@ -1,6 +1,6 @@
 """The «Dépendances» tab: the graph of the project's objects, read off data/dependencies.json (spec docs/requirements/completed/2026-10-21-graphe-dependances.md, UI-001, D-05; calc/domains/dependency_graph.py, docs/ui/tab-dependencies.md).
 
-A browser, like «Variables»: it writes nothing and has no `dirty` (variables_tab.py says why), so it defines no method `tab_guard.WRITERS` names. On the left, the objects of the last export by kind -- positions, loads, scripts, domains, checks… --, a filter above them; on the right, for the one chosen, **what it depends on** and **what depends on it** -- downstream transitively, the way the export's warnings count it --, each line naming the field or the command it is read through. A double click opens the object in its own tab (`MainWindow.open_object`), a section in the editor at the line of its call. A banner says when the graph is older than one of its objects' sources: the next export draws it again. The graph is read again each time the tab is shown; nothing is computed here.
+A browser, like «Variables»: it writes nothing and has no `dirty` (data_tab.py says why), so it defines no method `tab_guard.WRITERS` names. Since issue #106 the tab is a class of parameters on the type «Données» (data_tab.DataTab): the banner is the type's (`ExportBanner`, told through the context), the rest one whole service, `DependenciesBrowser`, found by `tab.service("browser")`. On the left, the objects of the last export by kind -- positions, loads, scripts, domains, checks… --, a filter above them; on the right, for the one chosen, **what it depends on** and **what depends on it** -- downstream transitively, the way the export's warnings count it --, each line naming the field or the command it is read through. A double click opens the object in its own tab (`MainWindow.open_object`), a section in the editor at the line of its call. A banner says when the graph is older than one of its objects' sources: the next export draws it again. The graph is read again each time the tab is shown; nothing is computed here.
 
 The tab's words, `dg_`, in the window's three languages, are merged into woodcore_gui's STRINGS; the kinds are said with the export's own words (`warn_dep_kind_<kind>`). It must not import woodcore_gui, which imports it.
 """
@@ -9,7 +9,9 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QSplitter, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget
 
 import project
+from data_tab import DataTab
 from domains import dependency_graph as graph_model
+from tab_frame import Service
 
 KEY = "tab_dependencies"
 
@@ -61,23 +63,20 @@ STRINGS = {
 _NODE = Qt.ItemDataRole.UserRole
 
 
-class DependenciesTab(QWidget):
-    """The graph of the last export: the objects by kind on the left, what the one chosen depends on and what depends on it on the right. A browser: no `dirty`, no writer."""
+class DependenciesBrowser(Service):
+    """The graph of the last export: the objects by kind on the left, what the one chosen depends on and what depends on it on the right -- the tab's one whole service (D-03 of the spec 2026-10-24-type-donnees). It reads, never writes."""
 
-    KEY = KEY
+    NAME = "browser"
+    ZONE = "body"
+    NEEDS = ("read", "newer_sources", "upstream", "downstream")
 
-    def __init__(self, app):
-        super().__init__()
-        self.app = app
-        self.t = app.t
+    def mount(self, ctx):
+        super().mount(ctx)
+        self.t = ctx.t
         self.graph = None
-        layout = QVBoxLayout(self)
+        self.widget = QWidget()
+        layout = QVBoxLayout(self.widget)
         layout.setContentsMargins(6, 6, 6, 6)
-        self.banner = QLabel("")
-        self.banner.setWordWrap(True)
-        self.banner.setProperty("callout", "warning")
-        self.banner.setVisible(False)
-        layout.addWidget(self.banner)
         self.filter = QLineEdit()
         self.filter.setPlaceholderText(self.t("dg_filter"))
         self.filter.textChanged.connect(self.fill_objects)
@@ -112,20 +111,15 @@ class DependenciesTab(QWidget):
         splitter.setStretchFactor(1, 2)
         layout.addWidget(splitter, 1)
         self.reload()
-        self.restore(app.views.get(KEY))
+        return self.widget
 
-    # -- surviving a rebuild of the window ------------------------------------------------
+    # -- surviving a rebuild of the window: the filter and the object chosen (the splitter's sizes are the frame's) --
 
-    def view_state(self):
-        """What the tab keeps through a rebuilt window (woodcore_gui.rebuild, refresh_tab): its splitter, its filter, the object chosen."""
-        return {"splitter": self.splitter.sizes(), "filter": self.filter.text(), "node": self.current_node()}
+    def state(self):
+        """What the tab keeps through a rebuilt window (woodcore_gui.rebuild, refresh_tab): its filter, the object chosen."""
+        return {"filter": self.filter.text(), "node": self.current_node()}
 
     def restore(self, state):
-        if not state:
-            return
-        sizes = state.get("splitter")
-        if sizes and len(sizes) == self.splitter.count():
-            self.splitter.setSizes(sizes)
         if state.get("filter"):
             self.filter.setText(state["filter"])
         if state.get("node"):
@@ -133,20 +127,19 @@ class DependenciesTab(QWidget):
 
     # -- reading ---------------------------------------------------------------------
 
-    def on_shown(self):
+    def shown(self):
         """The graph read again each time the tab is shown: an export may have drawn it since."""
         self.reload()
 
     def reload(self):
+        """The graph read off data/dependencies.json, the banner told whether it is missing or older than one of its objects' sources, the lists filled."""
         here = project.current()
         self.graph = graph_model.read(here.data_dir / graph_model.EXPORT_FILE)
         if self.graph is None:
-            self.banner.setText(self.t("dg_not_exported"))
-            self.banner.setVisible(True)
+            self.ctx.say(self.t("dg_not_exported"))
         else:
             newer = graph_model.newer_sources(here, self.graph)
-            self.banner.setText(self.t("dg_stale", files=", ".join(newer[:3]) + (" …" if len(newer) > 3 else "")) if newer else "")
-            self.banner.setVisible(bool(newer))
+            self.ctx.say(self.t("dg_stale", files=", ".join(newer[:3]) + (" …" if len(newer) > 3 else "")) if newer else "")
         self.up = graph_model.upstream(self.graph) if self.graph else {}
         self.down = graph_model.downstream(self.graph) if self.graph else {}
         self.fill_objects()
@@ -176,7 +169,7 @@ class DependenciesTab(QWidget):
             self.show_node(None)
 
     def current_node(self):
-        item = self.objects.currentItem() if hasattr(self, "objects") else None
+        item = self.objects.currentItem()
         return item.data(0, _NODE) if item is not None else None
 
     def select(self, node):
@@ -235,3 +228,11 @@ class DependenciesTab(QWidget):
         if hasattr(self.app, "set_status"):
             self.app.set_status(self.t("dg_no_tab", node=node))
         return False
+
+
+class DependenciesTab(DataTab):
+    """The tab: the type's banner, and the browser of the graph. Parameters only (tests/test_tab_overrides.py)."""
+
+    KEY = KEY
+    MODULE = graph_model
+    SERVICES = DataTab.SERVICES + (DependenciesBrowser,)

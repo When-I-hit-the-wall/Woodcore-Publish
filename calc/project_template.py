@@ -121,7 +121,7 @@ def create(folder, name, template=None, document_language=None, report_language=
         if not positions_store.path(here).exists():
             positions_store.write(here, [])
         import export_all
-        export_all.seed(here)       # and the export of a project holding nothing yet -- the journals of the three documents among it -- so every document compiles from the moment the project exists and not from its first export, which needs a load workbook (v0.86.1)
+        export_all.seed(here)       # and the export of a project holding nothing yet -- the journals of the three documents among it -- so every document compiles from the moment the project exists and not from its first export (v0.86.1)
         if made_from:
             here = project.update(here.file, **{project.CONTENT_TEMPLATES_KEY: {mode: found.ref for mode, found in made_from.items()}})
     except BaseException as exc:

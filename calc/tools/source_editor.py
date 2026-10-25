@@ -21,25 +21,15 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWi
 
 import autosave
 import cards
-import engine
+import case_list_logic
+import draft_logic
 import grouped_list
 import source_archive
 import validation
+from case_list_logic import NEW_ROW, next_free_id   # the list's rules, written once without Qt and called by the tabs built on a type too (spec 2026-10-23-onglets-types-et-services, ARCH-006); re-exported, the tabs import them from here
 
 # The words a tab of sources names by its prefix (`WORDS`), `<prefix>_<suffix>`: what its list's buttons say, a draft's row, a drop into a folder, the question about unsaved changes and a failed export. tests/test_i18n.py counts them as named.
 WORD_SUFFIXES = ("new", "duplicate", "delete", "new_item", "moved", "unsaved", "unsaved_title", "export_failed")
-
-NEW_ROW = "<new>"   # the list's row of the draft nobody has saved yet -- the one constant, which the tabs import (six copies until v0.120)
-
-
-def next_free_id(taken, prefix):
-    """The first id `prefix` + two digits that no source of `taken` holds -- compared without case, a file system that does not tell `s01` from `S01` being the engineer's own (five copies of this until v0.120, each with its own format)."""
-    lowered = {t.lower() for t in taken}
-    index = 1
-    while f"{prefix}{index:02d}".lower() in lowered:
-        index += 1
-    return f"{prefix}{index:02d}"
-
 
 def save_shortcut(tab):
     """Ctrl+S saves the draft of `tab`, and of this tab alone: every tab is built when the window opens, and a shortcut of the whole window would be claimed by each of them at once. The one way an editor tab binds it (thirteen copies of these lines until v0.120)."""
@@ -75,35 +65,13 @@ class SourceEditorTab:
         return next_free_id(self.saved_ids(), self.ID_PREFIX)
 
     def new(self):
-        if not self.confirm_leave():
-            return
-        self.source = self.make_source()
-        self.current_id = None
-        self.dirty = True
-        self.after_new()
-        self.fill_form()
-        self.refresh()
-        self.reload_list()
+        draft_logic.new(self)
 
     def duplicate(self):
-        if not self.confirm_leave():
-            return
-        source = self.draft()
-        source["id"] = self.duplicate_id(source)
-        for key in self.DUPLICATE_FORGETS:
-            source.pop(key, None)
-        self.source = source
-        self.current_id = None
-        self.dirty = True
-        self.fill_form()
-        self.refresh()
-        self.reload_list()
+        draft_logic.duplicate(self)
 
     def revert(self):
-        if self.current_id:
-            self.load(self.current_id)
-        else:
-            self.new()
+        draft_logic.revert(self)
 
     def delete(self):
         """«Supprimer»: what is selected goes to «Archives», its id removed (source_archive.py, v0.77) -- or, an archived entry selected, is deleted for good. A source never saved is simply discarded."""
@@ -113,31 +81,15 @@ class SourceEditorTab:
         self.open_first()
 
     def open_first(self):
-        """What the form shows once the source it showed is gone: the first source of the list, else a new one. A tab that keeps its own way of opening the first (`load_first`) says so."""
-        if hasattr(self, "load_first"):
-            self.load_first()
-            return
-        self.reload_list()
-        if self.ids:
-            self.load(self.ids[0])
-            self.reload_list(self.ids[0])
-        else:
-            self.blank()
+        """What the form shows once the source it showed is gone (draft_logic.open_first)."""
+        draft_logic.open_first(self)
 
     def blank(self):
-        """The form once its source is gone and nothing is left to open: a new source, as an empty tab shows at the start, with no dot -- nobody asked for it. «Nouveau»'s draft carries the dot, and here it was saved by itself as soon as the engineer looked elsewhere, an empty `SN-01.json` that «Supprimer» replaced by the next one (issue #97). Typed into, it is a draft like any other."""
-        self.source = self.make_source()
-        self.current_id = None
-        self.after_new()
-        self.fill_form()
-        self.dirty = False
-        self.refresh()
-        self.reload_list()
+        """The form once its source is gone and nothing is left to open, with no dot (draft_logic.blank, issue #97)."""
+        draft_logic.blank(self)
 
     def _after_archive(self):
-        """The source the form showed was archived: a new one opens, as deleting always did -- with no dot (`blank`)."""
-        self.reload_list()
-        self.blank()
+        draft_logic.after_archive(self)
 
     def fail_title(self):
         return self.t(self.KEY)
@@ -196,9 +148,7 @@ class SourceEditorTab:
 
     def discard_draft(self):
         """What «Abandonner» does where DISCARD_OPENS_FIRST: the draft forgotten, and a draft never saved gives its place to the first source of the list."""
-        self.dirty = False
-        if self.current_id is None:
-            self.load_first()
+        draft_logic.discard(self)
 
     # --- the left pane ----------------------------------------------------------------------
 
@@ -243,11 +193,7 @@ class SourceEditorTab:
 
     def _group_of(self, cid):
         """The folder a source is filed in, read off its own `group` -- the field, never a directory (grouped_list.py)."""
-        try:
-            source = json.loads((self.sources_dir() / ("%s.json" % cid)).read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return grouped_list.ROOT_GROUP
-        return grouped_list.group_of(source)
+        return case_list_logic.group_of_file(self.sources_dir() / ("%s.json" % cid))
 
     def install_save_shortcut(self):
         return save_shortcut(self)
@@ -266,20 +212,11 @@ class SourceEditorTab:
 
     def take_group(self, group):
         """The draft takes the folder `group` (None: the root): what it is saved with, so that its next save does not put it back where it was."""
-        if self.source is None:
-            return
-        if group:
-            self.source["group"] = group
-        else:
-            self.source.pop("group", None)
+        case_list_logic.set_group(self.source, group)
 
     def list_selection(self, select):
         """The row the list chooses once filled: `select`, else the source open -- the draft's row where it is unsaved."""
-        if select is None:
-            select = self.current_id
-        if select in self.ids:
-            return select
-        return NEW_ROW if self.current_id is None else None
+        return case_list_logic.selection(select, self.current_id, self.ids)
 
     def show_empty_hint(self):
         """The line under an empty list."""
@@ -292,83 +229,22 @@ class SourceEditorTab:
         """What a tab does once a row chosen is loaded."""
 
     def reload_list(self, select=None):
-        was_loading = self.loading
-        self.loading = True
-        rows = self.listed()
-        self.ids = [cid for cid, _text, _group in rows]
-        entries = [{"id": cid, "text": text, "group": group} for cid, text, group in rows]
-        if self.current_id is None:      # the draft nobody has saved yet, where it can be seen
-            entries.append({"id": NEW_ROW, "text": self.draft_text(), "group": self.draft_group()})
-        self.list.set_entries(entries, self.empty_folders, self.list_selection(select), archived=self.archived_entries())
-        self.empty_folders = self.list.empty_folders()
-        self.app.save_folder_settings(self.KEY, self.empty_folders)
-        self.show_empty_hint()
-        self.loading = was_loading   # a list rebuilt while the form is being filled leaves it being filled
-        self.update_list_marker()
+        case_list_logic.reload(self, select)
 
     def on_folders_changed(self):
-        """A folder made, renamed or removed in the list: what the widget now holds is what the tab keeps. ⚠️ Connecting `foldersChanged` straight to `reload_list` rebuilt the list from the tab's own copy of the empty folders, taken BEFORE the new one was added -- so a folder just made vanished the moment it was made."""
-        self.empty_folders = self.list.empty_folders()
-        self.reload_list(select=self.current_id)
+        """A folder made, renamed or removed in the list: what the widget now holds is what the tab keeps (case_list_logic.folders_changed)."""
+        case_list_logic.folders_changed(self)
 
     def update_list_marker(self):
-        """A dot beside the source being edited while it has unsaved changes. Every row carries a mark, dot or blank, so none of them moves sideways as the form is typed into."""
-        for cid in self.list.ids():
-            mine = cid == self.current_id or (self.current_id is None and cid == NEW_ROW)
-            self.list.set_mark(cid, self.app.dirty_mark(mine and self.dirty))
-        self.app.update_tab_marks()
+        """A dot beside the source being edited while it has unsaved changes (case_list_logic.update_marks)."""
+        case_list_logic.update_marks(self)
 
     def on_list_change(self, cid):
-        if self.loading or not cid:
-            return
-        if cid == self.current_id or (cid == NEW_ROW and self.current_id is None):
-            self.on_row_again(cid)
-            return
-        if cid not in self.ids:
-            return
-        if not self.confirm_leave():
-            self.reload_list(self.current_id)   # the row of the source kept chosen again
-            return
-        self.load(cid)
-        self.after_row_loaded(cid)
-        if NEW_ROW in self.list.ids():
-            self.reload_list(cid)         # the draft given up leaves the list
+        case_list_logic.row_changed(self, cid)
 
     def on_moved(self, ids, group):
-        """A drop wrote a folder (UI-001): the draft is saved first where it can be (`confirm_leave`, the question asked only where it cannot), then the field goes into each source, the sources written are exported, and the list is rebuilt from the files. The draft takes the folder too -- the source open, or the draft never saved, whose row was dropped -- or its next save would put it back where it was. A file the disk refuses (OneDrive holding it) stops the move there: what was written before is exported, and the status bar says which file failed, last."""
-        if not self.confirm_leave():
-            self.reload_list(self.current_id)
-            return
-        targets = [cid for cid in ids if cid != NEW_ROW]
-        if NEW_ROW in ids:
-            if self.current_id is None:
-                self.take_group(group)    # a draft has no file to write the field into: it carries the folder until it is saved
-            elif self.current_id not in targets:
-                targets.append(self.current_id)   # saved just now by confirm_leave: its file takes the folder
-        written, failure = [], None
-        for cid in targets:
-            path = self.sources_dir() / ("%s.json" % cid)
-            try:
-                source = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
-                continue
-            if group:
-                source["group"] = group
-            else:
-                source.pop("group", None)
-            try:
-                engine.write_json(path, source)
-            except OSError as exc:
-                failure = self.t("list_write_failed", id=cid, error=str(exc))
-                break
-            written.append(cid)
-            if cid == self.current_id:
-                self.take_group(group)
-        if written:
-            self.export_listed(self.word("moved", count=len(written), group=group or "—"))
-        self.reload_list(self.current_id)
-        if failure:
-            self.app.set_status(failure)
+        """A drop wrote a folder (UI-001): the draft saved first where it can be, the field written into each source, the sources written exported, the list rebuilt (case_list_logic.move)."""
+        case_list_logic.move(self, ids, group)
 
     def graph_id(self, cid):
         """The id a source of this tab has in the graph of dependencies: its own, by default."""
@@ -376,19 +252,11 @@ class SourceEditorTab:
 
     def lists_object(self, ident):
         """Whether the object `ident` of the graph is one of this tab's sources (MainWindow.open_object). Not `owns`, which a member check tab asks of a source."""
-        return any(self.graph_id(cid) == ident for cid in self.saved_ids())
+        return case_list_logic.lists_object(self, ident)
 
     def open_object(self, ident):
         """The source the graph names `ident` opened here, the draft open left as choosing another row leaves it (`confirm_leave`)."""
-        cid = next((c for c in self.saved_ids() if self.graph_id(c) == ident), None)
-        if cid is None or cid == self.current_id or not self.confirm_leave():
-            return
-        self.load(cid)
-        self.reload_list(cid)
+        case_list_logic.open_object(self, ident)
 
     def load(self, cid):
-        self.source = self.read_saved(self.sources_dir() / ("%s.json" % cid))
-        self.current_id = cid
-        self.dirty = False
-        self.fill_form()
-        self.refresh()
+        draft_logic.load(self, cid)

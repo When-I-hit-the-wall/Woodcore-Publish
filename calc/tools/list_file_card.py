@@ -59,6 +59,9 @@ STRINGS = {
 class ListFileCard:
     """The card, built into a tab's layout: `kind` one of list_files.KINDS, `document` a function giving the document whose journal it is ("rs" for the other two)."""
 
+    # «Écrire le fichier» and «Ajouter» write Positions/*.typ or the journal's file: guarded where they are defined, once, by tab_registry (tab_guard.guard_service) -- refused in a project open read-only, for the three tabs that build the card, «Métrés», «Journal» and «Positions» (spec docs/requirements/completed/2026-10-24-type-donnees.md, REQ-010, D-09). Not in tab_guard.WRITERS: names this common would be guarded on every tab method that bears them.
+    WRITERS = ("write", "add")
+
     def __init__(self, app, kind, document=lambda: "rs"):
         self.app, self.kind, self.document = app, kind, document
         self.t = app.t

@@ -6,7 +6,7 @@ The engineer: «à l'intérieur du dossier il doit y avoir 2 dossiers. Le premie
 
 **An excerpt is made in three steps, on the page itself.** Its source; then its title, clicked on the page or chosen among the source's bookmarks -- a print report's headings are drawn as vector paths and carry no text, so the title is found by its **bookmark** and not by selecting its words (measured on the engineer's own RFEM export, calc/domains/annex.py); then its frame, dragged over the page. A title used several times («Charges de barre» under each load case) is told apart by the path of titles above it, and the card says how many there are and which this one is. A source with no bookmark -- a PDF printed through a PDF printer -- is framed on its page directly, and such an excerpt must be confirmed again after every new version of its source.
 
-**Every write goes through calc/domains/annex.py and is followed by an export of the annexes alone** (`annex.export`), so `data/annexes.json` and the cropped pages follow at once and the report sees them without the load workbooks being read again -- the arrangement every editor tab has.
+**Every write goes through calc/domains/annex.py and is followed by an export of the annexes alone** (`annex.export`), so `data/annexes.json` and the cropped pages follow at once and the report sees them without the whole export being run again -- the arrangement every editor tab has.
 
 The PDF is rendered by QtPdf **from its bytes**, never from its file: a document QtPdf holds open is one Windows refuses to let «Remplacer» write over.
 

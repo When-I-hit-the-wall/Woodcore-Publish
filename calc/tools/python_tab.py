@@ -6,7 +6,7 @@ The engineer: «Je souhaite avoir un onglet dans woodcore, où le user peut écr
 
 **A script is a Python file and its identity is in it**, as three `@` comment keys at the top -- `@name`, `@label`, `@group` (calc/domains/script.py). ⚠️ So this tab shows them **read-only** rather than offering a form for them, which is a deliberate departure from every other editor tab: the engineer edits the file in this very pane, and a form beside it would be a second place for one thing (section 2 rule 1) and a round-trip to keep right. The ID is the file's name, and *Renommer* renames the file.
 
-**Every write goes through calc/domains/script.py**, as every other tab writes through its own domain module, and *Exécuter* saves, runs and exports in that order -- so what ran is what is on disk, which is what the export will run, and the report follows at once without the load workbooks being read again.
+**Every write goes through calc/domains/script.py**, as every other tab writes through its own domain module, and *Exécuter* saves, runs and exports in that order -- so what ran is what is on disk, which is what the export will run, and the report follows at once without the whole export being run again.
 
 ⚠️ **The run is in a process of its own** and cannot take the window with it, which is the whole reason the tab is thin: it edits text, spawns `woodcore-cli run-script`, and shows what came back.
 """
@@ -522,7 +522,7 @@ class PythonTab(source_editor.SourceEditorTab, QWidget):
         self.export()
 
     def export(self):
-        """Writes data/scripts.json, so the report sees what the scripts produced without the load workbooks being read again."""
+        """Writes data/scripts.json, so the report sees what the scripts produced without the whole export being run again."""
         try:
             model.export()
         except Exception as exc:                       # broad: an export refused says so; the file is written either way

@@ -79,7 +79,7 @@ def test_after_a_position_saved_no_tab_is_built_again_while_the_positions_tab_is
         assert calls == {}, f"tabs were built again: {calls}"
         assert window.tabs == before, "the tabs are the very ones that were there"
         import woodcore_gui
-        assert window.stale_tabs == {key for key, _f in woodcore_gui.TABS} - {"tab_positions"}
+        assert window.stale_tabs == {key for key, _f in woodcore_gui.TABS} - {"tab_positions"} - set(woodcore_gui.PROJECT_FREE)   # «Matériaux» reads nothing an export writes (issue #110)
         assert window.export_button.isEnabled() and window.pdf_button.isEnabled(), "the buttons the export held are given back"
 
 
@@ -170,18 +170,9 @@ def test_a_full_rebuild_builds_everything_and_leaves_nothing_stale_and_a_failed_
         assert rebuilt == [True]
 
 
-def test_the_banner_and_the_line_beside_the_name_follow_a_light_refresh():
+def test_the_line_beside_the_name_follows_a_light_refresh():   # the banner of workbooks changed since the export went with them (issue #109)
     window, here, calls = _window()
     with project.using(here):
         window.meta.setText("old")
         window.refresh_lightly()
         assert window.meta.text() == window.meta_text() and window.meta.text() != "old"
-        from PySide6.QtWidgets import QLabel
-        window.stale_banner = QLabel("workbooks changed since the export")
-        window.stale_banner.setVisible(True)
-        window.stale_text = lambda: ""
-        try:
-            window.refresh_lightly()
-        finally:
-            del window.stale_text
-        assert window.stale_banner.isHidden() and window.stale_banner.text() == "", "a banner of the old export is taken off"

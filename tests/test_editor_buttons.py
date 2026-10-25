@@ -16,9 +16,9 @@ import project  # the copy the tabs work on (calc/project.py)
 
 # Every tab whose list has «Nouveau», «Enregistrer», «Dupliquer» and «Supprimer» under it -- the journal's own since v0.99.
 # The annexes (v0.115) file their entries in two fixed folders and delete rather than archive, like the journal.
-EDITORS = ("PlanTab", "FireTab", "StaticsTab", "SchemaTab", "ConnectorsTab", "PolarTab", "JournalTab", "AnnexTab", "TensionTab", "CompressionTab")
+EDITORS = ("PlanTab", "FireTab", "StaticsTab", "SchemaTab", "ConnectorsTab", "PolarTab", "JournalTab", "AnnexTab", "FireCheckTab")   # the member checks of before; the four of issue #112 are tabs of calculation
 # The five that file their sources in folders and archive them on «Supprimer» (source_archive.py). The journal is one file of entries, in the journal's own order: it has no folder to make and nothing to archive, so the two checks that read a folder are skipped for it.
-ARCHIVING = ("PlanTab", "FireTab", "StaticsTab", "SchemaTab", "ConnectorsTab", "PolarTab", "TensionTab", "CompressionTab")
+ARCHIVING = ("PlanTab", "FireTab", "StaticsTab", "SchemaTab", "ConnectorsTab", "PolarTab", "FireCheckTab")
 CLICKS = ("load_first", "new", "save", "duplicate", "save", "revert", "delete", "load_first", "duplicate", "revert")
 
 # The modules of the tabs.
@@ -123,7 +123,7 @@ def test_supprimer_on_an_unsaved_draft_archives_nothing():
         for tab in window.tabs:
             if type(tab).__name__ not in ARCHIVING:
                 continue
-            folder = {"PlanTab": "plans", "FireTab": "fire", "StaticsTab": "statics", "SchemaTab": "details", "ConnectorsTab": "connectors", "PolarTab": "connections", "TensionTab": "checks", "CompressionTab": "checks"}[type(tab).__name__]
+            folder = {"PlanTab": "plans", "FireTab": "fire", "StaticsTab": "statics", "SchemaTab": "details", "ConnectorsTab": "connectors", "PolarTab": "connections", "FireCheckTab": "checks"}[type(tab).__name__]
             for verb in ("new", "duplicate"):
                 tab.dirty = False
                 if hasattr(tab, "load_first"):

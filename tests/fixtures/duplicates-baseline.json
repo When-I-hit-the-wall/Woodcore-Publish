@@ -16,10 +16,6 @@
   "calc/domains/schema_geometry.py:add",
   "calc/domains/statics_geometry.py:add"
  ],
- "432870ef7af39f72": [
-  "calc/tools/profile_tab.py:revert",
-  "calc/tools/source_editor.py:revert"
- ],
  "4a0d114022102a2f": [
   "calc/positions_store.py:_text",
   "calc/tools/positions_tab.py:cell_text"
@@ -55,10 +51,6 @@
   "calc/domains/script_runner.py:_load",
   "calc/engine.py:previous_json"
  ],
- "6b31a33dd51857ce": [
-  "calc/tools/load_tab.py:spin",
-  "calc/tools/member_check_tab.py:spin"
- ],
  "745e5c35b06d6c43": [
   "calc/tools/schema_tab.py:revert",
   "calc/tools/statics_tab.py:revert"
@@ -88,7 +80,7 @@
   "calc/domains/statics.py:text_records"
  ],
  "99278b9d558173c3": [
-  "calc/tools/commands_tab.py:plain_label",
+  "calc/tools/command_examples.py:plain_label",
   "calc/tools/drawing_tab_panes.py:plain_label",
   "calc/tools/polar_tab.py:plain_label",
   "calc/tools/positions_tab.py:plain_label",
@@ -124,10 +116,6 @@
   "calc/domains/schema.py:_string",
   "calc/domains/statics.py:_string"
  ],
- "c20b4b51ccbd4216": [
-  "calc/tools/load_tab.py:touch",
-  "calc/tools/member_check_tab.py:touch"
- ],
  "d1fd476573d7b27f": [
   "calc/tools/journal_tab.py:note",
   "calc/tools/positions_tab.py:note"
@@ -143,10 +131,6 @@
  "dc177a1e7e393ebe": [
   "calc/tools/drawing_tab.py:revert",
   "calc/tools/polar_tab.py:revert"
- ],
- "e46f816017843171": [
-  "calc/tools/fire_check_tab.py:on_duration_source",
-  "calc/tools/member_check_tab.py:on_size"
  ],
  "e5407ca5c2706753": [
   "calc/norms/sia260.py:_read",

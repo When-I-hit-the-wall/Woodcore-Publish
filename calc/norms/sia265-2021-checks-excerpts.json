@@ -1,0 +1,828 @@
+{
+ "_source": "SIA 265:2021 -- the clauses and figures the four member checks' tabs cite (issue #112, UI-012): each read off the editions shipped in norm-library/ -- the page, the box placed from the positions of the text layer (the figures' from the prototype «Vérifications d'éléments, troisième version», its caption added), the words the layer gives in its order, and held to the PDF by tests/test_norm_excerpts.py.",
+ "_note": "The clauses 4.2.3.1 and Tableau 4 are sia265-2021-domains-excerpts', Tabellen 8 and 9 sia265-2021-materials-excerpts': one excerpt for one clause (norms.excerpts.for_citation). An equation's line keeps the layer's order; the test leaves it out of its comparison.",
+ "edition": "SIA 265:2021",
+ "editions": {
+  "fr": {
+   "file": "SIA265-2021-FR.pdf",
+   "chapter": [
+    31,
+    37
+   ]
+  },
+  "de": {
+   "file": "SIA265-2021-DE.pdf",
+   "chapter": [
+    31,
+    37
+   ]
+  }
+ },
+ "excerpts": {
+  "2.2.6": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "2.2.6",
+     "page": 19,
+     "box": [
+      60.0,
+      489.3,
+      540.0,
+      534.9
+     ],
+     "text": "2.2.6 En général ηt = 1,0. Pour des actions assimilées à des chocs (par ex. les actions dynamiques\ndes charges routières ou des ponts roulants, des séismes ou des chocs), ηt sera admis égal à 1,4\npour le bois. Pour les matériaux dérivés du bois, la norme SIA 265/1 s’applique.",
+     "chapter": [
+      19,
+      19
+     ]
+    },
+    "de": {
+     "ref": "2.2.6",
+     "page": 19,
+     "box": [
+      60.0,
+      455.1,
+      540.0,
+      500.7
+     ],
+     "text": "2.2.6 Im Allgemeinen gilt ηt = 1,0. Für stossartige Einwirkungen (z. B. dynamische Einwirkungen von\nStrassenlasten sowie Erdbeben- und Anprallkräfte) darf bei Holz ηt = 1,4 gesetzt werden. Bei Holz-\nwerkstoffen gilt die SIA 265/1.",
+     "chapter": [
+      19,
+      19
+     ]
+    }
+   }
+  },
+  "4.2.1.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.1.1",
+     "page": 31,
+     "box": [
+      60.0,
+      318.4,
+      540.0,
+      358.3
+     ],
+     "text": "4.2.1.1 En cas de contrainte de traction parallèle au fil:\nσt,0,d ≤ ft,0,d (6)",
+     "chapter": [
+      31,
+      31
+     ]
+    },
+    "de": {
+     "ref": "4.2.1.1",
+     "page": 31,
+     "box": [
+      60.0,
+      307.0,
+      540.0,
+      346.9
+     ],
+     "text": "4.2.1.1 Bei Zugbeanspruchung in Faserrichtung ist zu erfüllen:\nσt,0,d ≤ ft,0,d (6)",
+     "chapter": [
+      31,
+      31
+     ]
+    }
+   }
+  },
+  "4.2.1.2": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.1.2",
+     "page": 31,
+     "box": [
+      60.0,
+      358.3,
+      540.0,
+      398.2
+     ],
+     "text": "4.2.1.2 En cas de contrainte de traction uniforme perpendiculaire au fil:\nσt,90,d ≤ ft,90,d (7)",
+     "chapter": [
+      31,
+      31
+     ]
+    },
+    "de": {
+     "ref": "4.2.1.2",
+     "page": 31,
+     "box": [
+      60.0,
+      346.9,
+      540.0,
+      398.2
+     ],
+     "text": "4.2.1.2 Bei Zugbeanspruchung rechtwinklig zur Faserrichtung in einem gleichmässig beanspruchten\nQuerschnitt ist zu erfüllen:\nσt,90,d ≤ ft,90,d (7)",
+     "chapter": [
+      31,
+      31
+     ]
+    }
+   }
+  },
+  "4.2.1.3": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.1.3",
+     "page": 31,
+     "box": [
+      60.0,
+      398.2,
+      540.0,
+      472.3
+     ],
+     "text": "4.2.1.3 En cas de contrainte de traction biaise (angle α) par rapport au fil:\nσt,α,d ≤ ft,α,d (8)\nft,α,d =  (9)",
+     "chapter": [
+      31,
+      31
+     ]
+    },
+    "de": {
+     "ref": "4.2.1.3",
+     "page": 31,
+     "box": [
+      60.0,
+      398.2,
+      540.0,
+      472.3
+     ],
+     "text": "4.2.1.3 Bei Zugbeanspruchung unter einem Winkel α zur Faserrichtung ist zu erfüllen:\nσt,α,d ≤ ft,α,d (8)\nft,α,d =  (9)",
+     "chapter": [
+      31,
+      31
+     ]
+    }
+   }
+  },
+  "4.2.2.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.2.1",
+     "page": 31,
+     "box": [
+      60.0,
+      495.1,
+      540.0,
+      557.8
+     ],
+     "text": "4.2.2.1 En cas de contrainte de compression parallèle au fil:\nσc,0,d ≤ kc · fc,0,d (10)\nkc  coefficient de flambage selon le chiffre 4.2.8.3",
+     "chapter": [
+      31,
+      31
+     ]
+    },
+    "de": {
+     "ref": "4.2.2.1",
+     "page": 31,
+     "box": [
+      60.0,
+      495.1,
+      540.0,
+      557.8
+     ],
+     "text": "4.2.2.1 Bei Druckbeanspruchung in Faserrichtung ist zu erfüllen:\nσc,0,d ≤ kc · fc,0,d (10)\nkc  Knickbeiwert gemäss 4.2.8.3",
+     "chapter": [
+      31,
+      31
+     ]
+    }
+   }
+  },
+  "4.2.2.2": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.2.2",
+     "page": 31,
+     "box": [
+      60.0,
+      557.8,
+      540.0,
+      631.9
+     ],
+     "text": "4.2.2.2 En cas de contrainte de compression perpendiculaire au fil:\nσc,90,d ≤ fc,90,d (11)\nEn alternative à l’expression (11), la vérification de la résistance en compression perpendiculaire\nau fil peut être effectuée conformément à l’annexe C de la présente norme.",
+     "chapter": [
+      31,
+      31
+     ]
+    },
+    "de": {
+     "ref": "4.2.2.2",
+     "page": 31,
+     "box": [
+      60.0,
+      557.8,
+      540.0,
+      631.9
+     ],
+     "text": "4.2.2.2 Bei Druckbeanspruchung rechtwinklig zur Faserrichtung ist zu erfüllen:\nσc,90,d ≤ fc,90,d (11)\nAlternativ zum Nachweis (11) darf der Tragsicherheitsnachweis bei Druckbeanspruchung recht-\nwinklig zur Faserrichtung auch gemäss Anhang C dieser Norm geführt werden.",
+     "chapter": [
+      31,
+      31
+     ]
+    }
+   }
+  },
+  "4.2.2.3": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.2.3",
+     "page": 31,
+     "box": [
+      60.0,
+      631.9,
+      540.0,
+      692.0
+     ],
+     "text": "4.2.2.3 En cas de contrainte de compression biaise par rapport au fil (angle α):\nσc,α,d ≤ fc,α,d (12)\nfc,α,d =  (13)",
+     "chapter": [
+      31,
+      31
+     ]
+    },
+    "de": {
+     "ref": "4.2.2.3",
+     "page": 31,
+     "box": [
+      60.0,
+      631.9,
+      540.0,
+      692.0
+     ],
+     "text": "4.2.2.3 Bei Druckbeanspruchung unter einem Winkel α zur Faserrichtung ist zu erfüllen:\nσc,α,d ≤ fc,α,d (12)\nfc,α,d =  (13)",
+     "chapter": [
+      31,
+      31
+     ]
+    }
+   }
+  },
+  "4.2.3.2": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.3.2",
+     "page": 32,
+     "box": [
+      60.0,
+      168.5,
+      540.0,
+      248.3
+     ],
+     "text": "4.2.3.2 Dans le cas de contraintes de flexion perpendiculaires au fil (figure 5) et de flexion transversale\n(figure 6), les conditions suivantes doivent être remplies:\nσm,90,d ≤ ft,90,d du côté tendu (15)\nσm,90,d ≤ fc,90,d du côté comprimé (16)",
+     "chapter": [
+      32,
+      32
+     ]
+    },
+    "de": {
+     "ref": "4.2.3.2",
+     "page": 32,
+     "box": [
+      60.0,
+      168.5,
+      540.0,
+      248.3
+     ],
+     "text": "4.2.3.2 Bei Biegebeanspruchung rechtwinklig zur Faserrichtung (Figur 5) und bei Querbiegung (Figur 6)\nmüssen folgende Bedingungen erfüllt sein:\nσm,90,d ≤ ft,90,d auf der Biegezugseite (15)\nσm,90,d ≤ fc,90,d auf der Biegedruckseite (16)",
+     "chapter": [
+      32,
+      32
+     ]
+    }
+   }
+  },
+  "4.2.3.3": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.3.3",
+     "page": 32,
+     "box": [
+      60.0,
+      430.7,
+      540.0,
+      464.9
+     ],
+     "text": "4.2.3.3 Dans le cas de contraintes de flexion biaises par rapport au fil (figure 7), les conditions suivantes\ndoivent être remplies:",
+     "chapter": [
+      32,
+      32
+     ]
+    },
+    "de": {
+     "ref": "4.2.3.3",
+     "page": 32,
+     "box": [
+      60.0,
+      430.7,
+      540.0,
+      464.9
+     ],
+     "text": "4.2.3.3 Bei Wirkung von Biegespannungen unter einem Winkel α zur Faserrichtung (Figur 7) müssen\nfolgende Bedingungen erfüllt werden:",
+     "chapter": [
+      32,
+      32
+     ]
+    }
+   }
+  },
+  "4.2.4.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.4.1",
+     "page": 32,
+     "box": [
+      60.0,
+      682.9,
+      540.0,
+      757.6
+     ],
+     "text": "4.2.4.1 Dans le cas de contraintes de flexion combinées avec des contraintes de traction, la condition\nsuivante doit être remplie vis-à-vis de la résistance:\n+  +  ≤ 1 (21)\nLa stabilité (déversement) doit en outre être vérifiée selon le chiffre 4.2.9.",
+     "chapter": [
+      32,
+      32
+     ]
+    },
+    "de": {
+     "ref": "4.2.4.1",
+     "page": 32,
+     "box": [
+      60.0,
+      682.9,
+      540.0,
+      757.6
+     ],
+     "text": "4.2.4.1 Bei gleichzeitiger Wirkung von Zug- und Biegespannungen in Faserrichtung ist folgende Bedin-\ngung bezüglich Festigkeit zu erfüllen:\n+  +  ≤ 1 (21)\nZusätzlich ist die Stabilität (Kippen) gemäss 4.2.9 zu prüfen.",
+     "chapter": [
+      32,
+      32
+     ]
+    }
+   }
+  },
+  "4.2.4.2": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.4.2",
+     "page": 33,
+     "box": [
+      60.0,
+      65.9,
+      540.0,
+      162.8
+     ],
+     "text": "4.2.4.2 Dans le cas de contraintes de flexion combinées avec des contraintes de compression, la condi-\ntion suivante doit être remplie vis-à-vis de la résistance:\n+  +  ≤ 1 (22)\nLa stabilité (déversement resp. flambage) doit être en outre vérifiée selon les chiffres 4.2.8\nresp. 4.2.9.",
+     "chapter": [
+      33,
+      33
+     ]
+    },
+    "de": {
+     "ref": "4.2.4.2",
+     "page": 33,
+     "box": [
+      60.0,
+      65.9,
+      540.0,
+      151.4
+     ],
+     "text": "4.2.4.2 Bei gleichzeitiger Wirkung von Druck- und Biegespannungen in Faserrichtung ist folgende Be-\ndingung bezüglich Festigkeit zu erfüllen:\n+  +  ≤ 1 (22)\nZusätzlich ist die Stabilität (Kippen bzw. Kippen) gemäss 4.2.8 bzw. 4.2.9 zu prüfen.",
+     "chapter": [
+      33,
+      33
+     ]
+    }
+   }
+  },
+  "4.2.5.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.5.1",
+     "page": 33,
+     "box": [
+      60.0,
+      185.6,
+      540.0,
+      225.5
+     ],
+     "text": "4.2.5.1 Dans le cas d’un effort tranchant parallèle au fil:\nτd ≤ fv,d (23)",
+     "chapter": [
+      33,
+      33
+     ]
+    },
+    "de": {
+     "ref": "4.2.5.1",
+     "page": 33,
+     "box": [
+      60.0,
+      174.2,
+      540.0,
+      214.1
+     ],
+     "text": "4.2.5.1 Bei Schubbeanspruchung parallel zur Faserrichtung ist folgende Bedingung zu erfüllen:\nτd ≤ fv,d (23)",
+     "chapter": [
+      33,
+      33
+     ]
+    }
+   }
+  },
+  "4.2.6": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.6",
+     "page": 33,
+     "box": [
+      60.0,
+      328.1,
+      540.0,
+      447.8
+     ],
+     "text": "4.2.6 Cisaillement\nDans le cas de cisaillement simple, la valeur de dimensionnement de la résistance au cisaillement\nfv,d sera réduite comme suit:\n– Pour le bois massif, bois massif à entures multiples\net bois massif reconstitué τa,d ≤ 0,6 · fv,d  (26)\n– Pour le bois lamellé collé τa,d ≤ 0,8 · fv,d (27)\nLa résistance au cisaillement simple ne peut être prise en compte que si la longueur de la zone\ncisaillée dans le fil atteint au moins 150 mm.",
+     "chapter": [
+      33,
+      33
+     ]
+    },
+    "de": {
+     "ref": "4.2.6",
+     "page": 33,
+     "box": [
+      60.0,
+      316.7,
+      540.0,
+      413.6
+     ],
+     "text": "4.2.6 Abscheren\nDer Nachweis auf Abscheren ist mit reduzierten Schubfestigkeiten fv,d zu führen:\n– bei Vollholz, keilgezinktem Vollholz und Balkenschichtholz τa,d ≤ 0,6 · fv,d  (26)\n– bei Brettschichtholz τa,d ≤ 0,8 · fv,d (27)\nDer Abscherwiderstand darf nur berücksichtigt werden, wenn die Scherfläche in Faserrichtung\ndes Holzes mindestens 150 mm lang ist.",
+     "chapter": [
+      33,
+      33
+     ]
+    }
+   }
+  },
+  "4.2.7.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.7.1",
+     "page": 33,
+     "box": [
+      60.0,
+      470.6,
+      540.0,
+      585.2
+     ],
+     "text": "4.2.7.1 En cas d’action combinée de contraintes de cisaillement τd et de contraintes normales perpendi-\nculaires à celles-ci σ90,d (figure 8) pour – fc,90,d ≤ σ90,d ≤ ft,90,d :\n+  ·  1 –  ≤ 1 (28)\nσ90,d = σt,90,d et kt,90 = 1,0 pour une contrainte de traction perpendiculaire au fil\nσ90,d = –σc,90,d et kt,90 = 4,0 pour une contrainte de compression perpendiculaire au fil\nLe chiffre 4.2.7.2 ne s’applique pas simultanément.",
+     "chapter": [
+      33,
+      33
+     ]
+    },
+    "de": {
+     "ref": "4.2.7.1",
+     "page": 33,
+     "box": [
+      60.0,
+      436.4,
+      540.0,
+      561.8
+     ],
+     "text": "4.2.7.1 Bei gleichzeitiger Wirkung von Schubspannungen τd und Normalspannungen rechtwinklig dazu\nσ90,d (Figur 8) gilt für –fc,90,d ≤ σ90,d ≤ ft,90,d :\n+  ·  1 –  ≤ 1 (28)\nσ90,d = σt,90,d und kt,90 = 1,0 bei Querzugbeanspruchung\nσ90,d = –σc,90,d und kt,90 = 4,0 bei Querdruckbeanspruchung\nDabei darf 4.2.7.2 nicht gleichzeitig angewendet werden.",
+     "chapter": [
+      33,
+      33
+     ]
+    }
+   }
+  },
+  "4.2.8": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.8",
+     "page": 34,
+     "box": [
+      60.0,
+      557.5,
+      540.0,
+      654.4
+     ],
+     "text": "4.2.8 Stabilité des barres comprimées (flambage)\n4.2.8.1 Dans le cas de sollicitation centrée et en admettant que la rectitude de la barre soit dans les\nlimites fixées au chiffre 8.2.5, la condition suivante doit être remplie:\nσ c,0,d ≤ kc · fc,0,d (29)\nkc  coefficient de flambage selon le chiffre 4.2.8.3",
+     "chapter": [
+      34,
+      34
+     ]
+    },
+    "de": {
+     "ref": "4.2.8",
+     "page": 34,
+     "box": [
+      60.0,
+      333.8,
+      540.0,
+      430.7
+     ],
+     "text": "4.2.8 Stabilität von Druckstäben (Knicken)\n4.2.8.1 Bei planmässiger zentrischer Beanspruchung und Einhaltung der Begrenzungen bezüglich Ge-\nradheit gemäss 8.2.5 ist folgende Bedingung zu erfüllen:\nσ c,0,d ≤ kc · fc,0,d (29)\nkc  Knickbeiwert gemäss 4.2.8.3",
+     "chapter": [
+      34,
+      34
+     ]
+    }
+   }
+  },
+  "4.2.8.5": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.8.5",
+     "page": 36,
+     "box": [
+      60.0,
+      65.9,
+      540.0,
+      225.5
+     ],
+     "text": "4.2.8.5 Les contraintes de flexion, résultant de charges transversales et d’excentricités planifiées ou de\ncourbures préexistantes inévitables supérieures aux valeurs limites du chiffre 8.2.5, seront prises\nen compte dans la vérification au flambage comme suit:\n+  ≤ 1 (37)\nσ m,d  valeur de dimensionnement de la contrainte de flexion résultant de charges\ntransversales et d’excentricités planifiées\nkc  coefficient de flambage selon le chiffre 4.2.8.2\nkm  coefficient de déversement selon le chiffre 4.2.9.2\nLa vérification peut être faite indépendamment pour les deux axes principaux de la barre com-\nprimée.",
+     "chapter": [
+      36,
+      36
+     ]
+    },
+    "de": {
+     "ref": "4.2.8.5",
+     "page": 35,
+     "box": [
+      60.0,
+      604.3,
+      540.0,
+      718.9
+     ],
+     "text": "4.2.8.5 Biegebeanspruchungen infolge planmässiger Exzentrizität und Querlast sowie grössere unver-\nmeidbare Vorkrümmungen als in 8.2.5 angegeben, sind im Knicknachweis zu berücksichtigen:\n+  ≤ 1 (37)\nσ m,d Bemessungswert der Biegespannung aus planmässigen Exzentrizitäten und Querlasten\nkc  Knickbeiwert gemäss 4.2.8.2\nkm  Kippbeiwert gemäss 4.2.9.2\nDer Nachweis darf für die beiden Hauptachsen des Druckstabs unabhängig durchgeführt  werden.",
+     "chapter": [
+      35,
+      35
+     ]
+    }
+   }
+  },
+  "4.2.9": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.9",
+     "page": 36,
+     "box": [
+      60.0,
+      225.5,
+      540.0,
+      311.0
+     ],
+     "text": "4.2.9 Stabilité des poutres fléchies (déversement)\n4.2.9.1 Les conditions suivantes doivent être remplies dans le cas de contraintes de flexion:\nσm,d ≤ km · fm,d (38)\nkm  coefficient de déversement selon le chiffre 4.2.9.2",
+     "chapter": [
+      36,
+      36
+     ]
+    },
+    "de": {
+     "ref": "4.2.9",
+     "page": 36,
+     "box": [
+      60.0,
+      65.9,
+      540.0,
+      151.4
+     ],
+     "text": "4.2.9 Stabilität von Biegeträgern (Kippen)\n4.2.9.1 Die Biegespannungen müssen die folgende Bedingung erfüllen:\nσm,d ≤ km · fm,d (38)\nkm  Kippbeiwert gemäss 4.2.9.2",
+     "chapter": [
+      36,
+      36
+     ]
+    }
+   }
+  },
+  "fig7": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Figure 7",
+     "page": 32,
+     "box": [
+      53.6,
+      461.3,
+      571.5,
+      550.6
+     ],
+     "text": "Figure 7 Flexion biaise par rapport au fil",
+     "chapter": [
+      32,
+      32
+     ]
+    },
+    "de": {
+     "ref": "Figur 7",
+     "page": 32,
+     "box": [
+      53.6,
+      461.3,
+      571.5,
+      562.5
+     ],
+     "text": "Figur 7 Biegebeanspruchung schräg zur Faserrichtung",
+     "chapter": [
+      32,
+      32
+     ]
+    }
+   }
+  },
+  "fig8": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Figure 8",
+     "page": 34,
+     "box": [
+      59.5,
+      50.6,
+      540.0,
+      279.8
+     ],
+     "text": "Figure 8  Action simultanée de contraintes de cisaillement et de contraintes normales perpendiculaires à celles-ci",
+     "chapter": [
+      34,
+      34
+     ]
+    },
+    "de": {
+     "ref": "Figur 8",
+     "page": 33,
+     "box": [
+      53.6,
+      559.6,
+      540.0,
+      773.9
+     ],
+     "text": "Figur 8 Gleichzeitig wirkende Schubspannungen und Normalspannungen rechtwinklig dazu",
+     "chapter": [
+      33,
+      33
+     ]
+    }
+   }
+  },
+  "fig9": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Figure 9",
+     "page": 34,
+     "box": [
+      59.5,
+      363.2,
+      540.0,
+      535.8
+     ],
+     "text": "Figure 9 Transmission directe des forces par compression transversale",
+     "chapter": [
+      34,
+      34
+     ]
+    },
+    "de": {
+     "ref": "Figur 9",
+     "page": 34,
+     "box": [
+      53.6,
+      131.0,
+      571.5,
+      315.5
+     ],
+     "text": "Figur 9 Direkte Kraftabtragung über Querdruck",
+     "chapter": [
+      34,
+      34
+     ]
+    }
+   }
+  },
+  "fig10": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Figure 10",
+     "page": 35,
+     "box": [
+      59.5,
+      119.1,
+      540.0,
+      339.3
+     ],
+     "text": "Figure 10 Coefficients de flambage kc en fonction de l’élancement relatif λrel",
+     "chapter": [
+      35,
+      35
+     ]
+    },
+    "de": {
+     "ref": "Figur 10",
+     "page": 35,
+     "box": [
+      53.6,
+      50.6,
+      571.5,
+      279.8
+     ],
+     "text": "Figur 10 Knickbeiwerte kc in Funktion der relativen Schlankheit λrel",
+     "chapter": [
+      35,
+      35
+     ]
+    }
+   }
+  },
+  "fig11": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Figure 11",
+     "page": 36,
+     "box": [
+      59.5,
+      443.5,
+      571.5,
+      669.7
+     ],
+     "text": "Figure 11  Coefficient de déversement pour une sollicitation en flexion constante entre les appuis latéraux (appuis à fourche) en fonction de l’élancement relatif λrel,m",
+     "chapter": [
+      36,
+      36
+     ]
+    },
+    "de": {
+     "ref": "Figur 11",
+     "page": 36,
+     "box": [
+      53.6,
+      285.7,
+      571.5,
+      538.7
+     ],
+     "text": "Figur 11  Kippbeiwert für konstante Biegebeanspruchung zwischen den seitlichen Halterungen (Gabellagerungen) in Funktion der relativen Schlankheit λrel,m",
+     "chapter": [
+      36,
+      36
+     ]
+    }
+   }
+  },
+  "fig46": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Figure 46",
+     "page": 100,
+     "box": [
+      53.6,
+      668.1,
+      586.4,
+      779.8
+     ],
+     "text": "Figure 46 Compression perpendiculaire au fil",
+     "chapter": [
+      100,
+      100
+     ]
+    },
+    "de": {
+     "ref": "Figur 46",
+     "page": 99,
+     "box": [
+      53.6,
+      666.7,
+      586.4,
+      779.8
+     ],
+     "text": "Figur 46 Druck rechtwinklig zur Faserrichtung des Holzes",
+     "chapter": [
+      99,
+      99
+     ]
+    }
+   }
+  }
+ }
+}

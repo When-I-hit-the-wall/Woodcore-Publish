@@ -453,7 +453,7 @@ def test_compute_gives_none_where_the_report_refuses():
     assert member_check.compute(rec) is None
     rec = member_check.resolve(_good(), POSITIONS)
     result = member_check.compute(rec)
-    assert set(result) == {"kind", "equation", "clause", "rows", "eta", "ok", "relation", "ratio"}
+    assert set(result) == {"kind", "equation", "clause", "rows", "eta", "ok", "relation", "ratio", "governing"}   # governing: issue #112, REQ-014
     assert all({"key", "symbol", "value", "unit"} <= set(row) for row in result["rows"])
     assert [row["key"] for row in result["rows"]][-1] == "eta" and result["rows"][-1]["value"] == result["eta"]
 

@@ -79,13 +79,13 @@ LEVEL = Option("level", "level", "ds_opt_level")
 WIDTH = Option("width", "width", "ds_opt_width")
 CAPTION = Option("caption", "caption", "ds_opt_caption")
 
-# The options of the commands the «Formules» tab writes (issue #19): what the line is -- its label, its description, its citation -- is written in «Calcul», how it is printed -- its level, its display type, its style, the summary table -- in «Affichage»
+# The options of `#var` the «Affichage» of a connector and of a polar moment offers for the line they copy (issue #19): its level, its texts, its citation -- the clause `norm-section:`, the one argument of the engine since the spec 2026-10-21-commandes-typst-refonte (issue #113, REQ-008: «Article» wrote `norm-ref:`, which the compile refuses beside `norm-section:`). The «Domaines» tab sets its lines through calc/domains/formula_args.py and calc/line_display.py since issue #113, not through these: `eq` and `verify`, which only its retired panel read, have no Spec any more.
 PRINT_LEVEL = Option("level", "level", "ds_opt_level", view="display")
 LABEL = Option("label", "text", "ds_opt_label", view="calc")
 DESCR = Option("descr", "text", "ds_opt_descr", view="calc")
 STYLE = Option("style", "choice", "ds_opt_style", choices=("", "bold", "underline", "double"), view="display")
 NORM = Option("norm", "text", "ds_opt_norm", view="calc")
-NORM_REF = Option("norm-ref", "text", "ds_opt_norm_ref", view="calc")
+NORM_REF = Option("norm-section", "text", "ds_opt_norm_ref", view="calc")
 
 SPECS = {
     # the drawings a native figure holds (spec 2026-10-21-commandes-typst-refonte, REQ-013, UI-002): what the figure shows, words of `detail-figure` -- none ticked, the command's own --, its width, the parts lit; no caption, the figure's being the engineer's
@@ -106,17 +106,11 @@ SPECS = {
     )),
     "var": Spec("var", (
         PRINT_LEVEL, LABEL, DESCR, STYLE, NORM, NORM_REF,
-    ), cards=(("ds_card_print", ("level", "style")), ("ds_card_texts", ("label", "descr")), ("ds_card_citation", ("norm", "norm-ref"))),
+    ), cards=(("ds_card_print", ("level", "style")), ("ds_card_texts", ("label", "descr")), ("ds_card_citation", ("norm", "norm-section"))),
         positional=("key",)),
     "find": Spec("find", (
         Option("type", "choice", "ds_opt_type_find", choices=("val+unit", "name", "val", "unit", "expression")),
     )),
-    # The «Formule» tab's commands (v0.117, calc/tools/formula_tab.py): what a block being written offers on the right, its middle filling the rest
-    "eq": Spec("eq", (
-        PRINT_LEVEL, LABEL, DESCR, STYLE, NORM, NORM_REF,
-    ), cards=(("ds_card_print", ("level", "style")), ("ds_card_texts", ("label", "descr")), ("ds_card_citation", ("norm", "norm-ref"))),
-        positional=("key",)),
-    "verify": Spec("verify", (PRINT_LEVEL,), positional=("relation",)),
 }
 
 # The commands whose panel is a widget of their own rather than a declaration (display_view.Entry.panel), and why: what they offer depends on what a declaration cannot know.
@@ -139,44 +133,14 @@ DISMISSED = {
         "role": FINE,
         "label-position": FINE,
         "descr-position": FINE,
-        "norm-section": FINE,
         "norm-position": FINE,
+        "norm-ref": "the clause's old name, read from a file of before and written `norm-section:` (the «Domaines» tab rebuilt, REQ-008): never offered, the compile refusing the two together",
         "id": FINE,
         "domain": "the place the value is read is the variable's own, chosen in the list on the left",
     },
     "find": {
         "object": "always «variable» here: the tab's list is the listing of the domains",
         "domain": "the domain chosen in the list on the left",
-    },
-    "eq": {
-        "name-calc": FINE,
-        "name-visible": FINE,
-        "equation": FINE,
-        "as-unit": FINE,
-        "display-formula": FINE,
-        "display-equation": FINE,
-        "role": FINE,
-        "label-position": FINE,
-        "descr-position": FINE,
-        "norm-section": FINE,
-        "norm-position": FINE,
-        "id": FINE,
-        "unit": "the output unit, chosen in the «Formules» tab's own list among the units of the result's dimension (lib/units.json's `offered`)",
-        "value": "an answer stated for a formula that is displayed and not evaluated: the «Formules» tab computes every formula it writes, and such a line is written by hand in VS Code",
-    },
-    "verify": {
-        "name-calc": FINE,
-        "name-visible": FINE,
-        "display": FINE,
-        "role": FINE,
-        "label": FINE,
-        "label-position": FINE,
-        "descr": FINE,
-        "descr-position": FINE,
-        "norm": FINE,
-        "norm-section": FINE,
-        "norm-position": FINE,
-        "id": "the relation's name, written by Woodcore when it unfolds a check and kept as the file has it, never an option of the display",
     },
 }
 
@@ -202,8 +166,6 @@ STRINGS = {
         "ds_not_exported": "« {id} » n'est pas encore dans l'export : l'aperçu ne peut pas le montrer. Cliquer « Import données ».",
         "ds_stale": "« {id} » a changé depuis le dernier export : l'aperçu montre l'état exporté. Cliquer « Import données ».",
         "ds_note_prints_nothing": "Cette commande n'imprime rien : elle lit des valeurs dans une variable, pour une section qui les met en forme elle-même. Pas d'aperçu.",
-        "ds_note_whole_document": "Cette commande lit tout le document — ce que chaque section a déclaré — qu'un aperçu isolé ne contient pas. L'aperçu se voit dans le PDF.",
-        "ds_note_document_variable": "Cette variable est déclarée dans un document : un aperçu isolé ne la connaît pas. L'aperçu se voit dans le PDF.",
         "ds_note_loop": "Une boucle sur tous les objets : elle s'aperçoit dans le PDF.",
         "ds_card_figure": "Figure",
         "ds_card_shown": "Ce qui est montré",
@@ -306,8 +268,6 @@ STRINGS = {
         "ds_not_exported": "«{id}» ist noch nicht im Export: die Vorschau kann es nicht zeigen. «Daten importieren» klicken.",
         "ds_stale": "«{id}» hat sich seit dem letzten Export geändert: die Vorschau zeigt den exportierten Stand. «Daten importieren» klicken.",
         "ds_note_prints_nothing": "Dieser Befehl druckt nichts: er liest Werte in eine Variable, für einen Abschnitt, der sie selbst gestaltet. Keine Vorschau.",
-        "ds_note_whole_document": "Dieser Befehl liest das ganze Dokument — was jeder Abschnitt deklariert hat —, das eine einzelne Vorschau nicht enthält. Die Vorschau sieht man im PDF.",
-        "ds_note_document_variable": "Diese Variable ist in einem Dokument deklariert: eine einzelne Vorschau kennt sie nicht. Die Vorschau sieht man im PDF.",
         "ds_note_loop": "Eine Schleife über alle Objekte: man sieht sie im PDF.",
         "ds_card_figure": "Abbildung",
         "ds_card_shown": "Was gezeigt wird",
@@ -410,8 +370,6 @@ STRINGS = {
         "ds_not_exported": "«{id}» is not in the export yet: the preview cannot show it. Click «Import data».",
         "ds_stale": "«{id}» has changed since the last export: the preview shows what was exported. Click «Import data».",
         "ds_note_prints_nothing": "This command prints nothing: it reads values into a variable, for a section that sets them its own way. No preview.",
-        "ds_note_whole_document": "This command reads the whole document — what every section declared — which a preview on its own does not hold. The preview is the PDF.",
-        "ds_note_document_variable": "This variable is declared in a document: a preview on its own does not know it. The preview is the PDF.",
         "ds_note_loop": "A loop over every object: it is seen in the PDF.",
         "ds_card_figure": "Figure",
         "ds_card_shown": "What is shown",

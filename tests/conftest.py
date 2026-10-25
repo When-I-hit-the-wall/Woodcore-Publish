@@ -99,6 +99,12 @@ def cleanup():
 
 atexit.register(cleanup)
 atexit.register(lambda: SETTINGS.unlink(missing_ok=True))
+# The engineer's library of materials, redirected with the settings (calc/usersettings.materials_dir, issue #110): beside the settings file, one per process, removed at exit -- a test that saves a material never reaches `%APPDATA%\Woodcore\materials\`.
+MATERIALS = SETTINGS.with_name(SETTINGS.stem + "-materials")
+atexit.register(lambda: _wipe(MATERIALS))
+# «Mes modèles» of the permanent loads, redirected the same way (calc/usersettings.dead_load_templates_dir, issue #111)
+DEAD_LOAD_TEMPLATES = SETTINGS.with_name(SETTINGS.stem + "-dead-load-templates")
+atexit.register(lambda: _wipe(DEAD_LOAD_TEMPLATES))
 
 
 # The project every test works on (v0.81): a copy of tests/projet-exemple/, made once per process, with the engine synced into it as an export does. The example is a real project anonymised -- the sources drawn in its window, its export and its report, no workbook, blank pages in place of the architect's (the engineer's decision, 19.09.2026) -- so a clone of the code tests itself without any project of its own.

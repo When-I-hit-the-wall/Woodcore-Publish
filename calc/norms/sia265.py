@@ -95,6 +95,9 @@ LATERAL_BUCKLING = "sia265-2021-4.2.9-kippen"
 TAB47 = "sia265-2021-tab47-druckfestigkeit-e005-vollholz"
 TAB48 = "sia265-2021-tab48-druckfestigkeit-e005-brettschichtholz"
 FIRE = "sia265-2021-4.5-brandfall"
+# the design values set for a class the tables do not list (3.3.2.2 solid timber, 3.4.2.2 glulam): what a member of the engineer's own reads (issue #110)
+OTHER_SOLID = "sia265-2021-3.3.2.2-andere-festigkeitsklassen"
+OTHER_GLULAM = "sia265-2021-3.4.2.2-andere-festigkeitsklassen"
 
 # The files the member checks of chapter 4.2 read (lib/timber.typ reads the same ones by relative path), and 4.5's for a check in the fire situation (issue #46).
 MEMBER_FILES = (K_H, SHEAR_OFF, SHEAR_TRANSVERSE, BUCKLING, LATERAL_BUCKLING, TAB47, TAB48, FIRE)
@@ -119,6 +122,8 @@ FILES = {
     YIELD_MOMENT: "clause",
     K_ALPHA: "clause",
     SLIP: "slip",
+    OTHER_SOLID: "clause",
+    OTHER_GLULAM: "clause",
     TAB01: "table_1",
     TAB03: "table_3",
     TAB04: "table_4",
@@ -379,6 +384,18 @@ def _check_scalar(name, entry, _data):
     _positive(name, "the clause", "value", entry["value"])
     if not entry["norm_ref"]:
         _fail(name, "the clause has no norm_ref -- a scalar taken from prose names the clause it came from")
+
+
+def _check_set_values(name, entry, _data):
+    """3.3.2.2 / 3.4.2.2: per family, the two design values the norm sets rather than deduces -- f_v,d and f_t,90,d, above 0."""
+    if not entry.get("norm_ref"):
+        _fail(name, "the clause has no norm_ref")
+    families = entry.get("families")
+    if not isinstance(families, dict) or not families:
+        _fail(name, "the clause has no families")
+    for family, values in families.items():
+        for key in SET_DESIGN_VALUES:
+            _positive(name, "families.%s" % family, key, values.get(key))
 
 
 def _check_k_alpha(name, entry, data):
@@ -774,6 +791,8 @@ _CHECKS = {
     YIELD_MOMENT: _check_yield_moment,
     K_ALPHA: _check_k_alpha,
     SLIP: _check_slip,
+    OTHER_SOLID: _check_set_values,
+    OTHER_GLULAM: _check_set_values,
     TAB01: _check_gamma_m,
     TAB03: _check_classes,
     TAB04: _check_eta_w,
@@ -908,6 +927,28 @@ def eta_t(impact=False):
 def eta_t_block():
     """The eta_t block entire, for the label and the clause the report cites beside the factor."""
     return _read(ETA_T)["eta_t"]
+
+
+# The design values 3.3.2.2 and 3.4.2.2 set for a class neither table lists; every other strength of such a class is deduced (2.2.2).
+SET_DESIGN_VALUES = ("f_v_d", "f_t_90_d")
+# A member's family (calc/domains/materials_contract.FAMILIES) -> its clause and its ratio γ_M/η_M of Tabelle 1.
+FAMILY_CLAUSE = {"softwood": OTHER_SOLID, "hardwood": OTHER_SOLID, "glulam": OTHER_GLULAM}
+FAMILY_GAMMA = {"softwood": "solid", "hardwood": "solid", "glulam": "glulam"}
+
+
+def set_design_value(family, key):
+    """(value, clause, page) of a design value 3.3.2.2 or 3.4.2.2 sets for `family` ("softwood", "hardwood", "glulam") -- `key` "f_v_d" or "f_t_90_d" --, or None for a key the norm deduces."""
+    if key not in SET_DESIGN_VALUES:
+        return None
+    if family not in FAMILY_CLAUSE:
+        raise validation.ValidationError("calc/norms/sia265-*: no family %r -- %s" % (family, ", ".join(FAMILY_CLAUSE)))
+    clause = _read(FAMILY_CLAUSE[family])["clause"]
+    return clause["families"][family][key], clause["norm_ref"], clause["page"]
+
+
+def family_gamma_m(family):
+    """γ_M/η_M of Tabelle 1 for a member's family."""
+    return gamma_m(FAMILY_GAMMA[family])
 
 
 def gamma_m(kind):

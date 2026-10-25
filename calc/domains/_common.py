@@ -9,10 +9,20 @@ from pathlib import Path
 import validation
 from number_text import exact as plain  # the one trimming of a number (calc/number_text.py, UI-003): six decimals, the load formulas' constants
 
+# The key of the result of a member check and of a steel check -- the utilisation η, the last `#eq` of every check's file (member_check, steel_check) -- written once here and read by the «Variables» tab, which marks it a result in each source that recalls the check (spec 2026-10-24-onglet-variables-groupes, REQ-004, ARCH-012): a check declares no `results` in checks.json or steel.json. tests/test_variable_calc.py holds it to the last `#eq` of every check file of the example.
+RESULT_KEY = "eta"
+
 
 def fail(where, message):
     """The refusal of a source or an export: `<where>: <message>`, `where` the file and the field (CLAUDE.md: a defect stops the export, naming both)."""
     raise validation.ValidationError(f"{where}: {message}")
+
+
+def fail_first(problems, fail):
+    """`fail(field, sentence)` on the first of a domain's `problems` [(field, code, params, sentence)], nothing where there is none: what a load's `check_fields` does with its `_problems` -- the snow's and the wind's (spec 2026-10-23-onglet-vent-briques, REQ-009), one rule written once."""
+    for field, _code, _params, sentence in problems:
+        fail(field, sentence)
+        return
 
 
 def is_number(value):
@@ -35,40 +45,3 @@ def source_paths(source_dir):
     if not source_dir.is_dir():
         return []
     return sorted(source_dir.glob("*.json"), key=lambda p: p.name.lower())
-
-
-def require_one_of(cells, value, allowed, sheet, ref, what):
-    """`value`, a cell of a workbook's sheet, where it is one of `allowed` -- refused naming the cell and the values it may take otherwise (snow.py and wind.py had a copy each until v0.120)."""
-    if value not in allowed:
-        allowed_text = ", ".join(repr(a) for a in allowed)
-        raise validation.ValidationError(f"{cells.address(sheet, ref)}: {what} is {value!r} -- expected one of: {allowed_text}")
-    return value
-
-
-# How far a value Excel computed may stand from Woodcore's before the export says so (spec 2026-10-21-restes-issue-69, D-07): relative, past the fifteen digits Excel keeps and well under the three a report prints
-SHEET_TOLERANCE = 1e-6
-
-
-def sheet_differences(cells, sheet, compared, vars_, notes):
-    """A sheet of the workbook computes what Woodcore computes from its inputs (snow.py, wind.py): where a value the sheet shows -- `compared`, [(var name, cell)] -- stands apart from Woodcore's (`vars_`), the export says so, naming the cell and the two values (D-07). Woodcore's is the one printed. An empty cell, a cell Excel shows as an error and a var the calculation does not have are no difference."""
-    import engine
-    if notes is None:
-        return
-    for name, ref in compared:
-        var = vars_.get(name)
-        if var is None or not is_number(var.get("value")):
-            continue
-        try:
-            shown = cells.value(sheet, ref, required=False)
-        except validation.ValidationError:
-            continue
-        if not is_number(shown):
-            continue
-        mine = var["value"]
-        if math.isclose(shown, mine, rel_tol=SHEET_TOLERANCE, abs_tol=1e-9):
-            continue
-        cell = cells.address(sheet, ref)
-        notes.append(engine.Note(
-            "sheet_value_differs",
-            f"{cell}: the sheet gives {name} = {shown:.6g}, Woodcore computes {mine:.6g} from the sheet's inputs -- the report prints Woodcore's",
-            cell=cell, name=name, excel=f"{shown:.6g}", woodcore=f"{mine:.6g}"))

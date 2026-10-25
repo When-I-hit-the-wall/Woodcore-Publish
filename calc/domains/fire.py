@@ -933,7 +933,7 @@ def write(data, files, data_dir):
 
 
 def export(source_dir, plans_dir, project_root, data_dir, values=None):
-    """The fire-protection plans' part of the export, on its own: what Woodcore's window runs when a plan is saved, so the report sees it without the load workbooks being read again. export_all.py runs the same two steps, handing over the position plans it has just built. `values` are the export's, which a text's variables print (issue #43). Returns the warnings."""
+    """The fire-protection plans' part of the export, on its own: what Woodcore's window runs when a plan is saved, so the report sees it without the whole export being run again. export_all.py runs the same two steps, handing over the position plans it has just built. `values` are the export's, which a text's variables print (issue #43). Returns the warnings."""
     data, files, notes = prepare(source_dir, plans_dir, project_root, data_dir, values=values)
     write(data, files, data_dir)
     return notes

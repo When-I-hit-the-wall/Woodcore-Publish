@@ -11,35 +11,35 @@
       }
     },
     "display": {
-      "label": {"fr": "Afficher un calcul de l'export", "de": "Eine Berechnung des Exports anzeigen", "en": "Showing an exported calculation"},
+      "label": {"fr": "Imprimer un dessin ou un objet", "de": "Eine Zeichnung oder ein Objekt drucken", "en": "Printing a drawing or an object"},
       "lead": {
-        "fr": "Imprimer ce que l'export a calculé : charges, positions, moyens d'assemblage, plans, modèles statiques et schémas.",
-        "de": "Drucken, was der Export berechnet hat: Lasten, Positionen, Verbindungsmittel, Pläne, statische Systeme und Schemas.",
-        "en": "Print what the export calculated: loads, positions, fasteners, plans, static models and schemas."
+        "fr": "Imprimer ce que le projet dessine et décrit : plans, modèles statiques, schémas, extraits de norme, cartouches, annexes et positions.",
+        "de": "Drucken, was das Projekt zeichnet und beschreibt: Pläne, statische Systeme, Schemas, Normauszüge, Planköpfe, Anhänge und Positionen.",
+        "en": "Print what the project draws and describes: plans, static models, schemas, norm excerpts, title blocks, annexes and positions."
       }
     },
     "data": {
-      "label": {"fr": "Lire les données", "de": "Die Daten lesen", "en": "Reading the data"},
+      "label": {"fr": "Lire les données du projet", "de": "Projektdaten lesen", "en": "Reading the project's data"},
       "lead": {
-        "fr": "Lire les données exportées, pour calculer avec elles ou les parcourir en boucle.",
-        "de": "Die exportierten Daten lesen, um mit ihnen zu rechnen oder sie in einer Schleife zu durchlaufen.",
-        "en": "Read the exported data, to calculate with it or to loop over it."
-      }
-    },
-    "format": {
-      "label": {"fr": "Mettre en forme", "de": "Formatieren", "en": "Formatting"},
-      "lead": {
-        "fr": "Les briques de l'affichage : nombres, unités, symboles et formules.",
-        "de": "Die Bausteine der Darstellung: Zahlen, Einheiten, Symbole und Formeln.",
-        "en": "The building blocks of the display: numbers, units, symbols and formulas."
+        "fr": "Lire les données exportées du projet, pour calculer avec elles, les inclure ou les parcourir en boucle.",
+        "de": "Die exportierten Projektdaten lesen, um mit ihnen zu rechnen, sie einzubinden oder in einer Schleife zu durchlaufen.",
+        "en": "Read the project's exported data, to calculate with it, include it or loop over it."
       }
     },
     "document": {
-      "label": {"fr": "Le rapport et sa langue", "de": "Der Bericht und seine Sprache", "en": "The report and its language"},
+      "label": {"fr": "Le document et ses citations", "de": "Das Dokument und seine Zitate", "en": "The document and its citations"},
       "lead": {
-        "fr": "La langue du rapport, ses mots, et les réglages du document.",
-        "de": "Die Sprache des Berichts, seine Wörter und die Einstellungen des Dokuments.",
-        "en": "The report's language, its words, and the document's settings."
+        "fr": "Le document lui-même : sa langue et ses mots, ses citations et sa bibliographie, ses réglages et son niveau.",
+        "de": "Das Dokument selbst: seine Sprache und seine Wörter, seine Zitate und seine Bibliographie, seine Einstellungen und seine Stufe.",
+        "en": "The document itself: its language and words, its citations and bibliography, its settings and its level."
+      }
+    },
+    "format": {
+      "label": {"fr": "Écrire un modèle", "de": "Vorlagen schreiben", "en": "Writing templates"},
+      "lead": {
+        "fr": "Les briques d'un modèle à soi : nombres, valeurs, symboles, formules et phrases mis en forme comme Woodcore les imprime.",
+        "de": "Die Bausteine einer eigenen Vorlage: Zahlen, Werte, Symbole, Formeln und Sätze, so formatiert, wie Woodcore sie druckt.",
+        "en": "The building blocks of a template of your own: numbers, values, symbols, formulas and sentences, formatted as Woodcore prints them."
       }
     },
     "internal": {
@@ -65,6 +65,40 @@
       "fr": "{n} passage(s) de cette commande ne sont pas encore traduits et restent en anglais.",
       "de": "{n} Abschnitt(e) dieses Befehls sind noch nicht übersetzt und bleiben englisch.",
       "en": "{n} passage(s) of this command are not translated yet."
-    }
+    },
+    "search": {"fr": "Chercher une commande…", "de": "Befehl suchen…", "en": "Search a command…"},
+    "essentials": {"fr": "L'essentiel", "de": "Das Wichtigste", "en": "The essentials"},
+    "examples": {"fr": "Exemples", "de": "Beispiele", "en": "Examples"},
+    "col_argument": {"fr": "Argument", "de": "Argument", "en": "Argument"},
+    "col_status": {"fr": "Statut", "de": "Status", "en": "Status"},
+    "col_does": {"fr": "Ce qu'il fait, et des exemples", "de": "Was es tut, und Beispiele", "en": "What it does, and examples"},
+    "required": {"fr": "obligatoire", "de": "erforderlich", "en": "required"},
+    "optional": {"fr": "optionnel", "de": "optional", "en": "optional"},
+    "default": {"fr": "par défaut", "de": "Standard", "en": "default"},
+    "group_pos": {"fr": "Les arguments de la ligne", "de": "Die Argumente der Zeile", "en": "The line's arguments"},
+    "group_show": {"fr": "Ce qui est imprimé", "de": "Was gedruckt wird", "en": "What is printed"},
+    "group_text": {"fr": "Libellé et description", "de": "Bezeichnung und Beschreibung", "en": "Label and description"},
+    "group_cite": {"fr": "Citation", "de": "Zitat", "en": "Citation"},
+    "group_other": {"fr": "Autres", "de": "Weitere", "en": "Other"},
+    "group_named": {"fr": "Écrits par leur nom", "de": "Mit Namen geschrieben", "en": "Written by name"},
+    "line_hint": {"fr": "Survolez un argument : ce qu'il fait. Survolez sa valeur : toutes les valeurs possibles. Un clic garde la bulle ouverte.", "de": "Über ein Argument fahren: was es tut. Über seinen Wert: alle möglichen Werte. Ein Klick hält die Blase offen.", "en": "Hover an argument: what it does. Hover its value: every possible value. A click keeps the bubble open."},
+    "values_hover": {"fr": "Survolez une valeur : son appel et ce qu'il imprime.", "de": "Über einen Wert fahren: sein Aufruf und was er druckt.", "en": "Hover a value: its call and what it prints."},
+    "prints": {"fr": "Ce qu'il imprime", "de": "Was gedruckt wird", "en": "What it prints"},
+    "same_as": {"fr": "Imprime la même chose que {n}.", "de": "Druckt dasselbe wie {n}.", "en": "Prints the same as {n}."},
+    "blank": {"fr": "Rien n'est imprimé.", "de": "Nichts wird gedruckt.", "en": "Nothing is printed."},
+    "role_note": {"fr": "Le rôle ne change pas la ligne : il dit à #var-table où la ranger.", "de": "Die Rolle ändert die Zeile nicht: sie sagt #var-table, wo sie hingehört.", "en": "The role does not change the line: it tells #var-table where to file it."},
+    "free_text": {"fr": "Un texte libre, par exemple :", "de": "Ein freier Text, zum Beispiel:", "en": "Free text, for example:"},
+    "frozen": {"fr": "Compilé une fois par le moteur de Woodcore, sur les données figées des exemples.", "de": "Einmal von der Engine von Woodcore kompiliert, mit den eingefrorenen Daten der Beispiele.", "en": "Compiled once by Woodcore's engine, on the examples' frozen data."},
+    "render_missing": {"fr": "Aucun rendu enregistré pour cette valeur — lancer calc/tools/build_examples.py.", "de": "Für diesen Wert ist keine Darstellung abgelegt — calc/tools/build_examples.py ausführen.", "en": "No committed print for this value — run calc/tools/build_examples.py."},
+    "render_stale": {"fr": "L'appel a changé depuis son rendu enregistré — relancer calc/tools/build_examples.py.", "de": "Der Aufruf hat sich seit der abgelegten Darstellung geändert — calc/tools/build_examples.py erneut ausführen.", "en": "The call has changed since its committed print — run calc/tools/build_examples.py again."},
+    "same123": {"fr": "Les trois niveaux impriment la même page.", "de": "Die drei Stufen drucken dieselbe Seite.", "en": "The three levels print the same page."},
+    "same12": {"fr": "Les niveaux 1 et 2 impriment la même page.", "de": "Die Stufen 1 und 2 drucken dieselbe Seite.", "en": "Levels 1 and 2 print the same page."},
+    "same23": {"fr": "Les niveaux 2 et 3 impriment la même page.", "de": "Die Stufen 2 und 3 drucken dieselbe Seite.", "en": "Levels 2 and 3 print the same page."},
+    "lines_to_copy": {"fr": "Lignes à copier", "de": "Zeilen zum Kopieren", "en": "Lines to copy"},
+    "copy_minimal": {"fr": "Appel minimal", "de": "Minimaler Aufruf", "en": "Minimal call"},
+    "copy_complete": {"fr": "Appel complet", "de": "Vollständiger Aufruf", "en": "Complete call"},
+    "in_project": {"fr": "Dans ce projet", "de": "In diesem Projekt", "en": "In this project"},
+    "in_project_none": {"fr": "Aucun appel dans ce projet.", "de": "Kein Aufruf in diesem Projekt.", "en": "No call in this project."},
+    "in_project_more": {"fr": "… et {n} de plus", "de": "… und {n} weitere", "en": "… and {n} more"}
   }
 }

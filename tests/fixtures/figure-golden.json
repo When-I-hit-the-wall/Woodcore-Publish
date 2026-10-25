@@ -1,5 +1,5 @@
 {
- "<dead-load DA-01>": "1fb3479bf32de5e8f1b6c31fec0780152d2c150a67745856293c5e6ddf483a5f",
+ "<dead-load DA-01>": "2787765a336ff2fac52eb82eb6dbb656b0d1071141c4d622d54dc437d02e8c73",
  "<snow SN-01 curved>": "384a758735d18f7e89e83b1584088a8e5d2a0c8cd3214a891aa84a7e3449ff9e",
  "<snow SN-01 default>": "807ccc2999d5964012c7161be53823c38062991bcabbf8d483a9e4a88df1da62",
  "<snow SN-01 duo>": "807ccc2999d5964012c7161be53823c38062991bcabbf8d483a9e4a88df1da62",
@@ -16,6 +16,10 @@
  "Details/Exports/Figures/VU-Skizze-de.svg": "f8526d47fe5d7918f838bd98c3ccd7f9c9baf0a619d414fcd28ebab21be0e3a3",
  "Details/Exports/Figures/VU-Skizze-en.svg": "f8526d47fe5d7918f838bd98c3ccd7f9c9baf0a619d414fcd28ebab21be0e3a3",
  "Details/Exports/Figures/VU-Skizze-fr.svg": "f8526d47fe5d7918f838bd98c3ccd7f9c9baf0a619d414fcd28ebab21be0e3a3",
+ "Permanent-loads/Exports/Figures/dead-load-EL+AL-DachRand.svg": "d3d990621e63dc73541f8dec14195b180c9a8d988d7f7b0860e94f320945f330",
+ "Permanent-loads/Exports/Figures/dead-load-EL+AL-Dach_mit_Wasser.svg": "e0c20c0ad896ba43a5b0ac6848390641f7ec9a44e7f15cd6b1ac5445ff1a9292",
+ "Permanent-loads/Exports/Figures/dead-load-EL+AL-Dach_ohne_Wasser.svg": "e0c20c0ad896ba43a5b0ac6848390641f7ec9a44e7f15cd6b1ac5445ff1a9292",
+ "Permanent-loads/Exports/Figures/dead-load-EL+AL-Wand.svg": "0df7961b26e10d9ce6dd037a857c212d6e48767cb8e6d84a470752c359db6aa4",
  "Plans/Fire-plan/Exports/Figures/Pavillon-EG-de.svg": "994b0d4c00eab2b73af29db50134fc06f7885184dc4a8ffbc313d23a0ca92567",
  "Plans/Fire-plan/Exports/Figures/Pavillon-EG-en.svg": "09022df9a3f99445929b0a0736a739f57d8382f99da8f00aecdbb48148b0c7ec",
  "Plans/Fire-plan/Exports/Figures/Pavillon-EG-fr.svg": "805fe2384742fb228a2f955e4988f8e3ea0d5440467920b8542ec29b5bf9c54b",
@@ -31,5 +35,6 @@
  "Statics/Exports/Figures/Bankli-Fall1-fr.svg": "f33b22518b849de876e4c7cf1e2ed3830433cd2febdd1da6ed8d2b0bbbb32f48",
  "Statics/Exports/Figures/Bankli-Fall2-de.svg": "5b869e9922b2fdf3f7df5d0e3d19de0df019601a8ad1489136d0536c5afc01fa",
  "Statics/Exports/Figures/Bankli-Fall2-en.svg": "5b869e9922b2fdf3f7df5d0e3d19de0df019601a8ad1489136d0536c5afc01fa",
- "Statics/Exports/Figures/Bankli-Fall2-fr.svg": "5b869e9922b2fdf3f7df5d0e3d19de0df019601a8ad1489136d0536c5afc01fa"
+ "Statics/Exports/Figures/Bankli-Fall2-fr.svg": "5b869e9922b2fdf3f7df5d0e3d19de0df019601a8ad1489136d0536c5afc01fa",
+ "Variable-loads/Snow/Exports/Figures/SL-fig3.svg": "d53e8216e1a8bd0c985d9e0a4f6bacf5610786ad3f9b8573d4a4224cd8997bac"
 }

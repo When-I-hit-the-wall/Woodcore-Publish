@@ -1,0 +1,256 @@
+{
+  "_source": "SIA 265/1:2018, Construction en bois -- Spécifications complémentaires; the French edition, the one shipped in norm-library/.",
+  "_note": "The excerpts the «Matériaux» tab shows as the source of a panel (issue #110, UI-008): Tableaux 6 and 9, and each of Tableaux 11 to 23 with its b beside its a -- the page, its box read off the text positions, the title of a word for word, held to the PDF by tests/test_norm_excerpts.py. One edition only: every language is shown the French one (excerpts.py, ARCH-009).",
+  "edition": "SIA 265/1:2018",
+  "editions": {
+    "fr": {
+      "file": "SIA265-1-2018-FR.pdf",
+      "chapter": [
+        26,
+        47
+      ]
+    }
+  },
+  "excerpts": {
+    "tab11": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 11a et 11b",
+          "page": 31,
+          "box": [
+            50,
+            66,
+            548,
+            751
+          ],
+          "text": "Tableau 11a Propriétés caractéristiques du contreplaqué de la classe de résistance à la flexion F25/10"
+        }
+      }
+    },
+    "tab12": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 12a et 12b",
+          "page": 32,
+          "box": [
+            50,
+            66,
+            548,
+            793
+          ],
+          "text": "Tableau 12a Propriétés caractéristiques du contreplaqué des classes de résistance à la flexion"
+        }
+      }
+    },
+    "tab13": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 13a et 13b",
+          "page": 34,
+          "box": [
+            50,
+            66,
+            548,
+            709
+          ],
+          "text": "Tableau 13a Propriétés caractéristiques des panneaux de particules liées à la résine synthétique"
+        }
+      }
+    },
+    "tab14": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 14a et 14b",
+          "page": 35,
+          "box": [
+            50,
+            66,
+            548,
+            709
+          ],
+          "text": "Tableau 14a Propriétés caractéristiques des panneaux de particules liées à la résine synthétique"
+        }
+      }
+    },
+    "tab15": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 15a et 15b",
+          "page": 36,
+          "box": [
+            50,
+            66,
+            548,
+            709
+          ],
+          "text": "Tableau 15a Propriétés caractéristiques des panneaux de particules liées à la résine synthétique"
+        }
+      }
+    },
+    "tab16": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 16a et 16b",
+          "page": 37,
+          "box": [
+            50,
+            66,
+            548,
+            709
+          ],
+          "text": "Tableau 16a Propriétés caractéristiques des panneaux de particules liées à la résine synthétique"
+        }
+      }
+    },
+    "tab17": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 17a et 17b",
+          "page": 39,
+          "box": [
+            50,
+            66,
+            548,
+            663
+          ],
+          "text": "Tableau 17a Propriétés caractéristiques des panneaux de particules liées au ciment"
+        }
+      }
+    },
+    "tab18": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 18a et 18b",
+          "page": 41,
+          "box": [
+            50,
+            66,
+            548,
+            739
+          ],
+          "text": "Tableau 18a Propriétés caractéristiques des panneaux OSB de la classe technique OSB/2"
+        }
+      }
+    },
+    "tab19": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 19a et 19b",
+          "page": 42,
+          "box": [
+            50,
+            66,
+            548,
+            739
+          ],
+          "text": "Tableau 19a Propriétés caractéristiques des panneaux OSB de la classe technique OSB/3"
+        }
+      }
+    },
+    "tab20": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 20a et 20b",
+          "page": 43,
+          "box": [
+            50,
+            66,
+            548,
+            739
+          ],
+          "text": "Tableau 20a Propriétés caractéristiques des panneaux OSB de la classe technique OSB/4"
+        }
+      }
+    },
+    "tab21": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 21a et 21b",
+          "page": 45,
+          "box": [
+            50,
+            66,
+            548,
+            728
+          ],
+          "text": "Tableau 21a Propriétés caractéristiques des panneaux de fibres durs et mi-durs des classes techniques"
+        }
+      }
+    },
+    "tab22": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 22a et 22b",
+          "page": 46,
+          "box": [
+            50,
+            66,
+            548,
+            720
+          ],
+          "text": "Tableau 22a Propriétés caractéristiques des panneaux de fibres de moyenne densité"
+        }
+      }
+    },
+    "tab23": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableaux 23a et 23b",
+          "page": 47,
+          "box": [
+            50,
+            66,
+            548,
+            720
+          ],
+          "text": "Tableau 23a Propriétés caractéristiques des panneaux de fibres de moyenne densité"
+        }
+      }
+    },
+    "tab06": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableau 6",
+          "page": 26,
+          "box": [
+            50,
+            66,
+            548,
+            383
+          ],
+          "text": "Tableau 6 Facteurs de résistance γ_M permettant de déterminer la valeur de calcul de la résistance f_d, resp. la valeur de calcul de la résistance ultime R_d des dérivés du bois"
+        }
+      }
+    },
+    "tab09": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableau 9",
+          "page": 28,
+          "box": [
+            50,
+            66,
+            548,
+            623
+          ],
+          "text": "Tableau 9 Facteur η_mod tenant compte de l'influence de la durée de chargement et de la classe d'humidité"
+        }
+      }
+    }
+  }
+}

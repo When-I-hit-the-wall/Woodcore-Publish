@@ -154,54 +154,6 @@ def test_plain_spans_names_the_lines_a_command_may_stand_on():
     assert [lines[starts.index(o)] for o in plain] == ["Text", "$ a +", "```", "#f(", "End"], [lines[starts.index(o)] for o in plain]
 
 
-def _layout_case():
-    F = fd.Command("var", key="F", value=5, unit="kN")
-    G = fd.Command("var", key="G", value=2, unit="kN", options={"label": "Gewicht"})
-    M = fd.Command("eq", key="M", formula="F * 2")
-    V = fd.Command("verify", formula="M <= F")
-    return F, G, M, V
-
-
-def test_the_pane_joins_a_command_printed_inline_into_its_sentence_and_reads_back():
-    """REQ-002, REQ-003, ARCH-004 (issue #40): a text line, a command printed inline and the next line are one paragraph of the pane -- one sentence for Typst --, a blank line beside it the paragraph break, a heading, a command on a line of its own (`note: "line"`, `verify`) and a text's own lines a paragraph each; the pane's paragraphs give back the same items."""
-    from domains import formula_layout as fl
-    F, G, M, V = _layout_case()
-    items = [fd.Command(fd.TEXT, raw="= Titre\nKraft"), F, fd.Command(fd.TEXT, raw="und danach"), M,
-             fd.Command(fd.TEXT, raw="\nNeuer Absatz"), G, fd.Command(fd.TEXT, raw="Satz $a +\nb$ Ende"), V, fd.Command(fd.TEXT, raw="Schluss")]
-    paragraphs = fl.to_paragraphs(items)
-    shape = [[v if k == "text" else "#" + v.key for k, v in p] for p in paragraphs]
-    assert shape == [["= Titre"], ["Kraft ", "#F", " und danach ", "#M"], ["Neuer Absatz ", "#G"], ["Satz $a +"], ["b$ Ende"], ["#", " Schluss"]], shape
-    back = fl.from_paragraphs(paragraphs)
-    assert [(c.kind, c.raw) for c in back] == [(c.kind, c.raw) for c in fd.tidy_items(items)], [(c.kind, c.raw) for c in back]
-    assert fl.to_paragraphs(back) == paragraphs
-    # Enter beside a pill is a new paragraph: the blank line that keeps the two apart for Typst (D-05)
-    split = [[("text", "Kraft")], [("cmd", F), ("text", " und")]]
-    written = fl.from_paragraphs(split)
-    assert [(c.kind, c.raw) for c in written] == [("text", "Kraft\n"), ("var", ""), ("text", "und")], [(c.kind, c.raw) for c in written]
-    assert fl.to_paragraphs(written) == [[("text", "Kraft")], [("cmd", F), ("text", " und")]]
-    # two pills side by side are one sentence, a space between them; the v0.117 example reads into paragraphs and back unchanged
-    assert fl.to_paragraphs([F, M]) == [[("cmd", F), ("text", " "), ("cmd", M)]]
-    example = fd.read(conftest.ROOT / "tests" / "projet-exemple" / "Domains" / "poutre-p1.typ")
-    # the body below its header: a domain made anew writes `#domain` (spec 2026-10-21-commandes-typst-refonte, REQ-008), the example's file keeps the `#var-domain` it was written with
-    rebuilt = fd.body_of(fd.Domain(id=example.id, name=example.name, commands=fl.from_paragraphs(fl.to_paragraphs(example.commands))))
-    assert rebuilt.split("\n", 1)[1] == fd.body_of(example).split("\n", 1)[1]
-
-
-def test_a_pill_is_refused_where_it_would_change_the_text_or_its_reading():
-    """REQ-004, D-06 (issue #40): no drop inside a heading, an equation, a raw block or a call (a string being one's); any other place of a sentence is one -- quotes in markup are words."""
-    from domains import formula_layout as fl
-    F, _G, _M, _V = _layout_case()
-    paragraphs = [[("text", "= Titre")], [("text", "Kraft $a + b$ und `raw` ")], [("text", "Mit #f(1, 2) Ende")], [("text", "Ein \"string\" hier")]]
-    assert fl.drop_refusal(paragraphs, (0, 0, 3))[0] == "apart"
-    assert fl.drop_refusal(paragraphs, (1, 0, 5)) is None
-    assert fl.drop_refusal(paragraphs, (1, 0, 9))[0] == "inside"
-    assert fl.drop_refusal(paragraphs, (1, 0, 14)) is None
-    assert fl.drop_refusal(paragraphs, (1, 0, 21))[0] == "inside"
-    assert fl.drop_refusal(paragraphs, (2, 0, 8))[0] == "inside"
-    assert fl.drop_refusal(paragraphs, (2, 0, 13)) is None
-    assert fl.drop_refusal(paragraphs, (3, 0, 7)) is None, "quotes in markup are words, not a string"
-
-
 def test_a_file_written_by_hand_is_kept_as_written_and_one_that_cannot_be_read_is_never_rewritten():
     """ARCH-003, ARCH-006, D-17 (spec 2026-10-15, reversing issue #15's canonical rewrite): a domain written by hand -- a call's spaces, a comment after it, an argument over two lines, CRLF, a word before the call, the tag of the old files -- is read as it is and written back byte for byte; changing a command changes the arguments that changed and nothing else -- an option changed, added or taken away in a call over two lines included. A file whose call cannot be read is never rewritten."""
     d = conftest.tmpdir("formula_hand")
@@ -448,22 +400,6 @@ def test_a_command_written_inside_a_line_is_read_computed_and_written_back_on_it
     assert '  #var("ak", 3, "kN/m", label: "Auflast")\n --- Auflast\n' in fd.write_text(read)
 
 
-def test_the_pane_keeps_a_command_written_inside_a_line_in_its_paragraph():
-    """UI-001, D-02: the pane shows a glued command in the paragraph of the text beside it -- a list's item included, which `_joins` alone would part -- and its paragraphs give back the same items; a glued command moved to the start of a paragraph is glued to nothing before it."""
-    from domains import formula_layout as fl
-    items = fd.split_items(_INLINE_BODY[_INLINE_BODY.index("[") + 1:-1])
-    paragraphs = fl.to_paragraphs(items)
-    shape = [[v if k == "text" else "#" + v.key for k, v in p] for p in paragraphs]
-    assert shape == [["#b"], ["#ak", "  --- Auflast"], [], ["- $0°$ bis $30°$:  ", "#g_1"], ["    - Unter:  ", "#c", "  $=>$ au besoin"],
-                     ["Zwei:  ", "#x1", "   ", "#x2", "  Ende"]], shape
-    back = fl.from_paragraphs(paragraphs)
-    assert [fd.item_key(c) for c in back] == [fd.item_key(c) for c in items]
-    c = next(i for i in items if i.key == "c")
-    moved = fl.from_paragraphs(paragraphs[:4] + [[("text", "    - Unter:")], [("cmd", c), ("text", "  $=>$ au besoin")]] + paragraphs[5:])
-    assert not c.glued_before and c.glued_after
-    assert "    - Unter:\n  #var(\"c\", \"c_(pe)\", -1) $=>$ au besoin\n" in fd.body_of(fd.Domain(id="x", name="Inline", commands=moved))
-
-
 def test_a_project_whose_domains_hold_commands_inside_lines_exports():
     """REQ-002: the export (formula_domain.prepare) reads such a domain -- the `export_failed` of one of the engineer's projects, 14.10.2026 --, and that project's domains folder, where `WOODCORE_INLINE_DOMAINS` names it on this machine, reads its every domain on a copy (CON-002). The folder is named by the environment, never written here: the repository names none of the engineer's projects (tests/test_no_third_party_name.py)."""
     here = conftest.project_copy("formula_inline_export", data=True)
@@ -637,10 +573,10 @@ def _levels_domain():
 
 
 def test_the_domain_modules_import_without_qt():
-    """ARCH-001: the domain, the algebra and the Greek names are Qt-free -- what the export and a test without a window import."""
+    """ARCH-001: the domain, the algebra and the Greek names are Qt-free -- what the export and a test without a window import --, and since issue #113 every module beside the domain the «Domaines» tab reads (ARCH-001, ARCH-011, ARCH-017)."""
     import sys
     code = ("import sys; sys.modules['PySide6'] = None; sys.path[:0] = [r'%s', r'%s']\n"
-            "from domains import formula_domain, formula_layout; import units, greek; print('ok')") % (ROOT_CALC, ROOT_CALC / "tools")
+            "from domains import formula_domain, formula_rows, formula_infer, formula_state, formula_args, formula_defaults, formula_links, formula_errors, formula_order, formula_undo; import units, greek; print('ok')") % (ROOT_CALC, ROOT_CALC / "tools")
     r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, encoding="utf-8", errors="replace")
     assert r.returncode == 0 and r.stdout.strip() == "ok", r.stderr
 

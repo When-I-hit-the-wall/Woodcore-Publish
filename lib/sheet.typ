@@ -115,7 +115,8 @@
   (shown: known + stack(spacing: 3mm, ..parts), dw: p.crop.w * size.s / 1mm, n: size.n)
 }
 
-/// **A schematic section as an image**, for a `#place` of an export sheet (spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015): the section plan drawn in Woodcore, its storey lines and their bubbles, the storey the sheet shows highlighted in a translucent red with a dashed outline, its title above it -- what `#sheet-section` placed.
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015.
+/// **A schematic section as an image**, for a `#place` of an export sheet: the section plan drawn in Woodcore, its storey lines and their bubbles, the storey the sheet shows highlighted in a translucent red with a dashed outline, its title above it -- what `#sheet-section` placed.
 ///
 /// ```typ
 /// #show: sheet.with(format: "A6", landscape: true)
@@ -194,7 +195,8 @@
   lines
 }
 
-/// **The legend of a sheet as an image**, for a `#place` of an export sheet (spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015): the symbols of the plans the sheet shows, each once, their quantities added where two plans draw one -- or the fire-protection plans' lines -- under its title, in a frame: what `#sheet-legend` and `#sheet-fire-legend` placed.
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015.
+/// **The legend of a sheet as an image**, for a `#place` of an export sheet: the symbols of the plans the sheet shows, each once, their quantities added where two plans draw one -- or the fire-protection plans' lines -- under its title, in a frame: what `#sheet-legend` and `#sheet-fire-legend` placed.
 ///
 /// ```typ
 /// #show: sheet.with(format: "A6", landscape: true)
@@ -253,7 +255,8 @@
   if value.trim() == "" { [] } else { value.split(regex("\r?\n")).map(l => [#l.trim()]).join(linebreak()) }
 }
 
-/// **The title block of a sheet as an image**, for a `#place` of an export sheet (spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015): STE Compact 02's cartouche -- the logo, the object and the element, the client and the architect, the phase, the project's and the plan's numbers, the latest revision, who drew it, the date, the scales of the sheet's plans and its size --, each field the project's own where it is auto: what `#sheet-titleblock` placed. Woodcore places it in the sheet's bottom right corner, `#place(bottom + right, dx: -10mm, dy: -10mm, …)`.
+// References of the block below (moved out of it, issue #115): spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015.
+/// **The title block of a sheet as an image**, for a `#place` of an export sheet: STE Compact 02's cartouche -- the logo, the object and the element, the client and the architect, the phase, the project's and the plan's numbers, the latest revision, who drew it, the date, the scales of the sheet's plans and its size --, each field the project's own where it is auto: what `#sheet-titleblock` placed. Woodcore places it in the sheet's bottom right corner, `#place(bottom + right, dx: -10mm, dy: -10mm, …)`.
 ///
 /// ```typ
 /// #show: sheet.with(format: "A4", landscape: true)

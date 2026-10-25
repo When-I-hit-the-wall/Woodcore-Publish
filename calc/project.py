@@ -25,7 +25,7 @@ import proc
 import validation
 
 # The program's version: what a project's engine copy and its export record, and what lets a program refuse a project a newer one wrote.
-VERSION = "0.124.0"
+VERSION = "0.125.0"
 
 EXTENSION = ".woodcore"
 FORMAT = "woodcore-project"
@@ -150,9 +150,9 @@ FIGURES_FOLDER = "Figures"
 # The documents the report draws on from outside -- the annexes' PDFs -- and the excerpts the export cuts from them, in its Exports/ (D-11, D-19).
 APPENDIX_FOLDER = "Appendix"
 # Each kind of figure the export draws, by the tab or the domain whose Exports/Figures/ holds it in a project laid out by folders (D-10, D-17), and the sub-folder of data/ it lay in until 0.119 -- where a project laid out before still has it written, and the name an old record is still read by (lib/calc-engine.typ `figure-path`).
-FIGURE_KINDS = {"plan": "plans", "fire": "fire", "statics": "statics", "details": "schemas", "connection": "connections", "connector": "connectors", "dead-load": "calculations", "snow-load": "calculations", "annex": "annexes"}
-# The loads whose cases are drawn by the export (registry.write_files): a permanent load's build-up, a snow load's column of SIA 261 Figur 3 (spec 2026-10-22-onglet-neige-type, D-32). In a project laid out before both lie in data/calculations/, written at once.
-LOAD_FIGURE_KINDS = ("dead-load", "snow-load")
+FIGURE_KINDS = {"plan": "plans", "fire": "fire", "statics": "statics", "details": "schemas", "connection": "connections", "connector": "connectors", "dead-load": "calculations", "snow-load": "calculations", "wind-load": "calculations", "annex": "annexes"}
+# The loads whose cases are drawn by the export (registry.write_files): a permanent load's build-up, a snow load's column of SIA 261 Figur 3 (spec 2026-10-22-onglet-neige-type, D-32), a wind load's figure of its table of Annexe C, cut out of the norm (spec 2026-10-23-onglet-vent-briques, REQ-017, D-28). In a project laid out before they lie in data/calculations/, written at once.
+LOAD_FIGURE_KINDS = ("dead-load", "snow-load", "wind-load")
 
 
 def tab_folder(kind):
@@ -836,22 +836,21 @@ def source_revision():
     return out.stdout.strip() if out.returncode == 0 else ""
 
 
-def record(project, workbooks=(), revision=None):
-    """data/project.json: the project as its file describes it, and what produced this export -- Woodcore's version and revision, Typst's version, and the SHA-256 of every workbook read. The report's title page and the PDF's metadata print from it (lib/calc-engine.typ, project-info), and the archive keeps it; no date, so an export repeated on the same inputs writes the same bytes.
+# 1.1 (issue #109): 1.0 without `workbooks`. A data/project.json at 1.0 is written again by the next export, or at once by the «Projet» tab (export_all.refresh_project_info)
+RECORD_SCHEMA_VERSION = "1.1"
+
+
+def record(project, revision=None):
+    """data/project.json (1.1): the project as its file describes it, and what produced this export -- Woodcore's version and revision, Typst's version (the SHA-256 of every workbook read until issue #109, `workbooks` in 1.0: no workbook is read any more, the positions being Woodcore's own since v0.114 and the loads since #109). The report's title page and the PDF's metadata print from it (lib/calc-engine.typ, project-info), and the archive keeps it; no date, so an export repeated on the same inputs writes the same bytes.
 
     `revision` is the report's own latest revision, the newest entry of its journal (calc/journal.py, `latest`), which the PDF's keywords name -- `{index, date, label, initials}` or None where the journal is empty. It is passed IN rather than read here, so that this module knows nothing of the journal and `seed()` writes a record without one; and the date in it is the engineer's typed day, not a clock reading, so an unchanged journal still writes the same bytes.
     """
-    books = {}
-    for path in sorted({Path(p) for p in (project.positions_book, *workbooks)}, key=lambda p: p.name.lower()):
-        if path.is_file():
-            books[path.name] = _sha(path.read_bytes())
     info = {
-        "schema_version": "1.0",
+        "schema_version": RECORD_SCHEMA_VERSION,
         "name": project.name,
         **{key: project.detail(key) for key in DETAILS},
         "woodcore": {"version": VERSION, "revision": source_revision()},
         "typst": typst_version(),
-        "workbooks": books,
     }
     if revision is not None:
         info["revision"] = {key: revision[key] for key in ("index", "date", "label", "initials")}

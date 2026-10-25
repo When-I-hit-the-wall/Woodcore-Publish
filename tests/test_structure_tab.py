@@ -104,7 +104,8 @@ def _open(name, mode="cu", lang="fr", read_only=False, here=None):
     here = here or _copy(name)
     app = FakeApp(lang, mode, read_only)
     with project.using(here):
-        tab = structure_tab.StructureTab(app)
+        holder = structure_tab.StructureTab(app)
+        tab = _view(holder)     # the widget the tab's one service wraps (issue #107): what every check reads and drives
         for name in ASKS:       # a modal off-screen never comes back: a check that expects a question answers it first
             setattr(tab, name, _unexpected(name))
         try:
@@ -112,7 +113,21 @@ def _open(name, mode="cu", lang="fr", read_only=False, here=None):
         finally:
             tab.stop_watching()
             tab.pane.stop()
-            tab.deleteLater()
+            holder.deleteLater()
+
+
+def _view(tab):
+    """The structure's widget of a «Structure du document» tab: its one service's (structure_tab.DocumentStructure, issue #107)."""
+    return tab.service("structure").view
+
+
+def _host(view):
+    """The tab a structure's widget stands in -- what the window calls (`confirm_leave`, `view_state`)."""
+    import structure_tab
+    widget = view
+    while widget is not None and not isinstance(widget, structure_tab.StructureTab):
+        widget = widget.parentWidget()
+    return widget
 
 
 @contextlib.contextmanager
@@ -256,7 +271,7 @@ def test_the_tab_is_the_only_document_tab_and_first_after_projet_in_the_navigati
         assert strings["tab_structure"] and strings["nav_document_group"] and strings["nav_document_group"] != strings["nav_document"], lang
         assert "tab_sections" not in strings
     # every writer of the tab is among those the window guards while a project is held read-only
-    defined = {k: v for c in reversed(woodcore_gui.own_classes(structure_tab.StructureTab)) for k, v in vars(c).items()}  # the class and its mixins (issue #30)
+    defined = {k: v for c in reversed(woodcore_gui.own_classes(structure_tab.StructureView)) for k, v in vars(c).items()}  # the class and its mixins (issue #30)
     own = [n for n in woodcore_gui.WRITERS if n in defined]
     for expected in ("write_enabled", "write_title", "write_add_section", "write_add_group", "write_remove", "write_rename", "write_move",
                      "write_object", "write_node_state", "write_heading_line", "write_add_object", "write_remove_object", "write_tag",
@@ -277,19 +292,19 @@ def test_the_window_shows_the_tab_second_for_each_document_and_writes_what_a_pan
             window.lang = "fr"
             window.mode = "rs"
             window.rebuild()
-            tab = next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab))
+            tab = _view(next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab)))
             select = window.nav.mode_select
             for mode in project.MODES:
                 select.setCurrentIndex(select.findData(mode))
                 keys = [woodcore_gui.TABS[index][0] for index in window.nav.order()]
                 assert keys[:2] == ["tab_project", "tab_structure"] and "tab_sections" not in keys, (mode, keys)
                 assert window.tab_widget.currentIndex() == window.project_index(), "another document did not bring «Projet» forward"
-                tab = next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab))
+                tab = _view(next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab)))
                 assert tab.mode() == mode
                 assert tab.tree.ids() == [n.id for n in structure.flatten(structure.tree(here, mode))] and tab.tree.ids(), mode
                 assert window.t("st_heading", document=tab.document_name()) == tab.title.text()
             select.setCurrentIndex(select.findData("cu"))
-            tab = next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab))
+            tab = _view(next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab)))
             window.tab_widget.setCurrentWidget(tab)
             node = next(n for n in structure.flatten(tab.nodes) if n.kind == "object" and n.object_type == "text" and n.parent == "purpose")
             _choose(tab, node.id)
@@ -298,21 +313,40 @@ def test_the_window_shows_the_tab_second_for_each_document_and_writes_what_a_pan
             assert "Un texte tapé" not in _text(_section_path(here, "cu", "purpose")), "a paragraph is written after a moment, not at each key"
             select.setCurrentIndex(select.findData("bp"))      # another document shown: what the pane held is written first (MODE_BOUND)
             assert "Un texte tapé, pas encore écrit." in _text(_section_path(here, "cu", "purpose"))
-            tab = next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab))
+            tab = _view(next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab)))
             assert tab.mode() == "bp" and tab.tree.ids() == [n.id for n in structure.flatten(structure.tree(here, "bp"))]
         finally:
             conftest.dispose(window)
 def test_it_has_nothing_unsaved_to_mark_and_compiles_nothing_before_it_is_shown():
     """It writes at once, so it has no `dirty` -- the dot of unsaved changes is for the editors -- and the window, which builds every tab when it opens, does not pay a compile for one the engineer has not looked at."""
     with _open("structure_tab_idle") as (tab, app, here):
-        assert not hasattr(tab, "dirty")
-        assert tab.confirm_leave() is True
+        assert not hasattr(tab, "dirty") and not _host(tab).dirty
+        assert _host(tab).confirm_leave() is True
         _pump(0.3)
         assert not tab.pane_loaded and not tab.pane.showing and not tab.pane.is_pending() and tab.pane.process is None
         assert tab.tree.ids(), "the tree is read when the tab is built: it is cheap, and the compile is what waits"
         assert tab.watcher is None, "nothing is watched before the tab is shown: a watch holds a directory on Windows"
         assert tab.request_preview() is None and not tab.pane.is_pending(), "no page is asked for before the tab has been given its document"
 
+
+
+def test_the_tab_reads_its_tree_once_as_it_is_built():
+    """ARCH-RISK-012 of the spec 2026-10-24-type-document (issue #107): the widget no longer reads its state at the end of its own construction -- the frame gives it back --, so the tree is read once, not twice."""
+    _qt()
+    import structure
+    import structure_tab
+    import woodcore_gui  # noqa: F401
+    here = _copy("structure_tab_read_once")
+    calls = []
+    original = structure.tree
+    with project.using(here), _patched(structure, tree=lambda *a, **k: calls.append(1) or original(*a, **k)):
+        holder = structure_tab.StructureTab(FakeApp())
+        try:
+            assert len(calls) == 1, f"the tree was read {len(calls)} times as the tab was built"
+            assert _view(holder).tree.ids()
+        finally:
+            _view(holder).pane.stop()
+            holder.deleteLater()
 
 # --- the tree ---------------------------------------------------------------------------------------
 
@@ -1249,10 +1283,10 @@ def test_the_import_dialog_offers_the_other_documents_and_what_is_ticked_is_what
 
         with _open("structure_tab_import_ask", mode="bp") as (tab, app, here2):
             with _patched(tab_dialog, exec=accept):
-                source, items, linked = structure_tab.StructureTab.ask_import(tab)
+                source, items, linked = structure_tab.StructureView.ask_import(tab)
             assert source == "cu" and [(i.kind, i.id) for i in items] == [("section", "purpose")] and linked is True
             with _patched(tab_dialog, exec=lambda self: QDialog.DialogCode.Rejected):
-                assert structure_tab.StructureTab.ask_import(tab) is None
+                assert structure_tab.StructureView.ask_import(tab) is None
         assert structure_tab.import_dialog is import_dialog
 
 
@@ -1517,9 +1551,9 @@ def test_the_template_dialog_asks_the_name_the_description_and_the_place_and_the
     with _own_templates("structure_tab_template_ask") as base:
         with _open("structure_tab_template_ask_project") as (tab, app, here):
             with _patched(import_dialog.TemplateDialog, exec=accept):
-                assert structure_tab.StructureTab.ask_template(tab) == ("Convention courte", "Description", "user")
+                assert structure_tab.StructureView.ask_template(tab) == ("Convention courte", "Description", "user")
             with _patched(import_dialog.TemplateDialog, exec=lambda self: QDialog.DialogCode.Rejected):
-                assert structure_tab.StructureTab.ask_template(tab) is None
+                assert structure_tab.StructureView.ask_template(tab) is None
             tab.ask_template = lambda: None
             tab.on_save_template()      # cancelled: nothing is written
             assert not (base / "user").exists()
@@ -1605,8 +1639,8 @@ def test_the_files_are_watched_only_while_the_tab_is_shown_and_a_save_in_an_edit
         tab.pane_loaded = True          # shown: the page is not what this check is about
         tab.pane.set_document(here, "cu")
         assert tab.watcher is None
-        tab.resize(900, 600)
-        tab.show()
+        _host(tab).resize(900, 600)
+        _host(tab).show()
         _pump(0.2)
         try:
             assert tab.watcher is not None
@@ -1619,7 +1653,7 @@ def test_the_files_are_watched_only_while_the_tab_is_shown_and_a_save_in_an_edit
             path.write_bytes(text.encode("utf-8"))
             _wait(lambda: "intended-use/from-the-editor" in tab.tree.ids(), timeout=15, what="the tree to read the file the editor saved")
         finally:
-            tab.hide()
+            _host(tab).hide()
         _pump(0.1)
         assert not (tab.watcher.files() + tab.watcher.directories()), "a hidden tab holds a directory on Windows"
         assert not tab.external_timer.isActive()
@@ -1630,25 +1664,27 @@ def test_the_tree_and_the_selection_survive_a_rebuilt_window_and_what_a_pane_hel
         tab.tree.expand_to(3)
         _choose(tab, "purpose/p2")
         tab.host.pane().edit.setPlainText("Tapé juste avant la reconstruction.")
-        state = tab.view_state()
+        state = _host(tab).view_state()
+        kept = state["services"]["structure"]   # the widget's own, kept by its service (issue #107)
         assert "Tapé juste avant la reconstruction." in _text(_section_path(here, "cu", "purpose")), "a pane held what the rebuilt window would lose"
-        assert state["tree"]["selection"] == ["purpose/p2"] and "purpose" in state["tree"]["expanded"] and state["pending"] is False
+        assert kept["tree"]["selection"] == ["purpose/p2"] and "purpose" in kept["tree"]["expanded"] and kept["pending"] is False
         assert tab.watcher is None or not (tab.watcher.files() + tab.watcher.directories())
     with project.using(here):
         import structure_tab
         app3 = FakeApp()
         app3.views["tab_structure"] = state
-        restored = structure_tab.StructureTab(app3)
+        restored_tab = structure_tab.StructureTab(app3)   # held: a tab nothing holds is deleted, its widget with it
+        restored = _view(restored_tab)
         try:
             assert restored.tree.selected_ids() == ["purpose/p2"] and restored.tree.row("purpose").isExpanded()
             assert restored.host.kind == "text" and restored.host.pane().edit.toPlainText() == "Tapé juste avant la reconstruction."
             assert restored.resume is False
             restored.pane.stop()
-            restored.view_state()
+            restored_tab.view_state()
             restored.resume = False
         finally:
             restored.stop_watching()
-            restored.deleteLater()
+            restored_tab.deleteLater()
 
 
 # --- a project held read-only -----------------------------------------------------------------------------------
@@ -1857,10 +1893,10 @@ def test_a_conflict_asks_which_version_to_keep_and_honours_the_choice_and_a_canc
             return QDialog.DialogCode.Accepted
 
         with _patched(import_dialog.ChoiceDialog, exec=accept):
-            assert structure_tab.StructureTab.ask_choice(tab, key, found) == "theirs"
+            assert structure_tab.StructureView.ask_choice(tab, key, found) == "theirs"
         assert seen["options"] == ["mine", "theirs", "rs"] and "Convention d'utilisation" in seen["texts"][1] and "Rapport" in seen["texts"][2]
         with _patched(import_dialog.ChoiceDialog, exec=lambda self: QDialog.DialogCode.Rejected):
-            assert structure_tab.StructureTab.ask_choice(tab, key, found) is None
+            assert structure_tab.StructureView.ask_choice(tab, key, found) is None
         assert structure_tab.import_dialog is import_dialog
 
 
@@ -2047,16 +2083,16 @@ def test_the_window_tells_its_tabs_when_the_layout_template_was_switched_and_the
             window.tab_widget.setCurrentWidget(next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab)))
             window.edit_properties()
             assert window.tab_widget.currentIndex() == window.project_index(), "«Propriétés du projet» did not open the «Projet» tab"
-            tab = next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab))
+            tab = _view(next(t for t in window.tabs if isinstance(t, structure_tab.StructureTab)))
             projet = next(t for t in window.tabs if isinstance(t, project_tab.ProjectTab))
             told = []
             with _patched(tab, on_properties_changed=lambda changed: told.append(changed)), \
                     _patched(QMessageBox, question=staticmethod(lambda *a, **k: QMessageBox.StandardButton.Yes)):
-                projet.fields["author"].setText("L. Exempel")
-                projet.mark_dirty()
+                projet.service("details").fields["author"].setText("L. Exempel")
+                projet.service("details").mark_dirty()
                 assert projet.save() and project.current().detail("author") == "L. Exempel"
                 assert told == [], told
-                assert projet.write_apply_form("builtin:compact")
+                assert projet.service("actions").write_apply_form("builtin:compact")
                 assert told == [True] and forms.current(here).ref == "builtin:compact", told
         finally:
             conftest.dispose(window)
@@ -2174,8 +2210,8 @@ def test_a_row_chosen_keeps_its_own_colour_orange_red_or_grey_and_the_selection_
     with _open("structure_tab_selected_ink", mode="bp") as (tab, app, here):
         _edit_object(_section_path(here, "cu", "service-life"), "p1", "Un nouveau texte de la durée d'utilisation.")
         tab.refresh_sync()
-        tab.resize(1400, 900)
-        tab.show()          # the tree is laid out only inside a tab that is shown
+        _host(tab).resize(1400, 900)
+        _host(tab).show()          # the tree is laid out only inside a tab that is shown
         tab.tree.expandAll()
         _pump(0.1)
         orange, ink, ground = QColor(theme.colour("override")), QColor(theme.colour("ink")), QColor(theme.colour("accent-soft"))
@@ -2211,8 +2247,8 @@ def test_a_conflict_row_chosen_stays_red():
         _edit_object(_section_path(here, "cu", "service-life"), "p1", "Texte de la convention.")
         _edit_object(_section_path(here, "bp", "service-life"), "p1", "Texte de la base de projet.")
         tab.refresh_sync()
-        tab.resize(1400, 900)
-        tab.show()          # the tree is laid out only inside a tab that is shown
+        _host(tab).resize(1400, 900)
+        _host(tab).show()          # the tree is laid out only inside a tab that is shown
         tab.tree.expandAll()
         _pump(0.1)
         red = QColor(theme.colour("danger"))
@@ -2336,17 +2372,18 @@ def test_the_sections_pane_shares_the_file_with_another_document_and_stops_shari
         assert tab.tree.row("introduction").icon(structure_tree.LINK).isNull()
         # ... and a rebuilt window (a language switch) carries it
         import structure_tab
-        state = tab.view_state()
-        assert state["stopped"] == {"cu": ["purpose"]}
+        state = _host(tab).view_state()
+        assert state["services"]["structure"]["stopped"] == {"cu": ["purpose"]}
         app2 = FakeApp()
         app2.views["tab_structure"] = state
-        again = structure_tab.StructureTab(app2)
+        again_tab = structure_tab.StructureTab(app2)   # held: a tab nothing holds is deleted, its widget with it
+        again = _view(again_tab)
         try:
             assert again.stopped_ids() == {"purpose"} and not again.tree.row("purpose").icon(structure_tree.LINK).isNull()
         finally:
             again.pane.stop()
             again.stop_watching()
-            again.deleteLater()
+            again_tab.deleteLater()
 
 
 def test_a_refusal_to_share_is_said_in_the_banner_by_its_code_and_the_greyed_marks_belong_to_the_document_they_were_made_in():

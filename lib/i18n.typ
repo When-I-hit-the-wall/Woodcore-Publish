@@ -2,8 +2,8 @@
 //
 // One glossary, `calc/i18n/strings.json`, read here and by `calc/i18n/strings.py` -- so a word both
 // sides say, such as the note under a connection's figure that Python sizes and Typst fills in, is
-// written once. What is *not* in it is the engineer's own data: Excel descriptions and text values,
-// sheet names, positions, material names, the prose of Sections/*.typ. That is the whole rule
+// written once. What is *not* in it is the engineer's own data: descriptions and text values,
+// case names, positions, material names, the prose of Sections/*.typ. That is the whole rule
 // `tl` applies -- a string is translated if the glossary carries it, and passes through if not.
 //
 // Two ways in, because Typst's state can only be read inside `context`:
@@ -178,8 +178,8 @@
 }
 
 /// A string the data carries, in the language given: a term of the glossary, else the template it was
-/// composed from, else itself. Unchanged is the safe and the usual answer -- a material's name, an
-/// Excel description, a sheet's name and a value the engineer typed are not the engine's words.
+/// composed from, else itself. Unchanged is the safe and the usual answer -- a material's name, a
+/// description, a case's name and a value the engineer typed are not the engine's words.
 ///
 /// ```typ
 /// #tl-of("fr", "Bezugshöhe")

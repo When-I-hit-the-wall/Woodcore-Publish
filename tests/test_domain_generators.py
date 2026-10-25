@@ -190,9 +190,9 @@ def test_a_snow_load_made_in_its_tab_is_written_out_over_its_stub_and_kept_at_th
     assert files["snow-load"]["neige"] == "/Variable-loads/Snow/neige.typ", files
     _archived, notes = domain_file.sync(here)
     assert not notes and written.read_text(encoding="utf-8") == text, notes
-    # the report's loads section includes every case written out, `include domain-file("snow-load", sheet)` (lot 18): the new report prints it as it is
+    # the report's loads section includes every case written out, `include domain-file("snow-load", case)` (lot 18): the new report prints it as it is
     loads = (here.document_dir("rs") / "Sections" / "004-einwirkungen.typ").read_text(encoding="utf-8")
-    assert 'include domain-file("snow-load", sheet)' in loads, loads
+    assert 'include domain-file("snow-load", case)' in loads, loads
     run = subprocess.run([project.typst_executable(), *documents.compile_args(here, "rs")], capture_output=True, text=True, encoding="utf-8", errors="replace")
     assert run.returncode == 0, run.stderr[-2000:]
 

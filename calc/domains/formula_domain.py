@@ -63,6 +63,11 @@ DIGITS = 3   # the decimals the tab prints with -- the report's own default (cal
 STATES = ("canonical", "misnamed", "unreadable")
 
 
+# Every code a DomainError is raised with -- here and in the modules beside this one (formula_infer, formula_args, formula_defaults) --, each a word of the window (calc/tools/formula_tab_words.py REFUSALS, issue #113 REQ-005)
+CODES = ("archive_missing", "changed_on_disk", "defaults_option", "defaults_value", "formula", "id_invalid", "id_taken", "key_invalid", "key_taken", "missing",
+         "name_empty", "name_line", "rename_failed", "text_command", "text_tag", "text_unbalanced", "unreadable", "value")
+
+
 class DomainError(validation.ValidationError, ValueError):
     """A domain the tab cannot save as asked -- a name taken, a key used twice -- said in a sentence and a code the window translates (`code`, `args`). A ValidationError (v0.120, C7), so an export it stops says so as a defect of the input; still a ValueError for the callers that catch one."""
 
@@ -203,11 +208,19 @@ def _unit_after(text, i):
     return None
 
 
+_SUBSCRIPT = re.compile(r"_\(([^()]*)\)")
+
+
+def _tight(text):
+    """A subscript's commas without the spaces after them (issue #113, REQ-002): `sigma_(m, d)` is typed for `sigma_(m,d)`."""
+    return _SUBSCRIPT.sub(lambda m: "_(" + re.sub(r"\s*,\s*", ",", m.group(1)) + ")", text)
+
+
 def _names(variables):
     """Every spelling a variable may be typed by -- its symbol, its key -- with the key it stands for, longest first."""
     out = {}
     for key, symbol in variables:
-        for spelling in (symbol, key):
+        for spelling in (_tight(symbol or ""), key):
             if spelling and spelling not in out:
                 out[spelling] = key
     return sorted(out.items(), key=lambda item: -len(item[0]))
@@ -216,6 +229,7 @@ def _names(variables):
 def typst_formula(text, variables):
     """A formula as the engineer types it -- the symbols the tab shows, numbers, a unit after a number, `12 N / 3000 mm` -- as `#eq` and `#verify` read it: each symbol written as its key, each number with a unit in parentheses and its unit in quotes (`(12 "N") / (3000 "mm")`), a decimal comma as a point, `×` as `*`. `variables` is [(key, symbol)] of what the domain declares above."""
     names = _names(variables)
+    text = _tight(text)
     out, i = [], 0
     while i < len(text):
         c = text[i]
@@ -336,6 +350,9 @@ def from_call(call):
         command = Command("verify", formula=_raw_text(pos[0]))
     else:
         raise typst_objects.ParseError(f"#{kind} is no command of a domain -- {', '.join(COMMANDS)}")
+    # «Article» is `norm-section:` (issue #113, REQ-008): a file of before written with `norm-ref:` is read into it, and written so at the next write of the line -- never the two at once
+    if "norm-ref" in named and "norm-section" not in named:
+        named = {("norm-section" if name == "norm-ref" else name): value for name, value in named.items()}
     command.options = named
     return command
 
@@ -382,23 +399,28 @@ def body_of(domain):
     **Only what changed is written in Woodcore's form** (spec 2026-10-15, ARCH-006, D-17, reversing the canonical rewrite of issue #15): a domain whose items and header are what the file held is its body as read, byte for byte; otherwise every command the tab did not change is written as it was written -- its arguments over several lines, a comment after it --, every text as typed, and the header as written unless it changed."""
     if domain.body_read and _signature(domain.commands) == domain.read_items and header_of(domain) == domain.header_call:
         return domain.body_read
+    return "".join(("" if glued else "\n") + text for _index, text, glued in body_pieces(domain))[1:]
+
+
+def body_pieces(domain):
+    """The body as `body_of` writes it, piece by piece: (index of the item or None for the header and the closing `]`, its text, whether it is written on the line before it) -- what `formula_rows.item_lines` counts the lines of the file with (issue #113, ARCH-011), never guessed."""
     header = domain.header_written if domain.header_written and header_of(domain) == domain.header_call else header_of(domain)
-    lines = [header]
+    out = [(None, header, False)]
     prev = None
-    for c in domain.commands:
+    for index, c in enumerate(domain.commands):
         if prev is not None and same_line(prev, c):
-            lines[-1] += c.raw if c.is_text else to_call(c)
+            out.append((index, c.raw if c.is_text else to_call(c), True))
         elif c.is_text:
-            lines.append(c.raw)
+            out.append((index, c.raw, False))
         elif c.written and to_call(c) == c.read_call:
-            lines.append(c.written)
+            out.append((index, c.written, False))
         elif c.written:
-            lines.append(patched(c.written, c.read_call, to_call(c)))
+            out.append((index, patched(c.written, c.read_call, to_call(c)), False))
         else:
-            lines.append("  " + to_call(c))
+            out.append((index, "  " + to_call(c), False))
         prev = c
-    lines.append("]")
-    return "\n".join(lines)
+    out.append((None, "]", False))
+    return out
 
 
 def same_line(prev, item):
@@ -591,7 +613,7 @@ def _top_level_lines(markup):
 
 
 def plain_spans(markup):
-    """The offsets of the lines of `markup` that begin in its own markup -- not inside a raw block, a comment, a string, an equation or a call -- read with typst_paths' lexer (ARCH-RISK-108), as a sorted list: where a command may stand on a line of its own without changing what the text around it means. The public face of `_top_level_lines` (issue #40, ARCH-004), which formula_layout reads to refuse a drop."""
+    """The offsets of the lines of `markup` that begin in its own markup -- not inside a raw block, a comment, a string, an equation or a call -- read with typst_paths' lexer (ARCH-RISK-108), as a sorted list: where a command may stand on a line of its own without changing what the text around it means. The public face of `_top_level_lines` (issue #40, ARCH-004), which the pills' layout read to refuse a drop until issue #113 took the pills away."""
     top, _hashes = _top_level_lines(typst_objects._normalise(markup))
     return sorted(top)
 
@@ -752,6 +774,12 @@ def read(path):
     path = Path(path)
     with open(path, encoding="utf-8", newline="") as file:
         text = file.read()   # the text as it is, its line endings with it: a write keeps them
+    return parse_text(text, path)
+
+
+def parse_text(text, path):
+    """`read` on a text rather than a file (issue #113, ARCH-016): what the «Code» mode reads its buffer with before anything is written -- the domain of `path` as `text` would make it."""
+    path = Path(path)
     domain = Domain(id=path.stem, name="", path=path, text=text)
     span, why = _body_span(text)
     if span is None:
@@ -877,12 +905,14 @@ def free_id(here, base, taken=()):
     return fid
 
 
-def new_domain(here, name, domains=None):
-    """A domain not yet written, its id made from its name and free in the folder -- made again from the name at its first write, until the engineer types an id of his own (REQ-004)."""
+def new_domain(here, name, domains=None, defaults=True):
+    """A domain not yet written, its id made from its name and free in the folder -- made again from the name at its first write, until the engineer types an id of his own (REQ-004). With `defaults`, it opens on `#calc-defaults(presets: "block", scope: "domain")` (issue #113, REQ-004, D-3: printed one line a value); a domain already written keeps what it has."""
     domains = list_domains(here) if domains is None else domains
     check_name(name)
     fid = free_id(here, slug(name), {d.id for d in domains})
-    return Domain(id=fid, name=name, path=here.formulas_dir / f"{fid}.typ")
+    from domains import formula_defaults
+    commands = [Command(TEXT, raw=formula_defaults.NEW_LINE)] if defaults else []
+    return Domain(id=fid, name=name, path=here.formulas_dir / f"{fid}.typ", commands=commands)
 
 
 def check_name(name):
@@ -1102,6 +1132,14 @@ class Result:
     op: str = ""
     error: str = ""
     warning: dict = None
+    # issue #113 (ARCH-012): the refusal's code and values (units.CODES), the keys the line reads (`uses`, what the linked hovers light), the index of the line whose fault this one only inherits (`blocked_by`: said once, REQ-006 -- `error` stays, so every reader still sees a line that gives nothing), and for a variable linked from elsewhere its symbol, label and origin (REQ-010)
+    code: str = ""
+    values: dict = field(default_factory=dict)
+    uses: tuple = ()
+    blocked_by: object = None
+    symbol: str = ""
+    label: str = ""
+    origin: object = None
 
 
 def _symbol_of(key, symbols):
@@ -1131,19 +1169,29 @@ def _numbers(formula, values, digits=DIGITS):
     return re.sub(r"\s+", " ", src).strip()
 
 
-def compute(domain, resolve=None, digits=DIGITS):
-    """What every command of `domain` gives, in order: [Result]. A command the report would refuse is a Result with its `error` -- the reason the compile would stop on -- and the commands after it go on, a name it would have defined being then unknown to them. `resolve(command)` gives a variable taken from elsewhere its (value, unit), or None where it cannot be found (REQ-015)."""
+def compute(domain, resolve=None, digits=DIGITS, describe=None):
+    """What every command of `domain` gives, in order: [Result]. A command the report would refuse is a Result with its `error` -- the reason the compile would stop on -- and the commands after it go on, a name it would have defined being then unknown to them: such a line, whose only unknown names are keys a line above failed to define, is `blocked_by` that line (issue #113, REQ-006: a fault said once). `resolve(command)` gives a variable taken from elsewhere its (value, unit), or None where it cannot be found (REQ-015); `describe(command)`, where given, its {symbol, label, origin} (formula_links.linked_info, REQ-010)."""
     values, symbols, out = {}, {}, []
-    for c in domain.commands:
+    broken = {}   # key -> the index of the line at the root of its failure
+    for index, c in enumerate(domain.commands):
         r = Result()
         if c.is_text:      # printed, never computed: an empty result keeps every list aligned with the items (ARCH-RISK-108)
             out.append(r)
             continue
+        if c.kind == "var":
+            r.uses = (c.key,) if c.source and c.source[0] == "again" else ()
+        else:
+            src = units.star_as_dot(c.formula)
+            known = units.operands_of(src, values)
+            r.uses = tuple(known) + tuple(n for n in units.unknown_names(src, known) if n in broken)
+        if c.kind == "var" and c.source and c.source[0] == "domain" and describe is not None:
+            info = describe(c) or {}
+            r.symbol, r.label, r.origin = info.get("symbol", ""), info.get("label", ""), info.get("origin")
         try:
             if c.kind == "var" and c.source and c.source[0] == "again":
                 # a variable printed again (REQ-002): the value it holds, shown in `unit:` for this line alone -- the registry keeps its own (Q-011)
                 if c.key not in values:
-                    raise units.FormulaError(f"var: no variable named {c.key!r} here -- declared here: {', '.join(values) or 'none'}")
+                    raise units.FormulaError(f"var: no variable named {c.key!r} here -- declared here: {', '.join(values) or 'none'}", "again", key=c.key, declared=tuple(values))
                 value, unit = values[c.key]
                 shown_unit = c.options.get("unit")
                 if isinstance(shown_unit, str) and shown_unit:
@@ -1151,7 +1199,7 @@ def compute(domain, resolve=None, digits=DIGITS):
                     new = units.written_unit(shown_unit)
                     parsed = units.parse_unit(new)
                     if parsed is None or q is None or not units.dims_equal(q.dims, parsed[1]):
-                        raise units.FormulaError(f"var: {c.key!r} is in {unit}, which cannot be shown in {shown_unit}")
+                        raise units.FormulaError(f"var: {c.key!r} is in {unit}, which cannot be shown in {shown_unit}", "shown_unit", key=c.key, unit=unit, wanted=shown_unit)
                     value, unit = q.base / parsed[0], new
                 r.value, r.unit = value, unit
             elif c.kind == "var":
@@ -1161,15 +1209,15 @@ def compute(domain, resolve=None, digits=DIGITS):
                 elif c.source:
                     got = resolve(c) if resolve else None
                     if got is None:
-                        raise units.FormulaError(f"var: {c.key!r} is taken from {describe_source(c)}, which gives no value here")
+                        raise units.FormulaError(f"var: {c.key!r} is taken from {describe_source(c)}, which gives no value here", "no_value", key=c.key, source=describe_source(c))
                     value, unit = got
                     unit = c.unit or unit
                 else:
                     value, unit = c.value, units.written_unit(c.unit or "")
                 if isinstance(value, (int, float)) and units.parse_unit(unit) is None:
-                    raise units.FormulaError(f"var: cannot read the unit {unit!r} of {c.key!r} -- write it as the report writes one, `kN`, `N/mm²`, `kNm`")
+                    raise units.FormulaError(f"var: cannot read the unit {unit!r} of {c.key!r} -- write it as the report writes one, `kN`, `N/mm²`, `kNm`", "unit_read", unit=unit, symbol=c.key)
                 values[c.key] = (value, unit)
-                symbols[c.key] = c.symbol
+                symbols[c.key] = c.symbol or r.symbol
                 r.value, r.unit = value, unit
             elif c.kind == "eq":
                 q, operands = units.evaluate("eq", c.formula, values)
@@ -1194,7 +1242,7 @@ def compute(domain, resolve=None, digits=DIGITS):
                     sides.append((q, operands, one))
                 (lq, lops, lone), (rq, rops, rone) = sides
                 if not units.dims_equal(lq.dims, rq.dims):
-                    raise units.FormulaError(f"verify: comparing {units.dims_text(lq.dims)} with {units.dims_text(rq.dims)} -- the two sides of a relation must have the same dimensions")
+                    raise units.FormulaError(f"verify: comparing {units.dims_text(lq.dims)} with {units.dims_text(rq.dims)} -- the two sides of a relation must have the same dimensions", "vdims", a=units.dims_text(lq.dims), b=units.dims_text(rq.dims))
                 r.holds = units.holds(op, lq.base, rq.base)
                 r.op = op if r.holds else units.RELATION_NEGATION[op]
                 shown = []
@@ -1207,7 +1255,15 @@ def compute(domain, resolve=None, digits=DIGITS):
                 r.value = (shown[0], shown[1])
                 r.letters = _letters(left.strip(), {k: symbols.get(k, "") for k in lops}) + f" {op} " + _letters(right.strip(), {k: symbols.get(k, "") for k in rops})
         except units.FormulaError as exc:
-            r.error = str(exc)
+            r.error, r.code, r.values = str(exc), exc.code, dict(exc.values)
+            names = exc.values.get("names") or ((c.key,) if exc.code == "again" else ())
+            if exc.code in ("unknown", "again") and names and all(n in broken for n in names):
+                r.blocked_by = broken[names[0]]
+            if c.defines:
+                broken[c.key] = r.blocked_by if r.blocked_by is not None else index
+        else:
+            if c.defines:
+                broken.pop(c.key, None)   # defined again: no longer broken below
         out.append(r)
     return out
 
@@ -1218,7 +1274,7 @@ def variables_of(domain, results=None):
     out, index = [], {}
     for c, r in zip(domain.commands, results):
         if c.defines and not r.error:
-            row = (c.key, c.symbol, r.value, r.unit)
+            row = (c.key, c.symbol or r.symbol, r.value, r.unit)
             if c.key in index:
                 out[index[c.key]] = row
             else:
@@ -1277,12 +1333,12 @@ def resolve_import(here, command, domains=(), _stack=(), calculations=None):
         if other is None:
             return None
         if other.id in _stack:
-            raise units.FormulaError(f"var: {CIRCLE} -- " + " → ".join(list(_stack) + [other.id]))
+            raise units.FormulaError(f"var: {CIRCLE} -- " + " → ".join(list(_stack) + [other.id]), "circle", path=" → ".join(list(_stack) + [other.id]))
         results = compute(other, lambda c: resolve_import(here, c, domains, _stack + (other.id,), calculations))
         for c, r in reversed(list(zip(other.commands, results))):
             if c.defines == name:
                 if CIRCLE in r.error:
-                    raise units.FormulaError(r.error)   # said where it was asked for, not lost as «gives no value»
+                    raise units.FormulaError(r.error, r.code or "formula", **r.values)   # said where it was asked for, not lost as «gives no value»
                 return None if r.error else (r.value, r.unit)
     return None
 

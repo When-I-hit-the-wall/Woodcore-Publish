@@ -60,6 +60,8 @@ STRINGS = {
         "notice_severity_success": "Succès",
         "notice_schema_unreadable_title": "Schéma ignoré",
         "notice_schema_unreadable": "Le schéma {file} est laissé de côté : il ne se lit pas — {error}",
+        "notice_materials_moved_title": "Matériaux versés dans votre bibliothèque",
+        "notice_materials_moved": "{n} matériau(x) saisi(s) dans ce projet sont maintenant dans votre bibliothèque (onglet Matériaux), le projet en garde une copie : {names}",
         "notice_command_removed_title": "Commande retirée",
         "notice_command_removed": "{file}, ligne {line} : {name} n'existe plus — {hint}",
         "notice_unit_scope_title": "Portée de #unit",
@@ -106,6 +108,8 @@ STRINGS = {
         "notice_severity_success": "Erfolg",
         "notice_schema_unreadable_title": "Schema übergangen",
         "notice_schema_unreadable": "Das Schema {file} wird übergangen: Es lässt sich nicht lesen — {error}",
+        "notice_materials_moved_title": "Materialien in Ihre Bibliothek übernommen",
+        "notice_materials_moved": "{n} in diesem Projekt erfasste(s) Material(ien) sind jetzt in Ihrer Bibliothek (Register Materialien), das Projekt behält eine Kopie: {names}",
         "notice_command_removed_title": "Befehl entfernt",
         "notice_command_removed": "{file}, Zeile {line}: {name} gibt es nicht mehr — {hint}",
         "notice_unit_scope_title": "Reichweite von #unit",
@@ -152,6 +156,8 @@ STRINGS = {
         "notice_severity_success": "Success",
         "notice_schema_unreadable_title": "Schema left out",
         "notice_schema_unreadable": "The schema {file} is left out: it does not read — {error}",
+        "notice_materials_moved_title": "Materials moved into your library",
+        "notice_materials_moved": "{n} material(s) typed in this project are now in your library (Materials tab), the project keeps a copy: {names}",
         "notice_command_removed_title": "Command removed",
         "notice_command_removed": "{file}, line {line}: {name} no longer exists — {hint}",
         "notice_unit_scope_title": "Reach of #unit",
@@ -846,6 +852,14 @@ def tell_removed_commands(removals, here):
         tell(f"{rel}, line {line}: {name} no longer exists -- {hint}", notifications.WARNING, code="command_removed",
              key="notice_command_removed", args={"file": rel, "line": line, "name": name, "hint": hint}, title_key="notice_command_removed_title",
              source="commands", file=str(path), line=line)
+
+
+def tell_materials_moved(names):
+    """The materials a project typed before issue #110, poured into the engineer's library at the opening (materials_migrate, REQ-015): named, once."""
+    if names:
+        text = f"{len(names)} material(s) typed in this project are now in your library (Materials tab), the project keeps a copy: {', '.join(names)}"
+        tell(text, notifications.INFO, code="materials_moved", key="notice_materials_moved", args={"n": len(names), "names": ", ".join(names)},
+             title_key="notice_materials_moved_title", source="materials")
 
 
 def tell_unscoped_units(found, here):

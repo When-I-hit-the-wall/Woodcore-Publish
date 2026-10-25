@@ -26,7 +26,7 @@ Halle Nord/
 └── _Archiv/                     a zip and a copy of the PDF per export
 ```
 
-Also copy your office's **load workbook** into this folder, the one whose name contains `Belastungsannahmen`: Woodcore finds it by its name (step 4).
+Nothing else needs copying into this folder: wind, snow and permanent loads are entered in Woodcore's tabs and saved in `Woodcore-Datei/loads/` (step 4).
 
 > [!note]
 > A project open in a window is **locked** by a file `Halle Nord.woodcore.lock`. If a colleague opens it at the same time, Woodcore says so and offers read-only: two windows saving the same project would lose the first one's work.

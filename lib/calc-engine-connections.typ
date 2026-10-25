@@ -142,7 +142,8 @@
    forces: forces, fmax: fmax, governing: governing, top: forces.at(governing.first() - 1))
 }
 
-/// **A polar moment as an image, the forces in its fasteners drawn on it**: the figure of the connection Woodcore exported, and over it, for the N, V and M given, the arrows of each fastener -- its resultant F_i in yellow, labelled F1, F2, …, the part of M in green, N/n in blue and V/n in red, all at one scale, at their true length -- and, at the legend's foot, the parts too small to make out, with their value (`#show-polar-moment`'s drawing until the spec 2026-10-21-commandes-typst-refonte retired it; brought back by the spec 2026-10-22-image-polar-moment).
+// References of the block below (moved out of it, issue #115): `#show-polar-moment`'s drawing until the spec 2026-10-21-commandes-typst-refonte retired it; brought back by the spec 2026-10-22-image-polar-moment.
+/// **A polar moment as an image, the forces in its fasteners drawn on it**: the figure of the connection Woodcore exported, and over it, for the N, V and M given, the arrows of each fastener -- its resultant F_i in yellow, labelled F1, F2, …, the part of M in green, N/n in blue and V/n in red, all at one scale, at their true length -- and, at the legend's foot, the parts too small to make out, with their value (the drawing `#show-polar-moment` printed, brought back as an image).
 ///
 /// ```typ
 /// #figure(image-polar-moment("VU-MP-1", N: 7.5, V: 25, M: 6.6), kind: image, caption: [Kräfte in den Verbindungsmitteln]) <vu-mp-1>

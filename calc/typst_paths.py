@@ -19,6 +19,7 @@ A literal whose target exists nowhere — neither where it was nor where it is g
 
 import os
 import re
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -85,7 +86,15 @@ def write_text(path, text):
     path = Path(path)
     part = path.with_name(path.name + ".part")
     part.write_bytes(text.encode("utf-8"))
-    os.replace(part, path)
+    for attempt in range(6):
+        try:
+            os.replace(part, path)
+            return
+        except PermissionError:
+            # Windows refuses the move while another program holds the file for a moment -- OneDrive or NextCloud syncing a file just copied, an antivirus reading it: a title.typ copied and rewritten at once was refused so, in the tests' tree (test_unfold, issue #112). Tried again, as structure._replace and project_migrate._retrying do.
+            if attempt == 5:
+                raise
+            time.sleep(0.1 * (attempt + 1))
 
 
 # --- the lexer ---------------------------------------------------------------------------

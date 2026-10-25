@@ -1,8 +1,8 @@
 """Single entry point for the whole data pipeline (docs/architecture/layout.md §11-12).
 
-Reads the project's positions -- Woodcore's own positions.json since v0.114 (calc/positions_store.py), Positionen.xlsx until then -- and every Belastungsannahmen workbook in the project folder (every load, one sheet per case, docs/domain/calculation-domains.md §3.3) -- and the connections and position plans saved in Woodcore's window (connections/<id>.json, section 3.3quinquies; plans/<id>.json, section 3.3sexies), builds the calculation domains, one descriptive record per element, one per connector, one record and figure per connection and one record, symbol drawing and background per plan, validates every artifact against schemas/ before writing, and fails loudly (non-zero exit) if anything doesn't validate. Typst is only ever compiled against data that passed here.
+Reads the project's positions -- Woodcore's own positions.json since v0.114 (calc/positions_store.py), Positionen.xlsx until then -- the loads entered in Woodcore's tabs (Woodcore-Datei/loads/, one source per case, docs/domain/calculation-domains.md §3.3) -- and the connections and position plans saved in Woodcore's window (connections/<id>.json, section 3.3quinquies; plans/<id>.json, section 3.3sexies), builds the calculation domains, one descriptive record per element, one per connector, one record and figure per connection and one record, symbol drawing and background per plan, validates every artifact against schemas/ before writing, and fails loudly (non-zero exit) if anything doesn't validate. Typst is only ever compiled against data that passed here.
 
-Loads come from no position file at all: they are calculated in (or from) the Belastungsannahmen workbooks, so the positions carry what the elements are and nothing else (docs/domain/loads.md §8).
+Loads come from no position file at all: they are entered and calculated in Woodcore's tabs of loads -- no load workbook is read since issue #109 (D-33) --, so the positions carry what the elements are and nothing else (docs/domain/loads.md §8).
 """
 
 import json
@@ -33,10 +33,10 @@ from domains import formula_domain                 # the calculation domains of 
 from domains import script as script_domain        # the `script` domain: one instance per script of the project
 from i18n import strings
 import registry
-from registry import build_calculations, open_workbooks
+from registry import build_calculations
 from build_reference import build_reference_workbook
 
-# Every path this pipeline reads or writes is the project's, named by its .woodcore file (calc/project.py, v0.81): the workbooks in the project's folder, beside the finished report, where the engineer works; the sources Woodcore's window writes -- connectors/, connections/, plans/, statics/ and details/ (not `schemas/`, the contracts' own folder, docs/domain/detail-schemas.md §3.3decies) -- in its `sources`; and the export, data/, in its `generated`. The load workbooks are not named here: registry.py finds every one whose name says it is one. Until v0.80 all of it was derived from this file's own location, which tied one copy of the code to one project.
+# Every path this pipeline reads or writes is the project's, named by its .woodcore file (calc/project.py, v0.81): the sources Woodcore's window writes -- connectors/, connections/, plans/, statics/ and details/ (not `schemas/`, the contracts' own folder, docs/domain/detail-schemas.md §3.3decies) -- in its `sources`; and the export, data/, in its `generated`. No load workbook is read (issue #109): registry.py only names one found in the project's folder. Until v0.80 all of it was derived from this file's own location, which tied one copy of the code to one project.
 
 # The version of a position record: 1.3 (v0.94) adds `section`, the dimension read once; 1.4 (v0.114) is the record of a position Woodcore keeps itself (calc/positions_store.py), every field but the id and the type blank where the Positions tab leaves it so, and a section that does not read written `null` with a warning rather than stopping the export.
 POSITION_SCHEMA_VERSION = "1.4"
@@ -102,14 +102,6 @@ def _warn(message):
         notifications.emit(message, source="export")
         return
     print(f"export_all: WARNING {message}", file=sys.stderr)
-
-
-def _workbooks_read_before(record_file):
-    """The workbooks the project's last export read, as its data/project.json names them -- none where there is no such file or it cannot be read, which is a project never exported (a seeded one names none)."""
-    try:
-        return list(json.loads(record_file.read_text(encoding="utf-8")).get("workbooks", {}))
-    except (OSError, ValueError, AttributeError):
-        return []
 
 
 def _sweep_positions(kept):
@@ -179,23 +171,16 @@ def run(update_engine=False, dry=False):
             for note in getattr(migrated, "notes", ()):
                 _warn(note)
         rows = positions_store.read(here)
-    # No load workbook stops the export only where the last one read a workbook that is gone; a project that has never had one is exported without loads (v0.89.1, registry.open_workbooks) -- and since v0.117 without a warning: the engineer saw it on every export of a new project, and the loads are to be computed by Woodcore itself one day. One line on stdout says it, as the line naming the workbooks read does; the report says which domains of loads are empty.
-    record_file = data_dir / "project.json"
-    workbooks = open_workbooks(here.root, _workbooks_read_before(record_file), record_file)
-    if workbooks:
-        # Which files were taken as load workbooks is decided by their name, so it is said out loud: a stray copy in the project folder would otherwise add its cases to the report without anyone having asked for them.
-        print(
-            "export_all: reading loads from "
-            + ", ".join(cells.path.name for cells in workbooks)
-        )
-    else:
-        print(f"export_all: no load workbook in {here.root} -- loads: none")
+    # A load workbook in the project folder is read no more (issue #109, D-33): found by its name alone, never opened, it is said at every full export -- its cases are entered in the tabs now, and a report must not lose them without the engineer knowing (REQ-003, UI-001). A tab's save (registry.export) says nothing.
+    workbook_warning = registry.workbook_note(here.root)
+    # `woodcore-cli check` writes nothing, so a data/calculations.json of an earlier Woodcore stays as it is: said, with its remedy (REQ-007, C-1) -- a full export replaces it, and never reads it against the schema
+    old_export_warning = registry.old_export_note(data_dir) if dry else None
 
     # Everything is built and checked before anything is written, so an export that fails leaves data/ as it was.
     calculation_files = {}
     # the warnings of the load sources whose fields follow a variable: one gone keeps its last value (issue #42, D-06)
     load_link_warnings = []
-    calculations = build_calculations(workbooks, here, calculation_files, load_link_warnings)
+    calculations = build_calculations(here, calculation_files, load_link_warnings)
     validation.validate_structure(calculations, "calculations")
     validation.validate_calculations_business(calculations)
 
@@ -270,7 +255,7 @@ def run(update_engine=False, dry=False):
     validation.validate_structure(quantity_data, "quantities")
     # The fire-protection plans, after the position plans they may follow: one that follows a position plan is set over that plan's own exported background, so it is handed the plans just built rather than reading the last export's off the disk (docs/domain/position-plans.md §3.3sexies; domains/fire.py). The documents a plan is drawn on live under the position plans' folder.
     fire_plans, fire_files, fire_warnings = fire.prepare(here.fire_dir, here.plans_dir, here.root, data_dir, plans["plans"], values)
-    # A load drawn on a static model may name a var of the calculations instead of stating a number, so the figure follows the workbook by itself. It is resolved against the record just built above -- nothing is read back off disk -- and a name that is no longer there is a warning, never a stop (docs/domain/static-models.md §3.3octies).
+    # A load drawn on a static model may name a var of the calculations instead of stating a number, so the figure follows the load by itself. It is resolved against the record just built above -- nothing is read back off disk -- and a name that is no longer there is a warning, never a stop (docs/domain/static-models.md §3.3octies).
     models, model_files, model_warnings = statics.prepare(here.statics_dir, values, place=engine.figures(data_dir, "statics"))
     # The report's revision journal, one file rather than a folder of them (calc/journal.py, docs/domain/journal.md §3.3terdecies): a project that has never been revised carries none, which is an empty journal and never an error. A project laid out in three documents has one per document, each printing its own (Project.journal_file_for), and each is exported beside the report's -- data/journal-cu.json and data/journal-bp.json, which their entry files read at every compile.
     journals, journal_warnings = {}, []
@@ -290,11 +275,11 @@ def run(update_engine=False, dry=False):
     validation.validate_structure(graph, dependency_graph.EXPORT_SCHEMA)
     graph_warnings = dependency_graph.notes(previous_graph, graph)
     # A key of the project file that names a feature Woodcore no longer has is read, ignored and said -- at every export, until the engineer takes it out (project.RETIRED_KEYS); the file is his and is not rewritten.
-    for message in here.retired_keys() + load_link_warnings + position_warnings + quantity_notes + warnings + check_warnings + link_warnings + plan_warnings + fire_warnings + model_warnings + schema_warnings + journal_warnings + script_warnings + annex_warnings + formula_warnings + (graph_warnings if dry else []):
+    for message in here.retired_keys() + [w for w in (workbook_warning, old_export_warning) if w] + load_link_warnings + position_warnings + quantity_notes + warnings + check_warnings + link_warnings + plan_warnings + fire_warnings + model_warnings + schema_warnings + journal_warnings + script_warnings + annex_warnings + formula_warnings + (graph_warnings if dry else []):
         _warn(message)
 
-    # What produced this export, beside it: the project as its file describes it, the program's version and revision, Typst's, and the workbooks' hashes (data/project.json, v0.82) -- what the one git repository proved until the code and the project came apart. Since v0.99 also the report's own latest revision, which the PDF's keywords name.
-    info = project.record(here, [cells.path for cells in workbooks], revision=journal.latest(journal_data))
+    # What produced this export, beside it: the project as its file describes it, the program's version and revision, Typst's (data/project.json, v0.82; the workbooks' digests until issue #109) -- what the one git repository proved until the code and the project came apart. Since v0.99 also the report's own latest revision, which the PDF's keywords name.
+    info = project.record(here, revision=journal.latest(journal_data))
     validation.validate_structure(info, "project")
     validation.validate_structure(script_domain.document(script_records), "scripts")
     if dry:
@@ -391,7 +376,7 @@ def write_project_info(here, info):
 def refresh_project_info(here):
     """The title page's fields of data/project.json brought into step with the project file at once, without an export (issue #87, the engineer: «une donnée modifiée est reportée tout de suite pour le prochain PDF»).
 
-    Only the name and DETAILS are taken from the project file: what produced the last export -- Woodcore's and Typst's versions, the workbooks' digests, the journal's revision -- is kept as that export wrote it, since nothing was exported now. No stamp is touched: data/project.json is an input of every document, so the next compile and the next export see a document changed, as they should. A file that is missing or does not hold to its contract is written as a new project's (project.record). Returns whether the file was written."""
+    Only the name and DETAILS are taken from the project file: what produced the last export -- Woodcore's and Typst's versions, the journal's revision -- is kept as that export wrote it, since nothing was exported now. No stamp is touched: data/project.json is an input of every document, so the next compile and the next export see a document changed, as they should. A file that is missing or does not hold to its contract is written as a new project's (project.record). Returns whether the file was written."""
     path = here.data_dir / "project.json"
     try:
         info = json.loads(path.read_text(encoding="utf-8"))
@@ -410,14 +395,14 @@ def refresh_project_info(here):
 def seed(here=None):
     """Writes each file of data/ a report reads that is missing -- empty, and nowhere else (v0.86.1) -- and returns their names relative to data/.
 
-    A new project had no data/ at all, and its report reads six files of it at every compile: project.json for the title page, positions-index.json, calculations.json, connectors.json, plans.json and statics.json for the loops of its sections. A full export needed a load workbook (registry.open_workbooks) until v0.89.1, which a new project has not got, and the window's own saves each write one file: so Tinymist stopped on «file not found … data/project.json» until the office's workbook was copied in and exported. These are the export of a project that holds nothing yet -- no position, no case of a load workbook's domains, no drawing -- save the one thing no workbook is needed for: the live loads of SIA 261 Tabelle 8, which every export carries. A file already there, written by an export or by a save in Woodcore's window, is never touched, so seeding a project twice, or a project already exported, writes nothing. A project laid out in three documents is seeded the journals of its two other documents as well, `journal-cu.json` and `journal-bp.json`, which their entry files read at every compile.
+    A new project had no data/ at all, and its report reads six files of it at every compile: project.json for the title page, positions-index.json, calculations.json, connectors.json, plans.json and statics.json for the loops of its sections. A full export needed a load workbook until v0.89.1, which a new project has not got, and the window's own saves each write one file: so Tinymist stopped on «file not found … data/project.json» until the office's workbook was copied in and exported. These are the export of a project that holds nothing yet -- no position, no load case, no drawing -- save the one thing nothing is entered for: the live loads of SIA 261 Tabelle 8, which every export carries. A file already there, written by an export or by a save in Woodcore's window, is never touched, so seeding a project twice, or a project already exported, writes nothing. A project laid out in three documents is seeded the journals of its two other documents as well, `journal-cu.json` and `journal-bp.json`, which their entry files read at every compile.
     """
     here = here or project.current()
     data_dir = here.data_dir
     # name in data/ -> (the contract it is checked against, what it holds): each built only where missing -- project.record asks git and Typst for their versions
     empty = {
         "project.json": ("project", lambda: project.record(here)),
-        "calculations.json": ("calculations", lambda: build_calculations([])),
+        "calculations.json": ("calculations", lambda: build_calculations()),
         "domain-state.json": ("domain-state", lambda: unfold.empty_state()),   # spec 2026-10-21-commandes-typst-refonte, ARCH-007: what #domain reads
         "domain-files.json": ("domain-files", lambda: unfold.empty_files()),   # ARCH-008: what domain-file(kind, id) reads
         "positions-index.json": ("positions-index", lambda: {"schema_version": "1.0", "positions": []}),

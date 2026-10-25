@@ -4,8 +4,6 @@
 #calc-defaults(presets: "block", scope: "domain") <VU-MP-1-presets>
 *E1 (T001), E2 (S001)* <VU-MP-1-member>
 
-#figure(image("/Connections/Exports/Figures/VU-MP-1-de.svg", width: 60%)) <VU-MP-1-figure>
-
   #var("x_c", 0, "mm", domain: ("connection", "VU-MP-1"), label: "Drehpunkt, x", norm: "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse", id: "x_c")
   #var("z_c", 0, "mm", domain: ("connection", "VU-MP-1"), label: "Drehpunkt, z", norm: "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse", id: "z_c")
   #var("theta_2", "theta_(1,2)", 90, "°", domain: ("connection", "VU-MP-1"), label: "Winkel von Element 1 zu Element 2", norm: "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse", id: "theta_2")
@@ -17,13 +15,16 @@
   #eq("I_p", `I_px + I_pz`, unit: "mm²", label: "Polares Flächenträgheitsmoment", norm: "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse", id: "I_p")
 
 _Lage der Verbindungsmittel_ <VU-MP-1-table-1-title>
-#table(columns: 7, table.header([*Nr.*], [*x [mm]*], [*z [mm]*], [*Δx [mm]*], [*Δz [mm]*], [*Δx² [mm²]*], [*Δz² [mm²]*]), [1], [-60], [-60], [-60], [-60], [3600], [3600], [2], [60], [-60], [60], [-60], [3600], [3600], [3], [60], [60], [60], [60], [3600], [3600], [4], [-60], [60], [-60], [60], [3600], [3600], [*Σ*], [], [], [], [], [*I\_px*], [*I\_pz*]) <VU-MP-1-table-1>
+#table(columns: 7, table.header([*Nr.*], [*x [mm]*], [*z [mm]*], [*Δx [mm]*], [*Δz [mm]*], [*Δx² [mm²]*], [*Δz² [mm²]*]), [1], [−60], [−60], [−60], [−60], [3600], [3600], [2], [60], [−60], [60], [−60], [3600], [3600], [3], [60], [60], [60], [60], [3600], [3600], [4], [−60], [60], [−60], [60], [3600], [3600], [*Σ*], [], [], [], [], [*14400*], [*14400*]) <VU-MP-1-table-1>
 x, z: Koordinaten im Rahmen des Schemas, x nach rechts, z nach unten; Δx, Δz: Abstände zum Drehpunkt. <VU-MP-1-table-1-note>
 
 $N$, $V$, $M$ <VU-MP-1-forces>
   #eq("N", `N_Ed`, unit: "kN", id: "N")
   #eq("V", `V_Ed`, unit: "kN", id: "V")
   #eq("M", `M_Ed`, unit: "kNm", id: "M")
+
+#figure(image-polar-moment("VU-MP-1", N: "N", V: "V", M: "M", width: 60%), kind: image, caption: [Anschluss VU-MP-1: Velo Unterstand: Stabdübel 4x 10mm Durchmesser – Verbindungsmittel und Kräfte je Verbindungsmittel]) <VU-MP-1-polar-figure>
+
   #eq("N_x", `N dot cos(alpha_N)`, unit: "kN", id: "N_x")
   #eq("N_z", `N dot sin(alpha_N)`, unit: "kN", id: "N_z")
   #eq("V_x", `V dot cos(alpha_V)`, unit: "kN", id: "V_x")

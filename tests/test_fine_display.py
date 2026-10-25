@@ -346,3 +346,27 @@ def test_show_masked_prints_every_hidden_line_pale_and_marked():
     assert "h0 = 850 m (ausgeblendet)" in shown and shown.endswith("b = 3 m"), shown
     hidden = _text("masked_off", body)
     assert hidden.strip() == "b = 3 m", hidden
+
+
+# --- a symbol written beside `domain:` names what it reads (spec 2026-10-23-neige-correctifs-issues-96-99, REQ-001) ------
+
+def test_a_symbol_beside_a_pair_domain_reads_the_export_and_prints_the_symbol():
+    """`name-visible:` (or a string in second place) beside `domain:` is the symbol printed over the export's, never a value: the line reads the export's value -- a word (the roof's form) as a number -- and compiles. Before, the symbol made the line a literal checked by `domain:` and the compile stopped on «has a symbol but no value», every new snow case of a French project with it."""
+    text = _text("pair_symbol_named", '#var("dachform", domain: ("snow-load", "SL"), name-visible: "\\"Forme de la toiture\\"", level: 1)')
+    assert "Forme de la toiture" in text and "Flachdach" in text and "Dachform" not in text, text
+    text = _text("pair_symbol_positional", '#var("ce", "C_(e,x)", domain: ("snow-load", "SL"), level: 1)')
+    assert "Ce,x = 1" in text.replace(" ", " "), text
+    text = _text("pair_symbol_number", '#var("h_0", name-visible: "h_(0,x)", domain: ("snow-load", "SL"), level: 1)')
+    assert "h0,x" in text and "551" in text, text
+    # in the three languages of a report, the export's word in the report's (the glossary's «Flachdach»)
+    for lang, word in (("fr", "Toit plat"), ("de", "Flachdach"), ("en", "Flat roof")):
+        text = _text("pair_symbol_" + lang, '#report-language.update("%s")\n#var("dachform", domain: ("snow-load", "SL"), name-visible: "\\"Forme\\"", level: 1)' % lang)
+        assert "Forme" in text and word in text, (lang, text)
+
+
+def test_a_value_beside_a_pair_domain_stays_a_literal_checked_by_it():
+    """A value written beside `domain:` -- with or without a symbol -- is still the literal the export checks (spec 2026-10-15, REQ-001): printed as written, and with the export's value beside it where they differ."""
+    same = _text("pair_literal_same", '#var("ce", "C_e", 1.0, domain: ("snow-load", "SL"), level: 1)')
+    assert "Ce = 1" in same, same
+    stale = _text("pair_literal_stale", '#var("ce", name-visible: "C_e", value: 1.2, domain: ("snow-load", "SL"), level: 1)')
+    assert "1.2" in stale and "1" in stale.replace("1.2", ""), stale

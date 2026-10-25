@@ -382,7 +382,7 @@ def test_the_report_refuses_a_polar_moment_the_schema_no_longer_carries():
     (sources / "SD_01-V1.json").write_text(json.dumps(_connection()), encoding="utf-8")
     connection.export(sources, python / "data", schemas={"D_SEAM": short})
     # what show-calc's lookup reads before it reaches a connection: no domain and no position here
-    (python / "data" / "calculations.json").write_text(json.dumps({"schema_version": "1.4", "domains": {}}), encoding="utf-8")
+    (python / "data" / "calculations.json").write_text(json.dumps({"schema_version": "1.9", "domains": {}}), encoding="utf-8")   # the version the engine reads (issue #109)
     (python / "data" / "positions-index.json").write_text(json.dumps({"schema_version": "1.0", "positions": []}), encoding="utf-8")
     for call in ('#var("I_p", domain: ("connection", "SD_01-V1"))',):
         (root / "probe.typ").write_text('#import "/commands.typ": *\n' + call + "\n", encoding="utf-8")

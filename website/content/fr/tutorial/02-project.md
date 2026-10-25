@@ -26,7 +26,7 @@ Halle Nord/
 └── _Archiv/                     un zip et une copie du PDF par export
 ```
 
-Copiez encore dans ce dossier le **classeur des charges** de votre bureau, dont le nom contient `Belastungsannahmen` : Woodcore le trouve par son nom (étape 4).
+Il n'y a rien d'autre à copier dans ce dossier : le vent, la neige et les charges permanentes se saisissent dans les onglets de Woodcore et s'enregistrent dans `Woodcore-Datei/loads/` (étape 4).
 
 > [!note]
 > Un projet ouvert dans une fenêtre est **verrouillé** par un fichier `Halle Nord.woodcore.lock`. Si un collègue l'ouvre en même temps, Woodcore le lui dit et propose la lecture seule : deux fenêtres qui enregistrent le même projet perdraient le travail de la première.

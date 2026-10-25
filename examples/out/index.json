@@ -1,5 +1,5 @@
 {
- "schema_version": "1.0",
+ "schema_version": "1.1",
  "lang": "de",
  "examples": [
   {
@@ -364,63 +364,78 @@
    "index": 0,
    "level": 1,
    "stem": "var-1-L1",
-   "hash": "625934d397cbf94d"
+   "hash": "625934d397cbf94d",
+   "page": "var-1",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 0,
    "level": 2,
    "stem": "var-1",
-   "hash": "3e45a144a1ec67bb"
+   "hash": "3e45a144a1ec67bb",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 0,
    "level": 3,
    "stem": "var-1-L3",
-   "hash": "49aa02aaebab8a63"
+   "hash": "49aa02aaebab8a63",
+   "page": "var-1",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 1,
    "level": 1,
    "stem": "var-2-L1",
-   "hash": "d09cb84a02a2abb8"
+   "hash": "d09cb84a02a2abb8",
+   "page": "var-2",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 1,
    "level": 2,
    "stem": "var-2",
-   "hash": "826007e1a4ef000d"
+   "hash": "826007e1a4ef000d",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 1,
    "level": 3,
    "stem": "var-2-L3",
-   "hash": "dab3e9c8e7bcab80"
+   "hash": "dab3e9c8e7bcab80",
+   "page": "var-2",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 2,
    "level": 1,
    "stem": "var-3-L1",
-   "hash": "16a8764b164845f7"
+   "hash": "16a8764b164845f7",
+   "page": "var-3",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 2,
    "level": 2,
    "stem": "var-3",
-   "hash": "ee28809130e3177c"
+   "hash": "ee28809130e3177c",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 2,
    "level": 3,
    "stem": "var-3-L3",
-   "hash": "0f5b1e0630e92914"
+   "hash": "0f5b1e0630e92914",
+   "page": "var-3",
+   "same": "123"
   },
   {
    "command": "var",
@@ -448,21 +463,25 @@
    "index": 4,
    "level": 1,
    "stem": "var-5-L1",
-   "hash": "011a24921af1a2cd"
+   "hash": "011a24921af1a2cd",
+   "page": "var-5",
+   "same": "12"
   },
   {
    "command": "var",
    "index": 4,
    "level": 2,
    "stem": "var-5",
-   "hash": "1ce22084f536c9b3"
+   "hash": "1ce22084f536c9b3",
+   "same": "12"
   },
   {
    "command": "var",
    "index": 4,
    "level": 3,
    "stem": "var-5-L3",
-   "hash": "e5f1308efb35ecc3"
+   "hash": "e5f1308efb35ecc3",
+   "same": "12"
   },
   {
    "command": "var",
@@ -490,21 +509,26 @@
    "index": 6,
    "level": 1,
    "stem": "var-7-L1",
-   "hash": "d7bf18ca75f83bcd"
+   "hash": "d7bf18ca75f83bcd",
+   "page": "var-7",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 6,
    "level": 2,
    "stem": "var-7",
-   "hash": "1bdfaf6171df54e0"
+   "hash": "1bdfaf6171df54e0",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 6,
    "level": 3,
    "stem": "var-7-L3",
-   "hash": "c5d40743d9faa70f"
+   "hash": "c5d40743d9faa70f",
+   "page": "var-7",
+   "same": "123"
   },
   {
    "command": "var",
@@ -539,21 +563,26 @@
    "index": 9,
    "level": 1,
    "stem": "var-10-L1",
-   "hash": "b7f7e6faf54bdcc3"
+   "hash": "b7f7e6faf54bdcc3",
+   "page": "var-10",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 9,
    "level": 2,
    "stem": "var-10",
-   "hash": "afcd56409ce7d8de"
+   "hash": "afcd56409ce7d8de",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 9,
    "level": 3,
    "stem": "var-10-L3",
-   "hash": "aff5595ad873a0e5"
+   "hash": "aff5595ad873a0e5",
+   "page": "var-10",
+   "same": "123"
   },
   {
    "command": "var",
@@ -581,42 +610,52 @@
    "index": 11,
    "level": 1,
    "stem": "var-12-L1",
-   "hash": "7bfa45571b6768eb"
+   "hash": "7bfa45571b6768eb",
+   "page": "var-12",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 11,
    "level": 2,
    "stem": "var-12",
-   "hash": "86895cb82d39dfa1"
+   "hash": "86895cb82d39dfa1",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 11,
    "level": 3,
    "stem": "var-12-L3",
-   "hash": "e846d347b6f704b1"
+   "hash": "e846d347b6f704b1",
+   "page": "var-12",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 12,
    "level": 1,
    "stem": "var-13-L1",
-   "hash": "fd5983901eee25e6"
+   "hash": "fd5983901eee25e6",
+   "page": "var-13",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 12,
    "level": 2,
    "stem": "var-13",
-   "hash": "6d8b4511a48b6cd3"
+   "hash": "6d8b4511a48b6cd3",
+   "same": "123"
   },
   {
    "command": "var",
    "index": 12,
    "level": 3,
    "stem": "var-13-L3",
-   "hash": "7a2efeec7c7b31ca"
+   "hash": "7a2efeec7c7b31ca",
+   "page": "var-13",
+   "same": "123"
   },
   {
    "command": "eq",
@@ -665,21 +704,26 @@
    "index": 2,
    "level": 1,
    "stem": "eq-3-L1",
-   "hash": "7fd4b6c1046c2bb0"
+   "hash": "7fd4b6c1046c2bb0",
+   "page": "eq-3",
+   "same": "123"
   },
   {
    "command": "eq",
    "index": 2,
    "level": 2,
    "stem": "eq-3",
-   "hash": "d4b5a9a6a0c31ab7"
+   "hash": "d4b5a9a6a0c31ab7",
+   "same": "123"
   },
   {
    "command": "eq",
    "index": 2,
    "level": 3,
    "stem": "eq-3-L3",
-   "hash": "77de54fef227950e"
+   "hash": "77de54fef227950e",
+   "page": "eq-3",
+   "same": "123"
   },
   {
    "command": "eq",
@@ -808,6 +852,20 @@
    "hash": "cfe27d725f305ba6"
   },
   {
+   "command": "from-level",
+   "index": 0,
+   "level": 2,
+   "stem": "from-level-1",
+   "hash": "eadebf3ccc78f5e3"
+  },
+  {
+   "command": "from-level",
+   "index": 1,
+   "level": 2,
+   "stem": "from-level-2",
+   "hash": "969218675a16c807"
+  },
+  {
    "command": "var-table",
    "index": 0,
    "level": 2,
@@ -889,42 +947,52 @@
    "index": 2,
    "level": 1,
    "stem": "verify-3-L1",
-   "hash": "b00c7f19ca57880c"
+   "hash": "b00c7f19ca57880c",
+   "page": "verify-3",
+   "same": "123"
   },
   {
    "command": "verify",
    "index": 2,
    "level": 2,
    "stem": "verify-3",
-   "hash": "e7c201fb15f12299"
+   "hash": "e7c201fb15f12299",
+   "same": "123"
   },
   {
    "command": "verify",
    "index": 2,
    "level": 3,
    "stem": "verify-3-L3",
-   "hash": "572dfbc5e6391beb"
+   "hash": "572dfbc5e6391beb",
+   "page": "verify-3",
+   "same": "123"
   },
   {
    "command": "verify",
    "index": 3,
    "level": 1,
    "stem": "verify-4-L1",
-   "hash": "f0327fd826c7dcdc"
+   "hash": "f0327fd826c7dcdc",
+   "page": "verify-4",
+   "same": "123"
   },
   {
    "command": "verify",
    "index": 3,
    "level": 2,
    "stem": "verify-4",
-   "hash": "9083f3cb4949a9ff"
+   "hash": "9083f3cb4949a9ff",
+   "same": "123"
   },
   {
    "command": "verify",
    "index": 3,
    "level": 3,
    "stem": "verify-4-L3",
-   "hash": "565be619b684896d"
+   "hash": "565be619b684896d",
+   "page": "verify-4",
+   "same": "123"
   },
   {
    "command": "verify",
@@ -1127,147 +1195,175 @@
    "index": 0,
    "level": 1,
    "stem": "distance-1-L1",
-   "hash": "9c5e035ed1e60561"
+   "hash": "9c5e035ed1e60561",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 0,
    "level": 2,
    "stem": "distance-1",
-   "hash": "b04e9cff821d06e7"
+   "hash": "b04e9cff821d06e7",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 0,
    "level": 3,
    "stem": "distance-1-L3",
-   "hash": "eb4f3abcdc80649a"
+   "hash": "eb4f3abcdc80649a",
+   "page": "distance-1",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 1,
    "level": 1,
    "stem": "distance-2-L1",
-   "hash": "488e3691b051103b"
+   "hash": "488e3691b051103b",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 1,
    "level": 2,
    "stem": "distance-2",
-   "hash": "a5be53ed7f2921da"
+   "hash": "a5be53ed7f2921da",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 1,
    "level": 3,
    "stem": "distance-2-L3",
-   "hash": "a1a193127082dc86"
+   "hash": "a1a193127082dc86",
+   "page": "distance-2",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 2,
    "level": 1,
    "stem": "distance-3-L1",
-   "hash": "acbaf459d1a78a4e"
+   "hash": "acbaf459d1a78a4e",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 2,
    "level": 2,
    "stem": "distance-3",
-   "hash": "5e786ce33e8b5173"
+   "hash": "5e786ce33e8b5173",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 2,
    "level": 3,
    "stem": "distance-3-L3",
-   "hash": "505449ed0a6a6299"
+   "hash": "505449ed0a6a6299",
+   "page": "distance-3",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 3,
    "level": 1,
    "stem": "distance-4-L1",
-   "hash": "1034a2e3451f084c"
+   "hash": "1034a2e3451f084c",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 3,
    "level": 2,
    "stem": "distance-4",
-   "hash": "126417a400e0f12b"
+   "hash": "126417a400e0f12b",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 3,
    "level": 3,
    "stem": "distance-4-L3",
-   "hash": "5b3f68c39b7a15db"
+   "hash": "5b3f68c39b7a15db",
+   "page": "distance-4",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 4,
    "level": 1,
    "stem": "distance-5-L1",
-   "hash": "daa87682354521fd"
+   "hash": "daa87682354521fd",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 4,
    "level": 2,
    "stem": "distance-5",
-   "hash": "5f0518c698034a4b"
+   "hash": "5f0518c698034a4b",
+   "same": "23"
   },
   {
    "command": "distance",
    "index": 4,
    "level": 3,
    "stem": "distance-5-L3",
-   "hash": "83fd5c551fbc7c9b"
+   "hash": "83fd5c551fbc7c9b",
+   "page": "distance-5",
+   "same": "23"
   },
   {
    "command": "show-bibliography",
    "index": 0,
    "level": 1,
    "stem": "show-bibliography-1-L1",
-   "hash": "20a080b501cbace4"
+   "hash": "20a080b501cbace4",
+   "same": "23"
   },
   {
    "command": "show-bibliography",
    "index": 0,
    "level": 2,
    "stem": "show-bibliography-1",
-   "hash": "3ecd6e6a8e111fb1"
+   "hash": "3ecd6e6a8e111fb1",
+   "same": "23"
   },
   {
    "command": "show-bibliography",
    "index": 0,
    "level": 3,
    "stem": "show-bibliography-1-L3",
-   "hash": "965854b83ddf86f4"
+   "hash": "965854b83ddf86f4",
+   "page": "show-bibliography-1",
+   "same": "23"
   },
   {
    "command": "show-bibliography",
    "index": 1,
    "level": 1,
    "stem": "show-bibliography-2-L1",
-   "hash": "c0c274d888f19e30"
+   "hash": "c0c274d888f19e30",
+   "same": "23"
   },
   {
    "command": "show-bibliography",
    "index": 1,
    "level": 2,
    "stem": "show-bibliography-2",
-   "hash": "01356934fe630fac"
+   "hash": "01356934fe630fac",
+   "same": "23"
   },
   {
    "command": "show-bibliography",
    "index": 1,
    "level": 3,
    "stem": "show-bibliography-2-L3",
-   "hash": "ba0bbf16a50e3f83"
+   "hash": "ba0bbf16a50e3f83",
+   "page": "show-bibliography-2",
+   "same": "23"
   },
   {
    "command": "cite-norm",
@@ -1288,42 +1384,50 @@
    "index": 0,
    "level": 1,
    "stem": "show-norm-list-1-L1",
-   "hash": "ec4884477361d2ad"
+   "hash": "ec4884477361d2ad",
+   "same": "23"
   },
   {
    "command": "show-norm-list",
    "index": 0,
    "level": 2,
    "stem": "show-norm-list-1",
-   "hash": "a64ba798fc218bb3"
+   "hash": "a64ba798fc218bb3",
+   "same": "23"
   },
   {
    "command": "show-norm-list",
    "index": 0,
    "level": 3,
    "stem": "show-norm-list-1-L3",
-   "hash": "cc798902d27096ae"
+   "hash": "cc798902d27096ae",
+   "page": "show-norm-list-1",
+   "same": "23"
   },
   {
    "command": "show-norm-list",
    "index": 1,
    "level": 1,
    "stem": "show-norm-list-2-L1",
-   "hash": "0321eb49ad7d9f7d"
+   "hash": "0321eb49ad7d9f7d",
+   "same": "23"
   },
   {
    "command": "show-norm-list",
    "index": 1,
    "level": 2,
    "stem": "show-norm-list-2",
-   "hash": "082bacb71ba8bdf8"
+   "hash": "082bacb71ba8bdf8",
+   "same": "23"
   },
   {
    "command": "show-norm-list",
    "index": 1,
    "level": 3,
    "stem": "show-norm-list-2-L3",
-   "hash": "aebd4c0068c344bc"
+   "hash": "aebd4c0068c344bc",
+   "page": "show-norm-list-2",
+   "same": "23"
   },
   {
    "command": "image-section",

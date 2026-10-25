@@ -53,5 +53,7 @@ Thumbs.db
 # The website, built by website/build.py (docs/conventions/build-and-release.md §12): generated locally to look at, and by the CI job that publishes it -- never versioned.
 public/
 examples/.site/
+# the prints of the commands' values, written and compiled by calc/tools/build_examples.py before they are put on their sheets in examples/out/values/ (issue #115)
+examples/.values/
 # The desktop app's scheduler lock (a harness file, never the project's); .claude/launch.json, which serves the website to the app's browser pane, is versioned.
 .claude/scheduled_tasks.lock

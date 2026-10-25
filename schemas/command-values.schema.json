@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "The map of the values' prints",
+  "description": "examples/out/values/index.json, schema 1.0 (spec 2026-10-24-onglet-commandes-pages, REQ-005, ARCH-004, ARCH-009) -- where each value of each argument with values of each command's page (calc/i18n/command-pages.json) stands in the sheet of its command and language, examples/out/values/<lang>-<command>.png. Written whole by calc/tools/build_examples.py's render_values, never by hand; read by calc/tools/command_page.py (the commands tab and the website cut the sheet at `rect`) and held by tests/test_command_values.py: every rectangle inside its sheet's size, every value of every page present in each language, its hash the hash of the call the page writes now.",
+  "type": "object",
+  "required": ["schema_version", "ppi", "scale", "sheets", "values"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "ppi": {"type": "integer", "description": "The resolution the calls were compiled at."},
+    "scale": {"type": "number", "description": "What a bubble shows a print at: 0.6 of its pixels."},
+    "sheets": {
+      "type": "object",
+      "description": "By `<lang>-<command>`, its sheet: the file, its size in pixels [width, height], the hash of its values' calls (a sheet whose hash is unchanged is not compiled again), and whether each value was compiled as a document of its own (always, ARCH-010).",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": ["file", "size", "hash", "isolate"],
+          "properties": {
+            "file": {"type": "string"},
+            "size": {"type": "array", "items": {"type": "integer"}},
+            "hash": {"type": "string"},
+            "isolate": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "values": {
+      "type": "object",
+      "description": "By `<command>|<argument>|<value as Typst writes it>`, by language: the hash of its call (value_hash), its rectangle in the sheet [top, width, height] -- absent where nothing is printed (`blank`) --, the hash of its ink, and the other values of the same argument whose print is the same (`same`).",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "object",
+              "required": ["hash", "same"],
+              "properties": {
+                "hash": {"type": "string"},
+                "rect": {"type": "array", "items": {"type": "integer"}},
+                "ink": {"type": "string"},
+                "blank": {"type": "boolean"},
+                "same": {"type": "array", "items": {"type": "string"}}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

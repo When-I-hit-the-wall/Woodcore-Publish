@@ -19,7 +19,7 @@ A project laid out in three documents compiles **each of them into its own PDF**
 
 **migrate** moves a project laid out as one report into three documents, or undoes a migration (calc/project_migrate.py's own command, its arguments handed on as they were typed).
 
-**check** runs the whole export and writes nothing: every workbook read, every source checked, every record validated.
+**check** runs the whole export and writes nothing: every source read and checked, every record validated.
 
 **sync-engine** copies the program's engine into the project, as an export does.
 
@@ -202,7 +202,7 @@ def new(args):
         print(f"woodcore-cli: {exc}", file=sys.stderr)
         return 1
     print(f"woodcore-cli: created {here.file}")
-    print("  next: copy the office's Belastungsannahmen workbook into the folder, enter the positions in Woodcore's Positions tab, "
+    print("  next: enter the positions in Woodcore's Positions tab and the loads in its tabs of actions, "
           "then woodcore-cli export --project \"%s\"" % here.file)
     return 0
 

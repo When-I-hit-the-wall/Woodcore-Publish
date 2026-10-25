@@ -107,6 +107,23 @@ def test_every_tab_and_every_row_carries_a_mark():
             assert not _icon(item).isNull(), f"{type(tab).__name__}: row {key!r} keeps no room for its mark"
 
 
+def test_the_tabs_of_data_are_browsers_and_never_marked():
+    """Issue #106 (REQ-006, UI-003 of the spec 2026-10-24-type-donnees): «Variables», «Métré», «Dépendances» and «Commandes», on the type «Données», have no `dirty` -- they are not among the editors -- and keep the blank even while every editor holds unsaved changes."""
+    import data_tab
+    win = _main_window()
+    data = [i for i, tab in enumerate(win.tabs) if isinstance(tab, data_tab.DataTab)]
+    assert len(data) == 4, data
+    _set_dirty(win, True)
+    try:
+        win.update_tab_marks()
+        for i in data:
+            tab = win.tabs[i]
+            assert tab not in _editors(win) and not hasattr(tab, "dirty") and not hasattr(tab, "update_list_marker"), type(tab).__name__
+            assert win.tab_widget.tabIcon(i).cacheKey() == win.dirty_mark(False).cacheKey(), type(tab).__name__
+    finally:
+        _set_dirty(win, False)
+
+
 def test_the_dot_marks_what_is_being_edited_and_its_tab():
     win = _main_window()
     _set_dirty(win, False)
@@ -141,24 +158,13 @@ def test_the_mark_is_never_written_into_the_text():
         _set_dirty(win, False)
 
 
-def test_the_stale_banner_names_a_load_workbook_and_never_positionen_xlsx():
-    """The banner named Positionen.xlsx when it was saved after the positions' export (periodic audit 260916, AUD-7-404). Since v0.114 the positions are Woodcore's own (calc/positions_store.py) and the workbook is read by no export, so a Positionen.xlsx left beside a project is never said to be stale; a load workbook saved after the export still is."""
-    import json
-    import time
+def test_the_window_holds_no_banner_of_load_workbooks():
+    """Issue #109 (UI-003): no workbook is read, so none can be stale -- the banner «… a été modifié après le dernier export» went with them, its word too."""
     _main_window()
     import woodcore_gui
-    d = conftest.tmpdir("stale_banner")
-    data_file = d / "calculations.json"
-    data = {"domains": {"snow-load": {"instances": {"SL": {"workbook": "Belastungsannahmen.xlsm", "sheet": "SL"}}}}}
-    data_file.write_text(json.dumps(data), encoding="utf-8")
-    (d / "Positionen.xlsx").write_bytes(b"")
-    (d / "Belastungsannahmen.xlsm").write_bytes(b"")
-    now = time.time()
-    os.utime(data_file, (now - 300, now - 300))
-    import project
-    with project.using(project.write(d / "Stale.woodcore", "Stale")):
-        stale = woodcore_gui.stale_workbooks(data, data_file=data_file)
-    assert stale == ["Belastungsannahmen.xlsm"], stale
+    import woodcore_gui_words
+    assert not hasattr(woodcore_gui, "stale_workbooks") and not hasattr(woodcore_gui.MainWindow, "stale_text")
+    assert all("stale" not in words for words in woodcore_gui_words.STRINGS.values())
 
 
 def test_a_missing_page_is_compiled_in_the_language_of_the_pages_beside_it():
@@ -169,7 +175,7 @@ def test_a_missing_page_is_compiled_in_the_language_of_the_pages_beside_it():
     win = _main_window()
     import build_examples
     import command_preview
-    tab = next(t for t in win.tabs if type(t).__name__ == "CommandsTab")
+    tab = next(t for t in win.tabs if type(t).__name__ == "CommandsTab").service("browser").page.renderer   # the examples' renderer, the page's own since issue #115, mounted by the tab's browser since issue #106
     seen = []
 
     def render(kind):

@@ -24,7 +24,10 @@ import engine
 import project
 import validation
 from domains._common import fail as _fail, is_number as _number  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
+from domains._common import RESULT_KEY  # noqa: F401  -- η, the key of the check's result, which the «Variables» tab reads here (spec 2026-10-24-onglet-variables-groupes, ARCH-012)
 from domains import line_keys, links      # line_keys: what tells a row's formula computes its value (_with_keys)
+from domains import member_check_material as material_  # what a check reads of its material: the library's, a panel's, the factors (issue #112, ARCH-001)
+from domains.member_check_stability import _compute_buckling, _compute_lateral  # 4.2.8 and 4.2.9, moved out with no change (tests/test_module_size.py)
 from norms import sia265, vkf
 from number_text import exact as _fmt  # a number as a section's text and a Typst call write it: six decimals, trailing zeros dropped (calc/number_text.py, UI-003)
 # the lines of `compute`, built by the engine (spec 2026-10-21-restes-issue-69, REQ-003): `_row` is timber_calc.line, NORM the norm a line cites where it states none of its own
@@ -38,7 +41,9 @@ SOURCE_SCHEMA_VERSION = "1.0"
 LINKED_SCHEMA_VERSION = "1.1"
 # 1.2 is 1.1 with `fire`, the design situation fire of SIA 265 4.5.2 (issue #46, spec 2026-10-12-resistance-au-feu ARCH-RISK-005): written only by a check in the fire situation, `links` or not -- every other check is saved and exported byte for byte as before
 FIRE_SCHEMA_VERSION = "1.2"
-SOURCE_SCHEMA_VERSIONS = (SOURCE_SCHEMA_VERSION, LINKED_SCHEMA_VERSION, FIRE_SCHEMA_VERSION)
+# 1.3 is 1.2 with the material of the library (issue #112, spec 2026-10-24-verifications-elements-v3, REQ-001): `material`, a panel's `loading`, `kled` and `accidental`, and `display`, the options of «Affichage» -- written only by a source that carries one of them (member_check_material.FIELDS), `links` and `fire` or not; every other check is saved and exported byte for byte as before
+LIBRARY_SCHEMA_VERSION = "1.3"
+SOURCE_SCHEMA_VERSIONS = (SOURCE_SCHEMA_VERSION, LINKED_SCHEMA_VERSION, FIRE_SCHEMA_VERSION, LIBRARY_SCHEMA_VERSION)
 EXPORT_SCHEMA_VERSION = "1.0"
 LINKED_EXPORT_VERSION = "1.1"
 FIRE_EXPORT_VERSION = "1.2"
@@ -50,6 +55,10 @@ UNFOLDED_FILE_EXPORT_VERSION = "1.4"
 REQUIRED_EXPORT_VERSION = "1.5"
 # 1.6 is 1.5 without `gen` (spec 2026-10-21-commandes-typst-refonte, ARCH-011): the form a check is written out from is the regeneration base's alone (calc/domains/unfold.py), the export no longer carries it -- every check printed unfolded is written at 1.6, with its `vars` and its `file`
 UNFOLDED_BASE_EXPORT_VERSION = "1.6"
+# 1.7 is 1.6 with the material of the library on a record whose source names one (issue #112, REQ-015): `material` {id, names, type, origin, short, from}, a panel's `loading`, `kled`, `accidental`, the `resistance` resolve froze (ARCH-008), the `reason_code` of a refusal of the material, and `display` -- what the «Synthèse» tab will read (OSB/3 en plaque ∥). `grade` and `grade_from` stay written for the readers of before
+LIBRARY_EXPORT_VERSION = "1.7"
+# The keys a record of 1.7 may carry beyond 1.6's
+LIBRARY_RECORD_KEYS = ("material", "loading", "kled", "accidental", "resistance", "reason_code", "reason_params", "display", "notes")
 
 # The kinds a check in the fire situation may be (D-09: bending with its shear as two checks, buckling, compression and tension of the section -- no lateral torsional buckling), all along the grain
 FIRE_KINDS = ("tension", "compression", "bending", "shear", "buckling")
@@ -133,6 +142,11 @@ def check_source(src, where="checks"):
         _fail(where, "schema_version is %r -- this reads %s" % (version, ", ".join(SOURCE_SCHEMA_VERSIONS)))
     if links.LINKS in src and version == SOURCE_SCHEMA_VERSION:
         _fail(where, "carries links at schema_version %r -- a source following a variable is %r" % (version, LINKED_SCHEMA_VERSION))
+    # the material of the library (issue #112, REQ-001): its fields at 1.3 only, each checked naming it
+    if material_.carries_library(src) and version != LIBRARY_SCHEMA_VERSION:
+        _fail(where, "carries %s at schema_version %r -- a source naming a material of the library is %r"
+              % (", ".join(k for k in material_.FIELDS if k in src), version, LIBRARY_SCHEMA_VERSION))
+    material_.check_fields(src, lambda message: _fail(where, message))
     links.check_links(src, LINKABLE, lambda message: _fail(where, message), "the check")
     for key in links.links_of(src):
         if key.startswith("section.") and not isinstance(src.get("section"), dict):
@@ -251,7 +265,7 @@ def _check_fire(src, where):
         if "fire" in src:
             _fail(where, "fire is null -- a check at normal temperature carries no fire key")
         return
-    if src.get("schema_version") != FIRE_SCHEMA_VERSION:
+    if src.get("schema_version") not in (FIRE_SCHEMA_VERSION, LIBRARY_SCHEMA_VERSION):
         _fail(where, "carries fire at schema_version %r -- a check in the fire situation is %r" % (src.get("schema_version"), FIRE_SCHEMA_VERSION))
     kind = src.get("kind")
     if kind not in FIRE_KINDS:
@@ -301,10 +315,15 @@ def read_source(path):
 
 
 def stamp_version(src):
-    """The schema_version a source is saved at, the lowest that holds what it carries: 1.2 with `fire` (links or not), 1.1 with a link, 1.0 with neither -- what Woodcore's window calls before it writes one."""
+    """The schema_version a source is saved at, the lowest that holds what it carries: 1.3 with a field of the library -- `material`, a panel's `loading`, `kled`, `accidental`, `display` (issue #112), each left out where empty --, 1.2 with `fire` (links or not), 1.1 with a link, 1.0 with none -- what Woodcore's window calls before it writes one."""
     if not links.links_of(src):
         src.pop(links.LINKS, None)
-    if src.get("fire") is not None:
+    material_.drop_empty(src)
+    if src.get("fire") is None:
+        src.pop("fire", None)
+    if material_.carries_library(src):
+        src["schema_version"] = LIBRARY_SCHEMA_VERSION
+    elif src.get("fire") is not None:
         src["schema_version"] = FIRE_SCHEMA_VERSION
     else:
         src.pop("fire", None)
@@ -375,6 +394,12 @@ def _table_of(grade):
     return sia265.table_8() if grade in {g["id"] for g in sia265.table_8()["grades"]} else sia265.table_9()
 
 
+def f_c_90_table(grade, case, larger=False):
+    """The f_c,90,d of SIA 265 Tabelle 8 or 9 for a class of the norm, a case of 4.2.2.2 and the bracketed value or not (note 4 / note 3) -- None where the table gives none (D30's bracketed values): what a compression at an angle reads, and what the five cards of the tab show (issue #112, UI-008)."""
+    cell = sia265.grade(grade)["f_c_90_d"][case]
+    return (cell.get("groessere_eindrueckungen") if larger else cell.get("value")) if isinstance(cell, dict) else (None if larger else cell)
+
+
 def _contact(src, grade, section):
     """What a compression at an angle to the grain reads beyond the member, as the record carries it: the case of Tabelle 8 or 9 and its words, the bracketed value or not, the table's f_c,90,d (before eta_w and eta_t, which the report applies -- read, not computed), the contact length and its width -- the section's b unless stated --, and why it cannot be calculated where it cannot. All null for a tension and for a compression along the grain, which read none of it. `grade` is None where the check already cannot be calculated."""
     out = {"case": None, "larger": None, "l": None, "w": None, "w_from": None, "case_label": None, "f_c_90_table": None, "reason": ""}
@@ -390,9 +415,10 @@ def _contact(src, grade, section):
         out.update(w=section["b"], w_from="section")
     elif section is not None:
         out["reason"] = "a round section gives no contact width to follow -- state the width w of the contact area"
+    if src.get("l") is None and not out["reason"]:
+        out["reason"] = "a compression at an angle to the grain needs the contact length l along the grain -- state it, in mm"
     if grade is not None and grade in sia265.grades():
-        cell = sia265.grade(grade)["f_c_90_d"][case]
-        value = (cell.get("groessere_eindrueckungen") if larger else cell.get("value")) if isinstance(cell, dict) else (None if larger else cell)
+        value = f_c_90_table(grade, case, larger)
         if value is None and not out["reason"]:
             out["reason"] = ("SIA 265 Tabelle %s gives %s no bracketed f_c,90,d for %s -- the larger indentations cannot be taken"
                              % (_table_of(grade).get("number", ""), grade, CASE_WORDS[case]))
@@ -486,7 +512,30 @@ def _fire_block(src, grade, section, building):
     return out, ""
 
 
-def resolve(src, positions, values=None, building=None):
+def find_material(material_id, library=None):
+    """The material an id of the library names (issue #112, REQ-002): one Woodcore ships (materials_catalogue), else the project's copy or the engineer's library -- `library` {id: material} where the caller read it (prepare), else read here, of the current project. None where none has it."""
+    from domains import materials_catalogue
+    found = materials_catalogue.find(material_id)
+    if found is not None or material_.kind_of_id(material_id) != "user":
+        return found
+    if library is None:
+        try:
+            library = library_of(project.current())
+        except project.ProjectError:
+            library = {}
+    return library.get(material_id)
+
+
+def library_of(here):
+    """{id: material} of the engineer's materials a project computes with -- its copies, then the library's for a draft not yet saved (materials_project.for_calculation) --, {} where they cannot be read."""
+    from domains import materials_project
+    try:
+        return {m["id"]: m for m in materials_project.for_calculation(here)["materials"]}
+    except (validation.ValidationError, OSError):
+        return {}
+
+
+def resolve(src, positions, values=None, building=None, library=None):
     """The record of one checked source against `positions` ({id: position record}, as export_all builds them, or connector.known_positions reads them back): the source's fields with `grade`, `section` and `moisture_class` resolved, where each came from, whether the check can be calculated and why not, and the warnings it earned (engine.Note). Nothing is computed and nothing stops.
 
     A field that follows a variable (`links`) takes the value `values` give it now (`links.index`'s shape); one whose variable cannot be read keeps the number the source holds, its last value, with a warning (D-06). The record then carries `links`, where each linked value came from (REQ-012)."""
@@ -519,7 +568,19 @@ def resolve(src, positions, values=None, building=None):
             return (rec.get("strength_class") or "").strip()
         return (rec.get("material") or "").strip()
 
-    grade, grade_from = follow(src.get("grade"), position_grade)
+    # the material (issue #112, REQ-013): one of the library written over the position -- a class of SIA 265 by its grade, any other by its resistance --, else the position's class
+    material_id = src.get("material")
+    material_kind = material_.kind_of_id(material_id)
+    material = None
+    if material_kind == "grade":
+        grade, grade_from = material_.grade_of(material_id), "stated"
+    elif material_kind is not None:
+        grade, grade_from = None, None
+        material = find_material(material_id, library)
+    else:
+        grade, grade_from = follow(src.get("grade"), position_grade)
+    refusal = None
+    material_notes = []
 
     reason = ""
     section, section_from = None, None
@@ -537,14 +598,26 @@ def resolve(src, positions, values=None, building=None):
     if not reason and section is None:
         reason = ("position %s gives no section -- state it here, or give the position a section type in the Positions tab" % pid
                   if record is not None else "no section -- state one, or name a position that has one")
-    if not reason and not grade:
+    if not reason and material_kind in ("panel", "user") and material is None:
+        refusal = material_.unknown_refusal(material_id)
+        reason = refusal.text
+    if not reason and not grade and material is None:
         reason = ("position %s gives no strength class -- state it here" % pid if record is not None
                   else "no strength class -- state one, or name a position that has one")
-    if not reason and grade not in sia265.grades():
+    if not reason and material is None and grade not in sia265.grades():
         reason = "strength class %r of position %s is not one of SIA 265 Tabelle 8 or 9 -- state one here" % (grade, pid)
     if not reason and moisture is None:
         reason = ("position %s states no moisture class -- state it here, or in the Positions tab" % pid if record is not None
                   else "no moisture class -- state one, or name a position that has one")
+    resistance = None
+    if not reason and material is not None:
+        # what the check reads of a material that is no class of SIA 265, frozen into the record (ARCH-008) -- and why it cannot, naming the material, the loading, what it lacks (REQ-005, REQ-007)
+        resistance, refusal, material_notes = material_.resistance(material, src, section, moisture)
+        if refusal is not None:
+            reason = refusal.text
+        if not reason and src.get("fire") is not None:
+            refusal = material_.fire_refusal(material)
+            reason = refusal.text
     kind = src["kind"]
     alpha = src.get("alpha", 0)
     if not reason and kind in ("tension", "compression", "buckling") and src["N"]["value"] <= 0:
@@ -596,7 +669,9 @@ def resolve(src, positions, values=None, building=None):
     contact = _contact(src, grade if not reason else None, section)
     if not reason and contact["reason"]:
         reason = contact["reason"]
-    if not reason and kind == "tension" and alpha == 0:
+    if resistance is not None and resistance["type"] == "member" and contact["case"] is not None and "f_c_90" in resistance["values"]:
+        contact["f_c_90_table"] = resistance["values"]["f_c_90"]["value"]   # the engineer's member: f_c,90,d «generell», the one it gives (REQ-005)
+    if not reason and kind == "tension" and alpha == 0 and grade:
         # Tabelle 8 note 2 (C16): «Für Zugglieder nicht zulässig» -- the very refusal verify-tension makes, said here so that the record is not exported as calculable and then refused by the report
         row = sia265.grade(grade)
         notes = (row.get("notes") or {}).get("f_t_0_d") or []
@@ -609,7 +684,7 @@ def resolve(src, positions, values=None, building=None):
     fire = None
     if src.get("fire") is not None:
         # the design situation fire (issue #46): the duration, the faces, the residual section -- and what makes it not calculable
-        fire, fire_reason = _fire_block(src, grade if not reason else None, section if not reason else None, building)
+        fire, fire_reason = _fire_block(src, grade if not reason and grade else None, section if not reason and grade else None, building)
         if not reason and fire_reason:
             reason = fire_reason
     if reason:
@@ -670,6 +745,29 @@ def resolve(src, positions, values=None, building=None):
         out["fire"] = fire
     if provenance:
         out["links"] = provenance
+    # the material of the library (issue #112, REQ-015): only where the source names one, so that every other record is exported as before
+    if material_id is not None:
+        shown = material if material is not None else find_material(material_id, library)
+        out["material"] = {"id": material_id, "type": (shown or {}).get("type") or ("member" if material_kind == "grade" else None),
+                           "origin": (shown or {}).get("origin") or ("user" if material_kind == "user" else None),
+                           "names": dict((shown or {}).get("names") or {}), "from": "stated"}
+        if material_kind == "panel" or (shown or {}).get("type") == "panel":
+            out["loading"] = dict(src.get("loading") or {"mode": "plaque", "direction": "par"})
+            out["kled"] = src.get("kled") or material_.DEFAULT_KLED
+            out["accidental"] = bool(src.get("accidental"))
+        if resistance is not None:
+            out["resistance"] = resistance
+        held = position_grade(record) if record is not None else ""
+        if held and held != grade:
+            # REQ-013: the position says another class -- said in orange («Classe de résistance est écrasée (GL24h) alors que T001 dit C24»)
+            material_notes = [("material_overrides", {"material": material_id, "position": pid, "held": held})] + list(material_notes)
+    if refusal is not None:
+        out["reason_code"] = refusal.code
+        out["reason_params"] = dict(refusal.params)
+    if material_notes:
+        out["notes"] = [{"code": code, "params": params} for code, params in material_notes]
+    if src.get("display"):
+        out["display"] = dict(src["display"])
     return out
 
 
@@ -686,7 +784,24 @@ def compute(record):
     result = _compute(record)
     if result:
         result["ratio"] = governing_ratio(result["rows"])
+        # the row that gives η where η is the largest of several -- a side, an axis -- which the window frames with a dashed line (issue #112, REQ-014); the rows stay in the order of the calculation, η last
+        result["governing"] = governing_rows(result["rows"])
     return result
+
+
+def governing_rows(rows):
+    """[key] of the row that governs a maximum -- the side or the axis whose utilisation η is (`max(…)`), the first on a tie, as `governing_ratio` reads it --, [] where η is no maximum (REQ-014)."""
+    eta = next((row for row in rows if row["key"] == "eta"), None)
+    if eta is None or not (eta.get("formula") or "").startswith("max("):
+        return []
+    sides = [row for row in rows if row["key"] in GOVERNING_KEYS]
+    if not sides:
+        return []
+    return [max(sides, key=lambda row: row["value"])["key"]]
+
+
+# The utilisations of the parts a check's η is the largest of: the two sides of a section at an angle, the section and its stability about each axis (issue #38)
+GOVERNING_KEYS = ("eta_m_t", "eta_m_c", "eta_s", "eta_y", "eta_z", "eta_m")
 
 
 def governing_ratio(rows):
@@ -802,9 +917,9 @@ def _compute_section(record, k_fi=1.0):
     fire = k_fi != 1.0
     kind = record["kind"]
     alpha = record.get("alpha", 0)
-    row = sia265.grade(record["grade"])
-    eta_w = sia265.eta_w(record["moisture_class"], "resistance")
-    eta_t = sia265.eta_t(bool(record.get("impact")))
+    # what the check reads of its material (issue #112, ARCH-RISK-005): a class of SIA 265 its table's values times eta_w and eta_t, as always; a member of one's own its design values times the same; a panel η_mod and γ_M of SIA 265/1
+    strengths = material_.Strengths(record, k_fi)
+    row = strengths.row
     section = record["section"]
     if section["type"] == "cir":
         area = math.pi * section["d"] ** 2 / 4
@@ -812,29 +927,21 @@ def _compute_section(record, k_fi=1.0):
     else:
         area = section["b"] * section["h"]
         area_row = _row("A", "A", area, "mm²", "b dot h", keys="b dot h")
-    factors = [_row("eta_w", "eta_w", eta_w, "", label="Feuchteklasse %d" % record["moisture_class"], clause="Tabelle 4"),
-               _row("eta_t", "eta_t", eta_t, "", clause="2.2.6")]
-    tab_ref = "Tabelle %s" % sia265.grade_table(record["grade"])
-
-    def design(key, symbol, table_value, label=None):
-        value = k_fi * eta_w * eta_t * table_value
-        # the table's own value, a var of the unfolded file (`table`): Tabelle 8/9 gives design values, which eta_w and eta_t then multiply (SIA 265 2.2.2, 3.3.2.1)
-        table = _row(key + "_tab", symbol[:-1] + ",\"Tab\")" if symbol.endswith(")") else symbol + "_\"Tab\"", table_value, "N/mm²", clause=tab_ref)
-        return value, _row(key, symbol, value, "N/mm²", "%seta_w dot eta_t dot %s" % ("k_(fi) dot " if fire else "", _fmt(table_value)), label,
-                           keys="%seta_w dot eta_t dot %s" % ("k_fi dot " if fire else "", table.key), clause=tab_ref, table=table)
+    factors = strengths.factor_rows
+    design = strengths.design
 
     def at_angle(f0, f90):
         a = math.radians(alpha)
         return f90 * f0 / (f0 * math.sin(a) ** 2 + f90 * math.cos(a) ** 2)
 
     if kind == "bending":
-        return _compute_bending(record, row, area, area_row, factors, design, at_angle, k_fi * eta_w * eta_t)
+        return _compute_bending(record, row, area, area_row, factors, design, at_angle, strengths)
     if kind == "shear":
-        return _compute_shear(record, area, area_row, factors, design, row)
+        return _compute_shear(record, area, area_row, factors, design, row, strengths)
     if kind == "buckling":
         return _compute_buckling(record, row, area, area_row, factors, design)
     if kind == "lateral-torsional":
-        return _compute_lateral(record, row, area, area_row, factors, design, k_fi * eta_w * eta_t)
+        return _compute_lateral(record, row, area, area_row, factors, design, strengths)
     force = record["N"]["value"] * _TO_KN[record["N"]["unit"]]       # kN
     if kind == "tension":
         force_row = _row("N_t_d", "N_(t,d)", force, "kN")
@@ -896,8 +1003,8 @@ def _compute_section(record, k_fi=1.0):
 _TO_KNM = {"Nm": 1e-3, "kNm": 1.0, "MNm": 1e3}
 
 
-def _bending_values(record, row, factor):
-    """What a bending check reads of its member, as `#member` computes it: the moments in kNm (a moment absent or 0 is None), W_y and W_z (π·d³/32 for both about a round section), k_h of glulam under 600 mm (3.4.2.3, `sia265.k_h`) and f_m,y,d, f_m,z,d -- with the rows each prints. `factor` is eta_w·eta_t. Shared by the section's check (`_compute_bending`) and lateral torsional buckling (`_compute_lateral`), so the arithmetic is written once."""
+def _bending_values(record, row, strengths):
+    """What a bending check reads of its member, as `#member` computes it: the moments in kNm (a moment absent or 0 is None), W_y and W_z (π·d³/32 for both about a round section), k_h of glulam under 600 mm (3.4.2.3, `sia265.k_h`) and f_m,y,d, f_m,z,d -- with the rows each prints. `strengths` (member_check_material.Strengths) gives f_m,d: a class's or a member's k_h · η_w · η_t · f_m,d, a panel's by SIA 265/1, no k_h (issue #112). Shared by the section's check (`_compute_bending`) and lateral torsional buckling (`_compute_lateral`), so the arithmetic is written once."""
     section = record["section"]
     moments = {key: abs(record[key]["value"]) * _TO_KNM[record[key]["unit"]] if record.get(key) else None for key in MOMENTS}   # kNm
     # the section's moduli and k_h, as #member computes them
@@ -910,7 +1017,7 @@ def _bending_values(record, row, factor):
         w_y, w_z = b * h ** 2 / 6, h * b ** 2 / 6
         modulus_rows = [_row("W_y", "W_y", w_y, "mm³", "b dot h^2 / 6")] + ([_row("W_z", "W_z", w_z, "mm³", "h dot b^2 / 6")] if moments["M_z"] else [])
         sides = (("k_h_y", "k_(h,y)", "h", h), ("k_h_z", "k_(h,z)", "b", b))
-    glulam = record["grade"] in {g["id"] for g in sia265.table_9()["grades"]}
+    glulam = strengths.glulam
     clause = sia265.k_h()
     # in the fire situation k_h is not applied (SIA 265 4.5.2.5) and the factor carries (51)'s k_fi
     fire = bool(record.get("fire"))
@@ -924,22 +1031,24 @@ def _bending_values(record, row, factor):
         else:
             k_h[key] = 1.0
     k_h.setdefault("k_h_z", k_h["k_h_y"])
-    f_m = {axis: k_h["k_h_" + axis] * factor * row["f_m_d"] for axis in ("y", "z")}
-    f_m_rows = {axis: _row("f_m_%s_d" % axis, "f_(m,%s,d)" % axis, f_m[axis], "N/mm²", "%s%seta_w dot eta_t dot %s" % ("k_(fi) dot " if fire else "", "k_(h,%s) dot " % axis if k_h["k_h_" + axis] != 1 else "", _fmt(row["f_m_d"])))
+    bent = {axis: strengths.bending(axis, k_h["k_h_" + axis]) for axis in ("y", "z")}
+    f_m = {axis: bent[axis][0] for axis in ("y", "z")}
+    clause_m, norm_m, label_m = strengths.bending_clause()
+    f_m_rows = {axis: _row("f_m_%s_d" % axis, "f_(m,%s,d)" % axis, f_m[axis], "N/mm²", bent[axis][1], label_m, clause=clause_m, norm=norm_m)
                 for axis in ("y", "z")}
     moment_rows = [_row("%s_d" % key, "M_(%s,d)" % key[-1], moments[key], "kNm") for key in MOMENTS if moments[key]]
     return {"moments": moments, "w_y": w_y, "w_z": w_z, "k_h": k_h, "k_rows": k_rows, "f_m": f_m, "f_m_rows": f_m_rows,
             "modulus_rows": modulus_rows, "moment_rows": moment_rows}
 
 
-def _compute_bending(record, row, area, area_row, factors, design, at_angle, factor):
+def _compute_bending(record, row, area, area_row, factors, design, at_angle, strengths):
     """`compute` for a bending, the section alone -- `#member`'s section values and design values, then verify-bending's or verify-bending-normal's arithmetic (lib/timber.typ): W_y = b·h²/6 and W_z = h·b²/6, or π·d³/32 for both; f_m by k_h for glulam under 600 mm (3.4.2.3, `sia265.k_h`); then (14), (15)/(16), (17) to (20), (21) or (22), and at an angle with a normal force (21) or (22) with (9) or (13), (19), (20) on the side where N adds and (17) or (18) on the other -- the engineer's reading (08.10.2026). `factor` is eta_w·eta_t. The rows are named by the registry's keys; the utilisation of each side is `eta_m_t` and `eta_m_c`, as the report stores it."""
     alpha = record.get("alpha", 0)
     normal = record["N"]["value"] * _TO_KN[record["N"]["unit"]]       # kN, tension positive
-    values = _bending_values(record, row, factor)
+    values = _bending_values(record, row, strengths)
     moments, w_y, w_z, k_rows, f_m, f_m_rows = values["moments"], values["w_y"], values["w_z"], values["k_rows"], values["f_m"], values["f_m_rows"]
     modulus_rows, moment_rows = values["modulus_rows"], values["moment_rows"]
-    f90_c_table = row["f_c_90_d"]["generell"]
+    f90_c_table = (row.get("f_c_90_d") or {}).get("generell")
     f90_c_table = f90_c_table.get("value") if isinstance(f90_c_table, dict) else f90_c_table   # #member reads «generell», a number in both tables
     tension = normal > 0
 
@@ -1053,20 +1162,19 @@ def _result(kind, equation, clause, rows, eta, relation):
     return {"kind": kind, "equation": equation, "clause": clause, "rows": rows, "eta": eta, "ok": eta <= 1 + 1e-9, "relation": relation}
 
 
-def _compute_shear(record, area, area_row, factors, design, row):
+def _compute_shear(record, area, area_row, factors, design, row, strengths):
     """`compute` for a shear check, by its variant (REQ-021): the shear of 4.2.5.1 (`_compute_shear_v`), the shear-off of 4.2.6, the shear with a stress perpendicular to the grain of 4.2.7.1."""
     variant = record.get("variant") or "shear"
     if variant == "shear-off":
-        return _compute_shear_off(record, factors, design, row)
+        return _compute_shear_off(record, factors, design, row, strengths.family)
     if variant == "shear-perp":
         return _compute_shear_perp(record, area, area_row, factors, design, row)
-    return _compute_shear_v(record, area, area_row, factors, design, row)
+    return _compute_shear_v(record, area, area_row, factors, design, row, strengths.family)
 
 
-def _compute_shear_off(record, factors, design, row):
+def _compute_shear_off(record, factors, design, row, family):
     """`compute` for a shear-off, SIA 265 4.2.6 -- verify-shear-off's arithmetic, now Python's (REQ-021): tau_a = F / (l · w), w the member's width where none is given, against k_a · f_v,d, k_a 0.6 for solid timber (26) and 0.8 for glulam (27), the sheared length at least the clause's."""
     clause = sia265.shear_off()
-    family = _family(record["grade"])
     force = abs(record["F"]["value"]) * _TO_KN[record["F"]["unit"]]        # kN
     length = record["l"]
     width = record.get("w") or record["section"].get("b") or record["section"].get("d")
@@ -1108,10 +1216,15 @@ def _compute_shear_perp(record, area, area_row, factors, design, row):
     rows.append(_row("eta", "eta", eta, "", formula, clause=clause["norm_ref"]))
     # (28) in the registry's keys, the relation an unfolded check verifies before its utilisation is written
     relation = "((f_c_90_d + sigma_90_d) / (f_c_90_d + k_t_90 dot f_t_90_d))^2 + (tau_d / f_v_d)^2 dot (1 - (f_c_90_d / (f_c_90_d + k_t_90 dot f_t_90_d))^2) <= 1"
-    return _result("shear", "(28)", clause["norm_ref"], rows, eta, relation)
+    out = _result("shear", "(28)", clause["norm_ref"], rows, eta, relation)
+    if not -f_c90 <= sigma <= f_t90:
+        # sigma_90,d outside -f_c,90,d … f_t,90,d (issue #112, REQ-008): said in orange, the check computed all the same
+        out["notes"] = [{"code": "sigma_90_outside", "field": "sigma_90", "level": "warn",
+                         "params": {"sigma": _fmt(round(sigma, 3)), "f_c_90_d": _fmt(round(f_c90, 3)), "f_t_90_d": _fmt(round(f_t90, 3))}}]
+    return out
 
 
-def _compute_shear_v(record, area, area_row, factors, design, row):
+def _compute_shear_v(record, area, area_row, factors, design, row, family):
     """`compute` for a shear, SIA 265 4.2.5.1 -- verify-shear's arithmetic: tau = factor · V / A at the centroid (1.5 for a rectangle, 4/3 for a circle: SHEAR_FACTORS, mechanics), the two planes added as vectors, against f_v,d -- halved for a member cut from the pith (Tabelle 8 note 6). Equation (23)."""
     factor = SHEAR_FACTORS[record["section"]["type"]]
     rows, taus = [area_row], []
@@ -1129,7 +1242,7 @@ def _compute_shear_v(record, area, area_row, factors, design, row):
     f_v, f_v_row = design("f_v_d", "f_(v,d)", row["f_v_d"])
     rows.append(f_v_row)
     shown_tau = "tau_d" if len(taus) == 2 else taus[0][0]
-    pith = bool(record.get("pith")) and _family(record["grade"]) != "Brettschichtholz"   # Tabelle 8 note 6, solid timber only (D-02)
+    pith = bool(record.get("pith")) and family == "Vollholz"   # Tabelle 8 note 6, solid timber only (D-02)
     if pith:
         f_v = f_v / 2
         rows.append(_row("f_v_d_p", "f_(v,d)", f_v, "N/mm²", "f_(v,d) / 2", "Markstück"))
@@ -1139,47 +1252,6 @@ def _compute_shear_v(record, area, area_row, factors, design, row):
     eta = tau_d / f_v
     rows.append(_row("eta", "eta", eta, "", "%s / %s" % (shown_tau, "(f_(v,d) / 2)" if pith else "f_(v,d)")))
     return _result("shear", "(23)", "4.2.5.1", rows, eta, relation)
-
-
-def _slenderness_rows(record, axis, lever, sigma_c, f_c, beta_c, f_c_0_k, e_0_05, bend=None):
-    """Buckling about one axis, 4.2.8 -- timber-kc's arithmetic: l_k = beta · l, lambda = l_k / i, lambda_rel = lambda/pi · sqrt(f_c,0,k / E_0,05) (34), and k_c = 1 up to lambda_rel,limit (Figur 10), else (30) with k of (31). `lever` is i about the axis; `bend` the bending term (37) adds, (formula, value) or None. Gives (rows, eta about the axis)."""
-    clause = sia265.buckling()
-    l_k = record["beta_" + axis] * record["l_" + axis]
-    lam = l_k / lever
-    lam_rel = lam / math.pi * math.sqrt(f_c_0_k / e_0_05)
-    rows = [_row("l_k_" + axis, "l_(k,%s)" % axis, l_k, "mm", "beta_%s dot l_%s" % (axis, axis)),
-            _row("lambda_" + axis, "lambda_" + axis, lam, "", "l_(k,%s) / i_%s" % (axis, axis)),
-            _row("lambda_rel_" + axis, "lambda_(rel,%s)" % axis, lam_rel, "", "lambda_%s / pi dot sqrt(f_(c,0,k) / E_(0,05))" % axis)]
-    if lam_rel <= clause["lambda_rel_limit"]:
-        k_c = 1.0
-        rows.append(_row("k_c_" + axis, "k_(c,%s)" % axis, k_c, "", label="λ_rel ⩽ %s" % _fmt(clause["lambda_rel_limit"])))
-    else:
-        k = clause["k_factor"] * (1 + beta_c * (lam_rel - clause["lambda_rel_offset"]) + lam_rel ** 2)
-        k_c = 1 / (k + math.sqrt(k ** 2 - lam_rel ** 2))
-        rows += [_row("k_" + axis, "k_" + axis, k, "", "%s dot (1 + beta_c dot (lambda_(rel,%s) - %s) + lambda_(rel,%s)^2)" % (_fmt(clause["k_factor"]), axis, _fmt(clause["lambda_rel_offset"]), axis)),
-                 _row("k_c_" + axis, "k_(c,%s)" % axis, k_c, "", "1 / (k_%s + sqrt(k_%s^2 - lambda_(rel,%s)^2))" % (axis, axis, axis))]
-    eta = sigma_c / (k_c * f_c) + (bend[1] if bend else 0)
-    formula = "sigma_(c,0,d) / (k_(c,%s) dot f_(c,0,d))" % axis + (" + " + bend[0] if bend else "")
-    rows.append(_row("eta_" + axis, "eta_(c,%s)" % axis, eta, "", formula))
-    return rows, eta
-
-
-def _stiffness(record):
-    """What the relative slendernesses read of the member, as `#member` stores it: f_c,0,k and E_0,05 of Anhang B (Tabellen 47, 48), E_0,05 times eta_w for the stiffness (Tabelle 4) -- the factor the Stützen workbook computes and leaves out (issue #38) -- and the radii of gyration i_y, i_z (d/4 both for a round section). Gives (rows, f_c_0_k, E_0_05, i_y, i_z)."""
-    characteristic = sia265.characteristic(record["grade"])
-    eta_w_e = sia265.eta_w(record["moisture_class"], "stiffness")
-    e_0_05 = eta_w_e * characteristic["E_0_05"]
-    section = record["section"]
-    if section["type"] == "cir":
-        i_y = i_z = section["d"] / 4
-        radius_rows = [_row("i_y", "i_y", i_y, "mm", "d / 4")]
-    else:
-        i_y, i_z = section["h"] / math.sqrt(12), section["b"] / math.sqrt(12)
-        radius_rows = [_row("i_y", "i_y", i_y, "mm", "sqrt(I_y / A)"), _row("i_z", "i_z", i_z, "mm", "sqrt(I_z / A)")]
-    rows = radius_rows + [_row("eta_w_E", "eta_(w,E)", eta_w_e, "", label="Feuchteklasse %d" % record["moisture_class"]),
-                          _row("f_c_0_k", "f_(c,0,k)", characteristic["f_c_0_k"], "N/mm²"),
-                          _row("E_0_05", "E_(0,05)", e_0_05, "N/mm²", "eta_(w,E) dot %s" % _fmt(characteristic["E_0_05"]))]
-    return rows, characteristic["f_c_0_k"], e_0_05, i_y, i_z
 
 
 def strong_axis(section):
@@ -1193,128 +1265,6 @@ def _family(grade):
     return "Brettschichtholz" if grade in {g["id"] for g in sia265.table_9()["grades"]} else "Vollholz"
 
 
-def _compute_buckling(record, row, area, area_row, factors, design):
-    """`compute` for a buckling, SIA 265 4.2.8 -- verify-compression's with `stability: true`: the section, sigma_c,0,d <= f_c,0,d (10), then about each axis (29) with k_c of (30), (31) and lambda_rel of (34); eta the largest of the three."""
-    force = record["N"]["value"] * _TO_KN[record["N"]["unit"]]
-    sigma = force * 1000 / area
-    f_c, f_row = design("f_c_0_d", "f_(c,0,d)", row["f_c_0_d"])
-    stiffness_rows, f_c_0_k, e_0_05, i_y, i_z = _stiffness(record)
-    beta_c = sia265.buckling()["beta_c"][_family(record["grade"])]
-    eta_s = sigma / f_c
-    rows = [area_row] + stiffness_rows + [_row("N_c_d", "N_(c,d)", force, "kN")] + factors + [
-        f_row, _row("sigma_c_0_d", "sigma_(c,0,d)", sigma, "N/mm²", "N_(c,d) / A"),
-        _row("eta_s", "eta_s", eta_s, "", "sigma_(c,0,d) / f_(c,0,d)"), _row("beta_c", "beta_c", beta_c, "")]
-    etas = [eta_s]
-    for axis, lever in (("y", i_y), ("z", i_z)):
-        axis_rows, eta_axis = _slenderness_rows(record, axis, lever, sigma, f_c, beta_c, f_c_0_k, e_0_05)
-        rows += axis_rows
-        etas.append(eta_axis)
-    eta = max(etas)
-    governing = ("sigma_c_0_d <= f_c_0_d", "sigma_c_0_d <= k_c_y dot f_c_0_d", "sigma_c_0_d <= k_c_z dot f_c_0_d")[etas.index(eta)]
-    rows.append(_row("eta", "eta", eta, "", "max(eta_s, eta_(c,y), eta_(c,z))"))
-    return _result("buckling", "(10), (29)", "4.2.8", rows, eta, governing)
-
-
-def _compute_lateral(record, row, area, area_row, factors, design, factor):
-    """`compute` for a lateral torsional buckling, SIA 265 4.2.9 -- verify-bending's or verify-bending-normal's with `stability: true`, along the grain: the section by (14), (21) or (22); sigma_m,crit of (41) from a, or as given, lambda_rel,m (40) and k_m (39); then without a normal force or with a tension (38), sigma_m,y,d <= k_m · f_m,y,d, and with a compression (37) about each axis, k_c of 4.2.8 beside k_m. eta the largest."""
-    values = _bending_values(record, row, factor)
-    moments, f_m = values["moments"], values["f_m"]
-    normal = record["N"]["value"] * _TO_KN[record["N"]["unit"]]       # kN, tension positive
-    section = record["section"]
-    rows = ([area_row] if normal else []) + values["modulus_rows"] + values["moment_rows"]
-    terms, shown_terms = [], []
-    if normal > 0:
-        f_n, f_n_row = design("f_t_0_d", "f_(t,0,d)", row["f_t_0_d"])
-        sigma_n = normal * 1000 / area
-        rows.append(_row("N_t_d", "N_(t,d)", normal, "kN"))
-        n_rows = [f_n_row, _row("sigma_t_0_d", "sigma_(t,0,d)", sigma_n, "N/mm²", "N_(t,d) / A")]
-        terms.append(sigma_n / f_n)
-        shown_terms.append("sigma_(t,0,d) / f_(t,0,d)")
-    elif normal < 0:
-        f_n, f_n_row = design("f_c_0_d", "f_(c,0,d)", row["f_c_0_d"])
-        sigma_n = -normal * 1000 / area
-        rows.append(_row("N_c_d", "N_(c,d)", -normal, "kN"))
-        n_rows = [f_n_row, _row("sigma_c_0_d", "sigma_(c,0,d)", sigma_n, "N/mm²", "N_(c,d) / A")]
-        terms.append((sigma_n / f_n) ** 2)
-        shown_terms.append("(sigma_(c,0,d) / f_(c,0,d))^2")
-    else:
-        n_rows = []
-    rows += factors + values["k_rows"]
-    sigma_m = {}
-    stress_rows = []
-    for axis, key in (("y", "M_y"), ("z", "M_z")):
-        if moments[key]:
-            rows.append(values["f_m_rows"][axis])
-            sigma_m[axis] = moments[key] * 1e6 / (values["w_y"] if axis == "y" else values["w_z"])
-            stress_rows.append(_row("sigma_m_%s_d" % axis, "sigma_(m,%s,d)" % axis, sigma_m[axis], "N/mm²", "M_(%s,d) / W_%s" % (axis, axis)))
-            terms.append(sigma_m[axis] / f_m[axis])
-            shown_terms.append("sigma_(m,%s,d) / f_(m,%s,d)" % (axis, axis))
-    rows += n_rows + stress_rows
-    eta_s = sum(terms)
-    rows.append(_row("eta_s", "eta_s", eta_s, "", " + ".join(shown_terms)))
-    # 4.2.9: sigma_m,crit, lambda_rel,m, k_m -- E_0,05 times eta_w for the stiffness, as #member stores it
-    stiffness_rows, f_c_0_k, e_0_05, i_y, i_z = _stiffness(record)
-    lateral = sia265.lateral_buckling()
-    rows += stiffness_rows
-    # the axis that tips (timber-tips' twin, D-09): y, z where the section is wider than high, none for a round section or where only the weak axis is bent (D-10, D-17) -- k_m = 1 then, and (38) has nothing to add
-    axis = strong_axis(section)
-    tips = axis is not None and axis in sigma_m
-    if not tips:
-        k_m = 1.0
-        if normal < 0:
-            # (37) reads it, as verify-bending-normal stores it; (38) has nothing to divide and prints none
-            rows.append(_row("k_m", "k_m", k_m, "", label="Kreisquerschnitt" if axis is None else "Biegung nur um die schwache Achse"))
-    else:
-        if record.get("sigma_m_crit") is not None:
-            crit = record["sigma_m_crit"]
-            rows.append(_row("sigma_m_crit", "sigma_(m,crit)", crit, "N/mm²", label="vorgegeben"))
-        else:
-            # (41) for a b × h rectangle bent about its strong axis: the side along the moment's axis squared over the other -- b²/h about y, h²/b about z
-            narrow, deep, shown = (section["b"], section["h"], "b^2 / (a dot h)") if axis == "y" else (section["h"], section["b"], "h^2 / (a dot b)")
-            crit = lateral["sigma_m_crit_factor"] * e_0_05 * narrow ** 2 / (record["a"] * deep)
-            rows += [_row("a", "a", record["a"], "mm"),
-                     _row("sigma_m_crit", "sigma_(m,crit)", crit, "N/mm²", "%s dot E_(0,05) dot %s" % (_fmt(lateral["sigma_m_crit_factor"]), shown))]
-        f_m_k = row["f_m_k"]
-        lam_m = math.sqrt(f_m_k / crit)
-        km = lateral["k_m"]
-        if lam_m <= km["lower_bound"]:
-            k_m, k_m_formula = 1.0, None
-        elif lam_m <= km["upper_bound"]:
-            k_m, k_m_formula = km["intercept"] - km["slope"] * lam_m, "%s - %s dot lambda_(rel,m)" % (_fmt(km["intercept"]), _fmt(km["slope"]))
-        else:
-            k_m, k_m_formula = 1 / lam_m ** 2, "1 / lambda_(rel,m)^2"
-        rows += [_row("f_m_k", "f_(m,k)", f_m_k, "N/mm²"), _row("lambda_rel_m", "lambda_(rel,m)", lam_m, "", "sqrt(f_(m,k) / sigma_(m,crit))"),
-                 _row("k_m", "k_m", k_m, "", k_m_formula)]
-    if normal >= 0:
-        if not tips:
-            rows.append(_row("eta", "eta", eta_s, "", "eta_s"))
-            return _result("lateral-torsional", "(38)", "4.2.9", rows, eta_s, "eta_s <= 1")
-        # (38): the bending about the strong axis against k_m · f_m,d about it
-        eta_m = sigma_m[axis] / (k_m * f_m[axis])
-        rows.append(_row("eta_m", "eta_m", eta_m, "", "sigma_(m,%s,d) / (k_m dot f_(m,%s,d))" % (axis, axis)))
-        eta = max(eta_s, eta_m)
-        relation = "sigma_m_%s_d <= k_m dot f_m_%s_d" % (axis, axis) if eta_m >= eta_s else "eta_s <= 1"
-        rows.append(_row("eta", "eta", eta, "", "max(eta_s, eta_m)"))
-        return _result("lateral-torsional", "(38)", "4.2.9", rows, eta, relation)
-    # (37) about each axis, with a compression: k_c beside k_m on y, the bending about z on z
-    f_c = f_n
-    beta_c = sia265.buckling()["beta_c"][_family(record["grade"])]
-    rows.append(_row("beta_c", "beta_c", beta_c, ""))
-    etas = [eta_s]
-    strong = axis
-    for axis, lever in (("y", i_y), ("z", i_z)):
-        bend = None
-        if axis in sigma_m:
-            # k_m on the strong axis's bending (D-09), whose own k_m is 1 where nothing tips
-            bend = ("sigma_(m,%s,d) / (k_m dot f_(m,%s,d))" % (axis, axis), sigma_m[axis] / (k_m * f_m[axis])) if axis == (strong or "y") else ("sigma_(m,%s,d) / f_(m,%s,d)" % (axis, axis), sigma_m[axis] / f_m[axis])
-        axis_rows, eta_axis = _slenderness_rows(record, axis, lever, sigma_n, f_c, beta_c, f_c_0_k, e_0_05, bend)
-        rows += axis_rows
-        etas.append(eta_axis)
-    eta = max(etas)
-    rows.append(_row("eta", "eta", eta, "", "max(eta_s, eta_(c,y), eta_(c,z))"))
-    return _result("lateral-torsional", "(22), (37)", "4.2.8.5", rows, eta, ("eta_s <= 1", "eta_y <= 1", "eta_z <= 1")[etas.index(eta)])
-
-
 # --- the export ----------------------------------------------------------------
 
 def empty():
@@ -1326,13 +1276,16 @@ def prepare(here, positions, values=None):
     """Every member check of `here`, read, checked and resolved against `positions` -- and its linked fields against `values` (`links.index`), a check in the fire situation against the project's building (`read_building`) --, as data/checks.json holds it. Nothing is written. A malformed source stops; anything the project lacks is in the record, `calculable: false` and its reason (the warnings are on each record: `warnings_of`)."""
     checks, seen = {}, {}
     building = read_building(here)
+    library = None   # the engineer's materials the checks name, read once where one names a u-… (issue #112, REQ-002)
     for path in source_paths(here):
         src = read_source(path)
         lower = src["id"].lower()
         if lower in seen:
             _fail("checks/%s" % path.name, "id %r is also %s's -- ids differ by more than their case" % (src["id"], seen[lower]))
         seen[lower] = path.name
-        record = resolve(src, positions, values, building)
+        if library is None and material_.kind_of_id(src.get("material")) == "user":
+            library = library_of(here)
+        record = resolve(src, positions, values, building, library)
         record["warnings"] = [str(note) for note in record["warnings"]]
         checks[src["id"]] = record
         if is_unfolded(record):
@@ -1341,7 +1294,8 @@ def prepare(here, positions, values=None):
     burning = any("fire" in record for record in checks.values())
     unfolded_any = any(is_unfolded(record) for record in checks.values())
     required_any = any((record.get("fire") or {}).get("required") for record in checks.values())
-    version = (UNFOLDED_BASE_EXPORT_VERSION if unfolded_any else REQUIRED_EXPORT_VERSION if required_any else FIRE_EXPORT_VERSION if burning
+    library_any = any(key in record for record in checks.values() for key in LIBRARY_RECORD_KEYS)
+    version = (LIBRARY_EXPORT_VERSION if library_any else UNFOLDED_BASE_EXPORT_VERSION if unfolded_any else REQUIRED_EXPORT_VERSION if required_any else FIRE_EXPORT_VERSION if burning
                else LINKED_EXPORT_VERSION if linked else EXPORT_SCHEMA_VERSION)
     data = {"schema_version": version, "checks": checks}
     validation.validate_structure(data, EXPORT_SCHEMA)
@@ -1357,7 +1311,8 @@ def mark_unfolded_files(data, files):
             record["file"] = files.get(rid)
             marked = True
     if marked:
-        data["schema_version"] = UNFOLDED_BASE_EXPORT_VERSION
+        if data["schema_version"] != LIBRARY_EXPORT_VERSION:
+            data["schema_version"] = UNFOLDED_BASE_EXPORT_VERSION   # 1.7 holds 1.6's file already
         validation.validate_structure(data, EXPORT_SCHEMA)
     return marked
 
@@ -1424,18 +1379,77 @@ def write(data, data_dir):
     engine.write_json(Path(data_dir) / EXPORT_FILE, data)
 
 
-def export(here=None):
-    """prepare() then write(), against the positions the last export wrote -- what Woodcore runs when a check is saved, so that one check is exported without the workbooks being read again (connector.export's arrangement)."""
+def export(here=None, moved=()):
+    """prepare() then write(), against the positions the last export wrote -- what Woodcore runs when a check is saved, so that one check is exported without the workbooks being read again (connector.export's arrangement). `moved`: the checks whose kind the save changed and whose file it moved (issue #112, REQ-011) -- written again in their new form after the export, the engineer's changed lines kept (`unfold.regenerate`)."""
     from domains import connector   # known_positions: the one reader of the exported positions Woodcore's tabs share
     here = here or project.current()
     import variable_sources   # the reader of data/'s variables, which imports the domains: imported here, as connector is
+    sync_materials(here)
     data = prepare(here, connector.known_positions(here.data_dir), variable_sources.known_values(here.data_dir))
     write(data, here.data_dir)
     # a check printed unfolded gets its domain when it is first saved (spec 2026-10-15, REQ-002), and the index of the domains lists it
     from domains import formula_domain, unfold
     if unfold.unfold_checks(here, data):
         formula_domain.export(here)
+    from domains import unfold_display
+    for rid in moved:
+        try:
+            unfold.regenerate(here, rid)
+            unfold_display.apply_check_display(here, rid, data["checks"][rid], retitle=True)
+        except (unfold.UnfoldError, KeyError):
+            pass   # a conflict, or a check no longer unfolded: the «Formules» tab asks it line by line
     return data
+
+
+def save_kind_change(here, rid, old_kind, new_kind):
+    """What a save does before the export when the stability was ticked or unticked (REQ-011, ARCH-009): the file moved to the folder of the new kind (`unfold.move_domain`). Returns the ids to write again in the new form (`export(moved=)`)."""
+    from domains import unfold
+    return (rid,) if unfold.move_domain(here, rid, old_kind, new_kind) is not None else ()
+
+
+def after_unfold(here, rid, record):
+    """What `unfold.unfold_domains` writes onto a check's file after its lines: the options of «Affichage» its source keeps (issue #112, REQ-010, ARCH-010) -- `unfold_display.apply_check_display`."""
+    from domains import unfold_display
+    return unfold_display.apply_check_display(here, rid, record)
+
+
+def change_kind(src, stability):
+    """The source with its stability ticked or not (issue #112, REQ-011, Q-001 A): a compression becomes a buckling and a bending a lateral torsional buckling -- along the grain, alpha 0, the system lengths and coefficients of `new_source` added where it has none --, and back. The id, the position, the material, the section and the forces stay. The kind is what a check is listed, exported and filed by; the save moves its file (`unfold.move_domain`)."""
+    out = dict(src)
+    kind = out["kind"]
+    target = {("compression", True): "buckling", ("bending", True): "lateral-torsional",
+              ("buckling", False): "compression", ("lateral-torsional", False): "bending"}.get((kind, bool(stability)))
+    if target is None:
+        return out
+    out["kind"] = target
+    if stability:
+        out["alpha"] = 0
+        defaults = new_source(out["id"], target)
+        for key in LENGTHS + BETAS + ("a", "sigma_m_crit"):
+            if key in defaults and out.get(key) is None:
+                out[key] = defaults[key]
+        if out.get("sigma_m_crit") is not None:
+            out["a"] = None
+    else:
+        for key in ("l_y", "l_z", "beta_y", "beta_z", "a", "sigma_m_crit"):
+            out.pop(key, None)
+        if target == "compression":
+            out.setdefault("case", "generell")
+            out.setdefault("larger", False)
+            out.setdefault("l", None)
+            out.setdefault("w", None)
+    return out
+
+
+def sync_materials(here):
+    """The project's copies of the engineer's materials made to follow what its cases name -- the checks among them (issue #112, REQ-002, D-21): a copy taken of a member or a panel of one's own a check newly names, at the save, before the export (materials_project.sync, as the permanent loads do). A material neither copied nor in the library is left to the check, which then says it cannot be calculated; a project whose materials.json is still at 1.0 is left as it is."""
+    from domains import materials_project
+    try:
+        used = materials_project.used_ids(here)
+        if used or materials_project.copies(here):
+            materials_project.sync(used, here)
+    except (validation.ValidationError, OSError):
+        pass
 
 
 def references(record):

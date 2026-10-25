@@ -298,37 +298,54 @@ def test_a_report_alone_is_seeded_as_it_always_was():
     assert export_all.seed(here) == ["journal.json"], "the report's journal is seeded as it always was"
 
 
-def test_a_project_that_never_had_a_load_workbook_exports_without_one():
-    """v0.89.1, the engineer's rule: no load workbook is a warning while no export has read one -- a new project exports its positions, plans and connectors before the office's workbook is copied in -- and still stops the export where the last one read a workbook that is gone, naming it: renamed out of the pattern, moved into a subfolder or not yet synced, it would otherwise look exactly like a project without loads, and the export would write the report's loads away. Until v0.89.1 it stopped whatever the project. Since v0.117 the export of a project that never had one says so in one line on stdout and warns no more: the engineer saw the warning on every export of a new project, in the window's box of warnings."""
+def test_a_new_project_exports_without_loads_and_names_a_load_workbook_it_never_opens():
+    """Issue #109 (REQ-001, REQ-003, UI-001, C-2): no load workbook is read. A new project exports its positions, plans and connectors without loads, and says nothing of a workbook it has not got; its data/project.json names none (1.1). A file of the project folder whose name says it is one -- `02_Belastungsannahmen.xlsm`, bytes no workbook reader would take -- is named by one warning at each full export, `load_workbook_not_read`, and never opened: its bytes and its date stay. Excel's lock file `~$…` is no workbook, a file in a subfolder is not looked at, two files are named together; a case saved in a tab (registry.export) says nothing."""
     import contextlib
     import io
+    import os
     import export_all
-    import validation
+    import registry
     folder = conftest.tmpdir("new_no_loads") / "Ohne Lasten"
     here = project_template.create(folder, "Ohne Lasten")
-    record = here.data_dir / "project.json"
-    assert list(json.loads(record.read_text(encoding="utf-8"))["workbooks"]) == [], "a seeded project has read no workbook at all"
+    record = json.loads((here.data_dir / "project.json").read_text(encoding="utf-8"))
+    assert record["schema_version"] == "1.1" and "workbooks" not in record, "a seeded project names no workbook (project.json 1.1)"
     with project.using(here):
-        # never had one: the export goes on, one line of information on stdout and no warning on stderr (v0.117, the engineer: «cette erreur ne doit plus être affichée»)
         err, out = io.StringIO(), io.StringIO()
         with contextlib.redirect_stderr(err), contextlib.redirect_stdout(out):
             export_all.run(dry=True)
-        assert "no load workbook" not in err.getvalue(), err.getvalue()
-        assert "no load workbook" in out.getvalue() and "loads: none" in out.getvalue(), out.getvalue()
-        # the last export read one, and it is gone: the export stops, naming it and the record that says so
-        info = json.loads(record.read_text(encoding="utf-8"))
-        info["workbooks"]["02_Belastungsannahmen.xlsm"] = "0" * 64
-        record.write_text(json.dumps(info), encoding="utf-8")
-        try:
-            export_all.run(dry=True)
-        except validation.ValidationError as exc:
-            assert "02_Belastungsannahmen.xlsm" in str(exc) and "project.json" in str(exc), exc
-        else:
-            raise AssertionError("a load workbook the last export read is gone, and the export went on without it")
-        # the way out the message names: the record deleted, the project is one without loads
-        record.unlink()
-        with contextlib.redirect_stderr(io.StringIO()):
-            export_all.run(dry=True)
+        assert "workbook" not in err.getvalue() and "workbook" not in out.getvalue(), (err.getvalue(), out.getvalue())
+        assert registry.workbook_note(here.root) is None
+        # a workbook by its name: unreadable bytes, never opened, named once
+        book = here.root / "02_Belastungsannahmen.xlsm"
+        book.write_bytes(b"\x00 no workbook at all \xff")
+        os.utime(book, (1_700_000_000, 1_700_000_000))
+        (here.root / "~$02_Belastungsannahmen.xlsm").write_bytes(b"Excel's lock")
+        (here.root / "Archiv").mkdir(exist_ok=True)
+        (here.root / "Archiv" / "Belastungsannahmen-alt.xlsx").write_bytes(b"below the folder")
+        note = registry.workbook_note(here.root)
+        assert note is not None and note.code == "load_workbook_not_read" and note.args == {"files": "02_Belastungsannahmen.xlsm"}, (note, getattr(note, "args", None))
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
+            export_all.run()
+        said = [line for line in err.getvalue().splitlines() if "load workbook" in line]
+        assert len(said) == 1 and "02_Belastungsannahmen.xlsm" in said[0] and "~$" not in said[0] and "alt" not in said[0], err.getvalue()
+        assert book.read_bytes() == b"\x00 no workbook at all \xff" and book.stat().st_mtime == 1_700_000_000, "the workbook is left as it was"
+        calculations = json.loads((here.data_dir / "calculations.json").read_text(encoding="utf-8"))
+        assert calculations["schema_version"] == "1.9" and not calculations["domains"]["snow-load"]["instances"], "no case came from it"
+        assert len(calculations["domains"]["live-load"]["instances"]) == 12, "the live loads of Tabelle 8, as ever (REQ-006)"
+        # a tab's save: nothing said, nothing read
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
+            registry.export(here)
+        assert "workbook" not in err.getvalue(), err.getvalue()
+        # two files: one note naming both, in file-name order
+        (here.root / "Belastungsannahmen Dach.XLSX").write_bytes(b"another")
+        both = registry.workbook_note(here.root)
+        assert both.args["files"] == "02_Belastungsannahmen.xlsm, Belastungsannahmen Dach.XLSX", both.args
+        # only the lock file: nothing
+        book.unlink()
+        (here.root / "Belastungsannahmen Dach.XLSX").unlink()
+        assert registry.load_workbook_names(here.root) == [] and registry.workbook_note(here.root) is None
 
 
 def test_seeding_fills_what_is_missing_and_touches_nothing_else():

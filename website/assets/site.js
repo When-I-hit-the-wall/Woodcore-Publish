@@ -173,4 +173,64 @@
     var offset = active.getBoundingClientRect().top - bar.getBoundingClientRect().top;
     if (offset > bar.clientHeight - 40) bar.scrollTop += offset - bar.clientHeight / 2;
   }
+
+  // The bubbles of a command's page (issue #115): a name opens its argument's sentence, a default every value with its call and its print. The content is the page's own <template>, written by website/build.py from the model Woodcore's commands tab reads; this only opens, places and keeps it -- open at the hover, kept while the pointer is in it, closed 300 ms after it leaves, pinned by a click or a touch, closed by Escape, a click elsewhere or a scroll.
+  var box = document.querySelector("[data-tipbox]");
+  if (box) {
+    var tip = null, timer = null;
+    var place = function (el) {
+      var r = el.getBoundingClientRect(), w = box.offsetWidth, h = box.offsetHeight;
+      var x = Math.min(window.innerWidth - w - 8, Math.max(8, r.left));
+      var y = r.bottom + 6;
+      if (y + h > window.innerHeight - 8 && r.top - h - 6 > 8) y = r.top - h - 6;
+      box.style.left = x + "px"; box.style.top = Math.max(8, y) + "px";
+    };
+    var show = function (el, pin) {
+      var source = document.getElementById("tip-" + el.getAttribute("data-tip"));
+      if (!source) return;
+      clearTimeout(timer);
+      box.innerHTML = source.innerHTML;
+      box.classList.toggle("wide", source.getAttribute("data-wide") === "1");
+      box.hidden = false;
+      tip = { el: el, pin: !!pin };
+      place(el);
+    };
+    var hide = function (force) {
+      clearTimeout(timer);
+      if (!tip || (tip.pin && !force)) return;
+      box.hidden = true; tip = null;
+    };
+    var later = function () { clearTimeout(timer); timer = setTimeout(function () { hide(false); }, 300); };
+    document.addEventListener("mouseover", function (event) {
+      if (tip && tip.pin) return;
+      if (event.target.closest("[data-tipbox]")) { clearTimeout(timer); return; }
+      var el = event.target.closest("[data-tip]");
+      if (el && (!tip || tip.el !== el)) show(el, false);
+      else if (el) clearTimeout(timer);
+    });
+    document.addEventListener("mouseout", function (event) {
+      var el = event.target.closest("[data-tip],[data-tipbox]");
+      if (el && (!event.relatedTarget || !el.contains(event.relatedTarget))) later();
+    });
+    box.addEventListener("mouseover", function (event) {
+      var row = event.target.closest("[data-pv]");
+      if (!row || !row.classList.contains("vrow")) return;
+      var i = row.getAttribute("data-pv");
+      box.querySelectorAll(".vrow").forEach(function (r) { r.classList.toggle("on", r === row); });
+      box.querySelectorAll(".vprev").forEach(function (p) { p.hidden = p.getAttribute("data-pv") !== i; });
+    });
+    document.addEventListener("click", function (event) {
+      var el = event.target.closest("[data-tip]");
+      if (el) { event.preventDefault(); show(el, true); return; }
+      if (event.target.closest("[data-tipbox]")) {
+        var row = event.target.closest(".vrow");   // a touch on a value shows its print, as the pointer's hover does
+        if (row) row.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+        if (tip) tip.pin = true;
+        return;
+      }
+      hide(true);
+    });
+    document.addEventListener("keydown", function (event) { if (event.key === "Escape") hide(true); });
+    window.addEventListener("scroll", function () { hide(true); }, { passive: true });
+  }
 })();

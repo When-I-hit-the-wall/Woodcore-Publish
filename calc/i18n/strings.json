@@ -929,6 +929,14 @@
     }
   },
   "templates": {
+    "check.eta_mod": {
+      "de": "Feuchteklasse {n}, KLED {kled}",
+      "fr": "classe d’humidité {n}, KLED {kled}",
+      "en": "moisture class {n}, KLED {kled}",
+      "translate": [
+        "kled"
+      ]
+    },
     "script.line": {
       "de": "Skript {file}, Z. {line}",
       "fr": "script {file}, l. {line}",
@@ -1281,28 +1289,124 @@
       "fr": "Acier {steel}",
       "en": "Steel {steel}"
     },
-    "wind_source.global_note": {
-      "de": "SIA 261, Anhang C, Tabelle {table}: $c_f$ ist der grösste bzw. kleinste globale Kraftbeiwert über die Windrichtungen; $c_\"red\"$ nach Figur 9 für b·h und d·h in den Windrichtungen 0°, 90° und 180°, der grössere der beiden in jeder anderen Windrichtung (6.3.3), 1.0 für jede andere Bezugsfläche (6.3.2). Negative Werte sind Sog.",
-      "fr": "SIA 261, annexe C, tableau {table} : $c_f$ est le plus grand, respectivement le plus petit coefficient de force global sur les directions du vent ; $c_\"red\"$ selon la figure 9 pour b·h et d·h dans les directions du vent 0°, 90° et 180°, le plus grand des deux dans toute autre direction (6.3.3), 1.0 pour toute autre surface de référence (6.3.2). Les valeurs négatives sont des succions.",
-      "en": "SIA 261, Annex C, Table {table}: $c_f$ is the largest, respectively the smallest global force coefficient over the wind directions; $c_\"red\"$ from Figure 9 for b·h and d·h in the wind directions 0°, 90° and 180°, the larger of the two in any other direction (6.3.3), 1.0 for any other reference area (6.3.2). Negative values are suction."
+    "wind_source.forces_note_per_m2": {
+      "de": "$Q_k = c_\"red\" dot c_d dot c_f dot q_p dot A_\"ref\"$ (SIA 261, 6.2.3.2); $A_\"ref\"$: {areas}. Ohne Bezugsfläche aus den Gebäudeabmessungen, je m²: {alone}. Negative Werte sind Sog.",
+      "fr": "$Q_k = c_\"red\" dot c_d dot c_f dot q_p dot A_\"ref\"$ (SIA 261, 6.2.3.2) ; $A_\"ref\"$ : {areas}. Sans surface de référence tirée des dimensions du bâtiment, par m² : {alone}. Les valeurs négatives sont des succions.",
+      "en": "$Q_k = c_\"red\" dot c_d dot c_f dot q_p dot A_\"ref\"$ (SIA 261, 6.2.3.2); $A_\"ref\"$: {areas}. Without a reference area from the building's dimensions, per m²: {alone}. Negative values are suction."
+    },
+    "wind_source.forces_note": {
+      "de": "$Q_k = c_\"red\" dot c_d dot c_f dot q_p dot A_\"ref\"$ (SIA 261, 6.2.3.2); $A_\"ref\"$: {areas}. Negative Werte sind Sog.",
+      "fr": "$Q_k = c_\"red\" dot c_d dot c_f dot q_p dot A_\"ref\"$ (SIA 261, 6.2.3.2) ; $A_\"ref\"$ : {areas}. Les valeurs négatives sont des succions.",
+      "en": "$Q_k = c_\"red\" dot c_d dot c_f dot q_p dot A_\"ref\"$ (SIA 261, 6.2.3.2); $A_\"ref\"$: {areas}. Negative values are suction."
     },
     "wind_source.local_note": {
-      "de": "Grösster (max) und kleinster (min) Wert je Fläche über die Windrichtungen der Tabelle {table}; aussen: $c_\"pe\" dot q_p$ allein; gleichmässig: gleichmässig verteilte Öffnungen; Öffnung A–D: dominante Öffnung in der Wand A, B, C bzw. D; netto: mit dem Innendruckbeiwert derselben Fläche. Negative Werte sind Sog.",
-      "fr": "Valeur la plus grande (max) et la plus petite (min) par surface sur les directions du vent du tableau {table} ; extérieur : $c_\"pe\" dot q_p$ seul ; réparti : ouvertures réparties uniformément ; ouverture A–D : ouverture prépondérante dans la paroi A, B, C ou D ; net : avec le coefficient de pression intérieure de la même surface. Les valeurs négatives sont des succions.",
-      "en": "The largest (max) and smallest (min) value per surface over the wind directions of Table {table}; external: $c_\"pe\" dot q_p$ alone; uniform: uniformly distributed openings; opening A–D: dominant opening in wall A, B, C or D; net: with the internal pressure coefficient of the same surface. Negative values are suction."
+      "de": "Grösster (max) und kleinster (min) Wert von $q_k = q_p dot (c_d dot c_\"pe\" - c_\"pi\")$ je Fläche über die Windrichtungen der Tabelle {table}; lokale Flächen (Figur 22): {surfaces}. Negative Werte sind Sog.",
+      "fr": "Valeur la plus grande (max) et la plus petite (min) de $q_k = q_p dot (c_d dot c_\"pe\" - c_\"pi\")$ par surface, sur les directions du vent du tableau {table} ; surfaces localisées (figure 22) : {surfaces}. Les valeurs négatives sont des succions.",
+      "en": "The largest (max) and smallest (min) value of $q_k = q_p dot (c_d dot c_\"pe\" - c_\"pi\")$ per surface over the wind directions of Table {table}; localised surfaces (Figure 22): {surfaces}. Negative values are suction."
+    },
+    "wind_source.local_note_plain": {
+      "de": "Grösster (max) und kleinster (min) Wert von $q_k = q_p dot (c_d dot c_\"pe\" - c_\"pi\")$ je Fläche über die Windrichtungen der Tabelle {table}. Negative Werte sind Sog.",
+      "fr": "Valeur la plus grande (max) et la plus petite (min) de $q_k = q_p dot (c_d dot c_\"pe\" - c_\"pi\")$ par surface, sur les directions du vent du tableau {table}. Les valeurs négatives sont des succions.",
+      "en": "The largest (max) and smallest (min) value of $q_k = q_p dot (c_d dot c_\"pe\" - c_\"pi\")$ per surface over the wind directions of Table {table}. Negative values are suction."
+    },
+    "wind_source.load_max_label": {
+      "de": "Maximale globale Windlast je m², Bezugsfläche {area}",
+      "fr": "Charge globale du vent maximale par m², surface de référence {area}",
+      "en": "Maximum global wind load per m², reference area {area}"
+    },
+    "wind_source.load_min_label": {
+      "de": "Minimale globale Windlast je m², Bezugsfläche {area}",
+      "fr": "Charge globale du vent minimale par m², surface de référence {area}",
+      "en": "Minimum global wind load per m², reference area {area}"
+    },
+    "wind_source.figure_title": {
+      "de": "Figur der Tabelle {table} (SIA 261, Anhang C)",
+      "fr": "Figure du tableau {table} (SIA 261, annexe C)",
+      "en": "Figure of Table {table} (SIA 261, Annex C)"
     },
     "wind_source.table_description": {
       "de": "SIA 261, Anhang C, Tabelle {table}, h : b : d = {ratio}.",
       "fr": "SIA 261, annexe C, tableau {table}, h : b : d = {ratio}.",
       "en": "SIA 261, Annex C, Table {table}, h : b : d = {ratio}."
-    },
-    "wind_source.local_surface": {
-      "de": "{surface} (lokal)",
-      "fr": "{surface} (local)",
-      "en": "{surface} (local)"
     }
   },
   "terms": {
+    "Zug": {
+      "fr": "traction",
+      "en": "tension"
+    },
+    "Druck": {
+      "fr": "compression",
+      "en": "compression"
+    },
+    "Knicken": {
+      "fr": "flambage",
+      "en": "buckling"
+    },
+    "ständig": {
+      "fr": "permanente",
+      "en": "permanent"
+    },
+    "lang": {
+      "fr": "longue",
+      "en": "long-term"
+    },
+    "mittel": {
+      "fr": "moyenne",
+      "en": "medium-term"
+    },
+    "kurz": {
+      "fr": "courte",
+      "en": "short-term"
+    },
+    "sehr kurz": {
+      "fr": "très courte",
+      "en": "instantaneous"
+    },
+    "aussergewöhnlich": {
+      "fr": "situation accidentelle",
+      "en": "accidental situation"
+    },
+    "eingegeben": {
+      "fr": "saisie",
+      "en": "typed"
+    },
+    "von der Norm festgelegt": {
+      "fr": "fixée par la norme",
+      "en": "set by the norm"
+    },
+    "abgeleitet": {
+      "fr": "déduite",
+      "en": "deduced"
+    },
+    "Plattenbeanspruchung": {
+      "fr": "en plaque",
+      "en": "as a plate"
+    },
+    "Scheibenbeanspruchung": {
+      "fr": "en voile",
+      "en": "as a diaphragm"
+    },
+    "Zug/Druck in der Plattenebene": {
+      "fr": "en traction / compression",
+      "en": "in tension / compression"
+    },
+    "Druck max [kN/m²]": {
+      "fr": "pression max [kN/m²]",
+      "en": "max pressure [kN/m²]"
+    },
+    "Sog max [kN/m²]": {
+      "fr": "succion max [kN/m²]",
+      "en": "max suction [kN/m²]"
+    },
+    "schräg": {
+      "fr": "oblique",
+      "en": "oblique"
+    },
+    "c_pi glm.": {
+      "fr": "c_pi rép.",
+      "en": "c_pi unif."
+    },
     "Höhe": {
       "fr": "Hauteur",
       "en": "Height"
@@ -3366,6 +3470,30 @@
     "Tabelle der Druckbeiwerte": {
       "fr": "Tableau des coefficients de pression",
       "en": "Table of pressure coefficients"
+    },
+    "Öffnungen gleichmässig verteilt": {
+      "fr": "Ouvertures réparties de façon homogène",
+      "en": "Openings distributed uniformly"
+    },
+    "Dominante Öffnung in der Wand A": {
+      "fr": "Ouverture prépondérante dans la paroi A",
+      "en": "Dominant opening in wall A"
+    },
+    "Dominante Öffnung in der Wand B": {
+      "fr": "Ouverture prépondérante dans la paroi B",
+      "en": "Dominant opening in wall B"
+    },
+    "Dominante Öffnung in der Wand C": {
+      "fr": "Ouverture prépondérante dans la paroi C",
+      "en": "Dominant opening in wall C"
+    },
+    "Dominante Öffnung in der Wand D": {
+      "fr": "Ouverture prépondérante dans la paroi D",
+      "en": "Dominant opening in wall D"
+    },
+    "Innendruckbeiwert jeder Fläche": {
+      "fr": "Coefficient de pression intérieure de chaque surface",
+      "en": "Internal pressure coefficient of each surface"
     },
     "aussen": {
       "fr": "extérieur",

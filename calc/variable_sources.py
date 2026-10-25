@@ -13,7 +13,7 @@ together are some tens of kilobytes.
 
 ⚠️ **Provenance is decided here and stored nowhere** (D-012): a variable read from a document's registry is
 Typst's whatever its `source` says -- `#var("s_k", domain: ("snow-load", "SL"))` copies an export's var into the
-registry, `excel:` source and all --, and every other one is what its `source` prefix says
+registry, `entered:` source and all --, and every other one is what its `source` prefix says
 (`variables.PROVENANCE`).
 
 No Qt: the tab shows what this returns and decides nothing of it.
@@ -27,7 +27,7 @@ import line_levels
 import project
 import validation
 import variables as model
-from domains import connection, connector, formula_domain, links, script
+from domains import connection, connector, formula_domain, links, member_check, script, steel_check, unfold
 
 # Where a domain was read: the export (data/), or one of the documents' registries, named by its mode ("cu", "bp", "rs").
 EXPORT = "export"
@@ -54,10 +54,11 @@ class Domain:
     label: str = ""                # the calculation's own label, «Schneelast»
     results: tuple = ()            # the keys the calculation declares as its results
     checks: tuple = ()             # the names of its checks, one show-check each
-    workbook: str = ""             # the workbook an instance was read from, relative to the project
-    sheet: str = ""
     formulas: dict = field(default_factory=dict)   # result key -> the formula of the step that computes it
     file: str = ""                 # the file of data/ it was read from, "" for a registry's domain
+    # Set when the tab assembles what it lists (variable_calc.assemble, spec 2026-10-24-onglet-variables-groupes, REQ-001 to REQ-003), never by a reader: the key of the tab of Woodcore that computes it (a key of tab_registry.SPECS), None where its calculation is not found or the document declares it itself; and the calculation it carries (variable_calc.CalcRef), the same for its three sources -- the export, the file, a document.
+    tab: str = None
+    calc: object = None
 
     @property
     def calculation(self):
@@ -65,11 +66,6 @@ class Domain:
 
     def variable(self, key):
         return next((var for var in self.variables if var.key == key), None)
-
-
-def instance_workbook(domain, instance):
-    """The workbook an instance was read from: carried per instance since a domain's sheets may come from several workbooks, per domain before that. Moved from the loads tab (v0.117); the window's staleness check reads it too."""
-    return instance.get("workbook") or domain.get("workbook", "")
 
 
 def _variable(key, name, v, table_domain=None):
@@ -89,13 +85,13 @@ def _formulas(record):
             if isinstance(step, dict) and step.get("result") and step.get("formula")}
 
 
-def _domain(name, address, record, label="", workbook="", sheet=""):
+def _domain(name, address, record, label=""):
     return Domain(
         name=name, origin=EXPORT, kind="export", address=address, label=label,
         variables=[_variable(key, name, v, address[0]) for key, v in (record.get("vars") or {}).items() if isinstance(v, dict)],
         results=tuple(record.get("results") or ()),
         checks=tuple(c["name"] for c in record.get("checks") or () if isinstance(c, dict) and c.get("name")),
-        workbook=workbook, sheet=sheet, formulas=_formulas(record),
+        formulas=_formulas(record),
     )
 
 
@@ -104,8 +100,7 @@ def calculation_domains(data):
     out = []
     for calc_id, calc in ((data or {}).get("domains") or {}).items():
         for instance_id, instance in (calc.get("instances") or {}).items():
-            out.append(_domain(f"{calc_id} · {instance_id}", (calc_id, instance_id), instance, label=calc.get("label") or "",
-                               workbook=instance_workbook(calc, instance), sheet=instance.get("sheet") or ""))
+            out.append(_domain(f"{calc_id} · {instance_id}", (calc_id, instance_id), instance, label=calc.get("label") or ""))
     return out
 
 
@@ -128,13 +123,24 @@ FILE_SOURCES = (
 )
 
 
+# The files of data/ that say which calculation a domain is, read beside FILE_SOURCES and never counted among them (spec 2026-10-24-onglet-variables-groupes, ARCH-003): (the index's key, file name, schema, what of it is kept). `domain-files.json` the file of each domain Woodcore wrote, by kind and id; `checks.json` and `steel.json` each check's record, whose `kind` and `fire` say its tab (D-12). One not there is a project exported before it -- its domains then have no calculation, which is no error --; one that cannot be read is said as the others are (`bad_file`).
+INDEX_FILES = (
+    ("domain-files", unfold.FILES_FILE, unfold.FILES_SCHEMA, "files"),
+    ("checks", member_check.EXPORT_FILE, "checks", "checks"),
+    ("steel", steel_check.EXPORT_FILE, "steel", "checks"),
+)
+# formulas.json is a source of variables and an index both: the id -> file of every «Domaines» domain, kept from the reading FILE_SOURCES already makes of it.
+FORMULAS_INDEX = "formulas"
+
+
 @dataclass
 class Export:
-    """What one reading of the export found: its domains, the files it did not find, and the files it could not read -- each a `VariablesError` coded `bad_file`, naming the file and what was wrong in it."""
+    """What one reading of the export found: its domains, the files it did not find, and the files it could not read -- each a `VariablesError` coded `bad_file`, naming the file and what was wrong in it -- and `index`, what INDEX_FILES (and formulas.json) say of the domains' calculations, by the index's key ({} for a file not there)."""
 
     domains: list = field(default_factory=list)
     missing: list = field(default_factory=list)     # file names
     errors: list = field(default_factory=list)      # variables.VariablesError
+    index: dict = field(default_factory=dict)       # "domain-files" | "checks" | "steel" | "formulas" -> its records
 
     @property
     def count(self):
@@ -157,11 +163,32 @@ def read_export(here=None):
             for domain in read:
                 domain.file = name
             found.domains.extend(read)
+            if name == formula_domain.EXPORT_FILE:
+                found.index[FORMULAS_INDEX] = dict(data.get("domains") or {})
         except (OSError, ValueError, validation.ValidationError, KeyError, TypeError, AttributeError) as exc:
             # json.JSONDecodeError is a ValueError; ValidationError names the field (`connections.VU-MP-1.vars.I_p: …`)
-            found.errors.append(model.VariablesError(f"variables: {path} cannot be read -- {exc}", "bad_file",
-                                                     file=name, path=str(path), field=str(exc)))
+            found.errors.append(_bad_file(name, path, exc))
+    for key, name, schema_name, root in INDEX_FILES:
+        found.index[key] = {}
+        path = here.data_dir / name
+        if not path.is_file():
+            continue   # an export older than the file: its domains have no calculation, which the tab says by «Sans onglet»
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            validation.validate_structure(data, schema_name)
+            found.index[key] = dict(data.get(root) or {})
+        except (OSError, ValueError, validation.ValidationError, KeyError, TypeError, AttributeError) as exc:
+            found.errors.append(_bad_file(name, path, exc))
+    found.index.setdefault(FORMULAS_INDEX, {})
     return found
+
+
+def _bad_file(name, path, exc):
+    """A file of data/ that cannot be read: `old_export` where it was written by an earlier Woodcore at a version this code no longer reads -- calculations.json at 1.8 and before (issue #109, REQ-007): what to do is «Import données» once --, `bad_file` for any other defect, naming the field."""
+    text = str(exc)
+    if "schema_version" in text and "earlier version of Woodcore" in text:
+        return model.VariablesError(f"variables: {path} was written by an earlier version of Woodcore -- {exc}", "old_export", file=name, path=str(path), field=text)
+    return model.VariablesError(f"variables: {path} cannot be read -- {exc}", "bad_file", file=name, path=str(path), field=text)
 
 
 def values_of_domains(domains):
@@ -190,7 +217,7 @@ def linkable(var, domain, field_unit=None, consumer=links.ANY):
 
 
 def export_values(here, calculations, connections=None, connectors=None, scripts=None, formulas=None):
-    """The same values, from an export being built in memory -- what export_all resolves the linked fields against, so a field follows the workbooks just read and not the last export written (spec 2026-10-11-variables-liees-champs-et-textes, ARCH-005, ARCH-RISK-003): the readers of FILE_SOURCES applied to the records themselves, the «Formule» domains computed against `calculations`."""
+    """The same values, from an export being built in memory -- what export_all resolves the linked fields against, so a field follows the loads just built and not the last export written (spec 2026-10-11-variables-liees-champs-et-textes, ARCH-005, ARCH-RISK-003): the readers of FILE_SOURCES applied to the records themselves, the «Formule» domains computed against `calculations`."""
     domains = calculation_domains(calculations)
     for data, root, word in ((connections, "connections", "connection"), (connectors, "connectors", "connector"), (scripts, "scripts", "script")):
         domains += _records(root, word)(data)
@@ -217,15 +244,15 @@ def known_values(data_dir=None):
 
 
 def registry_domains(mode, registry):
-    """A document's registry as domains, in the order it states them, each marked with the document it was read from."""
+    """A document's registry as domains, in the order it states them, each marked with the document it was read from -- its root domain (`variables.REPORT_DOMAIN`) left out: its variables are named by no call from elsewhere and the tab neither lists nor counts them (spec 2026-10-24-onglet-variables-groupes, REQ-005, D-5)."""
     if registry is None:
         return []
     return [Domain(name=name, origin=mode, variables=list(found), kind=model.domain_kind(name))
-            for name, found in registry.domains.items()]
+            for name, found in registry.domains.items() if name != model.REPORT_DOMAIN]
 
 
 def provenance(var, origin):
-    """EXCEL, WOODCORE, TYPST or UNKNOWN: TYPST for whatever a document's registry holds, else what the var's `source` says (D-012)."""
+    """WOODCORE, TYPST or UNKNOWN: TYPST for whatever a document's registry holds, else what the var's `source` says (D-012)."""
     if origin == formula_domain.ORIGIN:
         return model.provenance_of(var.source)   # computed by Woodcore from a file it wrote: woodcore:Formules/<id>.typ
     if origin != EXPORT:

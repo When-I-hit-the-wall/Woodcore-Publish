@@ -1,0 +1,217 @@
+{
+  "_source": "SIA 265/1:2018, Tableau 23a and 23b -- transcribed from the French edition, SIA265-1-2018-FR.pdf p. 47: the numbers taken from the page's text layer and every row checked on a render of the page (issue #110). The only copy of these values in the project.",
+  "_note": "Footnote 1 of a: the properties hold at hygroscopic equilibrium, 65 % relative humidity and 20 °C. Footnote 2 of a: the 5 % fractile of a modulus is 0,85 times its mean. The b table gives the design values for moisture class 1 and medium load duration (KLED moyenne); for any other, 6.1.2.1 (f_d = η_mod · f_k / γ_M, Tableaux 6 and 9). A cell the norm marks «valeurs non disponibles» is null and listed in the product's `unavailable`. Columns: (t_min, t_max] in mm, `from_inclusive` where the norm writes «≥».",
+  "edition": "SIA 265/1:2018",
+  "table_23": {
+    "number": "23",
+    "title": "Propriétés caractéristiques des panneaux de fibres de moyenne densité de la classe technique MDF.HLS",
+    "title_b": "Valeurs de calcul (classe d'humidité 1 et KLED moyenne) pour les panneaux de fibres de moyenne densité de la classe technique MDF.HLS",
+    "norm": "SIA 265/1",
+    "page": 47,
+    "fractile": "0,85",
+    "products": [
+      {
+        "id": "mdf-hls",
+        "product": "mdf_hls",
+        "label": "Panneau MDF MDF.HLS",
+        "isotropic": true,
+        "columns": [
+          {
+            "t_min": null,
+            "t_max": 12
+          },
+          {
+            "t_min": 12,
+            "t_max": 19
+          },
+          {
+            "t_min": 19,
+            "t_max": 30
+          },
+          {
+            "t_min": 30,
+            "t_max": null
+          }
+        ],
+        "rho_k": [
+          650,
+          600,
+          550,
+          500
+        ],
+        "grid": {
+          "plate": {
+            "f_m_k": {
+              "all": [
+                22.0,
+                22.0,
+                21.0,
+                18.0
+              ]
+            },
+            "f_c_90_k": {
+              "all": [
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "f_v_k": {
+              "all": [
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "E_m_mean": {
+              "all": [
+                3700,
+                3200,
+                3100,
+                2800
+              ]
+            },
+            "G_mean": {
+              "all": [
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "f_m_d": {
+              "all": [
+                10.2,
+                10.2,
+                9.7,
+                8.3
+              ]
+            },
+            "f_c_90_d": {
+              "all": [
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "f_v_d": {
+              "all": [
+                null,
+                null,
+                null,
+                null
+              ]
+            }
+          },
+          "shear": {
+            "f_m_k": {
+              "all": [
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "f_v_k": {
+              "all": [
+                8.5,
+                8.5,
+                8.5,
+                7.0
+              ]
+            },
+            "E_m_mean": {
+              "all": [
+                3100,
+                2800,
+                2700,
+                2400
+              ]
+            },
+            "G_mean": {
+              "all": [
+                1000,
+                1000,
+                1000,
+                800
+              ]
+            },
+            "f_m_d": {
+              "all": [
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "f_v_d": {
+              "all": [
+                3.9,
+                3.9,
+                3.9,
+                3.2
+              ]
+            }
+          },
+          "axial": {
+            "f_t_k": {
+              "all": [
+                18.0,
+                16.5,
+                16.0,
+                13.0
+              ]
+            },
+            "f_c_k": {
+              "all": [
+                18.0,
+                16.5,
+                16.0,
+                13.0
+              ]
+            },
+            "E_tc_mean": {
+              "all": [
+                3100,
+                2800,
+                2700,
+                2400
+              ]
+            },
+            "f_t_d": {
+              "all": [
+                8.3,
+                7.6,
+                7.4,
+                6.0
+              ]
+            },
+            "f_c_d": {
+              "all": [
+                8.3,
+                7.6,
+                7.4,
+                6.0
+              ]
+            }
+          }
+        },
+        "unavailable": [
+          "plate.f_c_90_k",
+          "plate.f_v_k",
+          "plate.G_mean",
+          "shear.f_m_k",
+          "plate.f_c_90_d",
+          "plate.f_v_d",
+          "shear.f_m_d"
+        ]
+      }
+    ],
+    "notes": {
+      "na": "Valeurs non disponibles."
+    }
+  }
+}

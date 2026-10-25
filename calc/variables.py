@@ -30,7 +30,7 @@ never what is stored, so level 1 and level 3 give byte-identical JSON (held by a
 all three reports. The language reaches the four labels the glossary composes (`eta_w`'s «Feuchteklasse 2»)
 and no value and no unit, so a read passes no `--input lang=` at all: what the tab shows is what the report
 itself holds, and the window's own chrome follows the window -- the loads tab's rule, whose labels stay as
-the workbook wrote them (§4bis, §10quater).
+the calculation wrote them (§4bis, §10quater).
 """
 
 import hashlib
@@ -116,28 +116,24 @@ def fmt_value(value, digits=3):
     return "0" if text in ("-0", "") else text
 
 
-# Where a value comes from, as the Variables tab says it (the engineer's issue 13, «les Excel, Woodcore […] et l'export JSON des variables calculées dans Typst»): what a var's `source` prefix means. A var's `source` is free text in every schema (calculations, connections, connectors), so this table is the one place its prefixes are named, and `tests/test_variable_sources.py` sweeps every source of the example project so that a prefix nobody added here fails the suite instead of being shown as unknown (docs/architecture/data-contracts.md §3.1).
-EXCEL, WOODCORE, TYPST, UNKNOWN = "excel", "woodcore", "typst", "unknown"
+# Where a value comes from, as the Variables tab says it (the engineer's issue 13, «les Excel, Woodcore […] et l'export JSON des variables calculées dans Typst»; no workbook since issue #109): what a var's `source` prefix means. A var's `source` is free text in every schema (calculations, connections, connectors), so this table is the one place its prefixes are named, and `tests/test_variable_sources.py` sweeps every source of the example project so that a prefix nobody added here fails the suite instead of being shown as unknown (docs/architecture/data-contracts.md §3.1).
+WOODCORE, TYPST, UNKNOWN = "woodcore", "typst", "unknown"
 PROVENANCE = {
-    "excel": EXCEL,         # a workbook's cell: excel:<workbook>!<sheet>!<cell>
     "python": WOODCORE,     # computed by a module of calc/ or a project's script: python:domains/dead_load.py
     "norm": WOODCORE,       # read off a norm table by Woodcore: norm:SIA 261 Tabelle 8
     "woodcore": WOODCORE,   # an input saved in Woodcore's window: woodcore:connectors/SD-10.json
+    "entered": WOODCORE,    # a load's input typed in its tab: entered:loads/snow/SL.json
 }
 
 
 def parse_source(source):
-    """A var's `source` as (kind, workbook, sheet, cell) -- `excel:<workbook>!<sheet>!<cell>` -- or (kind, "", "", rest) for every other kind (`python:domains/dead_load.py`, `norm:…`, `woodcore:…`). Moved from the loads tab (v0.117), whose detail pane the Variables tab took over."""
+    """A var's `source` as (kind, rest): `python:domains/dead_load.py` -> ("python", "domains/dead_load.py"), `norm:SIA 261:2020, Tabelle 8` -> ("norm", "SIA 261:2020, Tabelle 8"). A workbook's cell (`excel:<workbook>!<sheet>!<cell>`) was a kind of its own until issue #109; an old one is now a kind no table names (UNKNOWN)."""
     kind, _, rest = (source or "").partition(":")
-    if kind == "excel":
-        parts = rest.split("!")
-        if len(parts) >= 3:
-            return kind, parts[0], "!".join(parts[1:-1]), parts[-1]
-    return kind, "", "", rest
+    return kind, rest
 
 
 def provenance_of(source):
-    """EXCEL, WOODCORE or UNKNOWN from a var's `source` alone. ⚠️ A var read out of a **document's registry** is TYPST whatever its `source` says -- `#var("s_k", domain: (…))` copies an export's var, `excel:` source and all, into the registry -- and that precedence is the assembler's (`variable_sources.provenance`), which knows where a var was read; this function only reads the string."""
+    """WOODCORE or UNKNOWN from a var's `source` alone. ⚠️ A var read out of a **document's registry** is TYPST whatever its `source` says -- `#var("s_k", domain: (…))` copies an export's var, `entered:` source and all, into the registry -- and that precedence is the assembler's (`variable_sources.provenance`), which knows where a var was read; this function only reads the string."""
     kind = parse_source(source)[0]
     return PROVENANCE.get(kind, UNKNOWN) if kind else UNKNOWN
 
@@ -266,7 +262,7 @@ def stamp(here=None, mode="rs"):
     That is the document's own `.typ` files -- the entry, `Sections/` -- `config.typ` and `commands.typ`, and
     everything under the engine copy: `lib/`, the glossary and the norm tables it reads, and **`data/`**,
     which counts because `var-of(...)` reads the export and a `#var` carrying a value out of it moves when
-    the workbook does (`_sources`).
+    the export does (`_sources`).
 
     ⚠️ The PDF is deliberately left out. It is written *by* the very compile a read pays for, so a stamp that
     counted it would be stale the moment it was taken -- and again after every *Exporter PDF*.

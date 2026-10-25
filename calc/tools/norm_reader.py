@@ -10,6 +10,7 @@ from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtPdf import QPdfDocument
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
+import screen_fit
 import theme
 import usersettings
 from pdf_pane import ZoomablePdfView
@@ -106,6 +107,14 @@ class NormReader(QWidget):
         column.addWidget(self.view, 1)
         self.loaded = None
 
+    def _show_placed(self):
+        """Shown inside the screen of Woodcore's window, its title bar on it (UI-006): placed before it shows -- its frame estimated -- and again once shown, by its frame read; where it stands already, it is only kept inside."""
+        shown = self.isVisible()
+        screen_fit.place(self, getattr(self, "anchor", None), keep=shown)
+        self.show()
+        if not shown:
+            screen_fit.place(self, getattr(self, "anchor", None), keep=True)
+
     def show_excerpt(self, excerpt):
         """The chapter of `excerpt`'s edition, at its page, its box framed. Returns False where the edition is not there (said in the window)."""
         pdf = excerpt.pdf()
@@ -114,7 +123,7 @@ class NormReader(QWidget):
         if chapter is None:
             self.missing.setText(self.t("ct_reader_missing", file=excerpt.file))
             self.missing.show()
-            self.show()
+            self._show_placed()
             return False
         self.missing.hide()
         if self.loaded != chapter:
@@ -125,7 +134,7 @@ class NormReader(QWidget):
         if not 0 <= page < self.document.pageCount():
             page = 0
         box = excerpt.box or (0, 0, self.document.pagePointSize(page).width(), self.document.pagePointSize(page).height())
-        self.show()
+        self._show_placed()
         self.raise_()
         self.activateWindow()
         self.view.frame(page, box)
@@ -142,4 +151,5 @@ def reader(app, key="norm"):
     except RuntimeError:
         pass
     found = _readers[key] = NormReader(app.t, app.lang)
+    found.anchor = app if hasattr(app, "screen") else None   # the screen it opens on is the window's (UI-006)
     return found

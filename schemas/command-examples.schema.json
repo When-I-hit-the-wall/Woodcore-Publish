@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "The map of the examples' committed pages",
+  "description": "examples/out/index.json (docs/typst/command-docs.md §10sexies) -- one entry per worked example and level calc/tools/build_examples.py rendered, written whole by it, never by hand. 1.0 since v0.65; 1.1 (spec 2026-10-24-onglet-commandes-pages, REQ-008, ARCH-011) adds what is measured on the pages themselves: `same`, the levels of the example that print one page (123, 12 or 23), and `page`, for a level printing another level's page, the stem of the page kept -- its own file is not committed. A 1.0 file, which has neither, is still read: every level its own page.",
+  "type": "object",
+  "required": ["schema_version", "lang", "examples"],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["1.0", "1.1"]},
+    "lang": {"type": "string"},
+    "examples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["command", "index", "level", "stem", "hash"],
+        "properties": {
+          "command": {"type": "string"},
+          "index": {"type": "integer"},
+          "level": {"type": "integer"},
+          "stem": {"type": "string"},
+          "hash": {"type": "string"},
+          "same": {"type": "string", "enum": ["123", "12", "23"]},
+          "page": {"type": "string"}
+        }
+      }
+    }
+  }
+}

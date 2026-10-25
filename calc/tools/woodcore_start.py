@@ -46,7 +46,7 @@ STEPS = (
 # What the thread imports: no Qt, nothing that creates a window. Each a module name as calc/ and calc/tools/ are on the path.
 IMPORTS = {
     "libraries": ("numpy", "openpyxl", "openpyxl.workbook", "openpyxl.writer.excel", "openpyxl.packaging.extended", "pypdf"),   # packaging.extended: what saving a workbook imports, as the «Projet» tab's preview makes a project (issue #88)
-    "calc": ("project", "engine", "validation", "norms", "registry", "io_excel", "positions_store", "export_all", "build_reference",
+    "calc": ("project", "engine", "validation", "norms", "registry", "positions_store", "export_all", "build_reference",
              "domains.plan", "domains.plan_svg", "domains.fire", "domains.statics", "domains.schema", "domains.connector",
              "domains.member_check", "notifications", "typst_diagnostics"),
     "typst": ("typst_check", "updates"),

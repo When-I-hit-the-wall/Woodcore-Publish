@@ -1,19 +1,20 @@
 # Importer et explorer dans la fenêtre de Woodcore
 
-Un projet s'ouvre dans la **fenêtre de Woodcore**. Elle importe les classeurs, montre ce qu'ils contiennent, et c'est là qu'on dessine ce qu'un classeur ne sait pas décrire.
+Un projet s'ouvre dans la **fenêtre de Woodcore**. C'est là qu'on saisit les cas de charge et qu'on dessine ce que le rapport montre ; elle exporte ce que le projet contient et montre ce que l'export a retenu.
 
-## Importer Excel
+## Import données
 
-Le bouton **Importer Excel** lit les classeurs de charges, calcule ce qui doit l'être, vérifie chaque fichier et écrit l'export dans `Statischer Bericht (typst)/_woodcore/data/`. Rien n'est écrit si quelque chose ne va pas : le message nomme alors la feuille et la cellule à corriger, et les données précédentes restent affichées.
+Le bouton **Import données** lit les fichiers du projet — les cas de charge saisis dans les onglets, les positions, les dessins —, calcule ce qui doit l'être, vérifie chaque fichier et écrit l'export dans `Statischer Bericht (typst)/_woodcore/data/`. Rien n'est écrit si quelque chose ne va pas : le message nomme alors le fichier et le champ à corriger, et les données précédentes restent affichées.
 
 > [!note]
-> Un bandeau signale un classeur enregistré après le dernier import : il suffit d'importer à nouveau.
+> Un projet exporté par une version antérieure de Woodcore ne se compile plus tant qu'on n'a pas cliqué une fois **Import données**. Un fichier `Belastungsannahmen` resté dans le dossier n'est jamais lu : l'export le signale par un avertissement.
 
 ## Les onglets
 
 | Onglet | Ce qu'on y fait |
 |---|---|
-| **Charges** | Parcourir chaque charge, cas et valeur, avec sa provenance jusqu'à la cellule Excel. Un double-clic copie l'appel Typst qui l'imprime. |
+| **Vent**, **Neige**, **Poids propre et surcharge** | Saisir les cas de charge, sous **Actions** : chaque cas est un fichier de `Woodcore-Datei/loads/` (étape 4). |
+| **Variables** | Parcourir chaque charge, cas et valeur, avec sa provenance jusqu'à l'onglet où elle est saisie. |
 | **Plan de position** | Importer un document de l'architecte (PDF, image, SVG, DXF, DWG), le parcourir page par page, cocher les pages qui deviennent des plans, puis y poser les symboles STE des positions, avec les axes et l'échelle. Les feuilles de plans et la commande `#show-plan` s'y préparent aussi. |
 | **Positions** | La source des positions : ajouter, modifier ou supprimer une position (`Woodcore-Datei/positions.json`) ; l'export suit aussitôt. **Importer depuis Excel…** reprend un ancien `Positionen.xlsx`. |
 | **Modèles statiques** | Dessiner un système statique : barres, appuis, articulations, charges et cotes. |

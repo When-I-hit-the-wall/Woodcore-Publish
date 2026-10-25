@@ -33,10 +33,11 @@ def _window():
 
 
 def _tab(window):
+    """The tab's browser (issue #106: the tab is a class of parameters on the type «Données», its content one whole service)."""
     import woodcore_gui
     index = [k for k, _f in woodcore_gui.TABS].index("tab_dependencies")
     window.tab_widget.setCurrentIndex(index)
-    return window.tabs[index]
+    return window.tabs[index].service("browser")
 
 
 def _texts(widget):
@@ -62,7 +63,13 @@ def test_a_position_shows_what_depends_on_it_and_a_check_what_it_depends_on():
         assert all(window.t("warn_dep_kind_" + kind) in used for kind in ("check", "schema", "plan")), used
         # the tab survives a rebuild of itself, the object chosen kept (view_state, restore)
         new = window.refresh_tab("tab_dependencies")
-        assert new.current_node() == position
+        assert new.service("browser").current_node() == position
+        # and the filter (issue #106, REQ-007: the browser's state given back by the frame)
+        kind, ident = position.split(":", 1)
+        new.service("browser").filter.setText(ident)
+        again = window.refresh_tab("tab_dependencies").service("browser")
+        assert again.filter.text() == ident and again.current_node() == position
+        again.filter.setText("")
 
 
 def test_an_object_opened_from_the_tab_opens_in_its_own_tab():
@@ -76,7 +83,8 @@ def test_an_object_opened_from_the_tab_opens_in_its_own_tab():
         with _boxes():
             assert tab.open(node), node
         shown = window.tab_widget.currentWidget()
-        assert isinstance(shown, member_check_tab.MemberCheckTab) and shown.current_id == node.split(":", 1)[1], (type(shown).__name__, getattr(shown, "current_id", None))
+        import check_tabs
+        assert isinstance(shown, (member_check_tab.MemberCheckTab, check_tabs.TensionTab, check_tabs.CompressionTab, check_tabs.BendingTab, check_tabs.ShearTab)) and shown.current_id == node.split(":", 1)[1], (type(shown).__name__, getattr(shown, "current_id", None))
         # a case read from no source of Woodcore has no tab: said, nothing opened
         assert window.open_object("load:snow-load/no-such-case") is False
 
@@ -92,7 +100,8 @@ def test_a_graph_not_exported_yet_is_said_and_the_tab_writes_nothing():
         path.unlink()
         try:
             tab.reload()
-            assert tab.banner.text() == window.t("dg_not_exported") and tab.objects.topLevelItemCount() == 0
+            banner = tab.ctx.host.service("banner").label   # the type's banner, which the browser tells (data_tab.ExportBanner)
+            assert banner.text() == window.t("dg_not_exported") and tab.objects.topLevelItemCount() == 0
         finally:
             path.write_bytes(kept)
         tab.reload()

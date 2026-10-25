@@ -58,6 +58,7 @@
 
 ### Tests, tools and the way of working
 
+- *[in force]* «The test runner's parent holds every test's limit, drawn from its measured time, abandons a…»
 - *[in force]* «A domain is a source domain, an export domain or both, written as two Protocols, and wha…»
 - *[in force]* «A new project opens in the convention d'utilisation, and no console window may flash, sett…»
 - *[in force]* «Tinymist's root is stated, and a probe decided it, settled (v0.111).»
@@ -187,7 +188,18 @@
 
 ### The window and its tabs
 
-- *[in force]* «A tab of calculation is described by its domain and drawn by one base, `calc_tab.Declared…»
+- *[in force]* «The member checks read the material of the library -- a class of SIA 265, a member of the en…»
+- *[in force]* «The four member checks are tabs of calculation; the stability is the last accordion of the…»
+- *[in force]* «The «Domaines» tab edits a domain's file in three modes -- Formulaire, Code, Affi…»
+- *[in force]* «The «Variables» tab lists one line per source -- the export, the file Woodcore writes, each…»
+- *[in force]* «The commands tab shows one condensed page per command, written by hand in three languages …»
+- *[in force]* «The file of a calculation tab's case is written again in the calculation's form at every s…»
+- *[in force]* «A calculation tab's right pane is declared by its domain, and a block may show several…»
+- *[in force]* «The wind's tab is described by its domain on the type «Calcul», and the bricks it n…»
+- *[in force]* «A tab that browses the project -- «Variables», «Métré», «Dépendances», «Commandes» -- is built on the type «Données»…»
+- *[in force]* «A tab of a document is built on the type «Document», which stands on a frame extracted…»
+- *[in force]* «A tab is built from a type and its services, never copied: a tab is a class of par…»
+- *[partly superseded in v0.125]* «A tab of calculation is described by its domain and drawn by one base, `calc_tab.Declared…»
 - *[in force]* ««Affichage» of a tab of calculation sets the case's file line by line and shows, read onl…»
 - *[in force]* «The right pane of a tab of calculation is made of modules, reordered by drag and drop, th…»
 - *[in force]* «The level of detail -1, «Sélection manuelle», leaves the window too, with calc/shown_…»
@@ -198,7 +210,7 @@
 - *[in force]* «The «Projet» tab is the first row and every change of document brings it forward; a title…»
 - *[in force]* «The four canvases' list is the base's, settled (v0.120, issue #69, spec `docs/requirem…»
 - *[retired in v0.120]* «The level -1 «Sélection manuelle» is four joined buttons per variable, `0 | 1 | 2 | 3`, the variables side…»
-- *[partly superseded in v0.118]* «The «Formules» tab shows a domain as one text, each command a pill where Typst prints it, an…»
+- *[superseded in v0.125]* «The «Formules» tab shows a domain as one text, each command a pill where Typst prints it, an…»
 - *[in force]* «A computing command written inside a line of a domain is a command glued to what is beside it…»
 - *[in force]* «One tab «Poids propre et surcharge», settled (issue #35, 11.10.2026).»
 - *[in force]* «The «Formules» tab writes what a line is in «Calcul» and how it is printed in «Affichage»,…»
@@ -216,7 +228,7 @@
 - *[in force]* «A citation stays what it is and the bibliography is a second list, settled (v0.99).»
 - *[in force]* «The edition is left off the line where the designation already ends on it, settled (v0.99)…»
 - *[in force]* «The project's file is named as a path from the report's folder, settled (v0.99).»
-- *[in force]* «The two commands are «Le rapport et sa langue», settled (v0.99).»
+- *[partly superseded in v0.125]* «The two commands are «Le rapport et sa langue», settled (v0.99).»
 - *[in force]* ««Katalog» becomes «Woodcore», settled (v0.96).»
 - *[in force]* «The old file name is a shim, settled (v0.96).»
 - *[in force]* «The Positions tab re-imports after every write, settled (v0.94).»
@@ -231,7 +243,7 @@
 - *[in force]* «Fusion, dressed by one style sheet, replaces Windows 11's own style, settled (v0.90).»
 - *[in force]* «The scheme follows Windows unless the engineer chooses, per user; the density is compact,…»
 - *[in force]* «The list of the positions keeps to the page, and a table's columns may state a width, sett…»
-- *[in force]* ««Charges» gives way to «Variables», which lists every value with its provenance, settled (…»
+- *[partly superseded in v0.125]* ««Charges» gives way to «Variables», which lists every value with its provenance, settled (…»
 - *[in force]* «After a position is saved the window is not built again; each tab is built again when it i…»
 - *[in force]* «k_h applies to glulam bending by default, settled (v0.88).»
 - *[in force]* «A table is cited «SIA 265 Tabelle 8», without §, settled (v0.88).»
@@ -467,7 +479,7 @@
 - *[in force]* «Figur 45 is drawn by Python, word-free, and set under the table it is read with, settled (…»
 - *[in force]* «Every norm value a Python calculation uses lives in `calc/norms/`, once, flat, named after…»
 - *[in force]* «Every export is archived by one script, called identically by all three routes, settled (v…»
-- *[in force]* «A load is a domain whose instances are Excel sheets, settled (v0.18).»
+- *[superseded in v0.125]* «A load is a domain whose instances are Excel sheets, settled (v0.18).»
 - *[superseded in v0.120]* «Snow is calculated in Excel, not in Python, settled (v0.17).»
 - *[in force]* «Permanent loads are calculated in Python, settled (v0.18).»
 - *[in force]* «The local wind forces are enveloped in Python, settled (v0.29).»
@@ -507,13 +519,16 @@
 
 ### Data, norms and the export
 
+- *[in force]* «No load workbook is read: wind, snow and permanent loads are only cases entered in Woodc…»
 - *[in force]* «The norms are shipped with Woodcore in norm-library/, and the window shows and cuts their…»
-- *[in force]* «The snow's file carries the column of Figur 3 of its roof at its head, drawn without a wo…»
+- *[partly superseded in v0.125]* «The snow's file carries the column of Figur 3 of its roof at its head, drawn without a wo…»
 - *[in force]* «A project's graph of dependencies is built at every export, written to data/dependencies.json, and wh…»
-- *[in force]* «A load workbook's snow and wind sheets give their inputs; Woodcore computes them, settled…»
+- *[superseded in v0.125]* «A load workbook's snow and wind sheets give their inputs; Woodcore computes them, settled…»
 - *[in force]* «A timber member check's lines are engine vars, settled (v0.120, issue #69, spec `docs/req…»
-- *[in force]* «The norm's values for snow and wind come from calc/norms/ on both paths; the workbook gi…»
-- *[in force]* «The materials of a build-up come from SIA 261, the Belastungsannahmen library and the proj…»
+- *[superseded in v0.125]* «The norm's values for snow and wind come from calc/norms/ on both paths; the workbook gi…»
+- *[in force]* «A build-up of permanent loads is written at dead-load-source 2.0 -- a pose per layer, a line linked to t…»
+- *[in force]* «The materials are the engineer's library and the ones Woodcore ships; a project keeps a copy of his…»
+- *[superseded in v0.125]* «The materials of a build-up come from SIA 261, the Belastungsannahmen library and the proj…»
 - *[in force]* «The wind covers every building of Annexe C, settled (issue #37, 11.10.2026).»
 - *[in force]* «The curved roof is the third column of Figur 3, settled (issue #36, 11.10.2026).»
 - *[in force]* «The dead load, the snow and the wind are computed in Woodcore from SIA 261, and the load w…»
@@ -533,8 +548,8 @@
 - *[in force]* «The exact relative slenderness, with Anhang B's values, and E_0,05 times eta_w, settled (v…»
 - *[in force]* «The engine is checked when a project opens, in the very box the export asks with, settled…»
 - *[in force]* «A run of calculations is announced by a line of its own, settled (v0.84).»
-- *[in force]* «A new project carries no load workbook, settled (v0.83).»
-- *[in force]* «No load workbook is a warning while no export has read one, settled (v0.89.1).»
+- *[partly superseded in v0.125]* «A new project carries no load workbook, settled (v0.83).»
+- *[superseded in v0.125]* «No load workbook is a warning while no export has read one, settled (v0.89.1).»
 - *[in force]* «The record of an export carries no date, settled (v0.82).»
 - *[in force]* «The example project is a real project anonymised, without its workbooks, settled (v0.81).»
 - *[in force]* «A calculation whose drawing is gone is exported and refused, not stopped, settled (v0.79).»
@@ -548,18 +563,18 @@
 - *[in force]* «`show-calc` renders a whole calculation, settled (v0.18).»
 - *[in force]* «A calculation is printed in letters and then in numbers, settled (v0.20).»
 - *[superseded in v0.120]* «Wind is calculated in Excel, and its answer is a table, settled (v0.25).»
-- *[in force]* «The load workbooks are found by name, settled (v0.26).»
+- *[superseded in v0.125]* «The load workbooks are found by name, settled (v0.26).»
 - *[in force]* «Category E is refused by the report, settled (v0.49).»
 - *[in force]* «A load's action is declared in the data, settled (v0.28).»
-- *[in force]* «Woodcore reads the export, not the workbooks, settled (v0.28).»
+- *[partly superseded in v0.125]* «Woodcore reads the export, not the workbooks, settled (v0.28).»
 - *[in force]* «A connection is exported on its own, into its own file, settled (v0.31).»
 - *[in force]* «A load's magnitude may name a variable of the export, settled (v0.51).»
 - *[in force]* «A sentence with a hole is matched, not exported with its parts, settled (v0.52).»
 - *[in force]* «A calculation written by hand is computed by the engine, settled (v0.60).»
 - *[in force]* «A rule refuses rather than warns, even when it stops today's build, settled (v0.59).»
 - *[in force]* «Load combinations centralized, settled.»
-- *[in force]* «Neither Excel carries loads, settled (v0.18).»
-- *[in force]* «Two non-overlapping Excel workbooks, settled (v0.10).»
+- *[superseded in v0.125]* «Neither Excel carries loads, settled (v0.18).»
+- *[partly superseded in v0.125]* «Two non-overlapping Excel workbooks, settled (v0.10).»
 - *[partly retired in v0.11]* «First MWE built, settled (2026-08-25); calculation half retired (v0.11).»
 - *[in force]* «The page is cropped by the export, and declares PDF 1.7, settled (v0.111).»
 - *[in force]* «A load symbol is not a position, settled (v0.116, the implementer's decision).»

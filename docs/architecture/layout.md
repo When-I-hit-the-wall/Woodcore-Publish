@@ -83,7 +83,7 @@ Musterprojekt/
 ├── Musterprojekt.woodcore              names the project: schema_version, format, name, and optionally number, client, address, company, author, checker, layout, woodcore_version, content_templates (the content template each document was made from, v0.122, additive) and gui (the editor tabs' empty folders; `katalog` until v0.96, still read)
 ├── Musterprojekt.woodcore.lock         while a window has the project open: who, on which machine, since when -- removed when it closes (§10quater)
 ├── Positionen.xlsx                hand-edited source of truth (Positions Element, data_type) -- NO loads (§8), NO connectors (§7bis)
-├── *Belastungsannahmen*.xlsm      hand-edited too: every load, one sheet per case -- every .xlsm/.xlsx whose name contains "Belastungsannahmen" is read (§3.3)
+├── *Belastungsannahmen*.xlsm      read no more since v0.125 (issue #109): left in the folder, named by a warning at each export and never opened -- the loads are Woodcore-Datei/loads/ (§3.3)
 ├── Verbindung.xlsm                the engineer's connection workbook the Stabdübel resistance is checked against, cell by cell (§3.3nonies, §11ter)
 ├── Verbindungen.xlsx              the engineer's Verbindungen workbook, whose I_p,x / I_p,z naming the polar moment follows (§3.3quinquies)
 ├── 01_Pläne/ … 04_Skizzen/        the office's own folders: the architect's plans a position plan is drawn over (§3.3sexies), sketches and details -- read by no module
@@ -118,7 +118,7 @@ A project in three documents (since v0.111: a new project's layout and a migrate
 ```
 Halle Nord/
 ├── Halle Nord.woodcore            states the layout in full: typst_root ".", report/pdf, report_cu/pdf_cu, report_bp/pdf_bp, generated, images, sources, archives (a project made before 0.117 may state rfem_export too: ignored, and said at every export)
-├── Positionen.xlsx, *Belastungsannahmen*.xlsm, …   as above
+├── Positionen.xlsx, …   as above
 ├── .vscode/settings.json          Tinymist's settings, stating "tinymist.rootPath": "${workspaceFolder}" (§12)
 ├── config.typ, commands.typ, references.bib   the three documents' shared files -- the Typst root is THIS folder
 ├── Images/                        the pictures the three share
@@ -201,22 +201,33 @@ calc/
 │   ├── excerpts.py             # the excerpts a tab of calculation shows: per edition the file and the chapter, per excerpt its page, box and words, German the fallback (v0.124, issue #94)
 │   ├── sn_en_14592.py          # SN EN 14592+A1:2012 -- f_u,k of a Stabdübel, S355, 510 N/mm² (the engineer's value;
 │   └── sn-en-14592-2012-fu-k-stabduebel.json   # the edition is not in the library, so no page is cited yet)
-├── domains/                     # one module per calculation topic; a load domain
-│   │                            # declares DOMAIN/LABEL/ACTION/ENGINE/SHEET_PREFIX and a
-│   │                            # read_instances(cells, sheets) -- or, read from a norm table,
-│   │                            # SHEET_PREFIX = None and build_instances() (§3.3, §3.3septies)
+├── domains/                     # one module per calculation topic; a load domain's module
+│   │                            # declares DOMAIN/LABEL/ACTION/ENGINE and its source module computes
+│   │                            # a case entered in Woodcore -- or, read from a norm table,
+│   │                            # build_instances() (§3.3, §3.3septies)
 │   ├── figure_style.py           # the three factors a figure is set with, and which of them each kind of entry
 │   │                             # may state over the drawing's: one table, read by the plans, the static models
 │   │                             # and the detail schemas (§3.3quaterdecies, v0.99)
-│   ├── snow.py                  # reads the SL-* sheets' inputs, computed by snow_source; what the sheet computed compared (§3.3bis, v0.120)
-│   ├── dead_load.py             # computes gk/ak from the EL+AL-* layer tables (§3.3ter)
-│   ├── wind.py                  # reads the WL-* sheets' inputs, computed by wind_source; what the sheet computed compared (§3.3quater, v0.120)
-│   ├── loads_names.py           # the snow and wind values renamed in v0.120, by roof and table, and the cells a sheet shows each in (§3.3bis)
+│   ├── dead_load.py             # the sums of a build-up, gk/ak, and its table -- instance_from_layers, dead_load_source's (§3.3ter; the EL+AL-* sheets' reader until v0.125)
+│   ├── loads_names.py           # the snow and wind values renamed in v0.120, by roof and table (§3.3bis)
 │   ├── loads_migrate.py         # a project's sections, scripts and sources taken to those names when it is opened; the export's refusal (§3.3bis)
 │   ├── dependency_graph.py      # which object reads which: built at every export, data/dependencies.json, what changed and what it touches, circles across kinds (§3.3quinvicies, issue #71)
 │   ├── dead_load_source.py      # a build-up of loads/dead/<id>.json, weighed and summed by dead_load's own arithmetic (§3.3ter, issue #35)
-│   ├── dead_load_svg.py         # the drawing of a build-up: bands to scale, heights, widths and spacings dimensioned (§3.3ter)
-│   ├── materials.py             # the three libraries a layer is weighed with: SIA 261 Anhang A, Woodcore's materials library, the project's (§3.3ter)
+│   ├── dead_load_svg.py         # the section of a build-up at its true proportion, its legend mode, the boxes a click opens (§3.3ter, issue #111)
+│   ├── dead_load_layers.py      # the poses, the levels of two lines, the width that fills, the retained value, the contributions (issue #111)
+│   ├── dead_load_migrate.py     # a dead-load-source 1.x read as 2.0, in memory (issue #111)
+│   ├── dead_load_messages.py    # what a build-up says: one evaluation, red, orange, information, green (issue #111)
+│   ├── dead_load_overview.py    # every build-up of a project at a glance (issue #111)
+│   ├── dead_load_templates.py   # the Lignum templates and «Mes modèles» (issue #111)
+│   ├── materials.py             # a layer's weight: one material by its id (library «catalogue», issue #110), the three old libraries still read (§3.3ter, §3.3sexvicies)
+│   ├── materials_contract.py    # what a material is, written once: member, panel, other; check_material (§3.3sexvicies)
+│   ├── materials_user.py        # the engineer's library in %APPDATA%\Woodcore\materials\, its PDFs copied into sources/
+│   ├── materials_catalogue.py   # the materials Woodcore ships, read at their source (SIA 265, SIA 265/1, SIA 261, the workbook)
+│   ├── materials_derive.py      # design values typed, set or deduced; the state; «Disponible dans»
+│   ├── materials_search.py      # every word, three languages, the category and the type
+│   ├── materials_project.py     # the copy a project keeps (materials.json 2.0), the diff, Reprendre / Garder / Ajouter
+│   ├── materials_migrate.py     # a project's 1.0 materials poured into the library at the opening
+│   ├── materials_library.py     # what the «Matériaux» tab's type reads (its STORE)
 │   ├── snow_source.py           # a roof of loads/snow/<id>.json, its snow computed from SIA 261 chapter 5 (§3.3bis, issue #36)
 │   ├── snow_svg.py              # the sketch of a snow load's disposition, Figur 3 (§3.3bis)
 │   ├── wind_source.py           # a building of loads/wind/<id>.json, its wind computed from SIA 261 chapter 6 and Annexe C (§3.3quater, issue #37)
@@ -256,7 +267,16 @@ calc/
 │   ├── script.py                 # a script of the project: read, run in a process of its own, and its named results exported (§3.3sexdecies, v0.100)
 │   ├── script_runner.py          # what runs inside that process: the API a script is given, and the guard that refuses a write
 │   ├── annex.py                  # the annexes: sources and excerpts read and checked, the bookmarks of a PDF read, an excerpt found again in a new version of its source, cropped as a one-page PDF, and data/annexes.json with the pages the annexes carry (§3.3undevicies, v0.115)
-│   ├── formula_domain.py         # a calculation domain of the «Formules» tab: its file Formules/<id>.typ read and written between its tag -- commands and the engineer's own Typst between them --, its id renamed, duplicated, archived and restored (ArchiveBackend), its keys, the formula typed, what it computes (calc/units.py), data/formulas.json (v0.117, issue #15)
+│   ├── formula_domain.py         # a calculation domain of the «Domaines» tab: its file Formules/<id>.typ read and written between its tag -- commands and the engineer's own Typst between them --, its id renamed, duplicated, archived and restored (ArchiveBackend), its keys, the formula typed, what it computes (calc/units.py), data/formulas.json (v0.117, issue #15)
+│   ├── formula_rows.py           # the rows of the «Domaines» tab's form: a domain's items, glued ones one row, the line of the file each begins on (body_pieces), insert, delete, move one or several, refused above what a line uses (issue #113), no Qt
+│   ├── formula_state.py          # the state of a domain of the «Domaines» tab: faults said once with their dependents, the orange warnings, the fix of a link, the colour of a row (issue #113), no Qt
+│   ├── formula_infer.py          # what is typed in the «Domaines» tab: a new line inferred var, eq, verify or text, the calculation typed with the symbols of the lines above (issue #113), no Qt
+│   ├── formula_args.py           # the arguments of a line of a domain as the module «Arguments de la ligne» offers them, written into the line; the command of a line of the buffer; the domain's level (issue #113), no Qt
+│   ├── formula_defaults.py       # the domain's one `#calc-defaults(…, scope: "domain")` line read and written option by option, `presets: "block"` for a new domain (issue #113), no Qt
+│   ├── formula_links.py          # what the lines of a domain read from one another (the hovers), a linked variable's symbol, label and origin, the variables a link may take (issue #113), no Qt
+│   ├── formula_errors.py         # where a fault of a domain's file is, as Typst places it: the delimiter left open, its line and column (issue #113), no Qt
+│   ├── formula_order.py          # whether a domain read by its name is printed above the domain reading it, per document (issue #113), no Qt
+│   ├── formula_undo.py           # «Annuler» of the «Domaines» tab: one step, the file before and after the last deletion or gesture of several lines (issue #113), no Qt
 │   ├── links.py                  # a field that follows a variable of the export (issue #42, §3.3duovicies): its shape beside the field, units by calc/units.py, factor and offset, the last value kept with a warning, what a consumer may name -- no Qt, no file read
 │   ├── figure_text.py            # a text placed with the Text tool of the four drawing engines (issue #43, §3.3duovicies-bis): its token text and variables, what it prints now, its last values, its drawing -- no Qt
 │   ├── svg_text.py               # the one text engine of the figures (D-19): Arial's widths, a subscript cut and set, a text measured and drawn -- the static models', the schemas' and the texts'
@@ -265,6 +285,9 @@ calc/
 │   ├── unfold_display.py         # «Affichage» of a domain's file: its elements, a line's display, the figure, the domain's level written into the file (v0.124, issue #94)
 │   ├── timber_calc.py            # the lines of a member check, each an engine var (and step), and their projection as compute()'s rows (§3.3undecies, v0.120)
 │   ├── member_check.py           # a member check from checks/<id>.json: read and checked, resolved against the positions (what it follows, whether it can be calculated and why not), the Typst of a draft, data/checks.json -- and `compute`, the instant calculation of the window's results, which the report does not read (§3.3unvicies, v0.117)
+│   ├── member_check_material.py  # what a member check reads of its material (issue #112): the source's fields of the library (`material`, a panel's `loading`, `kled`, `accidental`, `display`), what each check reads, the resistance `resolve` freezes into the record, the factors (`Strengths`: η_w · η_t, η_mod · f_k / γ_M), the refusals as codes, the menu of a tab (§3.3unvicies-bis)
+│   ├── member_check_stability.py # buckling and lateral torsional buckling, SIA 265 4.2.8 and 4.2.9: `compute`'s arithmetic for the two, moved out of member_check.py unchanged (issue #112, the ceiling of §11)
+│   ├── member_check_view.py      # the four member checks' tabs as their type «Calcul» reads them (issue #112): `CheckDomain(tab)` -- its kinds in the folder the four share, its sections and fields, its messages, its instance and results, the stability's box turned into the kind, the scheme of a bending, the charts of the norm, the shear's tiles
 │   ├── fire.py                   # a fire-protection plan from fire/<id>.json: its checks, the upgrade of a 1.0 source, its frame (own or following a position plan), detach, rotate_source, measuring and hit tests, and data/fire.json with its figures per language and its legend lines (§3.3vicies, v0.115)
 │   ├── fire_svg.py               # a fire-protection plan's drawing and its legend's swatches, as SVG text: Woodcore's canvas and the report's figure
 │   ├── plan_pages.py             # the plans of both kinds drawn on a page of an imported document: which they are, the page turned and both kinds with it, both exported -- no Qt (§3.3vicies, v0.115)
@@ -273,10 +296,10 @@ calc/
 │       v0.11: both carried norm values hardcoded and their labels in English,
 │       so they were deleted rather than left to be woken up wrong. Deflection
 │       and fire were never written. Section 14 says what each needs.)
-├── registry.py                   # the domain list and the load-workbook name pattern; finds the
-│                                 # workbooks by name, each domain's sheets in them by prefix,
-│                                 # takes a norm domain's instances from its own table, and
-│                                 # assembles data/calculations.json (§3.3, §3.3septies)
+├── registry.py                   # the domain list; computes the cases entered in Woodcore by their
+│                                 # source modules, takes a norm domain's instances from its own table,
+│                                 # assembles data/calculations.json (1.9), and names a load workbook
+│                                 # found by its name, never opened (§3.3, §3.3septies, issue #109)
 ├── engine.py                     # Calculation class, norm/ref helpers, schema-conforming JSON export (§3)
 ├── list_order.py                 # the order of the window's lists and the «Formules» tab's folders, Woodcore-Datei/lists.json: read, checked, written; a Store the window holds, read only where the project is (issue #15)
 ├── project.py                    # where the program is and where the project is: the .woodcore file, project.current(), the engine copied into a project (sync_engine, engine_state) and what produced an export (record) -- v0.81, v0.82; and since v0.111 the paths of the three documents (has_modes, document_typ, document_pdf, document_dir, journal_file_for, structure_file, full_layout)
@@ -297,7 +320,13 @@ calc/
 │                                 # `typst eval` -- the values that live in a Typst state and in no file at
 │                                 # all (§1, §10quater, v0.100). Read, never written; cached outside the project
 ├── variable_sources.py           # every variable of the export -- calculations, connections, connectors, scripts, the Formule domains --
-│                                 # as the Variables tab lists it, and where each comes from: Excel, Woodcore or Typst (§10quater, v0.117, issue 13)
+│                                 # as the Variables tab lists it, and where each comes from: Excel, Woodcore or Typst (§10quater, v0.117, issue 13);
+│                                 # since issue #114 the index beside them (domain-files.json, checks.json, steel.json) and no document's root domain
+├── variable_calc.py              # the Variables tab's assembly (issue #114): the calculation each domain carries (CalcRef), its tab, its siblings,
+│                                 # the source that computes, printed or not, its results -- read off domain-files.json and the checks' records, no Qt
+├── variable_query.py             # the Variables tab's menu (the navigation given, never imported), filter, list grouped by domain, counts and tags, no Qt
+├── variable_select.py            # the Variables tab's choice «comme dans Windows»: click, Ctrl, Shift across the domains, the header's box, the keyboard, no Qt
+├── variable_card.py              # the Variables tab's card and the command to copy, by build_reference's call_* and formula_domain.include_call, no Qt
 ├── cli.py                        # woodcore-cli: export, check, sync-engine, new, migrate -- the report built from a terminal (§12, v0.82, v0.111)
 ├── cli_sync.py                   # woodcore-cli sync status|share|import|move and what check says of sync.json: the Structure tab's sharing from a terminal (§12, v0.117, issue #33)
 ├── project_lock.py               # the lock a window holds on its project, <name>.woodcore.lock (§10quater, v0.83)
@@ -328,10 +357,6 @@ calc/
 ├── proc.py                       # every child process of the program started without a console window flashing: run, popen, qprocess, start_detached (§10quater, v0.112)
 ├── positions_workbook.py         # Positionen.xlsx written: rows added, changed, renamed, deleted, the section type column added, the engineer's drop-down lists kept (§7, v0.94)
 ├── validation.py                 # structure/type/business validation against schemas/ (§3.6)
-├── io_excel.py                   # the only module touching a workbook: read_workbook() for
-│                                 # Positionen.xlsx's tables, find_workbooks() + open_cells() for the
-│                                 # Belastungsannahmen workbooks -- sheet_names() by prefix,
-│                                 # value()/at() by address, find_row() by label, address() for provenance
 ├── tools/
 │   ├── archive_export.py         # one zip and a flat copy of the PDF in the project's _Archiv/ after every successful compile, for both build routes -- and the revision journal beside the folders of the drawings (§12, v0.99)
 │   ├── dependencies.py           # the installed packages against requirements.txt on every start of Woodcore, and PyPI asked for newer ones (§10quater, §11ter)
@@ -343,10 +368,11 @@ calc/
 │   ├── woodcore_gui_menus.py      # split out of woodcore_gui.py (issue #30): WindowMenusMixin -- packages, settings, title and marks, the File menu
 │   ├── woodcore_gui_export.py     # split out of woodcore_gui.py (issue #30): WindowExportMixin -- the import, the export and the documents compiled
 │   ├── home_page.py              # the start page, the new-project dialog (the name, the place and the language since v0.122), the lock's question, the File menu's words (§10quater, v0.83)
-│   ├── project_tab.py            # the «Projet» tab: the title page, the language, the form, the documents and their content templates, the preview of the templates (v0.122, issues #87, #88, #90)
+│   ├── project_tab.py            # the «Projet» tab: the title page, the language, the form, the documents and their content templates, the preview of the templates (v0.122, issues #87, #88, #90); its parameters only on DocumentTab since issue #107
+│   ├── project_services.py       # its three services (issue #107): ProjectDetails («Informations»), ProjectTemplates («Templates», the preview off the window's thread), ProjectActions (apply a form, create a document)
 │   ├── command_palette.py        # the command palette, Ctrl+K, and what the window hands it (v0.122, issue #83)
 │   ├── migrate_dialog.py         # a project laid out as one report, offered its migration into three documents as it opens: the question, its progress and the banner «Migrer…» (§10quater, v0.111)
-│   ├── structure_tab.py          # its «Structure du document» tab, the one tab a document is written in: the tree, the page of what is chosen, the options by kind, what is shared (§10quater, v0.112)
+│   ├── structure_tab.py          # its «Structure du document» tab, the one tab a document is written in: the tree, the page of what is chosen, the options by kind, what is shared (§10quater, v0.112); StructureView, wrapped whole by the service DocumentStructure of StructureTab on DocumentTab (issue #107)
 │   ├── structure_tab_view.py     # split out of structure_tab.py (issue #30): StructureTabViewMixin -- the files watched, the tree, the selection, the right pane, the page
 │   ├── structure_tab_write.py    # split out of structure_tab.py (issue #30): StructureTabWriteMixin -- a section's state, title, place and objects written
 │   ├── structure_tab_share.py    # split out of structure_tab.py (issue #30): StructureTabShareMixin -- tagging, importing, sharing, templates, drops, what is shared
@@ -373,15 +399,28 @@ calc/
 │   ├── notices_ui.py             # the activity chip, the octagon and the triangle at the top right and their panel; tell, inline_error, install_hooks (§10quater, v0.117)
 │   ├── tasks.py                  # long work in the pool, its result on the window's thread; the activity said by the chip (§10quater, v0.117)
 │   ├── layout_store.py           # the panes' sizes by tab, view and set of screens, in the user's settings (§10quater, v0.117)
-│   ├── calc_tab.py               # the common base of the tabs of calculation: DeclaredTabMixin, its modules, «Affichage» of the case's file (docs/ui/calc-tab.md, v0.124, issue #94)
-│   ├── calc_fields.py            # the fields a domain's declaration names: number, buttons with a free value, tiles, checkbox, select, custom, each with its ⓘ
-│   ├── calc_tab_words.py         # the base's words, prefixed ct_
+│   ├── tab_frame.py              # the frame every tab built from services stands on (issue #107): TabFrame (services built, NEEDS checked, phases, service(name), view_state/restore, FRAME_API; no layout), FrameContext, Service
+│   ├── tab_host.py               # a tab built on a type: TabHost (the zones, the save bar, TAB_API), TabContext (what joins the services), PARAMS -- on the frame since issue #107 (docs/ui/building-a-tab.md, v0.125, issue #95)
+│   ├── document_tab.py           # the type «Document» (issue #107): DocumentTab on the frame, DocumentContext (one draft flag, read-only, reload, provide) -- «Projet» and «Structure du document»
+│   ├── data_tab.py               # the type «Données» (issue #106): DataTab on the frame (a zone «top» above the browser, no splitter of its own, EXPOSES as Exposed descriptors), DataContext (say, kept), ExportBanner (its default service) -- «Variables», «Métré», «Dépendances», «Commandes»
+│   ├── calc_tab.py               # the type «Calcul», CalcTab: the services every tab of calculation has (docs/ui/calc-tab.md, v0.124, issue #94; v0.125, issue #95)
+│   ├── case_list.py              # services: the list of the cases (CaseList) and the identity «Nom · Description · ID» (Identity)
+│   ├── case_list_logic.py        # the rules of a list of cases, Qt-free: the rows, the selection, the dot, a row chosen, a drop into a folder -- called by the services and by SourceEditorTab
+│   ├── draft_logic.py            # the life of a draft, Qt-free: new, a copy, back to what is saved, a case loaded, the form once its case is gone
+│   ├── source_store.py           # where a tab's cases lie and how one is saved, Qt-free: checked, written, exported; SourceStore.save, one guarded writer
+│   ├── field_links.py            # the numbers of a load that may follow a variable (LinkSet): LoadTab's, and a tab on a type's through its context
+│   ├── calc_form.py              # service: the declared form, its sections an accordion (DeclaredForm, Section)
+│   ├── calc_modules.py           # service: the right pane of modules -- the state, the results and the instance's tables, the drawing, the chart, the excerpts pinned (Modules)
+│   ├── calc_bubbles.py           # service: the bubbles of the norm, the reader at Ctrl+click (Bubbles)
+│   ├── calc_display.py           # service: «Affichage» of the case's file, its writers (DomainDisplay)
+│   ├── calc_fields.py            # the fields a domain's declaration names: number, buttons with a free value, tiles, checkbox, select, each with its ⓘ
+│   ├── calc_tab_words.py         # the services' words, prefixed ct_
 │   ├── module_pane.py            # the right pane of modules: drag and drop, fold, unpin, ⧉ a window zoomed by Ctrl+wheel, the order kept per tab on this machine
 │   ├── norm_bubble.py            # the norm under a datum: the ⓘ, the bubble (place), the excerpt's words then its image
 │   ├── norm_reader.py            # Woodcore's reader of a norm: the chapter at the clause, framed (FramedPdfView, page_rect_in_view)
 │   ├── excerpt_image.py          # an excerpt cut out of the shipped PDF by QtPdf, kept in Woodcore's cache
 │   ├── domain_file_display.py    # «Affichage» of a tab of calculation: the case's file compiled, what the report hides pale, «Éléments du fichier»
-│   ├── snow_tab.py, snow_tab_words.py  # «Neige», the first tab built on calc_tab (docs/ui/tab-snow.md), words sn_
+│   ├── snow_tab.py, snow_tab_words.py  # «Neige», the first tab built on the type «Calcul» (docs/ui/tab-snow.md), words sn_
 │   ├── bundle_view.py            # an export document's pages and its id, name, description and storey (§10quater, v0.117)
 │   ├── views.py                  # the views of a tab -- Import · Dessin · Typst · Export, Calcul · Affichage, … -- their words, and the user's setting that keeps each tab's (§10quater, v0.117)
 │   ├── autosave.py               # saving without a question when a tab, a view, a document or the window is left; what is never saved without the engineer (§10quater, v0.117)
@@ -434,23 +473,60 @@ calc/
 │   ├── sheet_list.py             # the export list of the plan tabs, a GroupedList whose folders are PDF bundles and whose sheets are dragged into, within and out of them (§10quater, v0.116)
 │   ├── journal_tab.py            # its journal tab: the report's revisions, written by hand (§10quater, v0.99)
 │   ├── action_tabs.py            # the words of the six empty tabs of «Actions» and their two sections -- Poids propre, Surcharge | Charge utile, Neige, Vent, Séisme (v0.117; `FutureTab` carries them, `woodcore_gui.NAV_SECTIONS` places the sub-titles)
-│   ├── load_tab.py               # the loads entered in Woodcore: «Poids propre et surcharge», «Vent» on one base, LoadTab (list | form in cards | the instant result and the drawing), issues #35-#37 -- the frame «Neige» is built on since v0.124 (calc_tab.py)
+│   ├── load_tab.py               # «Vent» on its former frame, LoadTab (list | form in cards | the instant result), issues #35-#37, until its own issue; the loads' words ld_ the three tabs share
+│   ├── dead_load_tab.py          # «Poids propre et surcharge» on the type «Calcul» (v0.125, issue #95): its parameters, the table of layers and the project's library in place of a declared form
+│   ├── layer_table.py            # service: the table of a build-up's layers at the keyboard and its retained value (LayerTable, issue #111)
+│   ├── layer_cells.py            # the table's columns and the way Tab goes through them (next_cell, pure)
+│   ├── layer_options.py          # «Couche n», the options of the line open, a module the table gives the right pane
+│   ├── layer_section.py          # service: «Coupe | Contributions» (LayerSection)
+│   ├── case_overview.py          # service: «⊞ Vue d'ensemble», every case at a glance (Overview)
+│   ├── template_picker.py        # service: «Nouveau…» from a template (TemplatePicker)
+│   ├── library_tab.py            # the type «Bibliothèque» (issue #110): LibraryTab and LibraryContext, a tab of the engineer's own files beside TabHost -- three zones of services, phases listed/selected/drafted, no `save`, `confirm_leave`
+│   ├── materials_tab.py          # «Matériaux» (issue #110, §10quater): a class of parameters on LibraryTab
+│   ├── materials_tab_words.py    # its words, mat_, in three languages
+│   ├── materials_list.py         # service: the list by category, the search, the filters, + Nouveau, Dupliquer, Supprimer (MaterialList)
+│   ├── materials_sheet.py        # service: the sheet of a material in folds, the grids of a member and a panel, deduced values in italics (MaterialSheet)
+│   ├── materials_pane.py         # service: the right pane -- État, La source (⤢ BigView, a PDF dropped), Disponible dans, Où il est enregistré (MaterialModules)
+│   ├── material_marks.py         # the icon of a material's type and the words of its source's label
+│   ├── material_copies.py        # service of «Poids propre»: the engineer's materials changed since the project took its copy -- Reprendre, Garder, Ajouter (MaterialCopies)
+│   ├── blink.py                  # a widget that flashes to be found (Blinker): a field named by a message, a module revealed
 │   ├── linkable_spin.py          # the button 𝑥 beside a field that may follow a variable, its linked state, factor, offset, «Délier» and «Introuvable» (issue #42, §3.3duovicies)
 │   ├── text_pane.py              # the right pane of a text placed with the Text tool, the same in the four drawing engines: content, «Insérer une variable», a card per variable (issue #43)
-│   ├── member_check_tab.py       # the member checks' two navigation groups: the «Traction» and «Compression» tabs on one base (list | form in cards | the instant results and the call, then the command's options and the Typst page of the draft, both collapsible) and the seven placeholders of the other modules (§10quater, v0.117)
+│   ├── member_check_tab.py       # MemberCheckTab, the base of the fire's and the steel's tabs (list | form in cards | instant result | «Affichage»), BucklingLengths, and the placeholders of torsion and of the serviceability (§10quater; the four checks themselves are check_tabs.py since issue #112)
+│   ├── check_tabs.py             # Traction, Compression, Flexion, Cisaillement on the type «Calcul» (issue #112): classes of parameters, the domain member_check_view's
+│   ├── check_list.py             # the list of a member check tab, a service (CaseList's): grouped by position, each check its rate green or red, sorted by position or by rate
+│   ├── check_member.py           # the head «Élément» of a member check, a service: position, the material and its menu, the section
+│   ├── load_row.py               # the row «Sollicitation» of a member check, a service: the loading bubbles, the ⓘ of the material's table, «La vérification lit»
+│   ├── factors_row.py            # the row «Facteurs» of a member check, a service: moisture class, action or KLED and situation, γ_M / η_mod shown
+│   ├── check_rows.py             # what the three services of a member check's head read alike: a number as the window writes it, the material a draft names, its value for the tab
+│   ├── check_results.py          # «Résultats» of a member check, a service: the verdict, the rows in the order of the calculation, the governing row framed
+│   ├── check_display.py          # «Affichage» of a member check, a service: the type's, its options written into the check's source
+│   ├── material_menu.py          # the menu of a material of the library, a brick: a search above the groups, a line each with what its caller says
 │   ├── member_check_tab_words.py # split out of member_check_tab.py (issue #30): the member checks' words in three languages
 │   ├── member_check_tab_form.py  # split out of member_check_tab.py (issue #30): MemberCheckFormMixin -- the form, the result, the «Affichage» view, the draft
 │   ├── member_check_tab_actions.py # split out of member_check_tab.py (issue #30): MemberCheckActionsMixin -- the list, the calculation and its command, the buttons
 │   ├── annex_tab.py              # its annexes tab: the sources and excerpts in two fixed folders, the page with its bookmarks, a title clicked and a frame dragged (§10quater, v0.115)
 │   ├── annex_tab_words.py        # split out of annex_tab.py (issue #30, after issue #16 grew it past 1500 lines): the tab's words in three languages
 │   ├── annex_tab_pages.py        # split out of annex_tab.py (issue #30): the PDF read, the source's pages shown with their frames, the frames found in a page
-│   ├── formula_tab.py            # its «Formules» tab: the domains in the shared list (folders, order, «Archives»), a domain written as text zones and blocks, options a click away, the ID renamed, «Affichage» with #include (§10quater, v0.117, issue #15)
-│   ├── formula_tab_widgets.py    # split out of formula_tab.py (issue #30): a block of a calculation with its fields, a zone of Typst between the blocks
+│   ├── formula_tab.py            # its «Domaines» tab (issue #113): the frame of three modes on a domain's file -- Formulaire, Code, Affichage --, the list, the modules, every writer
 │   ├── formula_tab_domains.py    # split out of formula_tab.py (issue #30): FormulaDomainsMixin -- the domains, the name line and the ID
-│   ├── formula_tab_blocks.py     # split out of formula_tab.py (issue #30): FormulaBlocksMixin -- the blocks and texts, the variables taken from elsewhere
-│   ├── variables_tab.py          # its variables tab: every value the report computes, by domain, filtered by
-│   ├── dependencies_tab.py      # «Dépendances»: the graph of the last export, «dépend de» / «utilisé par», an object opened in its tab (issue #71)
-│   │                             # name and by unit, with the calls that print one (§10quater, v0.100)
+│   ├── formula_tab_words.py      # split out of formula_tab.py (issue #113): the tab's words in three languages, the refusals by code, a message of the state said
+│   ├── formula_form.py           # the «Domaines» tab's Formulaire: a column of rows, the + between two, the line at the foot, the group by Ctrl+click, the drop (issue #113)
+│   ├── formula_row.py            # one row of the Formulaire: the fields of its line, its stripe, its detail, its grip (issue #113)
+│   ├── formula_new_line.py       # a new line of the Formulaire: its pill auto · var · eq · verify · texte and the fields of the command (issue #113)
+│   ├── formula_modules.py        # the «Domaines» tab's modules: État du domaine, Arguments de la ligne, Résultats, Variables du domaine (issue #113)
+│   ├── formula_link_dialog.py    # «Lier une variable…»: boxes, Ctrl, Shift, «Valider (n)» on variable_select (issue #113)
+│   ├── formula_code.py           # the «Domaines» tab's Code: the buffer read before it is written, the command of the cursor (issue #113)
+│   ├── formula_display.py        # the «Domaines» tab's Affichage: domain_file_display given the engineer's file, the domain's options and «lire une valeur ailleurs» (issue #113)
+│   ├── code_editor.py            # a text editor with two margins -- the numbers coloured by line, a note at the right of each line -- and one edit of a range of lines (issue #113)
+│   ├── variables_tab.py          # its variables tab, parameters on the type «Données» (issue #106): the browser and the banner, the names others call exposed (EXPOSES), the reading thread
+│   ├── variables_browser.py      # the variables tab's content, its one whole service (issue #106): three panes, the menu, the source, the tags, the list, the card, a field's choice
+│   ├── variables_list.py         # the variables tab's list: a QTableView on a flat model, a title per domain, the model's choice painted, widths kept
+│   ├── variables_detail.py       # the variables tab's card: the head, «Ouvrir l'onglet», the command and what to include, «Vient de», the same calculation elsewhere
+│   ├── variables_words.py        # the variables tab's words (vr_), fr/de/en
+│   ├── tag_search_bar.py         # a search bar carrying a filter as removable tags, no word of its own (issue #114, ARCH-002)
+│   ├── tree_menu.py              # a button opening a tree of entries with their numbers in a popup, an entry at zero greyed, no word of its own (issue #114)
+│   ├── dependencies_tab.py      # «Dépendances»: the graph of the last export, «dépend de» / «utilisé par», an object opened in its tab (issue #71); parameters on the type «Données», its content DependenciesBrowser (issue #106)
 │   ├── python_tab.py             # its Python tab: the editor, the run, the variable inspector and the terminal (§10quater, v0.100)
 │   ├── positions_tab.py          # its positions tab: Positionen.xlsx listed and edited, every write through positions_workbook (§10quater, v0.94)
 │   ├── statics_tab.py            # its static models tab, its five lists and that tab's texts in three languages
@@ -472,7 +548,15 @@ calc/
 │   ├── connectors_tab_form.py    # split out of connectors_tab.py (issue #30): ConnectorsFormMixin -- the form, its rows and boxes, the figures and results
 │   ├── connectors_tab_draft.py   # split out of connectors_tab.py (issue #30): ConnectorsDraftMixin -- the draft and the form, the live preview, the table's buttons
 │   │                             # as a detail schema, the two sources left naming it (v0.74, §3.3decies)
-│   ├── commands_tab.py           # its commands tab: every command of lib/, its arguments, its calls and its examples (§10sexies)
+│   ├── commands_tab.py           # its commands tab: three panes on one context, each a component (§10sexies, issue #115), mounted by CommandsBrowser, the tab parameters on the type «Données» (issue #106)
+│   ├── command_list.py           # the commands tab's left pane: the search (name and lead) and the commands by category, two lines a row
+│   ├── command_page_view.py      # its centre: the condensed page -- the line of the command and its bubbles, the cards, the arguments, the examples
+│   ├── command_side.py           # its right pane: the lines to copy, the examples, «Dans ce projet»
+│   ├── command_examples.py       # the worked examples of a page, their levels and their pages compiled on demand outside German
+│   ├── command_page.py           # a command's condensed page as data, without Qt: the window's and the website's (ARCH-008)
+│   ├── command_pages.py          # calc/i18n/command-pages.json read, validated and held to lib/ (REQ-001, REQ-003)
+│   ├── command_usage.py          # the calls of a command in a project's .typ files, twelve at most
+│   ├── hover_bubble.py           # a bubble open at the hover, kept under the pointer, pinned by a click (place, GAP)
 │   ├── command_preview.py        # the page one example is compiled as, and the fallback render
 │   ├── command_docs.py           # the translation of the documentation the commands tab shows, and what tests hold of it (§10sexies, v0.86)
 │   ├── build_examples.py         # writes the frozen MWEs from the /// fences and renders them once (§10sexies)
@@ -488,9 +572,9 @@ calc/
 
 Principles:
 - **`schemas/`** holds the documented JSON schemas (§3.0), the formal contract between Python and Typst — every structural change starts with updating the schema and its `schema_version`. It lives beside `calc/`, under `Woodcore/`, not nested inside it.
-- **`calc/libraries/`** holds what is no norm but is read like one: Woodcore's materials library, read out once, every entry keeping its source (`domains/materials.py`, issue #35, D-07). A value of a norm never goes here.
+- **`calc/libraries/`** holds what is no norm but is read like one: Woodcore's materials library, read out once, every entry keeping its source (`domains/materials.py`, issue #35, D-07), and since issue #110 `materials-catalogue.json`, the names and categories of the shipped materials, no number (`domains/materials_catalogue.py`), and since issue #111 `dead-load-templates.json`, the eight build-ups of Lignum's *Holzbau mit System* the tab «Poids propre» offers as templates, each layer naming a shipped material by its id (`domains/dead_load_templates.py`). A value of a norm never goes here.
 - **`calc/norms/`** is the sole source of values taken from a norm for a calculation made in Python (one made in Excel keeps its own) — **and, since v0.87, for Typst's `#distance`**, which reads the very same files by the relative path `../calc/norms/` (§10bis): one source for both, `calc/norms/sia265.py` checking them before an export reads anything and `tests/test_distance.py` holding the two lists of files equal, the files copied into each project's `_woodcore/` with the engine and into `examples/calc/norms/` at a freeze (§12, §10sexies) — **no norm value twice**, the engineer's rule (v0.77). One JSON per table or clause, **flat in the folder**, named `<norm>-<year>-<table or clause>-<designation>.json` — `sia265-2021-tab08-vollholz.json`, `sia265-2021-6.2.1.1-k-alpha.json`, `sn-en-14592-2012-fu-k-stabduebel.json` — and one reader per norm beside them (`sia261.py`, `sia263.py`, `sia265.py`, `sn_en_14592.py`) that checks each file before a value is taken out. **A coefficient inside a formula is a norm value like any other** and lives here, not beside its formula (v0.77, reversing v0.68). `tests/test_norms.py` holds the naming, that no file is read by nobody, and that `domains/dowel.py` writes none of SIA 265's coefficients. If a normative value changes edition, only one file needs updating. Populated since v0.49, when SIA 261's Tabelle 8 was the first file (`sia261_tables.json` until v0.77) — the pattern for every table that followed: the numbers in the JSON, the edition named there, the checks in its reader. Nothing is outside it any more: the GL24h constants that used to sit in `domains/bending.py` went with that module in v0.59, so a norm value now has exactly one place it may be written down. 👉 Where those values come *from* is the reference library (§11bis): a number reaches this folder by being read off a named edition at a page that can be turned to, and `sia261-2020-tab08-nutzlasten.json`'s `SIA 261:2020` is the name of a file in the reference library. ⚠️ One file cannot say that yet: SN EN 14592's f_u,k was given by the engineer, the edition not being in the library, and its `norm_ref` stays empty until it is. #distance's tables (v0.87) were transcribed off page renders of `SIA265-2021-DE.pdf` — Tabelle 24 p. 66 (extended, `dowel.py` reading it unchanged), 27 and 28 p. 68, 32 and 33 p. 71, 36 p. 74, 37 to 39 p. 75, 40 p. 76, 41 p. 80 — their French words from the French edition, their row names SIA 265's own words (it uses no a₃,t or a₄,c symbols), and their footnotes restated in one sentence each, never copied. ⚠️ Tabelle 38's first column is headed «d = 4 mm» in both editions; it is read as d ≤ 4 mm, and the printed text is kept in the file.
-- **`domains/`**: one file per calculation topic, each returning `Calculation` objects (via `engine.py`), never hand-written JSON. A *load* domain additionally declares `DOMAIN`, `LABEL`, `ACTION`, `ENGINE` and `SHEET_PREFIX` and exposes `read_instances(cells, sheets)`; that is the whole interface `registry.py` needs, which is why adding a `wind-load` domain means writing one module and adding it to `DOMAIN_MODULES`. Load combinations will follow the same `Calculation` logic when they are written (§3.5) — a domain like any other, not a special case.
+- **`domains/`**: one file per calculation topic, each returning `Calculation` objects (via `engine.py`), never hand-written JSON. A *load* domain's module additionally declares `DOMAIN`, `LABEL`, `ACTION` and `ENGINE`, and its source module (`FOLDER`, `source_paths`, `read_source`, `build_instance`) computes each case entered in Woodcore; that is the whole interface `registry.py` needs (`DOMAIN_MODULES`, `SOURCE_MODULES`). Until v0.125 a load domain also declared `SHEET_PREFIX` and read the sheets of the load workbooks (`read_instances(cells, sheets)`, `io_excel.py`), retired by issue #109. Load combinations will follow the same `Calculation` logic when they are written (§3.5) — a domain like any other, not a special case.
 - **`engine.py`** requires `norm`/`norm_ref` on every step — raises an explicit error at export time if a calculation doesn't cite its norm, to prevent oversights.
 - **`validation.py`** applies the three validation levels (§3.6) to every file before it's written to `data/` — blocking on failure.
 - **`export_all.py`** is the sole entry point of the Python build (called by `woodcore-cli` and by Woodcore) — it guarantees positions, calculations, and combinations are always consistent and validated before Typst runs.

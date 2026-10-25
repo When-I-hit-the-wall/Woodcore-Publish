@@ -180,6 +180,17 @@ def marked(text, positions):
     return "".join(f"<u>{html.escape(ch)}</u>" if i in chosen else html.escape(ch) for i, ch in enumerate(text))
 
 
+def _empty(layout):
+    """`layout` emptied, the widgets of its nested layouts deleted too: a nested layout taken out leaves its buttons on the panel, drawn over the next entry's."""
+    while layout.count():
+        item = layout.takeAt(0)
+        if item.widget() is not None:
+            item.widget().deleteLater()
+        elif item.layout() is not None:
+            _empty(item.layout())
+            item.layout().deleteLater()
+
+
 class CommandPalette(QDialog):
     """The palette, over the window: the search field, the categories, the list and the panel. `window` is the MainWindow: it hands in its own entries (`palette_entries`) and does what an entry asks (`palette_open`, `palette_action`)."""
 
@@ -424,10 +435,7 @@ class CommandPalette(QDialog):
     def show_panel(self, entry):
         """The panel on the right: the entry chosen, its detail and what can be done with it -- or the line saying to click one. Never hidden: nothing moves under the pointer at the first click."""
         self.chosen = entry
-        while self.panel_layout.count():
-            item = self.panel_layout.takeAt(0)
-            if item.widget() is not None:
-                item.widget().deleteLater()
+        _empty(self.panel_layout)
         if entry is None:
             hint = QLabel(self.t("cp_choose"))
             hint.setWordWrap(True)

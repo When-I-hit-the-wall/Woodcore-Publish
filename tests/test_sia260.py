@@ -415,9 +415,9 @@ def test_snow_is_not_a_live_load_and_is_not_on_any_category():
 
 
 def test_the_export_still_validates_without_the_factors():
-    data = {"schema_version": "1.4", "domains": {live_load.DOMAIN: {
+    data = {"schema_version": "1.9", "domains": {live_load.DOMAIN: {
         "label": live_load.LABEL, "action": live_load.ACTION, "engine": live_load.ENGINE,
-        "sheet_prefix": "", "instances": _instances()}}}
+        "instances": _instances()}}}
     validation.validate_structure(data, "calculations")
     validation.validate_calculations_business(data)
 

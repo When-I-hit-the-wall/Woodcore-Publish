@@ -54,7 +54,7 @@ def fixes_level(code):
 DOCUMENT_LANGUAGE = {"de": 'lang: "de", region: "CH"', "fr": 'lang: "fr", region: "CH"', "en": 'lang: "en"'}
 
 
-def preamble(level, lang, config="/config.typ", commands="/commands.typ", document_language=False):
+def preamble(level, lang, config="/config.typ", commands="/commands.typ", document_language=False, width=PAGE_WIDTH):
     """The lines before the example: the report's own setup, on a page the size of its text.
 
     The two import paths default to absolute ones, read from examples/ as the Typst root -- what a document compiled from standard input needs. The frozen MWEs, which are files, pass relative ones computed from where they are written (build_examples.imports_for).
@@ -72,7 +72,7 @@ def preamble(level, lang, config="/config.typ", commands="/commands.typ", docume
         lines.append(f"#set text({DOCUMENT_LANGUAGE[lang]})")
     return lines + [
         # conf sets an A4 with a footer and a page number. There is no page here, so both go.
-        f"#set page(width: {PAGE_WIDTH}, height: auto, margin: {PAGE_MARGIN}, "
+        f"#set page(width: {width}, height: auto, margin: {PAGE_MARGIN}, "
         "header: none, footer: none, numbering: none)",
         f'#set-report-language("{lang}")',
         f"#report-level.update({int(level)})",
@@ -80,14 +80,14 @@ def preamble(level, lang, config="/config.typ", commands="/commands.typ", docume
     ]
 
 
-def document(code, level, lang, config="/config.typ", commands="/commands.typ", document_language=False):
+def document(code, level, lang, config="/config.typ", commands="/commands.typ", document_language=False, width=PAGE_WIDTH):
     """The .typ one example is compiled as.
 
     The level and the language are written into the file rather than passed as --input: those two flags are read by Statischer Rapport.typ, not by the engine, so stating them here is both shorter and one failure mode fewer -- and the file then records what it was rendered at, which is worth having when one looks at it.
 
-    This is the one assembly of an example: the frozen MWEs (build_examples.py), the window's renders and the website's pages in three languages (website/build.py, with `document_language`) are all this document.
+    This is the one assembly of an example: the frozen MWEs (build_examples.py), the window's renders and the website's pages in three languages (website/build.py, with `document_language`) are all this document -- and the prints of the commands' values too, on a narrower page (`width`, build_examples.render_values).
     """
-    return "\n".join(preamble(level, lang, config, commands, document_language)) + "\n\n" + code.strip("\n") + "\n"
+    return "\n".join(preamble(level, lang, config, commands, document_language, width)) + "\n\n" + code.strip("\n") + "\n"
 
 
 def offset(level=DEFAULT_LEVEL, lang="de", document_language=False):

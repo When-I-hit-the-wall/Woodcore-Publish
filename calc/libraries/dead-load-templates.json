@@ -1,0 +1,813 @@
+{
+  "_source": "The templates of build-ups of permanent loads Woodcore ships (issue #111, spec docs/requirements/completed/2026-10-24-poids-propre-repense.md, REQ-010, T57): eight build-ups of Kolb, Kolb, Müller: Holzbau mit System, Lignum / Birkhäuser, each read off the page it names (the pages rendered and read on 24.10.2026). The book gives the layers and their thicknesses, rarely the spacings: what a template supposes is its `assumptions`, in three languages. Where the book gives the weight of the whole build-up (`book_weight`), the tab shows it beside the sum, as a check.",
+  "_note": "A template's layers are those of a build-up, dead-load-source 2.0 (schemas/dead-load-template.schema.json), its materials named by their id in the materials Woodcore ships (calc/domains/materials_catalogue.py): no weight is written here. Every layer names a material Woodcore ships; where the book names one it gives no weight for (the compact flat roof's Foamglas), the template takes one of the library, said in its assumptions.",
+  "schema_version": "1.0",
+  "templates": [
+    {
+      "id": "lignum-c4-tab6",
+      "kind": "roof",
+      "names": {
+        "fr": "Toiture inclinée, isolée entre chevrons",
+        "de": "Geneigtes Dach, zwischengedämmt",
+        "en": "Pitched roof, insulated between rafters"
+      },
+      "reference": {
+        "book": "Kolb, Kolb, Müller: Holzbau mit System, Lignum / Birkhäuser",
+        "where": "C4 Geneigte Dächer, Tabelle 6",
+        "page": 377
+      },
+      "assumptions": {
+        "fr": "Le livre laisse la couverture, l'isolation et les chevrons variables (part de bois 15 %) : tuiles à emboîtement lattis compris (SIA 261, tab. 29), isolation 200 mm entre chevrons 100/200 e = 625 (16 %), contre-lattes 60/50 e = 625, lattis intérieur 50/30 e = 400.",
+        "de": "Das Buch lässt Deckung, Dämmung und Sparren variabel (Holzanteil 15 %): Pfannenziegel inkl. Lattung (SIA 261, Tab. 29), Dämmung 200 mm zwischen Sparren 100/200 e = 625 (16 %), Konterlattung 60/50 e = 625, Lattenrost 50/30 e = 400.",
+        "en": "The book leaves the roofing, the insulation and the rafters open (timber share 15 %): interlocking tiles including battens (SIA 261, Table 29), 200 mm insulation between 100/200 rafters at 625 (16 %), counter-battens 60/50 at 625, inner battens 50/30 at 400."
+      },
+      "book_weight": null,
+      "layers": [
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "sia261:tonziegeldach_inkl_lattung_pfannenziegel",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "roofing",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "spaced",
+          "material": "ext:93",
+          "label": "",
+          "thickness": 50,
+          "width": 60,
+          "spacing": 625,
+          "link": false,
+          "fill": true,
+          "role": "counter_battens",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "sia261:unterdaecher_hartfaserplatten",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "underlay",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "spaced",
+          "material": "ext:93",
+          "label": "",
+          "thickness": 200,
+          "width": 100,
+          "spacing": 625,
+          "link": true,
+          "fill": true,
+          "role": "structure",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:46",
+          "label": "",
+          "thickness": 200,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "insulation",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "sia261:kunststofffolie",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "vapour_barrier",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "spaced",
+          "material": "ext:94",
+          "label": "",
+          "thickness": 30,
+          "width": 50,
+          "spacing": 400,
+          "link": false,
+          "fill": true,
+          "role": "battens",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:70",
+          "label": "",
+          "thickness": 15,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "lining",
+          "load": null
+        }
+      ]
+    },
+    {
+      "id": "lignum-c4-tab10",
+      "kind": "roof",
+      "names": {
+        "fr": "Toiture inclinée, isolée sur chevrons",
+        "de": "Geneigtes Dach, aussen gedämmt",
+        "en": "Pitched roof, insulated above the rafters"
+      },
+      "reference": {
+        "book": "Kolb, Kolb, Müller: Holzbau mit System, Lignum / Birkhäuser",
+        "where": "C4 Geneigte Dächer, Tabelle 10",
+        "page": 379
+      },
+      "assumptions": {
+        "fr": "Couverture variable dans le livre : tuiles en béton lattis compris (SIA 261, tab. 29) ; panneau isolant en fibre de bois 200 mm (Pavatherm) sur lambris 27 mm ; chevrons de 24 cm comme le calcul du livre, 120/240 e = 1000 ; contre-lattes 60/50 e = 625.",
+        "de": "Deckung im Buch variabel: Betonziegel inkl. Lattung (SIA 261, Tab. 29); Holzfaserdämmplatte 200 mm (Pavatherm) auf Dachschalung 27 mm; Sparren 24 cm wie die Berechnung des Buchs, 120/240 e = 1000; Konterlattung 60/50 e = 625.",
+        "en": "Roofing open in the book: concrete tiles including battens (SIA 261, Table 29); 200 mm wood-fibre insulation board (Pavatherm) on 27 mm boarding; rafters 24 cm deep as the book computes, 120/240 at 1000; counter-battens 60/50 at 625."
+      },
+      "book_weight": null,
+      "layers": [
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "sia261:betonziegeldach_inkl_lattung_pfannenziegel",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "roofing",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "spaced",
+          "material": "ext:93",
+          "label": "",
+          "thickness": 50,
+          "width": 60,
+          "spacing": 625,
+          "link": false,
+          "fill": true,
+          "role": "counter_battens",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "ext:158",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "underlay_membrane",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:49",
+          "label": "",
+          "thickness": 200,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "insulation",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "sia261:kunststofffolie",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "vapour_barrier",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "continuous",
+          "material": "ext:68",
+          "label": "",
+          "thickness": 27,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "boarding",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "spaced",
+          "material": "ext:92",
+          "label": "",
+          "thickness": 240,
+          "width": 120,
+          "spacing": 1000,
+          "link": false,
+          "fill": true,
+          "role": "structure",
+          "load": null
+        }
+      ]
+    },
+    {
+      "id": "lignum-c5-tab13",
+      "kind": "flat",
+      "names": {
+        "fr": "Toit plat compact sur bois massif",
+        "de": "Flachdach, Verbunddach auf Massivholz",
+        "en": "Compact flat roof on solid timber"
+      },
+      "reference": {
+        "book": "Kolb, Kolb, Müller: Holzbau mit System, Lignum / Birkhäuser",
+        "where": "C5 Flachdächer, Tabelle 13",
+        "page": 389
+      },
+      "assumptions": {
+        "fr": "Gravier 60 mm, couche de protection 2 mm, étanchéité 6 mm (EPDM), bois massif 100 mm. Le livre isole au verre cellulaire (Foamglas, 200 mm) sans en donner le poids : le modèle prend une laine de roche de toit plat, accessible, de la bibliothèque (Flumroc prima, 120 kg/m³, λ ≈ 0,040 comme le livre).",
+        "de": "Kiesauflage 60 mm, Schutzlage 2 mm, Abdichtung 6 mm (EPDM), Massivholz 100 mm. Das Buch dämmt mit Foamglas (200 mm), ohne sein Gewicht anzugeben: die Vorlage nimmt eine begehbare Flachdach-Steinwolle der Bibliothek (Flumroc prima, 120 kg/m³, λ ≈ 0,040 wie im Buch).",
+        "en": "Gravel 60 mm, protection layer 2 mm, waterproofing 6 mm (EPDM), solid timber 100 mm. The book insulates with cellular glass (Foamglas, 200 mm) without giving its weight: the template takes a walkable flat-roof stone wool of the library (Flumroc prima, 120 kg/m³, λ ≈ 0.040 as in the book)."
+      },
+      "book_weight": null,
+      "layers": [
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:79",
+          "label": "",
+          "thickness": 60,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "ballast",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "ext:159",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "protection",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "ext:156",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "waterproofing",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:59",
+          "label": "",
+          "thickness": 200,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "insulation",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "ext:155",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": null,
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "continuous",
+          "material": "sia261:holz_verleimte_nadelhoelzer",
+          "label": "",
+          "thickness": 100,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "structure",
+          "load": null
+        }
+      ]
+    },
+    {
+      "id": "lignum-a2-abb24-rahmen",
+      "kind": "wall",
+      "names": {
+        "fr": "Paroi à ossature bois, façade ventilée",
+        "de": "Holzrahmenbau, hinterlüftet",
+        "en": "Timber-frame wall, ventilated facade"
+      },
+      "reference": {
+        "book": "Kolb, Kolb, Müller: Holzbau mit System, Lignum / Birkhäuser",
+        "where": "A2, Abbildung 24",
+        "page": 35
+      },
+      "assumptions": {
+        "fr": "Montants 100/240 e = 625, la part de bois de 16 % du livre ; lattage 30/50 e = 600 ; bardage en mélèze 21 mm ; le plâtre intérieur, sans épaisseur dans le livre, omis.",
+        "de": "Ständer 100/240 e = 625, der Holzanteil von 16 % des Buchs; Hinterlüftungslattung 30/50 e = 600; Lärchenschalung 21 mm; Putz innen, im Buch ohne Dicke, weggelassen.",
+        "en": "Studs 100/240 at 625, the book's 16 % timber share; battens 30/50 at 600; larch cladding 21 mm; the inner plaster, given no thickness, left out."
+      },
+      "book_weight": null,
+      "layers": [
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:239",
+          "label": "",
+          "thickness": 21,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "facade",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "spaced",
+          "material": "ext:94",
+          "label": "",
+          "thickness": 30,
+          "width": 50,
+          "spacing": 600,
+          "link": false,
+          "fill": true,
+          "role": "battens",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "ext:249",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "facade_membrane",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:69",
+          "label": "",
+          "thickness": 15,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "bracing_panel",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "spaced",
+          "material": "ext:93",
+          "label": "",
+          "thickness": 240,
+          "width": 100,
+          "spacing": 625,
+          "link": true,
+          "fill": true,
+          "role": "structure",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:46",
+          "label": "",
+          "thickness": 240,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "insulation",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "continuous",
+          "material": "ext:62",
+          "label": "",
+          "thickness": 15,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "bracing_panel",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:69",
+          "label": "",
+          "thickness": 18,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "lining",
+          "load": null
+        }
+      ]
+    },
+    {
+      "id": "lignum-a2-abb24-bsp",
+      "kind": "wall",
+      "names": {
+        "fr": "Paroi en bois lamellé-croisé, isolation crépie",
+        "de": "Massivholzbau, Brettsperrholz",
+        "en": "Cross-laminated timber wall, rendered insulation"
+      },
+      "reference": {
+        "book": "Kolb, Kolb, Müller: Holzbau mit System, Lignum / Birkhäuser",
+        "where": "A2, Abbildung 24",
+        "page": 35
+      },
+      "assumptions": {
+        "fr": "Crépi extérieur 15 mm (sans épaisseur dans le livre) ; laine de roche 200 mm, de densité pour crépi (Flumroc type 3) ; bois lamellé-croisé 120 mm.",
+        "de": "Putz aussen 15 mm (im Buch ohne Dicke); Steinwolle 200 mm, verputzbar (Flumroc Typ 3); Brettsperrholz 120 mm.",
+        "en": "External render 15 mm (given no thickness in the book); stone wool 200 mm, dense enough to render (Flumroc type 3); cross-laminated timber 120 mm."
+      },
+      "book_weight": null,
+      "layers": [
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "sia261:moertelueberzuege_wandverputz_aussen",
+          "label": "",
+          "thickness": 15,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "facade",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:47",
+          "label": "",
+          "thickness": 200,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "insulation",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "continuous",
+          "material": "sia261:holz_verleimte_nadelhoelzer",
+          "label": "",
+          "thickness": 120,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "structure",
+          "load": null
+        }
+      ]
+    },
+    {
+      "id": "lignum-c7-abb13-2",
+      "kind": "floor",
+      "names": {
+        "fr": "Plancher à solives, sable entre lattes",
+        "de": "Holzbalkendecke, Sand zwischen Lattung",
+        "en": "Joisted floor, sand between battens"
+      },
+      "reference": {
+        "book": "Kolb, Kolb, Müller: Holzbau mit System, Lignum / Birkhäuser",
+        "where": "C7, Abbildung 13, Beispiel 2",
+        "page": 415
+      },
+      "assumptions": {
+        "fr": "Lattes 50/50 e = 500 ; sable sec 1500 kg/m³ (le livre ; SIA 261, tab. 30) entre les lattes ; solives 140/200 e = 600 ; non-tissé pour le résilient et le pare-gravillons.",
+        "de": "Lattung 50/50 e = 500; getrockneter Sand 1500 kg/m³ (das Buch; SIA 261, Tab. 30) zwischen der Lattung; Balken 140/200 e = 600; Vlies für Trittschalldämmvlies und Rieselschutz.",
+        "en": "Battens 50/50 at 500; dry sand 1500 kg/m³ (the book; SIA 261, Table 30) between the battens; joists 140/200 at 600; fleece for the impact layer and the trickle guard."
+      },
+      "book_weight": {
+        "value": 127,
+        "unit": "kg/m²"
+      },
+      "layers": [
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:30",
+          "label": "",
+          "thickness": 25,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "screed",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "ext:159",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "impact_insulation",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "spaced",
+          "material": "ext:94",
+          "label": "",
+          "thickness": 50,
+          "width": 50,
+          "spacing": 500,
+          "link": true,
+          "fill": true,
+          "role": "battens",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "sia261:erdauflasten_und_gleisschotter_sand",
+          "label": "",
+          "thickness": 50,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "ballast",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "ext:159",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "protection",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "continuous",
+          "material": "ext:68",
+          "label": "",
+          "thickness": 21,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "boarding",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "spaced",
+          "material": "ext:93",
+          "label": "",
+          "thickness": 200,
+          "width": 140,
+          "spacing": 600,
+          "link": false,
+          "fill": true,
+          "role": "structure",
+          "load": null
+        }
+      ]
+    },
+    {
+      "id": "lignum-c7-abb12-2",
+      "kind": "floor",
+      "names": {
+        "fr": "Plancher à solives, chape ciment",
+        "de": "Holzbalkendecke, Zementestrich",
+        "en": "Joisted floor, cement screed"
+      },
+      "reference": {
+        "book": "Kolb, Kolb, Müller: Holzbau mit System, Lignum / Birkhäuser",
+        "where": "C7, Abbildung 12, Beispiel 2",
+        "page": 415
+      },
+      "assumptions": {
+        "fr": "Chape ciment 50 mm ; panneau de fibres minérales 15 mm, 80 à 100 kg/m³ dans le livre (Flumroc Trittschall, 110 kg/m³) ; solives 140/200 e = 600.",
+        "de": "Zementestrich 50 mm; Mineralfaserplatte 15 mm, im Buch 80–100 kg/m³ (Flumroc Trittschall, 110 kg/m³); Balken 140/200 e = 600.",
+        "en": "Cement screed 50 mm; mineral-fibre board 15 mm, 80 to 100 kg/m³ in the book (Flumroc impact board, 110 kg/m³); joists 140/200 at 600."
+      },
+      "book_weight": {
+        "value": 150,
+        "unit": "kg/m²"
+      },
+      "layers": [
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:20",
+          "label": "",
+          "thickness": 50,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "screed",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "surface",
+          "material": "sia261:kunststofffolie",
+          "label": "",
+          "thickness": null,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "protection",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:40",
+          "label": "",
+          "thickness": 15,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "impact_insulation",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "continuous",
+          "material": "ext:68",
+          "label": "",
+          "thickness": 21,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "boarding",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "spaced",
+          "material": "ext:93",
+          "label": "",
+          "thickness": 200,
+          "width": 140,
+          "spacing": 600,
+          "link": false,
+          "fill": true,
+          "role": "structure",
+          "load": null
+        }
+      ]
+    },
+    {
+      "id": "lignum-a2-abb19-hohlkasten",
+      "kind": "floor",
+      "names": {
+        "fr": "Plancher caisson, gravillon entre nervures",
+        "de": "Hohlkastendecke, Kalksplitt zwischen Rippen",
+        "en": "Box floor, limestone chippings between ribs"
+      },
+      "reference": {
+        "book": "Kolb, Kolb, Müller: Holzbau mit System, Lignum / Birkhäuser",
+        "where": "A2, Abbildung 19",
+        "page": 33
+      },
+      "assumptions": {
+        "fr": "Nervures 80/200 e = 625 ; gravillon calcaire sec 120 mm entre elles, 80 mm d'air au-dessus ; panneaux trois plis 27 mm dessus et dessous.",
+        "de": "Rippen 80/200 e = 625; Kalksplittschüttung trocken 120 mm dazwischen, 80 mm Luft darüber; Dreischichtplatten 27 mm oben und unten.",
+        "en": "Ribs 80/200 at 625; dry limestone chippings 120 mm between them, 80 mm of air above; three-layer boards 27 mm above and below."
+      },
+      "book_weight": null,
+      "layers": [
+        {
+          "kind": "gk",
+          "pose": "continuous",
+          "material": "ext:25",
+          "label": "",
+          "thickness": 27,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "structure",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "spaced",
+          "material": "ext:93",
+          "label": "",
+          "thickness": 200,
+          "width": 80,
+          "spacing": 625,
+          "link": true,
+          "fill": true,
+          "role": "structure",
+          "load": null
+        },
+        {
+          "kind": "ak",
+          "pose": "continuous",
+          "material": "ext:55",
+          "label": "",
+          "thickness": 120,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "ballast",
+          "load": null
+        },
+        {
+          "kind": "gk",
+          "pose": "continuous",
+          "material": "ext:25",
+          "label": "",
+          "thickness": 27,
+          "width": null,
+          "spacing": null,
+          "link": false,
+          "fill": true,
+          "role": "structure",
+          "load": null
+        }
+      ]
+    }
+  ]
+}

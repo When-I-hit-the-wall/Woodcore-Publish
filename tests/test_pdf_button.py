@@ -177,7 +177,7 @@ def test_the_buttons_are_named_in_all_three_languages():
         # Every word the button has ever carried: a message still naming one of them sends the engineer to a button that is not there. This is the check that caught «Importer Excel» in three of these strings when the button was renamed.
         gone = ("xcel neu exportieren", "Re-export from Excel", "Réexporter depuis Excel",
                 "Importer Excel", "Aus Excel importieren", "Import from Excel")
-        for key in ("stale", "polar_empty"):
+        for key in ("polar_empty",):   # «stale» went with the load workbooks (issue #109)
             for word in gone:
                 assert word not in strings[key], (
                     f"{lang}/{key} still sends the engineer to a button that no longer exists ({word!r}): {strings[key]!r}"

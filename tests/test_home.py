@@ -181,16 +181,33 @@ def _main_window():
 
 def test_the_window_names_its_project_and_marks_what_is_unsaved():
     window = _main_window()
-    assert window.windowTitle() == "Exemple — Woodcore", window.windowTitle()
+    where = window.nav.path(window.tab_widget.currentIndex())
+    assert where and window.windowTitle() == f"Exemple — {where} — Woodcore", window.windowTitle()
     tab = next(t for t in window.tabs if hasattr(t, "dirty"))
     tab.dirty = True
     try:
         window.update_tab_marks()
-        assert window.windowTitle() == "• Exemple — Woodcore", window.windowTitle()
+        assert window.windowTitle() == f"• Exemple — {where} — Woodcore", window.windowTitle()
     finally:
         tab.dirty = False
         window.update_tab_marks()
-    assert window.windowTitle() == "Exemple — Woodcore"
+    assert window.windowTitle() == f"Exemple — {where} — Woodcore"
+
+
+def test_the_window_s_bar_names_the_tab_open_alone_in_its_group():
+    """Issue #112, UI-001: «Sécurité structurale › Cisaillement» in the bar -- the tab open and its group, nothing else."""
+    import woodcore_gui
+    window = _main_window()
+    before = window.tab_widget.currentIndex()
+    keys = [key for key, _factory in woodcore_gui.TABS]
+    try:
+        window.tab_widget.setCurrentIndex(keys.index("tab_mc_shear"))
+        title = window.windowTitle()
+        assert f"— {window.t('nav_safety')} › {window.t('tab_mc_shear')} —" in title, title
+        expected = {"fr": "Sécurité structurale › Cisaillement", "de": "Tragsicherheit › Schub", "en": "Structural safety › Shear"}[window.lang]
+        assert expected in title and window.t("tab_mc_bending") not in title, title
+    finally:
+        window.tab_widget.setCurrentIndex(before)
 
 
 def test_the_file_menu_holds_what_a_project_is_opened_and_closed_with():

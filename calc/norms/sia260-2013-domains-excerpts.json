@@ -1,0 +1,130 @@
+{
+ "_source": "SIA 260:2013 -- the clauses the «Domaines» tab's example domains cite (issue #113, REQ-014): their page and box relevé in the prototype «Domaines de calcul» v2 off the editions shipped in norm-library/, their words copied from them and held to the PDF by tests/test_norm_excerpts.py.",
+ "_note": "Found by a citation of a domain's line (`norm:`, `norm-section:`) through norms.excerpts.for_citation; a clause cited that no file lists has no bubble.",
+ "edition": "SIA 260:2013",
+ "editions": {
+  "fr": {
+   "file": "SIA260-2013-FR.pdf",
+   "chapter": [
+    30,
+    31
+   ]
+  },
+  "de": {
+   "file": "SIA260-2013-DE.pdf",
+   "chapter": [
+    30,
+    31
+   ]
+  },
+  "en": {
+   "file": "SIA260-2013-EN.pdf",
+   "chapter": [
+    30,
+    31
+   ]
+  }
+ },
+ "excerpts": {
+  "4.4.3.4": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.4.3.4",
+     "page": 31,
+     "box": [
+      58,
+      66,
+      542,
+      181
+     ],
+     "text": "4.4.3.4 Pour les situations de dimensionnement durables et transitoires, les valeurs de dimensionnement des effets des actions selon (10) seront déterminées comme suit:\nEd = E {γG Gk, γP Pk, γQ1 Qk1, ψ0i Qki, Xd, ad}   (16)\nLes facteurs de charge γG et γQ, ainsi que les coefficients de réduction ψ0i, sont indiqués dans le tableau 1 et dans les annexes A à F. Les facteurs de charge γP sont donnés dans les normes SIA 262 et SIA 267.\nPour les phases de construction, une diminution appropriée des facteurs de charge est admissible en cas d’application de la méthode observationnelle.",
+     "chapter": [
+      31,
+      31
+     ]
+    },
+    "de": {
+     "ref": "4.4.3.4",
+     "page": 31,
+     "box": [
+      58,
+      66,
+      542,
+      172
+     ],
+     "text": "4.4.3.4 Für andauernde und vorübergehende Bemessungssituationen sind die Bemessungswerte der Auswirkungen gemäss (10) wie folgt zu ermitteln:\nEd = E {γG Gk, γP Pk, γQ1 Qk1, ψ0i Qki, Xd, ad}   (16)\nDie Lastbeiwerte γG und γQ sowie die Reduktionsbeiwerte ψ0i gehen aus Tabelle 1 und aus den Anhängen A bis F hervor. Die Lastbeiwerte γP sind in den Normen SIA 262 und SIA 267 festgelegt.\nFür Bauzustände ist bei Anwendung der Beobachtungsmethode eine angemessene Abminderung der Lastbeiwerte zulässig.",
+     "chapter": [
+      31,
+      31
+     ]
+    },
+    "en": {
+     "ref": "4.4.3.4",
+     "page": 31,
+     "box": [
+      58,
+      66,
+      542,
+      170
+     ],
+     "text": "4.4.3.4 For persistent and transient dimensioning situations the dimensioning values of effects of actions according to (10) shall be determined as follows:\nEd = E {γG Gk, γP Pk, γQ1 Qk1, ψ0i Qki, Xd, ad}   (16)\nThe load factors γG and γQ and the reduction factors ψ0i are given in Table 1 and in the Appendices A to F, respectively. The load factors γP are given in codes SIA 262 and 267.\nFor construction states an appropriate reduction of the load factors is admissible when using the observational method.",
+     "chapter": [
+      31,
+      31
+     ]
+    }
+   }
+  },
+  "tab01": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 1",
+     "page": 30,
+     "box": [
+      100,
+      305,
+      535,
+      702
+     ],
+     "text": "Tableau 1: Facteurs de charge pour la vérification de la sécurité structurale",
+     "chapter": [
+      30,
+      30
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 1",
+     "page": 30,
+     "box": [
+      100,
+      305,
+      535,
+      707
+     ],
+     "text": "Tabelle 1: Lastbeiwerte für den Nachweis der Tragsicherheit",
+     "chapter": [
+      30,
+      30
+     ]
+    },
+    "en": {
+     "ref": "Table 1",
+     "page": 30,
+     "box": [
+      100,
+      305,
+      535,
+      707
+     ],
+     "text": "Table 1: Load factors for the verification of structural safety",
+     "chapter": [
+      30,
+      30
+     ]
+    }
+   }
+  }
+ }
+}

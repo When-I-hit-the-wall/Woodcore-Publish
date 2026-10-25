@@ -11,14 +11,18 @@ import action_tabs
 import annex_tab
 import commands_tab
 import connectors_tab
+import dead_load_tab
 import dependencies_tab
 import fire_check_tab
 import fire_tab
 import formula_tab
 import journal_tab
+import list_file_card
+import materials_tab
 import metre_tab
-import load_tab
 import snow_tab
+import wind_tab
+import check_tabs
 import member_check_tab
 import plan_tab
 import positions_tab
@@ -28,9 +32,11 @@ import python_tab
 import reserved_tab
 import schema_tab
 import source_archive
+import source_store
 import statics_tab
 import steel_tab
 import structure_tab
+import tab_frame
 import tab_guard
 import variables_tab
 from polar_tab import PolarTab
@@ -47,6 +53,7 @@ class TabSpec:
     section: str = None      # the sub-title it stands under (v0.117): the key of its words, "" for a thin line only, None for none
     documents: tuple = REPORT  # the documents that show it (the engineer's request of 30.09.2026): the report every tab, the two others what they are written from
     mode_bound: bool = False   # it holds one document's own work: asked what to do with what is unsaved before another document is shown (`confirm_leave`)
+    project: bool = True       # it reads and writes the project open (issue #110, ARCH-005): False for a tab of the engineer's own files -- the «Matériaux» tab, his library for every project -- which the read-only guard does not refuse, which is never greyed while a document is not made, and which an export does not mark stale
 
 
 SPECS = (
@@ -67,10 +74,10 @@ SPECS = (
     # The scripts: what the engineer writes into the project himself, read by the report like any other calculation (v0.100).
     TabSpec("tab_python", python_tab.PythonTab, "nav_project"),
     # «Actions» (action_tabs.py, v0.117): the permanent actions, then the variable ones, then the combinations below a line. Three are reserved for a calculation to come (D-04).
-    TabSpec("tab_ac_selfweight", load_tab.DeadLoadTab, "nav_actions", section="nav_permanent"),
+    TabSpec("tab_ac_selfweight", dead_load_tab.DeadLoadTab, "nav_actions", section="nav_permanent"),
     TabSpec("tab_ac_imposed", lambda app: reserved_tab.future(app, "tab_ac_imposed", action_tabs.SOON["tab_ac_imposed"], "tab_ac_imposed"), "nav_actions", section="nav_variable"),
     TabSpec("tab_ac_snow", snow_tab.SnowTab, "nav_actions"),
-    TabSpec("tab_ac_wind", load_tab.WindTab, "nav_actions"),
+    TabSpec("tab_ac_wind", wind_tab.WindTab, "nav_actions"),   # on the type «Calcul» since spec 2026-10-23-onglet-vent-briques (issue #100)
     TabSpec("tab_ac_seismic", lambda app: reserved_tab.future(app, "tab_ac_seismic", action_tabs.SOON["tab_ac_seismic"], "tab_ac_seismic"), "nav_actions"),
     TabSpec("tab_combinations", lambda app: reserved_tab.future(app, "tab_combinations", "future_combinations"), "nav_actions", section=""),
     TabSpec("tab_statics", statics_tab.StaticsTab, "nav_structure"),
@@ -79,13 +86,12 @@ SPECS = (
     TabSpec("tab_connections", connectors_tab.ConnectorsTab, "nav_connections"),
     TabSpec("tab_polar", PolarTab, "nav_connections"),
     # The member checks of SIA 265 chapter 4: 4.2 the structural safety, then 4.3 and 4.4 the serviceability. Torsion and the serviceability are reserved (D-04).
-    TabSpec("tab_mc_tension", member_check_tab.TensionTab, "nav_safety"),
-    TabSpec("tab_mc_compression", member_check_tab.CompressionTab, "nav_safety"),
-    TabSpec("tab_mc_bending", member_check_tab.BendingTab, "nav_safety"),
-    TabSpec("tab_mc_shear", member_check_tab.ShearTab, "nav_safety"),
+    # The four tabs on the type «Calcul» since issue #112 (check_tabs.py): the stability is the last accordion of the compression and of the bending -- «Flambage» and «Déversement» are no tabs of their own (REQ-011)
+    TabSpec("tab_mc_tension", check_tabs.TensionTab, "nav_safety"),
+    TabSpec("tab_mc_compression", check_tabs.CompressionTab, "nav_safety"),
+    TabSpec("tab_mc_bending", check_tabs.BendingTab, "nav_safety"),
+    TabSpec("tab_mc_shear", check_tabs.ShearTab, "nav_safety"),
     TabSpec("tab_mc_torsion", lambda app: member_check_tab.soon_tab(app, "tab_mc_torsion"), "nav_safety"),
-    TabSpec("tab_mc_buckling", member_check_tab.BucklingTab, "nav_safety"),
-    TabSpec("tab_mc_ltb", member_check_tab.LateralTab, "nav_safety"),
     # issue #46: the same checks in the design situation fire, last of «Sécurité structurale»
     TabSpec("tab_mc_fire", fire_check_tab.FireCheckTab, "nav_safety"),
     TabSpec("tab_sls_deformation", lambda app: member_check_tab.soon_tab(app, "tab_sls_deformation"), "nav_service"),
@@ -103,6 +109,8 @@ SPECS = (
     # Which object reads which (issue #71): the graph the export writes, read here -- a browser, like «Variables».
     TabSpec("tab_dependencies", dependencies_tab.DependenciesTab, "nav_reference", documents=ALL),
     TabSpec("tab_commands", commands_tab.CommandsTab, "nav_reference", documents=ALL),
+    # The engineer's library of materials, for every project of his computer (issue #110): the last row, in a group of its own -- the first tab that is not the project's.
+    TabSpec("tab_materials", materials_tab.MaterialsTab, "nav_others", documents=ALL, project=False),
 )
 
 # --- what the window reads, derived ---------------------------------------------------------
@@ -123,8 +131,24 @@ MODE_TABS = {
 
 MODE_BOUND = tuple(spec.key for spec in SPECS if spec.mode_bound)
 
+# The tabs of the engineer's own files rather than the project's (issue #110, ARCH-005): never greyed, never stale after an export, their writers not refused in a project open read-only -- they declare none of tab_guard.WRITERS' names, and are left out of both guards below explicitly.
+PROJECT_FREE = tuple(spec.key for spec in SPECS if not spec.project)
+
 # Every tab class the window builds, guarded (tab_guard.guard): its writers -- where they are defined, its own class, a mixin or a base it shares -- refused in a project opened read-only, and followed by the domains' files where the class says SYNC_DOMAIN.
-GUARDED_TABS = tuple(spec.factory for spec in SPECS if isinstance(spec.factory, type) and any(name in dir(spec.factory) for name in tab_guard.WRITERS))
+GUARDED_TABS = tuple(spec.factory for spec in SPECS if spec.project and isinstance(spec.factory, type) and any(name in dir(spec.factory) for name in tab_guard.WRITERS))
 for _cls in GUARDED_TABS:
     tab_guard.guard(_cls)
 tab_guard.guard_actions(source_archive.Actions)
+# The card of a list written once (list_file_card.ListFileCard: «Métrés», «Journal», «Positions»): its «Écrire le fichier» and «Ajouter» guarded where they are defined, once, by the WRITERS it declares (issue #106, REQ-010, D-09).
+tab_guard.guard_service(list_file_card.ListFileCard)
+
+# The writers of the tabs built on a type are their services' and their store's (spec 2026-10-23-onglets-types-et-services, ARCH-004): every service class a tab of SPECS mounts -- a tab of any type on the frame (tab_frame.TabFrame, issue #107) --, and the store of the cases, guarded by the `WRITERS` each declares -- where it is defined, once.
+GUARDED_SERVICES = tuple(dict.fromkeys([source_store.SourceStore] + [service for spec in SPECS if spec.project and isinstance(spec.factory, type) and issubclass(spec.factory, tab_frame.TabFrame)
+                                                                     for service in spec.factory.SERVICES]))
+for _cls in GUARDED_SERVICES:
+    tab_guard.guard_service(_cls)
+
+# The widgets a service wraps whole (`Service.WIDGET`: the document's structure, issue #107, ARCH-008): their writers are named in tab_guard.WRITERS and defined on the widget and its mixins, guarded there by name, once -- as a tab's were before it stood on a type.
+GUARDED_WIDGETS = tuple(dict.fromkeys(service.WIDGET for service in GUARDED_SERVICES if getattr(service, "WIDGET", None) is not None))
+for _cls in GUARDED_WIDGETS:
+    tab_guard.guard(_cls)

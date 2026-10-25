@@ -26,7 +26,7 @@ Halle Nord/
 └── _Archiv/                     ein Zip und eine Kopie des PDF pro Export
 ```
 
-Kopieren Sie noch die **Lasten-Arbeitsmappe** Ihres Büros in diesen Ordner, deren Name `Belastungsannahmen` enthält: Woodcore findet sie an ihrem Namen (Schritt 4).
+Sonst ist nichts in diesen Ordner zu kopieren: Wind, Schnee und ständige Lasten werden in den Registern von Woodcore erfasst und in `Woodcore-Datei/loads/` gespeichert (Schritt 4).
 
 > [!note]
 > Ein in einem Fenster geöffnetes Projekt ist durch eine Datei `Halle Nord.woodcore.lock` **gesperrt**. Öffnet es eine Kollegin oder ein Kollege gleichzeitig, sagt Woodcore es und bietet den Schreibschutz an: zwei Fenster, die dasselbe Projekt speichern, verlören die Arbeit des ersten.

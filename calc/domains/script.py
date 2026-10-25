@@ -206,6 +206,6 @@ def write(records):
 
 
 def export(timeout=TIMEOUT):
-    """Runs every script and writes `data/scripts.json`. Returns (file, notes) -- what export_all.py calls, and what Woodcore's Python tab calls when a script is saved, so that the report sees its results without the load workbooks being read again (the connectors' own arrangement)."""
+    """Runs every script and writes `data/scripts.json`. Returns (file, notes) -- what export_all.py calls, and what Woodcore's Python tab calls when a script is saved, so that the report sees its results without the whole export being run again (the connectors' own arrangement)."""
     records, notes = prepare(timeout=timeout)
     return write(records), notes

@@ -8,8 +8,8 @@ import inspect
 
 import project
 
-# Every way an editor tab writes a source: its «Enregistrer» and its Ctrl+S, «Supprimer» and a drop on «Archives» or out of it, a drop into a folder, the several plans «Nouveau» makes from the pages of one PDF (v0.83), and what each tab added since -- the one list, read by name.
-WRITERS = ("save", "delete", "on_moved", "create_plans", "delete_document", "delete_sheet", "write_enabled", "write_title",
+# Every way an editor tab writes a source: its «Enregistrer» and its Ctrl+S, «Supprimer» and a drop on «Archives» or out of it, a drop into a folder, and what each tab added since -- the one list, read by name; a name no tab, service or widget defines any more leaves it (tests/test_tab_registry.py: «create_plans», gone with the plans of v0.83, left in issue #107).
+WRITERS = ("save", "delete", "on_moved", "delete_document", "delete_sheet", "write_enabled", "write_title",
            "write_add_section", "write_add_group", "write_remove", "write_rename", "write_move",
            "write_object", "write_node_state", "write_heading_line", "write_add_object", "write_remove_object", "write_tag", "write_import",
            "write_sync_import", "write_sync_flag", "write_share", "write_stop_share", "add_annex_source", "replace_annex_source",
@@ -19,28 +19,31 @@ WRITERS = ("save", "delete", "on_moved", "create_plans", "delete_document", "del
            "write_refresh_documents",
            # issue #64: an annex's PDF written over in Appendix/ read again as the «Annexes» tab is shown (annex_tab.AnnexTab)
            "write_refresh_sources",
-           # issue #15: the «Formules» tab's domain duplicated, its id changed, an option of a closed block and a text written (formula_tab.FormulaTab)
-           "duplicate_domain", "rename_id", "write_options", "write_text",
-           # issue #19: a line's printing set in the «Formules» tab's «Affichage» (formula_tab.FormulaTab)
-           "write_display",
+           # issue #15: the «Domaines» tab's domain duplicated and its id changed (formula_tab.FormulaTab)
+           "duplicate_domain", "rename_id",
+           # issue #113: the «Domaines» tab's form, code and display -- a field of a row, a line written at the foot or by the +, rows deleted, undone, moved, links written, an argument, the code's buffer, the domain's options and level, a line's display reset (formula_tab.FormulaTab)
+           "write_field", "write_new_line", "write_delete_rows", "write_undo", "write_move_rows", "write_links", "write_argument", "write_code",
+           "write_domain_option", "write_reset_line",
            # issue #16: the annexes' excerpts made by a frame drawn, a range of pages or a frame found (annex_tab.AnnexTab)
            "extract_annex_pages", "extract_annex_rects", "write_extracted",
-           # issue #94: a line of a case's file, its figure and its domain's level set in «Affichage» (calc_tab.DeclaredTabMixin, spec 2026-10-22-onglet-neige-type, ARCH-RISK-W06)
+           # issue #94: a line of a case's file, its figure and its domain's level set in «Affichage» (spec 2026-10-22-onglet-neige-type, ARCH-RISK-W06; since issue #95 the writers of calc_display.DomainDisplay, guarded by guard_service: these names stay for the tabs that still define them)
            "write_line_display", "write_figure", "write_domain_level",
-           # issues #35-#37: the project's own materials saved (load_tab.DeadLoadTab)
-           "save_project_library",
+           # spec 2026-10-23-onglet-vent-briques: a table of a case's file shown or masked, its title and its note (calc_display.DomainDisplay, guarded by guard_service)
+           "write_table",
+           # issue #110: a copy of the engineer's material taken again, or kept, in the project (material_copies.MaterialCopies, guarded by guard_service; the project's own library, «save_project_library», went with it)
+           "take_material", "keep_material",
            # issue #46: the project's building for VKF 15-15, saved from the «Résistance au feu» tab (fire_check_tab.FireCheckTab)
            "save_building",
            # spec 2026-10-15: an unfolded check's lines imported, taken back, reinserted, chosen in a conflict, and the check regenerated (formula_tab_unfold.FormulaUnfoldMixin)
-           "write_unfold_import", "write_unfold_import_all", "write_unfold_take_back", "write_unfold_reinsert", "write_unfold_choice", "write_unfold_regenerate",
-           # issues #88, #90: the «Projet» tab's form applied to the project and a document made from its content template (project_tab.ProjectTab)
-           "write_apply_form", "write_create_document")
+           "write_unfold_import", "write_unfold_import_all", "write_unfold_take_back", "write_unfold_reinsert", "write_unfold_choice", "write_unfold_regenerate")
+# (issues #88, #90: the «Projet» tab's form applied and a document made, «write_apply_form» and «write_create_document», are its service's since issue #107 -- project_services.ProjectActions.WRITERS, guarded by guard_service)
 
 _MARK = "_woodcore_tab_guard"
 
 
 def _app_of(holder):
-    return getattr(holder, "app", None) or getattr(getattr(holder, "tab", None), "app", None)
+    """The window whose project a writer writes into: the tab's, the tab of an archive's actions, or -- a service of a tab built on a type (tab_host.py) -- its context's. A writer whose window cannot be found would let an edit through in a project open read-only, without a word (spec 2026-10-23-onglets-types-et-services, ARCH-RISK-001)."""
+    return getattr(holder, "app", None) or getattr(getattr(holder, "tab", None), "app", None) or getattr(getattr(holder, "ctx", None), "app", None)
 
 
 def _sync_domains(app):
@@ -74,8 +77,15 @@ def refused_when_read_only(method, sync=None):
     return guarded
 
 
-def _makes_domains(tab):
-    return bool(getattr(type(tab), "SYNC_DOMAIN", False))
+def _makes_domains(holder):
+    """Whether the domains' files follow a writer of `holder`: a store's own `sync_domain` (source_store.SourceStore, ARCH-004), else the tab's class `SYNC_DOMAIN` -- False for a tab built on a type, whose writers are its services' and its store's --, else a service's context's store's: the files follow once, after the writer that wrote."""
+    own = getattr(holder, "sync_domain", None)
+    if own is not None:
+        return bool(own)
+    declared = getattr(type(holder), "SYNC_DOMAIN", None)
+    if declared is not None:
+        return bool(declared)
+    return bool(getattr(getattr(getattr(holder, "ctx", None), "store", None), "sync_domain", False))
 
 
 def own_classes(cls):
@@ -90,6 +100,18 @@ def guard(cls):
             method = vars(owner).get(name)
             if method is not None and callable(method) and not getattr(method, _MARK, False):
                 setattr(owner, name, refused_when_read_only(method, sync=_makes_domains))
+    return cls
+
+
+def guard_service(cls):
+    """Every writer a service class names in its `WRITERS` -- a service of a tab built on a type, or the store of its cases (tab_host.py, source_store.py) -- wrapped where it is defined in its hierarchy, once: refused read-only, followed by the domains' files where its store says `sync_domain` (spec 2026-10-23-onglets-types-et-services, ARCH-004). A name in `WRITERS` that no class of the hierarchy defines is an error: a writer declared and never guarded is what this module exists to prevent. Returns `cls`."""
+    for name in getattr(cls, "WRITERS", ()):
+        owner = next((klass for klass in own_classes(cls) if name in vars(klass)), None)
+        if owner is None:
+            raise AttributeError(f"{cls.__name__} declares the writer {name!r} and defines none")
+        method = vars(owner)[name]
+        if callable(method) and not getattr(method, _MARK, False):
+            setattr(owner, name, refused_when_read_only(method, sync=_makes_domains))
     return cls
 
 

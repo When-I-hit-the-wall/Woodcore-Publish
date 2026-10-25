@@ -43,7 +43,7 @@ def test_a_line_the_table_does_not_name_keeps_its_own_or_its_domains_default():
 
 # --- lot 4: Python no longer writes a line's level ------------------------------------------------
 
-LINE_DOMAINS = ("connection", "dead_load", "dowel", "live_load", "snow", "snow_source", "wind", "wind_source", "steel_calc", "steel_resistance", "timber_calc", "script")
+LINE_DOMAINS = ("connection", "dead_load", "dowel", "live_load", "snow_source", "wind_source", "steel_calc", "steel_resistance", "timber_calc", "script")
 LINE_BUILDERS = {"add_var", "add_step", "var", "step", "check", "given", "add", "add263", "step263"}
 
 
@@ -72,9 +72,9 @@ def test_the_example_s_exports_carry_no_line_level_at_their_new_versions():
     import registry
     from domains import connection, connector, script, steel_check
     data = conftest.PROJECT.data_dir
-    wanted = {"calculations.json": registry.LEVELS_SCHEMA_VERSION, "steel.json": steel_check.EXPORT_SCHEMA_VERSION,
+    wanted = {"calculations.json": registry.SCHEMA_VERSION, "steel.json": steel_check.EXPORT_SCHEMA_VERSION,
               "connectors.json": connector.LEVELS_EXPORT_VERSION, "connections.json": connection.LEVELS_EXPORT_VERSION, "scripts.json": script.EXPORT_SCHEMA_VERSION}
-    assert wanted == {"calculations.json": "1.8", "steel.json": "1.2", "connectors.json": "3.3", "connections.json": "4.4", "scripts.json": "1.1"}
+    assert wanted == {"calculations.json": "1.9", "steel.json": "1.2", "connectors.json": "3.3", "connections.json": "4.4", "scripts.json": "1.1"}
     carried = []
 
     def walk(x, where):

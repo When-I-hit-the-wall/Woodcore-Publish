@@ -1,0 +1,1413 @@
+<title>Neige, quatrième version</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a reading column for what was retained and what it costs, around one wide, working prototype of the tab (left list · centre form · right pane of draggable modules). Woodcore's theme.json tokens for the window; the norm's figures stay black on white paper in both schemes, as the engineer asked. */
+:root{
+  --bg:#ffffff; --bg-soft:#f5f6f9; --bg-sunk:#eef0f4; --ink:#17161d; --ink-soft:#3d3c48; --muted:#6a6977;
+  --line:#e3e5eb; --line-strong:#cfd3dc; --accent:#239dad; --accent-strong:#1a7e8b; --accent-soft:#e3f4f6;
+  --wood:#d4944f; --wood-soft:#fbf1e6; --warning:#b35c00; --warning-soft:#fff3e3; --danger:#b42318; --danger-soft:#fdeceb; --ok:#1b7a3a; --ok-soft:#e7f5ec;
+  --card:#ffffff; --paper:#ffffff; --paper-ink:#111111; --paper-line:#d0d0d0; --veil:rgba(17,17,23,.35);
+  --shadow:0 1px 2px rgba(23,22,29,.06),0 10px 30px rgba(23,22,29,.12);
+  --font:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:"JetBrains Mono","Cascadia Mono",ui-monospace,Consolas,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111117; --bg-soft:#17171f; --bg-sunk:#1d1d27; --ink:#ececf1; --ink-soft:#cfcfd8; --muted:#9a99a8;
+  --line:#2a2a36; --line-strong:#3a3a48; --accent:#3cbccd; --accent-strong:#5fd0de; --accent-soft:#10323a;
+  --wood:#e0a768; --wood-soft:#2d2217; --warning:#f0a050; --warning-soft:#2f2214; --danger:#ff8a7a; --danger-soft:#33191a; --ok:#6fd08c; --ok-soft:#163222;
+  --card:#1d1d27; --paper:#f4f4f2; --paper-ink:#111111; --paper-line:#c8c8c8; --veil:rgba(0,0,0,.55);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111117; --bg-soft:#17171f; --bg-sunk:#1d1d27; --ink:#ececf1; --ink-soft:#cfcfd8; --muted:#9a99a8;
+  --line:#2a2a36; --line-strong:#3a3a48; --accent:#3cbccd; --accent-strong:#5fd0de; --accent-soft:#10323a;
+  --wood:#e0a768; --wood-soft:#2d2217; --warning:#f0a050; --warning-soft:#2f2214; --danger:#ff8a7a; --danger-soft:#33191a; --ok:#6fd08c; --ok-soft:#163222;
+  --card:#1d1d27; --paper:#f4f4f2; --paper-ink:#111111; --paper-line:#c8c8c8; --veil:rgba(0,0,0,.55);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.5); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 72px}
+.page{max-width:1000px;margin:0 auto}
+header.top{padding-block:36px 18px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-strong);font-weight:600}
+h1{font-size:32px;line-height:1.15;margin:8px 0 12px;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:23px;margin:48px 0 10px;text-wrap:balance}
+h3{font-size:17px;margin:22px 0 6px}
+p{margin:0 0 12px;max-width:70ch}
+.lede{font-size:17px;color:var(--ink-soft);max-width:72ch}
+.muted{color:var(--muted)}
+code{font-family:var(--mono);font-size:.86em;background:var(--bg-sunk);padding:1px 5px;border-radius:4px}
+a{color:var(--accent-strong)}
+.small{font-size:13.5px}
+.kept{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:8px 22px;margin:14px 0 0;padding:0;list-style:none;font-size:14px}
+.kept li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:8px}
+.kept li::before{content:"✓";color:var(--ok);font-weight:700}
+.try{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--ink-soft);margin:6px 0 0}
+.try b{color:var(--ink)}
+kbd{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--card)}
+
+/* ---------- prototype frame ---------- */
+.bleed{max-width:1420px;margin:22px auto 0}
+.bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:0 0 8px;font-size:13px}
+.bar .grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.bar .lbl{color:var(--muted)}
+.chipbtn{font:inherit;font-size:12.5px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink-soft);border-radius:999px;padding:3px 10px;cursor:pointer}
+.chipbtn:hover{border-color:var(--accent);color:var(--accent-strong)}
+.chipbtn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-strong);font-weight:600}
+.shot{overflow-x:auto;border:1px solid var(--line-strong);border-radius:12px;background:var(--bg-soft);box-shadow:var(--shadow)}
+.ui{font-family:var(--font);font-size:12.5px;line-height:1.4;color:var(--ink);padding:8px;width:1400px;display:grid;grid-template-columns:200px minmax(0,1fr) 430px;gap:8px;height:820px}
+.ui *{line-height:inherit}
+.pane{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.ct{font-weight:600;margin:0 0 8px}
+.sec{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:14px 0 8px}
+.list{flex:1;display:flex;flex-direction:column;gap:2px}
+.list .it{padding:5px 7px;border-radius:6px;display:flex;justify-content:space-between;gap:6px;cursor:default}
+.list .it.sel{background:var(--accent-soft)}
+.list .it small{color:var(--muted);font-family:var(--mono);font-size:11px}
+.list .fold{color:var(--muted);font-style:italic;padding:5px 7px}
+.form{flex:1;overflow:auto}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 9px}
+.lab{color:var(--ink-soft);white-space:nowrap;display:inline-block;min-width:0}
+.lab.w{width:178px}
+.inp{height:27px;border:1px solid var(--line-strong);border-radius:6px;background:var(--card);color:var(--ink);font:inherit;padding:0 8px;font-variant-numeric:tabular-nums}
+.inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.inp.num{width:84px;text-align:right}
+.inp.wide{width:220px}
+.unit{color:var(--muted);margin-left:-4px}
+select.inp{padding-right:4px}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden;height:27px;background:var(--card)}
+.seg button{font:inherit;border:0;border-left:1px solid var(--line-strong);background:transparent;color:var(--ink-soft);padding:0 10px;cursor:pointer;white-space:nowrap;display:flex;align-items:center}
+.seg button:first-child{border-left:0}
+.seg button small{margin-left:6px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.seg button.on{background:var(--accent-soft);color:var(--accent-strong);font-weight:600}
+.seg button.on small{color:var(--accent-strong)}
+.seg .free{display:flex;align-items:center;border-left:1px solid var(--line-strong);padding:0 6px 0 9px;gap:6px;color:var(--ink-soft)}
+.seg .free.on{background:var(--accent-soft);color:var(--accent-strong);font-weight:600}
+.seg .free input{width:56px;height:21px;border:1px solid var(--line-strong);border-radius:4px;font:inherit;text-align:right;padding:0 4px;background:var(--card);color:var(--ink)}
+.flash{animation:flash 1.2s ease-out 1}
+@keyframes flash{0%{box-shadow:0 0 0 4px var(--wood)}100%{box-shadow:0 0 0 0 transparent}}
+.i{width:16px;height:16px;border-radius:50%;border:1.3px solid var(--accent);color:var(--accent-strong);font:600 10.5px/1 var(--font);display:inline-flex;align-items:center;justify-content:center;vertical-align:-3px;margin-left:5px;background:transparent;cursor:help;padding:0}
+.i:hover,.i:focus-visible{background:var(--accent);color:var(--card);outline:none}
+.tiles{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.tile{width:108px;border:1px solid var(--line-strong);border-radius:8px;padding:6px 4px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--card);cursor:pointer;font:inherit;font-size:11.5px;color:var(--ink-soft);position:relative}
+.tile .pic{background:var(--paper);border-radius:4px;width:98px;height:64px;display:flex;align-items:center;justify-content:center}
+.tile.on{border:2px solid var(--accent);padding:5px 3px 4px;color:var(--accent-strong);font-weight:600}
+.tile .i{position:absolute;top:4px;right:4px;margin:0}
+.chk{display:inline-flex;gap:7px;align-items:center;cursor:pointer}
+.chk input{margin:0;accent-color:var(--accent)}
+.actions{display:flex;justify-content:flex-end;gap:8px}
+.btn{font:inherit;height:27px;padding:0 11px;border:1px solid var(--line-strong);border-radius:6px;background:var(--card);color:var(--ink);cursor:pointer}
+.btn.pri{border-color:var(--accent-strong);color:var(--accent-strong);font-weight:600}
+.idrow{display:flex;gap:10px;align-items:center;margin:0 0 4px}
+.idrow .nm{font-size:15px;font-weight:600;border:1px solid transparent;background:transparent;width:240px}
+.idrow .nm:hover{border-color:var(--line-strong)}
+.idrow .id{width:92px;font-family:var(--mono);font-size:12px}
+
+/* ---------- right pane: modules ---------- */
+.mods{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:0 2px 8px 0}
+.mod{background:var(--card);border:1px solid var(--line);border-radius:10px;flex:none}
+.mod.dragging{opacity:.45}
+.mod .mh{display:flex;align-items:center;gap:6px;padding:7px 8px 7px 6px;cursor:grab;user-select:none;border-radius:10px;touch-action:none}
+.mod .mh:active{cursor:grabbing}
+.mod .grip{color:var(--muted);font-size:13px;letter-spacing:-2px;width:14px;text-align:center}
+.mod .mt{font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mod .sum{color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
+.mod .mb{padding:0 10px 10px}
+.mod.collapsed .mb{display:none}
+.mod:not(.collapsed) .sum{display:none}
+.ib{width:22px;height:22px;border-radius:5px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:12px;padding:0;flex:none}
+.ib:hover{border-color:var(--line-strong);color:var(--ink)}
+.drop-mark{height:3px;border-radius:2px;background:var(--accent);flex:none}
+.stat{display:flex;flex-direction:column;gap:5px}
+.st{display:grid;grid-template-columns:18px minmax(0,1fr);gap:7px;align-items:start;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:12.5px}
+.st .ic{font-weight:700;text-align:center;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--card)}
+.st.err{background:var(--danger-soft)} .st.err .ic{background:var(--danger)}
+.st.warn{background:var(--warning-soft)} .st.warn .ic{background:var(--warning)}
+.st.ok{background:var(--ok-soft)} .st.ok .ic{background:var(--ok)}
+.st:hover{outline:1px solid var(--line-strong)}
+.st .ref{font-family:var(--mono);font-size:11px;color:var(--accent-strong);text-decoration:underline dotted;cursor:help}
+.res{display:flex;flex-direction:column;gap:4px;font-variant-numeric:tabular-nums}
+.step{border:1px solid var(--line);border-radius:7px;padding:5px 8px}
+.step .h{display:flex;gap:8px;align-items:center;cursor:pointer}
+.step .h .grow{flex:1;min-width:0}
+.step .f{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);margin:4px 0 1px 18px;white-space:normal}
+.step.closed .f{display:none}
+.caret{color:var(--muted);width:10px;display:inline-block;transition:transform .15s}
+.step:not(.closed) .caret{transform:rotate(90deg)}
+.cref{font-family:var(--mono);font-size:10.5px;color:var(--accent-strong);background:var(--accent-soft);padding:1px 6px;border-radius:4px;white-space:nowrap;cursor:help;border:0}
+.grp{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:8px 0 2px}
+.resbar{display:flex;justify-content:flex-end;gap:10px;font-size:11.5px;color:var(--muted);margin-top:6px}
+.resbar button{font:inherit;border:0;background:none;color:var(--accent-strong);cursor:pointer;padding:0}
+.paperbox{background:var(--paper);border-radius:6px;padding:6px;border:1px solid var(--line)}
+.paperbox svg{display:block;width:100%;height:auto}
+.normimg{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:4px;background:#fff}
+.normtxt{font-family:Georgia,"Times New Roman",serif;font-size:12.5px;line-height:1.5;color:var(--ink);background:var(--bg-soft);border-radius:6px;padding:8px 10px;white-space:pre-line;user-select:text}
+.normmeta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--muted);margin:0 0 6px}
+.badge{font-family:var(--mono);font-size:10.5px;padding:1px 6px;border-radius:4px;background:var(--bg-sunk);color:var(--ink-soft);white-space:nowrap}
+.badge.fb{background:var(--warning-soft);color:var(--warning)}
+.tabs{display:inline-flex;gap:2px;background:var(--bg-sunk);border-radius:6px;padding:2px}
+.tabs button{font:inherit;font-size:11.5px;border:0;background:transparent;color:var(--ink-soft);padding:2px 8px;border-radius:4px;cursor:pointer}
+.tabs button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+
+/* popover */
+.pop{position:fixed;z-index:50;width:640px;max-width:calc(100vw - 24px);background:var(--card);border:1px solid var(--line-strong);border-radius:10px;box-shadow:var(--shadow);padding:10px 12px;font-size:12.5px}
+.pop .ph{display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.pop .ph b{font-size:13px;flex:1;min-width:0}
+.pop .body{max-height:440px;overflow:auto}
+.pop .foot{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px;margin-top:8px;flex-wrap:wrap}
+.pop .tools{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:0 0 6px}
+
+/* windows */
+.wwin{position:fixed;z-index:60;background:var(--card);border:1px solid var(--line-strong);border-radius:10px;box-shadow:var(--shadow);display:flex;flex-direction:column;resize:both;overflow:hidden;min-width:320px;min-height:220px}
+.wwin .wt{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 12px;background:var(--bg-soft);border-bottom:1px solid var(--line);cursor:move;user-select:none;font-size:12.5px}
+.wwin .wt b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.wwin .wt .z{font-family:var(--mono);font-size:11px;color:var(--muted);width:44px;text-align:right}
+.wwin .wc{flex:1;overflow:auto;background:var(--bg)}
+.wwin .zz{padding:12px;width:max-content;min-width:100%}
+.wwin .hint{font-size:11px;color:var(--muted);padding:4px 12px;border-top:1px solid var(--line)}
+.pdfpage{position:relative;width:1000px;background:#fff;box-shadow:0 0 0 1px var(--line)}
+.pdfpage img{display:block;width:1000px;height:auto}
+.pdfpage .pno{position:absolute;right:8px;top:6px;font:11px var(--mono);color:#888}
+.pdfpage .hl{position:absolute;border:2px solid #e8841a;background:rgba(255,200,60,.18);border-radius:3px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:8px;font-size:13px;box-shadow:var(--shadow);max-width:min(640px,calc(100vw - 32px))}
+.toast a{color:var(--bg);font-weight:600}
+
+/* reading sections */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:12px}
+.gallery figure{margin:0;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--card)}
+.gallery figcaption{font-size:13px;color:var(--ink-soft);margin:6px 2px 0}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.cmp>div{min-width:0}
+.cmp .lbl{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px}
+@media (max-width:720px){.cmp{grid-template-columns:1fr}h1{font-size:27px}}
+.tbl{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+.tbl th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.scrollx{overflow-x:auto}
+.find{border-left:3px solid var(--wood);background:var(--wood-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0;font-size:14.5px}
+.find p{margin:0 0 6px}
+.q{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px;background:var(--card)}
+.q b{display:block;margin-bottom:4px}
+.q ol{margin:4px 0 0;padding-left:20px;font-size:14.5px}
+.q li{margin:0 0 3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.flash{animation:none}.caret{transition:none}}
+
+/* the view switch and the Affichage mode */
+.vbar{display:flex;align-items:center;gap:12px;padding:8px 10px 0}
+.vsw{display:inline-flex;border:1px solid var(--line-strong);border-radius:7px;overflow:hidden;background:var(--card)}
+.vsw button{font:inherit;font-size:12.5px;border:0;background:transparent;color:var(--ink-soft);padding:5px 16px;cursor:pointer}
+.vsw button.on{background:var(--ink);color:var(--bg);font-weight:600}
+.vnote{font-size:12px;color:var(--muted)}
+.disp{flex:1;overflow:auto;padding:0;display:flex;flex-direction:column;background:var(--bg-sunk)}
+.dtool{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
+.dsheet{margin:16px auto;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15);padding:28px 30px;width:calc(945px*var(--dz) + 60px);display:flex;flex-direction:column;gap:6px}
+.dsheet img.pv{display:block;width:calc(945px*var(--dz));height:auto}
+.cblk{position:relative;border:1.5px dashed transparent;border-radius:4px;padding:6px 4px 4px}
+.cblk.sel{border-color:var(--accent)}
+.cblk.clk{cursor:pointer}
+.cblk.clk:hover{border-color:var(--wood);background:rgba(212,148,79,.05)}
+.cblk .ctag{position:absolute;left:-2px;top:-11px;font:10.5px var(--mono);color:var(--accent-strong);background:#fff;padding:0 4px;display:none}
+.cblk.sel .ctag,.cblk.clk:hover .ctag{display:block}
+[hidden]{display:none!important}
+.dsheet.marg{padding-left:190px;width:calc(945px*var(--dz) + 220px)}
+.mrow{display:grid;grid-template-columns:150px minmax(0,1fr);align-items:center;gap:8px;margin-left:-160px}
+.mrow.off img{opacity:.22}
+.mctl{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:11px;color:#555}
+.mrow img{cursor:pointer}
+.seg.mini button{padding:1px 7px;font-size:11px}
+.seg.mini{min-height:20px;height:auto;flex-wrap:nowrap}
+.dseg{height:auto;min-height:27px}
+#dispRight select.inp{max-width:100%;width:100%}
+.tyerr{background:var(--danger-soft);border-left:3px solid var(--danger);padding:6px 10px;color:var(--ink);font-size:12px;border-radius:0 6px 6px 0}
+.tyerr pre{margin:4px 0 0;font:11px var(--mono);white-space:pre-wrap}
+.pnote{font-size:11.5px;color:var(--warning);background:var(--warning-soft);border-radius:5px;padding:4px 8px;margin:6px 0}
+.dright{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.clist{display:flex;flex-direction:column;gap:4px}
+.citem{display:grid;grid-template-columns:20px minmax(0,1fr) 22px;gap:6px;align-items:center;padding:5px 6px;border:1px solid var(--line);border-radius:7px;cursor:pointer}
+.citem.on{border-color:var(--accent);background:var(--accent-soft)}
+.citem .cno{font:600 11px var(--mono);color:var(--muted);text-align:center}
+.citem .ccode{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.addmenu{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 8px}
+.addmenu button{font:inherit;text-align:left;border:1px solid var(--line-strong);border-radius:7px;background:var(--card);color:var(--ink);padding:6px 8px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.addmenu button:hover{border-color:var(--accent)}
+.addmenu .mono{font-size:10.5px;color:var(--muted)}
+.mono{font-family:var(--mono)}
+.btn.sm{min-height:23px;height:auto;padding:2px 8px;font-size:11.5px}
+.arow{display:grid;grid-template-columns:118px minmax(0,1fr);gap:8px;align-items:center;margin:0 0 8px}
+.alab{color:var(--ink-soft);font-size:12px}
+.alab2{color:var(--ink-soft);font-size:12px;margin:8px 0 5px}
+.ahelp{display:inline-flex;width:14px;height:14px;border-radius:50%;background:var(--bg-sunk);color:var(--muted);font-size:10px;align-items:center;justify-content:center;margin-left:5px;cursor:help;vertical-align:1px}
+.awid{min-width:0;display:flex;flex-wrap:wrap;gap:6px}
+.dseg{flex-wrap:wrap}
+.inp.wide2{width:100%}
+.vtools{display:flex;gap:6px;margin:0 0 6px;flex-wrap:wrap}
+.vtab{width:100%;border-collapse:collapse;font-size:12px}
+.vtab td{padding:3px 4px;border-bottom:1px solid var(--line);vertical-align:middle}
+.vtab td.vs{white-space:nowrap;width:70px}
+.vtab td.vl{color:var(--ink-soft)}
+.vtab tr.off td.vs,.vtab tr.off td.vl{opacity:.45}
+.vimg{display:block;max-width:220px;height:auto;background:#fff;border-radius:3px}
+.lthumbs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.lth,.tth{font:inherit;font-size:11px;border:1px solid var(--line-strong);border-radius:7px;background:var(--card);color:var(--ink-soft);padding:4px;cursor:pointer;display:flex;flex-direction:column;gap:3px;align-items:stretch}
+.lth.on,.tth.on{border:2px solid var(--accent);padding:3px;color:var(--accent-strong);font-weight:600}
+.lth .lim{height:96px;overflow:hidden;background:#fff;border-radius:4px;display:block}
+.lth .lim img{width:100%;height:auto;display:block}
+.lth .lman{display:flex;align-items:center;justify-content:center;font-size:18px;color:#555}
+.tthumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}
+.tth img{width:100%;height:auto;background:#fff;border-radius:3px;display:block;max-height:60px;object-fit:contain;object-position:left top}
+.tth:disabled{opacity:.5;cursor:not-allowed}
+.codechips{font:12px/1.9 var(--mono);color:var(--ink);background:var(--bg-soft);border-radius:7px;padding:8px 10px}
+.cargs{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding-left:16px}
+.chipc{border:1px solid var(--line-strong);border-radius:5px;padding:0 6px;background:var(--card);cursor:pointer;line-height:1.7}
+.chipc:hover,.chipc.open{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.chipc.lock{cursor:default;opacity:.75}
+.chipc.add{border-style:dashed;color:var(--muted)}
+.chipedit{border:1px solid var(--accent);border-radius:7px;padding:8px;margin-top:6px;background:var(--card)}
+.codebox{font-size:11.5px;background:var(--bg-soft);border-radius:6px;padding:7px 9px;white-space:pre-wrap;word-break:break-all}
+.sy-c{color:#1a6fb0}.sy-s{color:#2f8a4c}.sy-n{color:#b0521a}.sy-k{color:#c2185b}.sy-num{color:#b0521a}
+details.adv{margin-top:6px;border-top:1px solid var(--line);padding-top:6px}
+details.adv summary{cursor:pointer;color:var(--ink-soft);font-size:12px;margin-bottom:6px}
+.vcard{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px;background:var(--card)}
+.vcard h3{margin:0 0 6px;font-size:16px}
+.vcard .two{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;font-size:14px}
+.vcard .two>div{min-width:0}
+.vcard ul{margin:4px 0 0;padding-left:18px}
+@media (max-width:720px){.vcard .two{grid-template-columns:1fr}}
+
+/* the Affichage mode, version 4 */
+.dsheet{gap:0;padding:28px 30px}
+.dsheet .el{position:relative;padding:1px 0}
+.dsheet .el.off .spr,.dsheet .el.off .fcap{opacity:.28}
+.dsheet .el.cur{background:#fff8dc;box-shadow:-8px 0 0 #fff8dc,8px 0 0 #fff8dc}
+.spr{background-repeat:no-repeat}
+.mtag{position:absolute;right:-4px;top:50%;transform:translateY(-50%);font:10.5px var(--mono);color:#888;background:#fff;border:1px solid #ddd;border-radius:4px;padding:0 5px}
+.fcap{font-family:"Libertinus Serif",Georgia,serif;text-align:center;color:#000;margin:4px 0 6px}
+.ctag2{font:10px var(--mono);color:#999}
+.dcard{padding:12px 12px 14px;display:flex;flex-direction:column}
+.dhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 0 8px}
+.dsec{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.elist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.erow{display:grid;grid-template-columns:46px 74px minmax(0,1fr) auto;gap:6px;align-items:center;padding:5px 8px;border-top:1px solid var(--line);cursor:pointer;font-size:12px}
+.erow:first-child{border-top:0}
+.erow:hover{background:var(--bg-soft)}
+.erow.open{background:var(--accent-soft)}
+.erow.off .esym,.erow.off .elab{opacity:.45}
+.esym{font-family:Georgia,serif;font-style:italic;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
+.esym sub{font-size:.72em;line-height:0;vertical-align:-.3em;margin-left:-1px}
+.esym .dot{width:6px;height:6px;border-radius:50%;background:var(--wood);display:inline-block}
+.elab{color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmdb{font:10px var(--mono);text-align:center;padding:1px 4px}
+.cmdb.var{background:#e8f0fb;color:#2c5b9a}.cmdb.eq{background:#eaf6ec;color:#2f7a3d}.cmdb.fig{background:#f6efe3;color:#8a5a1c}
+.lseg button.au{outline:1.5px dashed var(--accent);outline-offset:-3px;color:var(--accent-strong)}
+.opanel{border-top:1px solid var(--line);background:var(--bg-soft);padding:10px 10px 8px}
+.orow{display:grid;grid-template-columns:128px minmax(0,1fr);gap:8px;align-items:center;margin:0 0 6px;font-size:12px}
+.orow .mono{font-size:11.5px;color:var(--ink-soft)}
+.orow .inp{width:100%;max-width:100%}
+.addarg{background:#fff1c7;color:#6b4a00;border-radius:3px}
+.dtool .mono{white-space:nowrap}
+.whole{margin-top:12px}.whole summary{cursor:pointer;font-size:12px;color:var(--ink-soft)}
+.whole pre{white-space:pre-wrap;word-break:break-word;max-height:360px;overflow:auto}
+.alab2{font-size:11.5px;color:var(--muted);margin:6px 0 3px}
+.codebox{white-space:pre-wrap;word-break:break-word}
+</style>
+
+<div class="page">
+<header class="top">
+  <div class="eyebrow">Woodcore · onglet « Neige » · version 4 · SIA 261:2020, chapitre 5 et annexe D</div>
+  <h1>Neige, quatrième version</h1>
+  <p class="lede">Le mode Affichage refait d'après votre description : au centre, le fichier <code>.typ</code> de la toiture tel que le moteur de Woodcore 0.122 l'imprime ; à droite, le niveau 1, 2 ou 3 du domaine, puis chaque élément du fichier, réglable un par un. Le mode Calcul reste celui de la version 3. Les trois artefacts précédents restent tels quels.</p>
+  <ul class="kept">
+    <li><span>Commande à copier : <code>#include domain-file("snow-load", "SN-01")</code>. Le cas est écrit dans son fichier ; <code>show-calc</code> n'existe plus depuis la 0.121.</span></li>
+    <li><span>Plus de cadre bleu ni de clic dans l'aperçu ; les éléments masqués y restent, en pâle.</span></li>
+    <li><span>Niveau de détail 1, 2 ou 3, puis la section « Éléments du fichier » : la figure, h<sub>0</sub>, Δh, h<sub>ref</sub>… chacun avec 0 1 2 3.</span></li>
+    <li><span>Un clic sur une ligne ouvre ses arguments : pour <code>#var</code> display, style, label-position, descr-position, norm-position, level ; pour <code>#eq</code> aussi equation, unit, as-unit, display-formula, display-equation, role, label, descr ; pour la figure caption et width.</span></li>
+    <li><span>Chaque réglage montre le vrai rendu Typst de la ligne : environ 1 100 rendus compilés pour ce prototype.</span></li>
+    <li><span>La figure 3 du rapport à partir du niveau 3.</span></li>
+  </ul>
+</header>
+</div>
+
+<div class="bleed">
+  <div class="bar">
+    <div class="grp"><span class="lbl">Langue de la fenêtre</span>
+      <button class="chipbtn on" data-lang="fr" type="button">FR</button><button class="chipbtn" data-lang="de" type="button">DE</button><button class="chipbtn" data-lang="en" type="button">EN</button></div>
+    <div class="grp"><span class="lbl">Exemples</span>
+      <button class="chipbtn" data-preset="base" type="button">850 m · deux pans</button>
+      <button class="chipbtn" data-preset="high" type="button">2050 m</button>
+      <button class="chipbtn" data-preset="flat" type="button">toit plat 30 × 25 m</button>
+      <button class="chipbtn" data-preset="shed" type="button">sheds 45° / 15°</button>
+      <button class="chipbtn" data-preset="curved" type="button">cylindrique</button>
+      <button class="chipbtn" data-preset="err" type="button">avec erreurs</button></div>
+    <div class="grp"><button class="chipbtn" id="resetLayout" type="button">Remettre le volet droit</button></div>
+  </div>
+  <div class="try"><span><b>Survoler</b> un <span class="i" aria-hidden="true" style="cursor:default">i</span> : la norme</span><span><b>Clic</b> : épingler à droite</span><span><b><kbd>Ctrl</kbd>+clic</b> : ouvrir la norme</span><span><b>Glisser</b> l'en-tête d'un module : le déplacer</span><span><b>⧉</b> : fenêtre, puis <kbd>Ctrl</kbd>+molette pour zoomer</span></div>
+  <div class="shot" style="margin-top:10px"><div class="vbar"><span class="vsw"><button type="button" data-view="calc" class="on">Calcul</button><button type="button" data-view="disp">Affichage</button></span><span class="vnote">Comme dans la fenêtre de Woodcore : le même onglet, deux vues.</span></div><div class="ui" id="ui">
+    <div class="pane">
+      <div class="card list">
+        <div class="ct" data-t="roofs">Toitures</div>
+        <div class="it sel"><span id="listName">Toiture principale</span><small id="listQ">2.21</small></div>
+        <div class="it"><span>Annexe garage</span><small>2.76</small></div>
+        <div class="it"><span>Chalet d'alpage</span><small>11.3</small></div>
+        <div class="fold">Archives</div>
+      </div>
+      <div class="actions" style="justify-content:flex-start"><button class="btn" type="button" data-t="new">Nouveau</button><button class="btn" type="button" data-t="dup">Dupliquer</button></div>
+    </div>
+
+    <div class="pane">
+      <div class="card form" id="form">
+        <div class="idrow"><input class="inp nm" id="f_name" value="Toiture principale" aria-label="Nom"><span class="lab muted">ID</span><input class="inp id" id="f_id" value="SN-01" aria-label="ID"></div>
+
+        <div class="sec" data-t="bld">Bâtiment</div>
+        <div class="row">
+          <span class="lab w"><span data-t="L">Longueur</span> L<button class="i" type="button" data-norm="dims">i</button></span>
+          <input class="inp num" id="f_L" type="number" value="24" step="0.5"><span class="unit">m</span>
+          <span class="lab" style="margin-left:14px"><span data-t="B">Largeur</span> B</span>
+          <input class="inp num" id="f_B" type="number" value="12" step="0.5"><span class="unit">m</span>
+        </div>
+        <div class="sec" data-t="site">Lieu</div>
+        <div class="row">
+          <span class="lab w"><span data-t="h0">Altitude h₀</span><button class="i" type="button" data-norm="h0">i</button></span>
+          <input class="inp num" id="f_h0" type="number" value="850" step="10"><span class="unit">m</span>
+        </div>
+        <div class="row">
+          <span class="lab w"><span data-t="dh">Correction Δh (annexe D)</span><button class="i" type="button" data-norm="dh">i</button></span>
+          <select class="inp" id="f_dh" style="width:100px"><option value="-200">− 200 m</option><option value="0" selected>± 0 m</option><option value="200">+ 200 m</option><option value="400">+ 400 m</option><option value="500">+ 500 m</option></select>
+        </div>
+        <div class="row">
+          <span class="lab w"><span data-t="ce">Exposition C<sub>e</sub></span><button class="i" type="button" data-norm="ce">i</button></span>
+          <span class="seg" id="f_ce">
+            <button type="button" data-ce="1.2"><span data-t="ce_s">abrité</span><small>1.2</small></button>
+            <button type="button" data-ce="1.0" class="on"><span data-t="ce_n">normal</span><small>1.0</small></button>
+            <button type="button" data-ce="0.8"><span data-t="ce_e">exposé</span><small>0.8</small></button>
+            <label class="free" id="f_ce_free"><span data-t="ce_o">autre</span><input id="f_ce_val" type="number" step="0.05" placeholder="—" aria-label="C_e libre"></label>
+          </span>
+        </div>
+        <div class="row">
+          <span class="lab w"><span data-t="ct">Coefficient thermique C<sub>T</sub></span><button class="i" type="button" data-norm="ct">i</button></span>
+          <input class="inp num" id="f_ct" type="number" value="1.00" step="0.05" min="0" max="1">
+        </div>
+
+        <div class="sec" data-t="roof">Toiture</div>
+        <div class="tiles" id="tiles"></div>
+        <div id="roofFields"></div>
+        <div class="row">
+          <span class="lab w"><span data-t="slide">Glissement de la neige</span><button class="i" type="button" data-norm="slide">i</button></span>
+          <span class="seg" id="f_slide"><button type="button" data-v="possible" class="on" data-t="sl_p">possible</button><button type="button" data-v="hindered" data-t="sl_h">empêché ou rendu difficile</button></span>
+        </div>
+        <div class="row">
+          <span class="lab w"><span data-t="step">Décrochement</span><button class="i" type="button" data-norm="step">i</button></span>
+          <label class="chk"><input type="checkbox" id="f_step"><span data-t="step_l">toit étagé ou proche d'un ouvrage plus élevé</span></label>
+        </div>
+      </div>
+      <div class="card disp" id="dispCentre" hidden></div>
+      <div class="actions" id="formActions"><button class="btn" type="button" data-t="revert" id="b_revert">Annuler les modifications</button><button class="btn pri" type="button" data-t="save" id="b_save">Enregistrer</button></div>
+    </div>
+
+    <div class="pane"><div class="mods" id="mods"></div><div class="dright" id="dispRight" hidden></div></div>
+  </div></div>
+</div>
+
+<div class="page">
+<h2>Toutes les formes, comme la figure 3</h2>
+<p>Les cinq toitures dessinées par le même code que le module « Disposition », avec leurs valeurs pour h<sub>0</sub> = 850 m. Noir sur blanc, la structure dessous, les modèles 1 et 2 en lignes comme dans la norme. La figure 3 de la SIA 261 ne dessine que trois colonnes (deux pans, sheds, cylindrique) : le toit plat et le toit à un pan sont dessinés dans le même style, d'après 5.3.2 et 5.3.5.</p>
+<div class="gallery" id="gallery"></div>
+<div class="cmp">
+  <div><div class="lbl">La norme · SIA 261:2020, figure 3 (FR)</div><img class="normimg" src="norm/fr-fig3.png" alt="Figure 3 de la SIA 261:2020 en français : disposition de la charge de neige sur les toitures, trois colonnes et deux modèles de charge" loading="lazy"></div>
+  <div><div class="lbl">Woodcore · toit à deux pans, α₁ = 30°, α₂ = 20°</div><div class="paperbox" id="cmpDraw"></div></div>
+</div>
+
+<h2>Ce que fait chaque geste</h2>
+<div class="scrollx"><table class="tbl">
+  <tr><th>Geste</th><th>Sur</th><th>Ce qui se passe</th></tr>
+  <tr><td>Survol (≈ 350 ms)</td><td>un <b>i</b>, un pictogramme de toit, une référence en bleu</td><td>La bulle montre la clause : son texte mot pour mot, puis dessous son extrait découpé dans la norme ou sa figure. Pas d'onglets. Une toiture ne montre que l'extrait. Elle reste ouverte tant que la souris est sur le déclencheur ou sur la bulle.</td></tr>
+  <tr><td>Clic</td><td>le même</td><td>L'extrait devient un module du volet droit, sous l'état du calcul. Un second clic sur le même ne le double pas.</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+clic</td><td>le même</td><td>Le lecteur PDF de Woodcore ouvre le chapitre 5 entier, à la page, la clause encadrée. Pour Δh, c'est la carte de la neige de 261.sia.ch qui s'ouvre (<code>?lang=fr&amp;layer=snow</code>).</td></tr>
+  <tr><td>Glisser l'en-tête</td><td>un module</td><td>Le module change de place. L'ordre est retenu pour l'onglet.</td></tr>
+  <tr><td>▾ / ▸</td><td>un module</td><td>Réduit le module à sa ligne d'en-tête, avec un résumé (« ✓ complet · 1 info », « q<sub>k,11</sub> = 2.21 kN/m² »). Réduits, ils se réordonnent facilement.</td></tr>
+  <tr><td>⧉</td><td>un module</td><td>Une fenêtre Woodcore minimale avec ce module ; il reste aussi dans le volet. <kbd>Ctrl</kbd>+molette zoome, la fenêtre se déplace et se redimensionne.</td></tr>
+  <tr><td>×</td><td>un extrait épinglé</td><td>Le désépingle. L'état du calcul, les résultats et la disposition ne se ferment pas, ils se réduisent.</td></tr>
+  <tr><td>Clic</td><td>un message de l'état du calcul</td><td>Va au champ concerné et le fait clignoter.</td></tr>
+</table></div>
+
+<h2>Ce que j'ai trouvé en lisant la norme</h2>
+<div class="find"><p><b>Le calcul fait déjà les deux modèles.</b> <code>snow_source</code> calcule les modèles de charge 1 et 2 pour le toit à un pan, à deux pans, en sheds et cylindrique, et un seul pour le toit plat. Ce que vous demandez est donc tenu ; le prototype le montre et le dessine.</p></div>
+<div class="find"><p><b>Les noms français de la norme.</b> La SIA 261 dit « toiture en sheds » (tableaux 42 et 43) et « toits en forme semi-cylindrique » (tableau 64). Le glossaire de Woodcore a déjà « Toiture en sheds » et « Toiture cylindrique ». Le prototype utilise les mots du glossaire.</p></div>
+<div class="find"><p><b>h<sub>0</sub> n'est pas le même mot partout.</b> L'équation (10) écrit h<sub>0</sub> pour l'<i>altitude de référence</i> (« L'altitude de référence h<sub>0</sub> (en m) peut être déterminée selon l'annexe D »), et la légende de l'annexe D écrit h<sub>0</sub> = altitude. Woodcore appelle h<sub>0</sub> l'altitude du lieu et h<sub>ref</sub> = h<sub>0</sub> + Δh celle qui entre dans (10). Le calcul est juste ; le module des résultats le dit en clair, mais l'extrait de la norme montre h<sub>0</sub> là où Woodcore écrit h<sub>ref</sub>.</p></div>
+<div class="find"><p><b>Le français et l'allemand ne disent pas tout à fait la même chose.</b> FR : « peut être déterminée selon l'annexe D » ; DE : « ist gemäss Anhang D zu ermitteln » (doit). L'info-bulle montre chaque édition telle quelle, sans harmoniser.</p></div>
+<div class="find"><p><b>Pas d'édition anglaise.</b> Le dépôt des normes a SIA 261:2020 en allemand et en français. En anglais, la bulle montre l'allemand avec la mention « édition allemande ». En allemand, l'allemand ; en français, le français.</p></div>
+
+<h2>Ce que cela change dans Woodcore</h2>
+<div class="scrollx"><table class="tbl">
+  <tr><th>Quoi</th><th>Où</th><th>Coût, ce qu'il faut décider</th></tr>
+  <tr><td>Où se trouve chaque extrait</td><td><code>calc/norms/sia261-2020-5.2-schnee.json</code> : à côté de chaque <code>norm_ref</code>, par édition, le fichier, la page et le rectangle</td><td>Relevé une fois sur les PDF (c'est fait pour ce prototype : 14 clauses et figures, en FR et DE). Une seule source : le calcul et la bulle lisent la même entrée.</td></tr>
+  <tr><td>Le texte mot pour mot</td><td>le même fichier, ou lu dans le PDF à la volée (<code>pypdf</code>, déjà une dépendance)</td><td>Lu à la volée, il ne peut pas vieillir, mais l'extraction perd les μ (police de symboles) : ils doivent être rétablis. Recopié dans le fichier, il est exact mais c'est une copie.</td></tr>
+  <tr><td>Les PDF</td><td>votre dépôt <code>norms</code>, trouvé par <code>WOODCORE_NORMS_LIBRARY</code></td><td>Sans bibliothèque, la bulle montre la clause et le texte, sans image, sans erreur.</td></tr>
+  <tr><td>La règle « le rapport ne reproduit pas la norme »</td><td><code>docs/architecture/reference-library.md</code> §11bis et <code>docs/decisions.md</code></td><td>Vous levez cette limite : la décision est à écrire (afficher, découper, imprimer la norme est permis).</td></tr>
+  <tr><td>Le volet de modules</td><td>un composant de <code>calc/tools/</code>, commun aux onglets de calcul</td><td>Écrit une fois, repris par le vent, les charges permanentes, les vérifications. L'ordre et l'état réduit sont retenus par onglet, comme la largeur des volets aujourd'hui.</td></tr>
+  <tr><td>La fenêtre minimale</td><td>idem</td><td>Elle suit le cas affiché et se ferme avec le projet.</td></tr>
+  <tr><td>Ctrl+clic vers la norme</td><td>le lecteur PDF de Woodcore (<code>pdf_pane</code>, déjà utilisé par les annexes)</td><td>Il sait aller à une page et encadrer un rectangle ; un lecteur externe ne va pas toujours à la page demandée.</td></tr>
+  <tr><td>C<sub>e</sub> libre</td><td><code>schemas/snow-source</code> 1.3, <code>snow_source.check_fields</code></td><td>Nouveau contrat de données : le fichier garde l'exposition choisie ou une valeur. Pas de message dans Woodcore. Le rapport imprime alors la valeur seule, sans les mots de 5.2.4.</td></tr>
+  <tr><td>Figure 3 dessinée</td><td><code>calc/domains/snow_svg.py</code>, Qt-free</td><td>Remplace le croquis actuel ; mots des glossaires (« Modèle de charge 1 ») en trois langues. Dans le rapport, la colonne de la toiture (toit, modèles 1 et 2), à partir du niveau 3 : le SVG est écrit à l'export, et la figure en tête du fichier <code>.typ</code> du cas, comme les dessins d'une charge permanente.</td></tr>
+  <tr><td>Corniche (5.3.7)</td><td><code>snow_source</code></td><td>Au-dessus de 800 m, le message orange reste dans l'état du calcul. La ligne « Corniche = à prendre en considération » et sa note sortent du rapport : <code>snow_source</code> n'écrit plus la variable <code>schneeueberhang</code>.</td></tr>
+  <tr><td>États rouge / orange / vert</td><td><code>snow_source.warnings</code> rend le champ et la sorte de chaque message</td><td>Les mots en de/fr/en dans les tables de l'onglet. Le message des 2000 m perd « calculé quand même ».</td></tr>
+</table></div>
+<p class="small muted" style="margin-top:10px">Tout cela passe par <code>big-feature</code> une fois vos réponses données : plusieurs modules, un schéma et une décision changent.</p>
+
+<h2>Le mode Affichage, refait</h2>
+<p>Dans Woodcore 0.122, un cas de neige est écrit dans son propre fichier, <code>Variable-loads/Snow/SN-01.typ</code> : un <code>#domain</code>, puis une ligne <code>#var</code> ou <code>#eq</code> par valeur. Une section du rapport l'appelle par <code>#include domain-file("snow-load", "SN-01")</code>. J'avais encore écrit <code>show-calc</code> et <code>val</code>, retirés en 0.121 ; ce prototype part du vrai fichier, écrit pour la toiture principale par le générateur de Woodcore (<code>unfold._generate_load</code>), puis compilé par son moteur.</p>
+<div class="scrollx"><table class="tbl">
+  <tr><th>Où</th><th>Ce qu'on y voit, ce qu'on y fait</th></tr>
+  <tr><td>Au centre</td><td>Le fichier tel que Typst l'imprime, chaque élément dans son ordre : le titre du domaine, la figure, puis les lignes. Ce qui est masqué (niveau 0, <code>display: none</code>, ou la figure sous son niveau) reste visible en pâle, avec « masquée ». Pas de cadre, pas de clic : l'aperçu ne sert qu'à lire. La ligne ouverte à droite est seulement teintée. <kbd>Ctrl</kbd>+molette zoome.</td></tr>
+  <tr><td>À droite, en haut</td><td>Le fichier, la commande à copier dans la section, et le niveau de détail 1, 2 ou 3 : celui du domaine, <code>#domain(…, level: 2)</code>.</td></tr>
+  <tr><td>À droite, « Éléments du fichier »</td><td>Une section de la même carte, pas un autre module : chaque élément avec sa commande (figure, var, eq), son symbole, son libellé et son niveau 0 1 2 3. Le niveau du domaine est en pointillé tant que la ligne n'a pas le sien ; un clic le fixe, un second clic le rend au domaine.</td></tr>
+  <tr><td>Un clic sur une ligne</td><td>Ses arguments s'ouvrent dessous, en listes déroulantes, et en champs de texte pour ce qui s'écrit. La ligne écrite dans le fichier suit, les arguments ajoutés surlignés. « Voir le fichier entier » montre le <code>.typ</code> avec tous les réglages.</td></tr>
+</table></div>
+
+<h3 style="margin-top:18px">Les arguments réglables, par commande</h3>
+<p class="small muted">Lus dans <code>lib/formula.typ</code> de Woodcore 0.122. Le nom, la valeur et l'unité d'un <code>#var</code> sont ceux de l'export : ils ne se règlent pas ici.</p>
+<div class="scrollx"><table class="tbl">
+  <tr><th>Commande</th><th>Arguments</th><th>Valeurs</th></tr>
+  <tr><td><code>#var</code></td><td>display</td><td>none, variable, value, value-unit, variable-value-unit</td></tr>
+  <tr><td></td><td>style</td><td>normal, bold, underline, double</td></tr>
+  <tr><td></td><td>label-position</td><td>none, before, after, footnote</td></tr>
+  <tr><td></td><td>descr-position</td><td>none, after, footnote</td></tr>
+  <tr><td></td><td>norm-position</td><td>none, in-line, line-right, footnote</td></tr>
+  <tr><td></td><td>level</td><td>auto (celui du domaine), 0, 1, 2, 3</td></tr>
+  <tr><td><code>#eq</code></td><td>equation, unit, as-unit</td><td>la formule ; l'unité de la réponse, convertie ; ou l'unité donnée sans conversion</td></tr>
+  <tr><td></td><td>display-formula, display-equation</td><td>none, variable, value, value-unit, variable-value-unit</td></tr>
+  <tr><td></td><td>style, role</td><td>normal, bold, underline, double ; data, compute, result</td></tr>
+  <tr><td></td><td>label, label-position, descr, descr-position, norm-position, level</td><td>comme <code>#var</code>, plus le libellé et la description à écrire</td></tr>
+  <tr><td><code>#verify</code></td><td>display, role, label, label-position, descr-position, norm-position, level</td><td>display : none, variable, value-unit, variable-value-unit. Un fichier de neige n'en a pas ; les onglets des vérifications prendront le même panneau.</td></tr>
+  <tr><td>figure</td><td>caption, width</td><td>la légende ; la largeur, 40 à 100 %</td></tr>
+</table></div>
+
+<h3 style="margin-top:18px">Ce que l'aperçu montre, et ses limites</h3>
+<ul>
+  <li>Chaque ligne a été compilée seule, à chaque niveau, avec chaque valeur de chaque argument : environ 1 100 rendus Typst réels, en 18 compilations.</li>
+  <li>Avec plusieurs arguments changés sur la même ligne, l'aperçu applique le dernier et le dit ; Woodcore recompile la ligne avec tous.</li>
+  <li>Les textes écrits (equation, as-unit, label, descr) sont dans la ligne du fichier, mais le prototype ne les recompile pas. La légende de la figure est composée par la page quand on la change.</li>
+  <li>Une ligne compilée seule numérote sa note 1 ; le fichier entier, ci-dessous, les numérote juste.</li>
+</ul>
+
+<h2>Le fichier tel que Woodcore l'imprime aujourd'hui</h2>
+<p>Le fichier entier, compilé avec <code>#include domain-file("snow-load", "SN-01")</code>, au niveau 2 et au niveau 3, sans réglage. La figure est en tête du fichier, comme le générateur écrit les dessins d'une charge permanente. Elle s'imprime ici à tous les niveaux : <code>#figure</code> n'a pas de niveau (question 1).</p>
+<div class="cmp">
+  <div><div class="lbl">Niveau 2</div><img class="normimg" src="prev/file-L2.png" alt="Le fichier SN-01 compilé au niveau 2 : le titre, la figure 3 de la toiture, puis chaque valeur avec son libellé" loading="lazy"></div>
+  <div><div class="lbl">Niveau 3</div><img class="normimg" src="prev/file-L3.png" alt="Le fichier SN-01 compilé au niveau 3 : les formules en chiffres, les clauses à droite et les notes en bas" loading="lazy"></div>
+</div>
+
+<h2>Ce que la lecture du vrai fichier a montré</h2>
+<div class="find"><p><b>s<sub>k</sub> n'a plus sa formule.</b> Le générateur l'écrit en valeur, <code>#var("s_k", 2.759184, "kN/m²", …)</code> : l'équation (10) de 5.2.6 n'est plus imprimée, à aucun niveau. Avant la 0.121, le niveau 3 la montrait.</p></div>
+<div class="find"><p><b>De l'allemand dans le fichier français.</b> Les clauses <code>norm-section: "Figur 3"</code>, <code>"Figur 2"</code> et <code>"Anhang D"</code> ; les symboles « Dachform » et « Abgleiten des Schnees » ; la note du glissement écrit encore « mu_1 ».</p></div>
+<div class="find"><p><b>La corniche est encore écrite.</b> Le générateur écrit la ligne <code>schneeueberhang</code> ; le prototype l'a retirée, selon votre décision.</p></div>
+
+<h2>Vos décisions</h2>
+<div class="scrollx"><table class="tbl">
+  <tr><th>Sujet</th><th>Décision</th></tr>
+  <tr><td>L'Affichage</td><td>Le niveau 1, 2 ou 3, puis la liste des éléments du fichier avec 0 1 2 3, et les arguments de chaque ligne à son clic. Plus de variantes A à E.</td></tr>
+  <tr><td>L'aperçu</td><td>Toutes les commandes de neige du fichier, masquées comprises ; rien n'y est cliquable.</td></tr>
+  <tr><td>Longueur et largeur</td><td>Gardées : pour un toit plat, elles donnent μ<sub>1</sub> selon la figure 4 (majoration pour les bâtiments de grandes dimensions, sur le maximum de L et B quand les deux dépassent 20 m, 5.3.5). <code>snow_source</code> et le mode Calcul le font déjà.</td></tr>
+  <tr><td>La figure 3 du rapport</td><td>À partir du niveau 3.</td></tr>
+  <tr><td>Celles du 22.10.2026</td><td>Bulle : le texte puis l'image ; Ctrl+clic dans le lecteur PDF de Woodcore ; C<sub>e</sub> libre sans message ; corniche en orange dans Woodcore et hors du rapport ; modules glissés-déposés ; cartes 261.sia.ch <code>?lang=fr&amp;layer=snow</code> et <code>layer=wind</code>.</td></tr>
+</table></div>
+
+<h2>Questions</h2>
+<p class="muted">L'option recommandée est la première.</p>
+<div class="q"><b>1. Comment la figure sait-elle son niveau ?</b> <code>#figure</code> est la commande de Typst et n'en a pas.<ol><li>une commande de Woodcore pour la figure d'un calcul, <code>#calc-figure(image, caption:, width:, level: 3)</code> : la figure se règle comme une ligne, et le 0 1 2 3 de sa ligne veut dire « à partir de ce niveau »</li><li>le générateur entoure le <code>#figure</code> d'un test du niveau du domaine, sans commande nouvelle</li></ol></div>
+<div class="q"><b>2. Une ligne réglée ici, à l'export suivant :</b><ol><li>Woodcore garde ses arguments et ne rafraîchit que la valeur</li><li>Woodcore la tient pour une ligne modifiée à la main et ne la touche plus</li></ol></div>
+<div class="q"><b>3. s<sub>k</sub> :</b><ol><li>l'écrire en <code>#eq</code> avec l'équation (10), pour que le niveau 3 la montre de nouveau</li><li>le laisser en valeur</li></ol></div>
+
+</div>
+
+<div class="pop" id="pop" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------------- the norm: where each excerpt is, and its words, read off SIA261-2020-FR.pdf and -DE.pdf ---------------- */
+var PT = 1000/595.22; // page images are 1000 px wide
+var CHAPTER = {fr:[26,27,28,29], de:[25,26,27,28]};   // SIA 261:2020, chapter 5, in each edition
+var N = {
+  "514": {ref:"5.1.4", page:{fr:26,de:25}, box:{fr:[40,231.5,548,284],de:[40,219.5,548,272]},
+    title:{fr:"Domaine d'application : altitude", de:"Anwendungsbereich: Meereshöhe", en:"Scope: altitude"},
+    text:{fr:"Les dispositions suivantes ne sont pas applicables aux ouvrages se trouvant à une altitude supérieure à 2000 m, ni à ceux situés en des lieux exposés à des conditions extrêmes d’enneigement et de vent. Dans de tels cas, la charge de neige devra être déterminée sur la base d’investigations spécifiques à l’ouvrage concernant les hauteurs de neige et les conditions d’amoncellement.",
+      de:"Für Bauwerke über 2000 m Meereshöhe und für Bauwerke an Lagen mit aussergewöhnlichen Schnee- und Windverhältnissen sind die nachfolgenden Bestimmungen nicht anwendbar. In solchen Fällen sind zum Festlegen der Schneelast objektspezifische Untersuchungen über Schneehöhen und Ablagerungsverhältnisse notwendig."}},
+  "522": {ref:"5.2.2", page:{fr:26,de:25}, box:{fr:[40,521.5,548,568],de:[40,485.5,548,532]},
+    title:{fr:"Charge de neige sur la toiture q_k", de:"Schneelast auf dem Dach q_k", en:"Snow load on the roof q_k"},
+    text:{fr:"La valeur caractéristique de la charge de neige sur les toitures, rapportée à la surface horizontale recouverte, est définie par:\nq_k = μ_i · C_e · C_T · s_k   (9)",
+      de:"Der charakteristische Wert der Schneelast auf Dächern, bezogen auf die überdeckte Grundrissfläche, beträgt\nq_k = μ_i · C_e · C_T · s_k   (9)"}},
+  "523": {ref:"5.2.3", page:{fr:26,de:25}, box:{fr:[40,569.5,548,598],de:[40,533.5,548,562]},
+    title:{fr:"Coefficients de forme de toiture μ_i", de:"Dachformbeiwerte μ_i", en:"Roof shape coefficients μ_i"},
+    text:{fr:"Les coefficients de forme de toiture μ_i tiennent compte de la différence entre la charge de neige sur les toitures et celle sur un terrain horizontal. Ils sont à déterminer selon les figures 2 à 5.",
+      de:"Die Dachformbeiwerte μ_i berücksichtigen den Unterschied zwischen der Schneelast auf Dächern und jener auf horizontalem Gelände. Die Dachformbeiwerte μ_i sind gemäss Figur 2 bis 5 zu ermitteln."}},
+  "524": {ref:"5.2.4", page:{fr:26,de:25}, box:{fr:[40,599.5,548,652],de:[40,563.5,548,616]},
+    title:{fr:"Coefficient d'exposition C_e", de:"Expositionsbeiwert C_e", en:"Exposure coefficient C_e"},
+    text:{fr:"Selon l’exposition au vent de l’ouvrage, le coefficient d’exposition C_e prend les valeurs suivantes:\n– exposition au vent normale   C_e = 1,0\n– endroit fortement exposé au vent   C_e = 0,8\n– endroit protégé du vent   C_e = 1,2.",
+      de:"Je nach Windexposition des Bauwerks gilt für den Expositionsbeiwert C_e:\n– normale Windexposition   C_e = 1,0\n– dem Wind stark ausgesetzte Lage   C_e = 0,8\n– vor Wind geschützte Lage   C_e = 1,2."}},
+  "525": {ref:"5.2.5", page:{fr:26,de:25}, box:{fr:[40,653.5,548,706],de:[40,617.5,548,670]},
+    title:{fr:"Coefficient thermique C_T", de:"Thermischer Beiwert C_T", en:"Thermal coefficient C_T"},
+    text:{fr:"Le coefficient thermique C_T est généralement égal à 1,0. Il est possible de choisir une valeur plus petite si le processus de la fonte des neiges est accéléré par une forte transmission de chaleur à la surface du toit. L’influence d’une défaillance des installations techniques sur la transmission de chaleur admise devra être examinée au préalable, par exemple dans le cas de toitures vitrées recouvrant des locaux chauffés.",
+      de:"Der thermische Beiwert C_T ist im Allgemeinen gleich 1,0 zu setzen. Die Annahme eines kleineren Beiwerts ist möglich, wenn ein grosser Wärmedurchgang an der Dachoberfläche den Schmelzprozess beschleunigt. Der Einfluss des Ausfalls technischer Installationen auf den angenommenen Wärmedurchgang ist dabei zu prüfen, beispielsweise bei Glasdächern über geheizten Räumen."}},
+  "526": {ref:"5.2.6", page:{fr:26,de:25}, box:{fr:[40,707.5,548,785],de:[40,671.5,548,752]},
+    title:{fr:"Charge de neige sur terrain horizontal s_k", de:"Schneelast auf horizontalem Gelände s_k", en:"Snow load on the ground s_k"},
+    text:{fr:"La valeur caractéristique de la charge de neige sur un terrain horizontal est calculée au moyen de l’équation suivante:\ns_k = [1 + (h_0 / 350)²] · 0,4 kN/m² ≥ 0,9 kN/m²   (10)\nL’altitude de référence h_0 (en m) peut être déterminée selon l’annexe D. La correction concernant l’altitude tient compte du climat régional.",
+      de:"Der charakteristische Wert der Schneelast auf horizontalem Gelände beträgt\ns_k = [1 + (h_0 / 350)²] · 0,4 kN/m² ≥ 0,9 kN/m²   (10)\nDie Bezugshöhe h_0 (in m) ist gemäss Anhang D zu ermitteln. Die Korrektur bezüglich der Meereshöhe trägt dem regionalen Klima Rechnung."}},
+  "531": {ref:"5.3.1", page:{fr:27,de:26}, box:{fr:[40,151.5,548,204],de:[40,91.5,548,144]},
+    title:{fr:"Modèles de charge 1 et 2", de:"Lastmodelle 1 und 2", en:"Load models 1 and 2"},
+    text:{fr:"La disposition des charges sur des toitures de bâtiments exposées à des conditions normales de vent doit être prise en considération selon les indications de la figure 3:\n– modèle de charge 1   amoncellement uniforme, pas de transport par le vent,\n– modèle de charge 2   amoncellement non uniforme dû au transport par le vent.",
+      de:"Für Dächer normal windexponierter Gebäude sind die in Figur 3 angegebenen Lastanordnungen zu berücksichtigen:\n– Lastmodell 1   gleichmässige Ablagerung, keine Windverfrachtung,\n– Lastmodell 2   ungleichmässige Ablagerung durch Windverfrachtung."}},
+  "532": {ref:"5.3.2", page:{fr:27,de:26}, box:{fr:[40,205.5,548,222],de:[40,145.5,548,162]},
+    title:{fr:"Toit à un pan", de:"Pultdach", en:"Mono-pitch roof"},
+    text:{fr:"Un toit incliné sur un seul pan doit être traité comme la moitié d’une toiture symétrique.", de:"Ein einseitig geneigtes Dach ist wie eine Seite eines Satteldachs zu behandeln."}},
+  "533": {ref:"5.3.3", page:{fr:27,de:26}, box:{fr:[40,223.5,548,252],de:[40,163.5,548,192]},
+    title:{fr:"Pente supérieure à 60°", de:"Dachneigung über 60°", en:"Slope above 60°"},
+    text:{fr:"La charge de neige n’a pas besoin d’être prise en compte pour une pente de toit supérieure à 60°, pour autant que le glissement de la neige sur l’ensemble de la toiture ne soit pas empêché.",
+      de:"Sofern ein Abgleiten des Schnees von der gesamten Dachfläche ohne Behinderung möglich ist, darf die Schneelast ab einer Dachneigung von 60° vernachlässigt werden."}},
+  "534": {ref:"5.3.4", page:{fr:27,de:26}, box:{fr:[40,253.5,548,294],de:[40,193.5,548,234]},
+    title:{fr:"Glissement de la neige empêché", de:"Abgleiten behindert", en:"Sliding hindered"},
+    text:{fr:"Si un glissement de la neige sur la toiture est rendu difficile ou même empêché, par exemple lorsque des grilles ou autres arête-neige sont installés ou qu’un parapet longe le bord inférieur du toit, la valeur μ_1, sera choisie égale à 0,8.",
+      de:"Wenn ein Abgleiten des Schnees vom Dach erschwert oder behindert wird, beispielsweise wenn Schneefänger oder Schneestopper installiert sind oder wenn eine Brüstung am unteren Dachrand vorliegt, ist μ_1 mit 0,8 in Rechnung zu stellen."}},
+  "535": {ref:"5.3.5", page:{fr:27,de:26}, box:{fr:[40,295.5,548,336],de:[40,235.5,548,264]},
+    title:{fr:"Grands toits plats", de:"Grosse Flachdächer", en:"Large flat roofs"},
+    text:{fr:"Pour les bâtiments équipés d’un toit quasi horizontal (sa déclivité étant inférieure à env. 10°)de longueur et de largeur supérieure à 20 m, μ_1 doit être majoré selon la figure 4, indépendamment de la hauteur du bâtiment et de la direction principale du vent.",
+      de:"Für Gebäude mit quasi-horizontalem Dach (die Neigung ist kleiner als ca. 10°) mit Länge und Breite grösser als 20 m ist μ_1 gemäss Figur 4 zu erhöhen, und zwar unabhängig von Gebäudehöhe und Hauptwindrichtung."}},
+  "536": {ref:"5.3.6", page:{fr:27,de:26}, box:{fr:[40,337.5,548,402],de:[40,265.5,548,330]},
+    title:{fr:"Toit étagé, décrochement", de:"Abgestufte Dächer, Höhensprung", en:"Stepped roof"},
+    text:{fr:"Pour les bâtiments équipés d’un toit étagé ou ceux dont le toit est proche d’un ouvrage plus élevé, il faut appliquer une charge supplémentaire de répartition triangulaire selon la figure 5 sur la surface de toiture inférieure (doublement de μ_1 le long du décrochement). Cela permet de considérer les éventuels glissements de neige et le transport par le vent depuis la partie du toit située en amont. La longueur d’influence l_s correspond au double de la hauteur du décrochement Δh.",
+      de:"Bei Gebäuden mit abgestuften Dächern oder bei Gebäuden, deren Dach an Bauwerke grösserer Höhe angrenzt, ist auf der unteren Dachfläche eine dreieckförmige Zusatzlast gemäss Figur 5 in Rechnung zu stellen (Verdoppelung von μ_1 auf der Seite des Höhensprungs). Damit werden ein allfälliges Abgleiten des Schnees vom oberen Dachteil sowie entsprechende Windverfrachtungen berücksichtigt. Die Einflusslänge l_s entspricht dabei dem doppelten Höhenunterschied Δh."}},
+  "537": {ref:"5.3.7", page:{fr:27,de:26}, box:{fr:[40,403.5,548,469],de:[40,331.5,548,393]},
+    title:{fr:"Corniche", de:"Schneeüberhang", en:"Cornice"},
+    text:{fr:"Une corniche doit être prise en considération pour dimensionner les éléments de toiture en porte-à-faux des ouvrages situés à plus de 800 m d’altitude. La hauteur et la saillie de la corniche seront admises égales à la moitié de la hauteur de la neige sur la toiture. Cette hauteur de neige sera calculée sur la base de la charge de neige selon le chiffre 5.2.2, avec une charge volumique de 3 kN/m³. La charge de la corniche est admise comme une charge linéaire répartie au bord du toit.",
+      de:"Für Bauwerke über 800 m Meereshöhe ist bei der Bemessung von auskragenden Dachteilen ein Schneeüberhang zu berücksichtigen. Höhe und Breite des Überhangs sind gleich der halben Schneehöhe auf dem Dach anzunehmen. Die Schneehöhe auf dem Dach ist aus der Schneelast gemäss 5.2.2 mit einer Raumlast von 3 kN/m³ zu berechnen. Die Last des Schneeüberhangs ist als Linienlast am Dachrand anzunehmen."}},
+  "fig2": {ref:"Figure 2", refde:"Figur 2", page:{fr:28,de:27}, box:{fr:[40,65,548,312],de:[40,65,548,312]}, figure:true,
+    title:{fr:"Coefficients de forme de toiture μ(α)", de:"Dachformbeiwerte μ(α)", en:"Roof shape coefficients μ(α)"},
+    text:{fr:"Figure 2   Coefficients de forme de toiture, en fonction de l’angle d’inclinaison de la toiture α", de:"Figur 2   Dachformbeiwerte in Abhängigkeit der Dachneigung α"}},
+  "fig3": {ref:"Figure 3", refde:"Figur 3", page:{fr:28,de:27}, box:{fr:[40,325,548,680],de:[40,325,548,680]}, figure:true,
+    title:{fr:"Disposition de la charge de neige", de:"Schneelastanordnung", en:"Snow load arrangement"},
+    text:{fr:"Figure 3   Disposition de la charge de neige sur les toitures", de:"Figur 3   Schneelastanordnung auf Dächern"}},
+  "fig3-duo": {ref:"Figure 3", refde:"Figur 3", page:{fr:28,de:27}, box:{fr:[191,352,308,674],de:[191,352,308,674]}, figure:true,
+    title:{fr:"Toit à deux pans", de:"Satteldach", en:"Duo-pitch roof"},
+    text:{fr:"Figure 3   Disposition de la charge de neige sur les toitures\nμ_11 = μ_1 (α_1)   μ_12 = μ_1 (α_2)", de:"Figur 3   Schneelastanordnung auf Dächern\nμ_11 = μ_1 (α_1)   μ_12 = μ_1 (α_2)"}},
+  "fig3-shed": {ref:"Figure 3", refde:"Figur 3", page:{fr:28,de:27}, box:{fr:[304,352,421,674],de:[304,352,421,674]}, figure:true,
+    title:{fr:"Toiture en sheds", de:"Sheddach", en:"Shed roof"},
+    text:{fr:"Figure 3   Disposition de la charge de neige sur les toitures\nμ_2m = μ_2 · ((α_1 + α_2) / 2)", de:"Figur 3   Schneelastanordnung auf Dächern\nμ_2m = μ_2 · ((α_1 + α_2) / 2)"}},
+  "fig3-curved": {ref:"Figure 3", refde:"Figur 3", page:{fr:28,de:27}, box:{fr:[417,352,534,674],de:[417,352,534,674]}, figure:true,
+    title:{fr:"Toiture cylindrique", de:"Tonnendach", en:"Curved roof"},
+    text:{fr:"Figure 3   Disposition de la charge de neige sur les toitures\nμ_3 = μ_3 (α)   α_0 = 60°", de:"Figur 3   Schneelastanordnung auf Dächern\nμ_3 = μ_3 (α)   α_0 = 60°"}},
+  "fig4": {ref:"Figure 4", refde:"Figur 4", page:{fr:29,de:28}, box:{fr:[40,65,548,315],de:[40,65,548,315]}, figure:true,
+    title:{fr:"Majoration pour grands bâtiments", de:"Erhöhung bei grossen Gebäuden", en:"Increase for large buildings"},
+    text:{fr:"Figure 4   Majoration du coefficient de forme de toiture pour les bâtiments de grandes dimensions", de:"Figur 4   Erhöhung des Dachformbeiwertes bei grossen Gebäuden"}},
+  "fig5": {ref:"Figure 5", refde:"Figur 5", page:{fr:29,de:28}, box:{fr:[40,315,548,600],de:[40,315,548,600]}, figure:true,
+    title:{fr:"Toit étagé", de:"Höhensprung", en:"Stepped roof"},
+    text:{fr:"Figure 5   Coefficients de forme de toiture pour la charge de neige sur un toit étagé", de:"Figur 5   Dachformbeiwerte für Schneelasten an Höhensprüngen"}},
+  "annexD": {ref:"Annexe D", refde:"Anhang D", page:{fr:115,de:115}, web:"https://261.sia.ch/?lang={l}&layer=snow", figure:true, map:true,
+    title:{fr:"Altitude de référence pour les charges de neige", de:"Bezugshöhe für Schneelasten", en:"Reference height for snow loads"},
+    text:{fr:"Annexe D (normative)   Altitude de référence pour les charges de neige\n(pas applicable pour les constructions situées au-dessus de 2000 m d’altitude)\n− 200 m · ± 0 m · + 200 m · + 400 m · + 500 m", de:"Anhang D (normativ)   Bezugshöhe für Schneelasten\n(nicht anwendbar auf Bauwerke über 2000 m Meereshöhe)\n− 200 m · ± 0 m · + 200 m · + 400 m · + 500 m"}}
+};
+var FIELD_NORM = {h0:["526","514"], dh:["annexD"], ce:["524"], ct:["525"], slide:["534","533"], step:["536","fig5"], alpha:["523","fig2"],
+  roof_flat:["535","fig4"], roof_mono:["532","fig3"], roof_duo:["fig3"], roof_shed:["fig3"], roof_curved:["fig3"],
+  r_href:["526","annexD"], r_sk:["526"], r_mu:["fig2","fig3"], r_qk:["522","531"], dims:["535","fig4"]};
+// what a bubble shows all at once, the excerpts one under the other and no switch to the text (the engineer, 22.10.2026)
+var COMBO = {};   // every bubble shows all it cites at once, no tabs (the engineer, 22.10.2026)
+Object.keys(FIELD_NORM).forEach(function(k){ COMBO[k] = 1; });
+// a roof's bubble shows its excerpt only, without the words (the engineer, 22.10.2026)
+var BARE = {roof_flat:1, roof_mono:1, roof_duo:1, roof_shed:1, roof_curved:1};
+
+/* ---------------- words of the window, de/fr/en ---------------- */
+var W = {
+ fr:{roofs:"Toitures",bld:"Bâtiment",flatLB:"Toit plat : longueur et largeur sous Bâtiment, en tête (5.3.5, figure 4).",new:"Nouveau",dup:"Dupliquer",site:"Lieu",h0:"Altitude h₀",dh:"Correction Δh (annexe D)",ce:"Exposition C<sub>e</sub>",ce_s:"abrité",ce_n:"normal",ce_e:"exposé",ce_o:"autre",ct:"Coefficient thermique C<sub>T</sub>",roof:"Toiture",slide:"Glissement de la neige",sl_p:"possible",sl_h:"empêché ou rendu difficile",step:"Décrochement",step_l:"toit étagé ou proche d'un ouvrage plus élevé",revert:"Annuler les modifications",save:"Enregistrer",
+   a1:"Inclinaison α₁",a2:"Inclinaison α₂",a:"Inclinaison α",L:"Longueur",B:"Largeur",
+   flat:"Toit plat",mono:"Toit à un pan",duo:"Toit à deux pans",shed:"Toiture en sheds",curved:"Toiture cylindrique",
+   m_state:"État du calcul",m_res:"Résultats",m_fig:"Disposition de la charge · figure 3",m_fig2:"Figure 2 · μ(α), interactive",
+   lm1:"Modèle de charge 1",lm2:"Modèle de charge 2",one:"un seul modèle de charge pour un toit plat",
+   ok:"Toutes les entrées sont là, le calcul est fait.",
+   above:"Altitude h₀ = {h} m : la norme n'autorise pas ce calcul au-dessus de 2000 m ({r}).",
+   cornice:"Altitude h₀ = {h} m : au-dessus de 800 m, une corniche est à prendre en considération pour les porte-à-faux ({r}).",
+   steep:"{s} = {a}° : au-delà de 60°, la neige glisse, ce pan ne porte pas de neige ({r}).",
+   cefree:"C_e = {v} : autre que les trois valeurs de {r}.",
+   ctlow:"C_T = {v} : plus petit que 1,0, à justifier ({r}).",
+   large:"Toit plat de {L} m × {B} m : μ₁ majoré selon la figure 4 ({r}).",
+   stepi:"Décrochement : la charge supplémentaire de la figure 5 n'est pas calculée ({r}).",
+   e_id:"Il manque l'ID de la toiture : le cas ne peut pas être enregistré.",
+   e_h0:"Altitude h₀ manquante : s_k ne peut pas être calculé.",
+   e_ce:"C_e « autre » : saisir une valeur supérieure à 0.",
+   e_ct:"C_T doit être supérieur à 0 et au plus 1,0 ({r}).",
+   e_a:"{s} doit être compris entre 0° et 90°.",
+   e_dim:"Longueur et largeur doivent être supérieures à 0.",
+   s_ok:"✓ complet",s_info:"info",s_err:"à corriger",
+   unfold:"Tout déplier",fold:"Tout replier",copy:"Copier les valeurs",
+   pin:"Clic : épingler à droite",open:"Ctrl+clic : ouvrir la norme, p. {p}",openweb:"Ctrl+clic : ouvrir 261.sia.ch",
+   ex:"Extrait",tx:"Texte",fb:"pas d'édition anglaise : édition allemande",unpin:"Désépingler",collapse:"Réduire",win:"Ouvrir dans une fenêtre",
+   zoomhint:"Ctrl + molette : zoomer · glisser la barre : déplacer · coin : redimensionner",
+   proto:"Prototype : rien n'est enregistré.",web:"Woodcore ouvrirait 261.sia.ch, carte « Neige » :"},
+ de:{roofs:"Dächer",bld:"Gebäude",flatLB:"Flachdach: Länge und Breite oben unter Gebäude (5.3.5, Figur 4).",new:"Neu",dup:"Duplizieren",site:"Standort",h0:"Meereshöhe h₀",dh:"Korrektur Δh (Anhang D)",ce:"Exposition C<sub>e</sub>",ce_s:"geschützt",ce_n:"normal",ce_e:"exponiert",ce_o:"andere",ct:"Thermischer Beiwert C<sub>T</sub>",roof:"Dach",slide:"Abgleiten des Schnees",sl_p:"möglich",sl_h:"behindert oder erschwert",step:"Höhensprung",step_l:"abgestuftes Dach oder an höheres Bauwerk angrenzend",revert:"Änderungen verwerfen",save:"Speichern",
+   a1:"Dachneigung α₁",a2:"Dachneigung α₂",a:"Dachneigung α",L:"Länge",B:"Breite",
+   flat:"Flachdach",mono:"Pultdach",duo:"Satteldach",shed:"Sheddach",curved:"Tonnendach",
+   m_state:"Stand der Berechnung",m_res:"Resultate",m_fig:"Lastanordnung · Figur 3",m_fig2:"Figur 2 · μ(α), interaktiv",
+   lm1:"Lastmodell 1",lm2:"Lastmodell 2",one:"beim Flachdach nur ein Lastmodell",
+   ok:"Alle Eingaben sind vorhanden, die Berechnung ist erfolgt.",
+   above:"Meereshöhe h₀ = {h} m: Die Norm lässt diese Berechnung über 2000 m nicht zu ({r}).",
+   cornice:"Meereshöhe h₀ = {h} m: Über 800 m ist bei auskragenden Dachteilen ein Schneeüberhang zu berücksichtigen ({r}).",
+   steep:"{s} = {a}°: Über 60° gleitet der Schnee ab, diese Dachfläche trägt keinen Schnee ({r}).",
+   cefree:"C_e = {v}: keiner der drei Werte von {r}.",
+   ctlow:"C_T = {v}: kleiner als 1,0, zu begründen ({r}).",
+   large:"Flachdach {L} m × {B} m: μ₁ gemäss Figur 4 erhöht ({r}).",
+   stepi:"Höhensprung: Die Zusatzlast der Figur 5 wird nicht berechnet ({r}).",
+   e_id:"Die ID des Dachs fehlt: Der Fall kann nicht gespeichert werden.",
+   e_h0:"Meereshöhe h₀ fehlt: s_k kann nicht berechnet werden.",
+   e_ce:"C_e «andere»: einen Wert grösser als 0 eingeben.",
+   e_ct:"C_T muss grösser als 0 und höchstens 1,0 sein ({r}).",
+   e_a:"{s} muss zwischen 0° und 90° liegen.",
+   e_dim:"Länge und Breite müssen grösser als 0 sein.",
+   s_ok:"✓ vollständig",s_info:"Info",s_err:"zu korrigieren",
+   unfold:"Alle aufklappen",fold:"Alle zuklappen",copy:"Werte kopieren",
+   pin:"Klick: rechts anheften",open:"Ctrl+Klick: Norm öffnen, S. {p}",openweb:"Ctrl+Klick: 261.sia.ch öffnen",
+   ex:"Auszug",tx:"Text",fb:"",unpin:"Lösen",collapse:"Einklappen",win:"In einem Fenster öffnen",
+   zoomhint:"Ctrl + Mausrad: zoomen · Titelleiste ziehen: verschieben · Ecke: Grösse ändern",
+   proto:"Prototyp: Es wird nichts gespeichert.",web:"Woodcore würde 261.sia.ch öffnen, Karte «Schnee»:"},
+ en:{roofs:"Roofs",bld:"Building",flatLB:"Flat roof: length and width under Building, at the top (5.3.5, Figure 4).",new:"New",dup:"Duplicate",site:"Site",h0:"Altitude h₀",dh:"Correction Δh (Annex D)",ce:"Exposure C<sub>e</sub>",ce_s:"sheltered",ce_n:"normal",ce_e:"exposed",ce_o:"other",ct:"Thermal coefficient C<sub>T</sub>",roof:"Roof",slide:"Sliding of the snow",sl_p:"possible",sl_h:"hindered or prevented",step:"Height step",step_l:"stepped roof or next to a taller building",revert:"Discard changes",save:"Save",
+   a1:"Slope α₁",a2:"Slope α₂",a:"Slope α",L:"Length",B:"Width",
+   flat:"Flat roof",mono:"Mono-pitch roof",duo:"Duo-pitch roof",shed:"Shed roof",curved:"Curved roof",
+   m_state:"Calculation status",m_res:"Results",m_fig:"Load arrangement · Figure 3",m_fig2:"Figure 2 · μ(α), interactive",
+   lm1:"Load model 1",lm2:"Load model 2",one:"a flat roof has one load model only",
+   ok:"All inputs are there, the calculation is done.",
+   above:"Altitude h₀ = {h} m: the norm does not allow this calculation above 2000 m ({r}).",
+   cornice:"Altitude h₀ = {h} m: above 800 m, a cornice is to be considered for overhanging roof parts ({r}).",
+   steep:"{s} = {a}°: above 60° the snow slides off, this side carries no snow ({r}).",
+   cefree:"C_e = {v}: none of the three values of {r}.",
+   ctlow:"C_T = {v}: below 1.0, to be justified ({r}).",
+   large:"Flat roof {L} m × {B} m: μ₁ increased per Figure 4 ({r}).",
+   stepi:"Height step: the extra load of Figure 5 is not computed ({r}).",
+   e_id:"The roof's ID is missing: the case cannot be saved.",
+   e_h0:"Altitude h₀ missing: s_k cannot be computed.",
+   e_ce:"C_e “other”: enter a value above 0.",
+   e_ct:"C_T must be above 0 and at most 1.0 ({r}).",
+   e_a:"{s} must lie between 0° and 90°.",
+   e_dim:"Length and width must be above 0.",
+   s_ok:"✓ complete",s_info:"info",s_err:"to fix",
+   unfold:"Expand all",fold:"Collapse all",copy:"Copy values",
+   pin:"Click: pin to the right",open:"Ctrl+click: open the norm, p. {p}",openweb:"Ctrl+click: open 261.sia.ch",
+   ex:"Excerpt",tx:"Text",fb:"no English edition: German edition shown",unpin:"Unpin",collapse:"Collapse",win:"Open in a window",
+   zoomhint:"Ctrl + wheel: zoom · drag the title bar: move · corner: resize",
+   proto:"Prototype: nothing is saved.",web:"Woodcore would open 261.sia.ch, map “Snow”:"}
+};
+var lang = "fr";
+function t(k, p){ var s = (W[lang][k] != null ? W[lang][k] : W.fr[k]) || k; if (p) for (var x in p) s = s.split("{"+x+"}").join(p[x]); return s; }
+function nl(){ return lang === "fr" ? "fr" : "de"; }   // the edition shown: the window's, German where there is none
+function refOf(e){ return nl() === "de" && e.refde ? e.refde : e.ref; }
+function sub(s){ return s.replace(/([A-Za-zμα])_\{?([0-9a-zA-Z,]+)\}?/g, function(m, a, b){ return a + "<sub>" + b + "</sub>"; }); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function f2(x){ return (Math.round(x*100)/100).toFixed(2); }
+function f0(x){ return String(Math.round(x)); }
+
+/* ---------------- state and the calculation (the same arithmetic as calc/domains/snow_source.py) ---------------- */
+var S = {name:"Toiture principale", id:"SN-01", h0:850, dh:0, ce:"1.0", ceFree:"", ct:1.0, roof:"duo", a1:30, a2:30, L:24, B:12, slide:"possible", step:false};
+var PRESETS = {
+  base:{h0:850, dh:0, ce:"1.0", ceFree:"", ct:1.0, roof:"duo", a1:30, a2:30, slide:"possible", step:false, id:"SN-01"},
+  high:{h0:2050, dh:0, ce:"1.0", ceFree:"", ct:1.0, roof:"duo", a1:30, a2:30, slide:"possible", step:false, id:"SN-01"},
+  flat:{h0:620, dh:200, ce:"1.2", ceFree:"", ct:1.0, roof:"flat", L:30, B:25, slide:"possible", step:false, id:"SN-01"},
+  shed:{h0:480, dh:0, ce:"1.0", ceFree:"", ct:1.0, roof:"shed", a1:45, a2:15, slide:"possible", step:true, id:"SN-01"},
+  curved:{h0:1100, dh:400, ce:"0.8", ceFree:"", ct:1.0, roof:"curved", a1:30, slide:"possible", step:false, id:"SN-01"},
+  err:{h0:"", dh:0, ce:"free", ceFree:"", ct:1.2, roof:"duo", a1:30, a2:95, slide:"possible", step:false, id:""}
+};
+function curve(pts, x){ if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++){ if (x <= pts[i][0]){ var a = pts[i-1], b = pts[i]; return a[1] + (b[1]-a[1])*(x-a[0])/(b[0]-a[0]); } } return pts[pts.length-1][1]; }
+var MU1 = [[0,0.8],[30,0.8],[60,0]], MU2 = [[0,0.8],[30,1.6]], MU3 = [[0,0.2],[20,2.0]], LARGE = [[20,0.8],[25,1.0]];
+function num(v){ var x = parseFloat(v); return isFinite(x) ? x : null; }
+
+function compute(){
+  var errs = [], infos = [];
+  var h0 = num(S.h0), ct = num(S.ct), ce = S.ce === "free" ? num(S.ceFree) : num(S.ce);
+  var a1 = num(S.a1), a2 = num(S.a2), L = num(S.L), B = num(S.B);
+  var fields = {flat:["L","B"], mono:["a1"], duo:["a1","a2"], shed:["a1","a2"], curved:["a1"]}[S.roof];
+  var aname = function(k){ return S.roof === "mono" || S.roof === "curved" ? "α" : (k === "a1" ? "α₁" : "α₂"); };
+  if (!String(S.id).trim()) errs.push({k:"err", text:t("e_id"), field:"f_id"});
+  if (h0 === null || h0 < 0) errs.push({k:"err", text:t("e_h0"), field:"f_h0"});
+  if (S.ce === "free" && (ce === null || ce <= 0)) errs.push({k:"err", text:t("e_ce"), field:"f_ce_val"});
+  if (ct === null || ct <= 0 || ct > 1) errs.push({k:"err", text:t("e_ct", {r:"5.2.5"}), field:"f_ct", norm:"525"});
+  fields.forEach(function(k){
+    var v = num(S[k]);
+    if (k === "a1" || k === "a2"){ if (v === null || v < 0 || v > 90) errs.push({k:"err", text:t("e_a", {s:aname(k)}), field:"f_"+k}); }
+    else if (v === null || v <= 0) { if (!errs.some(function(e){ return e.field === "f_L"; })) errs.push({k:"err", text:t("e_dim"), field:"f_"+k}); }
+  });
+  if (h0 !== null && h0 > 2000) infos.push({k:"warn", text:t("above", {h:f0(h0), r:"5.1.4"}), field:"f_h0", norm:"514"});
+  else if (h0 !== null && h0 > 800) infos.push({k:"warn", text:t("cornice", {h:f0(h0), r:"5.3.7"}), field:"f_h0", norm:"537"});
+  if (ct !== null && ct > 0 && ct < 1) infos.push({k:"warn", text:t("ctlow", {v:f2(ct), r:"5.2.5"}), field:"f_ct", norm:"525"});
+  if (S.slide === "possible" && S.roof !== "flat" && S.roof !== "curved") fields.forEach(function(k){ var v = num(S[k]); if (v !== null && v >= 60 && v <= 90) infos.push({k:"warn", text:t("steep", {s:aname(k), a:f0(v), r:"5.3.3"}), field:"f_"+k, norm:"533"}); });
+  if (S.roof === "flat" && L > 20 && B > 20) infos.push({k:"warn", text:t("large", {L:f0(L), B:f0(B), r:"5.3.5"}), field:"f_L", norm:"535"});
+  if (S.step) infos.push({k:"warn", text:t("stepi", {r:"5.3.6"}), field:"f_step", norm:"536"});
+  var out = {errs:errs, infos:infos, ok:!errs.length};
+  if (errs.length) return out;
+  var hind = S.slide === "hindered";
+  function mu1(a){ return hind ? 0.8 : curve(MU1, a); }
+  var href = h0 + S.dh, sk = Math.max(0.9, (1 + Math.pow(href/350, 2))*0.4), base = ce*ct*sk;
+  var mu = {}, q = [];
+  if (S.roof === "flat"){ var v = mu1(0), fig4 = false; if (Math.min(L,B) > 20){ var w = curve(LARGE, Math.max(L,B)); if (w > v){ v = w; fig4 = true; } } mu.mu_1 = {v:v, why: fig4 ? "fig4" : "fig2", arg:null}; }
+  else if (S.roof === "mono") mu.mu_1 = {v:mu1(a1), arg:"α = "+f0(a1)+"°"};
+  else if (S.roof === "duo" || S.roof === "shed"){
+    mu.mu_11 = {v:mu1(a1), arg:"α₁ = "+f0(a1)+"°"}; mu.mu_12 = {v:mu1(a2), arg:"α₂ = "+f0(a2)+"°"};
+    if (S.roof === "shed") mu.mu_2m = {v:curve(MU2, (a1+a2)/2), arg:"(α₁ + α₂)/2 = "+f0((a1+a2)/2)+"°"};
+  } else mu.mu_3 = {v:curve(MU3, a1), arg:"α = "+f0(a1)+"°"};
+  function load(model, sym, musym, m, half){ q.push({model:model, sym:sym, musym:musym, mu:m, half:!!half, v:m*base/(half?2:1)}); }
+  if (S.roof === "flat") load(1, "q_k", "μ₁", mu.mu_1.v);
+  else if (S.roof === "mono"){ load(1, "q_k,1", "μ₁", mu.mu_1.v); load(2, "q_k,1,2", "μ₁", mu.mu_1.v, true); }
+  else if (S.roof === "duo"){ load(1, "q_k,11", "μ₁₁", mu.mu_11.v); load(1, "q_k,12", "μ₁₂", mu.mu_12.v); load(2, "q_k,11,2", "μ₁₁", mu.mu_11.v, true); load(2, "q_k,12,2", "μ₁₂", mu.mu_12.v, true); }
+  else if (S.roof === "shed"){ load(1, "q_k,11", "μ₁₁", mu.mu_11.v); load(1, "q_k,12", "μ₁₂", mu.mu_12.v); load(2, "q_k,2m", "μ₂ₘ", mu.mu_2m.v); }
+  else { load(1, "q_k,1", "0.8", 0.8); load(2, "q_k,3", "μ₃", mu.mu_3.v); load(2, "q_k,3,2", "μ₃", mu.mu_3.v, true); }
+  out.href = href; out.sk = sk; out.floored = (1 + Math.pow(href/350, 2))*0.4 < 0.9; out.ce = ce; out.ct = ct; out.mu = mu; out.q = q; out.base = base;
+  return out;
+}
+
+/* ---------------- the black-and-white drawings, in the style of SIA 261 Figure 3 ---------------- */
+var INK = "#111", GREY = "#8a8a8a", FONT = 'font-family="Arial, Helvetica, sans-serif"';
+function svg(w, h, inner){ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'">'+inner+'</svg>'; }
+function L(x1,y1,x2,y2,c,wd,dash){ return '<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="'+(c||INK)+'" stroke-width="'+(wd||1)+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>'; }
+function P(pts,c,wd,fill){ return '<polygon points="'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ')+'" fill="'+(fill||'none')+'" stroke="'+(c||INK)+'" stroke-width="'+(wd||1)+'"/>'; }
+function PL(pts,c,wd,dash){ return '<polyline points="'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ')+'" fill="none" stroke="'+(c||INK)+'" stroke-width="'+(wd||1)+'"'+(dash?' stroke-dasharray="'+dash+'"':'')+'/>'; }
+function T(x,y,s,size,anchor,extra){ return '<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" font-size="'+(size||11)+'" '+FONT+' fill="'+INK+'" text-anchor="'+(anchor||"start")+'"'+(extra||'')+'>'+s+'</text>'; }
+function R(x,y,w,h){ return '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+Math.max(w,0).toFixed(1)+'" height="'+Math.max(h,0).toFixed(1)+'" fill="#fff" stroke="'+INK+'" stroke-width="1"/>'; }
+function arcAngle(cx, cy, r, from, to, label, side, size){
+  // an arc from the horizontal to the roof line, arrow heads at both ends, as the norm draws them
+  var a0 = from*Math.PI/180, a1 = to*Math.PI/180;
+  var x0 = cx + r*Math.cos(a0), y0 = cy - r*Math.sin(a0), x1 = cx + r*Math.cos(a1), y1 = cy - r*Math.sin(a1);
+  var sweep = to > from ? 0 : 1, s = '<path d="M'+x0.toFixed(1)+','+y0.toFixed(1)+' A'+r+','+r+' 0 0 '+sweep+' '+x1.toFixed(1)+','+y1.toFixed(1)+'" fill="none" stroke="'+INK+'" stroke-width="0.9"/>';
+  function head(x, y, ang){ var dx = Math.cos(ang), dy = Math.sin(ang), n = 4; return P([[x,y],[x - n*dx + 2*dy, y - n*dy - 2*dx],[x - n*dx - 2*dy, y - n*dy + 2*dx]], INK, 0.6, INK); }
+  var t0 = a0 + (to > from ? -Math.PI/2 : Math.PI/2), t1 = a1 + (to > from ? Math.PI/2 : -Math.PI/2);
+  s += head(x0, y0, -t0) + head(x1, y1, -t1);
+  if (label){ var mid = (a0+a1)/2; var lx = cx + (r+5)*Math.cos(mid) + (side === "r" ? 4 : -4), ly = cy - (r+3)*Math.sin(mid) + 4; s += T(lx, ly, label, size||11, side === "r" ? "start" : "end"); }
+  return s;
+}
+function geometry(roof, v, x0, x1, top, bot){
+  // the roof's elevation above its walls (the "petit rectangle" that says the roof is up in the air); true slopes, the building narrowed and centred where the roof would not fit
+  var s = "", wall = bot, minWall = Math.max(12, (bot - top)*0.24), avail = bot - top - minWall - 2;
+  function deg(a){ return Math.max(0, Math.min(89, a)); }
+  function fit(hFull, span){ var k = hFull > avail ? avail/hFull : 1, cx = (x0 + x1)/2, w = span*k; var h = hFull*k, wy = Math.min(bot - minWall, Math.max(top + h + 2, top + (bot - top)*0.42)); return {a:cx - w/2, b:cx + w/2, h:h, wy:wy, w:w}; }
+  var span = x1 - x0;
+  if (roof === "flat"){
+    var wy = top + (bot - top)*0.42;
+    s += L(x0, wy, x1, wy, INK, 1.4) + L(x0, wy, x0, wall, GREY) + L(x1, wy, x1, wall, GREY) + L(x0, wall, x1, wall, GREY);
+    if (v.dims) s += T((x0+x1)/2, wy - 6, v.dims, 10.5, "middle");
+    v._x0 = x0; v._x1 = x1;
+  } else if (roof === "mono"){
+    var tn = Math.tan(deg(v.a1)*Math.PI/180), g = fit(tn*span, span);
+    s += L(g.a, g.wy, g.b, g.wy - g.h, INK, 1.4) + L(g.a, g.wy, g.a, wall, GREY) + L(g.b, g.wy - g.h, g.b, wall, GREY) + L(g.a, wall, g.b, wall, GREY);
+    s += L(g.a, g.wy, g.a + (v.ar ? v.ar*1.6 : 34), g.wy, INK, 0.8) + arcAngle(g.a, g.wy, v.ar || 22, 0, deg(v.a1), v.la, "r");
+    v._x0 = g.a; v._x1 = g.b;
+  } else if (roof === "duo"){
+    var t1 = Math.tan(deg(v.a1)*Math.PI/180), t2 = Math.tan(deg(v.a2)*Math.PI/180), f = (t1 + t2) ? t2/(t1 + t2) : 0.5, g = fit(t1*f*span, span), xr = g.a + g.w*f;
+    s += PL([[g.a, g.wy],[xr, g.wy - g.h],[g.b, g.wy]], INK, 1.4) + L(g.a, g.wy, g.a, wall, GREY) + L(g.b, g.wy, g.b, wall, GREY) + L(g.a, wall, g.b, wall, GREY);
+    s += L(g.a, g.wy, g.a + (v.ar ? v.ar*1.6 : 34), g.wy, INK, 0.8) + arcAngle(g.a, g.wy, v.ar || 22, 0, deg(v.a1), v.l1, "r");
+    s += L(g.b - (v.ar ? v.ar*1.6 : 34), g.wy, g.b, g.wy, INK, 0.8) + arcAngle(g.b, g.wy, v.ar || 22, 180, 180 - deg(v.a2), v.l2, "l");
+    v._x0 = g.a; v._xr = xr; v._x1 = g.b;
+  } else if (roof === "shed"){
+    // two sheds: the steep side α₁ rises from the valley, the long side α₂ falls to the next valley
+    var t1 = Math.tan(deg(v.a1)*Math.PI/180), t2 = Math.tan(deg(v.a2)*Math.PI/180), f = (t1 + t2) ? t2/(t1 + t2) : 0.5, g = fit(t1*f*span/2, span), w = g.w/2, d = w*f;
+    var pts = [];
+    for (var i = 0; i < 2; i++){ var vx = g.a + i*w; pts.push([vx, g.wy]); pts.push([vx + d, g.wy - g.h]); }
+    pts.push([g.b, g.wy]);
+    s += L(g.a - 16, g.wy - g.h*0.5, g.a, g.wy, INK, 0.9, "2 2") + L(g.b, g.wy, g.b + 14, g.wy - g.h*0.6, INK, 0.9, "2 2");
+    s += PL(pts, INK, 1.4);
+    for (i = 0; i <= 2; i++) s += L(g.a + i*w, g.wy, g.a + i*w, wall, GREY);
+    s += L(g.a - 14, wall, g.b + 14, wall, GREY, 1, "2 2") + L(g.a, wall, g.b, wall, GREY);
+    s += L(g.a, g.wy, g.a + (v.ar ? v.ar*1.6 : 30), g.wy, INK, 0.8) + arcAngle(g.a, g.wy, v.ar || 18, 0, deg(v.a1), v.l1, "r", 10.5);
+    s += L(g.b - (v.ar ? v.ar*1.6 : 30), g.wy, g.b, g.wy, INK, 0.8) + arcAngle(g.b, g.wy, v.ar || 18, 180, 180 - deg(v.a2), v.l2, "l", 10.5);
+    v._x0 = g.a; v._w = w; v._d = d; v._x1 = g.b;
+  } else {
+    // the curved roof: a semicircle over the walls, the chords, α and α₀ = 60°
+    var r = Math.min(span/2, avail), cx = (x0 + x1)/2, xa = cx - r, xb = cx + r, cy = Math.min(bot - minWall, top + r + 2);
+    s += '<path d="M'+xa.toFixed(1)+','+cy.toFixed(1)+' A'+r+','+r+' 0 0 1 '+xb.toFixed(1)+','+cy.toFixed(1)+'" fill="none" stroke="'+INK+'" stroke-width="1.4"/>';
+    var x60 = cx - r*Math.cos(30*Math.PI/180), y60 = cy - r*Math.sin(30*Math.PI/180); // where the slope is 60°
+    s += L(xa, cy, xb, cy, INK, 0.8) + L(xa, wall, xb, wall, GREY) + L(xa, cy, xa, wall, GREY) + L(xb, cy, xb, wall, GREY);
+    s += L(x60, y60, x60, wall, GREY, 0.8, "3 2") + L(2*cx - x60, y60, 2*cx - x60, wall, GREY, 0.8, "3 2");
+    s += PL([[x60, y60],[cx, cy - r],[2*cx - x60, y60]], INK, 0.8, "2 2") + L(xa, cy, cx, cy - r, INK, 0.6, "2 2");
+    s += arcAngle(x60, y60, v.ar || 16, 0, 60, v.l0 || "α₀", "r", 10.5) + L(x60, y60, x60 + 22, y60, INK, 0.6, "2 2");
+    s += arcAngle(xa, cy, v.ar || 22, 0, Math.min(89, v.a1), v.la, "r", 10.5);
+    v._x60 = x60; v._cx = cx; v._r = r; v._x0 = xa; v._x1 = xb;
+  }
+  return s;
+}
+function blockLabel(x, y, s, anchor){ return T(x, y - 3, s, 10.5, anchor || "start"); }
+function fig3(roof, res, opts){
+  opts = opts || {};
+  var W0 = opts.w || 400, lab = 108, x0 = lab + 18, x1 = W0 - 16;
+  var hasM2 = roof !== "flat", m2rows = (roof === "duo" || roof === "curved") ? 2 : 1;
+  var gH = 150, m1H = 70, m2H = hasM2 ? 76*m2rows : 30, fH = 26, H = gH + m1H + m2H + fH;
+  var s = '<rect x="0" y="0" width="'+W0+'" height="'+H+'" fill="#fff"/>';
+  // the table of the figure
+  s += L(lab, 0, W0 - 0.5, 0, INK, 0.8) + L(lab, 0, lab, H, INK, 0.8) + L(W0 - 0.5, 0, W0 - 0.5, H, INK, 0.8);
+  s += L(0, gH, W0, gH, INK, 0.8) + L(0, gH + m1H, W0, gH + m1H, INK, 0.8) + L(0, gH + m1H + m2H, W0, gH + m1H + m2H, INK, 0.8) + L(0, H - 0.5, W0, H - 0.5, INK, 0.8) + L(0.5, gH, 0.5, H, INK, 0.8);
+  s += T(8, gH + m1H/2 + 4, t("lm1"), 10) + T(8, gH + m1H + m2H/2 + 4, t("lm2"), 10);
+  var a1 = num(S.a1) || 0, a2 = num(S.a2) || 0;
+  var v = {a1: a1, a2: a2, l0: "α₀ = 60°",
+    l1: "α₁ = " + f0(a1) + "°", l2: "α₂ = " + f0(a2) + "°", la: "α = " + f0(a1) + "°", dims: "L = " + String(Math.round((num(S.L)||0)*100)/100) + " m · B = " + String(Math.round((num(S.B)||0)*100)/100) + " m"};
+  if (opts.v) for (var k in opts.v) v[k] = opts.v[k];
+  s += geometry(roof, v, x0, x1, 12, gH - 10);
+  var mu = res && res.mu, ok = !!mu;
+  function M(name){ return ok && mu[name] ? mu[name].v : 0.8; }
+  function lbl(sym, val){ return ok ? sym + " = " + f2(val) : sym; }
+  var maxmu = 0.8; if (ok) for (var n in mu) maxmu = Math.max(maxmu, mu[n].v);
+  function rowScale(h){ return (h - 26)/Math.max(maxmu, 0.8); }
+  // model 1
+  var b1 = gH + m1H - 12, u1 = rowScale(m1H), base = function(y){ return L(x0 - 8, y, x1 + 8, y, GREY, 2); };
+  var bx0 = v._x0, bx1 = v._x1;
+  if (roof === "curved"){ bx0 = v._x60; bx1 = 2*v._cx - v._x60; }
+  s += base(b1);
+  if (roof === "flat" || roof === "mono"){ var m = M("mu_1"); s += R(bx0, b1 - m*u1, bx1 - bx0, m*u1) + blockLabel(bx1 - 2, b1 - m*u1, lbl("μ₁", m), "end"); }
+  else if (roof === "duo"){ var xr = v._xr, m11 = M("mu_11"), m12 = M("mu_12");
+    s += R(bx0, b1 - m11*u1, xr - bx0, m11*u1) + R(xr, b1 - m12*u1, bx1 - xr, m12*u1);
+    s += blockLabel(bx0 + 2, b1 - m11*u1, lbl("μ₁₁", m11)) + blockLabel(bx1 - 2, b1 - m12*u1, lbl("μ₁₂", m12), "end"); }
+  else if (roof === "shed"){ var w = v._w, d = v._d, m11 = M("mu_11"), m12 = M("mu_12");
+    for (var i = 0; i < 2; i++){ var vx = bx0 + i*w; s += R(vx, b1 - m11*u1, d, m11*u1) + R(vx + d, b1 - m12*u1, w - d, m12*u1); }
+    s += blockLabel(bx0, b1 - Math.max(m11, m12)*u1 - 11, lbl("μ₁₁", m11)) + blockLabel(bx0 + w - 2, b1 - m12*u1, lbl("μ₁₂", m12), "end"); }
+  else { s += R(bx0, b1 - 0.8*u1, bx1 - bx0, 0.8*u1) + blockLabel(bx1 - 2, b1 - 0.8*u1, "0.80", "end"); }
+  // model 2
+  var y2 = gH + m1H;
+  if (!hasM2){ s += T((x0 + x1)/2, y2 + 19, t("one"), 10.5, "middle", ' font-style="italic"'); }
+  else if (roof === "mono"){ var b = y2 + m2H - 12, u = rowScale(m2H), m = M("mu_1"); s += base(b) + R(bx0, b - m/2*u, bx1 - bx0, m/2*u) + blockLabel(bx1 - 2, b - m/2*u, lbl("μ₁/2", m/2), "end"); }
+  else if (roof === "duo"){ var xr = v._xr, m11 = M("mu_11"), m12 = M("mu_12"), rows = [[m11/2, m12, "μ₁₁/2", "μ₁₂"],[m11, m12/2, "μ₁₁", "μ₁₂/2"]];
+    rows.forEach(function(r, j){ var b = y2 + 76*(j+1) - 12, u = rowScale(76); s += base(b) + R(bx0, b - r[0]*u, xr - bx0, r[0]*u) + R(xr, b - r[1]*u, bx1 - xr, r[1]*u) + blockLabel(bx0 + 2, b - r[0]*u, lbl(r[2], r[0])) + blockLabel(bx1 - 2, b - r[1]*u, lbl(r[3], r[1]), "end"); }); }
+  else if (roof === "shed"){ var w = v._w, d = v._d, m11 = M("mu_11"), m12 = M("mu_12"), m2m = M("mu_2m"), b = y2 + m2H - 12, u = rowScale(m2H);
+    var vx1 = bx0 + w;
+    s += base(b) + R(bx0, b - m11*u, d, m11*u);
+    s += P([[x0 + d, b],[vx1, b - m2m*u],[vx1, b]], INK, 1, "#fff") + P([[vx1, b],[vx1, b - m2m*u],[vx1 + d, b - m12*u],[vx1 + d, b]], INK, 1, "#fff") + R(vx1 + d, b - m12*u, w - d, m12*u);
+    s += blockLabel(bx0, b - m11*u, lbl("μ₁₁", m11)) + blockLabel(vx1 + 3, b - m2m*u, lbl("μ₂ₘ", m2m)) + blockLabel(bx1 - 2, b - m12*u, lbl("μ₁₂", m12), "end"); }
+  else { var m3 = M("mu_3"), cx = v._cx, xa = bx0, xb = bx1, rows = [[m3/2, m3, "μ₃/2", "μ₃"],[m3, m3/2, "μ₃", "μ₃/2"]];
+    rows.forEach(function(r, j){ var b = y2 + 76*(j+1) - 12, u = rowScale(76), la = (xa + cx)/2, rb = (cx + xb)/2;
+      s += base(b) + P([[xa, b],[la, b - r[0]*u],[cx, b]], INK, 1, "#fff") + L(la, b, la, b - r[0]*u) + P([[cx, b],[rb, b - r[1]*u],[xb, b]], INK, 1, "#fff") + L(rb, b, rb, b - r[1]*u);
+      s += blockLabel(la + 3, b - r[0]*u, lbl(r[2], r[0])) + blockLabel(rb + 3, b - r[1]*u, lbl(r[3], r[1])); }); }
+  // the definitions row, with the values
+  var fy = H - 9, foot = "";
+  if (roof === "flat") foot = ok ? "μ₁ = " + f2(M("mu_1")) + (mu.mu_1.why === "fig4" ? "  (figure 4)" : "  (figure 2, α = 0°)") : "μ₁";
+  else if (roof === "mono") foot = "μ₁ = μ₁(α) = " + (ok ? f2(M("mu_1")) : "—");
+  else if (roof === "duo") foot = "μ₁₁ = μ₁(α₁) = " + (ok ? f2(M("mu_11")) : "—") + "  ·  μ₁₂ = μ₁(α₂) = " + (ok ? f2(M("mu_12")) : "—");
+  else if (roof === "shed") foot = "μ₂ₘ = μ₂·((α₁ + α₂)/2) = " + (ok ? f2(M("mu_2m")) : "—");
+  else foot = "μ₃ = μ₃(α) = " + (ok ? f2(M("mu_3")) : "—") + "  ·  α₀ = 60°";
+  s += T((lab + W0)/2, fy, foot, 10.5, "middle");
+  return svg(W0, H, s);
+}
+function tileIcon(roof){
+  var v = {a1:30, a2:30, l1:"α₁", l2:"α₂", la:"α", l0:"α₀", dims:"", ar:10};
+  if (roof === "shed"){ v.a1 = 55; v.a2 = 20; }
+  return svg(98, 64, '<rect width="98" height="64" fill="#fff"/>' + geometry(roof, v, 14, 84, 4, 58).replace(/font-size="1[01](\.5)?"/g, 'font-size="9"'));
+}
+function fig2(opts){
+  // Figure 2 drawn by Woodcore from calc/norms (the same polylines the calculation reads), black and white, with the case's slopes marked
+  opts = opts || {};
+  var W0 = opts.w || 400, H = opts.h || 250, l = 34, r = 14, tp = 12, b = 30, X = function(a){ return l + a/70*(W0 - l - r); }, Y = function(m){ return tp + (2.4 - m)/2.4*(H - tp - b); };
+  var s = '<rect width="'+W0+'" height="'+H+'" fill="#fff"/>';
+  for (var a = 0; a <= 70; a += 10){ s += L(X(a), Y(0), X(a), Y(2.4), "#bbb", 0.6, "2 2") + T(X(a), H - b + 14, String(a), 10, "middle"); }
+  for (var m = 0; m <= 2.4001; m += 0.4){ s += L(X(0), Y(m), X(70), Y(m), "#bbb", 0.6, "2 2") + T(l - 5, Y(m) + 3.5, m.toFixed(1).replace(".", lang === "en" ? "." : ","), 10, "end"); }
+  s += '<rect x="'+X(0)+'" y="'+Y(2.4)+'" width="'+(X(70)-X(0))+'" height="'+(Y(0)-Y(2.4))+'" fill="none" stroke="'+INK+'" stroke-width="0.9"/>';
+  s += T(W0 - r, H - 4, "α " + (lang === "de" ? "in" : lang === "en" ? "in" : "en") + " °", 10, "end") + T(l - 10, tp - 2, "μ", 11);
+  function poly(pts){ return PL(pts.map(function(p){ return [X(p[0]), Y(p[1])]; }), INK, 1.3); }
+  s += poly([[0,0.8],[30,0.8],[60,0]]) + poly([[0,0.8],[30,1.6],[70,1.6]]) + poly([[0,0.2],[20,2.0],[45,2.0]]);
+  s += T(X(51), Y(0.42), "μ₁", 11) + T(X(64), Y(1.66), "μ₂", 11) + T(X(42), Y(2.06), "μ₃", 11);
+  var marks = [];
+  if (S.roof === "duo" || S.roof === "shed"){ marks.push(["α₁", num(S.a1)]); marks.push(["α₂", num(S.a2)]); }
+  else if (S.roof === "mono" || S.roof === "curved") marks.push(["α", num(S.a1)]);
+  else marks.push(["α", 0]);
+  var hind = S.slide === "hindered";
+  marks.forEach(function(mk, i){ if (mk[1] === null || mk[1] < 0 || mk[1] > 70) return; var a = mk[1];
+    var m = S.roof === "curved" ? curve(MU3, a) : (hind ? 0.8 : curve(MU1, a));
+    s += L(X(a), Y(0), X(a), Y(m), INK, 0.8, "3 2") + '<circle cx="'+X(a).toFixed(1)+'" cy="'+Y(m).toFixed(1)+'" r="4" fill="'+INK+'"/>';
+    s += T(X(a) + 6, Y(m) - 6 - i*13, mk[0] + " = " + f0(a) + "° → " + (S.roof === "curved" ? "μ₃" : "μ₁") + " = " + f2(m), 10.5, "start", ' font-weight="bold"'); });
+  s += '<g class="xh"></g>';
+  return svg(W0, H, s);
+}
+
+/* ---------------- the form ---------------- */
+var $ = function(id){ return document.getElementById(id); };
+function renderTiles(){
+  var box = $("tiles"); box.innerHTML = "";
+  ["flat","mono","duo","shed","curved"].forEach(function(r){
+    var b = document.createElement("button"); b.type = "button"; b.className = "tile" + (S.roof === r ? " on" : ""); b.dataset.roof = r;
+    b.innerHTML = '<span class="pic">' + tileIcon(r) + '</span><span>' + t(r) + '</span><span class="i" data-norm="roof_' + r + '" role="button" tabindex="0">i</span>';
+    b.addEventListener("click", function(ev){ if (ev.target.closest(".i")) return; S.roof = r; update(true); });
+    box.appendChild(b);
+  });
+}
+function renderRoofFields(){
+  var f = $("roofFields"), h = "";
+  function field(id, label, val, unit, norm){ return '<span class="lab"><span>' + label + '</span>' + (norm ? '<button class="i" type="button" data-norm="' + norm + '">i</button>' : '') + '</span><input class="inp num" id="' + id + '" type="number" value="' + esc(val) + '"><span class="unit">' + unit + '</span>'; }
+  if (S.roof === "flat") h = '<div class="row"><span class="muted small">' + esc(t("flatLB")) + '</span></div>';
+  else if (S.roof === "mono" || S.roof === "curved") h = '<div class="row">' + field("f_a1", t("a"), S.a1, "°", "alpha") + '</div>';
+  else h = '<div class="row">' + field("f_a1", t("a1"), S.a1, "°", "alpha") + '<span style="width:14px"></span>' + field("f_a2", t("a2"), S.a2, "°") + '</div>';
+  f.innerHTML = h;
+  ["f_a1","f_a2"].forEach(function(id){ var e = $(id); if (e) e.addEventListener("input", function(){ S[id.slice(2)] = e.value; update(); }); });
+  bindNorm(f);
+}
+function fillForm(){
+  $("f_L").value = S.L; $("f_B").value = S.B;
+  $("f_name").value = S.name; $("f_id").value = S.id; $("f_h0").value = S.h0; $("f_dh").value = String(S.dh); $("f_ct").value = typeof S.ct === "number" ? S.ct.toFixed(2) : S.ct;
+  document.querySelectorAll("#f_ce button").forEach(function(b){ b.classList.toggle("on", S.ce === b.dataset.ce); });
+  $("f_ce_free").classList.toggle("on", S.ce === "free"); $("f_ce_val").value = S.ceFree;
+  document.querySelectorAll("#f_slide button").forEach(function(b){ b.classList.toggle("on", S.slide === b.dataset.v); });
+  $("f_step").checked = !!S.step;
+  renderTiles(); renderRoofFields();
+}
+function words(){
+  document.querySelectorAll("[data-t]").forEach(function(e){ e.innerHTML = t(e.dataset.t); });
+  document.documentElement.lang = lang;
+}
+["f_L","f_B"].forEach(function(id){ $(id).addEventListener("input", function(e){ S[id.slice(2)] = e.target.value; update(); }); });
+$("f_name").addEventListener("input", function(e){ S.name = e.target.value; $("listName").textContent = S.name || "—"; });
+$("f_id").addEventListener("input", function(e){ S.id = e.target.value; update(); });
+$("f_h0").addEventListener("input", function(e){ S.h0 = e.target.value; update(); });
+$("f_dh").addEventListener("change", function(e){ S.dh = parseInt(e.target.value, 10); update(); });
+$("f_ct").addEventListener("input", function(e){ S.ct = e.target.value; update(); });
+document.querySelectorAll("#f_ce button").forEach(function(b){ b.addEventListener("click", function(){ S.ce = b.dataset.ce; fillForm(); update(); }); });
+$("f_ce_val").addEventListener("focus", function(){ if (S.ce !== "free"){ S.ce = "free"; document.querySelectorAll("#f_ce button").forEach(function(b){ b.classList.remove("on"); }); $("f_ce_free").classList.add("on"); update(); } });
+$("f_ce_val").addEventListener("input", function(e){ S.ce = "free"; S.ceFree = e.target.value; update(); });
+document.querySelectorAll("#f_slide button").forEach(function(b){ b.addEventListener("click", function(){ S.slide = b.dataset.v; fillForm(); update(); }); });
+$("f_step").addEventListener("change", function(e){ S.step = e.target.checked; update(); });
+$("b_save").addEventListener("click", function(){ toast(esc(t("proto"))); });
+$("b_revert").addEventListener("click", function(){ for (var k in PRESETS.base) S[k] = PRESETS.base[k]; S.name = "Toiture principale"; fillForm(); update(true); });
+
+/* ---------------- the modules of the right pane ---------------- */
+var MODS = [];           // {key, kind, title(), collapsed, norm}
+var DEFAULT = [{key:"state", kind:"state"},{key:"res", kind:"res"},{key:"fig", kind:"fig"},{key:"fig2", kind:"fig2", collapsed:true}];
+var STORE = "woodcore-snow-modules-v4";
+// for the prototype's own renders: the one column of figure 3 for a state, as the report would print it
+window.__fig = function(st, w){ var keep = JSON.parse(JSON.stringify(S)); Object.assign(S, st); var out = fig3(S.roof, compute(), {w: w || 400}); Object.assign(S, keep); return out; };
+function saveLayout(){ try { localStorage.setItem(STORE, JSON.stringify(MODS.map(function(m){ return {key:m.key, kind:m.kind, collapsed:!!m.collapsed, norm:m.norm}; }))); } catch (e) {} }
+function loadLayout(){ try { var v = JSON.parse(localStorage.getItem(STORE) || "null"); if (Array.isArray(v) && v.length) return v; } catch (e) {} return null; }
+var stepOpen = {sk:true};
+function modTitle(m){
+  if (m.kind === "state") return t("m_state");
+  if (m.kind === "res") return t("m_res");
+  if (m.kind === "fig") return t("m_fig");
+  if (m.kind === "fig2") return t("m_fig2");
+  if (m.kind === "combo"){ var ls = FIELD_NORM[m.norm] || [m.norm]; return "SIA 261 · " + ls.map(function(k){ return refOf(N[k]); }).join(" + ") + " · " + N[ls[0]].title[lang]; }
+  var e = N[m.norm]; return "SIA 261 · " + refOf(e) + " · " + e.title[lang];
+}
+var R0 = null;
+function modSummary(m){
+  if (m.kind === "state"){ if (!R0) return ""; var e = R0.errs.length, i = R0.infos.length; return e ? e + " " + t("s_err") + (i ? " · " + i + " " + t("s_info") : "") : t("s_ok") + (i ? " · " + i + " " + t("s_info") : ""); }
+  if (m.kind === "res"){ if (!R0 || !R0.ok) return "—"; var q = R0.q[0]; return q.sym + " = " + f2(q.v) + " kN/m²"; }
+  if (m.kind === "fig") return t(S.roof);
+  if (m.kind === "fig2") return "";
+  return "";
+}
+function modBody(m, inWindow){
+  var r = R0;
+  if (m.kind === "state"){
+    var h = '<div class="stat">';
+    r.errs.forEach(function(x){ h += msg(x, "err", "!"); });
+    r.infos.forEach(function(x){ h += msg(x, "warn", "i"); });
+    if (r.ok) h += '<div class="st ok"><span class="ic">✓</span><span>' + esc(t("ok")) + '</span></div>';
+    return h + '</div>';
+  }
+  if (m.kind === "res") return resultsHTML(r);
+  if (m.kind === "fig") return '<div class="paperbox">' + fig3(S.roof, r, {w: inWindow ? 560 : 396}) + '</div>';
+  if (m.kind === "combo") return comboBody(m.norm, inWindow);
+  if (m.kind === "fig2") return '<div class="paperbox f2">' + fig2({w: inWindow ? 620 : 396, h: inWindow ? 380 : 250}) + '</div>';
+  return normBody(m.norm, inWindow);
+}
+function msg(x, cls, ic){
+  var text = esc(x.text).replace(/\(([0-9.]+)\)/, function(all, ref){ var key = ref.replace(/\./g, ""); return N[key] ? '(<button class="ref" type="button" data-norm-key="' + key + '" style="border:0;background:none;padding:0">' + ref + '</button>)' : all; });
+  return '<div class="st ' + cls + '" data-field="' + x.field + '"><span class="ic">' + ic + '</span><span>' + sub(text) + '</span></div>';
+}
+function resultsHTML(r){
+  if (!r.ok) return '<div class="muted">—</div>';
+  function step(key, head, f, norm){ return '<div class="step' + (stepOpen[key] ? "" : " closed") + '" data-step="' + key + '"><div class="h"><span class="caret">▸</span><span class="grow">' + head + '</span><button class="cref" type="button" data-norm="' + norm + '">' + normChip(norm) + '</button></div><div class="f">' + f + '</div></div>'; }
+  var h = '<div class="res">';
+  h += step("href", 'h<sub>ref</sub> = <b>' + f0(r.href) + ' m</b>', 'h<sub>ref</sub> = h<sub>0</sub> + Δh = ' + f0(num(S.h0)) + ' ' + (S.dh < 0 ? "− " + Math.abs(S.dh) : "+ " + S.dh) + ' = ' + f0(r.href) + ' m', "r_href");
+  h += step("sk", 's<sub>k</sub> = <b>' + f2(r.sk) + ' kN/m²</b>', 's<sub>k</sub> = [1 + (h<sub>ref</sub>/350)²] · 0.4 ≥ 0.9<br>= [1 + (' + f0(r.href) + '/350)²] · 0.4 = ' + f2((1 + Math.pow(r.href/350, 2))*0.4) + (r.floored ? ' &lt; 0.9 → 0.90' : ' ≥ 0.9') + ' kN/m²', "r_sk");
+  var names = {mu_1:"μ₁", mu_11:"μ₁₁", mu_12:"μ₁₂", mu_2m:"μ₂ₘ", mu_3:"μ₃"};
+  for (var n in r.mu){ var m = r.mu[n], src = n === "mu_2m" ? "μ₂" : n === "mu_3" ? "μ₃" : "μ₁";
+    var f = m.arg ? names[n] + " = " + src + "(" + m.arg + ")" + (S.slide === "hindered" && src === "μ₁" ? " · " + (lang === "de" ? "Abgleiten behindert (5.3.4)" : lang === "en" ? "sliding hindered (5.3.4)" : "glissement empêché (5.3.4)") + " → 0.80" : "") + " = " + f2(m.v) : (m.why === "fig4" ? names[n] + " = " + f2(m.v) + " (figure 4, max(L, B) = " + f0(Math.max(num(S.L), num(S.B))) + " m)" : names[n] + " = μ₁(0°) = " + f2(m.v));
+    h += step(n, names[n] + ' = <b>' + f2(m.v) + '</b>', f, "r_mu"); }
+  [1, 2].forEach(function(model){
+    var qs = r.q.filter(function(q){ return q.model === model; }); if (!qs.length) return;
+    h += '<div class="grp">' + t("lm" + model) + '</div>';
+    qs.forEach(function(q){ var sym = 'q<sub>' + q.sym.slice(2) + '</sub>';
+      h += step(q.sym, sym + ' = <b>' + f2(q.v) + ' kN/m²</b>', sym + ' = ' + q.musym + (q.half ? '/2' : '') + ' · C<sub>e</sub> · C<sub>T</sub> · s<sub>k</sub><br>= ' + f2(q.mu) + (q.half ? '/2' : '') + ' · ' + f2(r.ce) + ' · ' + f2(r.ct) + ' · ' + f2(r.sk) + ' = ' + f2(q.v) + ' kN/m²', "r_qk"); });
+  });
+  h += '</div><div class="resbar"><button type="button" data-act="unfold">' + esc(t("unfold")) + '</button><button type="button" data-act="fold">' + esc(t("fold")) + '</button><button type="button" data-act="copy">' + esc(t("copy")) + '</button></div>';
+  return h;
+}
+function normChip(key){ var list = FIELD_NORM[key] || [key]; var e = N[list[0]]; return esc(refOf(e)); }
+function normBody(key, big, bare){
+  // the words of the clause first, word for word, then its excerpt or figure under them (the engineer, 22.10.2026)
+  var e = N[key], ed = nl();
+  var meta = '<div class="normmeta"><span class="badge">SIA 261:2020 · ' + ed.toUpperCase() + '</span><span class="badge">' + esc(refOf(e)) + '</span><span class="badge">' + (lang === "de" ? "S." : "p.") + ' ' + e.page[ed] + '</span>' + (lang === "en" ? '<span class="badge fb">' + esc(t("fb")) + '</span>' : '') + '</div>';
+  var img = key === "annexD" ? "norm/" + ed + "-annexD.jpg" : "norm/" + ed + "-" + key + ".png";
+  var words = bare || e.figure ? '' : '<div class="normtxt">' + sub(esc(e.text[ed])) + '</div><div style="height:8px"></div>';
+  return meta + words + '<img class="normimg" src="' + img + '" alt="' + esc(refOf(e) + " — " + e.title[lang]) + '"' + (e.figure && !big ? ' style="max-height:' + (key === "fig3" ? 560 : 360) + 'px;width:auto;max-width:100%;margin:0 auto"' : '') + '>';
+}
+var VIEW = {};
+function comboBody(key, big){ return (FIELD_NORM[key] || [key]).map(function(k){ return normBody(k, big, !!BARE[key]); }).join('<div style="height:10px"></div>'); }
+function renderMods(){
+  R0 = compute();
+  var box = $("mods"); box.innerHTML = "";
+  MODS.forEach(function(m, i){
+    var el = document.createElement("section"); el.className = "mod" + (m.collapsed ? " collapsed" : ""); el.dataset.i = i;
+    var closable = m.kind === "norm" || m.kind === "combo";
+    el.innerHTML = '<div class="mh"><span class="grip" aria-hidden="true">⋮⋮</span><span class="mt">' + sub(esc(modTitle(m))) + '</span><span class="sum">' + sub(esc(modSummary(m))) + '</span>' +
+      '<button class="ib" type="button" data-act="col" title="' + esc(t("collapse")) + '">' + (m.collapsed ? "▸" : "▾") + '</button>' +
+      '<button class="ib" type="button" data-act="win" title="' + esc(t("win")) + '">⧉</button>' +
+      (closable ? '<button class="ib" type="button" data-act="close" title="' + esc(t("unpin")) + '">×</button>' : '') + '</div><div class="mb">' + modBody(m) + '</div>';
+    box.appendChild(el);
+  });
+  bindNorm(box);
+  wireFig2(box);
+  refreshWindows();
+}
+$("mods").addEventListener("click", function(ev){
+  var mod = ev.target.closest(".mod"); if (!mod) return; var m = MODS[+mod.dataset.i];
+  var act = ev.target.closest("[data-act]"), tab = ev.target.closest(".tabs button"), st = ev.target.closest(".st"), stepH = ev.target.closest(".step .h");
+  if (act){ var a = act.dataset.act;
+    if (a === "col"){ m.collapsed = !m.collapsed; saveLayout(); renderMods(); }
+    else if (a === "win") openModWindow(m);
+    else if (a === "close"){ MODS.splice(+mod.dataset.i, 1); saveLayout(); renderMods(); }
+    else if (a === "unfold" || a === "fold"){ document.querySelectorAll(".step").forEach(function(s){ stepOpen[s.dataset.step] = a === "unfold"; }); renderMods(); }
+    else if (a === "copy"){ var r = R0, txt = ["h_ref = " + f0(r.href) + " m", "s_k = " + f2(r.sk) + " kN/m²"].concat(Object.keys(r.mu).map(function(n){ return n + " = " + f2(r.mu[n].v); })).concat(r.q.map(function(q){ return q.sym + " = " + f2(q.v) + " kN/m²"; })).join("\n");
+      try { navigator.clipboard.writeText(txt).then(function(){ toast("✓"); }, function(){ toast(esc(txt).replace(/\n/g, "<br>")); }); } catch (e) { toast(esc(txt).replace(/\n/g, "<br>")); } }
+    return; }
+  if (tab){ VIEW[tab.parentNode.dataset.viewOf] = tab.dataset.v; renderMods(); return; }
+  if (ev.target.closest("[data-norm],[data-norm-key]")) return;
+  if (st && st.dataset.field){ var f = $(st.dataset.field); if (f){ f.focus(); f.classList.remove("flash"); void f.offsetWidth; f.classList.add("flash"); } return; }
+  if (stepH){ var s = stepH.parentNode; stepOpen[s.dataset.step] = s.classList.contains("closed"); s.classList.toggle("closed"); }
+});
+// drag and drop by the header, no arrows: pointer events, so that it works with a mouse, a pen or a finger
+var drag = null, mark = document.createElement("div"); mark.className = "drop-mark";
+$("mods").addEventListener("pointerdown", function(ev){ var mh = ev.target.closest(".mh"); if (!mh || ev.target.closest("button") || ev.button !== 0) return; var mod = mh.parentNode; drag = {i:+mod.dataset.i, y0:ev.clientY, mod:mod, on:false}; try { mh.setPointerCapture(ev.pointerId); } catch (e) {} });
+$("mods").addEventListener("pointermove", function(ev){
+  if (!drag) return; if (!drag.on && Math.abs(ev.clientY - drag.y0) < 4) return;
+  drag.on = true; drag.mod.classList.add("dragging");
+  var box = $("mods"), mods = [].slice.call(box.querySelectorAll(".mod")), after = null;
+  for (var k = 0; k < mods.length; k++){ var rc = mods[k].getBoundingClientRect(); if (ev.clientY < rc.top + rc.height/2){ after = mods[k]; break; } }
+  if (after) box.insertBefore(mark, after); else box.appendChild(mark);
+  var br = box.getBoundingClientRect(); if (ev.clientY < br.top + 24) box.scrollTop -= 12; else if (ev.clientY > br.bottom - 24) box.scrollTop += 12;
+});
+function endDrag(){
+  if (!drag) return; var d = drag; drag = null; d.mod.classList.remove("dragging");
+  if (!d.on || !mark.parentNode){ mark.remove(); return; }
+  var kids = [].slice.call($("mods").children), pos = kids.indexOf(mark), before = kids.slice(0, pos).filter(function(c){ return c.classList.contains("mod"); }).length;
+  mark.remove(); var m = MODS.splice(d.i, 1)[0]; if (before > d.i) before--; MODS.splice(before, 0, m); saveLayout(); renderMods();
+}
+$("mods").addEventListener("pointerup", endDrag);
+$("mods").addEventListener("pointercancel", function(){ if (drag){ drag.on = false; } endDrag(); });
+
+// where a pin goes: under the results, after what is already pinned there, so that the pins keep the order they were made in
+function pinPlace(){ var i = MODS.findIndex(function(m){ return m.kind === "res"; }); if (i < 0) i = MODS.findIndex(function(m){ return m.kind === "state"; }); var at = i + 1; while (at < MODS.length && (MODS[at].kind === "norm" || MODS[at].kind === "combo")) at++; return at; }
+function pinNorm(key){
+  var list = FIELD_NORM[key] || [key];
+  if (COMBO[key]){ if (!MODS.some(function(m){ return m.kind === "combo" && m.norm === key; })) MODS.splice(pinPlace(), 0, {key:"c" + key, kind:"combo", norm:key}); }
+  else list.forEach(function(k){ if (MODS.some(function(m){ return m.norm === k && m.kind === "norm"; })) return; MODS.splice(pinPlace(), 0, {key:"n" + k, kind:"norm", norm:k}); });
+  saveLayout(); renderMods(); hidePop(true);
+  var first = COMBO[key] ? key : list[0], el = [].slice.call(document.querySelectorAll(".mod")).find(function(e){ return MODS[+e.dataset.i].norm === first; });
+  if (el){ el.scrollIntoView({block:"nearest"}); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+}
+
+/* ---------------- the hover bubble ---------------- */
+var pop = $("pop"), showT = null, hideT = null, popKey = null, popIdx = 0, anchor = null;
+function bindNorm(root){
+  root.querySelectorAll("[data-norm],[data-norm-key]").forEach(function(el){
+    if (el._bound) return; el._bound = true;
+    var key = el.dataset.norm || el.dataset.normKey;
+    el.addEventListener("mouseenter", function(){ clearTimeout(hideT); clearTimeout(showT); showT = setTimeout(function(){ showPop(key, el); }, 350); });
+    el.addEventListener("mouseleave", function(){ clearTimeout(showT); hideT = setTimeout(hidePop, 250); });
+    el.addEventListener("focus", function(){ showPop(key, el); });
+    el.addEventListener("blur", function(){ hideT = setTimeout(hidePop, 250); });
+    el.addEventListener("click", function(ev){ ev.preventDefault(); ev.stopPropagation(); if (ev.ctrlKey || ev.metaKey) openNorm(currentEntry(key)); else pinNorm(key); });
+    el.addEventListener("keydown", function(ev){ if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); if (ev.ctrlKey || ev.metaKey) openNorm(currentEntry(key)); else pinNorm(key); } });
+  });
+}
+function currentEntry(key){ var list = FIELD_NORM[key] || [key]; return list[popKey === key ? popIdx : 0]; }
+function showPop(key, el){
+  if (popKey !== key) popIdx = 0;
+  popKey = key; anchor = el;
+  var list = FIELD_NORM[key] || [key], k = list[popIdx], e = N[k], ed = nl();
+  if (COMBO[key]){ k = list[0]; e = N[k]; }
+  var tabs = list.length > 1 && !COMBO[key] ? '<span class="tabs" id="popTabs">' + list.map(function(x, i){ return '<button type="button" data-i="' + i + '" class="' + (i === popIdx ? "on" : "") + '">' + esc(refOf(N[x])) + '</button>'; }).join("") + '</span>' : '';
+  pop.innerHTML = '<div class="ph"><b>' + sub(esc(e.title[lang])) + '</b>' + tabs + '</div><div class="body">' + (COMBO[key] ? comboBody(key) : normBody(k)) + '</div><div class="foot"><span>' + esc(t("pin")) + '</span><span>' + esc(e.web ? t("openweb") : t("open", {p:e.page[ed]})) + '</span></div>';
+  pop.hidden = false;
+  // the bubble goes where there is more room, below or above, and scrolls inside rather than cover what it explains
+  var rc = el.getBoundingClientRect(), below = window.innerHeight - rc.bottom - 20, above = rc.top - 20, up = above > below && pop.offsetHeight > below;
+  var bd = pop.querySelector(".body"), chrome = pop.offsetHeight - bd.offsetHeight;
+  bd.style.maxHeight = Math.max(120, Math.min(440, (up ? above : below) - chrome)) + "px";
+  var pw = pop.offsetWidth, ph = pop.offsetHeight, x = rc.left - 20, y = up ? rc.top - ph - 8 : rc.bottom + 8;
+  if (x + pw > window.innerWidth - 12) x = window.innerWidth - 12 - pw; if (x < 12) x = 12; if (y < 12) y = 12;
+  pop.style.left = x + "px"; pop.style.top = y + "px";
+  var tb = $("popTabs"); if (tb) tb.querySelectorAll("button").forEach(function(b){ b.addEventListener("click", function(ev){ ev.stopPropagation(); popIdx = +b.dataset.i; showPop(key, anchor); }); });
+  pop.querySelectorAll(".tabs[data-view-of] button").forEach(function(b){ b.addEventListener("click", function(ev){ ev.stopPropagation(); VIEW[b.parentNode.dataset.viewOf] = b.dataset.v; showPop(key, anchor); renderMods(); }); });
+}
+function hidePop(now){ pop.hidden = true; if (now) popKey = null; }
+pop.addEventListener("mouseenter", function(){ clearTimeout(hideT); });
+pop.addEventListener("mouseleave", function(){ hideT = setTimeout(hidePop, 250); });
+pop.addEventListener("click", function(ev){ if (ev.target.closest("button")) return; var k = currentEntry(popKey); if (ev.ctrlKey || ev.metaKey) openNorm(k); else pinNorm(popKey); });
+
+/* ---------------- windows: a module, or the norm at its page ---------------- */
+var WINS = [], zTop = 60;
+function makeWindow(title, content, w, h, onZoom){
+  var el = document.createElement("div"); el.className = "wwin"; var n = WINS.length;
+  el.style.width = (w || 640) + "px"; el.style.height = (h || 480) + "px";
+  el.style.left = Math.max(12, Math.min(window.innerWidth - (w || 640) - 12, 120 + n*28)) + "px"; el.style.top = Math.max(12, Math.min(window.innerHeight - (h || 480) - 12, 90 + n*28)) + "px"; el.style.zIndex = ++zTop;
+  el.innerHTML = '<div class="wt"><span aria-hidden="true">◧</span><b></b><span class="z">100 %</span><button class="ib" type="button" data-z="-">−</button><button class="ib" type="button" data-z="0">⟲</button><button class="ib" type="button" data-z="+">+</button><button class="ib" type="button" data-z="x">×</button></div><div class="wc"><div class="zz"></div></div><div class="hint"></div>';
+  el.querySelector("b").textContent = "Woodcore — " + title; el.querySelector(".hint").textContent = t("zoomhint");
+  var zz = el.querySelector(".zz"), wc = el.querySelector(".wc"), z = 1;
+  if (typeof content === "string") zz.innerHTML = content; else zz.appendChild(content);
+  function setZ(v){ z = Math.max(0.25, Math.min(5, v)); zz.style.zoom = z; el.querySelector(".z").textContent = Math.round(z*100) + " %"; }
+  wc.addEventListener("wheel", function(ev){ if (!ev.ctrlKey && !ev.metaKey) return; ev.preventDefault(); var rc = wc.getBoundingClientRect(), mx = ev.clientX - rc.left + wc.scrollLeft, my = ev.clientY - rc.top + wc.scrollTop, old = z; setZ(z*(ev.deltaY < 0 ? 1.12 : 1/1.12)); wc.scrollLeft = mx*(z/old) - (ev.clientX - rc.left); wc.scrollTop = my*(z/old) - (ev.clientY - rc.top); }, {passive:false});
+  el.querySelector(".wt").addEventListener("click", function(ev){ var b = ev.target.closest("[data-z]"); if (!b) return; var a = b.dataset.z; if (a === "x"){ el.remove(); WINS = WINS.filter(function(x){ return x.el !== el; }); } else setZ(a === "0" ? 1 : z*(a === "+" ? 1.2 : 1/1.2)); });
+  var wt = el.querySelector(".wt"), dx = 0, dy = 0, drag = false;
+  wt.addEventListener("pointerdown", function(ev){ if (ev.target.closest("button")) return; drag = true; el.style.zIndex = ++zTop; dx = ev.clientX - el.offsetLeft; dy = ev.clientY - el.offsetTop; wt.setPointerCapture(ev.pointerId); });
+  wt.addEventListener("pointermove", function(ev){ if (!drag) return; el.style.left = Math.max(0, ev.clientX - dx) + "px"; el.style.top = Math.max(0, ev.clientY - dy) + "px"; });
+  wt.addEventListener("pointerup", function(){ drag = false; });
+  el.addEventListener("pointerdown", function(){ el.style.zIndex = ++zTop; });
+  document.body.appendChild(el);
+  var rec = {el:el, zz:zz, wc:wc, setZ:setZ}; WINS.push(rec); return rec;
+}
+function openModWindow(m){
+  var rec = makeWindow(modTitle(m), modBody(m, true), m.kind === "fig2" ? 680 : 640, m.kind === "fig" ? 620 : 480);
+  rec.mod = m; bindNorm(rec.zz); wireFig2(rec.zz);
+}
+function refreshWindows(){ WINS.forEach(function(w){ if (w.mod && w.mod.kind !== "norm"){ w.zz.innerHTML = modBody(w.mod, true); bindNorm(w.zz); wireFig2(w.zz); w.el.querySelector("b").textContent = "Woodcore — " + modTitle(w.mod); } }); }
+function openNorm(key){
+  var e = N[key], ed = nl();
+  hidePop(true);
+  // the snow map of 261.sia.ch, in the window's language, German where English is wanted (as for the norm)
+  if (e.web){ var url = e.web.replace("{l}", lang === "fr" ? "fr" : "de"), link = '<a href="' + url + '" target="_blank" rel="noopener">' + url.replace("https://", "") + '</a>'; toast(esc(t("web")) + " " + link); return; }
+  var file = "SIA261-2020-" + ed.toUpperCase() + ".pdf", p = e.page[ed], b = e.box[ed];
+  // the whole chapter 5 «Neige / Schnee», page after page, to scroll and read again (the engineer, 22.10.2026)
+  var pages = CHAPTER[ed], wrap = document.createElement("div"), PH = 842*PT, GAP = 12;
+  wrap.style.display = "flex"; wrap.style.flexDirection = "column"; wrap.style.gap = GAP + "px";
+  pages.forEach(function(n){ var pg = document.createElement("div"); pg.className = "pdfpage"; pg.innerHTML = '<img src="pages/' + ed + '-p' + n + '.jpg" alt="' + esc(file + " p. " + n) + '"><div class="pno">' + n + '</div>' + (n === p ? '<div class="hl" style="left:' + (b[0]*PT - 4).toFixed(0) + 'px;top:' + (b[1]*PT - 6).toFixed(0) + 'px;width:' + ((b[2]-b[0])*PT + 8).toFixed(0) + 'px;height:' + ((b[3]-b[1])*PT + 8).toFixed(0) + 'px"></div>' : ''); wrap.appendChild(pg); });
+  var idx = Math.max(0, pages.indexOf(p));
+  var rec = makeWindow(file + " — " + (lang === "de" ? "Kapitel 5 Schnee, S. " : lang === "en" ? "chapter 5 Snow, p. " : "chapitre 5 Neige, p. ") + pages[0] + "–" + pages[pages.length - 1] + " · " + refOf(e), wrap, 780, Math.min(window.innerHeight - 40, 780));
+  rec.setZ(0.72);
+  setTimeout(function(){ rec.wc.scrollTop = Math.max(0, ((PH + GAP)*idx + b[1]*PT + 12)*0.72 - 60); }, 30);
+}
+function wireFig2(root){
+  root.querySelectorAll(".f2 svg").forEach(function(sv){
+    if (sv._w) return; sv._w = true;
+    sv.addEventListener("mousemove", function(ev){
+      var rc = sv.getBoundingClientRect(), vb = sv.viewBox.baseVal, x = (ev.clientX - rc.left)/rc.width*vb.width, l = 34, r = 14, a = (x - l)/(vb.width - l - r)*70;
+      var g = sv.querySelector(".xh"); if (a < 0 || a > 70){ g.innerHTML = ""; return; }
+      var Y = function(m){ return 12 + (2.4 - m)/2.4*(vb.height - 12 - 30); };
+      var m1 = S.slide === "hindered" ? 0.8 : curve(MU1, a), m2 = curve(MU2, a), m3 = curve(MU3, a);
+      var bx = Math.min(x + 8, vb.width - 112);
+      g.innerHTML = L(x, Y(0), x, Y(2.4), "#e8841a", 1) + '<circle cx="' + x.toFixed(1) + '" cy="' + Y(m1).toFixed(1) + '" r="3" fill="#e8841a"/><circle cx="' + x.toFixed(1) + '" cy="' + Y(m2).toFixed(1) + '" r="3" fill="#e8841a"/><circle cx="' + x.toFixed(1) + '" cy="' + Y(m3).toFixed(1) + '" r="3" fill="#e8841a"/>'
+        + '<rect x="' + bx.toFixed(1) + '" y="16" width="104" height="70" fill="#fff" stroke="#999" stroke-width="0.6"/>' + T(bx + 8, 31, "α = " + f0(a) + "°", 11, "start", ' font-weight="bold"') + T(bx + 8, 47, "μ₁ = " + f2(m1), 10.5) + T(bx + 8, 62, "μ₂ = " + f2(m2), 10.5) + T(bx + 8, 77, "μ₃ = " + f2(m3), 10.5);
+    });
+    sv.addEventListener("mouseleave", function(){ var g = sv.querySelector(".xh"); if (g) g.innerHTML = ""; });
+  });
+}
+
+/* ---------------- toast, language, presets ---------------- */
+var toastT = null;
+function toast(html){ var el = $("toast"); el.innerHTML = html; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(function(){ el.hidden = true; }, 6000); }
+document.querySelectorAll("[data-lang]").forEach(function(b){ b.addEventListener("click", function(){ lang = b.dataset.lang; document.querySelectorAll("[data-lang]").forEach(function(x){ x.classList.toggle("on", x === b); }); words(); fillForm(); update(true); }); });
+document.querySelectorAll("[data-preset]").forEach(function(b){ b.addEventListener("click", function(){ var p = PRESETS[b.dataset.preset]; for (var k in p) S[k] = p[k]; fillForm(); update(true); }); });
+$("resetLayout").addEventListener("click", function(){ MODS = DEFAULT.map(function(m){ return Object.assign({}, m); }); saveLayout(); renderMods(); });
+
+function update(){
+  renderMods();
+  var q = R0.ok ? R0.q[0].v : null; $("listQ").textContent = q === null ? "—" : f2(q);
+  renderGallery();
+}
+function renderGallery(){
+  var g = $("gallery"); if (!g) return;
+  var keep = {}; for (var k in S) keep[k] = S[k];
+  var cases = [["flat", {L:30, B:25}], ["mono", {a1:20}], ["duo", {a1:30, a2:30}], ["shed", {a1:45, a2:15}], ["curved", {a1:30}]], html = "";
+  cases.forEach(function(c){ S.h0 = 850; S.dh = 0; S.ce = "1.0"; S.ct = 1.0; S.slide = "possible"; S.id = "X"; S.roof = c[0]; for (var k in c[1]) S[k] = c[1][k]; var r = compute(); html += '<figure><div class="paperbox">' + fig3(c[0], r, {w:380}) + '</div><figcaption>' + esc(t(c[0])) + '</figcaption></figure>'; });
+  S.roof = "duo"; S.a1 = 30; S.a2 = 20; var rr = compute(); var cmp = $("cmpDraw"); if (cmp) cmp.innerHTML = fig3("duo", rr, {w:400});
+  for (k in keep) S[k] = keep[k];
+  g.innerHTML = html;
+}
+
+/* ================= the Affichage mode: the roof's file as Typst prints it, and every line of it set in the right pane ================= */
+var D5 = {"h_0": {"w": 756, "h": 2396, "v": {"L1": [0, 27], "L1|display=none": [27, 0], "L1|display=variable": [27, 27], "L1|display=value": [54, 21], "L1|display=value-unit": [75, 21], "L1|display=variable-value-unit": [96, 27], "L1|style=normal": [123, 27], "L1|style=bold": [150, 27], "L1|style=underline": [177, 28], "L1|style=double": [205, 28], "L1|label-position=none": [233, 27], "L1|label-position=before": [260, 27], "L1|label-position=after": [287, 27], "L1|label-position=footnote": [314, 60], "L1|descr-position=none": [374, 27], "L1|descr-position=after": [401, 27], "L1|descr-position=footnote": [428, 60], "L1|norm-position=none": [488, 27], "L1|norm-position=in-line": [515, 27], "L1|norm-position=line-right": [542, 27], "L1|norm-position=footnote": [569, 60], "L2": [629, 27], "L2|display=none": [656, 0], "L2|display=variable": [656, 27], "L2|display=value": [683, 22], "L2|display=value-unit": [705, 22], "L2|display=variable-value-unit": [727, 27], "L2|style=normal": [754, 27], "L2|style=bold": [781, 27], "L2|style=underline": [808, 28], "L2|style=double": [836, 28], "L2|label-position=none": [864, 27], "L2|label-position=before": [891, 27], "L2|label-position=after": [918, 27], "L2|label-position=footnote": [945, 60], "L2|descr-position=none": [1005, 27], "L2|descr-position=after": [1032, 27], "L2|descr-position=footnote": [1059, 60], "L2|norm-position=none": [1119, 27], "L2|norm-position=in-line": [1146, 27], "L2|norm-position=line-right": [1173, 27], "L2|norm-position=footnote": [1200, 60], "L3": [1260, 60], "L3|display=none": [1320, 0], "L3|display=variable": [1320, 60], "L3|display=value": [1380, 59], "L3|display=value-unit": [1439, 59], "L3|display=variable-value-unit": [1498, 60], "L3|style=normal": [1558, 60], "L3|style=bold": [1618, 60], "L3|style=underline": [1678, 60], "L3|style=double": [1738, 60], "L3|label-position=none": [1798, 60], "L3|label-position=before": [1858, 60], "L3|label-position=after": [1918, 60], "L3|label-position=footnote": [1978, 62], "L3|descr-position=none": [2040, 27], "L3|descr-position=after": [2067, 27], "L3|descr-position=footnote": [2094, 60], "L3|norm-position=none": [2154, 60], "L3|norm-position=in-line": [2214, 60], "L3|norm-position=line-right": [2274, 60], "L3|norm-position=footnote": [2334, 62]}, "cmd": "var"}, "korrektur": {"w": 756, "h": 3768, "v": {"L1": [0, 22], "L1|display=none": [22, 0], "L1|display=variable": [22, 22], "L1|display=value": [44, 21], "L1|display=value-unit": [65, 21], "L1|display=variable-value-unit": [86, 22], "L1|style=normal": [108, 22], "L1|style=bold": [130, 22], "L1|style=underline": [152, 26], "L1|style=double": [178, 28], "L1|label-position=none": [206, 22], "L1|label-position=before": [228, 22], "L1|label-position=after": [250, 22], "L1|label-position=footnote": [272, 60], "L1|descr-position=none": [332, 22], "L1|descr-position=after": [354, 26], "L1|descr-position=footnote": [380, 134], "L1|norm-position=none": [514, 22], "L1|norm-position=in-line": [536, 22], "L1|norm-position=line-right": [558, 22], "L1|norm-position=footnote": [580, 60], "L2": [640, 22], "L2|display=none": [662, 0], "L2|display=variable": [662, 22], "L2|display=value": [684, 22], "L2|display=value-unit": [706, 22], "L2|display=variable-value-unit": [728, 22], "L2|style=normal": [750, 22], "L2|style=bold": [772, 22], "L2|style=underline": [794, 26], "L2|style=double": [820, 28], "L2|label-position=none": [848, 22], "L2|label-position=before": [870, 22], "L2|label-position=after": [892, 22], "L2|label-position=footnote": [914, 60], "L2|descr-position=none": [974, 22], "L2|descr-position=after": [996, 26], "L2|descr-position=footnote": [1022, 134], "L2|norm-position=none": [1156, 22], "L2|norm-position=in-line": [1178, 22], "L2|norm-position=line-right": [1200, 22], "L2|norm-position=footnote": [1222, 60], "L3": [1282, 134], "L3|display=none": [1416, 0], "L3|display=variable": [1416, 134], "L3|display=value": [1550, 134], "L3|display=value-unit": [1684, 134], "L3|display=variable-value-unit": [1818, 134], "L3|style=normal": [1952, 134], "L3|style=bold": [2086, 134], "L3|style=underline": [2220, 134], "L3|style=double": [2354, 134], "L3|label-position=none": [2488, 134], "L3|label-position=before": [2622, 134], "L3|label-position=after": [2756, 134], "L3|label-position=footnote": [2890, 134], "L3|descr-position=none": [3024, 22], "L3|descr-position=after": [3046, 50], "L3|descr-position=footnote": [3096, 134], "L3|norm-position=none": [3230, 134], "L3|norm-position=in-line": [3364, 134], "L3|norm-position=line-right": [3498, 134], "L3|norm-position=footnote": [3632, 136]}, "cmd": "var"}, "h_ref": {"w": 756, "h": 2430, "v": {"L1": [0, 27], "L1|display-formula=none": [27, 27], "L1|display-formula=variable": [54, 27], "L1|display-formula=value": [81, 27], "L1|display-formula=value-unit": [108, 27], "L1|display-formula=variable-value-unit": [135, 27], "L1|display-equation=none": [162, 0], "L1|display-equation=variable": [162, 27], "L1|display-equation=value": [189, 21], "L1|display-equation=value-unit": [210, 21], "L1|display-equation=variable-value-unit": [231, 27], "L1|style=normal": [258, 27], "L1|style=bold": [285, 27], "L1|style=underline": [312, 27], "L1|style=double": [339, 28], "L1|label-position=none": [367, 27], "L1|label-position=before": [394, 27], "L1|label-position=after": [421, 27], "L1|label-position=footnote": [448, 60], "L1|descr-position=none": [508, 27], "L1|descr-position=after": [535, 27], "L1|descr-position=footnote": [562, 27], "L1|norm-position=none": [589, 27], "L1|norm-position=in-line": [616, 27], "L1|norm-position=line-right": [643, 27], "L1|norm-position=footnote": [670, 60], "L1|unit=m": [730, 27], "L1|unit=cm": [757, 27], "L2": [784, 27], "L2|display-formula=none": [811, 27], "L2|display-formula=variable": [838, 27], "L2|display-formula=value": [865, 27], "L2|display-formula=value-unit": [892, 27], "L2|display-formula=variable-value-unit": [919, 27], "L2|display-equation=none": [946, 27], "L2|display-equation=variable": [973, 27], "L2|display-equation=value": [1000, 27], "L2|display-equation=value-unit": [1027, 27], "L2|display-equation=variable-value-unit": [1054, 27], "L2|style=normal": [1081, 27], "L2|style=bold": [1108, 27], "L2|style=underline": [1135, 27], "L2|style=double": [1162, 28], "L2|label-position=none": [1190, 27], "L2|label-position=before": [1217, 27], "L2|label-position=after": [1244, 27], "L2|label-position=footnote": [1271, 60], "L2|descr-position=none": [1331, 27], "L2|descr-position=after": [1358, 27], "L2|descr-position=footnote": [1385, 27], "L2|norm-position=none": [1412, 27], "L2|norm-position=in-line": [1439, 27], "L2|norm-position=line-right": [1466, 27], "L2|norm-position=footnote": [1493, 60], "L2|unit=m": [1553, 27], "L2|unit=cm": [1580, 27], "L3": [1607, 27], "L3|display-formula=none": [1634, 27], "L3|display-formula=variable": [1661, 27], "L3|display-formula=value": [1688, 27], "L3|display-formula=value-unit": [1715, 27], "L3|display-formula=variable-value-unit": [1742, 27], "L3|display-equation=none": [1769, 27], "L3|display-equation=variable": [1796, 27], "L3|display-equation=value": [1823, 27], "L3|display-equation=value-unit": [1850, 27], "L3|display-equation=variable-value-unit": [1877, 27], "L3|style=normal": [1904, 27], "L3|style=bold": [1931, 27], "L3|style=underline": [1958, 27], "L3|style=double": [1985, 28], "L3|label-position=none": [2013, 27], "L3|label-position=before": [2040, 27], "L3|label-position=after": [2067, 27], "L3|label-position=footnote": [2094, 60], "L3|descr-position=none": [2154, 27], "L3|descr-position=after": [2181, 27], "L3|descr-position=footnote": [2208, 27], "L3|norm-position=none": [2235, 27], "L3|norm-position=in-line": [2262, 27], "L3|norm-position=line-right": [2289, 27], "L3|norm-position=footnote": [2316, 60], "L3|unit=m": [2376, 27], "L3|unit=cm": [2403, 27]}, "cmd": "eq"}, "ce": {"w": 756, "h": 3228, "v": {"L1": [0, 27], "L1|display=none": [27, 0], "L1|display=variable": [27, 27], "L1|display=value": [54, 21], "L1|display=value-unit": [75, 21], "L1|display=variable-value-unit": [96, 27], "L1|style=normal": [123, 27], "L1|style=bold": [150, 27], "L1|style=underline": [177, 28], "L1|style=double": [205, 28], "L1|label-position=none": [233, 27], "L1|label-position=before": [260, 27], "L1|label-position=after": [287, 27], "L1|label-position=footnote": [314, 63], "L1|descr-position=none": [377, 27], "L1|descr-position=after": [404, 27], "L1|descr-position=footnote": [431, 101], "L1|norm-position=none": [532, 27], "L1|norm-position=in-line": [559, 27], "L1|norm-position=line-right": [586, 27], "L1|norm-position=footnote": [613, 60], "L2": [673, 27], "L2|display=none": [700, 0], "L2|display=variable": [700, 27], "L2|display=value": [727, 26], "L2|display=value-unit": [753, 26], "L2|display=variable-value-unit": [779, 27], "L2|style=normal": [806, 27], "L2|style=bold": [833, 27], "L2|style=underline": [860, 28], "L2|style=double": [888, 28], "L2|label-position=none": [916, 27], "L2|label-position=before": [943, 27], "L2|label-position=after": [970, 27], "L2|label-position=footnote": [997, 63], "L2|descr-position=none": [1060, 27], "L2|descr-position=after": [1087, 27], "L2|descr-position=footnote": [1114, 101], "L2|norm-position=none": [1215, 27], "L2|norm-position=in-line": [1242, 27], "L2|norm-position=line-right": [1269, 27], "L2|norm-position=footnote": [1296, 60], "L3": [1356, 101], "L3|display=none": [1457, 0], "L3|display=variable": [1457, 101], "L3|display=value": [1558, 101], "L3|display=value-unit": [1659, 101], "L3|display=variable-value-unit": [1760, 101], "L3|style=normal": [1861, 101], "L3|style=bold": [1962, 101], "L3|style=underline": [2063, 101], "L3|style=double": [2164, 101], "L3|label-position=none": [2265, 101], "L3|label-position=before": [2366, 101], "L3|label-position=after": [2467, 101], "L3|label-position=footnote": [2568, 101], "L3|descr-position=none": [2669, 27], "L3|descr-position=after": [2696, 27], "L3|descr-position=footnote": [2723, 101], "L3|norm-position=none": [2824, 101], "L3|norm-position=in-line": [2925, 101], "L3|norm-position=line-right": [3026, 101], "L3|norm-position=footnote": [3127, 101]}, "cmd": "var"}, "ct": {"w": 756, "h": 1817, "v": {"L1": [0, 27], "L1|display=none": [27, 0], "L1|display=variable": [27, 27], "L1|display=value": [54, 21], "L1|display=value-unit": [75, 21], "L1|display=variable-value-unit": [96, 27], "L1|style=normal": [123, 27], "L1|style=bold": [150, 27], "L1|style=underline": [177, 28], "L1|style=double": [205, 28], "L1|label-position=none": [233, 27], "L1|label-position=before": [260, 27], "L1|label-position=after": [287, 27], "L1|label-position=footnote": [314, 63], "L1|descr-position=none": [377, 27], "L1|descr-position=after": [404, 27], "L1|descr-position=footnote": [431, 27], "L1|norm-position=none": [458, 27], "L1|norm-position=in-line": [485, 27], "L1|norm-position=line-right": [512, 27], "L1|norm-position=footnote": [539, 60], "L2": [599, 27], "L2|display=none": [626, 0], "L2|display=variable": [626, 27], "L2|display=value": [653, 26], "L2|display=value-unit": [679, 26], "L2|display=variable-value-unit": [705, 27], "L2|style=normal": [732, 27], "L2|style=bold": [759, 27], "L2|style=underline": [786, 28], "L2|style=double": [814, 28], "L2|label-position=none": [842, 27], "L2|label-position=before": [869, 27], "L2|label-position=after": [896, 27], "L2|label-position=footnote": [923, 63], "L2|descr-position=none": [986, 27], "L2|descr-position=after": [1013, 27], "L2|descr-position=footnote": [1040, 27], "L2|norm-position=none": [1067, 27], "L2|norm-position=in-line": [1094, 27], "L2|norm-position=line-right": [1121, 27], "L2|norm-position=footnote": [1148, 60], "L3": [1208, 27], "L3|display=none": [1235, 0], "L3|display=variable": [1235, 27], "L3|display=value": [1262, 26], "L3|display=value-unit": [1288, 26], "L3|display=variable-value-unit": [1314, 27], "L3|style=normal": [1341, 27], "L3|style=bold": [1368, 27], "L3|style=underline": [1395, 28], "L3|style=double": [1423, 28], "L3|label-position=none": [1451, 27], "L3|label-position=before": [1478, 27], "L3|label-position=after": [1505, 27], "L3|label-position=footnote": [1532, 63], "L3|descr-position=none": [1595, 27], "L3|descr-position=after": [1622, 27], "L3|descr-position=footnote": [1649, 27], "L3|norm-position=none": [1676, 27], "L3|norm-position=in-line": [1703, 27], "L3|norm-position=line-right": [1730, 27], "L3|norm-position=footnote": [1757, 60]}, "cmd": "var"}, "dachform": {"w": 756, "h": 1858, "v": {"L1": [0, 26], "L1|display=none": [26, 0], "L1|display=variable": [26, 22], "L1|display=value": [48, 26], "L1|display=value-unit": [74, 26], "L1|display=variable-value-unit": [100, 26], "L1|style=normal": [126, 26], "L1|style=bold": [152, 26], "L1|style=underline": [178, 28], "L1|style=double": [206, 28], "L1|label-position=none": [234, 26], "L1|label-position=before": [260, 26], "L1|label-position=after": [286, 26], "L1|label-position=footnote": [312, 63], "L1|descr-position=none": [375, 26], "L1|descr-position=after": [401, 26], "L1|descr-position=footnote": [427, 26], "L1|norm-position=none": [453, 26], "L1|norm-position=in-line": [479, 26], "L1|norm-position=line-right": [505, 26], "L1|norm-position=footnote": [531, 63], "L2": [594, 26], "L2|display=none": [620, 0], "L2|display=variable": [620, 26], "L2|display=value": [646, 26], "L2|display=value-unit": [672, 26], "L2|display=variable-value-unit": [698, 26], "L2|style=normal": [724, 26], "L2|style=bold": [750, 26], "L2|style=underline": [776, 28], "L2|style=double": [804, 28], "L2|label-position=none": [832, 26], "L2|label-position=before": [858, 26], "L2|label-position=after": [884, 26], "L2|label-position=footnote": [910, 63], "L2|descr-position=none": [973, 26], "L2|descr-position=after": [999, 26], "L2|descr-position=footnote": [1025, 26], "L2|norm-position=none": [1051, 26], "L2|norm-position=in-line": [1077, 26], "L2|norm-position=line-right": [1103, 26], "L2|norm-position=footnote": [1129, 63], "L3": [1192, 26], "L3|display=none": [1218, 0], "L3|display=variable": [1218, 26], "L3|display=value": [1244, 26], "L3|display=value-unit": [1270, 26], "L3|display=variable-value-unit": [1296, 26], "L3|style=normal": [1322, 26], "L3|style=bold": [1348, 50], "L3|style=underline": [1398, 50], "L3|style=double": [1448, 50], "L3|label-position=none": [1498, 26], "L3|label-position=before": [1524, 26], "L3|label-position=after": [1550, 26], "L3|label-position=footnote": [1576, 63], "L3|descr-position=none": [1639, 26], "L3|descr-position=after": [1665, 26], "L3|descr-position=footnote": [1691, 26], "L3|norm-position=none": [1717, 26], "L3|norm-position=in-line": [1743, 26], "L3|norm-position=line-right": [1769, 26], "L3|norm-position=footnote": [1795, 63]}, "cmd": "var"}, "alpha_1": {"w": 756, "h": 1772, "v": {"L1": [0, 25], "L1|display=none": [25, 0], "L1|display=variable": [25, 22], "L1|display=value": [47, 21], "L1|display=value-unit": [68, 21], "L1|display=variable-value-unit": [89, 25], "L1|style=normal": [114, 25], "L1|style=bold": [139, 26], "L1|style=underline": [165, 27], "L1|style=double": [192, 27], "L1|label-position=none": [219, 25], "L1|label-position=before": [244, 27], "L1|label-position=after": [271, 27], "L1|label-position=footnote": [298, 60], "L1|descr-position=none": [358, 25], "L1|descr-position=after": [383, 25], "L1|descr-position=footnote": [408, 25], "L1|norm-position=none": [433, 25], "L1|norm-position=in-line": [458, 26], "L1|norm-position=line-right": [484, 25], "L1|norm-position=footnote": [509, 63], "L2": [572, 27], "L2|display=none": [599, 0], "L2|display=variable": [599, 27], "L2|display=value": [626, 22], "L2|display=value-unit": [648, 22], "L2|display=variable-value-unit": [670, 27], "L2|style=normal": [697, 27], "L2|style=bold": [724, 27], "L2|style=underline": [751, 28], "L2|style=double": [779, 28], "L2|label-position=none": [807, 25], "L2|label-position=before": [832, 27], "L2|label-position=after": [859, 27], "L2|label-position=footnote": [886, 60], "L2|descr-position=none": [946, 27], "L2|descr-position=after": [973, 27], "L2|descr-position=footnote": [1000, 27], "L2|norm-position=none": [1027, 27], "L2|norm-position=in-line": [1054, 27], "L2|norm-position=line-right": [1081, 27], "L2|norm-position=footnote": [1108, 63], "L3": [1171, 27], "L3|display=none": [1198, 0], "L3|display=variable": [1198, 27], "L3|display=value": [1225, 23], "L3|display=value-unit": [1248, 23], "L3|display=variable-value-unit": [1271, 27], "L3|style=normal": [1298, 27], "L3|style=bold": [1325, 27], "L3|style=underline": [1352, 28], "L3|style=double": [1380, 28], "L3|label-position=none": [1408, 25], "L3|label-position=before": [1433, 27], "L3|label-position=after": [1460, 27], "L3|label-position=footnote": [1487, 60], "L3|descr-position=none": [1547, 27], "L3|descr-position=after": [1574, 27], "L3|descr-position=footnote": [1601, 27], "L3|norm-position=none": [1628, 27], "L3|norm-position=in-line": [1655, 27], "L3|norm-position=line-right": [1682, 27], "L3|norm-position=footnote": [1709, 63]}, "cmd": "var"}, "alpha_2": {"w": 756, "h": 1772, "v": {"L1": [0, 25], "L1|display=none": [25, 0], "L1|display=variable": [25, 22], "L1|display=value": [47, 21], "L1|display=value-unit": [68, 21], "L1|display=variable-value-unit": [89, 25], "L1|style=normal": [114, 25], "L1|style=bold": [139, 26], "L1|style=underline": [165, 27], "L1|style=double": [192, 27], "L1|label-position=none": [219, 25], "L1|label-position=before": [244, 27], "L1|label-position=after": [271, 27], "L1|label-position=footnote": [298, 60], "L1|descr-position=none": [358, 25], "L1|descr-position=after": [383, 25], "L1|descr-position=footnote": [408, 25], "L1|norm-position=none": [433, 25], "L1|norm-position=in-line": [458, 26], "L1|norm-position=line-right": [484, 25], "L1|norm-position=footnote": [509, 63], "L2": [572, 27], "L2|display=none": [599, 0], "L2|display=variable": [599, 27], "L2|display=value": [626, 22], "L2|display=value-unit": [648, 22], "L2|display=variable-value-unit": [670, 27], "L2|style=normal": [697, 27], "L2|style=bold": [724, 27], "L2|style=underline": [751, 28], "L2|style=double": [779, 28], "L2|label-position=none": [807, 25], "L2|label-position=before": [832, 27], "L2|label-position=after": [859, 27], "L2|label-position=footnote": [886, 60], "L2|descr-position=none": [946, 27], "L2|descr-position=after": [973, 27], "L2|descr-position=footnote": [1000, 27], "L2|norm-position=none": [1027, 27], "L2|norm-position=in-line": [1054, 27], "L2|norm-position=line-right": [1081, 27], "L2|norm-position=footnote": [1108, 63], "L3": [1171, 27], "L3|display=none": [1198, 0], "L3|display=variable": [1198, 27], "L3|display=value": [1225, 23], "L3|display=value-unit": [1248, 23], "L3|display=variable-value-unit": [1271, 27], "L3|style=normal": [1298, 27], "L3|style=bold": [1325, 27], "L3|style=underline": [1352, 28], "L3|style=double": [1380, 28], "L3|label-position=none": [1408, 25], "L3|label-position=before": [1433, 27], "L3|label-position=after": [1460, 27], "L3|label-position=footnote": [1487, 60], "L3|descr-position=none": [1547, 27], "L3|descr-position=after": [1574, 27], "L3|descr-position=footnote": [1601, 27], "L3|norm-position=none": [1628, 27], "L3|norm-position=in-line": [1655, 27], "L3|norm-position=line-right": [1682, 27], "L3|norm-position=footnote": [1709, 63]}, "cmd": "var"}, "abgleiten": {"w": 756, "h": 2904, "v": {"L1": [0, 26], "L1|display=none": [26, 0], "L1|display=variable": [26, 26], "L1|display=value": [52, 26], "L1|display=value-unit": [78, 26], "L1|display=variable-value-unit": [104, 26], "L1|style=normal": [130, 26], "L1|style=bold": [156, 26], "L1|style=underline": [182, 28], "L1|style=double": [210, 28], "L1|label-position=none": [238, 26], "L1|label-position=before": [264, 26], "L1|label-position=after": [290, 26], "L1|label-position=footnote": [316, 63], "L1|descr-position=none": [379, 26], "L1|descr-position=after": [405, 50], "L1|descr-position=footnote": [455, 81], "L1|norm-position=none": [536, 26], "L1|norm-position=in-line": [562, 26], "L1|norm-position=line-right": [588, 26], "L1|norm-position=footnote": [614, 60], "L2": [674, 26], "L2|display=none": [700, 0], "L2|display=variable": [700, 26], "L2|display=value": [726, 26], "L2|display=value-unit": [752, 26], "L2|display=variable-value-unit": [778, 26], "L2|style=normal": [804, 26], "L2|style=bold": [830, 26], "L2|style=underline": [856, 28], "L2|style=double": [884, 28], "L2|label-position=none": [912, 26], "L2|label-position=before": [938, 26], "L2|label-position=after": [964, 26], "L2|label-position=footnote": [990, 63], "L2|descr-position=none": [1053, 26], "L2|descr-position=after": [1079, 50], "L2|descr-position=footnote": [1129, 81], "L2|norm-position=none": [1210, 26], "L2|norm-position=in-line": [1236, 26], "L2|norm-position=line-right": [1262, 26], "L2|norm-position=footnote": [1288, 60], "L3": [1348, 81], "L3|display=none": [1429, 0], "L3|display=variable": [1429, 81], "L3|display=value": [1510, 80], "L3|display=value-unit": [1590, 80], "L3|display=variable-value-unit": [1670, 81], "L3|style=normal": [1751, 81], "L3|style=bold": [1832, 81], "L3|style=underline": [1913, 81], "L3|style=double": [1994, 81], "L3|label-position=none": [2075, 81], "L3|label-position=before": [2156, 81], "L3|label-position=after": [2237, 81], "L3|label-position=footnote": [2318, 81], "L3|descr-position=none": [2399, 26], "L3|descr-position=after": [2425, 74], "L3|descr-position=footnote": [2499, 81], "L3|norm-position=none": [2580, 81], "L3|norm-position=in-line": [2661, 81], "L3|norm-position=line-right": [2742, 81], "L3|norm-position=footnote": [2823, 81]}, "cmd": "var"}, "mu_11": {"w": 756, "h": 1772, "v": {"L1": [0, 25], "L1|display=none": [25, 0], "L1|display=variable": [25, 22], "L1|display=value": [47, 21], "L1|display=value-unit": [68, 21], "L1|display=variable-value-unit": [89, 25], "L1|style=normal": [114, 25], "L1|style=bold": [139, 26], "L1|style=underline": [165, 27], "L1|style=double": [192, 27], "L1|label-position=none": [219, 25], "L1|label-position=before": [244, 27], "L1|label-position=after": [271, 27], "L1|label-position=footnote": [298, 60], "L1|descr-position=none": [358, 25], "L1|descr-position=after": [383, 25], "L1|descr-position=footnote": [408, 25], "L1|norm-position=none": [433, 25], "L1|norm-position=in-line": [458, 26], "L1|norm-position=line-right": [484, 25], "L1|norm-position=footnote": [509, 63], "L2": [572, 27], "L2|display=none": [599, 0], "L2|display=variable": [599, 27], "L2|display=value": [626, 22], "L2|display=value-unit": [648, 22], "L2|display=variable-value-unit": [670, 27], "L2|style=normal": [697, 27], "L2|style=bold": [724, 27], "L2|style=underline": [751, 28], "L2|style=double": [779, 28], "L2|label-position=none": [807, 25], "L2|label-position=before": [832, 27], "L2|label-position=after": [859, 27], "L2|label-position=footnote": [886, 60], "L2|descr-position=none": [946, 27], "L2|descr-position=after": [973, 27], "L2|descr-position=footnote": [1000, 27], "L2|norm-position=none": [1027, 27], "L2|norm-position=in-line": [1054, 27], "L2|norm-position=line-right": [1081, 27], "L2|norm-position=footnote": [1108, 63], "L3": [1171, 27], "L3|display=none": [1198, 0], "L3|display=variable": [1198, 27], "L3|display=value": [1225, 23], "L3|display=value-unit": [1248, 23], "L3|display=variable-value-unit": [1271, 27], "L3|style=normal": [1298, 27], "L3|style=bold": [1325, 27], "L3|style=underline": [1352, 28], "L3|style=double": [1380, 28], "L3|label-position=none": [1408, 25], "L3|label-position=before": [1433, 27], "L3|label-position=after": [1460, 27], "L3|label-position=footnote": [1487, 60], "L3|descr-position=none": [1547, 27], "L3|descr-position=after": [1574, 27], "L3|descr-position=footnote": [1601, 27], "L3|norm-position=none": [1628, 27], "L3|norm-position=in-line": [1655, 27], "L3|norm-position=line-right": [1682, 27], "L3|norm-position=footnote": [1709, 63]}, "cmd": "var"}, "mu_12": {"w": 756, "h": 1772, "v": {"L1": [0, 25], "L1|display=none": [25, 0], "L1|display=variable": [25, 22], "L1|display=value": [47, 21], "L1|display=value-unit": [68, 21], "L1|display=variable-value-unit": [89, 25], "L1|style=normal": [114, 25], "L1|style=bold": [139, 26], "L1|style=underline": [165, 27], "L1|style=double": [192, 27], "L1|label-position=none": [219, 25], "L1|label-position=before": [244, 27], "L1|label-position=after": [271, 27], "L1|label-position=footnote": [298, 60], "L1|descr-position=none": [358, 25], "L1|descr-position=after": [383, 25], "L1|descr-position=footnote": [408, 25], "L1|norm-position=none": [433, 25], "L1|norm-position=in-line": [458, 26], "L1|norm-position=line-right": [484, 25], "L1|norm-position=footnote": [509, 63], "L2": [572, 27], "L2|display=none": [599, 0], "L2|display=variable": [599, 27], "L2|display=value": [626, 22], "L2|display=value-unit": [648, 22], "L2|display=variable-value-unit": [670, 27], "L2|style=normal": [697, 27], "L2|style=bold": [724, 27], "L2|style=underline": [751, 28], "L2|style=double": [779, 28], "L2|label-position=none": [807, 25], "L2|label-position=before": [832, 27], "L2|label-position=after": [859, 27], "L2|label-position=footnote": [886, 60], "L2|descr-position=none": [946, 27], "L2|descr-position=after": [973, 27], "L2|descr-position=footnote": [1000, 27], "L2|norm-position=none": [1027, 27], "L2|norm-position=in-line": [1054, 27], "L2|norm-position=line-right": [1081, 27], "L2|norm-position=footnote": [1108, 63], "L3": [1171, 27], "L3|display=none": [1198, 0], "L3|display=variable": [1198, 27], "L3|display=value": [1225, 23], "L3|display=value-unit": [1248, 23], "L3|display=variable-value-unit": [1271, 27], "L3|style=normal": [1298, 27], "L3|style=bold": [1325, 27], "L3|style=underline": [1352, 28], "L3|style=double": [1380, 28], "L3|label-position=none": [1408, 25], "L3|label-position=before": [1433, 27], "L3|label-position=after": [1460, 27], "L3|label-position=footnote": [1487, 60], "L3|descr-position=none": [1547, 27], "L3|descr-position=after": [1574, 27], "L3|descr-position=footnote": [1601, 27], "L3|norm-position=none": [1628, 27], "L3|norm-position=in-line": [1655, 27], "L3|norm-position=line-right": [1682, 27], "L3|norm-position=footnote": [1709, 63]}, "cmd": "var"}, "s_k": {"w": 756, "h": 2170, "v": {"L1": [0, 27], "L1|display=none": [27, 0], "L1|display=variable": [27, 22], "L1|display=value": [49, 21], "L1|display=value-unit": [70, 23], "L1|display=variable-value-unit": [93, 27], "L1|style=normal": [120, 27], "L1|style=bold": [147, 28], "L1|style=underline": [175, 29], "L1|style=double": [204, 29], "L1|label-position=none": [233, 27], "L1|label-position=before": [260, 27], "L1|label-position=after": [287, 27], "L1|label-position=footnote": [314, 63], "L1|descr-position=none": [377, 27], "L1|descr-position=after": [404, 27], "L1|descr-position=footnote": [431, 27], "L1|norm-position=none": [458, 27], "L1|norm-position=in-line": [485, 27], "L1|norm-position=line-right": [512, 27], "L1|norm-position=footnote": [539, 60], "L2": [599, 27], "L2|display=none": [626, 0], "L2|display=variable": [626, 27], "L2|display=value": [653, 26], "L2|display=value-unit": [679, 26], "L2|display=variable-value-unit": [705, 27], "L2|style=normal": [732, 27], "L2|style=bold": [759, 28], "L2|style=underline": [787, 29], "L2|style=double": [816, 29], "L2|label-position=none": [845, 27], "L2|label-position=before": [872, 27], "L2|label-position=after": [899, 27], "L2|label-position=footnote": [926, 63], "L2|descr-position=none": [989, 27], "L2|descr-position=after": [1016, 27], "L2|descr-position=footnote": [1043, 27], "L2|norm-position=none": [1070, 27], "L2|norm-position=in-line": [1097, 46], "L2|norm-position=line-right": [1143, 46], "L2|norm-position=footnote": [1189, 60], "L3": [1249, 46], "L3|display=none": [1295, 0], "L3|display=variable": [1295, 46], "L3|display=value": [1341, 46], "L3|display=value-unit": [1387, 46], "L3|display=variable-value-unit": [1433, 46], "L3|style=normal": [1479, 46], "L3|style=bold": [1525, 47], "L3|style=underline": [1572, 47], "L3|style=double": [1619, 47], "L3|label-position=none": [1666, 27], "L3|label-position=before": [1693, 51], "L3|label-position=after": [1744, 46], "L3|label-position=footnote": [1790, 63], "L3|descr-position=none": [1853, 46], "L3|descr-position=after": [1899, 46], "L3|descr-position=footnote": [1945, 46], "L3|norm-position=none": [1991, 27], "L3|norm-position=in-line": [2018, 46], "L3|norm-position=line-right": [2064, 46], "L3|norm-position=footnote": [2110, 60]}, "cmd": "var"}, "q_k11": {"w": 756, "h": 3314, "v": {"L1": [0, 29], "L1|display-formula=none": [29, 29], "L1|display-formula=variable": [58, 29], "L1|display-formula=value": [87, 29], "L1|display-formula=value-unit": [116, 29], "L1|display-formula=variable-value-unit": [145, 29], "L1|display-equation=none": [174, 0], "L1|display-equation=variable": [174, 23], "L1|display-equation=value": [197, 21], "L1|display-equation=value-unit": [218, 28], "L1|display-equation=variable-value-unit": [246, 29], "L1|style=normal": [275, 29], "L1|style=bold": [304, 29], "L1|style=underline": [333, 29], "L1|style=double": [362, 29], "L1|label-position=none": [391, 29], "L1|label-position=before": [420, 29], "L1|label-position=after": [449, 29], "L1|label-position=footnote": [478, 64], "L1|descr-position=none": [542, 29], "L1|descr-position=after": [571, 29], "L1|descr-position=footnote": [600, 29], "L1|norm-position=none": [629, 29], "L1|norm-position=in-line": [658, 29], "L1|norm-position=line-right": [687, 29], "L1|norm-position=footnote": [716, 61], "L1|unit=kN/m²": [777, 29], "L1|unit=N/m²": [806, 29], "L2": [835, 29], "L2|display-formula=none": [864, 29], "L2|display-formula=variable": [893, 29], "L2|display-formula=value": [922, 29], "L2|display-formula=value-unit": [951, 29], "L2|display-formula=variable-value-unit": [980, 56], "L2|display-equation=none": [1036, 27], "L2|display-equation=variable": [1063, 28], "L2|display-equation=value": [1091, 27], "L2|display-equation=value-unit": [1118, 28], "L2|display-equation=variable-value-unit": [1146, 29], "L2|style=normal": [1175, 29], "L2|style=bold": [1204, 29], "L2|style=underline": [1233, 29], "L2|style=double": [1262, 29], "L2|label-position=none": [1291, 29], "L2|label-position=before": [1320, 29], "L2|label-position=after": [1349, 29], "L2|label-position=footnote": [1378, 64], "L2|descr-position=none": [1442, 29], "L2|descr-position=after": [1471, 29], "L2|descr-position=footnote": [1500, 29], "L2|norm-position=none": [1529, 29], "L2|norm-position=in-line": [1558, 29], "L2|norm-position=line-right": [1587, 56], "L2|norm-position=footnote": [1643, 61], "L2|unit=kN/m²": [1704, 29], "L2|unit=N/m²": [1733, 29], "L3": [1762, 56], "L3|display-formula=none": [1818, 29], "L3|display-formula=variable": [1847, 56], "L3|display-formula=value": [1903, 55], "L3|display-formula=value-unit": [1958, 57], "L3|display-formula=variable-value-unit": [2015, 56], "L3|display-equation=none": [2071, 51], "L3|display-equation=variable": [2122, 56], "L3|display-equation=value": [2178, 54], "L3|display-equation=value-unit": [2232, 55], "L3|display-equation=variable-value-unit": [2287, 56], "L3|style=normal": [2343, 56], "L3|style=bold": [2399, 56], "L3|style=underline": [2455, 58], "L3|style=double": [2513, 58], "L3|label-position=none": [2571, 29], "L3|label-position=before": [2600, 56], "L3|label-position=after": [2656, 56], "L3|label-position=footnote": [2712, 64], "L3|descr-position=none": [2776, 56], "L3|descr-position=after": [2832, 56], "L3|descr-position=footnote": [2888, 56], "L3|norm-position=none": [2944, 56], "L3|norm-position=in-line": [3000, 56], "L3|norm-position=line-right": [3056, 56], "L3|norm-position=footnote": [3112, 90], "L3|unit=kN/m²": [3202, 56], "L3|unit=N/m²": [3258, 56]}, "cmd": "eq"}, "q_k12": {"w": 756, "h": 3314, "v": {"L1": [0, 29], "L1|display-formula=none": [29, 29], "L1|display-formula=variable": [58, 29], "L1|display-formula=value": [87, 29], "L1|display-formula=value-unit": [116, 29], "L1|display-formula=variable-value-unit": [145, 29], "L1|display-equation=none": [174, 0], "L1|display-equation=variable": [174, 23], "L1|display-equation=value": [197, 21], "L1|display-equation=value-unit": [218, 28], "L1|display-equation=variable-value-unit": [246, 29], "L1|style=normal": [275, 29], "L1|style=bold": [304, 29], "L1|style=underline": [333, 29], "L1|style=double": [362, 29], "L1|label-position=none": [391, 29], "L1|label-position=before": [420, 29], "L1|label-position=after": [449, 29], "L1|label-position=footnote": [478, 64], "L1|descr-position=none": [542, 29], "L1|descr-position=after": [571, 29], "L1|descr-position=footnote": [600, 29], "L1|norm-position=none": [629, 29], "L1|norm-position=in-line": [658, 29], "L1|norm-position=line-right": [687, 29], "L1|norm-position=footnote": [716, 61], "L1|unit=kN/m²": [777, 29], "L1|unit=N/m²": [806, 29], "L2": [835, 29], "L2|display-formula=none": [864, 29], "L2|display-formula=variable": [893, 29], "L2|display-formula=value": [922, 29], "L2|display-formula=value-unit": [951, 29], "L2|display-formula=variable-value-unit": [980, 56], "L2|display-equation=none": [1036, 27], "L2|display-equation=variable": [1063, 28], "L2|display-equation=value": [1091, 27], "L2|display-equation=value-unit": [1118, 28], "L2|display-equation=variable-value-unit": [1146, 29], "L2|style=normal": [1175, 29], "L2|style=bold": [1204, 29], "L2|style=underline": [1233, 29], "L2|style=double": [1262, 29], "L2|label-position=none": [1291, 29], "L2|label-position=before": [1320, 29], "L2|label-position=after": [1349, 29], "L2|label-position=footnote": [1378, 64], "L2|descr-position=none": [1442, 29], "L2|descr-position=after": [1471, 29], "L2|descr-position=footnote": [1500, 29], "L2|norm-position=none": [1529, 29], "L2|norm-position=in-line": [1558, 29], "L2|norm-position=line-right": [1587, 56], "L2|norm-position=footnote": [1643, 61], "L2|unit=kN/m²": [1704, 29], "L2|unit=N/m²": [1733, 29], "L3": [1762, 56], "L3|display-formula=none": [1818, 29], "L3|display-formula=variable": [1847, 56], "L3|display-formula=value": [1903, 55], "L3|display-formula=value-unit": [1958, 57], "L3|display-formula=variable-value-unit": [2015, 56], "L3|display-equation=none": [2071, 51], "L3|display-equation=variable": [2122, 56], "L3|display-equation=value": [2178, 54], "L3|display-equation=value-unit": [2232, 55], "L3|display-equation=variable-value-unit": [2287, 56], "L3|style=normal": [2343, 56], "L3|style=bold": [2399, 56], "L3|style=underline": [2455, 58], "L3|style=double": [2513, 58], "L3|label-position=none": [2571, 29], "L3|label-position=before": [2600, 56], "L3|label-position=after": [2656, 56], "L3|label-position=footnote": [2712, 64], "L3|descr-position=none": [2776, 56], "L3|descr-position=after": [2832, 56], "L3|descr-position=footnote": [2888, 56], "L3|norm-position=none": [2944, 56], "L3|norm-position=in-line": [3000, 56], "L3|norm-position=line-right": [3056, 56], "L3|norm-position=footnote": [3112, 90], "L3|unit=kN/m²": [3202, 56], "L3|unit=N/m²": [3258, 56]}, "cmd": "eq"}, "q_k11h": {"w": 756, "h": 5031, "v": {"L1": [0, 29], "L1|display-formula=none": [29, 29], "L1|display-formula=variable": [58, 37], "L1|display-formula=value": [95, 41], "L1|display-formula=value-unit": [136, 41], "L1|display-formula=variable-value-unit": [177, 41], "L1|display-equation=none": [218, 0], "L1|display-equation=variable": [218, 23], "L1|display-equation=value": [241, 21], "L1|display-equation=value-unit": [262, 28], "L1|display-equation=variable-value-unit": [290, 29], "L1|style=normal": [319, 29], "L1|style=bold": [348, 29], "L1|style=underline": [377, 29], "L1|style=double": [406, 29], "L1|label-position=none": [435, 29], "L1|label-position=before": [464, 29], "L1|label-position=after": [493, 29], "L1|label-position=footnote": [522, 64], "L1|descr-position=none": [586, 29], "L1|descr-position=after": [615, 29], "L1|descr-position=footnote": [644, 29], "L1|norm-position=none": [673, 29], "L1|norm-position=in-line": [702, 29], "L1|norm-position=line-right": [731, 29], "L1|norm-position=footnote": [760, 61], "L1|unit=kN/m²": [821, 29], "L1|unit=N/m²": [850, 29], "L2": [879, 37], "L2|display-formula=none": [916, 29], "L2|display-formula=variable": [945, 37], "L2|display-formula=value": [982, 41], "L2|display-formula=value-unit": [1023, 71], "L2|display-formula=variable-value-unit": [1094, 113], "L2|display-equation=none": [1207, 37], "L2|display-equation=variable": [1244, 37], "L2|display-equation=value": [1281, 37], "L2|display-equation=value-unit": [1318, 37], "L2|display-equation=variable-value-unit": [1355, 37], "L2|style=normal": [1392, 37], "L2|style=bold": [1429, 67], "L2|style=underline": [1496, 37], "L2|style=double": [1533, 37], "L2|label-position=none": [1570, 37], "L2|label-position=before": [1607, 37], "L2|label-position=after": [1644, 37], "L2|label-position=footnote": [1681, 73], "L2|descr-position=none": [1754, 37], "L2|descr-position=after": [1791, 37], "L2|descr-position=footnote": [1828, 37], "L2|norm-position=none": [1865, 37], "L2|norm-position=in-line": [1902, 67], "L2|norm-position=line-right": [1969, 67], "L2|norm-position=footnote": [2036, 100], "L2|unit=kN/m²": [2136, 37], "L2|unit=N/m²": [2173, 67], "L3": [2240, 113], "L3|display-formula=none": [2353, 51], "L3|display-formula=variable": [2404, 67], "L3|display-formula=value": [2471, 71], "L3|display-formula=value-unit": [2542, 71], "L3|display-formula=variable-value-unit": [2613, 113], "L3|display-equation=none": [2726, 63], "L3|display-equation=variable": [2789, 83], "L3|display-equation=value": [2872, 70], "L3|display-equation=value-unit": [2942, 71], "L3|display-equation=variable-value-unit": [3013, 113], "L3|style=normal": [3126, 113], "L3|style=bold": [3239, 113], "L3|style=underline": [3352, 115], "L3|style=double": [3467, 115], "L3|label-position=none": [3582, 83], "L3|label-position=before": [3665, 83], "L3|label-position=after": [3748, 113], "L3|label-position=footnote": [3861, 119], "L3|descr-position=none": [3980, 113], "L3|descr-position=after": [4093, 113], "L3|descr-position=footnote": [4206, 113], "L3|norm-position=none": [4319, 113], "L3|norm-position=in-line": [4432, 113], "L3|norm-position=line-right": [4545, 113], "L3|norm-position=footnote": [4658, 147], "L3|unit=kN/m²": [4805, 113], "L3|unit=N/m²": [4918, 113]}, "cmd": "eq"}, "q_k12h": {"w": 756, "h": 5031, "v": {"L1": [0, 29], "L1|display-formula=none": [29, 29], "L1|display-formula=variable": [58, 37], "L1|display-formula=value": [95, 41], "L1|display-formula=value-unit": [136, 41], "L1|display-formula=variable-value-unit": [177, 41], "L1|display-equation=none": [218, 0], "L1|display-equation=variable": [218, 23], "L1|display-equation=value": [241, 21], "L1|display-equation=value-unit": [262, 28], "L1|display-equation=variable-value-unit": [290, 29], "L1|style=normal": [319, 29], "L1|style=bold": [348, 29], "L1|style=underline": [377, 29], "L1|style=double": [406, 29], "L1|label-position=none": [435, 29], "L1|label-position=before": [464, 29], "L1|label-position=after": [493, 29], "L1|label-position=footnote": [522, 64], "L1|descr-position=none": [586, 29], "L1|descr-position=after": [615, 29], "L1|descr-position=footnote": [644, 29], "L1|norm-position=none": [673, 29], "L1|norm-position=in-line": [702, 29], "L1|norm-position=line-right": [731, 29], "L1|norm-position=footnote": [760, 61], "L1|unit=kN/m²": [821, 29], "L1|unit=N/m²": [850, 29], "L2": [879, 37], "L2|display-formula=none": [916, 29], "L2|display-formula=variable": [945, 37], "L2|display-formula=value": [982, 41], "L2|display-formula=value-unit": [1023, 71], "L2|display-formula=variable-value-unit": [1094, 113], "L2|display-equation=none": [1207, 37], "L2|display-equation=variable": [1244, 37], "L2|display-equation=value": [1281, 37], "L2|display-equation=value-unit": [1318, 37], "L2|display-equation=variable-value-unit": [1355, 37], "L2|style=normal": [1392, 37], "L2|style=bold": [1429, 67], "L2|style=underline": [1496, 37], "L2|style=double": [1533, 37], "L2|label-position=none": [1570, 37], "L2|label-position=before": [1607, 37], "L2|label-position=after": [1644, 37], "L2|label-position=footnote": [1681, 73], "L2|descr-position=none": [1754, 37], "L2|descr-position=after": [1791, 37], "L2|descr-position=footnote": [1828, 37], "L2|norm-position=none": [1865, 37], "L2|norm-position=in-line": [1902, 67], "L2|norm-position=line-right": [1969, 67], "L2|norm-position=footnote": [2036, 100], "L2|unit=kN/m²": [2136, 37], "L2|unit=N/m²": [2173, 67], "L3": [2240, 113], "L3|display-formula=none": [2353, 51], "L3|display-formula=variable": [2404, 67], "L3|display-formula=value": [2471, 71], "L3|display-formula=value-unit": [2542, 71], "L3|display-formula=variable-value-unit": [2613, 113], "L3|display-equation=none": [2726, 63], "L3|display-equation=variable": [2789, 83], "L3|display-equation=value": [2872, 70], "L3|display-equation=value-unit": [2942, 71], "L3|display-equation=variable-value-unit": [3013, 113], "L3|style=normal": [3126, 113], "L3|style=bold": [3239, 113], "L3|style=underline": [3352, 115], "L3|style=double": [3467, 115], "L3|label-position=none": [3582, 83], "L3|label-position=before": [3665, 83], "L3|label-position=after": [3748, 113], "L3|label-position=footnote": [3861, 119], "L3|descr-position=none": [3980, 113], "L3|descr-position=after": [4093, 113], "L3|descr-position=footnote": [4206, 113], "L3|norm-position=none": [4319, 113], "L3|norm-position=in-line": [4432, 113], "L3|norm-position=line-right": [4545, 113], "L3|norm-position=footnote": [4658, 147], "L3|unit=kN/m²": [4805, 113], "L3|unit=N/m²": [4918, 113]}, "cmd": "eq"}, "_head": {"w": 756, "h": 99, "v": {"L1": [0, 33], "L2": [33, 33], "L3": [66, 33]}}, "_figure": {"w": 756, "h": 5132, "v": {"w40|cap": [0, 330], "w40|nocap": [330, 301], "w50|cap": [631, 403], "w50|nocap": [1034, 374], "w65|cap": [1408, 513], "w65|nocap": [1921, 484], "w80|cap": [2405, 623], "w80|nocap": [3028, 594], "w100|cap": [3622, 769], "w100|nocap": [4391, 741]}, "caption": "Toit à deux pans, modèles de charge 1 et 2 (SIA 261, figure 3)"}, "_lines": ["h_0", "korrektur", "h_ref", "ce", "ct", "dachform", "alpha_1", "alpha_2", "abgleiten", "mu_11", "mu_12", "s_k", "q_k11", "q_k12", "q_k11h", "q_k12h"], "_meta": {"h_0": {"cmd": "var", "line": "#var(\"h_0\", 850, \"m\", domain: (\"snow-load\", \"SN-01\"), label: \"Altitude\", descr: \"Altitude du lieu au-dessus du niveau de la mer.\", norm: \"SIA 261\", norm-section: \"5.2.6\", id: \"h_0\")", "label": "Altitude", "descr": "Altitude du lieu au-dessus du niveau de la mer.", "unit": null, "normSection": "5.2.6", "equation": null}, "korrektur": {"cmd": "var", "line": "#var(\"korrektur\", \"Delta h\", 0, \"m\", domain: (\"snow-load\", \"SN-01\"), label: \"Valeur de correction\", descr: \"Majoration ajoutée à l’altitude du lieu selon SIA 261, annexe D.\", norm: \"SIA 261\", norm-section: \"Anhang D\", id: \"korrektur\")", "label": "Valeur de correction", "descr": "Majoration ajoutée à l’altitude du lieu selon SIA 261, annexe D.", "unit": null, "normSection": "Anhang D", "equation": null}, "h_ref": {"cmd": "eq", "line": "#eq(\"h_ref\", \"h_\\\"ref\\\"\", `h_0 + korrektur`, unit: \"m\", label: \"Altitude de référence\", norm: \"SIA 261\", norm-section: \"5.2.6\", id: \"h_ref\")", "label": "Altitude de référence", "descr": null, "unit": "m", "normSection": "5.2.6", "equation": "h_0 + korrektur"}, "ce": {"cmd": "var", "line": "#var(\"ce\", \"C_e\", 1, domain: (\"snow-load\", \"SN-01\"), label: \"Coefficient d’exposition\", norm: \"SIA 261\", norm-section: \"5.2.4\", id: \"ce\")", "label": "Coefficient d’exposition", "descr": null, "unit": null, "normSection": "5.2.4", "equation": null}, "ct": {"cmd": "var", "line": "#var(\"ct\", \"C_T\", 1, domain: (\"snow-load\", \"SN-01\"), label: \"Coefficient thermique\", norm: \"SIA 261\", norm-section: \"5.2.5\", id: \"ct\")", "label": "Coefficient thermique", "descr": null, "unit": null, "normSection": "5.2.5", "equation": null}, "dachform": {"cmd": "var", "line": "#var(\"dachform\", domain: (\"snow-load\", \"SN-01\"), label: \"Forme de la toiture / modèle de charge\", norm: \"SIA 261\", norm-section: \"Figur 3\", id: \"dachform\")", "label": "Forme de la toiture / modèle de charge", "descr": null, "unit": null, "normSection": "Figur 3", "equation": null}, "alpha_1": {"cmd": "var", "line": "#var(\"alpha_1\", 30, \"°\", domain: (\"snow-load\", \"SN-01\"), label: \"Inclinaison de la toiture 1\", norm: \"SIA 261\", norm-section: \"Figur 3\", id: \"alpha_1\")", "label": "Inclinaison de la toiture 1", "descr": null, "unit": null, "normSection": "Figur 3", "equation": null}, "alpha_2": {"cmd": "var", "line": "#var(\"alpha_2\", 30, \"°\", domain: (\"snow-load\", \"SN-01\"), label: \"Inclinaison de la toiture 2\", norm: \"SIA 261\", norm-section: \"Figur 3\", id: \"alpha_2\")", "label": "Inclinaison de la toiture 2", "descr": null, "unit": null, "normSection": "Figur 3", "equation": null}, "abgleiten": {"cmd": "var", "line": "#var(\"abgleiten\", domain: (\"snow-load\", \"SN-01\"), label: \"Glissement de la neige\", descr: \"Si le glissement est empêché ou rendu difficile, le coefficient de forme de toiture mu_1 est admis à 0.8 (SIA 261, chiffre 5.3.4).\", norm: \"SIA 261\", norm-section: \"5.3.4\", id: \"abgleiten\")", "label": "Glissement de la neige", "descr": "Si le glissement est empêché ou rendu difficile, le coefficient de forme de toiture mu_1 est admis à 0.8 (SIA 261, chiffre 5.3.4).", "unit": null, "normSection": "5.3.4", "equation": null}, "mu_11": {"cmd": "var", "line": "#var(\"mu_11\", 0.8, domain: (\"snow-load\", \"SN-01\"), label: \"Coefficient de forme de toiture\", norm: \"SIA 261\", norm-section: \"Figur 2\", id: \"mu_11\")", "label": "Coefficient de forme de toiture", "descr": null, "unit": null, "normSection": "Figur 2", "equation": null}, "mu_12": {"cmd": "var", "line": "#var(\"mu_12\", 0.8, domain: (\"snow-load\", \"SN-01\"), label: \"Coefficient de forme de toiture 2\", norm: \"SIA 261\", norm-section: \"Figur 2\", id: \"mu_12\")", "label": "Coefficient de forme de toiture 2", "descr": null, "unit": null, "normSection": "Figur 2", "equation": null}, "s_k": {"cmd": "var", "line": "#var(\"s_k\", 2.759184, \"kN/m²\", domain: (\"snow-load\", \"SN-01\"), label: \"Valeur caractéristique de la charge de neige sur un terrain horizontal\", norm: \"SIA 261\", norm-section: \"5.2.6\", id: \"s_k\")", "label": "Valeur caractéristique de la charge de neige sur un terrain horizontal", "descr": null, "unit": null, "normSection": "5.2.6", "equation": null}, "q_k11": {"cmd": "eq", "line": "#eq(\"q_k11\", \"q_(k,11)\", `mu_11 dot ce dot ct dot s_k`, unit: \"kN/m²\", label: \"Charge de neige caractéristique\", norm: \"SIA 261\", norm-section: \"5.2.2\", id: \"q_k11\")", "label": "Charge de neige caractéristique", "descr": null, "unit": "kN/m²", "normSection": "5.2.2", "equation": "mu_11 dot ce dot ct dot s_k"}, "q_k12": {"cmd": "eq", "line": "#eq(\"q_k12\", \"q_(k,12)\", `mu_12 dot ce dot ct dot s_k`, unit: \"kN/m²\", label: \"Charge de neige caractéristique\", norm: \"SIA 261\", norm-section: \"5.2.2\", id: \"q_k12\")", "label": "Charge de neige caractéristique", "descr": null, "unit": "kN/m²", "normSection": "5.2.2", "equation": "mu_12 dot ce dot ct dot s_k"}, "q_k11h": {"cmd": "eq", "line": "#eq(\"q_k11h\", \"q_(k,11,2)\", `mu_11 / 2 dot ce dot ct dot s_k`, unit: \"kN/m²\", label: \"Charge de neige caractéristique, modèle de charge 2\", norm: \"SIA 261\", norm-section: \"5.2.2\", id: \"q_k11h\")", "label": "Charge de neige caractéristique, modèle de charge 2", "descr": null, "unit": "kN/m²", "normSection": "5.2.2", "equation": "mu_11 / 2 dot ce dot ct dot s_k"}, "q_k12h": {"cmd": "eq", "line": "#eq(\"q_k12h\", \"q_(k,12,2)\", `mu_12 / 2 dot ce dot ct dot s_k`, unit: \"kN/m²\", label: \"Charge de neige caractéristique, modèle de charge 2\", norm: \"SIA 261\", norm-section: \"5.2.2\", id: \"q_k12h\")", "label": "Charge de neige caractéristique, modèle de charge 2", "descr": null, "unit": "kN/m²", "normSection": "5.2.2", "equation": "mu_12 / 2 dot ce dot ct dot s_k"}}};
+var VIEWMODE = "calc", DLEVEL = 2, OPEN = null, DZOOM = null, FITZ = 0.8, SHOWHIDDEN = true;
+var LKEYS = D5._lines, META = D5._meta;
+var LST = {};   // per line: {level: null (auto) or 0..3, opts: {name: value}, last: the option changed last}
+LKEYS.forEach(function(k){ LST[k] = {level:null, opts:{}, last:null}; });
+var FIG = {level:null, width:80, caption:D5._figure.caption};
+var FILE = "Variable-loads/Snow/SN-01.typ", INCLUDE = '#include domain-file("snow-load", "SN-01")';
+var SYMH = {h_0:"h<sub>0</sub>", korrektur:"Δh", h_ref:"h<sub>ref</sub>", ce:"C<sub>e</sub>", ct:"C<sub>T</sub>", dachform:"Dachform", alpha_1:"α<sub>1</sub>", alpha_2:"α<sub>2</sub>", abgleiten:"Abgleiten", mu_11:"μ<sub>11</sub>", mu_12:"μ<sub>12</sub>", s_k:"s<sub>k</sub>", q_k11:"q<sub>k,11</sub>", q_k12:"q<sub>k,12</sub>", q_k11h:"q<sub>k,11,2</sub>", q_k12h:"q<sub>k,12,2</sub>"};
+var POS5 = ["none", "variable", "value", "value-unit", "variable-value-unit"];
+// the arguments of each command the engineer sets here, in the order of the engine's signatures (lib/formula.typ); the name, the value and the unit of a #var are the export's
+var ARGS = {
+  "var": [["display", POS5], ["style", ["normal", "bold", "underline", "double"]], ["label-position", ["none", "before", "after", "footnote"]], ["descr-position", ["none", "after", "footnote"]], ["norm-position", ["none", "in-line", "line-right", "footnote"]]],
+  "eq": [["equation", "text"], ["unit", "unit"], ["as-unit", "text"], ["display-formula", POS5], ["display-equation", POS5], ["style", ["normal", "bold", "underline", "double"]], ["role", ["data", "compute", "result"]], ["label", "text"], ["label-position", ["none", "before", "after", "footnote"]], ["descr", "text"], ["descr-position", ["none", "after", "footnote"]], ["norm-position", ["none", "in-line", "line-right", "footnote"]]]
+};
+var UNITS = {h_ref:["m", "cm"], q_k11:["kN/m²", "N/m²"], q_k12:["kN/m²", "N/m²"], q_k11h:["kN/m²", "N/m²"], q_k12h:["kN/m²", "N/m²"]};
+var DW = {
+ fr:{prev:"Aperçu",doc:"document en français",real:"rendu Typst réel du fichier",hidden:"Montrer les éléments masqués",file:"Le fichier de la toiture",copy:"Copier",copied:"Copié",inc:"Commande à copier dans la section",lvl:"Niveau de détail",lvlh:"Le niveau du domaine, #domain(level:). Une ligne sans niveau propre le suit.",els:"Éléments du fichier",elsh:"Cliquez une ligne pour régler ses arguments. 0 1 2 3 : le niveau propre de la ligne ; un clic sur le niveau déjà choisi la rend au niveau du domaine.",auto:"auto",reset:"Rétablir la ligne",line:"Ligne écrite dans le fichier",whole:"Voir le fichier entier",masked:"masquée",dnone:"display: none",lastonly:"Plusieurs options changées : l'aperçu applique la dernière ({o}). Woodcore recompile la ligne avec toutes.",textnote:"Le texte écrit ici est dans la ligne ; l'aperçu du prototype ne le recompile pas.",rolenote:"Le rôle ne change pas l'impression : #var-table liste les lignes par rôle.",figlvl:"La figure s'imprime à partir du niveau du domaine indiqué ; auto : 3.",caption:"Légende",width:"Largeur",composed:"légende composée par le prototype",other:"Ce prototype n'a compilé que la toiture principale (SN-01).",refuse:"Typst refuse cette valeur :"},
+ de:{prev:"Vorschau",doc:"Dokument auf Französisch",real:"echtes Typst-Rendering der Datei",hidden:"Ausgeblendete Elemente zeigen",file:"Die Datei des Dachs",copy:"Kopieren",copied:"Kopiert",inc:"Befehl für den Abschnitt",lvl:"Detailstufe",lvlh:"Die Stufe der Domäne, #domain(level:). Eine Zeile ohne eigene Stufe folgt ihr.",els:"Elemente der Datei",elsh:"Klicken Sie eine Zeile an, um ihre Argumente einzustellen. 0 1 2 3: die eigene Stufe der Zeile; ein Klick auf die gewählte Stufe gibt sie der Domäne zurück.",auto:"auto",reset:"Zeile zurücksetzen",line:"In die Datei geschriebene Zeile",whole:"Ganze Datei anzeigen",masked:"ausgeblendet",dnone:"display: none",lastonly:"Mehrere Optionen geändert: die Vorschau zeigt die letzte ({o}). Woodcore kompiliert die Zeile mit allen.",textnote:"Der Text steht in der Zeile; die Vorschau des Prototyps kompiliert ihn nicht neu.",rolenote:"Die Rolle ändert den Druck nicht: #var-table listet die Zeilen nach Rolle.",figlvl:"Die Figur wird ab der angegebenen Stufe der Domäne gedruckt; auto: 3.",caption:"Legende",width:"Breite",composed:"Legende vom Prototyp gesetzt",other:"Dieser Prototyp hat nur das Hauptdach (SN-01) kompiliert.",refuse:"Typst lehnt diesen Wert ab:"},
+ en:{prev:"Preview",doc:"document in French",real:"real Typst render of the file",hidden:"Show the hidden elements",file:"The roof's file",copy:"Copy",copied:"Copied",inc:"Command to copy into the section",lvl:"Level of detail",lvlh:"The domain's level, #domain(level:). A line without a level of its own follows it.",els:"Elements of the file",elsh:"Click a line to set its arguments. 0 1 2 3: the line's own level; clicking the level already chosen gives it back to the domain.",auto:"auto",reset:"Reset the line",line:"Line written in the file",whole:"Show the whole file",masked:"hidden",dnone:"display: none",lastonly:"Several options changed: the preview applies the last one ({o}). Woodcore recompiles the line with all of them.",textnote:"The text written here is in the line; the prototype's preview does not recompile it.",rolenote:"The role does not change the print: #var-table lists the lines by role.",figlvl:"The figure prints from the domain level given; auto: 3.",caption:"Caption",width:"Width",composed:"caption set by the prototype",other:"This prototype compiled the main roof (SN-01) only.",refuse:"Typst refuses this value:"}
+};
+function dt(k, o){ var s = (DW[lang] && DW[lang][k] != null) ? DW[lang][k] : DW.fr[k]; if (o) for (var x in o) s = s.replace("{" + x + "}", o[x]); return s; }
+function lvOf(k){ var s = LST[k]; return s.level === null ? DLEVEL : s.level; }
+function figShown(){ return FIG.level !== 0 && DLEVEL >= (FIG.level === null ? 3 : FIG.level); }
+var RENDERED = {};   // the options the prototype has a render of, per command
+["var", "eq"].forEach(function(c){ RENDERED[c] = {}; ARGS[c].forEach(function(a){ if (Array.isArray(a[1]) && a[0] !== "role") RENDERED[c][a[0]] = 1; }); });
+RENDERED.eq.unit = 1;
+/* which render of a line the preview shows: its level, and the option changed last among those the prototype rendered */
+function variantOf(k){
+  var s = LST[k], m = META[k], L = lvOf(k), set = Object.keys(s.opts).filter(function(o){ return RENDERED[m.cmd][o]; });
+  if (L === 0) return {name:"L" + Math.max(1, DLEVEL), hidden:"masked"};
+  var o = s.last && RENDERED[m.cmd][s.last] && s.opts[s.last] != null ? s.last : set[set.length - 1];
+  var name = o ? "L" + L + "|" + o + "=" + s.opts[o] : "L" + L;
+  var v = D5[k].v[name];
+  if (v && v[1] === 0) return {name:"L" + L, hidden:"dnone"};
+  return {name:name, several: set.length > 1 ? o : null};
+}
+function spr(sheet, name, cls){
+  var d = D5[sheet], v = d.v[name], z = DZOOM;
+  if (!v || !v[1]) return "";
+  var file = sheet === "_head" ? "head" : sheet === "_figure" ? "figure" : "line-" + sheet;
+  return '<div class="spr' + (cls ? " " + cls : "") + '" style="width:' + (d.w*z).toFixed(1) + 'px;height:' + (v[1]*z).toFixed(1) + 'px;background-image:url(prev/' + file + '.png);background-size:' + (d.w*z).toFixed(1) + 'px ' + (d.h*z).toFixed(1) + 'px;background-position:0 ' + (-v[0]*z).toFixed(1) + 'px"></div>';
+}
+/* --- the centre: the file, every element in its order, the hidden ones pale --- */
+function renderDispCentre(){
+  var box = $("dispCentre"), h = '';
+  // the page fits the pane's width at first, as Woodcore's Typst panes do; Ctrl+wheel or − / + zoom from there
+  if (DZOOM === null){ FITZ = Math.max(0.45, Math.min(1.2, (box.clientWidth - 90)/756)); DZOOM = FITZ; }
+  h += '<div class="dtool"><b>' + esc(dt("prev")) + '</b><span class="muted">' + esc(FILE) + ' · ' + esc(dt("doc")) + ' · ' + esc(dt("real")) + '</span><span style="flex:1"></span><label class="small muted" style="display:flex;gap:5px;align-items:center"><input type="checkbox" id="showHidden"' + (SHOWHIDDEN ? " checked" : "") + '>' + esc(dt("hidden")) + '</label><button class="ib" type="button" data-dz="-">−</button><span class="mono small">' + Math.round(DZOOM*100/FITZ) + ' %</span><button class="ib" type="button" data-dz="+">+</button></div>';
+  if (S.id && S.id !== "SN-01") h += '<div class="pnote" style="margin:10px 16px 0">' + esc(dt("other")) + '</div>';
+  h += '<div class="dsheet" style="width:' + (756*DZOOM + 60).toFixed(0) + 'px">';
+  h += '<div class="el">' + spr("_head", "L" + DLEVEL) + '</div>';
+  // the roof's column of figure 3, at the head of the file
+  var fs = figShown(), capDefault = FIG.caption === D5._figure.caption;
+  if (fs || SHOWHIDDEN){
+    h += '<div class="el' + (fs ? '' : ' off') + (OPEN === "_figure" ? ' cur' : '') + '">' + spr("_figure", "w" + FIG.width + "|" + (capDefault ? "cap" : "nocap"));
+    if (!capDefault) h += '<div class="fcap" style="font-size:' + (15.5*DZOOM).toFixed(1) + 'px">Fig. 1. – ' + esc(FIG.caption) + ' <span class="ctag2">' + esc(dt("composed")) + '</span></div>';
+    if (!fs) h += '<span class="mtag">' + esc(dt("masked")) + '</span>';
+    h += '</div>';
+  }
+  LKEYS.forEach(function(k){
+    var v = variantOf(k);
+    if (v.hidden && !SHOWHIDDEN) return;
+    h += '<div class="el' + (v.hidden ? ' off' : '') + (OPEN === k ? ' cur' : '') + '">' + spr(k, v.name) + (v.hidden ? '<span class="mtag">' + esc(dt(v.hidden)) + '</span>' : '') + '</div>';
+  });
+  h += '</div>';
+  box.innerHTML = h;
+}
+/* --- the right pane: the file, the level, the elements --- */
+function typstStr(s){ return '"' + String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"'; }
+function lineCode(k){
+  var s = LST[k], m = META[k], add = [];
+  if (s.level !== null) add.push("level: " + s.level);
+  ARGS[m.cmd].forEach(function(a){ var v = s.opts[a[0]]; if (v == null || v === "") return; if (a[0] === "equation") return; add.push(a[0] + ": " + typstStr(v)); });
+  var line = m.line;
+  if (s.opts.equation) line = line.replace(/`[^`]*`/, "`" + s.opts.equation + "`");
+  ["unit", "label", "descr"].forEach(function(o){ if (s.opts[o] != null && s.opts[o] !== "" && new RegExp(o + ': "').test(line)){ line = line.replace(new RegExp("(, )?" + o + ': "(?:[^"\\\\]|\\\\.)*"'), ""); } });
+  return add.length ? {base:line.slice(0, -1), add:add.join(", ")} : {base:line.slice(0, -1), add:""};
+}
+function figCode(){
+  return '#figure(image("/Variable-loads/Snow/SN-01-fig3.svg", width: ' + FIG.width + '%), caption: [' + FIG.caption + '])' + (FIG.level !== null ? ' // ' + (FIG.level === 0 ? "level: 0" : "level: " + FIG.level) : '') + ' <SN-01-figure-1>';
+}
+function domainCode(){ return '#domain("SN-01", label: "Charge de neige – SN-01", level: ' + DLEVEL + ')['; }
+function wholeFile(){
+  var out = ['#import "/000-Typst-Config/commands.typ": *', "", domainCode(), '#calc-defaults(presets: "block", scope: "domain") <SN-01-presets>', figCode(), ""];
+  LKEYS.forEach(function(k){ var c = lineCode(k); out.push("  " + c.base + (c.add ? ", " + c.add : "") + ")"); });
+  out.push("]"); return out.join("\n");
+}
+function codeHTML5(base, add){ return esc(base) + (add ? '<span class="addarg">, ' + esc(add) + '</span>' : '') + ')'; }
+function segL(k, cur, auto){
+  return '<span class="seg mini lseg" data-lk="' + k + '">' + [0,1,2,3].map(function(v){ var on = cur === v, au = cur === null && auto === v; return '<button type="button" data-lv="' + v + '" class="' + (on ? 'on' : au ? 'au' : '') + '">' + v + '</button>'; }).join("") + '</span>';
+}
+function optsPanel(k){
+  var s = LST[k], m = META[k], h = '<div class="opanel">';
+  ARGS[m.cmd].forEach(function(a){
+    var n = a[0], kind = a[1], v = s.opts[n], w;
+    if (kind === "text"){
+      var ph = n === "equation" ? m.equation : n === "label" ? m.label : n === "descr" ? m.descr : "";
+      w = '<input class="inp" data-opt="' + n + '" value="' + esc(v || "") + '" placeholder="' + esc(ph || "—") + '">';
+    } else if (kind === "unit"){
+      w = '<select class="inp" data-opt="unit"><option value="">' + esc(dt("auto")) + (m.unit ? " (" + esc(m.unit) + ")" : "") + '</option>' + (UNITS[k] || []).map(function(u){ return '<option' + (v === u ? ' selected' : '') + '>' + esc(u) + '</option>'; }).join("") + '</select>';
+    } else {
+      w = '<select class="inp" data-opt="' + n + '"><option value="">' + esc(dt("auto")) + '</option>' + kind.map(function(x){ return '<option' + (v === x ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join("") + '</select>';
+    }
+    h += '<label class="orow"><span class="mono">' + esc(n) + '</span>' + w + '</label>';
+  });
+  h += '<label class="orow"><span class="mono">level</span><select class="inp" data-opt="level"><option value="">' + esc(dt("auto")) + ' (' + DLEVEL + ')</option>' + [0,1,2,3].map(function(x){ return '<option' + (s.level === x ? ' selected' : '') + '>' + x + '</option>'; }).join("") + '</select></label>';
+  var v = variantOf(k), notes = [];
+  if (v.several) notes.push(dt("lastonly", {o: v.several + ": " + s.opts[v.several]}));
+  if (["equation", "as-unit", "label", "descr"].some(function(o){ return s.opts[o]; })) notes.push(dt("textnote"));
+  if (s.opts.role) notes.push(dt("rolenote"));
+  notes.forEach(function(n){ h += '<div class="pnote">' + esc(n) + '</div>'; });
+  var c = lineCode(k);
+  h += '<div class="alab2">' + esc(dt("line")) + '</div><div class="codebox mono">' + codeHTML5(c.base, c.add) + '</div>';
+  h += '<div style="display:flex;justify-content:flex-end;margin-top:6px"><button class="btn sm" type="button" data-reset="' + k + '">' + esc(dt("reset")) + '</button></div></div>';
+  return h;
+}
+function figPanel(){
+  var h = '<div class="opanel">';
+  h += '<label class="orow"><span class="mono">caption</span><input class="inp" data-fig="caption" value="' + esc(FIG.caption) + '"></label>';
+  h += '<label class="orow"><span class="mono">width</span><select class="inp" data-fig="width">' + [40, 50, 65, 80, 100].map(function(x){ return '<option value="' + x + '"' + (FIG.width === x ? ' selected' : '') + '>' + x + ' %</option>'; }).join("") + '</select></label>';
+  h += '<div class="small muted" style="margin:2px 0 6px">' + esc(dt("figlvl")) + '</div>';
+  h += '<div class="alab2">' + esc(dt("line")) + '</div><div class="codebox mono">' + esc(figCode()) + '</div></div>';
+  return h;
+}
+function renderDispRight(){
+  var box = $("dispRight"), h = '';
+  h += '<div class="card dcard"><div class="dhead"><b>' + esc(dt("file")) + '</b><span class="mono small muted">' + esc(FILE) + '</span></div>';
+  h += '<div class="alab2">' + esc(dt("inc")) + '</div><div class="codebox mono" id="incCode">' + esc(INCLUDE) + '</div><div style="display:flex;justify-content:flex-end;margin:6px 0 10px"><button class="btn sm" type="button" id="copyInc">' + esc(dt("copy")) + '</button></div>';
+  h += '<div class="arow"><span class="alab">' + esc(dt("lvl")) + '<span class="ahelp" title="' + esc(dt("lvlh")) + '">?</span></span><span class="seg dseg" id="dlev">' + [1,2,3].map(function(v){ return '<button type="button" data-dl="' + v + '" class="' + (DLEVEL === v ? 'on' : '') + '">' + v + '</button>'; }).join("") + '</span></div>';
+  h += '<div class="codebox mono small">' + esc(domainCode()) + '</div>';
+  // the elements of the file, a section of the same card
+  h += '<div class="dsec"><div class="dhead"><b>' + esc(dt("els")) + '</b><span class="small muted">' + (LKEYS.length + 1) + '</span></div><div class="small muted" style="margin:0 0 8px">' + esc(dt("elsh")) + '</div><div class="elist">';
+  h += '<div class="erow' + (OPEN === "_figure" ? ' open' : '') + (figShown() ? '' : ' off') + '" data-el="_figure"><span class="badge cmdb fig">figure</span><span class="esym">Fig.</span><span class="elab">' + esc(FIG.caption) + '</span>' + segL("_figure", FIG.level, figShown() ? (FIG.level === null ? 3 : FIG.level) : null) + '</div>';
+  if (OPEN === "_figure") h += figPanel();
+  LKEYS.forEach(function(k){
+    var m = META[k], s = LST[k], changed = s.level !== null || Object.keys(s.opts).length;
+    h += '<div class="erow' + (OPEN === k ? ' open' : '') + (lvOf(k) === 0 ? ' off' : '') + '" data-el="' + k + '"><span class="badge cmdb ' + m.cmd + '">' + m.cmd + '</span><span class="esym">' + (SYMH[k] || esc(k)) + (changed ? '<span class="dot" title="modifiée"></span>' : '') + '</span><span class="elab">' + esc(s.opts.label || m.label || "") + '</span>' + segL(k, s.level, DLEVEL) + '</div>';
+    if (OPEN === k) h += optsPanel(k);
+  });
+  h += '</div></div>';
+  h += '<details class="whole"><summary>' + esc(dt("whole")) + '</summary><pre class="codebox mono small">' + esc(wholeFile()) + '</pre></details>';
+  h += '</div>';
+  box.innerHTML = h;
+}
+function renderDisp(){ renderDispCentre(); renderDispRight(); }
+function wireDisp(){
+  var right = $("dispRight"), centre = $("dispCentre");
+  right.addEventListener("click", function(ev){
+    var t0 = ev.target;
+    if (t0.id === "copyInc"){ try { navigator.clipboard.writeText(INCLUDE); } catch (e) {} t0.textContent = dt("copied"); return; }
+    var dl = t0.closest("[data-dl]"); if (dl){ DLEVEL = +dl.dataset.dl; renderDisp(); return; }
+    var lv = t0.closest("[data-lv]");
+    if (lv){ ev.stopPropagation(); var k = lv.parentNode.dataset.lk, n = +lv.dataset.lv;
+      if (k === "_figure") FIG.level = FIG.level === n ? null : n; else LST[k].level = LST[k].level === n ? null : n;
+      renderDisp(); return; }
+    var rs = t0.closest("[data-reset]"); if (rs){ LST[rs.dataset.reset] = {level:null, opts:{}, last:null}; renderDisp(); return; }
+    var row = t0.closest("[data-el]"); if (row){ OPEN = OPEN === row.dataset.el ? null : row.dataset.el; renderDisp(); return; }
+  });
+  right.addEventListener("change", function(ev){
+    var t0 = ev.target;
+    if (t0.dataset.fig){ if (t0.dataset.fig === "width") FIG.width = +t0.value; else FIG.caption = t0.value || D5._figure.caption; renderDisp(); return; }
+    var o = t0.dataset.opt; if (!o || !OPEN || OPEN === "_figure") return;
+    var s = LST[OPEN];
+    if (o === "level") s.level = t0.value === "" ? null : +t0.value;
+    else { if (t0.value === "") delete s.opts[o]; else { s.opts[o] = t0.value; s.last = o; } }
+    renderDisp();
+  });
+  centre.addEventListener("click", function(ev){
+    var z = ev.target.closest("[data-dz]"); if (z){ DZOOM = Math.max(0.45, Math.min(1.6, DZOOM*(z.dataset.dz === "+" ? 1.15 : 1/1.15))); renderDispCentre(); }
+  });
+  centre.addEventListener("change", function(ev){ if (ev.target.id === "showHidden"){ SHOWHIDDEN = ev.target.checked; renderDispCentre(); } });
+  centre.addEventListener("wheel", function(ev){ if (!ev.ctrlKey) return; ev.preventDefault(); DZOOM = Math.max(0.45, Math.min(1.6, DZOOM*(ev.deltaY < 0 ? 1.1 : 1/1.1))); renderDispCentre(); }, {passive:false});
+}
+function setViewMode(m){
+  VIEWMODE = m; hidePop(true);
+  document.querySelectorAll("[data-view]").forEach(function(b){ b.classList.toggle("on", b.dataset.view === m); });
+  var disp = m === "disp";
+  $("form").hidden = disp; $("formActions").hidden = disp; $("mods").hidden = disp; $("dispCentre").hidden = !disp; $("dispRight").hidden = !disp;
+  if (disp) renderDisp();
+}
+document.querySelectorAll("[data-view]").forEach(function(b){ b.addEventListener("click", function(){ setViewMode(b.dataset.view); }); });
+wireDisp();
+window.__disp = {state:function(){ return {DLEVEL:DLEVEL, LST:LST, FIG:FIG, OPEN:OPEN}; }, file:wholeFile, setViewMode:setViewMode, variantOf:variantOf};
+
+MODS = (loadLayout() || DEFAULT).map(function(m){ return Object.assign({}, m); }).filter(function(m){ return m.kind !== "norm" || N[m.norm]; });
+words(); fillForm(); bindNorm(document); update();
+document.addEventListener("keydown", function(ev){ if (ev.key === "Escape"){ hidePop(true); } });
+})();
+</script>

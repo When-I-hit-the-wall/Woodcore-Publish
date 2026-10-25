@@ -1,4 +1,4 @@
-"""Snow loads entered in Woodcore (issue #36): one roof per source, its characteristic snow loads computed here from SIA 261:2020 chapter 5 -- the values out of `norms/sia261_snow.py`. Since v0.120 the one calculation of the snow: an `SL-*` sheet of the Belastungsannahmen workbook is read for its inputs alone and computed here too (domains/snow.py, spec 2026-10-21-restes-issue-69, REQ-001, ARCH-002; docs/domain/loads.md §3.3bis).
+"""Snow loads entered in Woodcore (issue #36): one roof per source, its characteristic snow loads computed here from SIA 261:2020 chapter 5 -- the values out of `norms/sia261_snow.py`. The one calculation of the snow and, since issue #109, its one way in: the `SL-*` sheets of the Belastungsannahmen workbooks are read no more (decision D-33; docs/domain/loads.md §3.3bis).
 
 **A source** is `Woodcore-Datei/loads/snow/<id>.json` (schemas/snow-source.schema.json, 1.0): the altitude `h_0` and the correction of Anhang D (`correction`, m), the exposure (`exposure`: normal, exposed, sheltered -- 5.2.4) and C_T (`c_t`, 5.2.5), the roof (`roof`) and what it reads -- `length` and `width` (m) of a flat roof, `alpha_1` of a mono-pitch or a curved roof, `alpha_1` and `alpha_2` of a duo-pitch or a shed roof --, and whether the snow can slide off (`sliding`: possible, hindered).
 
@@ -17,13 +17,16 @@ from pathlib import Path
 
 import project
 import validation
-from domains._common import fail as _fail, is_number as _number, plain as _fmt  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
+from domains._common import fail_first as _fail_first, fail as _fail, is_number as _number, plain as _fmt  # one copy of the domains' helpers (spec 2026-10-19-base-saine-nettoyage, G4)
 from domains import links  # a field that follows a variable of the export (spec 2026-10-11-variables-liees-champs-et-textes)
 from domains import snow_svg
 from norms import sia261_snow
 
-# The domain's name, held here: domains/snow.py, the reader of the sheets, takes it from its calculation (ARCH-RISK-806, no import the other way)
 DOMAIN = "snow-load"
+# What the registry writes of the domain (registry.DOMAIN_MODULES, docs/domain/calculation-domains.md §3.3): read off this module since the sheets' reader went (issue #109, ARCH-001)
+LABEL = "Schneelast"
+ENGINE = "python"
+ACTION = "variable"  # SIA 260: a variable action (Q), as opposed to a permanent one (G)
 SOURCE_SCHEMA = "snow-source"
 SOURCE_SCHEMA_VERSION = "1.0"
 # 1.1 is 1.0 with `links` (spec 2026-10-11-variables-liees-champs-et-textes, D-17): written only by a source that carries one, so a load following no variable is saved and exported as before
@@ -32,10 +35,12 @@ LINKED_SCHEMA_VERSION = "1.1"
 STEP_SCHEMA_VERSION = "1.2"
 # 1.3 is 1.2 with a free C_e (spec 2026-10-22-onglet-neige-type, REQ-021): `exposure: "custom"` and its number `c_e`, written only where the engineer types one -- the three buttons of 5.2.4 keep a source at its version
 CUSTOM_SCHEMA_VERSION = "1.3"
-SOURCE_SCHEMA_VERSIONS = (SOURCE_SCHEMA_VERSION, LINKED_SCHEMA_VERSION, STEP_SCHEMA_VERSION, CUSTOM_SCHEMA_VERSION)
-CUSTOM = "custom"   # the exposure of a free C_e
+# 1.4 is 1.3 with a free Δh (spec 2026-10-23-neige-correctifs-issues-96-99, REQ-004, D-5): `correction: "custom"` and its number `delta_h`, m, written only where the engineer types one -- the map's five corrections keep a source at its version
+DELTA_SCHEMA_VERSION = "1.4"
+SOURCE_SCHEMA_VERSIONS = (SOURCE_SCHEMA_VERSION, LINKED_SCHEMA_VERSION, STEP_SCHEMA_VERSION, CUSTOM_SCHEMA_VERSION, DELTA_SCHEMA_VERSION)
+CUSTOM = "custom"   # the exposure of a free C_e, and the correction of a free Δh
 # The fields a variable may fill (REQ-009, issue #42) -- the altitude, c_t, the roof's length, width and slopes --, with the unit each is written in. A load follows only another load or a «Formule» domain, the loads being computed first (links.LOADS, D-11). The lists take none.
-LINKABLE = {links.SELF: {"h_0": "m", "c_t": "", "length": "m", "width": "m", "alpha_1": "°", "alpha_2": "°", "c_e": ""}}   # c_e: a free C_e (REQ-021), a number like the others (issue #42)
+LINKABLE = {links.SELF: {"h_0": "m", "c_t": "", "length": "m", "width": "m", "alpha_1": "°", "alpha_2": "°", "c_e": "", "delta_h": "m"}}   # c_e: a free C_e (REQ-021), a number like the others (issue #42)
 FOLDER = "loads/snow"
 SOURCE = "python:domains/snow_source.py"
 NORM = "SIA 261"
@@ -70,12 +75,16 @@ def _version(text):
 
 
 def stamp_version(src):
-    """The schema_version a source is saved at: the highest floor one of its fields asks -- 1.3 a free C_e, 1.2 a height step, 1.1 a field following a variable, 1.0 none -- what Woodcore's window calls before it writes one. A height step that is false and the number of a C_e that is not free are not written at all (D-19, REQ-021), so a source without either stays byte for byte what it was."""
+    """The schema_version a source is saved at: the highest floor one of its fields asks -- 1.4 a free Δh, 1.3 a free C_e, 1.2 a height step, 1.1 a field following a variable, 1.0 none -- what Woodcore's window calls before it writes one. A height step that is false and the number of a C_e or a Δh that is not free are not written at all (D-19, REQ-021, D-5), so a source without either stays byte for byte what it was."""
     if not src.get("height_step"):
         src.pop("height_step", None)
     if src.get("exposure") != CUSTOM:
         src.pop("c_e", None)
-    if src.get("exposure") == CUSTOM:
+    if src.get("correction") != CUSTOM:
+        src.pop("delta_h", None)
+    if src.get("correction") == CUSTOM:
+        src["schema_version"] = DELTA_SCHEMA_VERSION
+    elif src.get("exposure") == CUSTOM:
         src["schema_version"] = CUSTOM_SCHEMA_VERSION
     elif src.get("height_step"):
         src["schema_version"] = STEP_SCHEMA_VERSION
@@ -97,6 +106,8 @@ def check_source(src, where="loads/snow"):
         _fail(where, "height_step at schema_version %r -- a roof with a height step is %r or later" % (src.get("schema_version"), STEP_SCHEMA_VERSION))
     if (src.get("exposure") == CUSTOM or "c_e" in src) and version < _version(CUSTOM_SCHEMA_VERSION):
         _fail(where, "a free C_e at schema_version %r -- it is %r or later" % (src.get("schema_version"), CUSTOM_SCHEMA_VERSION))
+    if (src.get("correction") == CUSTOM or "delta_h" in src) and version < _version(DELTA_SCHEMA_VERSION):
+        _fail(where, "a free Δh at schema_version %r -- it is %r or later" % (src.get("schema_version"), DELTA_SCHEMA_VERSION))
     links.check_all(src, LINKABLE, lambda message: _fail(where, message), "the snow load", links.LOADS)
     try:
         validation.validate_structure(src, SOURCE_SCHEMA)
@@ -116,7 +127,13 @@ def _problems(src):
         out.append((field, code, params, sentence))
     if not _number(src.get("h_0")) or src["h_0"] < 0:
         bad("h_0", "h_0", "h_0 is %r -- the altitude above sea level, m" % (src.get("h_0"),))
-    if src.get("correction") not in c["corrections"]["values"]:
+    if src.get("correction") == CUSTOM:
+        # a Δh of the engineer's own (REQ-004): its number, taken as it is, as a free C_e is
+        if not _number(src.get("delta_h")):
+            bad("correction", "delta_h", "delta_h is %r -- a free Δh is a number of metres (Anhang D)" % (src.get("delta_h"),), ref=c["corrections"]["norm_ref"])
+    elif "delta_h" in src:
+        bad("correction", "delta_h_unused", "delta_h is %r with the correction %r -- a Δh of its own is written with the correction %r" % (src["delta_h"], src.get("correction"), CUSTOM))
+    elif src.get("correction") not in c["corrections"]["values"]:
         bad("correction", "correction", "correction is %r -- SIA 261 Anhang D gives %s m" % (src.get("correction"), ", ".join("%+g" % v for v in c["corrections"]["values"])),
             values=", ".join("%+g" % v for v in c["corrections"]["values"]))
     # a site above 5.1.4's limit is no defect of the file: it is computed, and `messages` says so to the tab (spec 2026-10-14-neige-vent-affichage-altitude, REQ-003)
@@ -149,10 +166,8 @@ def _problems(src):
 
 
 def check_fields(src, fail):
-    """The fields the calculation reads, each checked against SIA 261: `fail(field, message)` stops on the first one wrong (`_problems`), naming the field -- a source names its file, a sheet of the workbook the cell the field is read from (domains/snow.py, ARCH-RISK-807)."""
-    for field, _code, _params, sentence in _problems(src):
-        fail(field, sentence)
-        return
+    """The fields the calculation reads, each checked against SIA 261: `fail(field, message)` stops on the first one wrong (`_problems`), naming the field, the caller naming the source's file."""
+    _fail_first(_problems(src), fail)
 
 
 def _alpha_symbol(src, key):
@@ -198,7 +213,7 @@ def warnings(src):
 
 
 def notes_of(src, where):
-    """`warnings(src)` as the export's warnings (engine.Note), `where` the file or the sheet they are of: a site above 5.1.4's limit is computed, and said (spec 2026-10-21-restes-issue-69, ARCH-RISK-811)."""
+    """`warnings(src)` as the export's warnings (engine.Note), `where` the file they are of: a site above 5.1.4's limit is computed, and said (spec 2026-10-21-restes-issue-69, ARCH-RISK-811)."""
     import engine
     return [engine.Note("snow_" + code, "%s: h_0 = %g m is above the %g m of SIA 261 %s -- its provisions do not apply there" % (where, p["h_0"], p["limit"], p["ref"]),
                         where=where, **p) for code, p in warnings(src)]
@@ -247,6 +262,17 @@ def chart(src):
     return snow_svg.chart(series, marks)
 
 
+# What each roof coefficient is read off, which no step of the instance records -- Figur 2 by a slope and the sliding, Figur 4 by the plan of a flat roof (`coefficients`) --, for the tab's highlight (spec 2026-10-23-neige-correctifs-issues-96-99, UI-004): {μ: names}, the roof's form beside each
+MU_USES = {"mu_1": ("alpha_1", "L", "B", "abgleiten"), "mu_11": ("alpha_1", "abgleiten"), "mu_12": ("alpha_2", "abgleiten"),
+           "mu_2m": ("alpha_1", "alpha_2"), "mu_3": ("alpha_1",)}
+
+
+def extra_dependencies(instance):
+    """{μ: [names it is read off]} for the coefficients the instance holds -- only the names it holds too (a flat roof has no slope) --, what `dependencies.graph` adds to the steps; never a step of the export, which would change the form of every case's file."""
+    held = set((instance or {}).get("vars") or ())
+    return {mu: [u for u in uses + ("dachform",) if u in held] for mu, uses in MU_USES.items() if mu in held}
+
+
 def read_source(path):
     path = Path(path)
     where = "%s/%s" % (FOLDER, path.name)
@@ -286,8 +312,8 @@ def coefficients(src):
     return {"mu_3": (sia261_snow.curve(c["mu_3"]["points"], src["alpha_1"]), "Figur 2")}
 
 
-def build_instance(src, here=None, inputs=None):
-    """One instance of `snow-load`: h_ref, s_k, C_e, C_T, the roof and its coefficients, and the loads of the two models of Figur 3. No drawing: `sketch` is the tab's (D-03). `inputs` says where each field of `src` was read, {field: source} -- a sheet's cells, `excel:<workbook>!<cell>` (domains/snow.py) --, a field it does not name being entered in Woodcore."""
+def build_instance(src, here=None):
+    """One instance of `snow-load`: h_ref, s_k, C_e, C_T, the roof and its coefficients, and the loads of the two models of Figur 3. No drawing: `sketch` is the tab's (D-03). Each input's provenance is the source it was entered in, `entered:loads/snow/<id>.json`."""
     import engine
     c = sia261_snow.clause()
     calc = engine.Calculation()
@@ -297,17 +323,22 @@ def build_instance(src, here=None, inputs=None):
         calc.add_var(name=name, value=value, unit=unit, symbol=symbol, label=label,
                      source=more.pop("source", SOURCE), norm=NORM, norm_ref=norm_ref, **more)
 
-    inputs = inputs or {}
-
-    def entered(field):
-        return inputs.get(field, "entered:%s" % where)
+    def entered(_field):
+        return "entered:%s" % where
     # --- the site
     var("h_0", src["h_0"], "h_0", "m", "Höhe ü. NN", "5.2.6", source=entered("h_0"), description="Höhe des Standorts über Meer.")
     # the corrections Anhang D allows, each its height (the workbook's dropdown until v0.120): the choice the report sets beside Δh
-    corrections = [{"value": v, "desc": "± 0 m" if v == 0 else "%+g m" % v} for v in c["corrections"]["values"]]
-    var("korrektur", src["correction"], "Delta h", "m", "Korrektur Wert", "Anhang D", source=entered("correction"),
-        description="Höhenzuschlag auf die Höhe ü. NN nach SIA 261, Anhang D.", choices=corrections)
-    h_ref = src["h_0"] + src["correction"]
+    if src["correction"] == CUSTOM:
+        # a Δh of the engineer's own (REQ-004): its number, without the map's five corrections beside it
+        correction = src["delta_h"]
+        var("korrektur", correction, "Delta h", "m", "Korrektur Wert", "Anhang D", source=entered("delta_h"),
+            description="Höhenzuschlag auf die Höhe ü. NN nach SIA 261, Anhang D.")
+    else:
+        correction = src["correction"]
+        corrections = [{"value": v, "desc": "± 0 m" if v == 0 else "%+g m" % v} for v in c["corrections"]["values"]]
+        var("korrektur", correction, "Delta h", "m", "Korrektur Wert", "Anhang D", source=entered("correction"),
+            description="Höhenzuschlag auf die Höhe ü. NN nach SIA 261, Anhang D.", choices=corrections)
+    h_ref = src["h_0"] + correction
     var("h_ref", h_ref, 'h_"ref"', "m", "Bezugshöhe", "5.2.6")
     calc.add_step(name="Bezugshöhe", result="h_ref", uses=["h_0", "korrektur"], formula='h_"ref" = h_0 + Delta h', norm=NORM, norm_ref="Anhang D")
     # --- the coefficients
@@ -414,18 +445,19 @@ def declaration():
     linkable = LINKABLE[links.SELF]
     by_id = {e["id"]: e for e in c["exposure"]["choices"]}
     fields = (
-        Field("length", "number", "m", excerpts=("5.3.5", "fig4"), minimum=0.0, maximum=1000.0, decimals=1, step=1.0, linkable="length" in linkable),
-        Field("width", "number", "m", excerpts=("5.3.5", "fig4"), minimum=0.0, maximum=1000.0, decimals=1, step=1.0, linkable="width" in linkable),
-        Field("h_0", "number", "m", excerpts=("5.2.6", "5.1.4"), minimum=0.0, maximum=5000.0, decimals=0, step=10.0, linkable="h_0" in linkable),
-        Field("correction", "buttons", "m", choices=tuple(Choice(v, value=v) for v in c["corrections"]["values"]), excerpts=("annexD",)),
+        Field("length", "number", "m", excerpts=("5.3.5", "fig4"), minimum=0.0, maximum=1000.0, decimals=1, step=1.0, linkable="length" in linkable, var="L"),
+        Field("width", "number", "m", excerpts=("5.3.5", "fig4"), minimum=0.0, maximum=1000.0, decimals=1, step=1.0, linkable="width" in linkable, var="B"),
+        Field("h_0", "number", "m", excerpts=("5.2.6", "5.1.4"), minimum=0.0, maximum=5000.0, decimals=0, step=10.0, linkable="h_0" in linkable, var="h_0"),
+        Field("correction", "buttons", "m", choices=tuple(Choice(v, value=v) for v in c["corrections"]["values"]), excerpts=("annexD",),
+              minimum=-1000.0, maximum=2000.0, decimals=0, step=10.0, free_id=CUSTOM, free_key="delta_h", var="korrektur"),
         Field("exposure", "buttons", "", choices=tuple(Choice(i, PREFIX + "c_exposure_" + i, by_id[i]["value"]) for i in EXPOSURE_ORDER),
-              excerpts=(c["exposure"]["norm_ref"],), minimum=0.01, maximum=5.0, decimals=2, step=0.05, free_id=CUSTOM, free_key="c_e"),
-        Field("c_t", "number", "", excerpts=(c["c_t"]["norm_ref"],), minimum=0.0, maximum=c["c_t"]["default"], decimals=2, step=0.05, linkable="c_t" in linkable),
-        Field("roof", "tiles", "", choices=tuple(Choice(r, ROOF_WORDS[r], excerpts=ROOF_EXCERPTS[r]) for r in ROOFS), excerpts=("fig3",)),
-        Field("alpha_1", "number", "°", excerpts=("5.2.3", "fig2"), minimum=0.0, maximum=90.0, decimals=1, step=1.0, linkable="alpha_1" in linkable),
-        Field("alpha_2", "number", "°", excerpts=("5.2.3", "fig2"), minimum=0.0, maximum=90.0, decimals=1, step=1.0, linkable="alpha_2" in linkable),
-        Field("sliding", "buttons", "", choices=tuple(Choice(k, PREFIX + "c_sliding_" + k) for k in SLIDING), excerpts=(c["hindered"]["norm_ref"], c["steep"]["norm_ref"])),
-        Field("height_step", "checkbox", "", excerpts=(c["height_step"]["norm_ref"], "fig5")),
+              excerpts=(c["exposure"]["norm_ref"],), minimum=0.01, maximum=5.0, decimals=2, step=0.05, free_id=CUSTOM, free_key="c_e", var="ce"),
+        Field("c_t", "number", "", excerpts=(c["c_t"]["norm_ref"],), minimum=0.0, maximum=c["c_t"]["default"], decimals=2, step=0.05, linkable="c_t" in linkable, var="ct"),
+        Field("roof", "tiles", "", choices=tuple(Choice(r, ROOF_WORDS[r], excerpts=ROOF_EXCERPTS[r]) for r in ROOFS), excerpts=("fig3",), var="dachform"),
+        Field("alpha_1", "number", "°", excerpts=("5.2.3", "fig2"), minimum=0.0, maximum=90.0, decimals=1, step=1.0, linkable="alpha_1" in linkable, var="alpha_1"),
+        Field("alpha_2", "number", "°", excerpts=("5.2.3", "fig2"), minimum=0.0, maximum=90.0, decimals=1, step=1.0, linkable="alpha_2" in linkable, var="alpha_2"),
+        Field("sliding", "buttons", "", choices=tuple(Choice(k, PREFIX + "c_sliding_" + k) for k in SLIDING), excerpts=(c["hindered"]["norm_ref"], c["steep"]["norm_ref"]), var="abgleiten"),
+        Field("height_step", "checkbox", "", excerpts=(c["height_step"]["norm_ref"], "fig5"), var="hoehensprung"),
     )
     sections = (("building", ("length", "width")), ("site", ("h_0", "correction", "exposure", "c_t")),
                 ("roof", ("roof", "alpha_1", "alpha_2", "sliding", "height_step")))

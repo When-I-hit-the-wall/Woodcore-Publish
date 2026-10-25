@@ -17,7 +17,9 @@ _STATE = {}
 # The engineer's list (T22) as the window names its tabs; the six checks not built yet get their views when they are built on MemberCheckTab, as «Flexion» did (08.10.2026).
 LISTED = ("tab_plan", "tab_fire", "tab_positions", "tab_journal", "tab_statics", "tab_schema", "tab_connections",
           "tab_polar", "tab_mc_tension", "tab_mc_compression", "tab_mc_bending", "tab_mc_shear",
-          "tab_mc_buckling", "tab_mc_ltb", "tab_mc_fire", "tab_variables")
+          "tab_mc_fire")
+# Tabs of the list that have one view since then: «Variables» lost «Affichage» with issue #114 (D-4, the engineer: the card suffices).
+ONE_VIEW = ("tab_variables",)
 
 
 def _qt():
@@ -95,7 +97,7 @@ def test_every_tab_of_the_list_declares_its_views_and_the_words_are_in_three_lan
         if key in LISTED:
             assert declared and ("display" in declared or "typst" in declared), (key, declared)   # how the report prints it: «Affichage», a plan's being its compiled #show-plan (key `typst`)
             assert all(view in views.WORDS for view in declared), (key, declared)
-        if key.startswith("tab_mc_") and key not in LISTED or key in ("tab_commands", "tab_structure", "tab_annexes", "tab_python"):
+        if key.startswith("tab_mc_") and key not in LISTED or key in ("tab_commands", "tab_structure", "tab_annexes", "tab_python") + ONE_VIEW:
             assert not declared, (key, declared)
     reference = set(views.STRINGS["fr"])
     assert set(views.STRINGS["de"]) == reference == set(views.STRINGS["en"])
@@ -271,7 +273,7 @@ def test_the_typst_view_takes_its_plan_from_the_list_and_recompiles_at_every_opt
 
 
 def test_affichage_offers_each_tabs_commands_and_each_changes_the_call():
-    """REQ-008 and REQ-009, tab by tab: in «Affichage» every command offered for what is chosen on the left gives its own call, and either a page is asked for or a note says why there is none. The variables offer val and var, each with its own options."""
+    """REQ-008 and REQ-009, tab by tab: in «Affichage» every command offered for what is chosen on the left gives its own call, and either a page is asked for or a note says why there is none. (The loads' commands, «Variables»' «Affichage» since v0.117, are its card's since issue #114: tests/test_variable_card.py.)"""
     window, here = _window()
     import views
     import woodcore_gui
@@ -281,11 +283,6 @@ def test_affichage_offers_each_tabs_commands_and_each_changes_the_call():
             if "display" not in views.declared(tab):
                 continue
             window.tab_widget.setCurrentIndex(index)
-            if key == "tab_variables":
-                exported = next((d for d in tab.export.domains if d.variables), None)
-                assert exported is not None, "the example's export lists values"
-                tab.select_key(("export", exported.name, exported.variables[0].key))
-                assert tab.variable(tab.selected_key()) is not None
             window.on_view_chosen("display")
             display = tab.display
             asked = []
@@ -299,59 +296,9 @@ def test_affichage_offers_each_tabs_commands_and_each_changes_the_call():
                 assert display.command(), (key, display.current().title)
                 assert len(asked) > before or not display.note.isHidden(), (key, display.current().title, "neither a page asked for nor a note")
             assert len(set(calls)) == len(calls), (key, calls)
-            if key == "tab_variables" and display.chooser.count() >= 2:
-                titles = [display.chooser.itemText(i) for i in range(display.chooser.count())]
-                assert titles[:2] == ["val", "var"], titles
-                display.chooser.setCurrentIndex(0)
-                val_options = set(display.panel().controls)
-                display.chooser.setCurrentIndex(1)
-                assert set(display.panel().controls) != val_options, "val and var have their own options"
             display.activate(False)
             window.on_view_chosen(views.declared(tab)[0])
         assert not shown, shown
-
-
-def test_the_loads_offer_each_rows_commands_a_value_a_case_and_a_category():
-    """REQ-008 of v0.117 for the loads, carried to the Variables tab that took them over in v0.117 (issue 13, D-006, D-013), in the forms of the spec 2026-10-21-commandes-typst-refonte: a value offers `#var`, read live (REQ-009); a case and a category of SIA 261 Tabelle 8 their file included, the loop over their calculation's cases (REQ-017) and the two load tables (Q-009) -- and each gives its own call, its page asked for or a note saying why there is none."""
-    window, here = _window()
-    with project.using(here), _boxes() as shown:
-        index, tab = _tab(window, "tab_variables")
-        window.tab_widget.setCurrentIndex(index)
-        window.on_view_chosen("display")
-        display = tab.display
-        asked = []
-        display.pane.request_snippet = lambda *a: asked.append(a)
-        display.activate(True)
-        case = next(d for d in tab.export.domains if d.address and d.address[0] not in ("live-load", "connection", "connector", "script") and d.variables)
-        live = next(d for d in tab.export.domains if d.address and d.address[0] == "live-load" and d.variable("q_k") is not None)
-        rows = {
-            "value": ("export", case.name, case.variables[0].key),
-            "case": ("export", case.name, None),
-            "category": ("export", live.name, None),
-        }
-        expected = {
-            "value": ["var"],
-            "case": ["domain-file"],
-            "category": ["domain-file"],
-        }
-        for what, key in rows.items():
-            tab.select_key(key)
-            titles = [display.chooser.itemText(n) for n in range(display.chooser.count())]
-            assert titles[:len(expected[what])] == expected[what], (what, titles)
-            if what != "value":
-                assert titles[-2:] == ["var-table", "var-table — kN/m"], (what, titles)
-                assert display.t("ds_loop", command="domain-file") in titles, (what, titles)
-            calls = []
-            for n in range(display.chooser.count()):
-                before = len(asked)
-                display.chooser.setCurrentIndex(n)
-                calls.append(display.command())
-                assert len(asked) > before or not display.note.isHidden() or n == 0, (what, titles[n])
-            assert len(set(calls)) == len(calls), (what, calls)
-        display.activate(False)
-        window.on_view_chosen("data")
-        assert not shown, shown
-
 
 
 def test_a_page_zoomed_goes_back_to_its_width_when_its_tab_is_left():

@@ -107,3 +107,23 @@ def test_a_level_written_survives_the_objects_round_trip():
         model = to.model_for(to.parse_call(call))
         assert model.get("level") in (1, 3), call
         assert "level: " + str(model.get("level")) in model.serialize(), (call, model.serialize())
+
+
+def test_the_levels_measured_on_the_pages_agree_with_the_declaration():
+    """ARCH-011 (spec 2026-10-24-onglet-commandes-pages, REQ-008): build_examples measures which levels of each example print the same page; a command declared in LEVELS_CONFOUNDED prints the same at those levels in every example rendered at three, and a command not declared has at least one example whose levels 2 and 3 differ -- a disagreement either way names the command."""
+    import build_examples as examples
+    by_command = {}
+    for entry in examples.load_manifest()["examples"]:
+        if entry["level"] == 2:
+            levels = {e["level"] for e in examples.load_manifest()["examples"] if (e["command"], e["index"]) == (entry["command"], entry["index"])}
+            if levels == {1, 2, 3}:
+                by_command.setdefault(entry["command"], []).append(entry.get("same"))
+    wrong = []
+    for command, measured in by_command.items():
+        declared = lib.LEVELS_CONFOUNDED.get(command, ((), ""))[0]
+        if tuple(declared) == (2, 3):
+            if any(same not in ("23", "123") for same in measured):
+                wrong.append(f"{command}: declared alike at 2 and 3, an example prints them differently ({measured})")
+        elif all(same in ("23", "123") for same in measured):
+            wrong.append(f"{command}: not declared alike at 2 and 3, and every example prints them alike ({measured})")
+    assert not wrong, wrong

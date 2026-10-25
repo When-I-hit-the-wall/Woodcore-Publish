@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Calculations",
-  "description": "data/calculations.json -- every calculation domain and its instances (docs/domain/calculation-domains.md §3.3). A domain groups calculations of one kind (snow-load, dead-load, wind-load, live-load); an instance is one sheet of one of the project's Belastungsannahmen workbooks (every .xlsm/.xlsx whose name contains 'Belastungsannahmen'), discovered by the domain's sheet_prefix -- or, for a domain read from a norm table (engine 'norm'), one row of that table: live-load's instances are the categories of SIA 261's Tabelle 8 (section 3.3septies). Domains attached to a position live in data/positions/<id>.json instead.",
+  "description": "data/calculations.json -- every calculation domain and its instances (docs/domain/calculation-domains.md §3.3). A domain groups calculations of one kind (snow-load, dead-load, wind-load, live-load); an instance is one case entered in Woodcore's tabs, computed from its source (Woodcore-Datei/loads/<kind>/<id>.json, `source_file`) -- or, for a domain read from a norm table (engine 'norm'), one row of that table: live-load's instances are the categories of SIA 261's Tabelle 8 (section 3.3septies). Domains attached to a position live in data/positions/<id>.json instead.",
   "type": "object",
   "required": [
     "schema_version",
@@ -10,13 +10,9 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "description": "1.5 since issues #35-#37 (additive: an instance may be computed from a source of the project -- `engine`, `source_file`, `figures`); 1.4 still read. Pinned to these two: an export written at another version is refused rather than read as this one. 1.6 (issue #42): 1.5 with an instance's `links`, written only where a load source follows a variable. 1.7 (issue #64): 1.6 with an instance's drawings named from the Typst root (`/Permanent-loads/Exports/Figures/dead-load-A1.svg`), written where a project laid out by folders draws one. 1.8 (v0.120, spec 2026-10-20-indices-et-niveaux, UI-002): a var, a step or a check carries no level -- lib/line-levels.json says the level each line is printed from, read by Typst when it prints; 1.8 holds what 1.6 and 1.7 hold, and a line's own level, where an older export writes one, is read where the table names it not.",
+      "description": "1.9 since issue #109 (decision D-33): no load workbook is read -- a domain carries no `sheet_prefix`, an instance no `workbook` and no `sheet`, an engine is 'python' or 'norm'. Pinned to it alone: an export written by an earlier version (1.4 to 1.8) is refused where it is read -- the Variables tab, the report's compile, `woodcore-cli check` -- and replaced by the next «Import données», which never reads it against this schema. Before: 1.5 since issues #35-#37 (an instance computed from a source of the project -- `engine`, `source_file`, `figures`). 1.6 (issue #42): 1.5 with an instance's `links`, written only where a load source follows a variable. 1.7 (issue #64): 1.6 with an instance's drawings named from the Typst root (`/Permanent-loads/Exports/Figures/dead-load-A1.svg`), written where a project laid out by folders draws one. 1.8 (v0.120, spec 2026-10-20-indices-et-niveaux, UI-002): a var, a step or a check carries no level -- lib/line-levels.json says the level each line is printed from, read by Typst when it prints; 1.8 holds what 1.6 and 1.7 hold, and a line's own level, where an older export writes one, is read where the table names it not.",
       "enum": [
-        "1.4",
-        "1.5",
-        "1.6",
-        "1.7",
-        "1.8"
+        "1.9"
       ]
     },
     "domains": {
@@ -28,7 +24,6 @@
             "label",
             "action",
             "engine",
-            "sheet_prefix",
             "instances"
           ],
           "properties": {
@@ -41,11 +36,7 @@
             },
             "engine": {
               "type": "string",
-              "description": "Which side produced the numbers: 'excel' (the sheet calculated them, Python only read the cells), 'python' (Python calculated them from the sheet's raw entries) or 'norm' (nobody calculated them -- they are read from a norm table, as live-load reads SIA 261's Tabelle 8). Recorded per domain the same way every var records its own `source`."
-            },
-            "sheet_prefix": {
-              "type": "string",
-              "description": "The prefix of the sheets carrying this domain's instances ('SL', 'WL', 'EL+AL'). Empty for a domain whose engine is 'norm', which is read from no workbook."
+              "description": "Which side produced the numbers: 'python' (Woodcore calculated them from the cases entered in its tabs) or 'norm' (nobody calculated them -- they are read from a norm table, as live-load reads SIA 261's Tabelle 8). Recorded per domain the same way every var records its own `source` (validation.ENGINES)."
             },
             "instances": {
               "type": "object",
@@ -59,17 +50,9 @@
                     "checks"
                   ],
                   "properties": {
-                    "workbook": {
-                      "type": "string",
-                      "description": "File name of the load workbook this sheet was read from (02_Belastungsannahmen.xlsm). Carried per instance, not per domain: one domain's sheets may come from several workbooks. Required of every instance read from a workbook (validation.py), and absent from one read from a norm table, which has no file to name."
-                    },
-                    "sheet": {
-                      "type": "string",
-                      "description": "The sheet this instance was read from, which is also its id. Absent for an instance read from a norm table, whose id is the table's own row key (a category of Tabelle 8)."
-                    },
                     "results": {
                       "type": "array",
-                      "description": "Names of the vars that are this instance's final results -- what show-calc prints at level 1. A list, not a single value, because one sheet may legitimately produce several (SL-Dach2's q_k11 and q_k12).",
+                      "description": "Names of the vars that are this instance's final results -- what show-calc prints at level 1. A list, not a single value, because one case may legitimately produce several (a duo-pitch roof's q_k11 and q_k12).",
                       "items": {
                         "type": "string"
                       }
@@ -108,7 +91,7 @@
                           },
                           "source": {
                             "type": "string",
-                            "description": "Where the table's own numbers come from, in a var's `source` format ('python:domains/wind.py'). For a table whose cells are numbers rather than vars -- a `value` cell's var carries its own -- and the one record that a table was computed in Python on a domain whose engine is Excel (wind-load's local forces)."
+                            "description": "Where the table's own numbers come from, in a var's `source` format ('python:domains/wind_source.py'). For a table whose cells are numbers rather than vars -- a `value` cell's var carries its own --."
                           },
                           "note": {
                             "type": [
@@ -179,7 +162,7 @@
                       "patternProperties": {
                         ".*": {
                           "type": "object",
-                          "description": "One traced input/result. `value` is a number for a calculated quantity, or a string for a text entry the source workbook offers as a dropdown -- a load model name, a Ja/Nein answer (docs/domain/loads.md §3.3bis).",
+                          "description": "One traced input/result. `value` is a number for a calculated quantity, or a string for a text entry chosen from a list -- a roof's name, the sliding of the snow (docs/domain/loads.md §3.3bis).",
                           "required": [
                             "value",
                             "unit",
@@ -336,7 +319,7 @@
                     },
                     "source_file": {
                       "type": "string",
-                      "description": "The source this instance was computed from, under Woodcore-Datei (loads/dead/D1.json): an instance entered in Woodcore names it, and no workbook and no sheet (1.5)."
+                      "description": "The source this instance was computed from, under Woodcore-Datei (loads/dead/D1.json): every case of a load names it (1.5)."
                     },
                     "figures": {
                       "type": "array",

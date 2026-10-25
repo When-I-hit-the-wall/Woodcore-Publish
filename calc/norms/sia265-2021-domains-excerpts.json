@@ -1,0 +1,128 @@
+{
+ "_source": "SIA 265:2021 -- the clauses the «Domaines» tab's example domains cite (issue #113, REQ-014): their page and box relevé in the prototype «Domaines de calcul» v2 off the editions shipped in norm-library/, their words copied from them and held to the PDF by tests/test_norm_excerpts.py.",
+ "_note": "Found by a citation of a domain's line (`norm:`, `norm-section:`) through norms.excerpts.for_citation; a clause cited that no file lists has no bubble.",
+ "edition": "SIA 265:2021",
+ "editions": {
+  "fr": {
+   "file": "SIA265-2021-FR.pdf",
+   "chapter": [
+    22,
+    32
+   ]
+  },
+  "de": {
+   "file": "SIA265-2021-DE.pdf",
+   "chapter": [
+    22,
+    32
+   ]
+  }
+ },
+ "excerpts": {
+  "3.3.2.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "3.3.2.1",
+     "page": 25,
+     "box": [
+      64,
+      89,
+      534,
+      150
+     ],
+     "text": "3.3.2.1 Les valeurs de dimensionnement pour le bois massif, le bois massif à entures multiples et le bois massif reconstitué du tableau 8 sont définies sur la base des chiffres 2.2.3 à 2.2.5. Les valeurs de calcul concernant la résistance et l’élasticité correspondent à la classe d’humidité 1 (ηw = 1,0). Pour des autres classes d’humidité ou pour des actions assimilables à des chocs, on multipliera ces valeurs par les coefficients correspondants ηw resp. ηt.",
+     "chapter": [
+      25,
+      25
+     ]
+    },
+    "de": {
+     "ref": "3.3.2.1",
+     "page": 25,
+     "box": [
+      64,
+      89,
+      534,
+      157
+     ],
+     "text": "3.3.2.1 Die Bemessungswerte für Vollholz, keilgezinktes Vollholz und Balkenschichtholz gemäss Tabelle 8 sind unter Beachtung von 2.2.3 bis 2.2.5 ermittelt. Die Bemessungswerte bezüglich Festigkeit und Steifigkeit gelten für die Feuchteklasse 1 (ηw = 1,0). Für andere Feuchteklassen und/oder stossartige Einwirkungen sind diese Werte mit den entsprechenden Beiwerten ηw bzw. ηt zu multiplizieren.",
+     "chapter": [
+      25,
+      25
+     ]
+    }
+   }
+  },
+  "4.2.3.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "4.2.3.1",
+     "page": 32,
+     "box": [
+      64,
+      66,
+      534,
+      162
+     ],
+     "text": "4.2.3 Flexion\n4.2.3.1 Dans le cas de contraintes de flexion parallèles au fil:\nσm,y,d / fm,y,d + σm,z,d / fm,z,d ≤ 1   (14)\nLe risque éventuel de déversement doit être vérifié selon le chiffre 4.2.9.",
+     "chapter": [
+      32,
+      32
+     ]
+    },
+    "de": {
+     "ref": "4.2.3.1",
+     "page": 32,
+     "box": [
+      64,
+      66,
+      534,
+      162
+     ],
+     "text": "4.2.3 Biegung\n4.2.3.1 Bei Wirkung von Biegespannungen in Faserrichtung ist folgende Bedingung zu erfüllen:\nσm,y,d / fm,y,d + σm,z,d / fm,z,d ≤ 1   (14)\nDie Möglichkeit des Kippens ist gemäss 4.2.9 zu prüfen.",
+     "chapter": [
+      32,
+      32
+     ]
+    }
+   }
+  },
+  "tab04": {
+   "kind": "figure",
+   "editions": {
+    "fr": {
+     "ref": "Tableau 4",
+     "page": 22,
+     "box": [
+      64,
+      641,
+      534,
+      756
+     ],
+     "text": "Tableau 4 Facteurs de réduction ηw pour tenir compte de l’influence de la teneur en eau du bois sur la résistance ultime et la rigidité",
+     "chapter": [
+      22,
+      22
+     ]
+    },
+    "de": {
+     "ref": "Tabelle 4",
+     "page": 22,
+     "box": [
+      64,
+      607,
+      534,
+      711
+     ],
+     "text": "Tabelle 4 Beiwerte ηw zur Erfassung des Einflusses der Holzfeuchte auf den Tragwiderstand und die Steifigkeit",
+     "chapter": [
+      22,
+      22
+     ]
+    }
+   }
+  }
+ }
+}

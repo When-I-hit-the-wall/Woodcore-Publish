@@ -63,12 +63,14 @@ LIB_FILES += ("positions.typ",)
 #
 # ⚠️ This list is the tab's contents. tests/test_commands.py checks it both ways -- a name here that the engine no longer defines, and a binding the engine defines that is named neither here nor implicitly internal -- so a command added to lib/ and given no category fails a test instead of quietly not existing for the reader.
 #
-# ⚠️ **The order of the categories is defined here and nowhere else**: Woodcore's tree, the website's navigation and its reference pages all follow it, and a category's name and its one-line introduction are calc/i18n/reference.json's (command_docs.category_label). What a report is written with comes first -- the engineer's order: calculating in the report, then showing what the export calculated.
+# ⚠️ **The order of the categories is defined here and nowhere else**: Woodcore's tree, the website's navigation and its reference pages all follow it, and a category's name and its one-line introduction are calc/i18n/reference.json's (command_docs.category_label). The categories go by task, what a report is written with first and the building blocks of a template last (the engineer's order, 24.10.2026): calculating in the report, printing a drawing or an object, reading the project's data, the document and its citations, writing a template.
 CATEGORIES = (
     ("formula", (
         "var", "eq", "unit", "verify",
         # the fine display arguments' own commands (spec 2026-10-21-commandes-typst-refonte, REQ-006, REQ-008): the defaults of the lines that follow, and the calculation domain that replaced var-domain
         "calc-defaults", "domain",
+        # what a domain's file prints from a level on, a figure of the norm at level 3 alone (spec 2026-10-23-onglet-vent-briques, D-29)
+        "from-level",
         # the variables of one role listed from the registry, of a domain or of all (REQ-010): the summaries' successor (Q-009)
         "var-table",
         # computed in the report from a diameter the call gives, like the lines above, and read from calc/norms/ rather than from the export (v0.87)
@@ -95,10 +97,6 @@ CATEGORIES = (
         # one field of a variable, one command since v0.120
         "get",
     )),
-    ("format", (
-        "fmt-number", "fmt-value", "fmt-decimals",
-        "render-symbol", "render-formula", "render-prose",
-    )),
     ("document", (
         # the bibliography at the end of the report, and a citation in the prose (v0.99): a part of the document, like its language and its metadata, and not a calculation of the export
         "show-bibliography", "cite-norm",
@@ -108,6 +106,11 @@ CATEGORIES = (
         "t", "tl", "t-str", "tl-str", "t-label", "t-pattern", "t-of", "tl-of",
         "report-level", "uniform-level",   # number-digits left them in v0.120: one display rule, lib/number.typ
         "show-masked",   # the preview of «Affichage» shows what the report hides (spec 2026-10-22-onglet-neige-type, UI-011)
+    )),
+    # the building blocks of a template of one's own, last: what a report is written with comes first (the engineer, 24.10.2026, issue #115 answer 3)
+    ("format", (
+        "fmt-number", "fmt-value", "fmt-decimals",
+        "render-symbol", "render-formula", "render-prose",
     )),
 )
 
@@ -121,6 +124,7 @@ NO_LEVEL = {
     "domain-file": "an accessor: it gives the path of a file, which `#include` prints (ARCH-008)",
     "sync": "a value kept in step, printed as it is written: its content says what it shows (REQ-011)",
     "position": "one position on a line, the same at every level: the fields its call names (REQ-015)",
+    "from-level": "its level is its first argument: what it holds is printed from that level on, never at a level of its own (spec 2026-10-23-onglet-vent-briques, D-29)",
     **{name: "a drawing for a native #figure: what it shows is its `detail-figure` and `detail-legend`, the same at every level (REQ-013, D-13)" for name in ("image-positions-plan", "image-fire-plan", "image-static-model", "image-schema", "image-extract", "image-polar-moment")},
     **{name: "a part of an export sheet, held by a #place: a sheet prints at level 2 (Q-015)" for name in ("image-section", "image-legend", "image-titleblock")},
     "var-table": "a table of the variables its call chooses -- their role, their domain, their unit and its columns --, which the lines it lists each print at their own level (REQ-010)",

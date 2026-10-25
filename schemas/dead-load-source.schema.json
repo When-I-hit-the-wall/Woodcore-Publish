@@ -13,10 +13,12 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "description": "-- pinned. 1.1 (issue #42): 1.0 with `links`, written only where a field follows a variable.",
+      "description": "-- pinned. 1.1 (issue #42): 1.0 with `links`, written only where a field follows a variable. 1.2 (issue #110): a layer names a material by its id, library catalogue -- written only where one does. 2.0 (issue #111, what Woodcore writes): a layer's pose, its material by its id, link to the line below in place of beside, fill, role; 1.x read through calc/domains/dead_load_migrate.py, in memory.",
       "enum": [
         "1.0",
-        "1.1"
+        "1.1",
+        "1.2",
+        "2.0"
       ]
     },
     "id": {
@@ -40,7 +42,7 @@
         "number",
         "null"
       ],
-      "description": "The permanent load designed with, kN/m², rounded up from the sum of the layers; null takes the sum."
+      "description": "The permanent load designed with, kN/m², rounded up from the sum of the layers; null takes the tenth above or equal to the sum (2.0; the sum itself before)."
     },
     "layers": {
       "type": "array",
@@ -48,9 +50,7 @@
       "items": {
         "type": "object",
         "required": [
-          "kind",
-          "library",
-          "material"
+          "kind"
         ],
         "additionalProperties": false,
         "properties": {
@@ -62,23 +62,41 @@
             ],
             "description": "gk: Eigenlast (poids propre); ak: Auflast (surcharge) -- the engineer's choice for each layer."
           },
+          "pose": {
+            "type": "string",
+            "enum": [
+              "continuous",
+              "spaced",
+              "surface",
+              "typed"
+            ],
+            "description": "2.0: continuous γ·t, spaced γ·t·b/e (width, spacing), surface γ (a weight per m², the thickness drawn only), typed the load written (load) -- calc/domains/dead_load_layers.py."
+          },
           "library": {
             "type": "string",
             "enum": [
               "sia261",
               "belastungsannahmen",
               "project",
-              "direct"
+              "direct",
+              "catalogue"
             ],
-            "description": "Where the weight is read: SIA 261 Anhang A (Tabelle 28 or 29), Woodcore's materials library, the project's materials.json -- or direct, a load typed in kN/m² (`load`)."
+            "description": "1.x only. Where the weight is read: SIA 261 Anhang A (Tabelle 28 or 29), Woodcore's materials library, the project's materials.json 1.0 -- or direct, a load typed in kN/m² (`load`); since 1.2 (issue #110) catalogue: one material by its id, shipped (sia265:, sia265-1:, sia261:, ext:) or the engineer's own (u-…), of which the project keeps a copy."
           },
           "material": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "1.x: the line of the library -- SIA 261's id, the workbook's material name (with its `ebene`), the project's id; for `catalogue` the material's id; for `direct`, the words the table prints. 2.0: the material's id (sia265:, sia265-1:, sia261:, ext:, lignum:, u-…, project:<id> for a 1.0 project's own weight), null for a load typed."
+          },
+          "label": {
             "type": "string",
-            "description": "The line of the library: SIA 261's id, the workbook's material name (with its `ebene`), the project's id; for `direct`, the words the table prints."
+            "description": "2.0: the words of a load typed, or a name typed that no material carries yet."
           },
           "ebene": {
             "type": "string",
-            "description": "The workbook's Ebene, which keys its library with the name."
+            "description": "1.x only. The workbook's Ebene, which keys its library with the name."
           },
           "thickness": {
             "type": [
@@ -92,7 +110,7 @@
               "number",
               "null"
             ],
-            "description": "In mm: the width of battens, rafters or joists set at `spacing`; null for a continuous layer."
+            "description": "In mm: the width of battens, rafters or joists set at `spacing`; 2.0: on a line that does not fill (fill false) the width it covers on 1 m; null otherwise."
           },
           "spacing": {
             "type": [
@@ -103,14 +121,29 @@
           },
           "beside": {
             "type": "boolean",
-            "description": "true: the layer shares the band of the layer above it, drawn in its gaps (the insulation between the rafters)."
+            "description": "1.x only. true: the layer shares the band of the layer above it, drawn in its gaps (the insulation between the rafters). 2.0 says it the other way: link on the layer above."
+          },
+          "link": {
+            "type": "boolean",
+            "description": "2.0: true where the layer shares its level with the line below (two lines at most, one spaced and one that fills, D-07)."
+          },
+          "fill": {
+            "type": "boolean",
+            "description": "2.0: on a level with a spaced line, true (the default) where this line fills the gap the pieces leave, 1000·(1 − b/e) mm on 1 m; false, the width written, 1000 where none is."
+          },
+          "role": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "2.0: what the layer is for, optional -- one of dead_load_layers.ROLES."
           },
           "load": {
             "type": [
               "number",
               "null"
             ],
-            "description": "For `direct`: the load typed, kN/m², above 0."
+            "description": "1.x: for `direct`, the load typed, kN/m², above 0. 2.0: the load of a load typed, or the load that replaces the calculation of a layer of any other pose (ARCH-006), kN/m², above 0; null for none."
           },
           "links": {
             "type": "object",

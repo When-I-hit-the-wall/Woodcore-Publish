@@ -763,7 +763,7 @@ def rename(source, collection, old, new):
 
 
 def known_values(data_dir):
-    """The same, read from data/ -- what Woodcore's window has, saving a model without the load workbooks being read again: every variable a link may name (`variable_sources.known_values`). Empty where nothing has been exported yet, so the window opens on a fresh checkout without complaining."""
+    """The same, read from data/ -- what Woodcore's window has, saving a model without the whole export being run again: every variable a link may name (`variable_sources.known_values`). Empty where nothing has been exported yet, so the window opens on a fresh checkout without complaining."""
     import variable_sources   # the reader of data/'s files: imported here, since it imports the domains that import this one
     return variable_sources.known_values(Path(data_dir))
 
@@ -1113,7 +1113,7 @@ def write(data, files, data_dir):
 
 
 def export(source_dir, data_dir, values=None):
-    """prepare + write, and the warnings -- what Woodcore's window runs when a model is saved, so the report sees it without the load workbooks being read again."""
+    """prepare + write, and the warnings -- what Woodcore's window runs when a model is saved, so the report sees it without the whole export being run again."""
     data, files, notes = prepare(source_dir, values, place=engine.figures(data_dir, "statics"))
     write(data, files, data_dir)
     return notes

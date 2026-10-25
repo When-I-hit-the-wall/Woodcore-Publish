@@ -1,6 +1,6 @@
 {
   "_source": "The material library of a load workbook of an engineering office («load workbook» template, sheet «Material (hier ergänzen)», table Tabelle2, rows 14 to 249), read out once on 11.10.2026 (issue #35, decision D-07). Not a norm, and a faithful read-out but for four entries the norm contradicts: Aluwellblech (row 152), Blech Aluminium (row 243) and Blech Aluminium 2mm (rows 85, 160) carry the value of SIA 261 Tabelle 28/29, the workbook's in their `info` (spec 2026-10-12-audit-issues-47-48-49, D-05; tests/test_dead_load_source.py holds them equal to the norm files). Otherwise not a norm: each entry keeps the workbook's own «Quellen» column, and where SIA 261 Anhang A gives the material, the norm's table (calc/norms/sia261-2020-tab28/29) is offered beside it and wins (docs/domain/loads.md §3.3ter).",
-  "_note": "Keyed by (ebene, material), as a layer of the workbook names both: a name listed under two Ebenen with two weights (Gartenplatten, Sand, Schlacke, Duripanel, PV-Anlage) is two entries. `mass` is in the unit given, kg/m³ or kg/m²; the load of a layer is mass / 100 kN per kg (g = 10 m/s², the workbook's own conversion) times its thickness, width and spacing. `row` is the workbook row the entry was read from. An entry of weight 0 (Scobalit, row 235) is listed as the workbook lists it and refused where a layer names it.",
+  "_note": "Keyed by (ebene, material), as a layer of the workbook names both: a name listed under two Ebenen with two weights (Gartenplatten, Sand, Schlacke, Duripanel, PV-Anlage) is two entries. `mass` is in the unit given, kg/m³ or kg/m²; the load of a layer is mass / 100 kN per kg (g = 10 m/s², the workbook's own conversion) times its thickness, width and spacing. `row` is the workbook row the entry was read from. An entry of weight 0 is refused where a layer names it; the workbook's Scobalit of row 235 (0) carries row 151's 500 kg/m³ since issue #111 (Q-004), and its Glas (rows 150, 234: 5000 kg/m³) SIA 261 Tabelle 28's «Glasbausteine, voll» (D-06 of the spec 2026-10-24-poids-propre-repense), each keeping the workbook's value in `info`, as the aluminium entries do.",
   "edition": "Woodcore 2026-10-11",
   "materials": [
     {
@@ -1230,10 +1230,10 @@
     {
       "ebene": "Dachhaut",
       "material": "Glas",
-      "mass": 5000,
+      "mass": 2500,
       "unit": "kg/m³",
-      "quelle": "",
-      "info": "",
+      "quelle": "SIA 261 Tab 28",
+      "info": "Korrigiert: das Arbeitsblatt gibt 5000 kg/m³; SIA 261 Tabelle 28, Glasbausteine, voll: 25 kN/m³",
       "row": 150
     },
     {
@@ -1986,19 +1986,19 @@
     {
       "ebene": "Fassade",
       "material": "Glas",
-      "mass": 5000,
+      "mass": 2500,
       "unit": "kg/m³",
-      "quelle": "",
-      "info": "",
+      "quelle": "SIA 261 Tab 28",
+      "info": "Korrigiert: das Arbeitsblatt gibt 5000 kg/m³; SIA 261 Tabelle 28, Glasbausteine, voll: 25 kN/m³",
       "row": 234
     },
     {
       "ebene": "Fassade",
       "material": "Scobalit",
-      "mass": 0,
+      "mass": 500,
       "unit": "kg/m³",
       "quelle": "",
-      "info": "",
+      "info": "Korrigiert: das Arbeitsblatt gibt 0 kg/m³; der Wert der Zeile 151 (Dachhaut, Scobalit) desselben Arbeitsblatts (issue #111, Q-004)",
       "row": 235
     },
     {

@@ -452,9 +452,6 @@ def test_the_units_of_a_reading_are_ordered_commonest_first():
 def test_the_calls_are_spelled_by_build_reference_alone():
     assert ref.call_var_registry("M", "S10 - 0.55 kN Ende") == '#var("M", domain: "S10 - 0.55 kN Ende")'
     assert ref.call_var_domain("snow-load", "SL", "s_k") == '#var("s_k", domain: ("snow-load", "SL"))'
-    assert ref.call_find("T001") == '#find(object: "variable", domain: "T001")'
-    assert ref.call_find() == '#find(object: "variable")'
-    assert ref.call_find("T001", "name") == '#find(object: "variable", domain: "T001", type: "name")'
 
 
 def test_a_var_call_without_a_domain_is_refused_rather_than_written_broken():
@@ -471,7 +468,7 @@ def test_a_var_call_without_a_domain_is_refused_rather_than_written_broken():
 # ---------------------------------------------------------------- the tab
 
 def _tab():
-    """The Variables tab of a window built once, off-screen."""
+    """The Variables tab of a window built once, off-screen, on the report."""
     if "tab" not in _WINDOW:
         conftest.exported("calculations.json")
         try:
@@ -482,35 +479,51 @@ def _tab():
         import woodcore_gui
         QApplication.instance() or QApplication([])
         window = woodcore_gui.MainWindow()
+        window.mode = "rs"
+        window.apply_mode()
         found = [t for t in window.tabs if isinstance(t, variables_tab.VariablesTab)]
         assert found, "the window has no Variables tab -- is it in woodcore_gui.TABS?"
         _WINDOW["window"], _WINDOW["tab"] = window, found[0]
     return _WINDOW["tab"]
 
 
-def _fill(tab, registry, export=None):
-    """The tab listing `registry` as the report's reading and `export` as the export's -- none by default, so that the rows are the sample's."""
-    import variable_sources
-    tab.readings = {"rs": registry} if registry is not None else {}
-    tab.errors = {}
-    tab.export = export if export is not None else variable_sources.Export()
-    tab.domain_key = None
-    tab.all_domains_box.setChecked(False)
-    tab.results_box.setChecked(False)
-    tab.search.setText("")
-    tab.refresh()
-    tab.unit_box.setCurrentIndex(0)
-    tab.provenance_box.setCurrentIndex(0)
+def _browser():
+    return _tab().service("browser")
+
+
+def _banner(b):
+    """The type's banner the browser tells (issue #106: data_tab.ExportBanner, above the browser, no longer inside it)."""
+    return b.ctx.host.service("banner").label
+
+
+_EXPORT = {}
 
 
 def _real_export():
     import variable_sources
-    found = variable_sources.read_export(conftest.PROJECT)
-    assert not found.errors, [str(e) for e in found.errors]
-    return found
+    if "export" not in _EXPORT:
+        found = variable_sources.read_export(conftest.PROJECT)
+        assert not found.errors, [str(e) for e in found.errors]
+        _EXPORT["export"] = found
+    return _EXPORT["export"]
+
+
+def _fill(browser, registry, export=None):
+    """The tab listing `registry` as the report's reading and `export` as the export's -- the example's real export by default --, its filter, its choice and its field's choice cleared."""
+    import variable_query as query
+    browser.readings = {"rs": registry} if registry is not None else {}
+    browser.errors = {}
+    browser.export = export if export is not None else _real_export()
+    browser.filter = query.Filter()
+    browser.selection.chosen, browser.selection.focus, browser.selection.anchor = {}, None, None
+    browser.search.blockSignals(True)
+    browser.search.setText("")
+    browser.search.blockSignals(False)
+    browser.refresh()
 
 
 def _sample():
+    """A report's registry of the example's shape: its root domain, a domain it declares itself, and `SL`, which the export computes."""
     return model.Registry(stamp="pinned", domains={
         "": [model.Variable(key="R_d", domain="", value=2.655, unit="kN", symbol="R_d", label="Tragwiderstand")],
         "T001": [
@@ -518,30 +531,11 @@ def _sample():
             model.Variable(key="eta_w", domain="T001", value=0.8, unit="", symbol="eta_w",
                            label="Feuchteklasse 2", norm="SIA 265", norm_ref="Tabelle 4"),
         ],
-        "S001-verify-compression": [
-            model.Variable(key="eta", domain="S001-verify-compression", value=0.78, unit="", symbol="eta"),
-        ],
+        "SL": [model.Variable(key="q_k1", domain="SL", value=1.115, unit="kN/m²", symbol="q_k1")],
     })
 
 
-def _domains(tab):
-    """The domain pane's rows: (caption, count, provenance)."""
-    return [tuple(tab.domain_list.topLevelItem(n).text(c) for c in range(3)) for n in range(tab.domain_list.topLevelItemCount())]
-
-
-def _rows(tab):
-    """The variable list's rows: (domain caption, name to write) -- a flat list, which this asserts too."""
-    import variables_tab
-    out = []
-    for index in range(tab.tree.topLevelItemCount()):
-        row = tab.tree.topLevelItem(index)
-        assert row.childCount() == 0, "a row under another: the list is flat since v0.117"
-        out.append((row.text(variables_tab.DOMAIN), row.data(variables_tab.NAME, 0x0100)[2]))
-    return out
-
-
 def _report(domain, name=None):
-    """A row's key: its origin -- the report's reading here -- its domain and its name."""
     return ("rs", domain, name)
 
 
@@ -549,218 +543,346 @@ def _export_key(calc, instance, name=None):
     return ("export", f"{calc} · {instance}", name)
 
 
-def _calls(tab):
-    """The calls the «Affichage» view offers for what is chosen, each at its options' defaults, and its import line (v0.117: the card of calls left the right pane)."""
-    import display_view
-    return [display_view.entry_call(entry) for entry in tab.display_entries()] + [tab.display.import_field.text()]
+def _side(browser):
+    """The left pane's domains: [(origin, name)], in their order."""
+    out = []
+    for n in range(browser.domain_list.topLevelItemCount()):
+        key = browser.domain_list.topLevelItem(n).data(0, 0x0100)
+        if key is not None:
+            out.append(tuple(key))
+    return out
 
 
-def _detail(tab, key):
-    caption, cell = tab.rows[key]
-    return cell.text() if not cell.isHidden() else ""
+def _shown(browser):
+    return browser.list.shown()
 
 
-def test_the_tab_has_three_panes_and_the_display_a_fourth():
-    """Issue 13: «trois colonnes : domaines | variables | détail»; «Affichage»'s options are a fourth pane, hidden in «Données», and its page takes the detail's place -- the domains and the variables stay (D-011)."""
+def _rows(browser):
+    model_ = browser.list.list_model
+    return [r for r in range(model_.rowCount()) if model_.key(r) is not None]
+
+
+# ---------------------------------------------------------------- the panes and the shell (UI-001, ARCH-004, ARCH-009)
+
+def test_the_tab_has_three_panes_and_one_view():
+    """UI-001: the domains, the variables, the card -- and no «Données · Affichage» any more (D-4)."""
+    import views
     tab = _tab()
-    assert tab.splitter.count() == 4
-    assert tab.splitter.widget(0).isAncestorOf(tab.domain_list)
-    assert tab.splitter.widget(1).isAncestorOf(tab.tree)
-    assert tab.splitter.widget(2).isAncestorOf(tab.identity)
-    assert tab.splitter.widget(3) is tab.display.right
-    assert tab.view == "data" and tab.display.right.isHidden()
+    b = tab.service("browser")
+    assert tab.splitter is b.splitter and b.splitter.count() == 3
+    assert b.splitter.widget(0).isAncestorOf(b.domain_list) and b.splitter.widget(0).isAncestorOf(b.menu)
+    assert b.splitter.widget(1).isAncestorOf(b.list) and b.splitter.widget(1).isAncestorOf(b.search_bar)
+    assert b.splitter.widget(2) is b.detail
+    assert views.declared(tab) == () and tab.VIEWS == () and not hasattr(tab, "display")   # VIEWS empty, the type «Données»'s (issue #106), where the shell of before had none
+    assert not hasattr(tab, "install_display") and not hasattr(tab, "display_entries") and not hasattr(tab, "chosen")
 
 
-def test_the_domains_are_a_pane_of_their_own():
-    tab = _tab()
-    _fill(tab, _sample())
-    rows = _domains(tab)
-    assert [caption for caption, _n, _p in rows] == [tab.t("vr_domain_report"), "T001", "S001-verify-compression"]
-    assert rows[1][1] == "2", "a domain says how many variables it holds"
-    assert rows[1][2] == f"{tab.t('vr_prov_typst')} · RS"
-    # a check domain says what it is
-    assert tab.t("vr_kind_check") in tab.domain_list.topLevelItem(2).toolTip(0)
-    # nothing chosen, nothing listed -- and the list says why
-    assert tab.tree.topLevelItemCount() == 0 and tab.empty.text() == tab.t("vr_choose_domain")
-    tab.select_key(_report("T001"))
-    assert sorted(key for _d, key in _rows(tab)) == ["A", "eta_w"]
-
-
-def test_the_filter_reaches_the_domain_chosen_or_every_domain():
-    """T3: «choisir, quand on filtre, de filtrer toutes les variables et pas seulement celles du domaine sélectionné» -- the box «Tous les domaines» (D-005)."""
+def test_the_shell_only_forwards_and_the_content_is_the_browser_s():
+    """ARCH-004, ARCH-009; issue #106 (D-06): VariablesTab names its parameters and the names it exposes -- set by the type as redirections to its browser --, and nothing else."""
+    import data_tab
+    import variables_browser
     import variables_tab
-    tab = _tab()
-    _fill(tab, _sample())
+    exposed = {"begin_pick", "end_pick", "pick_chosen", "selected_key", "selected_keys", "variable", "address", "select_key", "search", "domains", "pick_bar", "pick_label"}
+    names = {n for n in vars(variables_tab.VariablesTab) if not (n.startswith("__") and n.endswith("__"))} - {"staticMetaObject"}
+    assert names == {"KEY", "SERVICES", "EXPOSES"} | exposed, sorted(names)
+    assert set(variables_tab.VariablesTab.EXPOSES) == exposed and all(isinstance(vars(variables_tab.VariablesTab)[n], data_tab.Exposed) for n in exposed)
+    assert not any(base.__module__.startswith("PySide6") for base in variables_browser.VariablesBrowser.__mro__), "the content is a plain class (a service's shape)"
+    source = (ROOT / "calc" / "tools" / "variables_browser.py").read_text(encoding="utf-8")
+    assert "self.app.tabs" not in source, "the content reads no other tab"
+
+
+def test_the_browser_alone_reads_filters_chooses_and_copies():
+    """ARCH-009: the content built without its shell."""
+    import variables_browser
+    from PySide6.QtWidgets import QWidget
+    window = _tab().app
+    browser = variables_browser.VariablesBrowser(window)
+    holder = QWidget(window)
+    browser.mount().setParent(holder)
+    _fill(browser, _sample())
+    browser.search.setText("kn " + browser.t("tab_ac_snow").lower())   # «kn neige» in the window's language
+    keys = _shown(browser)
+    assert keys and all(browser.variable(k).unit.lower().startswith("kn") for k in keys)
+    browser.list.gesture(browser.list.list_model.row_of(keys[0]), 1)
+    assert browser.selected_key() == keys[0]
+    copied = []
+    browser.copy = copied.append
+    browser.copy_chosen()
+    assert copied and copied[0].startswith("#var(")
+    holder.deleteLater()
+
+
+def test_the_root_domain_of_a_document_is_neither_listed_nor_counted():
+    """REQ-005, D-5: «R_d» of the report's own domain is in no pane."""
+    b = _browser()
+    _fill(b, _sample())
+    assert ("rs", "") not in b.domains and _report("T001")[:2] in b.domains
+    assert not any(k[1] == "" for k in _shown(b))
+    count = sum(len(d.variables) for d in b.domains.values())
+    assert b.state_label.text().startswith(b.t("vr_count", count=count, domains=len(b.domains)))
+
+
+def test_the_example_counts_974_variables_in_76_domains_once_its_documents_are_read():
+    """REQ-005, CON-005: measured on 25.10.2026 (935 in 78 with the three root domains, the issue's figures); 974 in 76 once the example's loads are sources (issue #109: the wind's six Q_k, its renamed cases)."""
+    if not conftest.have_typst():
+        raise Skip("typst is not on the PATH")
+    b = _browser()
+    readings = {mode: model.best(conftest.PROJECT, mode=mode) for mode in conftest.PROJECT.created_modes}
     try:
-        tab.select_key(_report("T001"))
-        tab.search.setText("R_d")
-        assert _rows(tab) == [] and tab.empty.text() == tab.t("vr_filtered")
-        assert tab.tree.isColumnHidden(variables_tab.DOMAIN)
-        tab.all_domains_box.setChecked(True)
-        assert _rows(tab) == [(tab.t("vr_domain_report"), "R_d")]
-        assert not tab.tree.isColumnHidden(variables_tab.DOMAIN), "every domain listed: each row names its own"
-        tab.search.setText("eta")
-        assert sorted(k for _d, k in _rows(tab)) == ["eta", "eta_w"]
-        # every word, in any order: what an engineer types when he half remembers a name
-        tab.search.setText("feucht 265")
-        assert _rows(tab) == [("T001", "eta_w")]
-        tab.search.setText("")
-        tab.unit_box.setCurrentIndex(tab.unit_box.findData("kN"))
-        assert _rows(tab) == [(tab.t("vr_domain_report"), "R_d")]
-        tab.unit_box.setCurrentIndex(0)
-        tab.search.setText("zzzz")
-        assert not tab.tree.isVisibleTo(tab) and tab.empty.text() == tab.t("vr_filtered")
-        # and the count beside a domain is its whole count, whatever the filter (D-015)
-        assert _domains(tab)[1][1] == "2"
+        b.readings, b.errors, b.export = readings, {}, _real_export()
+        b.refresh()
+        count = sum(len(d.variables) for d in b.domains.values())
+        assert (count, len(b.domains)) == (974, 76), (count, len(b.domains))
     finally:
-        _fill(tab, _sample())
+        _fill(b, _sample())
 
 
-def test_every_source_is_listed_with_its_provenance():
-    """T4: the Excel workbooks, Woodcore and Typst, each variable saying which (D-004, D-012)."""
-    import variables_tab
+# ---------------------------------------------------------------- the menu, the source, the tags (UI-002 to UI-004)
+
+def test_the_menu_counts_in_the_source_and_greys_an_entry_at_zero():
+    b = _browser()
+    _fill(b, _sample())
+    from PySide6.QtCore import Qt
+    seismic = b.menu.item("tab_ac_seismic")
+    assert seismic is not None and not (seismic.flags() & Qt.ItemFlag.ItemIsEnabled), "a reserved tab: zero, greyed"
+    assert b.menu.item("tab_ac_snow").text(1) == str(b.catalogue.count("tab_ac_snow", "all"))
+    assert b.menu.item("doc:rs") is not None, "the report's own domains under its entry (D-14)"
+    b.choose_source("export")
+    assert b.menu.item("tab_ac_snow").text(1) == str(b.catalogue.count("tab_ac_snow", "export"))
+    assert b.menu.item("doc:rs").text(1) == "—"
+    b.menu.choose("s:nav_actions:tab_ac_imposed")
+    assert b.filter.menu == "s:nav_actions:tab_ac_imposed" and b.menu.text().startswith(b.t("nav_actions"))
+    assert {b.catalogue.tab_title(b.domains[k]) for k in _side(b)} <= {b.t(k) for k in ("tab_ac_imposed", "tab_ac_snow", "tab_ac_wind", "tab_ac_seismic")}
+    _fill(b, _sample())
+
+
+def test_a_click_on_a_domain_chooses_it_a_second_lets_it_go_and_the_tag_follows():
+    """UI-003, UI-004: the domain chosen on the left is a tag of the search bar; its × lets it go on the left too; ⌫ in an empty bar takes the tags off from the last."""
+    b = _browser()
+    _fill(b, _sample())
+    sl = _export_key("snow-load", "SL")[:2]
+    b.click_domain(sl)
+    assert b.filter.domain == sl and b.search_bar.kinds() == ["domain"] and {k[:2] for k in _shown(b)} == {sl}
+    b.click_domain(sl)
+    assert b.filter.domain is None and b.search_bar.kinds() == []
+    b.choose_menu("s:nav_actions:tab_ac_imposed")
+    b.choose_source("export")
+    b.click_domain(_export_key("live-load", "A1")[:2])
+    assert b.search_bar.kinds() == ["menu", "source", "domain"]
+    b.search_bar.close_button("domain").click()
+    assert b.filter.domain is None and b.domain_list.currentItem() is None
+    from PySide6.QtCore import QEvent, Qt
+    from PySide6.QtGui import QKeyEvent
+    from PySide6.QtWidgets import QApplication
+    QApplication.sendEvent(b.search, QKeyEvent(QEvent.Type.KeyPress, Qt.Key.Key_Backspace, Qt.KeyboardModifier.NoModifier))
+    assert b.search_bar.kinds() == ["menu"] and b.filter.source == "all" and b.source_switch.current_key() == "all"
+    _fill(b, _sample())
+
+
+def test_the_search_finds_every_word_in_the_filter_and_the_count_is_the_list_s():
+    """UI-005: «kn neige»; «Résultats seulement»; the count beside the filters."""
+    b = _browser()
+    _fill(b, _sample())
+    b.search.setText("kn " + b.t("tab_ac_snow").lower())   # «kn neige» in the window's language
+    keys = _shown(b)
+    assert keys and {b.catalogue.tab_title(b.domains[k[:2]]) for k in keys} == {b.t("tab_ac_snow")}
+    assert b.count_label.text() == b.t("vr_list_count", count=len(keys), domains=len({k[:2] for k in keys}))
+    b.search.setText("")
+    b.results_box.setChecked(True)
+    assert all(k[2] in b.domains[k[:2]].results for k in _shown(b))
+    assert _export_key("live-load", "A1", "q_k") in _shown(b) and ("formulas", "A1", "q_k") in _shown(b), "REQ-004: a result in each source"
+    b.results_box.setChecked(False)
+    _fill(b, _sample())
+
+
+# ---------------------------------------------------------------- the choice (UI-009, UI-010, REQ-007)
+
+def test_ctrl_click_three_variables_the_last_is_selected_key_and_all_are_selected_keys():
+    """REQ-007, UI-010: `selected_key()` the last one clicked, `selected_keys()` all in the order of the list; «Copier les 3 commandes» one line each in that order; a variable hidden by the filter stays chosen."""
+    import build_reference as ref
     tab = _tab()
-    export = _real_export()
-    _fill(tab, _sample(), export)
-    try:
-        assert len(_domains(tab)) == 3 + len(export.domains)
-        def provenance_of(key):
-            tab.select_key(key)
-            row = next(tab.tree.topLevelItem(n) for n in range(tab.tree.topLevelItemCount())
-                       if tab.tree.topLevelItem(n).data(variables_tab.NAME, 0x0100) == key)
-            return row.text(variables_tab.PROVENANCE)
-        assert provenance_of(_export_key("snow-load", "SL", "h_0")) == "Excel"
-        assert provenance_of(_export_key("dead-load", "EL+AL-Dach mit Wasser", "gk")) == "Woodcore"
-        connector = next(d for d in export.domains if d.calculation == "connector" and any(v.source.startswith("woodcore:") for v in d.variables))
-        woodcore = next(v for v in connector.variables if v.source.startswith("woodcore:"))
-        assert provenance_of(("export", connector.name, woodcore.key)) == "Woodcore"
-        assert provenance_of(_report("T001", "A")) == f"{tab.t('vr_prov_typst')} · RS"
-        # the filter by provenance keeps one of them, over every domain
-        tab.all_domains_box.setChecked(True)
-        tab.provenance_box.setCurrentIndex(tab.provenance_box.findData(model.EXCEL))
-        rows = [tab.tree.topLevelItem(n) for n in range(tab.tree.topLevelItemCount())]
-        assert rows and {row.text(variables_tab.PROVENANCE) for row in rows} == {"Excel"}
-        tab.provenance_box.setCurrentIndex(tab.provenance_box.findData(f"{model.TYPST}:rs"))
-        assert sorted(k for _d, k in _rows(tab)) == ["A", "R_d", "eta", "eta_w"]
-    finally:
-        _fill(tab, _sample())
+    b = tab.service("browser")
+    _fill(b, _sample())
+    b.search.setText("q_k")
+    rows = _rows(b)
+    picked = [rows[5], rows[0], rows[3]]
+    b.list.gesture(picked[0], 1)
+    b.list.gesture(picked[1], 1, ctrl=True)
+    b.list.gesture(picked[2], 1, ctrl=True)
+    keys = [b.list.list_model.key(r) for r in picked]
+    assert tab.selected_key() == keys[2]
+    assert tab.selected_keys() == [b.list.list_model.key(r) for r in sorted(picked)]
+    assert not b.choice_bar.isHidden() and b.choice_label.text() == b.t("vr_selected", count=3)
+    assert b.copy_button.text() == b.t("vr_copy_many", count=3)
+    copied = []
+    b.copy = copied.append
+    b.copy_chosen()
+
+    def call(k):
+        domain = b.domains[k[:2]]
+        return ref.call_var_domain(*domain.address, k[2]) if k[0] == "export" else ref.call_var_registry(k[2], k[1])
+    assert copied[0].split("\n") == [call(k) for k in tab.selected_keys()]
+    first = tab.selected_keys()[0]
+    b.click_domain(keys[2][:2])   # a filter that hides the others
+    assert len(b.selection) == 3 and b.selection.hidden(_shown(b)) == 2
+    assert b.choice_label.text() == b.t("vr_selected_hidden", count=3, hidden=2)
+    b.copy_chosen()
+    assert copied[-1].split("\n")[0] == call(keys[2]) and copied[-1].split("\n")[1] == call(first), "the shown first, then the hidden in the order of the list"
+    b.clear_choice()
+    assert len(b.selection) == 0 and b.choice_bar.isHidden()
+    _fill(b, _sample())
 
 
-def test_a_result_is_marked_and_can_be_kept_alone():
-    """D-007: ★ before a result of its calculation, and «Résultats seulement», unticked by default."""
-    import variables_tab
+def test_a_sibling_s_button_chooses_the_same_variable_in_the_other_source():
+    """UI-011: «Le même calcul ailleurs», a button per other source."""
+    b = _browser()
+    _fill(b, _sample())
+    b.select_key(_export_key("snow-load", "SL", "q_k1"))
+    texts = [button.text() for button in b.detail.sibling_buttons]
+    assert len(texts) == 2 and "RS" in texts[-1], texts
+    assert b.detail.computed.text() == b.t("vr_computed_here")
+    b.detail.sibling_buttons[-1].click()
+    assert b.selected_key() == _report("SL", "q_k1")
+    assert b.detail.computed.text() == b.t("vr_computed_in", source=b.t("vr_badge_export"))
+    _fill(b, _sample())
+
+
+def test_the_card_of_a_variable_and_of_a_domain():
+    """UI-011, UI-012: the head, the result's frame, «Vient de» in words, the command and what to include; a domain alone its whole file and its counts."""
+    b = _browser()
+    _fill(b, _sample())
+    d = b.detail
+    b.select_key(_export_key("snow-load", "SL", "q_k1"))
+    assert not d.result_tag.isHidden() and "border" in d.head.value.styleSheet()
+    assert d.command_field.text() == '#var("q_k1", domain: ("snow-load", "SL"))' and d.command_note.text() == b.t("vr_inc_export")
+    b.select_key(_export_key("snow-load", "SL", "h_0"))
+    assert d.result_tag.isHidden() and "border" not in d.head.value.styleSheet()
+    assert d.rows["vr_came_from"][1].text() == b.t("vr_from_woodcore")   # typed in the snow tab (issue #109)
+    b.select_key(("formulas", "SL", "q_k1"))
+    assert d.command_note.text() == b.t("vr_inc_file", include='#include domain-file("snow-load", "SL")')
+    b.select_key(_report("T001", "A"))
+    assert d.command_note.text() == b.t("vr_inc_document", document=b.document_name("rs")) and not d.untraced.isHidden()
+    b.select_key(_export_key("snow-load", "SL"))
+    assert d.command_field.text() == '#include domain-file("snow-load", "SL")'
+    domain = b.domains[_export_key("snow-load", "SL")[:2]]
+    assert d.rows["vr_its_variables"][1].text() == b.t("vr_domain_counts", count=len(domain.variables), results=len(domain.results))
+    assert d.result_tag.isHidden()
+    _fill(b, _sample())
+
+
+# ---------------------------------------------------------------- «Ouvrir l'onglet» (REQ-009)
+
+def _open(b, key):
+    b.select_key(key)
+    return b.detail.open_button
+
+
+def test_open_the_tab_brings_the_computing_tab_forward_on_its_case():
+    """REQ-009: the snow from the export and from the report, a bending check, a check in the fire situation; Python forward without a case; greyed with its reason for a domain the report declares and a reserved tab."""
+    import woodcore_gui
     tab = _tab()
-    export = _real_export()
-    _fill(tab, _sample(), export)
+    window = tab.app
+    b = tab.service("browser")
+    _fill(b, _sample())
+    keys = [k for k, _f in woodcore_gui.TABS]
     try:
-        assert not tab.results_box.isChecked()
-        snow = next(d for d in export.domains if d.address == ("snow-load", "SL"))
-        tab.select_key(("export", snow.name, None))
-        everything = _rows(tab)
-        assert len(everything) == len(snow.variables)
-        marked = [tab.tree.topLevelItem(n).text(variables_tab.NAME) for n in range(tab.tree.topLevelItemCount())]
-        assert {text[len(variables_tab.RESULT_MARK):] for text in marked if text.startswith(variables_tab.RESULT_MARK)} == set(snow.results)
-        tab.results_box.setChecked(True)
-        assert sorted(k for _d, k in _rows(tab)) == sorted(snow.results)
+        for key, expected, case in ((_export_key("snow-load", "SL", "q_k1"), "tab_ac_snow", "SL"), (_report("SL", "q_k1"), "tab_ac_snow", "SL"),
+                                    (("formulas", "BI-01", "eta"), "tab_mc_bending", "BI-01"), (("formulas", "FE-01", "eta"), "tab_mc_fire", "FE-01")):
+            window.tab_widget.setCurrentWidget(tab)
+            button = _open(b, key)
+            assert button.isEnabled(), (key, button.toolTip())
+            button.click()
+            shown = window.tabs[window.tab_widget.currentIndex()]
+            assert keys[window.tab_widget.currentIndex()] == expected, (key, keys[window.tab_widget.currentIndex()])
+            node = b.assembly.node(b.domains[key[:2]])
+            if shown.lists_object(node.split(":", 1)[1]):
+                assert shown.current_id == case, (key, shown.current_id)   # the case opened where the tab lists it -- a case read from a workbook is listed by none
+            else:
+                assert expected.startswith("tab_ac_"), (key, "a check is a case its tab lists")
+        window.tab_widget.setCurrentWidget(tab)
+        _open(b, _export_key("script", "dreigelenk", "H_d")).click()
+        assert keys[window.tab_widget.currentIndex()] == "tab_python"
+        window.tab_widget.setCurrentWidget(tab)
+        button = _open(b, _report("T001", "A"))
+        assert not button.isEnabled() and button.toolTip() == b.t("vr_open_none_tip")
+        button = _open(b, _export_key("live-load", "A1", "q_k"))
+        assert not button.isEnabled() and button.toolTip() == b.t("open_tab_reserved", tab=b.t("tab_ac_imposed"), document=window.document_name())
     finally:
-        _fill(tab, _sample())
+        window.tab_widget.setCurrentWidget(tab)
+        _fill(b, _sample())
 
 
-def test_the_detail_carries_what_the_loads_tab_showed():
-    """D-006: level, formula, choices, and the workbook, sheet and cell a value was read from."""
+def test_the_tab_of_each_domain_is_the_one_whose_lists_object_answers():
+    """REQ-001, REQ-009, ARCH-RISK-001: for every domain of the example that has a node, the tab of `Domain.tab` is the one that lists that node -- the tables of variable_calc held to the real tabs."""
+    import woodcore_gui
     tab = _tab()
-    export = _real_export()
-    _fill(tab, _sample(), export)
-    try:
-        tab.select_key(_export_key("snow-load", "SL", "h_0"))
-        assert _detail(tab, "vr_provenance") == "Excel"
-        assert _detail(tab, "vr_workbook") == "Belastungsannahmen.xlsm"
-        assert _detail(tab, "vr_sheet") == "SL" and _detail(tab, "vr_cell") == "H10"
-        assert _detail(tab, "vr_level") == "3"
-        assert _detail(tab, "vr_source") == "excel:Belastungsannahmen.xlsm!SL!H10"
-        assert not tab.open_button.isHidden()
-        assert tab.open_button.isEnabled() == (conftest.PROJECT.root / "Belastungsannahmen.xlsm").exists()
-        assert tab.open_button.toolTip() == tab.t("vr_open_workbook_tip"), "a disabled button says why"
-        tab.select_key(_export_key("snow-load", "SL", "h_ref"))
-        assert _detail(tab, "vr_formula") == 'h_"ref" = h_0 + Delta h'
-        chosen = next((d, v) for d in export.domains for v in d.variables if v.choices)
-        tab.select_key(("export", chosen[0].name, chosen[1].key))
-        assert "▶" in _detail(tab, "vr_choices")
-        # a value of a document carries none of it, and says it is untraced
-        tab.select_key(_report("T001", "eta_w"))
-        assert _detail(tab, "vr_workbook") == "" and tab.open_button.isHidden()
-        assert not tab.untraced.isHidden()
-    finally:
-        _fill(tab, _sample())
+    window = tab.app
+    b = tab.service("browser")
+    _fill(b, _sample())
+    keys = [k for k, _f in woodcore_gui.TABS]
+    checked = 0
+    for domain in b.domains.values():
+        node = b.assembly.node(domain)
+        if node is None:
+            continue
+        kind, ident = node.split(":", 1)
+        listing = [keys[i] for i, t in enumerate(window.tabs) if getattr(t, "GRAPH_KIND", None) == kind and t.lists_object(ident)]
+        if listing:
+            assert domain.tab in listing, (domain.origin, domain.name, domain.tab, listing)
+            checked += 1
+        else:
+            # listed by no tab: a case read from a workbook (no case of Woodcore's), a «Domaines» or a script domain (no GRAPH_KIND, Q-002) -- never a tab of another kind that lists it
+            assert not any(getattr(t, "GRAPH_KIND", None) == kind and t.lists_object(ident) for t in window.tabs), (domain.origin, domain.name)
+    assert checked >= 15, checked   # the checks, the connector and the polar moment of the example, in their two sources
 
 
-def test_the_export_offers_the_calls_the_loads_tab_offered():
-    """REQ-007, in the forms of the spec 2026-10-21-commandes-typst-refonte: a variable of the export -- `#var`, read live (REQ-009) --; a case -- its file included, the loop over its calculation's cases (REQ-017, UI-002) and the two load tables (Q-009) --; a polar moment its file and its loop, no load table."""
+# ---------------------------------------------------------------- «Choisir pour un champ» (REQ-008)
+
+def test_choosing_for_a_field_offers_one_value_of_what_the_field_takes():
+    """REQ-008: a field in kN -- no document's domain, only numbers of its dimension counted, no two values, «Ouvrir l'onglet» greyed; «Importer» gives the key; the choice ended, everything is offered again and the choice of before comes back."""
+    import variable_sources
+    from domains import links
     tab = _tab()
-    export = _real_export()
-    _fill(tab, _sample(), export)
+    window = tab.app
+    b = tab.service("browser")
+    _fill(b, _sample())
+    b.search.setText("q_k")
+    rows = _rows(b)
+    b.list.gesture(rows[0], 1)
+    b.list.gesture(rows[1], 1, ctrl=True)
+    before = list(b.selection.chosen)
+    b.search.setText("")
+    accept = lambda var, domain: variable_sources.linkable(var, domain, "kN", links.ANY)   # noqa: E731
+    got = []
+    window.tab_widget.setCurrentWidget(window.tabs[0])
+    assert window.begin_variable_pick(got.append, "N de ZT-01 [kN]", accept)
     try:
-        tab.select_key(_export_key("snow-load", "SL", "h_0"))
-        assert [e.key for e in tab.display_entries()] == ["var"]
-        assert ref.call_var_domain("snow-load", "SL", "h_0") in _calls(tab)
-        snow = next(d for d in export.domains if d.address == ("snow-load", "SL"))
-        tab.select_key(("export", snow.name, None))
-        keys = [e.key for e in tab.display_entries()]
-        assert keys[0] == "file" and "loop" in keys and "summary" in keys and "line-summary" in keys, keys
-        calls = _calls(tab)
-        assert ref.call_include_domain("snow-load", "SL") in calls and ref.call_domain_loop("snow-load") in calls, calls
-        assert tab.address(tab.selected_key()) == ("snow-load", "SL")
-        # a polar moment is a calculation too, with no load table
-        connection = next(d for d in export.domains if d.calculation == "connection")
-        tab.select_key(("export", connection.name, None))
-        keys = [e.key for e in tab.display_entries()]
-        assert "file" in keys and "summary" not in keys, keys
+        assert not b.pick_bar.isHidden() and window.picking
+        assert not any(k[0] == "rs" for k in _side(b)), "a document's domain is not offered"
+        for node, n in b.catalogue.menu_rows("all", accept):
+            assert b.menu.item(node.id).text(1) == (str(n) if n else "—")
+        keys = _shown(b)
+        assert keys and all(accept(b.variable(k), b.domains[k[:2]]) for k in keys)
+        b.list.gesture(b.list.list_model.row_of(keys[0]), 1)
+        b.list.gesture(b.list.list_model.row_of(keys[1]), 1, ctrl=True)
+        assert list(b.selection.chosen) == [keys[1]], "one value"
+        assert b.choice_bar.isHidden()
+        button = b.detail.open_button
+        assert not button.isEnabled() and button.toolTip() == b.t("open_tab_picking", tab=b.t(b.domains[keys[1][:2]].tab), document=window.document_name())
+        assert not b.detail.pick_box.isHidden() and b.detail.pick_import.isEnabled()
+        b.detail.pick_import.click()
     finally:
-        _fill(tab, _sample())
+        if window.picking:
+            b.end_pick(None)
+    assert got and got[0] is not None and got[0][:2] == keys[1][:2] and got[0][2].key == keys[1][2]
+    assert b.pick_bar.isHidden() and list(b.selection.chosen) == before, "the choice of before is back"
+    assert any(k[0] == "rs" for k in _side(b)), "everything is offered again"
+    _fill(b, _sample())
 
 
-def test_the_real_export_is_listed_domain_by_domain_in_its_own_order():
-    """REQ-002 and REQ-003 on the example's own export, not a sample: one row per domain with its whole count, and a case's variables in the order calculations.json states them, flat."""
-    import variables_tab
-    tab = _tab()
-    export = _real_export()
-    _fill(tab, _sample(), export)
-    try:
-        counts = {(tab.domain_list.topLevelItem(n).data(0, 0x0100)): tab.domain_list.topLevelItem(n).text(1)
-                  for n in range(tab.domain_list.topLevelItemCount())}
-        assert len(counts) == tab.domain_list.topLevelItemCount() == len(tab.all_domains()), "one row per domain read"
-        for domain in export.domains:
-            assert counts[(domain.origin, domain.name)] == str(len(domain.variables)), domain.name
-        data = json.loads((conftest.PROJECT.data_dir / "calculations.json").read_text(encoding="utf-8"))
-        tab.select_key(_export_key("snow-load", "SL"))
-        assert [key for _d, key in _rows(tab)] == list(data["domains"]["snow-load"]["instances"]["SL"]["vars"])
-        # and a polar moment says it is Woodcore's
-        connection = next(d for d in export.domains if d.calculation == "connection")
-        tab.select_key(("export", connection.name, "I_p"))
-        row = tab.tree.currentItem()
-        assert row is not None and row.text(variables_tab.PROVENANCE) == "Woodcore"
-    finally:
-        _fill(tab, _sample())
-
-
-def test_in_affichage_the_domains_and_the_variables_stay():
-    """D-011: the page takes the detail's place and the options are shown; the domains and the variables stay, so another variable can be chosen."""
-    tab = _tab()
-    _fill(tab, _sample())
-    try:
-        tab.set_view("display", enter=False)
-        assert tab.panes.centre.currentIndex() == 1, "the page is where the detail was"
-        assert not tab.display.right.isHidden(), "the options are a pane of their own"
-        assert not tab.splitter.widget(0).isHidden() and not tab.splitter.widget(1).isHidden()
-        tab.select_key(_report("T001", "A"))
-        assert tab.selected_key() == _report("T001", "A")
-    finally:
-        tab.set_view("data", enter=False)
-    assert tab.panes.centre.currentIndex() == 0 and tab.display.right.isHidden()
-
+# ---------------------------------------------------------------- what the tab kept from before
 
 def test_building_and_showing_the_tab_writes_nothing():
-    """ARCH-002 on the tab itself: built on a copy of the project and shown, it leaves every file of the project as it was."""
     import variables_tab
     here = conftest.project_copy("vt_readonly")
     _tab()
@@ -769,72 +891,35 @@ def test_building_and_showing_the_tab_writes_nothing():
         tab = variables_tab.VariablesTab(_WINDOW["window"])
         tab.setParent(_WINDOW["window"])
         tab.on_shown()
-        tab.all_domains_box.setChecked(True)
+        tab.service("browser").search.setText("q")
     after = {str(p.relative_to(here.root)): (p.stat().st_size, p.stat().st_mtime_ns) for p in here.root.rglob("*") if p.is_file()}
     assert after == before
 
 
-def test_the_tab_offers_no_var_call_for_the_report_own_domain():
-    """`#var("R_d")` alone can never work, and a variable of the report's own domain has nothing to be carried out of."""
-    tab = _tab()
-    _fill(tab, _sample())
-    tab.select_key(_report("", "R_d"))
-    calls = _calls(tab)
-    assert not [c for c in calls if c.startswith("#var(")], calls
-    tab.select_key(_report("T001", "A"))
-    calls = _calls(tab)
-    assert '#var("A", domain: "T001")' in calls, calls
-    assert ref.import_line() in calls
-    assert tab.address(tab.selected_key()) is None
-
-
-def test_a_domain_row_offers_the_find_calls():
-    tab = _tab()
-    _fill(tab, _sample())
-    tab.select_key(_report("T001"))
-    assert ref.call_find("T001") in _calls(tab)
-    # «name» is an option of find's panel since v0.117, where it was a call of its own
-    import display_view
-    find = next(entry for entry in tab.display_entries() if entry.command == "find")
-    assert display_view.entry_call(find, {"type": "name"}) == ref.call_find("T001", "name")
-
-
 def test_the_tab_reads_on_its_first_showing_and_later_only_when_it_is_free():
-    """The rule since v0.110, in both halves.
-
-    A tab switch must not cost a **compile**, but it may well cost the half-second of opening a PDF that already
-    carries the answer. So: the first showing reads whatever it costs, which is what the engineer asked for; a
-    later one reads only where `pdf_is_current` says the report has been exported since, which is how an
-    *Exporter PDF* on another tab is picked up by coming back.
-    """
+    """The rule since v0.110: the first showing reads whatever it costs; a later one only where the PDF already carries the answer."""
     import unittest.mock as mock
 
     import variables_tab
     _tab()
     tab = variables_tab.VariablesTab(_WINDOW["window"])
-    tab.setParent(_WINDOW["window"])   # owned by the window, as a tab always is: an orphan tab outlived the application and crashed the interpreter's exit (v0.117)
-    tab.readings = {}                        # nothing cached: the first showing should read
-    # the suite turns the automatic reading off (conftest), so it is turned back on for these checks
+    tab.setParent(_WINDOW["window"])   # owned by the window, as a tab always is
+    b = tab.service("browser")
+    b.readings = {}
     on = mock.patch.object(model, "auto_enabled", return_value=True)
-
-    with on, mock.patch.object(model, "pdf_is_current", return_value=False), \
-            mock.patch.object(tab, "reload") as spy:
+    with on, mock.patch.object(model, "pdf_is_current", return_value=False), mock.patch.object(b, "reload") as spy:
         tab.on_shown()
         assert spy.called and spy.call_args.kwargs.get("automatic") is True, "the first showing did not read"
         spy.reset_mock()
         tab.on_shown()
         tab.on_shown()
         assert not spy.called, "a later showing paid for a compile"
-
-    # and a PDF exported since is picked up, because reading it is free
-    with on, mock.patch.object(model, "pdf_is_current", return_value=True), \
-            mock.patch.object(tab, "reload") as spy:
+    with on, mock.patch.object(model, "pdf_is_current", return_value=True), mock.patch.object(b, "reload") as spy:
         tab.on_shown()
         assert spy.called, "a PDF exported since was not picked up"
 
 
 def test_the_export_is_read_again_at_every_showing():
-    """D-014: a polar moment saved on another tab is here when one comes back -- the four files are read from disk, not from what the window loaded at startup."""
     import unittest.mock as mock
 
     import variable_sources
@@ -849,88 +934,79 @@ def test_a_current_reading_is_not_read_again_on_the_first_showing():
     import unittest.mock as mock
 
     import variables_tab
-    _tab()      # the window is built here, and it is what a second tab is built on
+    _tab()
     tab = variables_tab.VariablesTab(_WINDOW["window"])
-    tab.setParent(_WINDOW["window"])   # owned by the window, as a tab always is: an orphan tab outlived the application and crashed the interpreter's exit (v0.117)
-    with mock.patch.object(model, "is_current", return_value=True), mock.patch.object(tab, "reload") as spy:
+    tab.setParent(_WINDOW["window"])
+    with mock.patch.object(model, "is_current", return_value=True), mock.patch.object(tab.service("browser"), "reload") as spy:
         tab.on_shown()
         assert not spy.called, "a reading that still answers was paid for again"
 
 
 def test_the_tab_keeps_what_it_had_when_a_reading_fails():
-    """And says where the failure is: Typst names the file and the line, which nothing in the window could."""
+    """And says where the failure is: Typst names the file and the line."""
     import unittest.mock as mock
 
     import variable_sources
-    tab = _tab()
-    _fill(tab, _sample())
-    before = tab.readings["rs"].count
+    b = _browser()
+    _fill(b, _sample())
+    before = b.readings["rs"].count
     typst_said = "error: file not found (searched at Images/image.png)\n   ┌─ Sections/005.typ:90:4"
-    tab.read_failed("rs", model.VariablesError("no", "compile_failed", exit_code=1, output=typst_said))
+    b.read_failed("rs", model.VariablesError("no", "compile_failed", exit_code=1, output=typst_said))
     try:
-        with mock.patch.object(variable_sources, "read_export", return_value=variable_sources.Export()):
-            tab.read_finished()
-        assert tab.readings["rs"].count == before, "a failed reading threw away the values that were on screen"
-        assert tab.reload_button.isEnabled()
-        # the banner carries the reason AND Typst's own message, in the danger colour
-        assert tab.t("vr_err_compile_failed") in tab.banner.text()
-        assert "Sections/005.typ:90:4" in tab.banner.text(), "Typst's own message is not shown"
-        assert tab.banner.property("callout") == "danger"
-        # isVisibleTo, not isVisible: this window is never shown, so every child reads as hidden
-        assert tab.banner.isVisibleTo(tab)
-        # and the bar says what is on screen rather than repeating the banner's first line
-        assert tab.t("vr_count", count=before, domains=len(tab.readings["rs"].domains)) == tab.state.text()
+        with mock.patch.object(variable_sources, "read_export", return_value=_real_export()):
+            b.read_finished()
+        assert b.readings["rs"].count == before, "a failed reading threw away the values that were on screen"
+        assert b.reload_button.isEnabled()
+        assert b.t("vr_err_compile_failed") in _banner(b).text() and "Sections/005.typ:90:4" in _banner(b).text()
+        assert _banner(b).property("callout") == "danger" and _banner(b).isVisibleTo(b.ctx.host)
+        count = sum(len(d.variables) for d in b.domains.values())
+        assert b.t("vr_count", count=count, domains=len(b.domains)) == b.state_label.text()
     finally:
-        _fill(tab, _sample())
+        _fill(b, _sample())
 
 
 def test_a_file_of_the_export_that_cannot_be_read_is_named_in_the_banner():
-    """ARCH-003: a defect of a file Woodcore wrote is said with its name; what the other files hold stays listed."""
     import variable_sources
-    tab = _tab()
+    b = _browser()
     broken = variable_sources.Export(errors=[model.VariablesError("x", "bad_file", file="connections.json", path="x", field="connections.VU-MP-1: boom")])
-    _fill(tab, _sample(), broken)
+    _fill(b, _sample(), broken)
     try:
-        assert "connections.json" in tab.banner.text() and "boom" in tab.banner.text()
-        assert tab.banner.property("callout") == "danger" and tab.banner.isVisibleTo(tab)
-        assert len(_domains(tab)) == 3
+        assert "connections.json" in _banner(b).text() and "boom" in _banner(b).text()
+        assert _banner(b).property("callout") == "danger" and _banner(b).isVisibleTo(b.ctx.host)
+        assert set(b.domains) == {_report("T001")[:2], _report("SL")[:2]}
     finally:
-        _fill(tab, _sample())
+        _fill(b, _sample())
 
 
 def test_a_project_not_exported_says_so():
     import variable_sources
-    tab = _tab()
+    b = _browser()
     missing = variable_sources.Export(missing=[name for name, _s, _r in variable_sources.FILE_SOURCES])
-    _fill(tab, None, missing)
+    _fill(b, None, missing)
     try:
-        assert tab.t("vr_no_export") in tab.empty.text()
+        assert b.t("vr_no_export") in b.empty.text() and b.list.isHidden()
     finally:
-        _fill(tab, _sample())
+        _fill(b, _sample())
 
 
 def test_a_first_reading_that_fails_leaves_the_bar_saying_so():
-    """There is then nothing on screen for the bar to describe, so it carries the failure itself."""
     import unittest.mock as mock
 
     import variable_sources
-    tab = _tab()
+    b = _browser()
     try:
-        _fill(tab, None)
-        tab.read_failed("rs", model.VariablesError("no", "no_typst"))
+        _fill(b, None, variable_sources.Export())
+        b.read_failed("rs", model.VariablesError("no", "no_typst"))
         with mock.patch.object(variable_sources, "read_export", return_value=variable_sources.Export()):
-            tab.read_finished()
-        assert tab.t("vr_err_no_typst") in tab.state.text()
-        # the document is named: of three, the bar says which could not be read
-        assert tab.document_name("rs") in tab.state.text()
-        assert tab.banner.isVisibleTo(tab) and tab.banner.property("callout") == "danger"
+            b.read_finished()
+        assert b.t("vr_err_no_typst") in b.state_label.text() and b.document_name("rs") in b.state_label.text()
+        assert _banner(b).isVisibleTo(b.ctx.host) and _banner(b).property("callout") == "danger"
     finally:
-        _fill(tab, _sample())
+        _fill(b, _sample())
 
 
 def test_every_refusal_the_module_can_raise_has_a_sentence_in_three_languages():
-    """A code the window has no sentence for would reach the engineer as Python's own message."""
-    import variables_tab
+    import variables_words
     codes = set()
     for module in ("variables.py", "variable_sources.py"):
         source = (ROOT / "calc" / module).read_text(encoding="utf-8")
@@ -938,78 +1014,80 @@ def test_every_refusal_the_module_can_raise_has_a_sentence_in_three_languages():
         codes |= set(re.findall(r'"([a-z_]+)"\)\s*from exc', source))
     codes = {c for c in codes if c}
     assert codes and "bad_file" in codes, codes
-    for lang, texts in variables_tab.STRINGS.items():
+    for lang, texts in variables_words.STRINGS.items():
         for code in codes:
             assert f"vr_err_{code}" in texts, f"{lang}: no sentence for the refusal {code!r}"
 
 
-def test_the_tab_speaks_the_window_three_languages():
-    import variables_tab
-    reference = set(variables_tab.STRINGS["fr"])
-    for lang, texts in variables_tab.STRINGS.items():
+def test_the_tab_speaks_the_window_three_languages_and_marks_no_star():
+    """ARCH-006, UI-008: the words in fr/de/en, no ß; the ★ of before gone from the tab's code."""
+    import variables_words
+    reference = set(variables_words.STRINGS["fr"])
+    for lang, texts in variables_words.STRINGS.items():
         assert set(texts) == reference, (lang, reference ^ set(texts))
-        assert texts["tab_variables"], lang
         for key, text in texts.items():
             assert text.strip(), f"{lang}: {key} is empty"
-    # Swiss German, never an ß (§4bis)
-    assert "ß" not in "".join(variables_tab.STRINGS["de"].values())
-    # the raw `source` is «Source» and the column «Provenance»: two words for two things (review ARCH-RISK-012)
-    assert variables_tab.STRINGS["fr"]["vr_source"] != variables_tab.STRINGS["fr"]["vr_provenance"]
+    assert "ß" not in "".join(variables_words.STRINGS["de"].values())
+    for name in ("variables_tab.py", "variables_browser.py", "variables_list.py", "variables_detail.py", "variables_words.py"):
+        assert "★" not in (ROOT / "calc" / "tools" / name).read_text(encoding="utf-8"), name
 
 
 def test_the_tab_carries_its_view_through_a_rebuild():
-    tab = _tab()
-    _fill(tab, _sample())
+    """UI-007: the filter, the widths and the choice kept; `source`, `domain`, `name` are the variable chosen; the segment is `origin_filter`."""
+    b = _browser()
+    _fill(b, _sample())
     try:
-        tab.all_domains_box.setChecked(True)
-        tab.results_box.setChecked(False)
-        tab.search.setText("eta")
-        tab.unit_box.setCurrentIndex(tab.unit_box.findData(""))
-        tab.provenance_box.setCurrentIndex(tab.provenance_box.findData(f"{model.TYPST}:rs"))
-        tab.select_key(_report("T001", "eta_w"))
-        state = tab.view_state()
-        _fill(tab, _sample())
-        tab.restore(state)
-        assert tab.search.text() == "eta"
-        assert tab.unit_box.currentData() == ""
-        assert tab.provenance_box.currentData() == f"{model.TYPST}:rs"
-        assert tab.all_domains_box.isChecked()
-        assert tuple(tab.selected_key()) == _report("T001", "eta_w")
+        b.choose_menu("g:nav_actions")
+        b.choose_source("export")
+        b.click_domain(_export_key("snow-load", "SL")[:2])
+        b.search.setText("q")
+        b.list.header.resizeSection(1, 200)
+        b.select_key(_export_key("snow-load", "SL", "q_k1"))
+        state = b.state()
+        assert (state["source"], state["domain"], state["name"]) == _export_key("snow-load", "SL", "q_k1")
+        assert state["origin_filter"] == "export" and state["menu"] == "g:nav_actions" and state["widths"]["symbol"] == 200
+        _fill(b, _sample())
+        b.restore(state)
+        assert b.filter.menu == "g:nav_actions" and b.filter.source == "export" and b.source_switch.current_key() == "export"
+        assert b.list.widths()["symbol"] == 200 and b.selected_key() == _export_key("snow-load", "SL", "q_k1")
+        assert b.filter.domain == _export_key("snow-load", "SL")[:2]
     finally:
-        _fill(tab, _sample())
+        _fill(b, _sample())
 
 
-def test_a_view_of_the_tree_s_time_is_read_without_harm():
-    """Before v0.117 the splitter had three panes and the filter a document: three sizes laid on four panes would squeeze the detail to nothing, so they are not applied, and the rest is read (review ARCH-RISK-001)."""
-    tab = _tab()
-    _fill(tab, _sample())
-    before = tab.splitter.sizes()
+def test_a_view_of_before_is_read_without_harm_and_sets_no_source():
+    """UI-007, ARCH-RISK-006: a state of v0.117 -- `provenance`, `all_domains`, a `source` that is an origin -- chooses its variable again and sets no source filter; with no widths, the defaults."""
+    import theme
+    from variables_list import DEFAULT_WIDTHS, SYMBOL
+    b = _browser()
+    _fill(b, _sample())
+    before = b.splitter.sizes()
     try:
-        tab.restore({"splitter": [500, 300, 0], "search": "", "unit": None, "document": "rs",
-                     "source": "rs", "domain": "T001", "name": "A", "opened": False})
-        assert tab.splitter.sizes() == before
-        assert tuple(tab.selected_key()) == _report("T001", "A")
+        b.restore({"splitter": [500, 300, 0, 0], "search": "", "unit": None, "provenance": "typst:rs", "all_domains": True,
+                   "source": "rs", "domain": "T001", "name": "A", "opened": False})
+        assert b.splitter.sizes() == before
+        assert b.selected_key() == _report("T001", "A") and b.filter.source == "all"
+        assert b.list.widths()["symbol"] == theme.scaled(DEFAULT_WIDTHS[SYMBOL])
+        # a view kept while the provenance «Excel» still was (issue #109, UI-003): read without harm
+        b.restore({"provenance": "excel", "source": "export", "domain": "snow-load · SL", "name": "h_0"})
+        assert b.filter.source == "all"
     finally:
-        _fill(tab, _sample())
+        _fill(b, _sample())
+
+
+def test_the_panes_sizes_are_no_longer_kept_under_the_view_data():
+    """ARCH-RISK-006 (c): with «Données» gone, the window keeps the panes under (tab_variables, -, panes)."""
+    tab = _tab()
+    assert tab.app.layout_bindings["tab_variables"].key() == ("tab_variables", "-", "panes")
 
 
 def test_the_tab_edits_nothing():
-    """It reads and copies; it carries no unsaved changes and is in none of the window's writers.
-
-    ⚠️ It does have a `confirm_leave`, which every other tab has in order to *refuse* a close: here it only
-    waits for a reading's thread and always answers True, that being the one hook the window offers a tab on
-    its way out (`closeEvent`). So a tab that saves nothing has one, and what is asserted is that it never
-    refuses rather than that it has none.
-    """
+    """It reads and copies; no unsaved changes, no writer, no `dirty` (what tells an editor from a browser)."""
     import woodcore_gui
     tab = _tab()
-    assert not hasattr(tab, "save")
-    assert tab.confirm_leave() is True
+    assert not hasattr(tab, "save") and tab.confirm_leave() is True
     for name in woodcore_gui.WRITERS:
         assert not hasattr(tab, name), f"the Variables tab has a writer named {name!r}"
-    # ⚠️ And no `dirty`: it is what tells an editor from a browser, and `tests/test_window.py` takes every tab
-    # that has one for an editor and calls `update_list_marker()` on it. A `dirty` always False would owe that
-    # walk a marker this tab has no list to mark -- which is how the four errors in test_window read today.
     assert not hasattr(tab, "dirty"), "the Variables tab is a browser: a `dirty` puts it among the editors"
     for browser in ("CommandsTab",):
         other = [t for t in _WINDOW["window"].tabs if type(t).__name__ == browser]
@@ -1018,34 +1096,30 @@ def test_the_tab_edits_nothing():
 
 
 def test_a_disabled_reload_button_says_why():
-    """v0.47's rule, which tests/test_window.py holds for every tab: a button shown disabled with no tooltip cannot be told from a broken one. Held here too, on the one button that is ever disabled, so a failure names this tab rather than the whole window."""
-    tab = _tab()
-    tab.set_reading(True)
+    b = _browser()
+    b.set_reading(True)
     try:
-        assert not tab.reload_button.isEnabled()
-        assert tab.reload_button.toolTip() == tab.t("vr_reading")
+        assert not b.reload_button.isEnabled() and b.reload_button.toolTip() == b.t("vr_reading")
     finally:
-        tab.set_reading(False)
-    assert tab.reload_button.isEnabled()
-    # and an enabled one says what it will cost, a reading being a compile of some seconds
-    assert tab.reload_button.toolTip() == tab.t("vr_reload_hint")
+        b.set_reading(False)
+    assert b.reload_button.isEnabled() and b.reload_button.toolTip() == b.t("vr_reload_hint")
 
 
 def test_the_automatic_reading_is_turned_off_for_the_suite():
-    """`WOODCORE_VARIABLES_READ=0`, as conftest sets it -- and «Relire» is unaffected, what is turned off being reading without being asked."""
     assert not model.auto_enabled(), "conftest no longer turns the automatic reading off"
     import unittest.mock as mock
 
     import variables_tab
     _tab()
     tab = variables_tab.VariablesTab(_WINDOW["window"])
-    tab.setParent(_WINDOW["window"])   # owned by the window, as a tab always is: an orphan tab outlived the application and crashed the interpreter's exit (v0.117)
-    tab.readings = {}
-    with mock.patch.object(tab, "reload") as spy:
+    tab.setParent(_WINDOW["window"])
+    b = tab.service("browser")
+    b.readings = {}
+    with mock.patch.object(b, "reload") as spy:
         tab.on_shown()
         assert not spy.called, "a suite run paid for a compile by opening a tab"
-    with mock.patch.object(model, "auto_enabled", return_value=True), mock.patch.object(tab, "reload") as spy:
-        tab.opened = False
+    with mock.patch.object(model, "auto_enabled", return_value=True), mock.patch.object(b, "reload") as spy:
+        b.opened = False
         tab.on_shown()
         assert spy.called, "with the automatic reading on, the first showing does not read"
 
@@ -1061,18 +1135,9 @@ def test_the_tab_is_named_once_in_the_navigation_and_has_an_icon():
 
 
 def test_the_variables_tab_sits_between_the_formulas_and_the_commands():
-    """Where it is in *Référence* is a decision and not an accident: «Formule» is what to write, «Variables»
-    what there is to name in what you write, «Commandes» what there is to call — this project's own values
-    before the engine's surface, the more specific first. It also fixes Ctrl+n for the three.
-
-    ⚠️ A **relative** ordering and not the exact tuple `test_journal.py` pins `nav_project` with. Four sessions
-    add tabs to this file at once, so an exact tuple is a test that fails for everyone who adds a neighbour
-    while catching nothing about *this* tab; the ordering catches a reorder and survives a newcomer. It is
-    `test_chrome.py`'s own shape for `nav_structure` («Schémas» right under «Modèles statiques»).
-    """
+    """A relative ordering, not an exact tuple: «Formule» what to write, «Variables» what there is to name, «Commandes» what there is to call."""
     import woodcore_gui
     reference = dict(woodcore_gui.NAV_GROUPS)["nav_reference"]
-    # «Formule» since 0.117 -- the tab that writes calculation domains, in the place of v0.100's «Formules» (keyword lines), retired then (archive/formules-dsl/)
     for key in ("tab_formula", "tab_variables", "tab_commands"):
         assert key in reference, (key, reference)
     assert reference.index("tab_formula") < reference.index("tab_variables") < reference.index("tab_commands"), reference
@@ -1170,3 +1235,48 @@ def test_a_reading_is_the_document_s_own_and_its_pdf_is_judged_by_its_stamp():
     pdf.write_bytes(pdf.read_bytes() + b"\n")
     os.utime(pdf, (later + 10, later + 10))
     assert model.pdf_is_current(here, "cu"), "a PDF newer than every source, written by a route that stamps nothing, is not current"
+
+
+def test_show_tab_opens_the_case_where_the_tab_lists_it():
+    """ARCH-010, REQ-009: `show_tab("tab_ac_snow", "load:snow-load/SL")` brings the snow forward and asks it to open `snow-load/SL` -- by the tab's own `open_object`, where its `lists_object` answers. The example's SL is read from the workbook and listed by no tab, so the tab is asked through stand-ins of the two calls it answers."""
+    import unittest.mock as mock
+
+    import woodcore_gui
+    tab = _tab()
+    window = tab.app
+    keys = [k for k, _f in woodcore_gui.TABS]
+    snow = window.tabs[keys.index("tab_ac_snow")]
+    opened = []
+    try:
+        with mock.patch.object(snow, "lists_object", lambda ident: ident == "snow-load/SL"), mock.patch.object(snow, "open_object", opened.append):
+            assert window.show_tab("tab_ac_snow", "load:snow-load/SL")
+            assert window.tabs[window.tab_widget.currentIndex()] is snow and opened == ["snow-load/SL"]
+            b = tab.service("browser")
+            _fill(b, _sample())
+            window.tab_widget.setCurrentWidget(tab)
+            b.select_key(_report("SL", "q_k1"))   # chosen in the report that recalls it: the export's tab, its case
+            b.detail.open_button.click()
+            assert window.tabs[window.tab_widget.currentIndex()] is snow and opened[-1] == "snow-load/SL"
+    finally:
+        window.tab_widget.setCurrentWidget(tab)
+
+
+def test_leaving_the_tab_waits_for_a_reading_in_its_thread():
+    """Issue #106 (REQ-006): the tab's `confirm_leave` is the type's -- the phase `leave`, then True --, and the browser's `leave` waits for a reading in its thread, which cannot be cut short."""
+    import tab_frame
+    import variables_tab
+    tab = _tab()
+    assert "confirm_leave" not in vars(variables_tab.VariablesTab) and variables_tab.VariablesTab.confirm_leave is tab_frame.TabFrame.confirm_leave
+    b = tab.service("browser")
+    waited = []
+
+    class Reader:
+        modes = ["rs"]
+
+        def wait(self, ms):
+            waited.append(ms)
+    b.reader = Reader()
+    try:
+        assert tab.confirm_leave() is True and len(waited) == 1 and waited[0] > 0
+    finally:
+        b.reader = None

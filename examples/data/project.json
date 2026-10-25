@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "Exemple",
   "number": "",
   "client": "",
@@ -8,11 +8,10 @@
   "author": "Max Muster",
   "checker": "",
   "woodcore": {
-    "version": "0.82.0",
-    "revision": ""
+    "version": "0.124.0",
+    "revision": "a64c41a6-dirty"
   },
-  "typst": "0.14.2",
-  "workbooks": {},
+  "typst": "0.15.1",
   "revision": {
     "index": 3,
     "date": "2026-09-25",

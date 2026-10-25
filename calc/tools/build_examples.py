@@ -48,6 +48,7 @@ EXAMPLES = ROOT / "examples"
 EXAMPLE_PROJECT = ROOT / "tests" / "projet-exemple" / "Exemple.woodcore"
 OUT = EXAMPLES / "out"
 MANIFEST = OUT / "index.json"
+MANIFEST_SCHEMA = "1.1"   # 1.1 (issue #115): `same` and `page`, the levels an example prints alike (measure_levels); a 1.0 manifest is still read
 
 # The language the pages are rendered in. One, not three: three would be ~37 MB of PNG for a gain the documentation does not need -- it is written in English, and the labels the data carries are German whatever the window is set to (docs/typst/language.md §4bis). An example that wants another language calls `set-report-language` itself, which is better than the window doing it invisibly.
 LANG = "de"
@@ -122,7 +123,17 @@ def freeze(root=ROOT, source_project=None):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source, target)
             rooted += 1
-    print(f"build_examples: froze {source_data}, strings.json, the norm tables and {rooted} figures named from the root into {EXAMPLES.name}/")
+    # Every domain's file the index of the domains names (data/formulas.json) -- a check unfolded, a load, the engineer's own `Domains/<id>.typ` --, copied to the same path: an index that announces a file examples/ does not hold was the defect 11 of issue #113 (REQ-017), held by tests/test_examples_domains.py
+    import json
+    named = json.loads((EXAMPLES / "data" / "formulas.json").read_text(encoding="utf-8")).get("domains", {}) if (EXAMPLES / "data" / "formulas.json").is_file() else {}
+    for entry in named.values():
+        source = Path(here.typst_root) / entry["file"]
+        if source.is_file():
+            target = EXAMPLES / entry["file"]
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+            rooted += 1
+    print(f"build_examples: froze {source_data}, strings.json, the norm tables and {rooted} figures and domains named from the root into {EXAMPLES.name}/")
 
 
 def _rooted_files(data_dir):
@@ -215,7 +226,7 @@ KEPT = {"commands.typ", "config.typ"}
 def sweep(entries):
     """Removes a .typ or a .png left behind by an example that no longer exists."""
     keep_typ = {f"{e['stem']}.typ" for e in entries}
-    keep_png = {f"{e['stem']}.png" for e in entries}
+    keep_png = {f"{e.get('page', e['stem'])}.png" for e in entries}   # a level printing another's page keeps no file of its own (measure_levels)
     for path in EXAMPLES.glob("*.typ"):
         if path.name not in keep_typ and path.name not in KEPT:
             path.unlink()
@@ -305,13 +316,220 @@ def page(command, example_index, level, code, manifest=None):
     entry = manifest.get((command, example_index, level))
     if entry is None:
         return None, "missing"
-    png = OUT / f"{entry['stem']}.png"
+    png = OUT / f"{entry.get('page', entry['stem'])}.png"   # `page`: the level whose page this one prints (measure_levels)
     if not png.exists():
         return None, "missing"
     return png, ("fresh" if entry.get("hash") == source_hash(code, level) else "stale")
 
 
-def build(root=ROOT, do_freeze=False, source_project=None):
+# --- the levels an example prints alike (spec 2026-10-24-onglet-commandes-pages, REQ-008, ARCH-011) ------------
+
+def measure_levels(entries, previous=None):
+    """Which levels of each example rendered at three print the same page, measured on the pages themselves: {(command, index): "123" | "12" | "23"}, nothing for one whose three differ. Where two pages are one, the second is dropped and its entry names the page kept (`page`), so the one picture is committed once and the tab and the site say it rather than show it twice (the engineer, question 6: «un seul niveau, et la mention»)."""
+    by_example = {}
+    for entry in entries:
+        by_example.setdefault((entry["command"], entry["index"]), {})[entry["level"]] = entry
+    same = {}
+    for key, levels in by_example.items():
+        if set(levels) != set(preview.LEVELS):
+            continue
+        digest = {}
+        for level, entry in levels.items():
+            png = OUT / f"{entry.get('page', entry['stem'])}.png"
+            before = (previous or {}).get((entry["command"], entry["index"], level)) or {}
+            if not png.exists() and before.get("page") and before.get("hash") == entry["hash"]:
+                png = OUT / f"{before['page']}.png"   # dropped by the last build as the page of another level, its fence unchanged
+            if not png.exists():
+                break
+            digest[level] = hashlib.sha256(png.read_bytes()).hexdigest()
+        else:
+            if digest[1] == digest[2] == digest[3]:
+                same[key] = "123"
+            elif digest[1] == digest[2]:
+                same[key] = "12"
+            elif digest[2] == digest[3]:
+                same[key] = "23"
+    for (command, index), kind in same.items():
+        levels = by_example[(command, index)]
+        kept = levels[preview.DEFAULT_LEVEL]
+        for level in ({1, 3} if kind == "123" else {1} if kind == "12" else {3}):
+            levels[level]["page"] = kept.get("page", kept["stem"])
+        for entry in levels.values():
+            entry["same"] = kind
+    return same
+
+
+def levels_same(command, index, manifest=None):
+    """The levels of one example that print the same page, as measured (measure_levels): "123", "12", "23" or None."""
+    manifest = globals()["index"]() if manifest is None else manifest
+    entry = manifest.get((command, index, preview.DEFAULT_LEVEL))
+    return entry.get("same") if entry else None
+
+
+# --- the prints of the values (spec 2026-10-24-onglet-commandes-pages, REQ-005, ARCH-003, ARCH-009, ARCH-010) -----
+
+VALUES = OUT / "values"
+VALUES_INDEX = VALUES / "index.json"
+VALUES_SCHEMA = "1.0"
+VALUES_WORK = EXAMPLES / ".values"   # the documents and their raw pages, before the sheets (gitignored)
+VALUE_PPI = 160        # what the prototype was compiled at, shown at 0.6 in the bubble: ~96 dpi on the screen
+VALUE_SCALE = 0.6
+VALUE_WIDTH = "12cm"   # narrower than an example's 16 cm: a bubble, not a page
+VALUE_COLOURS = 32     # the sheets quantised: three languages committed (Q-001 A) must stay light (CON-004)
+VALUE_MARGIN = 6       # pixels left around the ink
+
+
+def value_key(command, argument, value):
+    """How the map names one value: `var|display|"none"`, the value as Typst writes it."""
+    return f"{command}|{argument}|{value}"
+
+
+def value_hash(command, argument, value, setup, call, lang):
+    """What says a committed print still matches the call it was compiled from (like source_hash)."""
+    digest = hashlib.sha256()
+    for part in (command, argument, value, setup, call, lang, str(VALUE_PPI), VALUE_WIDTH):
+        digest.update(part.encode("utf-8"))
+        digest.update(b"\0")
+    return digest.hexdigest()[:16]
+
+
+def values_index():
+    """examples/out/values/index.json, or an empty map where there is none."""
+    try:
+        return json.loads(VALUES_INDEX.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"schema_version": VALUES_SCHEMA, "sheets": {}, "values": {}}
+
+
+def value_jobs(table=None):
+    """Every value of every argument with values of every page, in each language: (command, argument, value, lang, setup, call), in the order of the page."""
+    import command_pages as pages
+    table = pages.pages() if table is None else table
+    for command, page in table["commands"].items():
+        for argument, spec in page["arguments"].items():
+            for value in spec.get("values") or ():
+                if "call" not in value:
+                    continue   # an argument whose values print whole pages (`unrendered`)
+                for lang in pages.LANGS:
+                    setup = pages.tr(value["setup"], lang) if value.get("setup") else ""
+                    yield command, argument, value["value"], lang, setup, pages.tr(value["call"], lang)
+
+
+def value_document(setup, call, lang):
+    """The document one value is compiled as: the examples' own setting (command_preview.document) on a narrower page, in the report of `lang`, at the report's base level -- one call a paragraph, a blank line after every line, as in a report, else two #eq run on in one line."""
+    body = "\n\n".join(part.replace("\n", "\n\n") for part in (setup, call) if part)
+    config, commands = imports_for(VALUES_WORK)
+    return preview.document(body, preview.DEFAULT_LEVEL, lang, config=config, commands=commands, document_language=True, width=VALUE_WIDTH)
+
+
+def _compile_value(job):
+    """One value compiled to its raw page: (job, png path or None, Typst's message or None)."""
+    command, argument, value, lang, setup, call = job
+    name = hashlib.sha256("|".join(job).encode("utf-8")).hexdigest()[:16]
+    source, png = VALUES_WORK / f"{name}.typ", VALUES_WORK / f"{name}.png"
+    source.write_text(value_document(setup, call, lang), encoding="utf-8", newline="\n")
+    result = preview.proc.run(["typst", "compile", "--root", str(EXAMPLES), "--format", "png", "--ppi", str(VALUE_PPI), str(source), str(png)],
+                              capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if result.returncode != 0 or not png.exists():
+        return job, None, (result.stderr or result.stdout or "typst failed without a message").strip()
+    return job, png, None
+
+
+def _ink(png):
+    """The raw page cropped to its ink, a few pixels around it; None where nothing is printed."""
+    from PIL import Image, ImageChops
+    image = Image.open(png).convert("RGB")
+    box = ImageChops.invert(image).getbbox()
+    if box is None:
+        return None
+    x0, y0, x1, y1 = box
+    return image.crop((max(0, x0 - VALUE_MARGIN), max(0, y0 - VALUE_MARGIN), min(image.width, x1 + VALUE_MARGIN), min(image.height, y1 + VALUE_MARGIN)))
+
+
+def render_values(table=None, jobs=8, only=None, force=False):
+    """Compiles every value of every page into one sheet a command and a language -- examples/out/values/<lang>-<command>.png -- and its map, examples/out/values/index.json (REQ-005, ARCH-009).
+
+    Each value is its own document (ARCH-010): `#calc-defaults(scope: "document")` sets every line after it, two `#var("M_d", …)` of one sheet would meet in the registry, the counters of the footnotes run on, so a sheet written as one document would print each value under the ones before it. One document a value costs one run of Typst each, on `jobs` threads, and only for the sheets whose calls changed: a sheet's hash is its values' (value_hash), and a sheet whose hash is the map's is left as it is. Every value is cropped to its ink; a value that prints nothing is `blank`; two values of one argument whose prints are the same pixels are `same` of each other (the bubble says so). A call that does not compile fails the build, naming the command, the argument, the value and the language. Returns the failures, [(key, lang, message)].
+    """
+    from concurrent.futures import ThreadPoolExecutor
+    from PIL import Image
+    VALUES.mkdir(parents=True, exist_ok=True)
+    VALUES_WORK.mkdir(parents=True, exist_ok=True)
+    old = values_index()
+    sheets_of = {}
+    for job in value_jobs(table):
+        sheets_of.setdefault(f"{job[3]}-{job[0]}", []).append(job)
+    if only:
+        sheets_of = {k: v for k, v in sheets_of.items() if v[0][0] in only}
+    index = {"schema_version": VALUES_SCHEMA, "ppi": VALUE_PPI, "scale": VALUE_SCALE, "sheets": dict(old.get("sheets") or {}), "values": dict(old.get("values") or {})}
+    todo = {}
+    for sheet, sheet_jobs in sheets_of.items():
+        digest = hashlib.sha256("".join(value_hash(*j[:3], j[4], j[5], j[3]) for j in sheet_jobs).encode()).hexdigest()[:16]
+        known = index["sheets"].get(sheet)
+        if not force and known and known.get("hash") == digest and (VALUES / known["file"]).exists():
+            continue
+        todo[sheet] = (digest, sheet_jobs)
+    failures = []
+    pending = [job for _digest, sheet_jobs in todo.values() for job in sheet_jobs]
+    with ThreadPoolExecutor(max_workers=jobs) as pool:
+        results = {job: (png, error) for job, png, error in pool.map(_compile_value, pending)}
+    for sheet, (digest, sheet_jobs) in todo.items():
+        tiles, entries = [], {}
+        for job in sheet_jobs:
+            command, argument, value, lang, setup, call = job
+            png, error = results[job]
+            key = value_key(command, argument, value)
+            entry = {"hash": value_hash(command, argument, value, setup, call, lang)}
+            if error:
+                failures.append((key, lang, error))
+                continue
+            image = _ink(png)
+            if image is None:
+                entry["blank"] = True
+            else:
+                entry["ink"] = hashlib.sha256(image.tobytes()).hexdigest()[:16]
+                tiles.append((key, image))
+            entries[key] = entry
+        width = max([image.width for _key, image in tiles] or [1])
+        height = sum(image.height + 2 for _key, image in tiles) or 1
+        canvas = Image.new("RGB", (width, height), "white")
+        y = 0
+        for key, image in tiles:
+            canvas.paste(image, (0, y))
+            entries[key]["rect"] = [y, image.width, image.height]
+            y += image.height + 2
+        lang = sheet_jobs[0][3]
+        for key, entry in entries.items():
+            command, argument, _value = key.split("|", 2)
+
+            def alike(other):
+                return other.get("ink") is not None and other.get("ink") == entry.get("ink") or (other.get("blank") and entry.get("blank"))
+            entry["same"] = [other.split("|", 2)[2] for other, e in entries.items()
+                             if other != key and other.split("|", 2)[:2] == [command, argument] and alike(e)]
+            index["values"].setdefault(key, {})[lang] = entry
+        file = f"{sheet}.png"
+        canvas.quantize(colors=VALUE_COLOURS, method=Image.Quantize.MEDIANCUT).save(VALUES / file, optimize=True)
+        failed_here = any(f[1] == lang and f[0].split("|", 1)[0] == sheet_jobs[0][0] for f in failures)
+        # a sheet with a value that did not compile is not up to date: the next build compiles it again
+        index["sheets"][sheet] = {"file": file, "size": [width, height], "hash": "" if failed_here else digest, "isolate": True}
+    if not only:
+        # what no page holds any more: its sheet and its values
+        for sheet in [s for s in index["sheets"] if s not in sheets_of]:
+            (VALUES / index["sheets"][sheet]["file"]).unlink(missing_ok=True)
+            del index["sheets"][sheet]
+        wanted = {value_key(*j[:3]) for jobs_ in sheets_of.values() for j in jobs_}
+        index["values"] = {k: v for k, v in index["values"].items() if k in wanted}
+    VALUES_INDEX.write_text(json.dumps(index, ensure_ascii=False, indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
+    shutil.rmtree(VALUES_WORK, ignore_errors=True)
+    return failures
+
+
+def values_weight():
+    """The bytes of every sheet of examples/out/values/ (CON-004: a ceiling of 30 MB, measured after each category)."""
+    return sum(p.stat().st_size for p in VALUES.glob("*.png")) if VALUES.exists() else 0
+
+
+def build(root=ROOT, do_freeze=False, source_project=None, values_only=False):
     if do_freeze:
         freeze(root, source_project)
     if not (EXAMPLES / "data").exists():
@@ -319,22 +537,28 @@ def build(root=ROOT, do_freeze=False, source_project=None):
             "build_examples: no frozen data in examples/ -- run once with --freeze to take a snapshot"
         )
     refresh_engine(root)
+    previous = index()
     entries = write_sources(root)
-    failures = render(entries)
+    # `values_only`: the examples' pages left as they are -- their levels measured again on the committed files -- and the values compiled
+    failures = [] if values_only else render(entries)
+    measure_levels(entries, previous)
     sweep(entries)
     MANIFEST.parent.mkdir(parents=True, exist_ok=True)
     MANIFEST.write_text(
-        json.dumps({"schema_version": "1.0", "lang": LANG, "examples": entries}, indent=1, ensure_ascii=False) + "\n",
+        json.dumps({"schema_version": MANIFEST_SCHEMA, "lang": LANG, "examples": entries}, indent=1, ensure_ascii=False) + "\n",
         encoding="utf-8", newline="\n",
     )
+    for key, lang, message in render_values():
+        failures.append((f"value {key} ({lang})", message))
+    print(f"build_examples: the values' sheets in {VALUES.relative_to(ROOT)}, {values_weight() // 1024} KB")
     for name, message in failures:
         first = [line for line in message.splitlines() if line.strip()][:2]
         print(f"build_examples: {name} does not compile -- {' / '.join(first)}")
     for name, missing in dangling(source_project.data_dir if source_project is not None else None):
         print(f"build_examples: WARNING {name} names {missing!r}, which the example project no longer has "
               f"-- repoint the /// fence, or re-freeze if the snapshot is meant to move")
-    total = sum((OUT / f"{e['stem']}.png").stat().st_size for e in entries
-                if (OUT / f"{e['stem']}.png").exists())
+    total = sum((OUT / f"{e.get('page', e['stem'])}.png").stat().st_size for e in entries
+                if "page" not in e and (OUT / f"{e['stem']}.png").exists())
     print(f"build_examples: {len(entries)} example(s), "
           f"{len(entries) - len(failures)} rendered ({total // 1024} KB) in {OUT.relative_to(ROOT)}")
     return failures
@@ -346,11 +570,13 @@ def main():
                         help="re-copy data/ and the glossary into examples/ before building")
     parser.add_argument("--project", default=None,
                         help="the .woodcore file whose export --freeze takes; the example project (tests/projet-exemple) when left out")
+    parser.add_argument("--values", action="store_true",
+                        help="compile the values' prints alone (examples/out/values/), the examples' pages left as they are and their levels measured again")
     args = parser.parse_args()
     source = project.Project.load(args.project) if args.project else None
     if not preview.have_typst():
         raise SystemExit("build_examples: typst is not on the path")
-    raise SystemExit(1 if build(do_freeze=args.freeze, source_project=source) else 0)
+    raise SystemExit(1 if build(do_freeze=args.freeze, source_project=source, values_only=args.values) else 0)
 
 
 if __name__ == "__main__":

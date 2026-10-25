@@ -1,0 +1,255 @@
+{
+  "_source": "SIA 265/1:2018, Tableau 13a and 13b -- transcribed from the French edition, SIA265-1-2018-FR.pdf p. 34: the numbers taken from the page's text layer and every row checked on a render of the page (issue #110). The only copy of these values in the project.",
+  "_note": "Footnote 1 of a: the properties hold at hygroscopic equilibrium, 65 % relative humidity and 20 °C. Footnote 2 of a: the 5 % fractile of a modulus is 0,8 times its mean. The b table gives the design values for moisture class 1 and medium load duration (KLED moyenne); for any other, 6.1.2.1 (f_d = η_mod · f_k / γ_M, Tableaux 6 and 9). A cell the norm marks «valeurs non disponibles» is null and listed in the product's `unavailable`. Columns: (t_min, t_max] in mm, `from_inclusive` where the norm writes «≥».",
+  "edition": "SIA 265/1:2018",
+  "table_13": {
+    "number": "13",
+    "title": "Propriétés caractéristiques des panneaux de particules liées à la résine synthétique de la classe technique P4",
+    "title_b": "Valeurs de calcul (classe d'humidité 1 et KLED moyenne) pour des panneaux de particules liées à la résine synthétique de la classe technique P4",
+    "norm": "SIA 265/1",
+    "page": 34,
+    "fractile": "0,8",
+    "products": [
+      {
+        "id": "particle-p4",
+        "product": "p4",
+        "label": "Panneau de particules P4",
+        "isotropic": true,
+        "columns": [
+          {
+            "t_min": null,
+            "t_max": 13
+          },
+          {
+            "t_min": 13,
+            "t_max": 20
+          },
+          {
+            "t_min": 20,
+            "t_max": 25
+          },
+          {
+            "t_min": 25,
+            "t_max": 32
+          },
+          {
+            "t_min": 32,
+            "t_max": 40
+          },
+          {
+            "t_min": 40,
+            "t_max": 50
+          }
+        ],
+        "rho_k": [
+          650,
+          600,
+          550,
+          550,
+          500,
+          500
+        ],
+        "grid": {
+          "plate": {
+            "f_m_k": {
+              "all": [
+                14.2,
+                12.5,
+                10.8,
+                9.2,
+                7.5,
+                5.8
+              ]
+            },
+            "f_c_90_k": {
+              "all": [
+                10.0,
+                10.0,
+                10.0,
+                8.0,
+                6.0,
+                6.0
+              ]
+            },
+            "f_v_k": {
+              "all": [
+                1.8,
+                1.6,
+                1.4,
+                1.2,
+                1.1,
+                1.0
+              ]
+            },
+            "E_m_mean": {
+              "all": [
+                3200,
+                2900,
+                2700,
+                2400,
+                2100,
+                1800
+              ]
+            },
+            "G_mean": {
+              "all": [
+                200,
+                200,
+                200,
+                100,
+                100,
+                100
+              ]
+            },
+            "f_m_d": {
+              "all": [
+                7.1,
+                6.3,
+                5.4,
+                4.6,
+                3.8,
+                2.9
+              ]
+            },
+            "f_c_90_d": {
+              "all": [
+                5.0,
+                5.0,
+                5.0,
+                4.0,
+                3.0,
+                3.0
+              ]
+            },
+            "f_v_d": {
+              "all": [
+                0.9,
+                0.8,
+                0.7,
+                0.6,
+                0.55,
+                0.5
+              ]
+            }
+          },
+          "shear": {
+            "f_m_k": {
+              "all": [
+                8.9,
+                7.9,
+                6.9,
+                6.1,
+                5.0,
+                4.4
+              ]
+            },
+            "f_v_k": {
+              "all": [
+                6.6,
+                6.1,
+                5.5,
+                4.8,
+                4.4,
+                4.2
+              ]
+            },
+            "E_m_mean": {
+              "all": [
+                1800,
+                1700,
+                1600,
+                1400,
+                1200,
+                1100
+              ]
+            },
+            "G_mean": {
+              "all": [
+                860,
+                830,
+                770,
+                680,
+                600,
+                550
+              ]
+            },
+            "f_m_d": {
+              "all": [
+                4.5,
+                4.0,
+                3.5,
+                3.1,
+                2.5,
+                2.2
+              ]
+            },
+            "f_v_d": {
+              "all": [
+                3.3,
+                3.1,
+                2.8,
+                2.4,
+                2.2,
+                2.1
+              ]
+            }
+          },
+          "axial": {
+            "f_t_k": {
+              "all": [
+                8.9,
+                7.9,
+                6.9,
+                6.1,
+                5.0,
+                4.4
+              ]
+            },
+            "f_c_k": {
+              "all": [
+                12.0,
+                11.1,
+                9.6,
+                9.0,
+                7.6,
+                6.1
+              ]
+            },
+            "E_tc_mean": {
+              "all": [
+                1800,
+                1700,
+                1600,
+                1400,
+                1200,
+                1100
+              ]
+            },
+            "f_t_d": {
+              "all": [
+                4.5,
+                4.0,
+                3.5,
+                3.1,
+                2.5,
+                2.2
+              ]
+            },
+            "f_c_d": {
+              "all": [
+                6.0,
+                5.6,
+                4.8,
+                4.5,
+                3.8,
+                3.1
+              ]
+            }
+          }
+        },
+        "unavailable": []
+      }
+    ],
+    "notes": {}
+  }
+}

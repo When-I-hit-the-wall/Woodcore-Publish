@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "id": "SL",
+  "name": "",
+  "label": "",
+  "group": "",
+  "h_0": 551.767944335937,
+  "correction": 0,
+  "exposure": "normal",
+  "c_t": 1,
+  "roof": "flat",
+  "length": 17.5,
+  "width": 4.25,
+  "alpha_1": null,
+  "alpha_2": null,
+  "sliding": "hindered"
+}

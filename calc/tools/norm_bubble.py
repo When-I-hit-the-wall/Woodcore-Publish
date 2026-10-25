@@ -1,6 +1,6 @@
 """The norm under a datum: the ⓘ beside each field, the bubble it opens, the excerpt it shows (spec 2026-10-22-onglet-neige-type, UI-003, UI-004, UI-005, REQ-001 to REQ-004; the engineer's decisions of 21-22.10.2026).
 
-**Hover** a ⓘ for about `DELAY_MS`: a bubble shows, for each excerpt the field cites, the norm, its edition, the clause and the page, then **the norm's words first and the image of the excerpt under them** (D-4), cut out of the shipped PDF (excerpt_image) -- no tabs. A tile's bubble shows the image alone (T28: `bare`). The bubble stays while the pointer is on the ⓘ or on it; it opens under the ⓘ, above it where there is no room under, and scrolls inside where neither holds it -- it never covers what it explains (`place`, a pure function a test holds). **Click** the ⓘ or the bubble: its excerpts are pinned as modules of the right pane (`pinned`). **Ctrl+click**: the edition is opened in Woodcore's reader at the clause, framed -- or, for an excerpt with a map, the map's site (`opened`). The language is the window's, German where the norm has no edition in it (excerpts.excerpt).
+**Hover** a ⓘ for about `DELAY_MS`: a bubble shows, for each excerpt the field cites, the norm, its edition, the clause and the page, then **the norm's words first and the image of the excerpt under them** (D-4), cut out of the shipped PDF (excerpt_image) -- no tabs. A tile's bubble shows the image alone (T28: `bare`). The bubble stays while the pointer is on the ⓘ or on it; it opens under the ⓘ, above it where there is no room under, and scrolls inside where neither holds it -- it never covers what it explains (`place`, a pure function a test holds). **Click** the ⓘ or the bubble: its excerpts are pinned as modules of the right pane (`pinned`); clicked again, pinned already, they are taken out of it as by their × (`unpinned`, issue #96) -- the ⓘ of an excerpt pinned is filled, and the bubble's foot says what its click will do. **Ctrl+click**: the edition is opened in Woodcore's reader at the clause, framed -- or, for an excerpt with a map, the map's site (`opened`). The language is the window's, German where the norm has no edition in it (excerpts.excerpt).
 
 Nothing here knows the snow: the tab hands each ⓘ the norm file and the excerpt ids its declaration names (contracts.Field.excerpts). The bubble is a tool window that never takes the focus, hidden when its tab is hidden, its window deactivated or its view changed (ARCH-RISK-W11).
 """
@@ -10,6 +10,7 @@ from PySide6.QtGui import QCursor, QGuiApplication, QPixmap
 from PySide6.QtWidgets import QApplication, QFrame, QLabel, QScrollArea, QSizePolicy, QVBoxLayout, QWidget
 
 import excerpt_image
+from hover_bubble import GAP, place  # noqa: F401  -- where the bubble goes: the commands tab's bubble shares it (issue #115)
 import theme
 from norms import excerpts as norm_excerpts
 
@@ -18,23 +19,6 @@ DELAY_MS = 350
 LEAVE_MS = 250
 # The bubble's widest, and the gap between it and its ⓘ
 WIDTH = 460
-GAP = 6
-
-
-def place(trigger, size, screen):
-    """Where the bubble goes (UI-003): `trigger` the ⓘ's rectangle and `screen` the screen's available one, both global, `size` the bubble's natural size. Under the ⓘ where it fits; above it where it does not and fits there; else on the side with more room, as high as that room, scrolling inside -- never over the ⓘ. Returns (QRect, whether it must scroll)."""
-    width = min(size.width(), screen.width())
-    x = max(screen.left(), min(trigger.left(), screen.right() - width + 1))
-    below = screen.bottom() - (trigger.bottom() + GAP)
-    above = (trigger.top() - GAP) - screen.top()
-    height = size.height()
-    if height <= below:
-        return QRect(x, trigger.bottom() + GAP + 1, width, height), False
-    if height <= above:
-        return QRect(x, trigger.top() - GAP - height, width, height), False
-    if below >= above:
-        return QRect(x, trigger.bottom() + GAP + 1, width, max(below, 1)), True
-    return QRect(x, screen.top(), width, max(above, 1)), True
 
 
 class FitImage(QLabel):
@@ -110,15 +94,22 @@ class NormBubble(QFrame):
         self.scroll = QScrollArea(self)
         self.scroll.setWidgetResizable(True)
         self.scroll.setFrameShape(QFrame.Shape.NoFrame)
+        # what a click will do, and a Ctrl+click (issue #96): «Clic : épingler à droite» or «Clic : retirer du volet droit»
+        self.foot = QLabel()
+        self.foot.setWordWrap(True)
+        self.foot.setStyleSheet("color: %s;" % theme.colour("muted"))
         column = QVBoxLayout(self)
         column.setContentsMargins(10, 10, 10, 10)
         column.addWidget(self.scroll)
+        column.addWidget(self.foot)
         self.scrolling = False
 
-    def show_for(self, view, trigger_rect, screen_rect):
+    def show_for(self, view, trigger_rect, screen_rect, foot=""):
         view.setMaximumWidth(WIDTH - 24)
         self.scroll.setWidget(view)
-        natural = QSize(WIDTH, view.sizeHint().height() + 24)
+        self.foot.setText(foot)
+        self.foot.setVisible(bool(foot))
+        natural = QSize(WIDTH, view.sizeHint().height() + 24 + (self.foot.sizeHint().height() + 6 if foot else 0))
         rect, self.scrolling = place(trigger_rect, natural, screen_rect)
         self.setGeometry(rect)
         self.show()
@@ -137,20 +128,31 @@ class InfoMark(QLabel):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setToolTip("")
         self.setAccessibleDescription(tip)
-        self.setStyleSheet("color: %s; padding: 0 3px;" % theme.colour("accent"))
+        self.set_pinned(False)
+
+    def set_pinned(self, pinned):
+        """Filled where its excerpts are pinned on the right, hollow where they are not (issue #96, the wind prototype's `.i.pinned`)."""
+        self.pinned = bool(pinned)
+        if self.pinned:
+            self.setStyleSheet("color: %s; background: %s; border-radius: 7px; padding: 0 3px;" % (theme.colour("card"), theme.colour("accent")))
+        else:
+            self.setStyleSheet("color: %s; padding: 0 3px;" % theme.colour("accent"))
 
 
 class BubbleController(QObject):
-    """The bubbles of one tab: `attach(widget, norm, ids, bare)` makes `widget` -- a ⓘ, a tile -- open the bubble of the excerpts `ids` of the norm file `norm`. `pinned(norm, ids)` is emitted at a click, `opened(norm, id)` at a Ctrl+click: the tab pins (module_pane) and opens (norm_reader). `lang()` gives the window's language, `t` its words."""
+    """The bubbles of one tab: `attach(widget, norm, ids, bare)` makes `widget` -- a ⓘ, a tile -- open the bubble of the excerpts `ids` of the norm file `norm`. `pinned(norm, ids)` is emitted at a click, `unpinned(norm, ids)` at a click on excerpts pinned already (issue #96: the click is a toggle), `opened(norm, id)` at a Ctrl+click: the tab pins and unpins (module_pane) and opens (norm_reader). `lang()` gives the window's language, `t` its words, `is_pinned(norm, ids)` whether the tab's pane holds those excerpts -- the tab's to say, the pane being its own; `refresh_marks()` fills the ⓘ of what is pinned."""
 
     pinned = Signal(str, tuple)
+    unpinned = Signal(str, tuple)
     opened = Signal(str, str)
 
-    def __init__(self, t, lang, parent=None):
+    def __init__(self, t, lang, parent=None, is_pinned=None):
         super().__init__(parent)
         self.t, self.lang = t, lang
+        self.is_pinned = is_pinned or (lambda _norm, _ids: False)
         self.bubble = None
         self.targets = {}         # id(widget) -> (norm, ids, bare)
+        self.widgets = {}         # id(widget) -> widget: the ⓘ whose fill follows its pin
         self.current = None       # the widget whose bubble is open
         self.waiting = None       # the widget the pointer rests on
         self.show_timer = QTimer(self)
@@ -164,8 +166,26 @@ class BubbleController(QObject):
 
     def attach(self, widget, norm, ids, bare=False):
         self.targets[id(widget)] = (norm, tuple(ids), bare)
+        self.widgets[id(widget)] = widget
         widget.installEventFilter(self)
         widget.setMouseTracking(True)
+        if hasattr(widget, "set_pinned"):
+            widget.set_pinned(self.is_pinned(norm, tuple(ids)))
+
+    def refresh_marks(self):
+        """Every ⓘ filled where its excerpts are pinned, hollow where not -- called at each pin and unpin, by a click, by × or by a window rebuilt (issue #96)."""
+        for key, widget in list(self.widgets.items()):
+            norm, ids, _bare = self.targets[key]
+            try:
+                if hasattr(widget, "set_pinned"):
+                    widget.set_pinned(self.is_pinned(norm, ids))
+            except RuntimeError:   # deleted with a window rebuilt
+                self.widgets.pop(key, None)
+                self.targets.pop(key, None)
+
+    def foot(self, norm, ids):
+        """What the bubble's foot says: what a click will do -- pin or take out --, then the Ctrl+click."""
+        return self.t("ct_click_unpin" if self.is_pinned(norm, ids) else "ct_click_pin") + "   ·   " + self.t("ct_ctrl_click")
 
     def excerpts(self, norm, ids):
         return [norm_excerpts.excerpt(norm, eid, self.lang()) for eid in ids]
@@ -199,9 +219,12 @@ class BubbleController(QObject):
         norm, ids, _bare = target
         if modifiers & Qt.KeyboardModifier.ControlModifier:
             self.opened.emit(norm, ids[0])
+        elif self.is_pinned(norm, ids):
+            self.unpinned.emit(norm, ids)
         else:
             self.pinned.emit(norm, ids)
         self.hide()
+        self.refresh_marks()
 
     def _show(self):
         obj = self.waiting
@@ -219,7 +242,7 @@ class BubbleController(QObject):
             self.bubble.installEventFilter(_BubbleHover(self, self.bubble))
             self.bubble.clicked.connect(lambda modifiers: self.current is not None and self._act(self.targets[id(self.current)], modifiers))
         screen = QGuiApplication.screenAt(rect.center()) or QGuiApplication.primaryScreen()
-        self.bubble.show_for(ExcerptView(self.excerpts(norm, ids), self.t, bare), rect, screen.availableGeometry())
+        self.bubble.show_for(ExcerptView(self.excerpts(norm, ids), self.t, bare), rect, screen.availableGeometry(), self.foot(norm, ids))
         self.current = obj
 
     def _maybe_hide(self):
@@ -248,3 +271,13 @@ class _BubbleHover(QObject):
         elif event.type() == QEvent.Type.Leave:
             self.controller.hide_timer.start()
         return False
+
+
+def pin_excerpts(pane, norm, ids, lang, t, title, after="results"):
+    """The excerpts `ids` of the norm file `norm` pinned as a module of `pane` (a module_pane.ModulePane) under the module `after`, once (REQ-003): its id `excerpt_module_id`'s, its body an ExcerptView in the edition shown for `lang`, `title(excerpts)` its title. Returns the module -- written once, for the calculation tabs (calc_modules.Modules.pin) and the «Domaines» tab (issue #113, ARCH-RISK-012)."""
+    import module_pane
+    from tab_host import excerpt_module_id
+    ids = tuple(ids)
+    items = [norm_excerpts.excerpt(norm, eid, lang) for eid in ids]
+    spec = module_pane.ModuleSpec(excerpt_module_id(norm, ids), title(items), lambda: ExcerptView(items, t), closable=True, kind="excerpt")
+    return pane.pin(spec, after=after)

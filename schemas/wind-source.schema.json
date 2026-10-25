@@ -18,10 +18,11 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "description": "-- pinned. 1.1 (issue #42): 1.0 with `links`, written only where a field follows a variable.",
+      "description": "-- pinned. 1.1 (issue #42): 1.0 with `links`, written only where a field follows a variable. 1.2 (spec 2026-10-23-onglet-vent-briques, CON-002): 1.1 with `openings`, what every source the wind's tab saves is written at; 1.0 and 1.1 are still read, their openings taken as uniformly distributed with a warning (D-24).",
       "enum": [
         "1.0",
-        "1.1"
+        "1.1",
+        "1.2"
       ]
     },
     "id": {
@@ -77,9 +78,20 @@
       "type": "number",
       "description": "The dynamic factor, 1.0 for the buildings of SIA 261 6.3.5, else SIA 261/1's."
     },
+    "openings": {
+      "type": "string",
+      "enum": [
+        "rep",
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "description": "The openings' case whose c_pi the local pressures take (SIA 261 Annexe C, the columns c_pi of a closed building): rep, openings distributed uniformly; A to D, a dominant opening in that wall. Ignored by a table with no such column (Tableaux 46-50 take each surface's own c_pi, 57a-d, 63, 64 none), and kept. Only at schema_version 1.2."
+    },
     "links": {
       "type": "object",
-      "description": "The fields of this entry that follow a variable of the export, by their key (q_p0, b, d, h, z, c_d): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.1.",
+      "description": "The fields of this entry that follow a variable of the export, by their key (q_p0, b, d, h, z, c_d): the number the field holds is the last value known, which a variable that can no longer be read leaves in place with a warning (D-06). Absent where none follows one; only at schema_version 1.1 or 1.2.",
       "patternProperties": {
         ".*": {
           "type": "object",

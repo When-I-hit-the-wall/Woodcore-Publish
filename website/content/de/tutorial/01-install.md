@@ -13,9 +13,8 @@ Die Option **.woodcore-Dateien mit Woodcore öffnen** angekreuzt lassen. Ein Woo
 
 ## Die Werkzeuge daneben
 
-Woodcore liest Excel-Arbeitsmappen und schreibt einen Bericht in Typst. Zwei Werkzeuge machen die Arbeit bequem:
+Woodcore rechnet die Lasten in seinem Fenster und schreibt einen Bericht in Typst. Ein Werkzeug macht die Arbeit bequem:
 
-- **Microsoft Excel**, um die Lasten-Arbeitsmappe auszufüllen;
 - **Visual Studio Code** mit der Erweiterung **Tinymist**, um den Bericht zu schreiben: Tinymist zeigt die Dokumentation jedes Befehls beim Überfahren und eine laufende Vorschau des PDF.
 
 Typst selbst wird mit Woodcore geliefert: es ist nichts weiter zu installieren.

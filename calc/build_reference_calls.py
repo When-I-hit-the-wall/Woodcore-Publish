@@ -142,16 +142,6 @@ def call_var_registry(name, domain, **options):
     return call_command("var", name, domain=domain, **_given(**options))
 
 
-def call_find(domain=None, type_=None):
-    """What there is to name in a call, for one domain (docs/typst/command-docs.md §10sexies, v0.85).
-
-    `#find(object: "variable", domain: "T001")`. `domain` left out is what the report has declared at that
-    line, which is what a `#verify` refusing a name is asking about; a pair is a calculation of the export and
-    is `call_find_source`'s business, not this one's.
-    """
-    return call_command("find", object="variable", **_given(domain=domain, type=type_))
-
-
 def registry_key(name, symbol=None):
     """The name a formula written by hand cites a value by (docs/typst/formulas.md §10quinquies).
 

@@ -272,13 +272,13 @@ def test_the_command_line_refuses_to_overwrite_an_edited_engine():
 def test_the_record_of_an_export_names_what_produced_it_and_carries_no_date():
     folder = conftest.tmpdir("record")
     here = project.write(folder / "R.woodcore", "Halle", company="Musterbüro", author="Max Muster")
-    here.positions_book.write_bytes(b"not really a workbook")
+    here.positions_book.write_bytes(b"not really a workbook")   # read by no record since issue #109 (project.json 1.1)
     first, second = project.record(here), project.record(here)
     assert first == second, "two records of the same inputs differ"
     validation.validate_structure(first, "project")
     assert (first["name"], first["company"], first["author"], first["number"]) == ("Halle", "Musterbüro", "Max Muster", "")
     assert first["woodcore"]["version"] == project.VERSION
-    assert list(first["workbooks"]) == ["Positionen.xlsx"] and len(first["workbooks"]["Positionen.xlsx"]) == 64
+    assert first["schema_version"] == "1.1" and "workbooks" not in first, "no workbook's digest since issue #109"
 
 
 def test_the_project_beside_the_checkout_is_found_in_a_neighbouring_folder():
@@ -553,18 +553,22 @@ def test_the_title_page_is_reported_into_the_export_alone_and_the_last_export_ke
     info = here.data_dir / "project.json"
     kept = json.loads(info.read_text(encoding="utf-8"))
     kept["woodcore"] = {"version": "0.1.0", "revision": "abc"}   # what an older export wrote: kept, nothing being exported now
-    kept["workbooks"] = {"Belastungsannahmen.xlsm": "0" * 64}
     info.write_text(json.dumps(kept), encoding="utf-8")
     when, _engine = project.last_export(here)
     here = project.update(here.file, client="Après", number="P-42")
     assert export_all.refresh_project_info(here) is True
     now = json.loads(info.read_text(encoding="utf-8"))
     assert now["client"] == "Après" and now["number"] == "P-42" and now["name"] == "Probe"
-    assert now["woodcore"] == {"version": "0.1.0", "revision": "abc"} and now["workbooks"] == kept["workbooks"]
+    assert now["woodcore"] == {"version": "0.1.0", "revision": "abc"} and "workbooks" not in now
     assert export_all.refresh_project_info(here) is False, "rewritten with nothing changed"
     assert project.last_export(here)[0] == when, "the title page's report moved the date of the last export"
     info.write_text("{ not json", encoding="utf-8")
     assert export_all.refresh_project_info(here) is True and json.loads(info.read_text(encoding="utf-8"))["client"] == "Après"
+    # a record of before issue #109, 1.0 with the workbooks' digests: written again at 1.1, without an error (REQ-007)
+    info.write_text(json.dumps(dict(now, schema_version="1.0", workbooks={"Belastungsannahmen.xlsm": "0" * 64})), encoding="utf-8")
+    assert export_all.refresh_project_info(here) is True
+    again = json.loads(info.read_text(encoding="utf-8"))
+    assert again["schema_version"] == "1.1" and "workbooks" not in again and again["client"] == "Après"
 
 
 def test_the_documents_made_are_the_ones_whose_entry_is_there():

@@ -1,0 +1,302 @@
+{
+  "_source": "SIA 265/1:2018, Tableau 21a and 21b -- transcribed from the French edition, SIA265-1-2018-FR.pdf p. 45: the numbers taken from the page's text layer and every row checked on a render of the page (issue #110). The only copy of these values in the project.",
+  "_note": "Footnote 1 of a: the properties hold at hygroscopic equilibrium, 65 % relative humidity and 20 °C. Footnote 2 of a: the 5 % fractile of a modulus is 0,8 times its mean. The b table gives the design values for moisture class 1 and medium load duration (KLED moyenne); for any other, 6.1.2.1 (f_d = η_mod · f_k / γ_M, Tableaux 6 and 9). A cell the norm marks «valeurs non disponibles» is null and listed in the product's `unavailable`. Columns: (t_min, t_max] in mm, `from_inclusive` where the norm writes «≥».",
+  "edition": "SIA 265/1:2018",
+  "table_21": {
+    "number": "21",
+    "title": "Propriétés caractéristiques des panneaux de fibres durs et mi-durs des classes techniques HB.HLA2 et MBH.LA2",
+    "title_b": "Valeurs de calcul (classe d'humidité 1 et KLED moyenne) pour les panneaux de fibres durs et mi-durs des classes techniques HB.HLA2 et MBH.LA2",
+    "norm": "SIA 265/1",
+    "page": 45,
+    "fractile": "0,8",
+    "products": [
+      {
+        "id": "hb",
+        "product": "hb",
+        "label": "Panneau de fibres dur HB.HLA2",
+        "isotropic": true,
+        "columns": [
+          {
+            "t_min": null,
+            "t_max": 5.5
+          },
+          {
+            "t_min": 5.5,
+            "t_max": null
+          }
+        ],
+        "rho_k": [
+          850,
+          800
+        ],
+        "grid": {
+          "plate": {
+            "f_m_k": {
+              "all": [
+                35.0,
+                32.0
+              ]
+            },
+            "f_c_90_k": {
+              "all": [
+                12.0,
+                12.0
+              ]
+            },
+            "f_v_k": {
+              "all": [
+                3.0,
+                2.5
+              ]
+            },
+            "E_m_mean": {
+              "all": [
+                4800,
+                4600
+              ]
+            },
+            "G_mean": {
+              "all": [
+                200,
+                200
+              ]
+            },
+            "f_m_d": {
+              "all": [
+                17.5,
+                16.0
+              ]
+            },
+            "f_c_90_d": {
+              "all": [
+                6.0,
+                6.0
+              ]
+            },
+            "f_v_d": {
+              "all": [
+                1.5,
+                1.3
+              ]
+            }
+          },
+          "shear": {
+            "f_m_k": {
+              "all": [
+                26.0,
+                23.0
+              ]
+            },
+            "f_v_k": {
+              "all": [
+                18.0,
+                16.0
+              ]
+            },
+            "E_m_mean": {
+              "all": [
+                4800,
+                4600
+              ]
+            },
+            "G_mean": {
+              "all": [
+                2000,
+                1900
+              ]
+            },
+            "f_m_d": {
+              "all": [
+                13.0,
+                11.5
+              ]
+            },
+            "f_v_d": {
+              "all": [
+                9.0,
+                8.0
+              ]
+            }
+          },
+          "axial": {
+            "f_t_k": {
+              "all": [
+                26.0,
+                23.0
+              ]
+            },
+            "f_c_k": {
+              "all": [
+                27.0,
+                24.0
+              ]
+            },
+            "E_tc_mean": {
+              "all": [
+                4800,
+                4600
+              ]
+            },
+            "f_t_d": {
+              "all": [
+                13.0,
+                11.5
+              ]
+            },
+            "f_c_d": {
+              "all": [
+                13.5,
+                12.0
+              ]
+            }
+          }
+        },
+        "unavailable": []
+      },
+      {
+        "id": "mbh",
+        "product": "mbh",
+        "label": "Panneau de fibres mi-dur MBH.LA2",
+        "isotropic": true,
+        "columns": [
+          {
+            "t_min": null,
+            "t_max": 10
+          },
+          {
+            "t_min": 10,
+            "t_max": null
+          }
+        ],
+        "rho_k": [
+          650,
+          600
+        ],
+        "grid": {
+          "plate": {
+            "f_m_k": {
+              "all": [
+                17.0,
+                15.0
+              ]
+            },
+            "f_c_90_k": {
+              "all": [
+                8.0,
+                8.0
+              ]
+            },
+            "f_v_k": {
+              "all": [
+                0.3,
+                0.25
+              ]
+            },
+            "E_m_mean": {
+              "all": [
+                3100,
+                2900
+              ]
+            },
+            "G_mean": {
+              "all": [
+                100,
+                100
+              ]
+            },
+            "f_m_d": {
+              "all": [
+                7.8,
+                6.9
+              ]
+            },
+            "f_c_90_d": {
+              "all": [
+                3.7,
+                3.7
+              ]
+            },
+            "f_v_d": {
+              "all": [
+                0.15,
+                0.1
+              ]
+            }
+          },
+          "shear": {
+            "f_m_k": {
+              "all": [
+                9.0,
+                8.0
+              ]
+            },
+            "f_v_k": {
+              "all": [
+                5.5,
+                4.5
+              ]
+            },
+            "E_m_mean": {
+              "all": [
+                3100,
+                2900
+              ]
+            },
+            "G_mean": {
+              "all": [
+                1300,
+                1200
+              ]
+            },
+            "f_m_d": {
+              "all": [
+                4.2,
+                3.7
+              ]
+            },
+            "f_v_d": {
+              "all": [
+                2.5,
+                2.1
+              ]
+            }
+          },
+          "axial": {
+            "f_t_k": {
+              "all": [
+                9.0,
+                8.0
+              ]
+            },
+            "f_c_k": {
+              "all": [
+                9.0,
+                8.0
+              ]
+            },
+            "E_tc_mean": {
+              "all": [
+                3100,
+                2900
+              ]
+            },
+            "f_t_d": {
+              "all": [
+                4.2,
+                3.7
+              ]
+            },
+            "f_c_d": {
+              "all": [
+                4.2,
+                3.7
+              ]
+            }
+          }
+        },
+        "unavailable": []
+      }
+    ],
+    "notes": {}
+  }
+}

@@ -1,6 +1,6 @@
 """FormulaTab's card of a member check printed unfolded (spec docs/requirements/completed/2026-10-15-calculs-deplies-balises-figures-natives.md, UI-002): where each line of the domain stands against its check and its file, and what Woodcore can do with it -- «Importer», «Tout importer», «Reprendre», «Réinsérer», «Régénérer», and in a conflict «Garder la mienne» or «Prendre celle de l'export».
 
-**Nothing is decided here** (ARCH-005): the states and every write are calc/domains/unfold.py's, the very functions `woodcore-cli unfold` calls; this mixin shows them, marks each pill with its line's state (`pill_state`, read by formula_tab_widgets.PillPainter) and calls them. Every action that writes is one of woodcore_gui.WRITERS, refused while the project is read only.
+**Nothing is decided here** (ARCH-005): the states and every write are calc/domains/unfold.py's, the very functions `woodcore-cli unfold` calls; this mixin shows them, gives each row of the form its line's state -- the stripe of the row since issue #113 (REQ-015), where it was the outline of a pill (`item_states`, coloured by calc/domains/formula_state.py `COLOURS`) -- and calls them. Every action that writes is one of woodcore_gui.WRITERS, refused while the project is read only.
 """
 
 import html
@@ -16,8 +16,7 @@ import theme
 import validation
 from domains import unfold
 
-# A line's state as a pill shows it: the colour of its outline (theme.json), none where it is in step -- one table, the painter's
-from formula_tab_widgets import PILL_STATE_COLOURS
+from domains import formula_state
 
 
 class FormulaUnfoldMixin:
@@ -115,10 +114,17 @@ class FormulaUnfoldMixin:
         name = command.options.get("id") if command.kind == "verify" else command.key
         return f"{command.kind}:{name}" if name else None
 
-    def pill_state(self, block):
-        """The state of the line a pill stands for -- what its outline is drawn in (PILL_STATE_COLOURS) --, None where it is in step or the domain is no unfolded check."""
-        state = getattr(self, "unfold_states", {}).get(self.unfold_line_of(getattr(block, "command", None)))
-        return state if state in PILL_STATE_COLOURS else None
+    def item_states(self):
+        """{index of an item of the domain: its line's state} where it is not in step -- what the stripe of its row says (REQ-015, ARCH-RISK-018); {} for a domain that is no unfolded check."""
+        states = getattr(self, "unfold_states", {}) or {}
+        if not states or self.domain is None:
+            return {}
+        out = {}
+        for i, c in enumerate(self.domain.commands):
+            state = states.get(self.unfold_line_of(c))
+            if state in formula_state.UNFOLD_STATES:
+                out[i] = state
+        return out
 
     def unfold_chosen(self):
         item = self.unfold_list.currentItem()

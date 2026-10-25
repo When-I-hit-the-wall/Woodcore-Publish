@@ -97,7 +97,7 @@ def test_the_window_reads_the_reference_s_words_and_carries_no_copy():
         said = {docs.category_label(key, lang) for key in ref.CATEGORY_KEYS} | {docs.word(word, lang) for word in table["words"]}
         copies = sorted(key for key, text in strings.items() if key != "tab_commands" and (text in said or key.startswith("ref_cat_")))
         assert not copies, f"the commands tab says again what calc/i18n/reference.json says ({lang}): {copies}"
-    source = (ROOT / "calc" / "tools" / "commands_tab.py").read_text(encoding="utf-8")
+    source = "".join((ROOT / "calc" / "tools" / name).read_text(encoding="utf-8") for name in ("commands_tab.py", "command_list.py", "command_page_view.py"))
     assert "docs.category_label(" in source and "docs.word(" in source, "the commands tab no longer reads calc/i18n/reference.json"
 
 
@@ -825,3 +825,24 @@ def test_the_dry_run_sends_nothing_and_writes_nothing():
     finally:
         publish.DIST, publish.RELEASES = saved
     assert releases.read_text(encoding="utf-8") == before
+
+
+def test_a_command_s_page_is_the_condensed_page_with_its_bubbles():
+    """UI-011 (spec 2026-10-24-onglet-commandes-pages, issue #115): the page of #var in each language carries the line of the command, the key points, the table of the arguments and a bubble for each argument and each default; every print a bubble shows is a published sheet; the norm tables of #distance stay off the site; the search reads the name and the lead alone."""
+    import command_pages
+    site = _built()
+    for lang in SITE.LANGS:
+        page = (site.out / lang / "docs" / "var" / "index.html").read_text(encoding="utf-8")
+        assert 'class="cmdline"' in page and 'class="keys"' in page and 'class="atab"' in page, lang
+        assert html.escape(command_pages.entry("var")["lead"][lang], quote=False).split()[0] in page
+        for arg in command_pages.entry("var")["arguments"]:
+            assert f'id="tip-arg-{html.escape(arg)}"' in page, (lang, arg)
+        assert 'id="tip-val-display"' in page and 'data-tip="val-display"' in page
+        for sheet in set(re.findall(r"url\(\.\./\.\./\.\./values/([^)]+)\)", page)):
+            assert (site.out / "values" / sheet).is_file(), sheet
+        distance = (site.out / lang / "docs" / "distance" / "index.html").read_text(encoding="utf-8")
+        assert "values/" + lang + "-distance.png" not in distance and not (site.out / "values" / f"{lang}-distance.png").exists()
+        index = json.loads((site.out / "search" / f"{lang}.json").read_text(encoding="utf-8"))
+        var = next(e for e in index if e["k"] == "cmd" and e["t"] == "var")
+        assert set(var) == {"t", "u", "k", "c", "s"}, "a command is searched by its name and its lead, nothing else"
+    assert "[data-tipbox]" in (ROOT / "website" / "assets" / "site.js").read_text(encoding="utf-8")

@@ -13,9 +13,8 @@ Laissez cochée l'option **Ouvrir les fichiers .woodcore avec Woodcore**. Un pro
 
 ## Les outils à côté
 
-Woodcore lit des classeurs Excel et écrit un rapport en Typst. Deux outils rendent le travail confortable :
+Woodcore calcule les charges dans sa fenêtre et écrit un rapport en Typst. Un outil rend le travail confortable :
 
-- **Microsoft Excel**, pour remplir le classeur des charges ;
 - **Visual Studio Code** avec l'extension **Tinymist**, pour écrire le rapport : Tinymist affiche la documentation de chaque commande au survol et l'aperçu du PDF en direct.
 
 Typst lui-même est livré avec Woodcore : il n'y a rien à installer de plus.

@@ -1,0 +1,77 @@
+{
+  "_source": "SIA 265:2021, Holzbau / Construction en bois -- Tabellen 8 and 9, the strength classes Woodcore ships as materials; the editions shipped in norm-library/.",
+  "_note": "The excerpts the «Matériaux» tab shows as the source of a strength class (issue #110, UI-008): each table whole, its box read off the page's text positions, its title word for word, held to the PDF by tests/test_norm_excerpts.py. Its values are sia265-2021-tab08-vollholz.json and -tab09-brettschichtholz.json.",
+  "edition": "SIA 265:2021",
+  "editions": {
+    "fr": {
+      "file": "SIA265-2021-FR.pdf",
+      "chapter": [
+        24,
+        28
+      ]
+    },
+    "de": {
+      "file": "SIA265-2021-DE.pdf",
+      "chapter": [
+        24,
+        28
+      ]
+    }
+  },
+  "excerpts": {
+    "tab08": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableau 8",
+          "page": 25,
+          "box": [
+            50,
+            322,
+            548,
+            780
+          ],
+          "text": "Tableau 8 Propriétés caractéristiques et valeurs de dimensionnement du bois massif, ainsi"
+        },
+        "de": {
+          "ref": "Tabelle 8",
+          "page": 25,
+          "box": [
+            50,
+            311,
+            548,
+            768
+          ],
+          "text": "Tabelle 8 Kennzeichnende Eigenschaften und Bemessungswerte für Vollholz sowie für"
+        }
+      }
+    },
+    "tab09": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableau 9",
+          "page": 27,
+          "box": [
+            50,
+            65,
+            548,
+            789
+          ],
+          "text": "Tableau 9 Propriétés caractéristiques et valeurs de dimensionnement pour le bois lamellé collé"
+        },
+        "de": {
+          "ref": "Tabelle 9",
+          "page": 27,
+          "box": [
+            50,
+            65,
+            548,
+            717
+          ],
+          "text": "Tabelle 9 Kennzeichnende Eigenschaften und Bemessungswerte für Brettschichtholz aus Nadelholz"
+        }
+      }
+    }
+  }
+}

@@ -83,7 +83,7 @@ EDITORS = {
     "tab_schema": (_edit_identity, lambda here, tab: here.details_dir / f"{tab.current_id}.json"),
     "tab_statics": (_edit_identity, lambda here, tab: here.statics_dir / f"{tab.current_id}.json"),
     "tab_connections": (_edit_identity, lambda here, tab: here.connectors_dir / f"{tab.current_id}.json"),
-    "tab_mc_tension": (_edit_identity, lambda here, tab: here.checks_dir / f"{tab.current_id}.json"),
+    "tab_mc_fire": (_edit_identity, lambda here, tab: here.checks_dir / f"{tab.current_id}.json"),
     "tab_polar": (lambda tab, text: tab.label_edit.setText(text), lambda here, tab: here.connections_dir / f"{tab.current_id}.json"),
     "tab_positions": (lambda tab, text: tab.description_edit.setPlainText(text), lambda here, tab: here.positions_dir / "positions.json"),
     "tab_journal": (lambda tab, text: tab.label_edit.setText(text), lambda here, tab: tab.file()),
@@ -205,7 +205,7 @@ def test_the_window_left_for_another_application_saves_what_can_be():
     from PySide6.QtCore import Qt
     window, here = _window()
     with project.using(here):
-        tab = _show(window, "tab_mc_tension")
+        tab = _show(window, "tab_mc_fire")
         path = here.checks_dir / f"{tab.current_id}.json"
         with _boxes() as shown:
             _edit_identity(tab, "focus left")
@@ -246,7 +246,7 @@ def test_the_focus_left_never_saves_an_id_being_typed_and_closing_asks_for_what_
     from PySide6.QtCore import Qt
     window, here = _window()
     with project.using(here):
-        tab = _show(window, "tab_mc_tension")
+        tab = _show(window, "tab_mc_fire")
         path = here.checks_dir / f"{tab.current_id}.json"
         before = path.read_bytes()
         with _boxes() as shown:
@@ -276,7 +276,7 @@ def test_the_fire_plan_the_compression_an_annex_and_a_script_save_without_a_box(
             _leave(window)
         assert not shown and not fire.dirty and "fire left" in path.read_text(encoding="utf-8"), window.status.text()
 
-        check = _show(window, "tab_mc_compression")
+        check = _show(window, "tab_mc_fire")
         path = here.checks_dir / f"{check.current_id}.json"
         with _boxes() as shown:
             _edit_identity(check, "compression left")

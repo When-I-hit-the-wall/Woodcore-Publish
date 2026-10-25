@@ -671,9 +671,25 @@
    "frame_height": 100,
    "frame_ratio": 4
   },
+  "scope": {
+   "max_height": 200,
+   "norm_ref": "6.1.2",
+   "note": "6.1.2: the provisions of chapter 6 hold for buildings up to 200 m high."
+  },
   "forces": {
    "equation": "15",
-   "norm_ref": "6.2.3.2"
+   "norm_ref": "6.2.3.2",
+   "areas_note": "A_ref of the force coefficients' headers in Annexe C, Tableaux 31-64, each a sum of terms k · pi^pi · b^b · d^d · h^h of the building's own b, d, h; a header with a dimension the source does not hold (h1, d1, hs) is absent and its force given per m² only (spec 2026-10-23-onglet-vent-briques, REQ-002). The header's factor (0,96·d·h) multiplies it.",
+   "areas": {
+    "b·h": [{"k": 1, "b": 1, "h": 1}],
+    "d·h": [{"k": 1, "d": 1, "h": 1}],
+    "d·b": [{"k": 1, "d": 1, "b": 1}],
+    "b·d": [{"k": 1, "b": 1, "d": 1}],
+    "π·d²/8": [{"k": 0.125, "pi": 1, "d": 2}],
+    "π·d²/4": [{"k": 0.25, "pi": 1, "d": 2}],
+    "d·(b+d)/2": [{"k": 0.5, "d": 1, "b": 1}, {"k": 0.5, "d": 2}],
+    "d·(b+d)": [{"k": 1, "d": 1, "b": 1}, {"k": 1, "d": 2}]
+   }
   },
   "pressures": {
    "external": "13",

@@ -157,7 +157,7 @@ def write(data, data_dir, mode="rs"):
 
 
 def export(path, data_dir, mode="rs"):
-    """prepare + write, and the warnings -- what Woodcore runs when an entry is saved, so the report sees it without the load workbooks being read again. `mode` is the document whose journal `path` is (`Project.journal_file_for`), the report's by default."""
+    """prepare + write, and the warnings -- what Woodcore runs when an entry is saved, so the report sees it without the whole export being run again. `mode` is the document whose journal `path` is (`Project.journal_file_for`), the report's by default."""
     data, notes = prepare(path)
     write(data, data_dir, mode)
     return notes

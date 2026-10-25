@@ -1,0 +1,104 @@
+{
+  "_source": "SIA 261:2020, Einwirkungen auf Tragwerke / Actions sur les structures porteuses -- Anhang A, Tabellen 28, 29 and 30; the editions shipped in norm-library/.",
+  "_note": "The excerpts the «Matériaux» tab shows as the source of a weight of SIA 261 (issue #110, UI-008): each table, its box read off the page's text positions, its title word for word, held to the PDF by tests/test_norm_excerpts.py. Its values are sia261-2020-tab28/29/30-*.json.",
+  "edition": "SIA 261:2020",
+  "editions": {
+    "fr": {
+      "file": "SIA261-2020-FR.pdf",
+      "chapter": [
+        77,
+        78
+      ]
+    },
+    "de": {
+      "file": "SIA261-2020-DE.pdf",
+      "chapter": [
+        77,
+        78
+      ]
+    }
+  },
+  "excerpts": {
+    "tab28": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableau 28",
+          "page": 77,
+          "box": [
+            50,
+            124,
+            548,
+            586
+          ],
+          "text": "Tableau 28 Charges volumiques moyennes des matériaux"
+        },
+        "de": {
+          "ref": "Tabelle 28",
+          "page": 77,
+          "box": [
+            50,
+            124,
+            548,
+            544
+          ],
+          "text": "Tabelle 28 Mittlere Raumlasten von Baustoffen"
+        }
+      }
+    },
+    "tab29": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableau 29",
+          "page": 78,
+          "box": [
+            50,
+            65,
+            548,
+            350
+          ],
+          "text": "Tableau 29 Charges moyennes des couvertures et des revêtements par unité de surface"
+        },
+        "de": {
+          "ref": "Tabelle 29",
+          "page": 78,
+          "box": [
+            50,
+            65,
+            548,
+            350
+          ],
+          "text": "Tabelle 29 Mittlere Flächenlasten von Bedachungen und Verkleidungen"
+        }
+      }
+    },
+    "tab30": {
+      "kind": "figure",
+      "editions": {
+        "fr": {
+          "ref": "Tableau 30",
+          "page": 78,
+          "box": [
+            50,
+            352,
+            548,
+            783
+          ],
+          "text": "Tableau 30 Charges volumiques et angles de talus naturels des terres, du ballast, des matériaux et denrées stockés"
+        },
+        "de": {
+          "ref": "Tabelle 30",
+          "page": 78,
+          "box": [
+            50,
+            352,
+            548,
+            774
+          ],
+          "text": "Tabelle 30 Raumlasten und Schüttwinkel von Erdauflasten, Gleisschotter und Lagergütern"
+        }
+      }
+    }
+  }
+}

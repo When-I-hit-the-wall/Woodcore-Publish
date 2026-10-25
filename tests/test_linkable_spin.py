@@ -45,17 +45,25 @@ def _window():
     return _STATE["window"], _STATE["here"]
 
 
+def _n(tab):
+    """The field N of the «Traction» tab, on the type «Calcul» since issue #112."""
+    return tab.service("form").fields["N"].spin
+
+
 def _tabs(window):
-    import member_check_tab
+    import check_tabs
     import variables_tab
-    tension = next(t for t in window.tabs if isinstance(t, member_check_tab.TensionTab))
+    tension = next(t for t in window.tabs if isinstance(t, check_tabs.TensionTab))
     listing = next(t for t in window.tabs if isinstance(t, variables_tab.VariablesTab))
     return tension, listing
 
 
 def _listed_domains(listing):
+    """The domains the left pane offers -- its rows under a tab's title (issue #114), a title carrying no domain."""
     from PySide6.QtCore import Qt
-    return [tuple(listing.domain_list.topLevelItem(i).data(0, Qt.ItemDataRole.UserRole)) for i in range(listing.domain_list.topLevelItemCount())]
+    rows = listing.service("browser").domain_list
+    found = [rows.topLevelItem(i).data(0, Qt.ItemDataRole.UserRole) for i in range(rows.topLevelItemCount())]
+    return [tuple(key) for key in found if key is not None]
 
 
 def test_a_field_is_linked_through_the_variables_tab_and_unlinked():
@@ -68,8 +76,8 @@ def test_a_field_is_linked_through_the_variables_tab_and_unlinked():
         window.tab_widget.setCurrentWidget(tab)
         tab.load("ZT-01")
         tab.dirty = False
-        wrapper = tab.linkables["N"]
-        assert wrapper.link() is None and not tab.n_spin.isReadOnly()
+        wrapper = tab.ctx.links.linkables["N"]
+        assert wrapper.link() is None and not _n(tab).isReadOnly()
 
         # the button: «Variables» in front, the rest closed, only what a force in kN may take
         wrapper.button.click()
@@ -94,7 +102,7 @@ def test_a_field_is_linked_through_the_variables_tab_and_unlinked():
         listing.select_key((*live, "Q_k"))
         listing.pick_chosen()
         assert window.nav.isEnabled() and window.tab_widget.currentWidget() is tab
-        assert tab.n_spin.value() == 2.0 and tab.n_spin.isReadOnly() and tab.dirty
+        assert _n(tab).value() == 2.0 and _n(tab).isReadOnly() and tab.dirty
         assert wrapper.link() == {"domain": "live-load", "instance": "A1", "var": "Q_k"}
         assert "Q_k" in wrapper.chip.text() and not wrapper.linked_row.isHidden()
         draft = tab.draft()
@@ -104,15 +112,15 @@ def test_a_field_is_linked_through_the_variables_tab_and_unlinked():
 
         # the factor, then «Délier»
         wrapper.factor.setValue(1.5)
-        assert tab.n_spin.value() == 3.0 and tab.draft()["links"]["N"]["factor"] == 1.5
+        assert _n(tab).value() == 3.0 and tab.draft()["links"]["N"]["factor"] == 1.5
         wrapper.unlink_button.click()
-        assert wrapper.link() is None and not tab.n_spin.isReadOnly() and tab.n_spin.value() == 3.0
+        assert wrapper.link() is None and not _n(tab).isReadOnly() and _n(tab).value() == 3.0
         draft = tab.draft()
         assert "links" not in draft and draft["schema_version"] == member_check.SOURCE_SCHEMA_VERSION
 
         # a variable gone: the last value, in the warning colour
         wrapper.set_link(links.make("live-load", "A1", "gone"))
-        assert tab.n_spin.value() == 3.0 and "gone" in wrapper.chip.text()
+        assert _n(tab).value() == 3.0 and "gone" in wrapper.chip.text()
         assert theme.colour("warning") in wrapper.chip.styleSheet()
         wrapper.set_link(None)
         tab.dirty = False
@@ -137,11 +145,15 @@ def test_every_field_of_the_perimeter_has_its_button_and_no_list_has_one():
                 assert not isinstance(wrapper.spin, QComboBox)
             assert not any(isinstance(w.parent(), linkable_spin.LinkableSpin) for w in tab.findChildren(QComboBox))
         kinds = {type(t).__name__: set(t.linkables) for t in window.tabs if isinstance(t, member_check_tab.MemberCheckTab)}
-        assert {"l", "w"} <= kinds["CompressionTab"]
-        assert {"M_y", "M_z"} <= kinds["BendingTab"]
-        assert {"l_y", "l_z", "beta_y", "beta_z"} <= kinds["BucklingTab"]
-        assert {"M_y", "M_z", "a", "sigma_m_crit", "l_y", "beta_z"} <= kinds["LateralTab"]
-        assert {"V_z", "V_y"} <= kinds["ShearTab"]
+        # the four tabs on the type «Calcul» (issue #112): their linkable numbers are their context's, held to member_check.LINKABLE
+        import check_tabs
+        calc = {type(t).__name__: set(t.ctx.links.linkables) for t in window.tabs if isinstance(t, (check_tabs.TensionTab, check_tabs.CompressionTab, check_tabs.BendingTab, check_tabs.ShearTab))}
+        for name, keys in calc.items():
+            assert keys <= set(member_check.LINKABLE) and {"section.b", "section.h", "section.d"} <= keys, (name, keys)
+        assert {"N", "alpha"} <= calc["TensionTab"]
+        assert {"l", "w", "l_y", "l_z", "beta_y", "beta_z"} <= calc["CompressionTab"]
+        assert {"M_y", "M_z", "a", "sigma_m_crit", "l_y", "beta_z"} <= calc["BendingTab"]
+        assert {"V_z", "V_y"} <= calc["ShearTab"]
         assert {"N", "A_net"} <= kinds["SteelTensionTab"]
         assert {"N", "M_y", "M_z"} <= kinds["SteelBendingTab"]
         assert {"V_z", "V_y", "M_y"} <= kinds["SteelShearTab"]
@@ -152,8 +164,9 @@ def test_a_section_that_follows_its_position_takes_no_variable():
     with project.using(here):
         tab, _listing = _tabs(window)
         tab.load("ZT-01")                     # T001's section, followed
-        assert tab.section_box.currentData() is None
-        assert not tab.linkables["section.b"].button.isEnabled()
+        member = tab.service("member")
+        assert member.section_type.currentIndex() == 0
+        assert not tab.ctx.links.linkables["section.b"].isVisibleTo(member.box), "a section followed shows no number to link"
         tab.dirty = False
 
 
@@ -376,7 +389,7 @@ def test_a_load_s_field_follows_another_load_and_a_circle_is_refused_as_it_is_ch
     """REQ-009 (lot 2), D-11, REQ-007: a snow load's h_0 follows a wind load's b; a script is not offered to a load; a link that would make two loads follow each other is refused as it is chosen, said in the status line; a dead load's layer has its buttons, its link travelling with the layer."""
     import json
     window, _here = _window()
-    import load_tab
+    import wind_tab  # noqa: F401 -- the wind on the type «Calcul» (issue #100)
     from domains import links, snow_source, wind_source
     # a copy of its own: leaving a load tab saves its case and rebuilds calculations.json, which a project without its workbooks writes without their sheets -- the other tests read those
     here = conftest.project_copy("linkable_spin_loads")
@@ -393,13 +406,13 @@ def test_a_load_s_field_follows_another_load_and_a_circle_is_refused_as_it_is_ch
         _tension, listing = _tabs(window)
         window.tab_widget.setCurrentWidget(snow)
         snow.new()
-        assert {"h_0", "c_t", "length", "width", "alpha_1", "alpha_2", "c_e"} == set(snow.linkables)   # c_e: a free C_e (spec 2026-10-22-onglet-neige-type)
-        snow.linkables["h_0"].button.click()
+        assert {"h_0", "c_t", "length", "width", "alpha_1", "alpha_2", "c_e", "delta_h"} == set(snow.ctx.links.linkables)   # c_e: a free C_e (spec 2026-10-22-onglet-neige-type); delta_h: a free Δh (spec 2026-10-23-neige-correctifs-issues-96-99)
+        snow.ctx.links.linkables["h_0"].button.click()
         listed = _listed_domains(listing)
         assert not any((listing.domains[k].address or ("",))[0] in ("script", "connection", "connector") for k in listed), listed
         listing.end_pick(None)
-        _pick(window, listing, snow.linkables["h_0"], ("wind-load", "WI-01"), "b")
-        assert window.tab_widget.currentWidget() is snow and snow.fields["h_0"].spin.value() == 12
+        _pick(window, listing, snow.ctx.links.linkables["h_0"], ("wind-load", "WI-01"), "b")
+        assert window.tab_widget.currentWidget() is snow and snow.service("form").fields["h_0"].spin.value() == 12
         draft = snow.draft()
         assert draft["links"]["h_0"]["domain"] == "wind-load" and draft["schema_version"] == snow_source.LINKED_SCHEMA_VERSION
         # a wind load on the disk that follows this snow load: linking back to it closes a circle
@@ -407,21 +420,22 @@ def test_a_load_s_field_follows_another_load_and_a_circle_is_refused_as_it_is_ch
         wind = wind_source.new_source("WI-77")
         wind["links"] = {"b": links.make("snow-load", sid, "h_0")}
         (folder / "WI-77.json").write_text(json.dumps(wind_source.stamp_version(wind), indent=2), encoding="utf-8")
-        message = snow.refuse_link(links.make("wind-load", "WI-77", "b"))
+        message = snow.ctx.links.refuse(links.make("wind-load", "WI-77", "b"))
         assert message and "WI-77" in message and sid in message, message
-        assert snow.refuse_link(links.make("wind-load", "WI-01", "b")) is None
+        assert snow.ctx.links.refuse(links.make("wind-load", "WI-01", "b")) is None
         (folder / "WI-77.json").unlink()
         snow.dirty = False
-        dead = next(t for t in window.tabs if isinstance(t, load_tab.DeadLoadTab))
+        dead = next(t for t in window.tabs if getattr(t, "KEY", None) == "tab_ac_selfweight")   # dead_load_tab.DeadLoadTab, on the type «Calcul» since issue #95
+        layers = dead.service("layers")
         dead.new()
-        if dead.table.rowCount() == 0:
-            dead.add_layer()
-        cell = dead.table.cellWidget(0, 3)
+        if layers.table.rowCount() == 0:
+            layers.add_layer()
+        cell = layers.cell(0, "thickness")
         assert hasattr(cell, "link") and cell.unit == "mm"
         cell.set_link(links.make("wind-load", "WI-01", "h", factor=10))
-        layer = dead.current_layers()[0]
-        assert layer["links"]["thickness"]["instance"] == "WI-01" and dead.draft()["schema_version"] == "1.1"
-        assert "chosen" in dead.linkables
+        layer = layers.current_layers()[0]
+        assert layer["links"]["thickness"]["instance"] == "WI-01" and dead.draft()["schema_version"] == "2.0"   # a layer carries its links at 2.0, what the window writes since issue #111
+        assert "chosen" in dead.ctx.links.linkables
         dead.dirty = False
     # «Variables» read again from the window's own copy, which the other tests of this file read
     with project.using(_here):
@@ -433,7 +447,7 @@ def test_every_number_of_the_joints_and_loads_tabs_has_its_button_and_no_list_ha
     window, here = _window()
     import connectors_tab
     import linkable_spin
-    import load_tab
+    import wind_tab  # noqa: F401 -- the wind on the type «Calcul» (issue #100)
     import polar_tab
     from PySide6.QtWidgets import QComboBox, QDoubleSpinBox
 
@@ -461,14 +475,14 @@ def test_every_number_of_the_joints_and_loads_tabs_has_its_button_and_no_list_ha
         assert {(0, "t"), (0, "plates.slot"), (0, "plates.ratio"), ("self", "diameter"), ("self", "dowel.f_u_k"), (0, "alpha"), (0, "a_1")} <= set(joints.link_fields)
         joints.dirty = False
         check(next(t for t in window.tabs if isinstance(t, polar_tab.PolarTab)), "polar")
-        dead = next(t for t in window.tabs if isinstance(t, load_tab.DeadLoadTab))
+        dead = next(t for t in window.tabs if getattr(t, "KEY", None) == "tab_ac_selfweight")
         dead.new()
-        if dead.table.rowCount() == 0:
-            dead.add_layer()
+        if dead.service("layers").table.rowCount() == 0:
+            dead.service("layers").add_layer()
         check(dead, "dead load")
         dead.dirty = False
         snow = next(t for t in window.tabs if getattr(t, "KEY", None) == "tab_ac_snow")   # snow_tab.SnowTab since the spec 2026-10-22-onglet-neige-type
         check(snow, "snow")
-        wind = next(t for t in window.tabs if isinstance(t, load_tab.WindTab))
+        wind = next(t for t in window.tabs if getattr(t, "KEY", None) == "tab_ac_wind")   # wind_tab.WindTab, on the type «Calcul» since issue #100
         check(wind, "wind")
-        assert set(wind.linkables) == {"q_p0", "b", "d", "h", "z", "c_d"}
+        assert set(wind.ctx.links.linkables) == {"q_p0", "b", "d", "h", "z", "c_d"}

@@ -1,0 +1,12568 @@
+{
+ "ppi": 160,
+ "scale": 0.6,
+ "schema_version": "1.0",
+ "sheets": {
+  "de-calc-defaults": {
+   "file": "de-calc-defaults.png",
+   "hash": "d39a0660dfa15e05",
+   "isolate": true,
+   "size": [
+    741,
+    6111
+   ]
+  },
+  "de-distance": {
+   "file": "de-distance.png",
+   "hash": "9a5acc7116cce864",
+   "isolate": true,
+   "size": [
+    745,
+    8308
+   ]
+  },
+  "de-domain": {
+   "file": "de-domain.png",
+   "hash": "23b8f7f4aca5dedc",
+   "isolate": true,
+   "size": [
+    739,
+    2286
+   ]
+  },
+  "de-domain-file": {
+   "file": "de-domain-file.png",
+   "hash": "886b8dcfbe4e74bc",
+   "isolate": true,
+   "size": [
+    387,
+    68
+   ]
+  },
+  "de-eq": {
+   "file": "de-eq.png",
+   "hash": "3bb917dfd46b958e",
+   "isolate": true,
+   "size": [
+    740,
+    3011
+   ]
+  },
+  "de-find": {
+   "file": "de-find.png",
+   "hash": "3aa41b023f0582b9",
+   "isolate": true,
+   "size": [
+    750,
+    3901
+   ]
+  },
+  "de-fmt-decimals": {
+   "file": "de-fmt-decimals.png",
+   "hash": "b26a7a4d6a8438da",
+   "isolate": true,
+   "size": [
+    61,
+    120
+   ]
+  },
+  "de-from-level": {
+   "file": "de-from-level.png",
+   "hash": "fe1fe5cf674ed60c",
+   "isolate": true,
+   "size": [
+    542,
+    491
+   ]
+  },
+  "de-get": {
+   "file": "de-get.png",
+   "hash": "eb9b1533640edd75",
+   "isolate": true,
+   "size": [
+    146,
+    283
+   ]
+  },
+  "de-ids": {
+   "file": "de-ids.png",
+   "hash": "988f5a2443d86a5a",
+   "isolate": true,
+   "size": [
+    745,
+    517
+   ]
+  },
+  "de-image-fire-plan": {
+   "file": "de-image-fire-plan.png",
+   "hash": "c8877cc26483d432",
+   "isolate": true,
+   "size": [
+    592,
+    2332
+   ]
+  },
+  "de-image-legend": {
+   "file": "de-image-legend.png",
+   "hash": "fb64ea3c75291c54",
+   "isolate": true,
+   "size": [
+    518,
+    1454
+   ]
+  },
+  "de-image-polar-moment": {
+   "file": "de-image-polar-moment.png",
+   "hash": "d960fe4b9022eea3",
+   "isolate": true,
+   "size": [
+    437,
+    1533
+   ]
+  },
+  "de-image-positions-plan": {
+   "file": "de-image-positions-plan.png",
+   "hash": "8ff27c15441c35aa",
+   "isolate": true,
+   "size": [
+    473,
+    3043
+   ]
+  },
+  "de-image-schema": {
+   "file": "de-image-schema.png",
+   "hash": "de9d735124e8fe6b",
+   "isolate": true,
+   "size": [
+    428,
+    1083
+   ]
+  },
+  "de-image-section": {
+   "file": "de-image-section.png",
+   "hash": "cb7c338aad8e1ac3",
+   "isolate": true,
+   "size": [
+    329,
+    1653
+   ]
+  },
+  "de-image-static-model": {
+   "file": "de-image-static-model.png",
+   "hash": "c0d56a937c8b09d7",
+   "isolate": true,
+   "size": [
+    371,
+    842
+   ]
+  },
+  "de-image-titleblock": {
+   "file": "de-image-titleblock.png",
+   "hash": "a32d741b52ec2d1f",
+   "isolate": true,
+   "size": [
+    750,
+    861
+   ]
+  },
+  "de-journal-entries": {
+   "file": "de-journal-entries.png",
+   "hash": "2dad998018c0afc3",
+   "isolate": true,
+   "size": [
+    82,
+    148
+   ]
+  },
+  "de-position": {
+   "file": "de-position.png",
+   "hash": "a46057752d542b85",
+   "isolate": true,
+   "size": [
+    295,
+    435
+   ]
+  },
+  "de-set-report-language": {
+   "file": "de-set-report-language.png",
+   "hash": "6b3c2ad322e2d1d5",
+   "isolate": true,
+   "size": [
+    741,
+    259
+   ]
+  },
+  "de-show-bibliography": {
+   "file": "de-show-bibliography.png",
+   "hash": "49e909a424de3ef6",
+   "isolate": true,
+   "size": [
+    741,
+    2527
+   ]
+  },
+  "de-show-norm-list": {
+   "file": "de-show-norm-list.png",
+   "hash": "0a0315a04b6cfe58",
+   "isolate": true,
+   "size": [
+    746,
+    431
+   ]
+  },
+  "de-t-of": {
+   "file": "de-t-of.png",
+   "hash": "896cf10dce7ac440",
+   "isolate": true,
+   "size": [
+    139,
+    106
+   ]
+  },
+  "de-tl-of": {
+   "file": "de-tl-of.png",
+   "hash": "6027949032f5b7b4",
+   "isolate": true,
+   "size": [
+    222,
+    102
+   ]
+  },
+  "de-unit": {
+   "file": "de-unit.png",
+   "hash": "d9ed379bd2fb69e8",
+   "isolate": true,
+   "size": [
+    278,
+    612
+   ]
+  },
+  "de-var": {
+   "file": "de-var.png",
+   "hash": "207def68982fa296",
+   "isolate": true,
+   "size": [
+    740,
+    1891
+   ]
+  },
+  "de-var-table": {
+   "file": "de-var-table.png",
+   "hash": "59f4d110fc11290e",
+   "isolate": true,
+   "size": [
+    545,
+    2893
+   ]
+  },
+  "de-verify": {
+   "file": "de-verify.png",
+   "hash": "68eee303c9ef2450",
+   "isolate": true,
+   "size": [
+    742,
+    1576
+   ]
+  },
+  "en-calc-defaults": {
+   "file": "en-calc-defaults.png",
+   "hash": "ff8537ce14746119",
+   "isolate": true,
+   "size": [
+    741,
+    6263
+   ]
+  },
+  "en-distance": {
+   "file": "en-distance.png",
+   "hash": "a7cfdea2fd300f3d",
+   "isolate": true,
+   "size": [
+    744,
+    5369
+   ]
+  },
+  "en-domain": {
+   "file": "en-domain.png",
+   "hash": "2442ff6c4df4ced9",
+   "isolate": true,
+   "size": [
+    740,
+    2272
+   ]
+  },
+  "en-domain-file": {
+   "file": "en-domain-file.png",
+   "hash": "a82ff2f9ad08765b",
+   "isolate": true,
+   "size": [
+    387,
+    68
+   ]
+  },
+  "en-eq": {
+   "file": "en-eq.png",
+   "hash": "5d65fcd4a1a1c779",
+   "isolate": true,
+   "size": [
+    740,
+    3016
+   ]
+  },
+  "en-find": {
+   "file": "en-find.png",
+   "hash": "8c4744dabf61e482",
+   "isolate": true,
+   "size": [
+    744,
+    4119
+   ]
+  },
+  "en-fmt-decimals": {
+   "file": "en-fmt-decimals.png",
+   "hash": "70b940010940930f",
+   "isolate": true,
+   "size": [
+    61,
+    120
+   ]
+  },
+  "en-from-level": {
+   "file": "en-from-level.png",
+   "hash": "854659c5f29140b1",
+   "isolate": true,
+   "size": [
+    520,
+    491
+   ]
+  },
+  "en-get": {
+   "file": "en-get.png",
+   "hash": "890607d8d1a8089b",
+   "isolate": true,
+   "size": [
+    137,
+    288
+   ]
+  },
+  "en-ids": {
+   "file": "en-ids.png",
+   "hash": "ee8335b9a5332e58",
+   "isolate": true,
+   "size": [
+    745,
+    517
+   ]
+  },
+  "en-image-fire-plan": {
+   "file": "en-image-fire-plan.png",
+   "hash": "f0b72965a88c546a",
+   "isolate": true,
+   "size": [
+    593,
+    2332
+   ]
+  },
+  "en-image-legend": {
+   "file": "en-image-legend.png",
+   "hash": "10dcf808c9a1ee43",
+   "isolate": true,
+   "size": [
+    518,
+    1454
+   ]
+  },
+  "en-image-polar-moment": {
+   "file": "en-image-polar-moment.png",
+   "hash": "4fa3c13da1decd15",
+   "isolate": true,
+   "size": [
+    437,
+    1533
+   ]
+  },
+  "en-image-positions-plan": {
+   "file": "en-image-positions-plan.png",
+   "hash": "6e27a25d49c10782",
+   "isolate": true,
+   "size": [
+    484,
+    3043
+   ]
+  },
+  "en-image-schema": {
+   "file": "en-image-schema.png",
+   "hash": "408b270bbcd5cdf9",
+   "isolate": true,
+   "size": [
+    428,
+    1083
+   ]
+  },
+  "en-image-section": {
+   "file": "en-image-section.png",
+   "hash": "8fd8cafe99a06f74",
+   "isolate": true,
+   "size": [
+    329,
+    1653
+   ]
+  },
+  "en-image-static-model": {
+   "file": "en-image-static-model.png",
+   "hash": "5a321721150d898e",
+   "isolate": true,
+   "size": [
+    371,
+    842
+   ]
+  },
+  "en-image-titleblock": {
+   "file": "en-image-titleblock.png",
+   "hash": "de9a42cf137cae6b",
+   "isolate": true,
+   "size": [
+    750,
+    861
+   ]
+  },
+  "en-journal-entries": {
+   "file": "en-journal-entries.png",
+   "hash": "a04908ab6e26b8a5",
+   "isolate": true,
+   "size": [
+    82,
+    148
+   ]
+  },
+  "en-position": {
+   "file": "en-position.png",
+   "hash": "e467fa333f191125",
+   "isolate": true,
+   "size": [
+    287,
+    431
+   ]
+  },
+  "en-set-report-language": {
+   "file": "en-set-report-language.png",
+   "hash": "7fd84359eb9564dc",
+   "isolate": true,
+   "size": [
+    741,
+    259
+   ]
+  },
+  "en-show-bibliography": {
+   "file": "en-show-bibliography.png",
+   "hash": "03135e3c27364a84",
+   "isolate": true,
+   "size": [
+    746,
+    2527
+   ]
+  },
+  "en-show-norm-list": {
+   "file": "en-show-norm-list.png",
+   "hash": "f3ce3db74eb394a7",
+   "isolate": true,
+   "size": [
+    746,
+    431
+   ]
+  },
+  "en-t-of": {
+   "file": "en-t-of.png",
+   "hash": "9c61ec3d154669bf",
+   "isolate": true,
+   "size": [
+    139,
+    106
+   ]
+  },
+  "en-tl-of": {
+   "file": "en-tl-of.png",
+   "hash": "d0a53a969646fd85",
+   "isolate": true,
+   "size": [
+    222,
+    102
+   ]
+  },
+  "en-unit": {
+   "file": "en-unit.png",
+   "hash": "4cb6d92306a2a3c3",
+   "isolate": true,
+   "size": [
+    278,
+    612
+   ]
+  },
+  "en-var": {
+   "file": "en-var.png",
+   "hash": "efa80db411311103",
+   "isolate": true,
+   "size": [
+    740,
+    1897
+   ]
+  },
+  "en-var-table": {
+   "file": "en-var-table.png",
+   "hash": "74db9ffcaa473026",
+   "isolate": true,
+   "size": [
+    536,
+    2893
+   ]
+  },
+  "en-verify": {
+   "file": "en-verify.png",
+   "hash": "ef5fb7def47b4d3f",
+   "isolate": true,
+   "size": [
+    742,
+    1552
+   ]
+  },
+  "fr-calc-defaults": {
+   "file": "fr-calc-defaults.png",
+   "hash": "ec521e40477885ff",
+   "isolate": true,
+   "size": [
+    741,
+    6111
+   ]
+  },
+  "fr-distance": {
+   "file": "fr-distance.png",
+   "hash": "a74b7a7a83c2b3a2",
+   "isolate": true,
+   "size": [
+    744,
+    5380
+   ]
+  },
+  "fr-domain": {
+   "file": "fr-domain.png",
+   "hash": "1d2bfc2fd407a705",
+   "isolate": true,
+   "size": [
+    740,
+    2272
+   ]
+  },
+  "fr-domain-file": {
+   "file": "fr-domain-file.png",
+   "hash": "490b42649821e32d",
+   "isolate": true,
+   "size": [
+    387,
+    68
+   ]
+  },
+  "fr-eq": {
+   "file": "fr-eq.png",
+   "hash": "5f34c2e0a7ad7870",
+   "isolate": true,
+   "size": [
+    740,
+    2969
+   ]
+  },
+  "fr-find": {
+   "file": "fr-find.png",
+   "hash": "4446da1872ac74ea",
+   "isolate": true,
+   "size": [
+    744,
+    4754
+   ]
+  },
+  "fr-fmt-decimals": {
+   "file": "fr-fmt-decimals.png",
+   "hash": "18f4d33eea051af5",
+   "isolate": true,
+   "size": [
+    61,
+    120
+   ]
+  },
+  "fr-from-level": {
+   "file": "fr-from-level.png",
+   "hash": "63329d32bbf08c87",
+   "isolate": true,
+   "size": [
+    542,
+    491
+   ]
+  },
+  "fr-get": {
+   "file": "fr-get.png",
+   "hash": "de37667a723e0524",
+   "isolate": true,
+   "size": [
+    241,
+    288
+   ]
+  },
+  "fr-ids": {
+   "file": "fr-ids.png",
+   "hash": "0051de8f2ca7561c",
+   "isolate": true,
+   "size": [
+    745,
+    517
+   ]
+  },
+  "fr-image-fire-plan": {
+   "file": "fr-image-fire-plan.png",
+   "hash": "88364d4d9d7380f7",
+   "isolate": true,
+   "size": [
+    617,
+    2332
+   ]
+  },
+  "fr-image-legend": {
+   "file": "fr-image-legend.png",
+   "hash": "ac3c028fc1138ca6",
+   "isolate": true,
+   "size": [
+    518,
+    1646
+   ]
+  },
+  "fr-image-polar-moment": {
+   "file": "fr-image-polar-moment.png",
+   "hash": "cbfc63ba6240936b",
+   "isolate": true,
+   "size": [
+    437,
+    1533
+   ]
+  },
+  "fr-image-positions-plan": {
+   "file": "fr-image-positions-plan.png",
+   "hash": "be2efbc251f60cce",
+   "isolate": true,
+   "size": [
+    610,
+    3043
+   ]
+  },
+  "fr-image-schema": {
+   "file": "fr-image-schema.png",
+   "hash": "23b3cd60a58f4835",
+   "isolate": true,
+   "size": [
+    428,
+    1083
+   ]
+  },
+  "fr-image-section": {
+   "file": "fr-image-section.png",
+   "hash": "e397a51b3a485a30",
+   "isolate": true,
+   "size": [
+    329,
+    1653
+   ]
+  },
+  "fr-image-static-model": {
+   "file": "fr-image-static-model.png",
+   "hash": "c1b506b11bcc7585",
+   "isolate": true,
+   "size": [
+    371,
+    842
+   ]
+  },
+  "fr-image-titleblock": {
+   "file": "fr-image-titleblock.png",
+   "hash": "c73a1cb6d5882b06",
+   "isolate": true,
+   "size": [
+    750,
+    861
+   ]
+  },
+  "fr-journal-entries": {
+   "file": "fr-journal-entries.png",
+   "hash": "45d95d973dab6d32",
+   "isolate": true,
+   "size": [
+    82,
+    148
+   ]
+  },
+  "fr-position": {
+   "file": "fr-position.png",
+   "hash": "2d91ec75fde9d3fe",
+   "isolate": true,
+   "size": [
+    301,
+    431
+   ]
+  },
+  "fr-set-report-language": {
+   "file": "fr-set-report-language.png",
+   "hash": "1f3bedf31238f66a",
+   "isolate": true,
+   "size": [
+    741,
+    259
+   ]
+  },
+  "fr-show-bibliography": {
+   "file": "fr-show-bibliography.png",
+   "hash": "ba008060af874388",
+   "isolate": true,
+   "size": [
+    741,
+    2527
+   ]
+  },
+  "fr-show-norm-list": {
+   "file": "fr-show-norm-list.png",
+   "hash": "b629243fdaa45b2a",
+   "isolate": true,
+   "size": [
+    741,
+    431
+   ]
+  },
+  "fr-t-of": {
+   "file": "fr-t-of.png",
+   "hash": "9c9deabc2399c521",
+   "isolate": true,
+   "size": [
+    139,
+    106
+   ]
+  },
+  "fr-tl-of": {
+   "file": "fr-tl-of.png",
+   "hash": "77e2c59cb41ab775",
+   "isolate": true,
+   "size": [
+    222,
+    102
+   ]
+  },
+  "fr-unit": {
+   "file": "fr-unit.png",
+   "hash": "6fe9a3081d18ed84",
+   "isolate": true,
+   "size": [
+    278,
+    612
+   ]
+  },
+  "fr-var": {
+   "file": "fr-var.png",
+   "hash": "c60c2c478212ce70",
+   "isolate": true,
+   "size": [
+    740,
+    1850
+   ]
+  },
+  "fr-var-table": {
+   "file": "fr-var-table.png",
+   "hash": "d81673785a1846ac",
+   "isolate": true,
+   "size": [
+    560,
+    2893
+   ]
+  },
+  "fr-verify": {
+   "file": "fr-verify.png",
+   "hash": "d3f9114f4ad2fc3d",
+   "isolate": true,
+   "size": [
+    742,
+    1552
+   ]
+  }
+ },
+ "values": {
+  "calc-defaults|descr-position|\"after\"": {
+   "de": {
+    "hash": "4411c2da79e25753",
+    "ink": "9d5112736ba27f87",
+    "rect": [
+     3870,
+     283,
+     153
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "8d06334ebd97213b",
+    "ink": "b29a4f68e52ae8eb",
+    "rect": [
+     3958,
+     273,
+     158
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "e10d8b01b7932958",
+    "ink": "4a01380f6e04a570",
+    "rect": [
+     3870,
+     378,
+     153
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|descr-position|\"footnote\"": {
+   "de": {
+    "hash": "de4b6a2ee6ff9e0e",
+    "ink": "ae0fe51f8b326616",
+    "rect": [
+     4025,
+     231,
+     154
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "c30a9cc5ef60d29c",
+    "ink": "2a8cc1d64855172e",
+    "rect": [
+     4118,
+     231,
+     157
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "cc84b5bb47457b71",
+    "ink": "b3013df54d01bb8b",
+    "rect": [
+     4025,
+     306,
+     154
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|descr-position|\"none\"": {
+   "de": {
+    "hash": "4e4ade1a975a1543",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     3716,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "d10d6f9eea1fcbb6",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     3799,
+     231,
+     157
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "30f4ede3608eada5",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     3716,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "calc-defaults|descr-position|auto": {
+   "de": {
+    "hash": "a1b2e79568c44e2c",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     3562,
+     231,
+     152
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "en": {
+    "hash": "70e78a55e630b964",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     3640,
+     231,
+     157
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "fr": {
+    "hash": "9c9eb0f232081db4",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     3562,
+     231,
+     152
+    ],
+    "same": [
+     "\"none\""
+    ]
+   }
+  },
+  "calc-defaults|display-equation|\"none\"": {
+   "de": {
+    "hash": "68d247a75dcf7ba7",
+    "ink": "f543037dceab7c56",
+    "rect": [
+     1945,
+     72,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5d1befb93eb12e1e",
+    "ink": "f543037dceab7c56",
+    "rect": [
+     1978,
+     72,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "bcc0b7e5c853c31c",
+    "ink": "f543037dceab7c56",
+    "rect": [
+     1945,
+     72,
+     59
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display-equation|\"value\"": {
+   "de": {
+    "hash": "8958482514554c2b",
+    "ink": "274f3796c90dd731",
+    "rect": [
+     2067,
+     174,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5441ce825f6b6475",
+    "ink": "274f3796c90dd731",
+    "rect": [
+     2100,
+     174,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "fbb4ac7a5f5cc687",
+    "ink": "274f3796c90dd731",
+    "rect": [
+     2067,
+     174,
+     59
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display-equation|\"value-unit\"": {
+   "de": {
+    "hash": "53637ab6c711dfbe",
+    "ink": "62edfd9ca29459b9",
+    "rect": [
+     2128,
+     234,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "3c4d8635bb9d30c2",
+    "ink": "62edfd9ca29459b9",
+    "rect": [
+     2161,
+     234,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "e56a32c06ff8621c",
+    "ink": "62edfd9ca29459b9",
+    "rect": [
+     2128,
+     234,
+     59
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display-equation|\"variable\"": {
+   "de": {
+    "hash": "07147d00b010a828",
+    "ink": "f0ff47d3fb7746fa",
+    "rect": [
+     2006,
+     139,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d86f91b45222364c",
+    "ink": "f0ff47d3fb7746fa",
+    "rect": [
+     2039,
+     139,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "266382b3019661a1",
+    "ink": "f0ff47d3fb7746fa",
+    "rect": [
+     2006,
+     139,
+     59
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display-equation|\"variable-value-unit\"": {
+   "de": {
+    "hash": "adb9e0179b4017ad",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     2189,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "1da74d863f5abc3f",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     2222,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "ba1c65a8357b2a60",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     2189,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "calc-defaults|display-equation|auto": {
+   "de": {
+    "hash": "cc06d6dca8e1fad7",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1884,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   },
+   "en": {
+    "hash": "17369059905d2c81",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1917,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   },
+   "fr": {
+    "hash": "c1ad3bd17e4aa720",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1884,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   }
+  },
+  "calc-defaults|display-formula|\"none\"": {
+   "de": {
+    "hash": "59eba5cbbdfbad60",
+    "ink": "9a626283af8950a3",
+    "rect": [
+     1602,
+     206,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "02cfb97da66bf5f7",
+    "ink": "9a626283af8950a3",
+    "rect": [
+     1635,
+     206,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "f69c9ebcbf90af6b",
+    "ink": "9a626283af8950a3",
+    "rect": [
+     1602,
+     206,
+     36
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display-formula|\"value\"": {
+   "de": {
+    "hash": "ddbb5df4dcc8bbb1",
+    "ink": "9e4a0220c5c25179",
+    "rect": [
+     1701,
+     316,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f957b23c5024563b",
+    "ink": "9e4a0220c5c25179",
+    "rect": [
+     1734,
+     316,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "f0925a59b8db7fa6",
+    "ink": "9e4a0220c5c25179",
+    "rect": [
+     1701,
+     316,
+     59
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display-formula|\"value-unit\"": {
+   "de": {
+    "hash": "1f3a9e8cc6eeb59a",
+    "ink": "b9c0916c5225cda8",
+    "rect": [
+     1762,
+     416,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "69ca9490a7e86ab0",
+    "ink": "b9c0916c5225cda8",
+    "rect": [
+     1795,
+     416,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c74750bb14410c82",
+    "ink": "b9c0916c5225cda8",
+    "rect": [
+     1762,
+     416,
+     59
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display-formula|\"variable\"": {
+   "de": {
+    "hash": "2f77451a68eea617",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1640,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "42471f9d2827eecf",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1673,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "3d5b1aea35fabc9b",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1640,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "calc-defaults|display-formula|\"variable-value-unit\"": {
+   "de": {
+    "hash": "bab44cb4766db2b5",
+    "ink": "677b4fa87dcc5717",
+    "rect": [
+     1823,
+     512,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "963be625f8daf3bd",
+    "ink": "677b4fa87dcc5717",
+    "rect": [
+     1856,
+     512,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "777cf9db77fa7f25",
+    "ink": "677b4fa87dcc5717",
+    "rect": [
+     1823,
+     512,
+     59
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display-formula|auto": {
+   "de": {
+    "hash": "7423b6a5c504ffb3",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1541,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable\""
+    ]
+   },
+   "en": {
+    "hash": "924762aa77e47617",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1574,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable\""
+    ]
+   },
+   "fr": {
+    "hash": "1dd8299914940745",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1541,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable\""
+    ]
+   }
+  },
+  "calc-defaults|display|\"none\"": {
+   "de": {
+    "blank": true,
+    "hash": "15958675da1eb94c",
+    "same": []
+   },
+   "en": {
+    "blank": true,
+    "hash": "d8918f7d1911b891",
+    "same": []
+   },
+   "fr": {
+    "blank": true,
+    "hash": "1dd51e5246d2bd27",
+    "same": []
+   }
+  },
+  "calc-defaults|display|\"value\"": {
+   "de": {
+    "hash": "3323f2fb9a49c3eb",
+    "ink": "4650c28ea16ae056",
+    "rect": [
+     1079,
+     231,
+     152
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "b267d5bed1ab96b7",
+    "ink": "92dbf00a39476677",
+    "rect": [
+     1099,
+     231,
+     156
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b14b8ab49005ba31",
+    "ink": "bf719403a2a743fb",
+    "rect": [
+     1079,
+     231,
+     152
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display|\"value-unit\"": {
+   "de": {
+    "hash": "f437eb36fdb56189",
+    "ink": "68f2166e9441b111",
+    "rect": [
+     1233,
+     231,
+     152
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "a78186f9f40b4b6d",
+    "ink": "75ea4e48a8f0929a",
+    "rect": [
+     1257,
+     231,
+     156
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "7b0c9cdfd11438f9",
+    "ink": "2d481a326aec5b42",
+    "rect": [
+     1233,
+     231,
+     152
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display|\"variable\"": {
+   "de": {
+    "hash": "96b302e5ff12580d",
+    "ink": "8d51f628607e3602",
+    "rect": [
+     925,
+     231,
+     152
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "6330243b30e02c2a",
+    "ink": "5b9da212b47cff86",
+    "rect": [
+     940,
+     231,
+     157
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "de9b731f9048045e",
+    "ink": "8b59a64fa1881f83",
+    "rect": [
+     925,
+     231,
+     152
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|display|\"variable-value-unit\"": {
+   "de": {
+    "hash": "4562d340ae2b7f70",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     1387,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "a975a95565434b5b",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     1415,
+     231,
+     157
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "4863824a96608875",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     1387,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "calc-defaults|display|auto": {
+   "de": {
+    "hash": "5e82b4b32de65a36",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     771,
+     231,
+     152
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   },
+   "en": {
+    "hash": "52f24cb534532bae",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     781,
+     231,
+     157
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   },
+   "fr": {
+    "hash": "44db2107636855f3",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     771,
+     231,
+     152
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   }
+  },
+  "calc-defaults|label-position|\"after\"": {
+   "de": {
+    "hash": "239e88c575457580",
+    "ink": "2af00c0111bbbc7e",
+    "rect": [
+     3330,
+     216,
+     76
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "c5f787aaaf565cb5",
+    "ink": "f5ba8da68e9694a1",
+    "rect": [
+     3398,
+     229,
+     81
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d964766154aab022",
+    "ink": "826a3dde611bba61",
+    "rect": [
+     3330,
+     243,
+     76
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|label-position|\"before\"": {
+   "de": {
+    "hash": "231d79c8bce395c5",
+    "ink": "81a2a7cd3a4f9237",
+    "rect": [
+     3252,
+     202,
+     76
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "1d0fbf3e25fd21a7",
+    "ink": "f9d959925ae827fd",
+    "rect": [
+     3315,
+     214,
+     81
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "523ca62b4a00a242",
+    "ink": "09091eaea25a6bed",
+    "rect": [
+     3252,
+     231,
+     76
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|label-position|\"footnote\"": {
+   "de": {
+    "hash": "809ddecc874b1694",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     3408,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "0af8cf444e0bf954",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     3481,
+     231,
+     157
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "57dadc02459f9ee5",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     3408,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "calc-defaults|label-position|\"none\"": {
+   "de": {
+    "hash": "0f9d82634b8d75d4",
+    "ink": "9bc2859d7462f413",
+    "rect": [
+     3174,
+     130,
+     76
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "8cdc08eb2f8d5682",
+    "ink": "9bc2859d7462f413",
+    "rect": [
+     3237,
+     130,
+     76
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d6aaf1d379563a4c",
+    "ink": "9bc2859d7462f413",
+    "rect": [
+     3174,
+     130,
+     76
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|label-position|auto": {
+   "de": {
+    "hash": "d48196977efb9ca0",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     3020,
+     231,
+     152
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   },
+   "en": {
+    "hash": "a5d3ccc5fd70d454",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     3078,
+     231,
+     157
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   },
+   "fr": {
+    "hash": "8e172e7c881ac768",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     3020,
+     231,
+     152
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   }
+  },
+  "calc-defaults|level|0": {
+   "de": {
+    "blank": true,
+    "hash": "29f162b574d5ab26",
+    "same": []
+   },
+   "en": {
+    "blank": true,
+    "hash": "7c4fa9d78174dd9e",
+    "same": []
+   },
+   "fr": {
+    "blank": true,
+    "hash": "58c148fa792888fe",
+    "same": []
+   }
+  },
+  "calc-defaults|level|1": {
+   "de": {
+    "hash": "b870afe57fe50b9b",
+    "ink": "9bc2859d7462f413",
+    "rect": [
+     5723,
+     130,
+     76
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f0d825fc696efde2",
+    "ink": "9bc2859d7462f413",
+    "rect": [
+     5867,
+     130,
+     76
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "aa9bf0eae86fce63",
+    "ink": "9bc2859d7462f413",
+    "rect": [
+     5723,
+     130,
+     76
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|level|2": {
+   "de": {
+    "hash": "152b8ebfd5a0c6bf",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     5801,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "d1964c2aa1ece95c",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     5945,
+     231,
+     157
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "1e938a39a3d1ce39",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     5801,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "calc-defaults|level|3": {
+   "de": {
+    "hash": "279a55034b2b1e1e",
+    "ink": "cfcbd0b6eeee803d",
+    "rect": [
+     5955,
+     321,
+     154
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "926a10207bf7a018",
+    "ink": "3c7a15b3592c8d71",
+    "rect": [
+     6104,
+     320,
+     157
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "e8127ae9c5a72271",
+    "ink": "fc86b6c6e68a6c10",
+    "rect": [
+     5955,
+     426,
+     154
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|level|auto": {
+   "de": {
+    "hash": "f2212c8de0c296ee",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     5569,
+     231,
+     152
+    ],
+    "same": [
+     "2"
+    ]
+   },
+   "en": {
+    "hash": "2a9c86285662a44d",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     5708,
+     231,
+     157
+    ],
+    "same": [
+     "2"
+    ]
+   },
+   "fr": {
+    "hash": "28b4b6c9d0a31b61",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     5569,
+     231,
+     152
+    ],
+    "same": [
+     "2"
+    ]
+   }
+  },
+  "calc-defaults|norm-position|\"footnote\"": {
+   "de": {
+    "hash": "449ab9f22b0c6214",
+    "ink": "2f83fb04e5c44889",
+    "rect": [
+     4797,
+     231,
+     154
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "49761b3fc16da5fb",
+    "ink": "1cf4f9842545dc8f",
+    "rect": [
+     4913,
+     231,
+     157
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "385cec7429afb048",
+    "ink": "655bf531005cadd8",
+    "rect": [
+     4797,
+     231,
+     154
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|norm-position|\"in-line\"": {
+   "de": {
+    "hash": "6c36821087f8623c",
+    "ink": "4997d8851bc2efcc",
+    "rect": [
+     4489,
+     276,
+     152
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ed60bfd668cd830d",
+    "ink": "0dca7a2f6b8cd6d0",
+    "rect": [
+     4595,
+     276,
+     157
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c8ded20c7180c8e2",
+    "ink": "5448af9316c94358",
+    "rect": [
+     4489,
+     276,
+     152
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|norm-position|\"line-right\"": {
+   "de": {
+    "hash": "2b8bb6d4c425cad4",
+    "ink": "95664178e613fb39",
+    "rect": [
+     4643,
+     741,
+     152
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ba0100232f280221",
+    "ink": "d5c9174e8bc7434c",
+    "rect": [
+     4754,
+     741,
+     157
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "4ba2e3e20e40d8f3",
+    "ink": "ebaa7670424e3a5a",
+    "rect": [
+     4643,
+     741,
+     152
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|norm-position|\"none\"": {
+   "de": {
+    "hash": "68edb3c3df92ee48",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     4335,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "09addac8b93b2e4f",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     4436,
+     231,
+     157
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "e7fd5824ad223f73",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     4335,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "calc-defaults|norm-position|auto": {
+   "de": {
+    "hash": "54e034529e2036c6",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     4181,
+     231,
+     152
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "en": {
+    "hash": "bbefeee0ec58e7a3",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     4277,
+     231,
+     157
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "fr": {
+    "hash": "28e585b744348b29",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     4181,
+     231,
+     152
+    ],
+    "same": [
+     "\"none\""
+    ]
+   }
+  },
+  "calc-defaults|presets|\"block\"": {
+   "de": {
+    "hash": "d02df73e08e2502b",
+    "ink": "133ef917a1d655ee",
+    "rect": [
+     643,
+     231,
+     126
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "7c198ee57a5dd8b9",
+    "ink": "299d0145a7931ef7",
+    "rect": [
+     648,
+     231,
+     131
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "cc36a4e2abe3499a",
+    "ink": "930e6d460dd15ffb",
+    "rect": [
+     643,
+     237,
+     126
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|presets|\"inline\"": {
+   "de": {
+    "hash": "39d36f4308d7fe21",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     489,
+     231,
+     152
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d0e856f0014a6686",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     489,
+     231,
+     157
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "e72d69e6452025cd",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     489,
+     231,
+     152
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|role|\"compute\"": {
+   "de": {
+    "hash": "d21f46b1cbfcdfa8",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     5261,
+     231,
+     152
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "3434c7269c889ab1",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     5390,
+     231,
+     157
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "34332e3b893ae4d9",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     5261,
+     231,
+     152
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   }
+  },
+  "calc-defaults|role|\"data\"": {
+   "de": {
+    "hash": "6653428233efafa8",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     5107,
+     231,
+     152
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "da7f8a7afea7a459",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     5231,
+     231,
+     157
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "d31de37e10148490",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     5107,
+     231,
+     152
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   }
+  },
+  "calc-defaults|role|\"result\"": {
+   "de": {
+    "hash": "df75b77a50f03b89",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     5415,
+     231,
+     152
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   },
+   "en": {
+    "hash": "df72383ad6948788",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     5549,
+     231,
+     157
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   },
+   "fr": {
+    "hash": "1fa01338044333ca",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     5415,
+     231,
+     152
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   }
+  },
+  "calc-defaults|role|auto": {
+   "de": {
+    "hash": "aa919fef3059e775",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     4953,
+     231,
+     152
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "abb663155fec8d73",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     5072,
+     231,
+     157
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "b8f32fd3bec0c5c2",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     4953,
+     231,
+     152
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   }
+  },
+  "calc-defaults|scope|\"document\"": {
+   "de": {
+    "hash": "fc99e5320dc44ad5",
+    "ink": "ce9609b7933ad76d",
+    "rect": [
+     327,
+     90,
+     160
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d22f30b9b7a0b5c8",
+    "ink": "ce9609b7933ad76d",
+    "rect": [
+     327,
+     90,
+     160
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "ef3b98ee51779346",
+    "ink": "ce9609b7933ad76d",
+    "rect": [
+     327,
+     90,
+     160
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|scope|\"domain\"": {
+   "de": {
+    "hash": "e50e5f100239a0ad",
+    "ink": "63bd7d57271abc7e",
+    "rect": [
+     164,
+     114,
+     161
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "0126c41baa69b104",
+    "ink": "63bd7d57271abc7e",
+    "rect": [
+     164,
+     114,
+     161
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "1a529bbec1ec90fe",
+    "ink": "63bd7d57271abc7e",
+    "rect": [
+     164,
+     114,
+     161
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|scope|\"next\"": {
+   "de": {
+    "hash": "3d16dba6c14a7be1",
+    "ink": "f688ce0ee4f73d49",
+    "rect": [
+     0,
+     131,
+     162
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "2737449bf1541d8f",
+    "ink": "f688ce0ee4f73d49",
+    "rect": [
+     0,
+     131,
+     162
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "fa5e1b155b0e4e4c",
+    "ink": "f688ce0ee4f73d49",
+    "rect": [
+     0,
+     131,
+     162
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|style|\"bold\"": {
+   "de": {
+    "hash": "3bb98ae2747a91e3",
+    "ink": "50442b3dbe713b62",
+    "rect": [
+     2558,
+     231,
+     152
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "20d433a051611030",
+    "ink": "0d2f318a968c00e7",
+    "rect": [
+     2601,
+     231,
+     157
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "447f971ebcfee477",
+    "ink": "88dc5fe36e2ee0ff",
+    "rect": [
+     2558,
+     231,
+     152
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|style|\"double\"": {
+   "de": {
+    "hash": "267668b7fa4bbc15",
+    "ink": "a50fcbde72233241",
+    "rect": [
+     2866,
+     233,
+     152
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "b1cf8de26fade169",
+    "ink": "c6a978f2dca4903f",
+    "rect": [
+     2919,
+     233,
+     157
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "79b1c44fe372634b",
+    "ink": "be9febc9580609a0",
+    "rect": [
+     2866,
+     233,
+     152
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|style|\"normal\"": {
+   "de": {
+    "hash": "3a7e58c5c198007e",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     2404,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "5f8452906ca8de74",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     2442,
+     231,
+     157
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "99c85fe22bc05837",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     2404,
+     231,
+     152
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "calc-defaults|style|\"underline\"": {
+   "de": {
+    "hash": "db55f742fb1fa212",
+    "ink": "e4f4c4ec01735880",
+    "rect": [
+     2712,
+     231,
+     152
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "8869e1c3719394fd",
+    "ink": "9e0ef7ca79f74045",
+    "rect": [
+     2760,
+     231,
+     157
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b61fe0c865bcffe1",
+    "ink": "27dd0b23bad096b8",
+    "rect": [
+     2712,
+     231,
+     152
+    ],
+    "same": []
+   }
+  },
+  "calc-defaults|style|auto": {
+   "de": {
+    "hash": "cd97b459a8f95e2b",
+    "ink": "644ef52534ee02b8",
+    "rect": [
+     2250,
+     231,
+     152
+    ],
+    "same": [
+     "\"normal\""
+    ]
+   },
+   "en": {
+    "hash": "e70ec3a93701f7b9",
+    "ink": "d7fc8d82c2f784ea",
+    "rect": [
+     2283,
+     231,
+     157
+    ],
+    "same": [
+     "\"normal\""
+    ]
+   },
+   "fr": {
+    "hash": "6a1822715c8eac46",
+    "ink": "5f56a4cf1144c90b",
+    "rect": [
+     2250,
+     231,
+     152
+    ],
+    "same": [
+     "\"normal\""
+    ]
+   }
+  },
+  "distance|connector|\"bolt\"": {
+   "de": {
+    "hash": "f582b2f2ddf3c213",
+    "ink": "aea60b8994f7aaae",
+    "rect": [
+     188,
+     744,
+     228
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "076f1c0788ffad01",
+    "ink": "31f4da280b66e0c0",
+    "rect": [
+     188,
+     744,
+     227
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "6d68e07e312fc446",
+    "ink": "f4cf3d79cbdee588",
+    "rect": [
+     188,
+     744,
+     227
+    ],
+    "same": []
+   }
+  },
+  "distance|connector|\"dowel\"": {
+   "de": {
+    "hash": "d066004445e91682",
+    "ink": "1d08afd7ae27d3b6",
+    "rect": [
+     0,
+     744,
+     186
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5eaf179bf6b8d28c",
+    "ink": "70c984e063456b8a",
+    "rect": [
+     0,
+     744,
+     186
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "05efc123828cdfec",
+    "ink": "18e4f78c53bc5ecd",
+    "rect": [
+     0,
+     744,
+     186
+    ],
+    "same": []
+   }
+  },
+  "distance|connector|\"nail\"": {
+   "de": {
+    "hash": "fb0744a8b7d0030a",
+    "ink": "c25d2a13f9457157",
+    "rect": [
+     418,
+     744,
+     419
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5cca625e211f8cf9",
+    "ink": "a31a84382ab7f94d",
+    "rect": [
+     417,
+     744,
+     224
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "642f14b4f77a2891",
+    "ink": "c0d630212b6eccfe",
+    "rect": [
+     417,
+     744,
+     229
+    ],
+    "same": []
+   }
+  },
+  "distance|connector|\"ring\"": {
+   "de": {
+    "hash": "eb5b7911eeb9ded3",
+    "ink": "791418d4944cfaa5",
+    "rect": [
+     1260,
+     745,
+     309
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "4b4e93608b4cb971",
+    "ink": "d173ffcefbc57d46",
+    "rect": [
+     874,
+     744,
+     229
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "88e7f530b978f350",
+    "ink": "5f50d9005c502772",
+    "rect": [
+     879,
+     744,
+     229
+    ],
+    "same": []
+   }
+  },
+  "distance|connector|\"screw\"": {
+   "de": {
+    "hash": "b0d28a6e0e6c14db",
+    "ink": "1e41cbd4b6d7f85f",
+    "rect": [
+     839,
+     744,
+     419
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "e41928e3363aed05",
+    "ink": "45c544d86ea2218b",
+    "rect": [
+     643,
+     744,
+     229
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b15029db1c6cde34",
+    "ink": "5dc30d65a37df4b4",
+    "rect": [
+     648,
+     744,
+     229
+    ],
+    "same": []
+   }
+  },
+  "distance|label|\"…\"": {
+   "de": {
+    "hash": "b33ccd2182a24ff8",
+    "ink": "593adb74846c66b1",
+    "rect": [
+     3782,
+     744,
+     468
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "739394f481e24d0c",
+    "ink": "a05d6544910c3224",
+    "rect": [
+     2552,
+     744,
+     279
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d21d274a2fce5ba0",
+    "ink": "5db8432e568edaec",
+    "rect": [
+     2562,
+     744,
+     279
+    ],
+    "same": []
+   }
+  },
+  "distance|label|auto": {
+   "de": {
+    "hash": "261ce30b3433fa36",
+    "ink": "9c4d909e63b2c705",
+    "rect": [
+     2837,
+     745,
+     501
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "c80b03d6e24661bc",
+    "ink": "c745154f9cf79f25",
+    "rect": [
+     1987,
+     744,
+     311
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "1c7421390d9f80ff",
+    "ink": "a3c9c50c54ad2645",
+    "rect": [
+     1997,
+     744,
+     311
+    ],
+    "same": []
+   }
+  },
+  "distance|label|none": {
+   "de": {
+    "hash": "7ee743a9ecee970e",
+    "ink": "114b662f5147a8a5",
+    "rect": [
+     3340,
+     744,
+     440
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d57d5e63157d14ac",
+    "ink": "910f66d2325d41ab",
+    "rect": [
+     2300,
+     744,
+     250
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "bfc4fdb75ee663a0",
+    "ink": "3b727bdb64aec978",
+    "rect": [
+     2310,
+     744,
+     250
+    ],
+    "same": []
+   }
+  },
+  "distance|level|1": {
+   "de": {
+    "hash": "0247e966e2aae254",
+    "ink": "be5d58d9400a0853",
+    "rect": [
+     6764,
+     744,
+     498
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5d98118e6bdd8243",
+    "ink": "d5a3406fece8471c",
+    "rect": [
+     4395,
+     744,
+     308
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "921e834b93fa1830",
+    "ink": "53b7973efa801a16",
+    "rect": [
+     4405,
+     744,
+     309
+    ],
+    "same": []
+   }
+  },
+  "distance|level|2": {
+   "de": {
+    "hash": "76b8d487a20cbf97",
+    "ink": "5d2b5329e41869dd",
+    "rect": [
+     7264,
+     744,
+     520
+    ],
+    "same": [
+     "auto",
+     "3"
+    ]
+   },
+   "en": {
+    "hash": "6bde9d50d4830070",
+    "ink": "967bb5f57e6b8cc8",
+    "rect": [
+     4705,
+     744,
+     330
+    ],
+    "same": [
+     "auto",
+     "3"
+    ]
+   },
+   "fr": {
+    "hash": "30b4a3bb40a41447",
+    "ink": "c4766404416abbba",
+    "rect": [
+     4716,
+     744,
+     330
+    ],
+    "same": [
+     "auto",
+     "3"
+    ]
+   }
+  },
+  "distance|level|3": {
+   "de": {
+    "hash": "11a5c26524510068",
+    "ink": "5d2b5329e41869dd",
+    "rect": [
+     7786,
+     744,
+     520
+    ],
+    "same": [
+     "auto",
+     "2"
+    ]
+   },
+   "en": {
+    "hash": "8245832299d70b35",
+    "ink": "967bb5f57e6b8cc8",
+    "rect": [
+     5037,
+     744,
+     330
+    ],
+    "same": [
+     "auto",
+     "2"
+    ]
+   },
+   "fr": {
+    "hash": "c5ff7777230e5d32",
+    "ink": "c4766404416abbba",
+    "rect": [
+     5048,
+     744,
+     330
+    ],
+    "same": [
+     "auto",
+     "2"
+    ]
+   }
+  },
+  "distance|level|auto": {
+   "de": {
+    "hash": "097af085934362fe",
+    "ink": "5d2b5329e41869dd",
+    "rect": [
+     6242,
+     744,
+     520
+    ],
+    "same": [
+     "2",
+     "3"
+    ]
+   },
+   "en": {
+    "hash": "1539756178bb10cb",
+    "ink": "967bb5f57e6b8cc8",
+    "rect": [
+     4063,
+     744,
+     330
+    ],
+    "same": [
+     "2",
+     "3"
+    ]
+   },
+   "fr": {
+    "hash": "525cecaca00ce606",
+    "ink": "c4766404416abbba",
+    "rect": [
+     4073,
+     744,
+     330
+    ],
+    "same": [
+     "2",
+     "3"
+    ]
+   }
+  },
+  "distance|norm-section|\"…\"": {
+   "de": {
+    "hash": "58a98694216ae5e8",
+    "ink": "575e921b4ccce6bc",
+    "rect": [
+     5740,
+     745,
+     500
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5045db8ffa3d6246",
+    "ink": "6b9aa455f1d00c8e",
+    "rect": [
+     3751,
+     744,
+     310
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c85708025e405245",
+    "ink": "42dd4389235f5780",
+    "rect": [
+     3761,
+     744,
+     310
+    ],
+    "same": []
+   }
+  },
+  "distance|norm-section|auto": {
+   "de": {
+    "hash": "6ddca19e7026f345",
+    "ink": "9c4d909e63b2c705",
+    "rect": [
+     5237,
+     745,
+     501
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "a1c10265d0ec7a84",
+    "ink": "c745154f9cf79f25",
+    "rect": [
+     3438,
+     744,
+     311
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "1322e9e3a7035dbe",
+    "ink": "a3c9c50c54ad2645",
+    "rect": [
+     3448,
+     744,
+     311
+    ],
+    "same": []
+   }
+  },
+  "distance|norm|auto": {
+   "de": {
+    "hash": "f05e86bc64dfcb68",
+    "ink": "9c4d909e63b2c705",
+    "rect": [
+     4252,
+     745,
+     501
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "399381dfa357a2fd",
+    "ink": "c745154f9cf79f25",
+    "rect": [
+     2833,
+     744,
+     311
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "163b4f561743c4d6",
+    "ink": "a3c9c50c54ad2645",
+    "rect": [
+     2843,
+     744,
+     311
+    ],
+    "same": []
+   }
+  },
+  "distance|norm|none": {
+   "de": {
+    "hash": "817006d5d375d2b7",
+    "ink": "17a4e20b02701b22",
+    "rect": [
+     4755,
+     745,
+     480
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "dec2aeb896f6a779",
+    "ink": "037d38be79dcd875",
+    "rect": [
+     3146,
+     744,
+     290
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "481ea20ebc4ffaa2",
+    "ink": "fb31d41608240b85",
+    "rect": [
+     3156,
+     744,
+     290
+    ],
+    "same": []
+   }
+  },
+  "distance|table|(36, 38)": {
+   "de": {
+    "hash": "26091105f5c820ca",
+    "ink": "5194f42a486ef4b2",
+    "rect": [
+     2180,
+     745,
+     655
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9b212c6034e06d21",
+    "ink": "aef701618ac8f441",
+    "rect": [
+     1519,
+     744,
+     466
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "acb7e16115953f1e",
+    "ink": "95e74dd7dc6b1dfa",
+    "rect": [
+     1529,
+     744,
+     466
+    ],
+    "same": []
+   }
+  },
+  "distance|table|28": {
+   "de": {
+    "hash": "05a413402ef9ad13",
+    "ink": "c25d2a13f9457157",
+    "rect": [
+     1759,
+     744,
+     419
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "fe0ce0c6a7502729",
+    "ink": "a31a84382ab7f94d",
+    "rect": [
+     1293,
+     744,
+     224
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "4f4b5c7d15deda6c",
+    "ink": "c0d630212b6eccfe",
+    "rect": [
+     1298,
+     744,
+     229
+    ],
+    "same": []
+   }
+  },
+  "distance|table|auto": {
+   "de": {
+    "hash": "97457970e3b8e695",
+    "ink": "1d08afd7ae27d3b6",
+    "rect": [
+     1571,
+     744,
+     186
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "7f76a024e98f8a4f",
+    "ink": "70c984e063456b8a",
+    "rect": [
+     1105,
+     744,
+     186
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "142d350c79e57ee5",
+    "ink": "18e4f78c53bc5ecd",
+    "rect": [
+     1110,
+     744,
+     186
+    ],
+    "same": []
+   }
+  },
+  "domain-file|kind|\"check\"": {
+   "de": {
+    "hash": "7b6e109d437aa759",
+    "ink": "8634a1800ebc8d98",
+    "rect": [
+     0,
+     387,
+     32
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "b7913e4890d9395b",
+    "ink": "8634a1800ebc8d98",
+    "rect": [
+     0,
+     387,
+     32
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "528479775141286c",
+    "ink": "8634a1800ebc8d98",
+    "rect": [
+     0,
+     387,
+     32
+    ],
+    "same": []
+   }
+  },
+  "domain-file|kind|\"journal\"": {
+   "de": {
+    "hash": "bd98707f71a8bcae",
+    "ink": "5155137ebf821d11",
+    "rect": [
+     34,
+     387,
+     32
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "1e73e228163b6866",
+    "ink": "5155137ebf821d11",
+    "rect": [
+     34,
+     387,
+     32
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "327575a57e1cf450",
+    "ink": "5155137ebf821d11",
+    "rect": [
+     34,
+     387,
+     32
+    ],
+    "same": []
+   }
+  },
+  "domain|descr-position|\"after\"": {
+   "de": {
+    "hash": "80a2fa9f96a6e419",
+    "ink": "3b7379847cfef0e5",
+    "rect": [
+     874,
+     315,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "910eebd394abf8d6",
+    "ink": "0ff2dc5186cec61e",
+    "rect": [
+     862,
+     322,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "6e937c70b2a1635b",
+    "ink": "f83aa14c32308aff",
+    "rect": [
+     862,
+     417,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "domain|descr-position|\"footnote\"": {
+   "de": {
+    "hash": "44cffaafbcf9fc7d",
+    "ink": "cdc52888b300113b",
+    "rect": [
+     1000,
+     327,
+     128
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "7ad24e657ca3da4c",
+    "ink": "583b9a19c349497a",
+    "rect": [
+     988,
+     304,
+     126
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "37f343c8ebe193f1",
+    "ink": "85c5a8449d5ce0a6",
+    "rect": [
+     988,
+     427,
+     126
+    ],
+    "same": []
+   }
+  },
+  "domain|descr-position|\"none\"": {
+   "de": {
+    "hash": "bf21d1b801dcbf56",
+    "ink": "5eb46820f2aef312",
+    "rect": [
+     793,
+     315,
+     79
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "e94997e8dddb04dc",
+    "ink": "cfb5981aeb2a29b4",
+    "rect": [
+     781,
+     262,
+     79
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "594cdc5340e2aa87",
+    "ink": "b4e722754821c36b",
+    "rect": [
+     781,
+     416,
+     79
+    ],
+    "same": []
+   }
+  },
+  "domain|descr-position|auto": {
+   "de": {
+    "hash": "91517499a5a4f09f",
+    "ink": "3b7379847cfef0e5",
+    "rect": [
+     667,
+     315,
+     124
+    ],
+    "same": [
+     "\"after\""
+    ]
+   },
+   "en": {
+    "hash": "af8a27e249022cdb",
+    "ink": "0ff2dc5186cec61e",
+    "rect": [
+     655,
+     322,
+     124
+    ],
+    "same": [
+     "\"after\""
+    ]
+   },
+   "fr": {
+    "hash": "e4b189a02e7f301c",
+    "ink": "f83aa14c32308aff",
+    "rect": [
+     655,
+     417,
+     124
+    ],
+    "same": [
+     "\"after\""
+    ]
+   }
+  },
+  "domain|label-position|\"after\"": {
+   "de": {
+    "hash": "cfd819965496c043",
+    "ink": "dfbd42a9cdf7b838",
+    "rect": [
+     337,
+     315,
+     149
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d401b201cc9f8ed4",
+    "ink": "62f16c0a0e22e1bb",
+    "rect": [
+     337,
+     322,
+     142
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "872daa97d6715a6d",
+    "ink": "575937e0841456b7",
+    "rect": [
+     337,
+     417,
+     142
+    ],
+    "same": []
+   }
+  },
+  "domain|label-position|\"before\"": {
+   "de": {
+    "hash": "086ae08843cb4587",
+    "ink": "3b7379847cfef0e5",
+    "rect": [
+     211,
+     315,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "f22a3d3eb9680ccd",
+    "ink": "0ff2dc5186cec61e",
+    "rect": [
+     211,
+     322,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "8e3dc33a2e0f2d3b",
+    "ink": "f83aa14c32308aff",
+    "rect": [
+     211,
+     417,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "domain|label-position|\"footnote\"": {
+   "de": {
+    "hash": "ee3c8c82dd96aefa",
+    "ink": "0b755b957b595205",
+    "rect": [
+     488,
+     274,
+     177
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "fa4906ebe6744b61",
+    "ink": "b441121ecfa8ec69",
+    "rect": [
+     481,
+     322,
+     172
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "fd7203e1463f5cc9",
+    "ink": "a57a9b25f9e10484",
+    "rect": [
+     481,
+     279,
+     172
+    ],
+    "same": []
+   }
+  },
+  "domain|label-position|\"none\"": {
+   "de": {
+    "hash": "429c4d7289a0f3c9",
+    "ink": "59f8418724645abd",
+    "rect": [
+     126,
+     273,
+     83
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "cc50398ff93383b5",
+    "ink": "33c8b4c340a14aa8",
+    "rect": [
+     126,
+     322,
+     83
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "08e8c11ba0d5a367",
+    "ink": "9e5b0d8f6d3f12cb",
+    "rect": [
+     126,
+     279,
+     83
+    ],
+    "same": []
+   }
+  },
+  "domain|label-position|auto": {
+   "de": {
+    "hash": "4bb5c48a71e483e3",
+    "ink": "3b7379847cfef0e5",
+    "rect": [
+     0,
+     315,
+     124
+    ],
+    "same": [
+     "\"before\""
+    ]
+   },
+   "en": {
+    "hash": "511bd042855168b7",
+    "ink": "0ff2dc5186cec61e",
+    "rect": [
+     0,
+     322,
+     124
+    ],
+    "same": [
+     "\"before\""
+    ]
+   },
+   "fr": {
+    "hash": "55fda4e48dfb1201",
+    "ink": "f83aa14c32308aff",
+    "rect": [
+     0,
+     417,
+     124
+    ],
+    "same": [
+     "\"before\""
+    ]
+   }
+  },
+  "domain|level|0": {
+   "de": {
+    "blank": true,
+    "hash": "05f7743ac894f136",
+    "same": []
+   },
+   "en": {
+    "blank": true,
+    "hash": "372b314c7198c8c1",
+    "same": []
+   },
+   "fr": {
+    "blank": true,
+    "hash": "a1ddba588d3450f3",
+    "same": []
+   }
+  },
+  "domain|level|1": {
+   "de": {
+    "hash": "e2995a43c9e18bef",
+    "ink": "5eb46820f2aef312",
+    "rect": [
+     1942,
+     315,
+     79
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5133df7edd0fdcd7",
+    "ink": "cfb5981aeb2a29b4",
+    "rect": [
+     1928,
+     262,
+     79
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "4e7d0caeec2a0d5a",
+    "ink": "b4e722754821c36b",
+    "rect": [
+     1928,
+     416,
+     79
+    ],
+    "same": []
+   }
+  },
+  "domain|level|2": {
+   "de": {
+    "hash": "f246c52bf59c48af",
+    "ink": "3b7379847cfef0e5",
+    "rect": [
+     2023,
+     315,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "52aa3d60c6e5eeea",
+    "ink": "0ff2dc5186cec61e",
+    "rect": [
+     2009,
+     322,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "4116713436372e71",
+    "ink": "f83aa14c32308aff",
+    "rect": [
+     2009,
+     417,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "domain|level|3": {
+   "de": {
+    "hash": "9f6ec74a0d0f0566",
+    "ink": "0dcefa16c3684682",
+    "rect": [
+     2149,
+     739,
+     135
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5bd1f4b2f9321a63",
+    "ink": "36d309ef5ae1cf29",
+    "rect": [
+     2135,
+     740,
+     135
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "38b9da13473e3357",
+    "ink": "9893dadd29ee7cf5",
+    "rect": [
+     2135,
+     740,
+     135
+    ],
+    "same": []
+   }
+  },
+  "domain|level|auto": {
+   "de": {
+    "hash": "c0339047e0a0fad1",
+    "ink": "3b7379847cfef0e5",
+    "rect": [
+     1816,
+     315,
+     124
+    ],
+    "same": [
+     "2"
+    ]
+   },
+   "en": {
+    "hash": "48b7b998f797ef8b",
+    "ink": "0ff2dc5186cec61e",
+    "rect": [
+     1802,
+     322,
+     124
+    ],
+    "same": [
+     "2"
+    ]
+   },
+   "fr": {
+    "hash": "771be71f294f54fc",
+    "ink": "f83aa14c32308aff",
+    "rect": [
+     1802,
+     417,
+     124
+    ],
+    "same": [
+     "2"
+    ]
+   }
+  },
+  "domain|norm-position|\"footnote\"": {
+   "de": {
+    "hash": "64e209f8802fb098",
+    "ink": "2b9b63b22a002601",
+    "rect": [
+     1645,
+     327,
+     169
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "e3a5b4b4311b6af7",
+    "ink": "f355212bc7b25d9b",
+    "rect": [
+     1631,
+     322,
+     169
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "2dcfca94817afc6c",
+    "ink": "ae5b1c43c2385a34",
+    "rect": [
+     1631,
+     427,
+     169
+    ],
+    "same": []
+   }
+  },
+  "domain|norm-position|\"in-line\"": {
+   "de": {
+    "hash": "507b133ea0021d3f",
+    "ink": "9a580d868fe99529",
+    "rect": [
+     1382,
+     517,
+     124
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "48d73bee2d9dceed",
+    "ink": "176cc0d487d6866a",
+    "rect": [
+     1368,
+     465,
+     124
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b9033bbbb242dbfc",
+    "ink": "d538d4c5f62a3f48",
+    "rect": [
+     1368,
+     619,
+     124
+    ],
+    "same": []
+   }
+  },
+  "domain|norm-position|\"line-right\"": {
+   "de": {
+    "hash": "24b8190cb014e2ec",
+    "ink": "0dcefa16c3684682",
+    "rect": [
+     1508,
+     739,
+     135
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "e406498e10a9aeaf",
+    "ink": "36d309ef5ae1cf29",
+    "rect": [
+     1494,
+     740,
+     135
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "afee598dac457619",
+    "ink": "9893dadd29ee7cf5",
+    "rect": [
+     1494,
+     740,
+     135
+    ],
+    "same": []
+   }
+  },
+  "domain|norm-position|\"none\"": {
+   "de": {
+    "hash": "beb083efa0f9bbc4",
+    "ink": "3b7379847cfef0e5",
+    "rect": [
+     1256,
+     315,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "9f601bd5f47b4489",
+    "ink": "0ff2dc5186cec61e",
+    "rect": [
+     1242,
+     322,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "075325fa0b38907b",
+    "ink": "f83aa14c32308aff",
+    "rect": [
+     1242,
+     417,
+     124
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "domain|norm-position|auto": {
+   "de": {
+    "hash": "41378577cd68d02e",
+    "ink": "3b7379847cfef0e5",
+    "rect": [
+     1130,
+     315,
+     124
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "en": {
+    "hash": "cba553f8dd62a666",
+    "ink": "0ff2dc5186cec61e",
+    "rect": [
+     1116,
+     322,
+     124
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "fr": {
+    "hash": "01d25c8861564759",
+    "ink": "f83aa14c32308aff",
+    "rect": [
+     1116,
+     417,
+     124
+    ],
+    "same": [
+     "\"none\""
+    ]
+   }
+  },
+  "eq|descr-position|\"after\"": {
+   "de": {
+    "hash": "54f3eec25b69b419",
+    "ink": "bea9cf7cb34ace3c",
+    "rect": [
+     1697,
+     441,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ce0718ef00a8432a",
+    "ink": "de8b7a8e582ab865",
+    "rect": [
+     1697,
+     431,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "146dcc754244f446",
+    "ink": "ed13dc2df63cdd21",
+    "rect": [
+     1687,
+     536,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|descr-position|\"footnote\"": {
+   "de": {
+    "hash": "d8cc1ef6e3565177",
+    "ink": "18ab7de2b3598f9c",
+    "rect": [
+     1758,
+     314,
+     102
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "dc9d6f6d1308fd52",
+    "ink": "e881fbfbee681527",
+    "rect": [
+     1758,
+     314,
+     107
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "93f51bc8c8fe9967",
+    "ink": "c15aac9e300f5dc8",
+    "rect": [
+     1748,
+     314,
+     102
+    ],
+    "same": []
+   }
+  },
+  "eq|descr-position|\"none\"": {
+   "de": {
+    "hash": "ff24e13abd1708e5",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1636,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "6a44e5ae809f85f5",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1636,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "ccf9a4de68ebff77",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1626,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "eq|descr-position|auto": {
+   "de": {
+    "hash": "baff352dc72052ee",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1575,
+     301,
+     59
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "en": {
+    "hash": "5ecd342276f8479c",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1575,
+     301,
+     59
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "fr": {
+    "hash": "61bd366eb4aac0cc",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1565,
+     301,
+     59
+    ],
+    "same": [
+     "\"none\""
+    ]
+   }
+  },
+  "eq|display-equation|\"none\"": {
+   "de": {
+    "hash": "5413f77e2133aea7",
+    "ink": "f543037dceab7c56",
+    "rect": [
+     221,
+     72,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "955161863151b3fe",
+    "ink": "f543037dceab7c56",
+    "rect": [
+     221,
+     72,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b250303d020b86c9",
+    "ink": "f543037dceab7c56",
+    "rect": [
+     221,
+     72,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|display-equation|\"value\"": {
+   "de": {
+    "hash": "84d69eb179905657",
+    "ink": "274f3796c90dd731",
+    "rect": [
+     343,
+     174,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "b736a161139d5c1b",
+    "ink": "274f3796c90dd731",
+    "rect": [
+     343,
+     174,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "58e46320bd1a134f",
+    "ink": "274f3796c90dd731",
+    "rect": [
+     343,
+     174,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|display-equation|\"value-unit\"": {
+   "de": {
+    "hash": "bb146fe217035c76",
+    "ink": "62edfd9ca29459b9",
+    "rect": [
+     404,
+     234,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "2714e18d584b236a",
+    "ink": "62edfd9ca29459b9",
+    "rect": [
+     404,
+     234,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "fee71114ffd06af8",
+    "ink": "62edfd9ca29459b9",
+    "rect": [
+     404,
+     234,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|display-equation|\"variable\"": {
+   "de": {
+    "hash": "ddcd2a889d7a57b0",
+    "ink": "f0ff47d3fb7746fa",
+    "rect": [
+     282,
+     139,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "eb04f5f023629533",
+    "ink": "f0ff47d3fb7746fa",
+    "rect": [
+     282,
+     139,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "7cc1500e904a5e6a",
+    "ink": "f0ff47d3fb7746fa",
+    "rect": [
+     282,
+     139,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|display-equation|\"variable-value-unit\"": {
+   "de": {
+    "hash": "e8733b40b9878d88",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     465,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "acece30519cecd57",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     465,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "a87e27cdc4ab9637",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     465,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "eq|display-equation|auto": {
+   "de": {
+    "hash": "205d92466c52f073",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     160,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   },
+   "en": {
+    "hash": "ae2e66c5ee933c39",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     160,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   },
+   "fr": {
+    "hash": "6751c8de74b3ee5d",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     160,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   }
+  },
+  "eq|display-formula|\"none\"": {
+   "de": {
+    "hash": "5bd0e9bf1bd07d36",
+    "ink": "9a626283af8950a3",
+    "rect": [
+     587,
+     206,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "a26ca3378ec445a7",
+    "ink": "9a626283af8950a3",
+    "rect": [
+     587,
+     206,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "2c9f172674b5f395",
+    "ink": "9a626283af8950a3",
+    "rect": [
+     587,
+     206,
+     36
+    ],
+    "same": []
+   }
+  },
+  "eq|display-formula|\"value\"": {
+   "de": {
+    "hash": "14e765a5b18d3854",
+    "ink": "9e4a0220c5c25179",
+    "rect": [
+     686,
+     316,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "3b3043fce9319169",
+    "ink": "9e4a0220c5c25179",
+    "rect": [
+     686,
+     316,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "2a543354cf0d3e63",
+    "ink": "9e4a0220c5c25179",
+    "rect": [
+     686,
+     316,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|display-formula|\"value-unit\"": {
+   "de": {
+    "hash": "51e969196f51a6dd",
+    "ink": "b9c0916c5225cda8",
+    "rect": [
+     747,
+     416,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "e22ce973a619bf95",
+    "ink": "b9c0916c5225cda8",
+    "rect": [
+     747,
+     416,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "350d81b8f1ec55c5",
+    "ink": "b9c0916c5225cda8",
+    "rect": [
+     747,
+     416,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|display-formula|\"variable\"": {
+   "de": {
+    "hash": "3658404379c46b3d",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     625,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "1bbfb979cb4f8d35",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     625,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "73b6b6fc5521d2cf",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     625,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "eq|display-formula|\"variable-value-unit\"": {
+   "de": {
+    "hash": "f90e075828c99c50",
+    "ink": "677b4fa87dcc5717",
+    "rect": [
+     808,
+     512,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d7c08ea2007e5ba1",
+    "ink": "677b4fa87dcc5717",
+    "rect": [
+     808,
+     512,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c16e59889e05e59b",
+    "ink": "677b4fa87dcc5717",
+    "rect": [
+     808,
+     512,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|display-formula|auto": {
+   "de": {
+    "hash": "f76cfaf4925ed87f",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     526,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable\""
+    ]
+   },
+   "en": {
+    "hash": "f5265c002f71348b",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     526,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable\""
+    ]
+   },
+   "fr": {
+    "hash": "e92c3d882f64df77",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     526,
+     301,
+     59
+    ],
+    "same": [
+     "\"variable\""
+    ]
+   }
+  },
+  "eq|label-position|\"after\"": {
+   "de": {
+    "hash": "5140008f27cba496",
+    "ink": "9e0e726a9f0c22c8",
+    "rect": [
+     1405,
+     537,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "c47974d85df5a255",
+    "ink": "412c77995672ee18",
+    "rect": [
+     1405,
+     491,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "9b0a27394ef9e394",
+    "ink": "2da8cb441b834282",
+    "rect": [
+     1400,
+     509,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|label-position|\"before\"": {
+   "de": {
+    "hash": "8336b72bcb27069d",
+    "ink": "f7b7f0404fdc51eb",
+    "rect": [
+     1344,
+     522,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "e2a37ab0af8075d5",
+    "ink": "928f45dc1d3f41d5",
+    "rect": [
+     1344,
+     475,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "04d7aa2e81492635",
+    "ink": "704973ed53f0c44a",
+    "rect": [
+     1339,
+     497,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|label-position|\"footnote\"": {
+   "de": {
+    "hash": "f7f83966e2e857e7",
+    "ink": "156e09c30d2e7f5c",
+    "rect": [
+     1466,
+     314,
+     107
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "a4ab4e8d83e7730c",
+    "ink": "12949b6bfcfa960f",
+    "rect": [
+     1466,
+     314,
+     107
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "2a55cd11786e515b",
+    "ink": "39be42b805a2f719",
+    "rect": [
+     1461,
+     314,
+     102
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "eq|label-position|\"none\"": {
+   "de": {
+    "hash": "b65334e66df581cf",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1283,
+     301,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "1aee34d42e2e752e",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1283,
+     301,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "262fd54b65d517af",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1278,
+     301,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|label-position|auto": {
+   "de": {
+    "hash": "89b032124bcca696",
+    "ink": "156e09c30d2e7f5c",
+    "rect": [
+     1174,
+     314,
+     107
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   },
+   "en": {
+    "hash": "7826ac6f04fe3a0e",
+    "ink": "12949b6bfcfa960f",
+    "rect": [
+     1174,
+     314,
+     107
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   },
+   "fr": {
+    "hash": "d6d9690e2d8b0e2b",
+    "ink": "39be42b805a2f719",
+    "rect": [
+     1174,
+     314,
+     102
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   }
+  },
+  "eq|level|0": {
+   "de": {
+    "blank": true,
+    "hash": "f530266d59ea53ad",
+    "same": []
+   },
+   "en": {
+    "blank": true,
+    "hash": "18f4e4fdccf51b3a",
+    "same": []
+   },
+   "fr": {
+    "blank": true,
+    "hash": "5bb517c652bfb884",
+    "same": []
+   }
+  },
+  "eq|level|1": {
+   "de": {
+    "hash": "297f4d52d594485b",
+    "ink": "9a626283af8950a3",
+    "rect": [
+     2755,
+     206,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "1b6088ea3a4ad8c1",
+    "ink": "9a626283af8950a3",
+    "rect": [
+     2760,
+     206,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "8a754a8316f4757b",
+    "ink": "9a626283af8950a3",
+    "rect": [
+     2720,
+     206,
+     36
+    ],
+    "same": []
+   }
+  },
+  "eq|level|2": {
+   "de": {
+    "hash": "034c941722db2804",
+    "ink": "156e09c30d2e7f5c",
+    "rect": [
+     2793,
+     314,
+     107
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "56a01aa8ec3c724a",
+    "ink": "12949b6bfcfa960f",
+    "rect": [
+     2798,
+     314,
+     107
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "857293ba30fb8b30",
+    "ink": "39be42b805a2f719",
+    "rect": [
+     2758,
+     314,
+     102
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "eq|level|3": {
+   "de": {
+    "hash": "8f62c6313a86df6d",
+    "ink": "1ca6839dbdce3711",
+    "rect": [
+     2902,
+     524,
+     107
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "3b5661e7359b2029",
+    "ink": "fbf494e8ca3d66f4",
+    "rect": [
+     2907,
+     524,
+     107
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "a776bd8d5c95ffb9",
+    "ink": "1c1fd46425afd931",
+    "rect": [
+     2862,
+     524,
+     105
+    ],
+    "same": []
+   }
+  },
+  "eq|level|auto": {
+   "de": {
+    "hash": "eb3def9b75d43a0b",
+    "ink": "156e09c30d2e7f5c",
+    "rect": [
+     2646,
+     314,
+     107
+    ],
+    "same": [
+     "2"
+    ]
+   },
+   "en": {
+    "hash": "91b284e35d52dfb4",
+    "ink": "12949b6bfcfa960f",
+    "rect": [
+     2651,
+     314,
+     107
+    ],
+    "same": [
+     "2"
+    ]
+   },
+   "fr": {
+    "hash": "d2c6734910877997",
+    "ink": "39be42b805a2f719",
+    "rect": [
+     2616,
+     314,
+     102
+    ],
+    "same": [
+     "2"
+    ]
+   }
+  },
+  "eq|norm-position|\"footnote\"": {
+   "de": {
+    "hash": "1decd26b5cf88f1d",
+    "ink": "e2f2b7fb07741e94",
+    "rect": [
+     2106,
+     314,
+     102
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d8087de28f5178e4",
+    "ink": "e2f2b7fb07741e94",
+    "rect": [
+     2111,
+     314,
+     102
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "e65e22575c6083d8",
+    "ink": "e2f2b7fb07741e94",
+    "rect": [
+     2096,
+     314,
+     102
+    ],
+    "same": []
+   }
+  },
+  "eq|norm-position|\"in-line\"": {
+   "de": {
+    "hash": "681f4ce18099a58b",
+    "ink": "1f1a52531444428e",
+    "rect": [
+     1984,
+     434,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "920bd2bc5d110538",
+    "ink": "1f1a52531444428e",
+    "rect": [
+     1989,
+     434,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "1b9722bc6030d736",
+    "ink": "1f1a52531444428e",
+    "rect": [
+     1974,
+     434,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|norm-position|\"line-right\"": {
+   "de": {
+    "hash": "f20cb37b83ce958c",
+    "ink": "5ba9cccb5b27e573",
+    "rect": [
+     2045,
+     740,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "85d5ba2821dc5df5",
+    "ink": "5ba9cccb5b27e573",
+    "rect": [
+     2050,
+     740,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "42526b48b9305688",
+    "ink": "5ba9cccb5b27e573",
+    "rect": [
+     2035,
+     740,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|norm-position|\"none\"": {
+   "de": {
+    "hash": "78f170d38f0aeda8",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1923,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "207b32ad4dd22723",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1928,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "2e8524651ef993a9",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1913,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "eq|norm-position|auto": {
+   "de": {
+    "hash": "22cdb7b191192c5a",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1862,
+     301,
+     59
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "en": {
+    "hash": "552806b2bcfc5a1f",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1867,
+     301,
+     59
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "fr": {
+    "hash": "a26d2b5527530a32",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     1852,
+     301,
+     59
+    ],
+    "same": [
+     "\"none\""
+    ]
+   }
+  },
+  "eq|role|\"compute\"": {
+   "de": {
+    "hash": "1b0eee949e94c182",
+    "ink": "156e09c30d2e7f5c",
+    "rect": [
+     2428,
+     314,
+     107
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "4d2102488f1ec703",
+    "ink": "12949b6bfcfa960f",
+    "rect": [
+     2433,
+     314,
+     107
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "b06f0cff453a0f83",
+    "ink": "39be42b805a2f719",
+    "rect": [
+     2408,
+     314,
+     102
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   }
+  },
+  "eq|role|\"data\"": {
+   "de": {
+    "hash": "ec268cdc28f43653",
+    "ink": "156e09c30d2e7f5c",
+    "rect": [
+     2319,
+     314,
+     107
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "92aee289032cc90b",
+    "ink": "12949b6bfcfa960f",
+    "rect": [
+     2324,
+     314,
+     107
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "0ab1c7b473f96245",
+    "ink": "39be42b805a2f719",
+    "rect": [
+     2304,
+     314,
+     102
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   }
+  },
+  "eq|role|\"result\"": {
+   "de": {
+    "hash": "2f78d4d872f2801f",
+    "ink": "156e09c30d2e7f5c",
+    "rect": [
+     2537,
+     314,
+     107
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   },
+   "en": {
+    "hash": "9d4f45c9746418cc",
+    "ink": "12949b6bfcfa960f",
+    "rect": [
+     2542,
+     314,
+     107
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   },
+   "fr": {
+    "hash": "6a8f27a9e9addfd4",
+    "ink": "39be42b805a2f719",
+    "rect": [
+     2512,
+     314,
+     102
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   }
+  },
+  "eq|role|auto": {
+   "de": {
+    "hash": "3f6f0577cc751516",
+    "ink": "156e09c30d2e7f5c",
+    "rect": [
+     2210,
+     314,
+     107
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "eed473f4ec3c32f0",
+    "ink": "12949b6bfcfa960f",
+    "rect": [
+     2215,
+     314,
+     107
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "c04c164bf3172e2c",
+    "ink": "39be42b805a2f719",
+    "rect": [
+     2200,
+     314,
+     102
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   }
+  },
+  "eq|style|\"bold\"": {
+   "de": {
+    "hash": "ef8714c546b5f98c",
+    "ink": "a2da8ed8a2613d70",
+    "rect": [
+     991,
+     319,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d28174f53aae68d9",
+    "ink": "a2da8ed8a2613d70",
+    "rect": [
+     991,
+     319,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c111d853908fe946",
+    "ink": "a2da8ed8a2613d70",
+    "rect": [
+     991,
+     319,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|style|\"double\"": {
+   "de": {
+    "hash": "64c32958e1d095f6",
+    "ink": "4f80e30dc247c1f2",
+    "rect": [
+     1113,
+     304,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5424d98fcec8d4f7",
+    "ink": "4f80e30dc247c1f2",
+    "rect": [
+     1113,
+     304,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "70abb31cac762d86",
+    "ink": "4f80e30dc247c1f2",
+    "rect": [
+     1113,
+     304,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|style|\"normal\"": {
+   "de": {
+    "hash": "5b213258052646f7",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     930,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "e9870cefbf8001f9",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     930,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "b7edc0afd6d23bca",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     930,
+     301,
+     59
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "eq|style|\"underline\"": {
+   "de": {
+    "hash": "56812b503c7673a2",
+    "ink": "fba0cf4a85edb7fb",
+    "rect": [
+     1052,
+     302,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "4090523c1d816e9c",
+    "ink": "fba0cf4a85edb7fb",
+    "rect": [
+     1052,
+     302,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "54ee9e81bcfa0765",
+    "ink": "fba0cf4a85edb7fb",
+    "rect": [
+     1052,
+     302,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|style|auto": {
+   "de": {
+    "hash": "767a882ffe9ebec7",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     869,
+     301,
+     59
+    ],
+    "same": [
+     "\"normal\""
+    ]
+   },
+   "en": {
+    "hash": "c39ef7b20449d88d",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     869,
+     301,
+     59
+    ],
+    "same": [
+     "\"normal\""
+    ]
+   },
+   "fr": {
+    "hash": "a0ce3c3e19de813b",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     869,
+     301,
+     59
+    ],
+    "same": [
+     "\"normal\""
+    ]
+   }
+  },
+  "eq|unit|\"\"": {
+   "de": {
+    "hash": "c633d3fafe35066a",
+    "ink": "eb186f475e10dbfa",
+    "rect": [
+     122,
+     198,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "afce4aa8fd02b537",
+    "ink": "eb186f475e10dbfa",
+    "rect": [
+     122,
+     198,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "6c1dcbf830bf0b82",
+    "ink": "eb186f475e10dbfa",
+    "rect": [
+     122,
+     198,
+     36
+    ],
+    "same": []
+   }
+  },
+  "eq|unit|\"Nm\"": {
+   "de": {
+    "hash": "32835cc155911304",
+    "ink": "1c0564165e77af30",
+    "rect": [
+     61,
+     301,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "c3613028e2656d17",
+    "ink": "1c0564165e77af30",
+    "rect": [
+     61,
+     301,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "87af4202fb43a4c3",
+    "ink": "1c0564165e77af30",
+    "rect": [
+     61,
+     301,
+     59
+    ],
+    "same": []
+   }
+  },
+  "eq|unit|auto": {
+   "de": {
+    "hash": "318271055a38201f",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     0,
+     301,
+     59
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "bd808973ca17a24e",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     0,
+     301,
+     59
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d2905027ff85969a",
+    "ink": "ea9eb78bf8fe6009",
+    "rect": [
+     0,
+     301,
+     59
+    ],
+    "same": []
+   }
+  },
+  "find|object|\"domain\"": {
+   "de": {
+    "hash": "e3933212c92ff394",
+    "ink": "ba820afb597860b2",
+    "rect": [
+     0,
+     151,
+     28
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "c9212cd5fbe210c7",
+    "ink": "ba820afb597860b2",
+    "rect": [
+     0,
+     151,
+     28
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "398b421f4d4059ad",
+    "ink": "a880d14920c44417",
+    "rect": [
+     0,
+     154,
+     28
+    ],
+    "same": []
+   }
+  },
+  "find|object|\"variable\"": {
+   "de": {
+    "hash": "6cb4461ba1422654",
+    "ink": "0c46ab2119f39fd1",
+    "rect": [
+     30,
+     744,
+     554
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "adb82563f100140d",
+    "ink": "4a3989e0fb38927e",
+    "rect": [
+     30,
+     744,
+     522
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "012d7861be302ab6",
+    "ink": "8fa1d3a7ea27442d",
+    "rect": [
+     30,
+     744,
+     585
+    ],
+    "same": []
+   }
+  },
+  "find|type|\"expression\"": {
+   "de": {
+    "hash": "5f5a4a619ca94caf",
+    "ink": "0c442607e27bcedb",
+    "rect": [
+     3282,
+     744,
+     617
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "b598982d4f4b56d9",
+    "ink": "7e2b05370d4e4672",
+    "rect": [
+     3531,
+     744,
+     586
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "f1a0ae539cc726e9",
+    "ink": "1e19d7208f3da788",
+    "rect": [
+     4072,
+     744,
+     680
+    ],
+    "same": []
+   }
+  },
+  "find|type|\"name\"": {
+   "de": {
+    "hash": "287f35740cc27c06",
+    "ink": "0c46ab2119f39fd1",
+    "rect": [
+     586,
+     744,
+     554
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "e6cabab01a381c60",
+    "ink": "4a3989e0fb38927e",
+    "rect": [
+     554,
+     744,
+     522
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "5f2b503dcf931775",
+    "ink": "8fa1d3a7ea27442d",
+    "rect": [
+     617,
+     744,
+     585
+    ],
+    "same": []
+   }
+  },
+  "find|type|\"unit\"": {
+   "de": {
+    "hash": "0bf669374a4ba055",
+    "ink": "54e4968baf577104",
+    "rect": [
+     1887,
+     744,
+     648
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "cccf9e6b4d6c7f3f",
+    "ink": "5e4d01d1c6b55e24",
+    "rect": [
+     2011,
+     744,
+     585
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "15bbf860a17616a4",
+    "ink": "6a207cbe292225f3",
+    "rect": [
+     2297,
+     744,
+     680
+    ],
+    "same": []
+   }
+  },
+  "find|type|\"val\"": {
+   "de": {
+    "hash": "6dfa20e5c77e3ef2",
+    "ink": "157e44c3358dd02a",
+    "rect": [
+     1142,
+     750,
+     743
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "4b1c9c6bc7953a12",
+    "ink": "ef04f39dcd2ec020",
+    "rect": [
+     1078,
+     744,
+     931
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "1e2d5281168e7ffd",
+    "ink": "061ecc1e8cf6ceb8",
+    "rect": [
+     1204,
+     744,
+     1091
+    ],
+    "same": []
+   }
+  },
+  "find|type|\"val+unit\"": {
+   "de": {
+    "hash": "4918a5b92f1af21f",
+    "ink": "d11327d2f2b41aaa",
+    "rect": [
+     2537,
+     750,
+     743
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "b52c5180c6deceee",
+    "ink": "d5a0a768f471abc5",
+    "rect": [
+     2598,
+     744,
+     931
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "90fe27f537bccaf7",
+    "ink": "b0c8d73fb550fd16",
+    "rect": [
+     2979,
+     744,
+     1091
+    ],
+    "same": []
+   }
+  },
+  "fmt-decimals|digits|0": {
+   "de": {
+    "hash": "c74ddeeba69e67bb",
+    "ink": "5ea1a43211f58365",
+    "rect": [
+     0,
+     22,
+     28
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "126aaa3e8b7c3990",
+    "ink": "5ea1a43211f58365",
+    "rect": [
+     0,
+     22,
+     28
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "f13733efbad0b014",
+    "ink": "5ea1a43211f58365",
+    "rect": [
+     0,
+     22,
+     28
+    ],
+    "same": []
+   }
+  },
+  "fmt-decimals|digits|1": {
+   "de": {
+    "hash": "07abdd61b6b5bde0",
+    "ink": "0fee9bc6e6c95eee",
+    "rect": [
+     30,
+     38,
+     28
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "beb6564d70b418e1",
+    "ink": "0fee9bc6e6c95eee",
+    "rect": [
+     30,
+     38,
+     28
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "ea7189f14ce8b48b",
+    "ink": "0fee9bc6e6c95eee",
+    "rect": [
+     30,
+     38,
+     28
+    ],
+    "same": []
+   }
+  },
+  "fmt-decimals|digits|2": {
+   "de": {
+    "hash": "7c15b8ac3bf7eff8",
+    "ink": "fbd19262c43da95c",
+    "rect": [
+     60,
+     49,
+     28
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "8a2bb4c15a700674",
+    "ink": "fbd19262c43da95c",
+    "rect": [
+     60,
+     49,
+     28
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "dfd229429b1a4649",
+    "ink": "fbd19262c43da95c",
+    "rect": [
+     60,
+     49,
+     28
+    ],
+    "same": []
+   }
+  },
+  "fmt-decimals|digits|3": {
+   "de": {
+    "hash": "acbe6f9cc933df5c",
+    "ink": "76c04fe7006db06f",
+    "rect": [
+     90,
+     61,
+     28
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "962a5d25c51cf8c4",
+    "ink": "76c04fe7006db06f",
+    "rect": [
+     90,
+     61,
+     28
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "f4f0030d63a19dd8",
+    "ink": "76c04fe7006db06f",
+    "rect": [
+     90,
+     61,
+     28
+    ],
+    "same": []
+   }
+  },
+  "from-level|lowest|1": {
+   "de": {
+    "hash": "11d083a14fdc86c8",
+    "ink": "b6e61ddfa99424dc",
+    "rect": [
+     0,
+     542,
+     203
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "229520caa5198c8b",
+    "ink": "9d8730e82516014a",
+    "rect": [
+     0,
+     520,
+     203
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "fcc45e2cc66c1d50",
+    "ink": "dd3c159971aaa9b4",
+    "rect": [
+     0,
+     541,
+     203
+    ],
+    "same": []
+   }
+  },
+  "from-level|lowest|2": {
+   "de": {
+    "hash": "d706b5399acbc2b1",
+    "ink": "06a3ca0c4505719e",
+    "rect": [
+     205,
+     542,
+     203
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "23bf88e6e7c64df3",
+    "ink": "7bcac9c25394baf0",
+    "rect": [
+     205,
+     520,
+     203
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "1f1fa2418e8b7bba",
+    "ink": "c1b791ce2d4dedd9",
+    "rect": [
+     205,
+     542,
+     203
+    ],
+    "same": []
+   }
+  },
+  "from-level|lowest|3": {
+   "de": {
+    "hash": "02fa94711b69b328",
+    "ink": "2deea0091ea64748",
+    "rect": [
+     410,
+     181,
+     79
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "83c7b4fe3320d9ff",
+    "ink": "698036487632ead2",
+    "rect": [
+     410,
+     201,
+     79
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "bc92236af995c279",
+    "ink": "20dfe79a4833462a",
+    "rect": [
+     410,
+     272,
+     79
+    ],
+    "same": []
+   }
+  },
+  "get|field|\"choices\"": {
+   "de": {
+    "hash": "17ed7f674339375b",
+    "ink": "0ef41a9458459487",
+    "rect": [
+     225,
+     62,
+     24
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "6654ab116d5db1e7",
+    "ink": "0ef41a9458459487",
+    "rect": [
+     230,
+     62,
+     24
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b55faa4acd2c6ccc",
+    "ink": "0ef41a9458459487",
+    "rect": [
+     230,
+     62,
+     24
+    ],
+    "same": []
+   }
+  },
+  "get|field|\"description\"": {
+   "de": {
+    "hash": "7e17a4a859472ed5",
+    "ink": "20729826d86569d7",
+    "rect": [
+     193,
+     146,
+     30
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d5b8d890545f38c6",
+    "ink": "bba6cf0902a270cd",
+    "rect": [
+     192,
+     137,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "f98819349818d4c6",
+    "ink": "5a8d61fa838d4b32",
+    "rect": [
+     198,
+     241,
+     30
+    ],
+    "same": []
+   }
+  },
+  "get|field|\"label\"": {
+   "de": {
+    "hash": "860aa67bbd7a4a30",
+    "ink": "afdb615fb9296f79",
+    "rect": [
+     99,
+     97,
+     30
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d240518997069b20",
+    "ink": "311031dc6e31caf4",
+    "rect": [
+     99,
+     82,
+     29
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "f795394ef718d11c",
+    "ink": "308dd5013bdbd001",
+    "rect": [
+     99,
+     84,
+     35
+    ],
+    "same": []
+   }
+  },
+  "get|field|\"norm\"": {
+   "de": {
+    "hash": "dfa7494cee6df658",
+    "ink": "413e47c250ea8095",
+    "rect": [
+     131,
+     103,
+     29
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "0824d25dc78bd30a",
+    "ink": "413e47c250ea8095",
+    "rect": [
+     130,
+     103,
+     29
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "ffb040a27e0bffc5",
+    "ink": "413e47c250ea8095",
+    "rect": [
+     136,
+     103,
+     29
+    ],
+    "same": []
+   }
+  },
+  "get|field|\"norm_ref\"": {
+   "de": {
+    "hash": "e83fb0cf4730175f",
+    "ink": "3853f4250cdcd3b7",
+    "rect": [
+     162,
+     55,
+     29
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "c6d48077f7fb1b7c",
+    "ink": "3853f4250cdcd3b7",
+    "rect": [
+     161,
+     55,
+     29
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "13ad8015ba4e594e",
+    "ink": "3853f4250cdcd3b7",
+    "rect": [
+     167,
+     55,
+     29
+    ],
+    "same": []
+   }
+  },
+  "get|field|\"role\"": {
+   "de": {
+    "hash": "1c7ebdf2f7f5665a",
+    "ink": "b27deef0d71e4da2",
+    "rect": [
+     251,
+     69,
+     30
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "637e8df3cb1dcfba",
+    "ink": "b27deef0d71e4da2",
+    "rect": [
+     256,
+     69,
+     30
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "4d89df9576882fc5",
+    "ink": "b27deef0d71e4da2",
+    "rect": [
+     256,
+     69,
+     30
+    ],
+    "same": []
+   }
+  },
+  "get|field|\"symbol\"": {
+   "de": {
+    "hash": "371ec78d8e94e105",
+    "ink": "fbaf646466b5e2df",
+    "rect": [
+     63,
+     61,
+     34
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "30ebcb8af3d817f8",
+    "ink": "fbaf646466b5e2df",
+    "rect": [
+     63,
+     61,
+     34
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "5f730c2a8429aabe",
+    "ink": "fbaf646466b5e2df",
+    "rect": [
+     63,
+     61,
+     34
+    ],
+    "same": []
+   }
+  },
+  "get|field|\"unit\"": {
+   "de": {
+    "hash": "7d801c96d1335757",
+    "ink": "716b5f66a51e967e",
+    "rect": [
+     30,
+     91,
+     31
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "6eb40541fbb01fc8",
+    "ink": "716b5f66a51e967e",
+    "rect": [
+     30,
+     91,
+     31
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "70020bbc5aa52e7c",
+    "ink": "716b5f66a51e967e",
+    "rect": [
+     30,
+     91,
+     31
+    ],
+    "same": []
+   }
+  },
+  "get|field|\"value\"": {
+   "de": {
+    "hash": "cb3764562bb3fe06",
+    "ink": "3a01a5c1da24fa70",
+    "rect": [
+     0,
+     61,
+     28
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9691bd3b34791aa3",
+    "ink": "3a01a5c1da24fa70",
+    "rect": [
+     0,
+     61,
+     28
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "cf7d1b4bf5362eb8",
+    "ink": "3a01a5c1da24fa70",
+    "rect": [
+     0,
+     61,
+     28
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"annex\"": {
+   "de": {
+    "hash": "3ca69fe6ae294b60",
+    "ink": "73d8d3b5a06478cb",
+    "rect": [
+     349,
+     126,
+     35
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f8c303e219e9d678",
+    "ink": "73d8d3b5a06478cb",
+    "rect": [
+     349,
+     126,
+     35
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "8d7ef3a87d8843e2",
+    "ink": "73d8d3b5a06478cb",
+    "rect": [
+     349,
+     126,
+     35
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"check-member\"": {
+   "de": {
+    "hash": "c1e537026bec2673",
+    "ink": "4564e55190592dc9",
+    "rect": [
+     386,
+     745,
+     64
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "439e44c88c78c2e0",
+    "ink": "4564e55190592dc9",
+    "rect": [
+     386,
+     745,
+     64
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "9a58cd6a6f7ddb6e",
+    "ink": "4564e55190592dc9",
+    "rect": [
+     386,
+     745,
+     64
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"check-steel\"": {
+   "de": {
+    "hash": "283bbe403be16789",
+    "ink": "2a221abd57e76956",
+    "rect": [
+     452,
+     134,
+     32
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d15996e198e7fce2",
+    "ink": "2a221abd57e76956",
+    "rect": [
+     452,
+     134,
+     32
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "9b2056ba80a7d57a",
+    "ink": "2a221abd57e76956",
+    "rect": [
+     452,
+     134,
+     32
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"connection\"": {
+   "de": {
+    "hash": "022cf960d5129d70",
+    "ink": "308b49f8dee87894",
+    "rect": [
+     69,
+     105,
+     29
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "64fde130379d999c",
+    "ink": "308b49f8dee87894",
+    "rect": [
+     69,
+     105,
+     29
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "7c7f80b9a01dd637",
+    "ink": "308b49f8dee87894",
+    "rect": [
+     69,
+     105,
+     29
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"connector\"": {
+   "de": {
+    "hash": "39e9812d8f92266b",
+    "ink": "6b68087753364b77",
+    "rect": [
+     100,
+     71,
+     29
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "694812df3d138569",
+    "ink": "6b68087753364b77",
+    "rect": [
+     100,
+     71,
+     29
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "cdb1577ede1d4e63",
+    "ink": "6b68087753364b77",
+    "rect": [
+     100,
+     71,
+     29
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"domain\"": {
+   "de": {
+    "hash": "f6f416ef719eb65c",
+    "ink": "afa51305d802d03a",
+    "rect": [
+     34,
+     435,
+     33
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d5c8f6c98f2a8b9f",
+    "ink": "afa51305d802d03a",
+    "rect": [
+     34,
+     435,
+     33
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b0db79910d468b55",
+    "ink": "afa51305d802d03a",
+    "rect": [
+     34,
+     435,
+     33
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"extract\"": {
+   "de": {
+    "hash": "72c107d885baddf6",
+    "ink": "30bfb3bc022e138d",
+    "rect": [
+     312,
+     177,
+     35
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "92356797a70e7677",
+    "ink": "30bfb3bc022e138d",
+    "rect": [
+     312,
+     177,
+     35
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "0d2273576d81b236",
+    "ink": "30bfb3bc022e138d",
+    "rect": [
+     312,
+     177,
+     35
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"fire-plan\"": {
+   "de": {
+    "hash": "220f6b9e153bb2b8",
+    "ink": "7df3561d43cb5bbc",
+    "rect": [
+     207,
+     274,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "bbc7812cb74ef60e",
+    "ink": "7df3561d43cb5bbc",
+    "rect": [
+     207,
+     274,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "35e6df74210fb620",
+    "ink": "7df3561d43cb5bbc",
+    "rect": [
+     207,
+     274,
+     36
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"plan\"": {
+   "de": {
+    "hash": "b7df35bc017d3d48",
+    "ink": "888eb27417eda56f",
+    "rect": [
+     169,
+     532,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "2e488ace6b58d89a",
+    "ink": "888eb27417eda56f",
+    "rect": [
+     169,
+     532,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "5486abe99830a86f",
+    "ink": "888eb27417eda56f",
+    "rect": [
+     169,
+     532,
+     36
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"position\"": {
+   "de": {
+    "hash": "862cdca57ad2943c",
+    "ink": "354fe5b90e4abaf9",
+    "rect": [
+     0,
+     175,
+     32
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "c7de6e885e5449c2",
+    "ink": "354fe5b90e4abaf9",
+    "rect": [
+     0,
+     175,
+     32
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "dbc8d3badd4c0b5b",
+    "ink": "354fe5b90e4abaf9",
+    "rect": [
+     0,
+     175,
+     32
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"schema\"": {
+   "de": {
+    "hash": "8b24e4e3f6be4db1",
+    "ink": "f9d8fce4758f1649",
+    "rect": [
+     280,
+     115,
+     30
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "90960eeeb20f765b",
+    "ink": "f9d8fce4758f1649",
+    "rect": [
+     280,
+     115,
+     30
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "de0ecaf3d6337813",
+    "ink": "f9d8fce4758f1649",
+    "rect": [
+     280,
+     115,
+     30
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"script\"": {
+   "de": {
+    "hash": "ded3936fd8a62ac9",
+    "ink": "10a004c59938c093",
+    "rect": [
+     131,
+     117,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9c0c2c073e1ba2d2",
+    "ink": "10a004c59938c093",
+    "rect": [
+     131,
+     117,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "a8db1ae4123493f4",
+    "ink": "10a004c59938c093",
+    "rect": [
+     131,
+     117,
+     36
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"snow-load\"": {
+   "de": {
+    "hash": "189b251dea8c6735",
+    "ink": "ced6e047aa373977",
+    "rect": [
+     486,
+     36,
+     29
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9a8be5de3ff48a8d",
+    "ink": "ced6e047aa373977",
+    "rect": [
+     486,
+     36,
+     29
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "ca91fd327ce13337",
+    "ink": "ced6e047aa373977",
+    "rect": [
+     486,
+     36,
+     29
+    ],
+    "same": []
+   }
+  },
+  "ids|kind|\"static-model\"": {
+   "de": {
+    "hash": "826785669266d6e9",
+    "ink": "600383f134f6ac45",
+    "rect": [
+     245,
+     263,
+     33
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "12ffa6f866102bb4",
+    "ink": "600383f134f6ac45",
+    "rect": [
+     245,
+     263,
+     33
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d360a1b52cd059e9",
+    "ink": "600383f134f6ac45",
+    "rect": [
+     245,
+     263,
+     33
+    ],
+    "same": []
+   }
+  },
+  "image-fire-plan|detail-legend|\"none\"": {
+   "de": {
+    "hash": "f66e7058be8f87db",
+    "ink": "2f54fa231beb752e",
+    "rect": [
+     329,
+     300,
+     178
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "dc36024e69add190",
+    "ink": "2f54fa231beb752e",
+    "rect": [
+     329,
+     300,
+     178
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "338bc5154cd8ccfe",
+    "ink": "2f54fa231beb752e",
+    "rect": [
+     329,
+     300,
+     178
+    ],
+    "same": []
+   }
+  },
+  "image-fire-plan|detail-legend|\"objects\"": {
+   "de": {
+    "hash": "f4a0a4c3ea7c631f",
+    "ink": "6264640af1152fdb",
+    "rect": [
+     509,
+     375,
+     236
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9e30d5a8b4f06bed",
+    "ink": "06a937e00a23d282",
+    "rect": [
+     509,
+     376,
+     236
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "386fd0c85ee24c27",
+    "ink": "df33ded97cc0cfe1",
+    "rect": [
+     509,
+     393,
+     236
+    ],
+    "same": []
+   }
+  },
+  "image-fire-plan|detail-legend|\"scale-bar\"": {
+   "de": {
+    "hash": "c24c0b587b1a5b4e",
+    "ink": "05fc5756ec17770e",
+    "rect": [
+     747,
+     342,
+     269
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "368d3d032c0295f9",
+    "ink": "05fc5756ec17770e",
+    "rect": [
+     747,
+     342,
+     269
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "fa545b60c3073bf2",
+    "ink": "05fc5756ec17770e",
+    "rect": [
+     747,
+     342,
+     269
+    ],
+    "same": []
+   }
+  },
+  "image-fire-plan|detail-legend|auto": {
+   "de": {
+    "hash": "a1e5214d8a5c06f1",
+    "ink": "93b9ef2dfde0c7d7",
+    "rect": [
+     0,
+     417,
+     327
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ad3dbf7b400acfb0",
+    "ink": "ee42a2a018ac305d",
+    "rect": [
+     0,
+     418,
+     327
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "8c9558cf91040c76",
+    "ink": "fcf1cbdabfe86a70",
+    "rect": [
+     0,
+     435,
+     327
+    ],
+    "same": []
+   }
+  },
+  "image-fire-plan|title|\"…\"": {
+   "de": {
+    "hash": "5ea3358f4282c003",
+    "ink": "fb4cdbc349d3520c",
+    "rect": [
+     1840,
+     592,
+     490
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "25670b5b5aaec29a",
+    "ink": "2ef52d2e36c5327c",
+    "rect": [
+     1840,
+     593,
+     490
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "fa57494f38d4367a",
+    "ink": "f76a11f19d214f0b",
+    "rect": [
+     1840,
+     617,
+     490
+    ],
+    "same": []
+   }
+  },
+  "image-fire-plan|title|auto": {
+   "de": {
+    "hash": "aa474d87aa9784e1",
+    "ink": "53399ce3146acdf0",
+    "rect": [
+     1347,
+     592,
+     491
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "cd3c5c71508d0deb",
+    "ink": "367ae9f661454d8c",
+    "rect": [
+     1347,
+     593,
+     491
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "51db73faa7b37c6a",
+    "ink": "c28de97a81cd1211",
+    "rect": [
+     1347,
+     617,
+     491
+    ],
+    "same": []
+   }
+  },
+  "image-fire-plan|title|none": {
+   "de": {
+    "hash": "c1adb9e69f258b73",
+    "ink": "93b9ef2dfde0c7d7",
+    "rect": [
+     1018,
+     417,
+     327
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "21437f3b67ef596c",
+    "ink": "ee42a2a018ac305d",
+    "rect": [
+     1018,
+     418,
+     327
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "46eac09ff02d1223",
+    "ink": "fcf1cbdabfe86a70",
+    "rect": [
+     1018,
+     435,
+     327
+    ],
+    "same": []
+   }
+  },
+  "image-legend|kind|\"fire\"": {
+   "de": {
+    "hash": "13c951a6bf4cd924",
+    "ink": "450614290cbf0401",
+    "rect": [
+     524,
+     518,
+     484
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9f2d478b4911edaf",
+    "ink": "3054d59d8638afbe",
+    "rect": [
+     524,
+     518,
+     484
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "119204cc23ff8d3d",
+    "ink": "e7d48db106136e1e",
+    "rect": [
+     620,
+     518,
+     484
+    ],
+    "same": []
+   }
+  },
+  "image-legend|kind|\"position\"": {
+   "de": {
+    "hash": "01128754a61f5f81",
+    "ink": "e85e7166bf54c5b0",
+    "rect": [
+     364,
+     392,
+     158
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ec108ebec14ba2ac",
+    "ink": "30512a73bf97031a",
+    "rect": [
+     364,
+     392,
+     158
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "8ddef3fd5e51eae3",
+    "ink": "1b7346b20557fb1a",
+    "rect": [
+     428,
+     392,
+     190
+    ],
+    "same": []
+   }
+  },
+  "image-legend|plans|\"id\"": {
+   "de": {
+    "hash": "d18ed9fee7e57b5c",
+    "ink": "e85e7166bf54c5b0",
+    "rect": [
+     44,
+     392,
+     158
+    ],
+    "same": [
+     "(\"a\", \"b\")"
+    ]
+   },
+   "en": {
+    "hash": "041593284f7af5e8",
+    "ink": "30512a73bf97031a",
+    "rect": [
+     44,
+     392,
+     158
+    ],
+    "same": [
+     "(\"a\", \"b\")"
+    ]
+   },
+   "fr": {
+    "hash": "893b7b42ee8201ec",
+    "ink": "1b7346b20557fb1a",
+    "rect": [
+     44,
+     392,
+     190
+    ],
+    "same": [
+     "(\"a\", \"b\")"
+    ]
+   }
+  },
+  "image-legend|plans|(\"a\", \"b\")": {
+   "de": {
+    "hash": "fb0957b2e43d0762",
+    "ink": "e85e7166bf54c5b0",
+    "rect": [
+     204,
+     392,
+     158
+    ],
+    "same": [
+     "\"id\""
+    ]
+   },
+   "en": {
+    "hash": "f08121d05b17396d",
+    "ink": "30512a73bf97031a",
+    "rect": [
+     204,
+     392,
+     158
+    ],
+    "same": [
+     "\"id\""
+    ]
+   },
+   "fr": {
+    "hash": "6d76d8ad3deb5390",
+    "ink": "1b7346b20557fb1a",
+    "rect": [
+     236,
+     392,
+     190
+    ],
+    "same": [
+     "\"id\""
+    ]
+   }
+  },
+  "image-legend|plans|auto": {
+   "de": {
+    "hash": "076ce451ca5327c8",
+    "ink": "ee9ccf8db25b7dff",
+    "rect": [
+     0,
+     135,
+     42
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "92a8f26296cc80f4",
+    "ink": "147d9a13ebf425b4",
+    "rect": [
+     0,
+     119,
+     42
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "43c1c58daeea43ed",
+    "ink": "041ab73d9d107908",
+    "rect": [
+     0,
+     139,
+     42
+    ],
+    "same": []
+   }
+  },
+  "image-legend|title|[…]": {
+   "de": {
+    "hash": "c10908c3be69a827",
+    "ink": "a370fda1832d9dfc",
+    "rect": [
+     1294,
+     392,
+     158
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "0cb4becaa971a96f",
+    "ink": "648f5dad264238b6",
+    "rect": [
+     1294,
+     392,
+     158
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "978ce8d29b48e4ca",
+    "ink": "db0705c750990e4f",
+    "rect": [
+     1454,
+     392,
+     190
+    ],
+    "same": []
+   }
+  },
+  "image-legend|title|auto": {
+   "de": {
+    "hash": "3acffaa3a61230b9",
+    "ink": "e85e7166bf54c5b0",
+    "rect": [
+     1010,
+     392,
+     158
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "d933c2e7a073638d",
+    "ink": "30512a73bf97031a",
+    "rect": [
+     1010,
+     392,
+     158
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "831363b5403cc7f5",
+    "ink": "1b7346b20557fb1a",
+    "rect": [
+     1106,
+     392,
+     190
+    ],
+    "same": []
+   }
+  },
+  "image-legend|title|none": {
+   "de": {
+    "hash": "8ee049bccab6dfd0",
+    "ink": "e284c25f3692ff16",
+    "rect": [
+     1170,
+     392,
+     122
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "14c7ea672a0a6324",
+    "ink": "34304f0ba505b3fc",
+    "rect": [
+     1170,
+     392,
+     122
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c3dea3dc7130460f",
+    "ink": "e1103afba4e42fcd",
+    "rect": [
+     1298,
+     392,
+     154
+    ],
+    "same": []
+   }
+  },
+  "image-polar-moment|detail-figure|\"forces\"": {
+   "de": {
+    "hash": "ce4bb17b4197c99b",
+    "ink": "21b8b69f7c4ae0f7",
+    "rect": [
+     511,
+     437,
+     509
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "09fdf4b65a4b34d7",
+    "ink": "757a3c30e6cb9218",
+    "rect": [
+     511,
+     437,
+     509
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "bbae6b7cae73fe31",
+    "ink": "ffc010dc7f160b19",
+    "rect": [
+     511,
+     437,
+     509
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "image-polar-moment|detail-figure|()": {
+   "de": {
+    "hash": "58b347f852323696",
+    "ink": "70a38864e3edc899",
+    "rect": [
+     1022,
+     436,
+     509
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "e72bf93400a3124a",
+    "ink": "692959d1a9e6a4be",
+    "rect": [
+     1022,
+     436,
+     509
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "df9e82bf05b53268",
+    "ink": "e50fcc5c018b4c3b",
+    "rect": [
+     1022,
+     436,
+     509
+    ],
+    "same": []
+   }
+  },
+  "image-polar-moment|detail-figure|auto": {
+   "de": {
+    "hash": "2658f07827ae287e",
+    "ink": "21b8b69f7c4ae0f7",
+    "rect": [
+     0,
+     437,
+     509
+    ],
+    "same": [
+     "\"forces\""
+    ]
+   },
+   "en": {
+    "hash": "28a0ec5aff5274df",
+    "ink": "757a3c30e6cb9218",
+    "rect": [
+     0,
+     437,
+     509
+    ],
+    "same": [
+     "\"forces\""
+    ]
+   },
+   "fr": {
+    "hash": "a4808454eabaf793",
+    "ink": "ffc010dc7f160b19",
+    "rect": [
+     0,
+     437,
+     509
+    ],
+    "same": [
+     "\"forces\""
+    ]
+   }
+  },
+  "image-positions-plan|detail-figure|\"axes\"": {
+   "de": {
+    "hash": "6ad22a011cbc6cf9",
+    "ink": "b8755fc4d5eb990a",
+    "rect": [
+     719,
+     473,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"dimensions\"",
+     "\"centres\"",
+     "()"
+    ]
+   },
+   "en": {
+    "hash": "eda1ee69cc89a19c",
+    "ink": "fe34cfebb0e8c707",
+    "rect": [
+     719,
+     484,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"dimensions\"",
+     "\"centres\"",
+     "()"
+    ]
+   },
+   "fr": {
+    "hash": "c42e78431a224f5e",
+    "ink": "1c15784c10ded4e3",
+    "rect": [
+     719,
+     610,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"dimensions\"",
+     "\"centres\"",
+     "()"
+    ]
+   }
+  },
+  "image-positions-plan|detail-figure|\"centres\"": {
+   "de": {
+    "hash": "47cc2a8ac9669552",
+    "ink": "b8755fc4d5eb990a",
+    "rect": [
+     1177,
+     473,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"axes\"",
+     "\"dimensions\"",
+     "()"
+    ]
+   },
+   "en": {
+    "hash": "7e31bea1eda74510",
+    "ink": "fe34cfebb0e8c707",
+    "rect": [
+     1177,
+     484,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"axes\"",
+     "\"dimensions\"",
+     "()"
+    ]
+   },
+   "fr": {
+    "hash": "42b4764f9f05f8e7",
+    "ink": "1c15784c10ded4e3",
+    "rect": [
+     1177,
+     610,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"axes\"",
+     "\"dimensions\"",
+     "()"
+    ]
+   }
+  },
+  "image-positions-plan|detail-figure|\"dimensions\"": {
+   "de": {
+    "hash": "c6833e47dbeef3c9",
+    "ink": "b8755fc4d5eb990a",
+    "rect": [
+     948,
+     473,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"axes\"",
+     "\"centres\"",
+     "()"
+    ]
+   },
+   "en": {
+    "hash": "a5e61ba196df5d5c",
+    "ink": "fe34cfebb0e8c707",
+    "rect": [
+     948,
+     484,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"axes\"",
+     "\"centres\"",
+     "()"
+    ]
+   },
+   "fr": {
+    "hash": "31471e3aa16f6347",
+    "ink": "1c15784c10ded4e3",
+    "rect": [
+     948,
+     610,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"axes\"",
+     "\"centres\"",
+     "()"
+    ]
+   }
+  },
+  "image-positions-plan|detail-figure|\"length\"": {
+   "de": {
+    "hash": "912bef35d2ad1ebe",
+    "ink": "b8755fc4d5eb990a",
+    "rect": [
+     490,
+     473,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"axes\"",
+     "\"dimensions\"",
+     "\"centres\"",
+     "()"
+    ]
+   },
+   "en": {
+    "hash": "a58e0ddee21054a7",
+    "ink": "fe34cfebb0e8c707",
+    "rect": [
+     490,
+     484,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"axes\"",
+     "\"dimensions\"",
+     "\"centres\"",
+     "()"
+    ]
+   },
+   "fr": {
+    "hash": "3d60f5ce1df3a8bd",
+    "ink": "1c15784c10ded4e3",
+    "rect": [
+     490,
+     610,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"axes\"",
+     "\"dimensions\"",
+     "\"centres\"",
+     "()"
+    ]
+   }
+  },
+  "image-positions-plan|detail-figure|()": {
+   "de": {
+    "hash": "fe0fb0b86cb79148",
+    "ink": "b8755fc4d5eb990a",
+    "rect": [
+     1406,
+     473,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"axes\"",
+     "\"dimensions\"",
+     "\"centres\""
+    ]
+   },
+   "en": {
+    "hash": "c847670df970e311",
+    "ink": "fe34cfebb0e8c707",
+    "rect": [
+     1406,
+     484,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"axes\"",
+     "\"dimensions\"",
+     "\"centres\""
+    ]
+   },
+   "fr": {
+    "hash": "a19412ea30aa9942",
+    "ink": "1c15784c10ded4e3",
+    "rect": [
+     1406,
+     610,
+     227
+    ],
+    "same": [
+     "auto",
+     "\"length\"",
+     "\"axes\"",
+     "\"dimensions\"",
+     "\"centres\""
+    ]
+   }
+  },
+  "image-positions-plan|detail-figure|auto": {
+   "de": {
+    "hash": "42f4ff901cdb702b",
+    "ink": "b8755fc4d5eb990a",
+    "rect": [
+     261,
+     473,
+     227
+    ],
+    "same": [
+     "\"length\"",
+     "\"axes\"",
+     "\"dimensions\"",
+     "\"centres\"",
+     "()"
+    ]
+   },
+   "en": {
+    "hash": "05be156ce2f775ee",
+    "ink": "fe34cfebb0e8c707",
+    "rect": [
+     261,
+     484,
+     227
+    ],
+    "same": [
+     "\"length\"",
+     "\"axes\"",
+     "\"dimensions\"",
+     "\"centres\"",
+     "()"
+    ]
+   },
+   "fr": {
+    "hash": "e5ef619336d8308e",
+    "ink": "1c15784c10ded4e3",
+    "rect": [
+     261,
+     610,
+     227
+    ],
+    "same": [
+     "\"length\"",
+     "\"axes\"",
+     "\"dimensions\"",
+     "\"centres\"",
+     "()"
+    ]
+   }
+  },
+  "image-positions-plan|detail-legend|\"length\"": {
+   "de": {
+    "hash": "3e1749b28dc7a4dc",
+    "ink": "39b6876f1cc76ce8",
+    "rect": [
+     1961,
+     25,
+     95
+    ],
+    "same": [
+     "\"none\"",
+     "\"scale-bar\""
+    ]
+   },
+   "en": {
+    "hash": "03b8333a906bfd85",
+    "ink": "39b6876f1cc76ce8",
+    "rect": [
+     1961,
+     25,
+     95
+    ],
+    "same": [
+     "\"none\"",
+     "\"scale-bar\""
+    ]
+   },
+   "fr": {
+    "hash": "66ff1820f4b391ff",
+    "ink": "39b6876f1cc76ce8",
+    "rect": [
+     1961,
+     25,
+     95
+    ],
+    "same": [
+     "\"none\"",
+     "\"scale-bar\""
+    ]
+   }
+  },
+  "image-positions-plan|detail-legend|\"none\"": {
+   "de": {
+    "hash": "67b7b4493abb05e1",
+    "ink": "39b6876f1cc76ce8",
+    "rect": [
+     1864,
+     25,
+     95
+    ],
+    "same": [
+     "\"length\"",
+     "\"scale-bar\""
+    ]
+   },
+   "en": {
+    "hash": "fe7625b834bb9d29",
+    "ink": "39b6876f1cc76ce8",
+    "rect": [
+     1864,
+     25,
+     95
+    ],
+    "same": [
+     "\"length\"",
+     "\"scale-bar\""
+    ]
+   },
+   "fr": {
+    "hash": "fbfaa30370664d4f",
+    "ink": "39b6876f1cc76ce8",
+    "rect": [
+     1864,
+     25,
+     95
+    ],
+    "same": [
+     "\"length\"",
+     "\"scale-bar\""
+    ]
+   }
+  },
+  "image-positions-plan|detail-legend|\"objects\"": {
+   "de": {
+    "hash": "45ce0c56bc808e53",
+    "ink": "b8755fc4d5eb990a",
+    "rect": [
+     2058,
+     473,
+     227
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "0473047c5a6d25ab",
+    "ink": "fe34cfebb0e8c707",
+    "rect": [
+     2058,
+     484,
+     227
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "9de2ef482561d50e",
+    "ink": "1c15784c10ded4e3",
+    "rect": [
+     2058,
+     610,
+     227
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "image-positions-plan|detail-legend|\"scale-bar\"": {
+   "de": {
+    "hash": "0de2ba8ce02eb28a",
+    "ink": "39b6876f1cc76ce8",
+    "rect": [
+     2287,
+     25,
+     95
+    ],
+    "same": [
+     "\"none\"",
+     "\"length\""
+    ]
+   },
+   "en": {
+    "hash": "73c55825daf94e14",
+    "ink": "39b6876f1cc76ce8",
+    "rect": [
+     2287,
+     25,
+     95
+    ],
+    "same": [
+     "\"none\"",
+     "\"length\""
+    ]
+   },
+   "fr": {
+    "hash": "a1f14bfcdc5c309c",
+    "ink": "39b6876f1cc76ce8",
+    "rect": [
+     2287,
+     25,
+     95
+    ],
+    "same": [
+     "\"none\"",
+     "\"length\""
+    ]
+   }
+  },
+  "image-positions-plan|detail-legend|auto": {
+   "de": {
+    "hash": "579b6b74cfd8ef54",
+    "ink": "b8755fc4d5eb990a",
+    "rect": [
+     1635,
+     473,
+     227
+    ],
+    "same": [
+     "\"objects\""
+    ]
+   },
+   "en": {
+    "hash": "b2e67e87e6ea08d2",
+    "ink": "fe34cfebb0e8c707",
+    "rect": [
+     1635,
+     484,
+     227
+    ],
+    "same": [
+     "\"objects\""
+    ]
+   },
+   "fr": {
+    "hash": "d6539b272ea475d8",
+    "ink": "1c15784c10ded4e3",
+    "rect": [
+     1635,
+     610,
+     227
+    ],
+    "same": [
+     "\"objects\""
+    ]
+   }
+  },
+  "image-positions-plan|frame|\"all\"": {
+   "de": {
+    "hash": "5c690a11162719a0",
+    "ink": "606de127d5c86eae",
+    "rect": [
+     0,
+     473,
+     214
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "bd5c46d36568b49d",
+    "ink": "72e176ac7df768f9",
+    "rect": [
+     0,
+     484,
+     214
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d1b68033cbe3ac5f",
+    "ink": "d8445100fe7b8ce5",
+    "rect": [
+     0,
+     610,
+     214
+    ],
+    "same": []
+   }
+  },
+  "image-positions-plan|frame|\"highlight\"": {
+   "de": {
+    "hash": "bf0de310e1fd4350",
+    "ink": "75d3a0b369e22280",
+    "rect": [
+     216,
+     249,
+     43
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "4087de26a88bd950",
+    "ink": "75d3a0b369e22280",
+    "rect": [
+     216,
+     249,
+     43
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "ad8a5ae9e26cbb17",
+    "ink": "75d3a0b369e22280",
+    "rect": [
+     216,
+     249,
+     43
+    ],
+    "same": []
+   }
+  },
+  "image-positions-plan|title|\"…\"": {
+   "de": {
+    "hash": "397fbb6dba1cfca8",
+    "ink": "52fa6038a9f4bced",
+    "rect": [
+     2828,
+     213,
+     213
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "8ee221679c09204b",
+    "ink": "52fa6038a9f4bced",
+    "rect": [
+     2828,
+     213,
+     213
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "9e39042823c73023",
+    "ink": "52fa6038a9f4bced",
+    "rect": [
+     2828,
+     213,
+     213
+    ],
+    "same": []
+   }
+  },
+  "image-positions-plan|title|auto": {
+   "de": {
+    "hash": "76011bc7d465225a",
+    "ink": "bd1eb06511e43ce2",
+    "rect": [
+     2613,
+     119,
+     213
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "6267e5340e96483f",
+    "ink": "bd1eb06511e43ce2",
+    "rect": [
+     2613,
+     119,
+     213
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "6f33ac8fbc46e8e4",
+    "ink": "bd1eb06511e43ce2",
+    "rect": [
+     2613,
+     119,
+     213
+    ],
+    "same": []
+   }
+  },
+  "image-positions-plan|title|none": {
+   "de": {
+    "hash": "27b65d7f69bc7317",
+    "ink": "b8755fc4d5eb990a",
+    "rect": [
+     2384,
+     473,
+     227
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9190f36b0b6c438d",
+    "ink": "fe34cfebb0e8c707",
+    "rect": [
+     2384,
+     484,
+     227
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "21f8e8601186c5ce",
+    "ink": "1c15784c10ded4e3",
+    "rect": [
+     2384,
+     610,
+     227
+    ],
+    "same": []
+   }
+  },
+  "image-schema|detail-figure|\"aids\"": {
+   "de": {
+    "hash": "38db5573febf4ba9",
+    "ink": "642bb45abd878db7",
+    "rect": [
+     361,
+     428,
+     359
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "c26f03df62e55ac1",
+    "ink": "642bb45abd878db7",
+    "rect": [
+     361,
+     428,
+     359
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "78c6027012128f20",
+    "ink": "642bb45abd878db7",
+    "rect": [
+     361,
+     428,
+     359
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "image-schema|detail-figure|()": {
+   "de": {
+    "hash": "d6aa9495bba188bc",
+    "ink": "e63ac075583b526b",
+    "rect": [
+     722,
+     428,
+     359
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "92b5099327fac3de",
+    "ink": "e63ac075583b526b",
+    "rect": [
+     722,
+     428,
+     359
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "75a8464addb23c8b",
+    "ink": "e63ac075583b526b",
+    "rect": [
+     722,
+     428,
+     359
+    ],
+    "same": []
+   }
+  },
+  "image-schema|detail-figure|auto": {
+   "de": {
+    "hash": "65ffc743d04180c3",
+    "ink": "642bb45abd878db7",
+    "rect": [
+     0,
+     428,
+     359
+    ],
+    "same": [
+     "\"aids\""
+    ]
+   },
+   "en": {
+    "hash": "cca6f2b4e0848673",
+    "ink": "642bb45abd878db7",
+    "rect": [
+     0,
+     428,
+     359
+    ],
+    "same": [
+     "\"aids\""
+    ]
+   },
+   "fr": {
+    "hash": "c7e43b853fba0a87",
+    "ink": "642bb45abd878db7",
+    "rect": [
+     0,
+     428,
+     359
+    ],
+    "same": [
+     "\"aids\""
+    ]
+   }
+  },
+  "image-section|plan|\"id\"": {
+   "de": {
+    "hash": "68bb4ada9f132a26",
+    "ink": "a78999ac6798af55",
+    "rect": [
+     0,
+     281,
+     429
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "4cb00994abdb4d00",
+    "ink": "a364319f331fa1a4",
+    "rect": [
+     0,
+     281,
+     429
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "a9a57ea8cc97ce49",
+    "ink": "bdde21f40329dc77",
+    "rect": [
+     0,
+     281,
+     429
+    ],
+    "same": []
+   }
+  },
+  "image-section|plan|none": {
+   "de": {
+    "hash": "b462057fa1c71eec",
+    "ink": "73269855ee6a11c1",
+    "rect": [
+     431,
+     329,
+     303
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "188a8117c3cbd30c",
+    "ink": "17f049c3c2702575",
+    "rect": [
+     431,
+     329,
+     303
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "a4f72ce33e0023fa",
+    "ink": "c6719acde89d299c",
+    "rect": [
+     431,
+     329,
+     303
+    ],
+    "same": []
+   }
+  },
+  "image-section|title|[…]": {
+   "de": {
+    "hash": "5ed958d7d2dcc1b3",
+    "ink": "64725c0b9b484888",
+    "rect": [
+     1222,
+     281,
+     429
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "985fc973e9f568bb",
+    "ink": "64725c0b9b484888",
+    "rect": [
+     1222,
+     281,
+     429
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c78a08342f0c4d73",
+    "ink": "64725c0b9b484888",
+    "rect": [
+     1222,
+     281,
+     429
+    ],
+    "same": []
+   }
+  },
+  "image-section|title|auto": {
+   "de": {
+    "hash": "e0c0b51ea21445bf",
+    "ink": "a78999ac6798af55",
+    "rect": [
+     736,
+     281,
+     429
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9bc0d76618efad67",
+    "ink": "a364319f331fa1a4",
+    "rect": [
+     736,
+     281,
+     429
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "cdf7eb6efd250fe5",
+    "ink": "bdde21f40329dc77",
+    "rect": [
+     736,
+     281,
+     429
+    ],
+    "same": []
+   }
+  },
+  "image-section|title|none": {
+   "de": {
+    "hash": "16014df8829cbcb8",
+    "ink": "daf7c300ec0b2dc8",
+    "rect": [
+     1167,
+     211,
+     53
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ae4cca3e458ae285",
+    "ink": "daf7c300ec0b2dc8",
+    "rect": [
+     1167,
+     211,
+     53
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "27a95f162416dcab",
+    "ink": "daf7c300ec0b2dc8",
+    "rect": [
+     1167,
+     211,
+     53
+    ],
+    "same": []
+   }
+  },
+  "image-static-model|detail-figure|\"dimensions\"": {
+   "de": {
+    "hash": "6e91ca2e18c0c328",
+    "ink": "96432616ab048ffc",
+    "rect": [
+     517,
+     346,
+     226
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ed2c736567a87446",
+    "ink": "96432616ab048ffc",
+    "rect": [
+     517,
+     346,
+     226
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "42289c9e7f313d48",
+    "ink": "96432616ab048ffc",
+    "rect": [
+     517,
+     346,
+     226
+    ],
+    "same": []
+   }
+  },
+  "image-static-model|detail-figure|\"loads\"": {
+   "de": {
+    "hash": "e423bb6104a2fbc5",
+    "ink": "a1cdffed7e75320e",
+    "rect": [
+     324,
+     371,
+     191
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "caf174da90392b1f",
+    "ink": "a1cdffed7e75320e",
+    "rect": [
+     324,
+     371,
+     191
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "de8b60829b5079e4",
+    "ink": "a1cdffed7e75320e",
+    "rect": [
+     324,
+     371,
+     191
+    ],
+    "same": []
+   }
+  },
+  "image-static-model|detail-figure|()": {
+   "de": {
+    "hash": "e940f518fd7ef0c5",
+    "ink": "855f27ca7f84b22b",
+    "rect": [
+     745,
+     346,
+     95
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "8eb4510d46c2f1ae",
+    "ink": "855f27ca7f84b22b",
+    "rect": [
+     745,
+     346,
+     95
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "03823861e10dd6ac",
+    "ink": "855f27ca7f84b22b",
+    "rect": [
+     745,
+     346,
+     95
+    ],
+    "same": []
+   }
+  },
+  "image-static-model|detail-figure|auto": {
+   "de": {
+    "hash": "966b1efd6b0d3a37",
+    "ink": "89348749c3db4f57",
+    "rect": [
+     0,
+     371,
+     322
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5f41a80285dc19cb",
+    "ink": "89348749c3db4f57",
+    "rect": [
+     0,
+     371,
+     322
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c0384dd9ea3e8efa",
+    "ink": "89348749c3db4f57",
+    "rect": [
+     0,
+     371,
+     322
+    ],
+    "same": []
+   }
+  },
+  "image-titleblock|logo|[…]": {
+   "de": {
+    "hash": "1580d8d80d11c20c",
+    "ink": "5e2056449af329bd",
+    "rect": [
+     574,
+     750,
+     285
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ca94f44506ba73f3",
+    "ink": "d2f78c08bb1483e8",
+    "rect": [
+     574,
+     750,
+     285
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "476e44094d14c390",
+    "ink": "9bdb1fc627884cdf",
+    "rect": [
+     574,
+     750,
+     285
+    ],
+    "same": []
+   }
+  },
+  "image-titleblock|logo|auto": {
+   "de": {
+    "hash": "1ca4644a97854eef",
+    "ink": "0b49f724d3d2a642",
+    "rect": [
+     0,
+     750,
+     285
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "87cc87e7a4ac3a95",
+    "ink": "6c9ac7fe3fde1b37",
+    "rect": [
+     0,
+     750,
+     285
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "81048e4bb8d5ced9",
+    "ink": "70f6f78463a7649c",
+    "rect": [
+     0,
+     750,
+     285
+    ],
+    "same": []
+   }
+  },
+  "image-titleblock|logo|none": {
+   "de": {
+    "hash": "a41e45d85e1acb8c",
+    "ink": "e6b74bdca29c2829",
+    "rect": [
+     287,
+     750,
+     285
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "a0d90b894480a768",
+    "ink": "18732569a3afbf09",
+    "rect": [
+     287,
+     750,
+     285
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "435add0631e967e1",
+    "ink": "0332ba78e01a083a",
+    "rect": [
+     287,
+     750,
+     285
+    ],
+    "same": []
+   }
+  },
+  "journal-entries|document|\"bp\"": {
+   "de": {
+    "hash": "f16908197a555c02",
+    "ink": "57dbfe53c3e9b7a2",
+    "rect": [
+     74,
+     25,
+     35
+    ],
+    "same": [
+     "\"cu\""
+    ]
+   },
+   "en": {
+    "hash": "5366803e4d0dff64",
+    "ink": "57dbfe53c3e9b7a2",
+    "rect": [
+     74,
+     25,
+     35
+    ],
+    "same": [
+     "\"cu\""
+    ]
+   },
+   "fr": {
+    "hash": "4d766d81cf4518f5",
+    "ink": "57dbfe53c3e9b7a2",
+    "rect": [
+     74,
+     25,
+     35
+    ],
+    "same": [
+     "\"cu\""
+    ]
+   }
+  },
+  "journal-entries|document|\"cu\"": {
+   "de": {
+    "hash": "c37fb375e3c7f2c3",
+    "ink": "57dbfe53c3e9b7a2",
+    "rect": [
+     37,
+     25,
+     35
+    ],
+    "same": [
+     "\"bp\""
+    ]
+   },
+   "en": {
+    "hash": "144b3f29ff81038c",
+    "ink": "57dbfe53c3e9b7a2",
+    "rect": [
+     37,
+     25,
+     35
+    ],
+    "same": [
+     "\"bp\""
+    ]
+   },
+   "fr": {
+    "hash": "c6d50b4b5372e398",
+    "ink": "57dbfe53c3e9b7a2",
+    "rect": [
+     37,
+     25,
+     35
+    ],
+    "same": [
+     "\"bp\""
+    ]
+   }
+  },
+  "journal-entries|document|\"rs\"": {
+   "de": {
+    "hash": "eff6f6af39ceccb2",
+    "ink": "85b85871532bb096",
+    "rect": [
+     0,
+     82,
+     35
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "6b5c4a946e75ef22",
+    "ink": "85b85871532bb096",
+    "rect": [
+     0,
+     82,
+     35
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "1cf7603ea04bbaf1",
+    "ink": "85b85871532bb096",
+    "rect": [
+     0,
+     82,
+     35
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "journal-entries|document|auto": {
+   "de": {
+    "hash": "fe675abb1a69e296",
+    "ink": "85b85871532bb096",
+    "rect": [
+     111,
+     82,
+     35
+    ],
+    "same": [
+     "\"rs\""
+    ]
+   },
+   "en": {
+    "hash": "3e0d583c91493707",
+    "ink": "85b85871532bb096",
+    "rect": [
+     111,
+     82,
+     35
+    ],
+    "same": [
+     "\"rs\""
+    ]
+   },
+   "fr": {
+    "hash": "c29105f9b5edfe84",
+    "ink": "85b85871532bb096",
+    "rect": [
+     111,
+     82,
+     35
+    ],
+    "same": [
+     "\"rs\""
+    ]
+   }
+  },
+  "position|category-show|\"descr\"": {
+   "de": {
+    "hash": "df37fcc3cad35b8f",
+    "ink": "14c0559b93938064",
+    "rect": [
+     396,
+     122,
+     37
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "3715306e0b81e21a",
+    "ink": "14c0559b93938064",
+    "rect": [
+     392,
+     122,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b77a1705af580291",
+    "ink": "14c0559b93938064",
+    "rect": [
+     392,
+     122,
+     37
+    ],
+    "same": []
+   }
+  },
+  "position|category-show|\"dimension\"": {
+   "de": {
+    "hash": "d7c7bed6de9a116d",
+    "ink": "ed919902cfd7131c",
+    "rect": [
+     201,
+     165,
+     37
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "4518f0e0ee1ef6fd",
+    "ink": "ed919902cfd7131c",
+    "rect": [
+     197,
+     165,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "cb6f3b5d947a3a8b",
+    "ink": "ed919902cfd7131c",
+    "rect": [
+     197,
+     165,
+     37
+    ],
+    "same": []
+   }
+  },
+  "position|category-show|\"label\"": {
+   "de": {
+    "hash": "73510ba93eeda4db",
+    "ink": "7ff73fa291d382f3",
+    "rect": [
+     357,
+     79,
+     37
+    ],
+    "same": [
+     "\"length\""
+    ]
+   },
+   "en": {
+    "hash": "c719c18913436643",
+    "ink": "7ff73fa291d382f3",
+    "rect": [
+     353,
+     79,
+     37
+    ],
+    "same": [
+     "\"length\""
+    ]
+   },
+   "fr": {
+    "hash": "7d1751620ee31e3e",
+    "ink": "7ff73fa291d382f3",
+    "rect": [
+     353,
+     79,
+     37
+    ],
+    "same": [
+     "\"length\""
+    ]
+   }
+  },
+  "position|category-show|\"length\"": {
+   "de": {
+    "hash": "59951c0274a3d2f7",
+    "ink": "7ff73fa291d382f3",
+    "rect": [
+     318,
+     79,
+     37
+    ],
+    "same": [
+     "\"label\""
+    ]
+   },
+   "en": {
+    "hash": "4943261395186dfe",
+    "ink": "7ff73fa291d382f3",
+    "rect": [
+     314,
+     79,
+     37
+    ],
+    "same": [
+     "\"label\""
+    ]
+   },
+   "fr": {
+    "hash": "071d69510f4f526c",
+    "ink": "7ff73fa291d382f3",
+    "rect": [
+     314,
+     79,
+     37
+    ],
+    "same": [
+     "\"label\""
+    ]
+   }
+  },
+  "position|category-show|\"material\"": {
+   "de": {
+    "hash": "185e4210f1041a9f",
+    "ink": "7e387110d7f3a6ca",
+    "rect": [
+     82,
+     150,
+     37
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "1275b2a0971d5a1a",
+    "ink": "7e387110d7f3a6ca",
+    "rect": [
+     78,
+     150,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "47be944c08c642f6",
+    "ink": "7e387110d7f3a6ca",
+    "rect": [
+     78,
+     150,
+     37
+    ],
+    "same": []
+   }
+  },
+  "position|category-show|\"moisture-class\"": {
+   "de": {
+    "hash": "2c20c8eca9f2057f",
+    "ink": "315765147686558d",
+    "rect": [
+     279,
+     245,
+     37
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ecf6174d40a7d75b",
+    "ink": "270fa923c6300b7f",
+    "rect": [
+     275,
+     249,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "560d6614d2e7ca8e",
+    "ink": "31b27a639cd11cc2",
+    "rect": [
+     275,
+     285,
+     37
+    ],
+    "same": []
+   }
+  },
+  "position|category-show|\"section-type\"": {
+   "de": {
+    "hash": "0f8fccbfa2707622",
+    "ink": "818d7ee5bbba73de",
+    "rect": [
+     160,
+     295,
+     39
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "a59b9b635048bcee",
+    "ink": "db266fa2f49a65df",
+    "rect": [
+     156,
+     287,
+     39
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c5b8e4c5eb2ee5ab",
+    "ink": "4a6c87db0c9a7daa",
+    "rect": [
+     156,
+     301,
+     39
+    ],
+    "same": []
+   }
+  },
+  "position|category-show|\"strength-class\"": {
+   "de": {
+    "hash": "b3eb368eabecb004",
+    "ink": "b2d5a2a384416133",
+    "rect": [
+     121,
+     128,
+     37
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "2fe5248b9d572efa",
+    "ink": "b2d5a2a384416133",
+    "rect": [
+     117,
+     128,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "41fbbd377ef41e37",
+    "ink": "b2d5a2a384416133",
+    "rect": [
+     117,
+     128,
+     37
+    ],
+    "same": []
+   }
+  },
+  "position|category-show|\"type\"": {
+   "de": {
+    "hash": "4f38f1ed9e8dadab",
+    "ink": "b0536301fccf8bb5",
+    "rect": [
+     41,
+     157,
+     39
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5aaedf2d10a8df1c",
+    "ink": "e3ca31cac83d418b",
+    "rect": [
+     39,
+     146,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "44e0302f0e049733",
+    "ink": "d7c95cec5f3ea7ec",
+    "rect": [
+     39,
+     155,
+     37
+    ],
+    "same": []
+   }
+  },
+  "position|category-show|\"units\"": {
+   "de": {
+    "hash": "24254d4685b182ec",
+    "ink": "60aa25c0d49cf098",
+    "rect": [
+     240,
+     129,
+     37
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5e156ae0f7271cbe",
+    "ink": "60aa25c0d49cf098",
+    "rect": [
+     236,
+     129,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "3f532e32d8c8c994",
+    "ink": "60aa25c0d49cf098",
+    "rect": [
+     236,
+     129,
+     37
+    ],
+    "same": []
+   }
+  },
+  "position|category-show|(\"type\", \"material\", \"strength-class\")": {
+   "de": {
+    "hash": "25e6f8957157cc75",
+    "ink": "f481e18be3e7c407",
+    "rect": [
+     0,
+     277,
+     39
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "335a353aa3ee6146",
+    "ink": "9986efbc7e8be237",
+    "rect": [
+     0,
+     268,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "4b01e8396d13016d",
+    "ink": "f1523146b62c74ac",
+    "rect": [
+     0,
+     278,
+     37
+    ],
+    "same": []
+   }
+  },
+  "set-report-language|lang|\"de\"": {
+   "de": {
+    "hash": "19dea324dc1451b2",
+    "ink": "d7c0edd733ecdf67",
+    "rect": [
+     0,
+     715,
+     83
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9c62b51ae645ab5b",
+    "ink": "d7c0edd733ecdf67",
+    "rect": [
+     0,
+     715,
+     83
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d9ffb952ca08e7aa",
+    "ink": "d7c0edd733ecdf67",
+    "rect": [
+     0,
+     715,
+     83
+    ],
+    "same": []
+   }
+  },
+  "set-report-language|lang|\"en\"": {
+   "de": {
+    "hash": "d5075380fca78450",
+    "ink": "5e47431c225253d8",
+    "rect": [
+     172,
+     659,
+     85
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "18df594fe5ce8657",
+    "ink": "5e47431c225253d8",
+    "rect": [
+     172,
+     659,
+     85
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "6a952fef42fcfa2b",
+    "ink": "5e47431c225253d8",
+    "rect": [
+     172,
+     659,
+     85
+    ],
+    "same": []
+   }
+  },
+  "set-report-language|lang|\"fr\"": {
+   "de": {
+    "hash": "7e9a2d6fcd3f748a",
+    "ink": "4e53853edfb7c81f",
+    "rect": [
+     85,
+     741,
+     85
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9e018a37599989c6",
+    "ink": "4e53853edfb7c81f",
+    "rect": [
+     85,
+     741,
+     85
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "e0d922ad2f5b65e0",
+    "ink": "4e53853edfb7c81f",
+    "rect": [
+     85,
+     741,
+     85
+    ],
+    "same": []
+   }
+  },
+  "show-bibliography|blocks|(\"norm\",)": {
+   "de": {
+    "hash": "2be59883e8d81b3d",
+    "ink": "092689697e305536",
+    "rect": [
+     848,
+     732,
+     243
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "243ea8d11e6e6639",
+    "ink": "d939ceefbe336faf",
+    "rect": [
+     848,
+     746,
+     243
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "2a8079495178987f",
+    "ink": "2acc8d72fc5f7584",
+    "rect": [
+     848,
+     741,
+     243
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "show-bibliography|blocks|auto": {
+   "de": {
+    "hash": "fcd45bf7f67c03e7",
+    "ink": "092689697e305536",
+    "rect": [
+     603,
+     732,
+     243
+    ],
+    "same": [
+     "(\"norm\",)"
+    ]
+   },
+   "en": {
+    "hash": "081c863f8e806f60",
+    "ink": "d939ceefbe336faf",
+    "rect": [
+     603,
+     746,
+     243
+    ],
+    "same": [
+     "(\"norm\",)"
+    ]
+   },
+   "fr": {
+    "hash": "a890f35606699586",
+    "ink": "2acc8d72fc5f7584",
+    "rect": [
+     603,
+     741,
+     243
+    ],
+    "same": [
+     "(\"norm\",)"
+    ]
+   }
+  },
+  "show-bibliography|data|false": {
+   "de": {
+    "hash": "f06b1a4b530f6956",
+    "ink": "092689697e305536",
+    "rect": [
+     358,
+     732,
+     243
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "b055439cffc23aac",
+    "ink": "d939ceefbe336faf",
+    "rect": [
+     358,
+     746,
+     243
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "2a00610811700f94",
+    "ink": "2acc8d72fc5f7584",
+    "rect": [
+     358,
+     741,
+     243
+    ],
+    "same": []
+   }
+  },
+  "show-bibliography|data|true": {
+   "de": {
+    "hash": "2cf9f9007dec767c",
+    "ink": "63f038edc20a5870",
+    "rect": [
+     0,
+     741,
+     356
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "e226eb8b20771f82",
+    "ink": "ed37cc104efa447f",
+    "rect": [
+     0,
+     746,
+     356
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b6909d75428ba0c0",
+    "ink": "631a7b44bc781253",
+    "rect": [
+     0,
+     741,
+     356
+    ],
+    "same": []
+   }
+  },
+  "show-bibliography|heading|2": {
+   "de": {
+    "hash": "58710917da8671d5",
+    "ink": "05c6148ae48dd536",
+    "rect": [
+     1338,
+     732,
+     255
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "cf9e1cb672a27a0a",
+    "ink": "aa695a265ce0e80d",
+    "rect": [
+     1338,
+     746,
+     255
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c06a690d65746f3b",
+    "ink": "3faac2e4daab4ed6",
+    "rect": [
+     1338,
+     740,
+     255
+    ],
+    "same": []
+   }
+  },
+  "show-bibliography|heading|none": {
+   "de": {
+    "hash": "95151a834f78a667",
+    "ink": "092689697e305536",
+    "rect": [
+     1093,
+     732,
+     243
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "50a8d1a910340817",
+    "ink": "d939ceefbe336faf",
+    "rect": [
+     1093,
+     746,
+     243
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "9febe3550455ae75",
+    "ink": "2acc8d72fc5f7584",
+    "rect": [
+     1093,
+     741,
+     243
+    ],
+    "same": []
+   }
+  },
+  "show-bibliography|level|1": {
+   "de": {
+    "hash": "f7441225eddb5cb4",
+    "ink": "2d2acc5a64d41600",
+    "rect": [
+     1840,
+     731,
+     195
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f28911c12b75d11f",
+    "ink": "96275281a12bc5fc",
+    "rect": [
+     1840,
+     746,
+     195
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b9b81fb7f9880598",
+    "ink": "2430d4827d65add0",
+    "rect": [
+     1840,
+     740,
+     195
+    ],
+    "same": []
+   }
+  },
+  "show-bibliography|level|2": {
+   "de": {
+    "hash": "d6497a1d87f18622",
+    "ink": "092689697e305536",
+    "rect": [
+     2037,
+     732,
+     243
+    ],
+    "same": [
+     "auto",
+     "3"
+    ]
+   },
+   "en": {
+    "hash": "8419db77f69e925d",
+    "ink": "d939ceefbe336faf",
+    "rect": [
+     2037,
+     746,
+     243
+    ],
+    "same": [
+     "auto",
+     "3"
+    ]
+   },
+   "fr": {
+    "hash": "ce680f4d21fc5541",
+    "ink": "2acc8d72fc5f7584",
+    "rect": [
+     2037,
+     741,
+     243
+    ],
+    "same": [
+     "auto",
+     "3"
+    ]
+   }
+  },
+  "show-bibliography|level|3": {
+   "de": {
+    "hash": "5de3c02a3d4a7365",
+    "ink": "092689697e305536",
+    "rect": [
+     2282,
+     732,
+     243
+    ],
+    "same": [
+     "auto",
+     "2"
+    ]
+   },
+   "en": {
+    "hash": "9948a1e244e8561f",
+    "ink": "d939ceefbe336faf",
+    "rect": [
+     2282,
+     746,
+     243
+    ],
+    "same": [
+     "auto",
+     "2"
+    ]
+   },
+   "fr": {
+    "hash": "bbcb1d06d9765ef3",
+    "ink": "2acc8d72fc5f7584",
+    "rect": [
+     2282,
+     741,
+     243
+    ],
+    "same": [
+     "auto",
+     "2"
+    ]
+   }
+  },
+  "show-bibliography|level|auto": {
+   "de": {
+    "hash": "3b5d4a6b2e1470fc",
+    "ink": "092689697e305536",
+    "rect": [
+     1595,
+     732,
+     243
+    ],
+    "same": [
+     "2",
+     "3"
+    ]
+   },
+   "en": {
+    "hash": "85dc181d1d1ae4f8",
+    "ink": "d939ceefbe336faf",
+    "rect": [
+     1595,
+     746,
+     243
+    ],
+    "same": [
+     "2",
+     "3"
+    ]
+   },
+   "fr": {
+    "hash": "0cd9c39441f364b8",
+    "ink": "2acc8d72fc5f7584",
+    "rect": [
+     1595,
+     741,
+     243
+    ],
+    "same": [
+     "2",
+     "3"
+    ]
+   }
+  },
+  "show-norm-list|level|1": {
+   "de": {
+    "hash": "2e81d387da41bfc4",
+    "ink": "6ff5278a329f147e",
+    "rect": [
+     124,
+     87,
+     57
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ea6d1c4602bdd2f8",
+    "ink": "6ff5278a329f147e",
+    "rect": [
+     124,
+     87,
+     57
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "44e621f6568acee3",
+    "ink": "6ff5278a329f147e",
+    "rect": [
+     124,
+     87,
+     57
+    ],
+    "same": []
+   }
+  },
+  "show-norm-list|level|2": {
+   "de": {
+    "hash": "2f6e62d69ff982db",
+    "ink": "cb1163974fd8efc5",
+    "rect": [
+     183,
+     746,
+     122
+    ],
+    "same": [
+     "auto",
+     "3"
+    ]
+   },
+   "en": {
+    "hash": "b6546f7cb0c877cb",
+    "ink": "dbff81d84222492a",
+    "rect": [
+     183,
+     746,
+     122
+    ],
+    "same": [
+     "auto",
+     "3"
+    ]
+   },
+   "fr": {
+    "hash": "f78573fd1259c8f3",
+    "ink": "e898db12c55e209f",
+    "rect": [
+     183,
+     741,
+     122
+    ],
+    "same": [
+     "auto",
+     "3"
+    ]
+   }
+  },
+  "show-norm-list|level|3": {
+   "de": {
+    "hash": "7ccc269cc6380136",
+    "ink": "cb1163974fd8efc5",
+    "rect": [
+     307,
+     746,
+     122
+    ],
+    "same": [
+     "auto",
+     "2"
+    ]
+   },
+   "en": {
+    "hash": "a7b0b6aa277601bc",
+    "ink": "dbff81d84222492a",
+    "rect": [
+     307,
+     746,
+     122
+    ],
+    "same": [
+     "auto",
+     "2"
+    ]
+   },
+   "fr": {
+    "hash": "1c7ec0fea1dbdfb6",
+    "ink": "e898db12c55e209f",
+    "rect": [
+     307,
+     741,
+     122
+    ],
+    "same": [
+     "auto",
+     "2"
+    ]
+   }
+  },
+  "show-norm-list|level|auto": {
+   "de": {
+    "hash": "5c6a1c7b3e8027fa",
+    "ink": "cb1163974fd8efc5",
+    "rect": [
+     0,
+     746,
+     122
+    ],
+    "same": [
+     "2",
+     "3"
+    ]
+   },
+   "en": {
+    "hash": "ae19a4af7c85bb5b",
+    "ink": "dbff81d84222492a",
+    "rect": [
+     0,
+     746,
+     122
+    ],
+    "same": [
+     "2",
+     "3"
+    ]
+   },
+   "fr": {
+    "hash": "62eb344636411322",
+    "ink": "e898db12c55e209f",
+    "rect": [
+     0,
+     741,
+     122
+    ],
+    "same": [
+     "2",
+     "3"
+    ]
+   }
+  },
+  "t-of|lang|\"de\"": {
+   "de": {
+    "hash": "416bbba20c74e049",
+    "ink": "5cdad228b08a5f6a",
+    "rect": [
+     0,
+     135,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "177108e7400eecee",
+    "ink": "5cdad228b08a5f6a",
+    "rect": [
+     0,
+     135,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "a346a590a5da5739",
+    "ink": "5cdad228b08a5f6a",
+    "rect": [
+     0,
+     135,
+     36
+    ],
+    "same": []
+   }
+  },
+  "t-of|lang|\"en\"": {
+   "de": {
+    "hash": "6cab20bfeecd5e2f",
+    "ink": "c7e2709dd7d35f8a",
+    "rect": [
+     69,
+     118,
+     35
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f4d9f1eed80ec1d7",
+    "ink": "c7e2709dd7d35f8a",
+    "rect": [
+     69,
+     118,
+     35
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "7ccb5f55001ada22",
+    "ink": "c7e2709dd7d35f8a",
+    "rect": [
+     69,
+     118,
+     35
+    ],
+    "same": []
+   }
+  },
+  "t-of|lang|\"fr\"": {
+   "de": {
+    "hash": "7fcdb2a028ab8dc7",
+    "ink": "d2fd2853ab700e57",
+    "rect": [
+     38,
+     139,
+     29
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "fe1dc94444c24308",
+    "ink": "d2fd2853ab700e57",
+    "rect": [
+     38,
+     139,
+     29
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "0a09081501ef5eb8",
+    "ink": "d2fd2853ab700e57",
+    "rect": [
+     38,
+     139,
+     29
+    ],
+    "same": []
+   }
+  },
+  "tl-of|lang|\"de\"": {
+   "de": {
+    "hash": "b4204a1f630244e1",
+    "ink": "36abe6bfa0e5b8b5",
+    "rect": [
+     0,
+     132,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "10cac43ec18c2ae6",
+    "ink": "36abe6bfa0e5b8b5",
+    "rect": [
+     0,
+     132,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "a6225cec495c5c9d",
+    "ink": "36abe6bfa0e5b8b5",
+    "rect": [
+     0,
+     132,
+     36
+    ],
+    "same": []
+   }
+  },
+  "tl-of|lang|\"en\"": {
+   "de": {
+    "hash": "143026c80b664e1c",
+    "ink": "46f7b59a65448140",
+    "rect": [
+     70,
+     192,
+     30
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "263715c6bcd1fc90",
+    "ink": "46f7b59a65448140",
+    "rect": [
+     70,
+     192,
+     30
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c4e5134ea54c1e96",
+    "ink": "46f7b59a65448140",
+    "rect": [
+     70,
+     192,
+     30
+    ],
+    "same": []
+   }
+  },
+  "tl-of|lang|\"fr\"": {
+   "de": {
+    "hash": "34d7a91c60b68a62",
+    "ink": "27a71238f5d7383e",
+    "rect": [
+     38,
+     222,
+     30
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ddf3115b5459c781",
+    "ink": "27a71238f5d7383e",
+    "rect": [
+     38,
+     222,
+     30
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "ffc6de94e2b0aafb",
+    "ink": "27a71238f5d7383e",
+    "rect": [
+     38,
+     222,
+     30
+    ],
+    "same": []
+   }
+  },
+  "unit|scope|\"document\"": {
+   "de": {
+    "hash": "aee76895a8986c99",
+    "ink": "3d3e7c4fe82a64e9",
+    "rect": [
+     408,
+     278,
+     202
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "e8ec8201fa24103a",
+    "ink": "3d3e7c4fe82a64e9",
+    "rect": [
+     408,
+     278,
+     202
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "7ea7461c6b0299cc",
+    "ink": "3d3e7c4fe82a64e9",
+    "rect": [
+     408,
+     278,
+     202
+    ],
+    "same": []
+   }
+  },
+  "unit|scope|\"domain\"": {
+   "de": {
+    "hash": "7cdb8b3d79f02423",
+    "ink": "ee2b274173d71cd1",
+    "rect": [
+     204,
+     268,
+     202
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "93ffbc98ca4012b7",
+    "ink": "ee2b274173d71cd1",
+    "rect": [
+     204,
+     268,
+     202
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "cce5332ca41ed755",
+    "ink": "ee2b274173d71cd1",
+    "rect": [
+     204,
+     268,
+     202
+    ],
+    "same": []
+   }
+  },
+  "unit|scope|\"next\"": {
+   "de": {
+    "hash": "7f83003085b152d3",
+    "ink": "f5f798451c15b54b",
+    "rect": [
+     0,
+     268,
+     202
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f36d7381abe89980",
+    "ink": "f5f798451c15b54b",
+    "rect": [
+     0,
+     268,
+     202
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "43549838387d0866",
+    "ink": "f5f798451c15b54b",
+    "rect": [
+     0,
+     268,
+     202
+    ],
+    "same": []
+   }
+  },
+  "var-table|columns|\"descr\"": {
+   "de": {
+    "hash": "c83e6e0d4d181185",
+    "ink": "7e1361aae1e846c3",
+    "rect": [
+     2097,
+     394,
+     131
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "2c59514063011cb9",
+    "ink": "823e10e260e4c636",
+    "rect": [
+     2097,
+     372,
+     131
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "ff8f49de98c83aca",
+    "ink": "49e02a001e30560b",
+    "rect": [
+     2097,
+     470,
+     131
+    ],
+    "same": []
+   }
+  },
+  "var-table|columns|\"label\"": {
+   "de": {
+    "hash": "bb7ac257e0f865bc",
+    "ink": "ce3221710a35da6c",
+    "rect": [
+     1964,
+     386,
+     131
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "8c7f6b01224bb85f",
+    "ink": "429699ed4f409c3a",
+    "rect": [
+     1964,
+     377,
+     131
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "11b02629e7c5bc89",
+    "ink": "b6bda572e67a2965",
+    "rect": [
+     1964,
+     389,
+     131
+    ],
+    "same": []
+   }
+  },
+  "var-table|columns|\"norm\"": {
+   "de": {
+    "hash": "415616761c2db601",
+    "ink": "8b8550bf3e0b9650",
+    "rect": [
+     2627,
+     371,
+     131
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "0ded9dd89750a28a",
+    "ink": "1e2573d08a59beb6",
+    "rect": [
+     2627,
+     371,
+     131
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "908051beefea885f",
+    "ink": "ff74be66e4e21e77",
+    "rect": [
+     2627,
+     383,
+     131
+    ],
+    "same": []
+   }
+  },
+  "var-table|columns|\"norm-section\"": {
+   "de": {
+    "hash": "d3a222e63a033ea3",
+    "ink": "87493b2a1b915ba3",
+    "rect": [
+     2760,
+     306,
+     131
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "a6e2f6b97e8d687f",
+    "ink": "ada0472395054203",
+    "rect": [
+     2760,
+     318,
+     131
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "bff346c33711d9e1",
+    "ink": "7785a4a165e6e454",
+    "rect": [
+     2760,
+     331,
+     131
+    ],
+    "same": []
+   }
+  },
+  "var-table|columns|\"symbol\"": {
+   "de": {
+    "hash": "8060e80725b5420b",
+    "ink": "2eeecf16dd61c791",
+    "rect": [
+     2230,
+     285,
+     131
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "c48df9b25f2138ac",
+    "ink": "e6b7c0016f054795",
+    "rect": [
+     2230,
+     276,
+     131
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "1fa9628431ef0878",
+    "ink": "99494c6e1ea47a4c",
+    "rect": [
+     2230,
+     288,
+     131
+    ],
+    "same": []
+   }
+  },
+  "var-table|columns|\"unit\"": {
+   "de": {
+    "hash": "fab0d94b7d928b7f",
+    "ink": "3e762e54a15644f4",
+    "rect": [
+     2494,
+     300,
+     131
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5adf5d65276be87a",
+    "ink": "93d06ca99c1d1028",
+    "rect": [
+     2494,
+     277,
+     131
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b263dd52eae4ca15",
+    "ink": "f3b816168a8df45f",
+    "rect": [
+     2494,
+     311,
+     131
+    ],
+    "same": []
+   }
+  },
+  "var-table|columns|\"value\"": {
+   "de": {
+    "hash": "2466d53ba9521194",
+    "ink": "c78c5ea9abf793f8",
+    "rect": [
+     2363,
+     281,
+     129
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "416b3a2c696b17ca",
+    "ink": "d610cf9c7dec1a19",
+    "rect": [
+     2363,
+     272,
+     129
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "66c34beb6914c2e8",
+    "ink": "b3d26a02a9ab86d7",
+    "rect": [
+     2363,
+     272,
+     129
+    ],
+    "same": []
+   }
+  },
+  "var-table|domain|\"all\"": {
+   "de": {
+    "hash": "ee5226106c4a78b6",
+    "ink": "c58455d28dcf5590",
+    "rect": [
+     1162,
+     545,
+     208
+    ],
+    "same": [
+     "\"id\""
+    ]
+   },
+   "en": {
+    "hash": "c3c007e77113ae36",
+    "ink": "1fd5674aa6b2084a",
+    "rect": [
+     1162,
+     536,
+     208
+    ],
+    "same": [
+     "\"id\""
+    ]
+   },
+   "fr": {
+    "hash": "2edfef138e17e8b4",
+    "ink": "8b2c7775dd3ddeb4",
+    "rect": [
+     1162,
+     560,
+     208
+    ],
+    "same": [
+     "\"id\""
+    ]
+   }
+  },
+  "var-table|domain|\"id\"": {
+   "de": {
+    "hash": "62a89f33cc549742",
+    "ink": "c58455d28dcf5590",
+    "rect": [
+     703,
+     545,
+     208
+    ],
+    "same": [
+     "\"all\""
+    ]
+   },
+   "en": {
+    "hash": "3d9d1eca8a34f39f",
+    "ink": "1fd5674aa6b2084a",
+    "rect": [
+     703,
+     536,
+     208
+    ],
+    "same": [
+     "\"all\""
+    ]
+   },
+   "fr": {
+    "hash": "518f8fb9b4b1f02e",
+    "ink": "8b2c7775dd3ddeb4",
+    "rect": [
+     703,
+     560,
+     208
+    ],
+    "same": [
+     "\"all\""
+    ]
+   }
+  },
+  "var-table|domain|(\"a\", \"b\")": {
+   "de": {
+    "hash": "0e802b0768d7615a",
+    "ink": "371a18689236bdf2",
+    "rect": [
+     913,
+     545,
+     247
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "6ce7c426f2c38c19",
+    "ink": "554d0c09f2f48fcf",
+    "rect": [
+     913,
+     536,
+     247
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "e30fbd3288bb932d",
+    "ink": "2b75f0b91ae5a242",
+    "rect": [
+     913,
+     560,
+     247
+    ],
+    "same": []
+   }
+  },
+  "var-table|domain|auto": {
+   "de": {
+    "hash": "763252ea72d5bc87",
+    "ink": "5f6e8eec228b788f",
+    "rect": [
+     531,
+     472,
+     170
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "47ef1d092c05f0ee",
+    "ink": "479773c5595e1063",
+    "rect": [
+     531,
+     463,
+     170
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "2662827247fccceb",
+    "ink": "1196d2db3dc4e124",
+    "rect": [
+     531,
+     487,
+     170
+    ],
+    "same": []
+   }
+  },
+  "var-table|role|\"compute\"": {
+   "de": {
+    "hash": "bd630fa3d03480b6",
+    "ink": "29c5791897327a2b",
+    "rect": [
+     343,
+     545,
+     92
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f9c91faf5cd859d1",
+    "ink": "1b46e5cbef220941",
+    "rect": [
+     343,
+     536,
+     92
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "940e73be60c76457",
+    "ink": "9f2f743a17b92ed8",
+    "rect": [
+     343,
+     560,
+     92
+    ],
+    "same": []
+   }
+  },
+  "var-table|role|\"data\"": {
+   "de": {
+    "hash": "d95fe3321fe3d3a8",
+    "ink": "9bad21875a012dd0",
+    "rect": [
+     210,
+     472,
+     131
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "a9e93f5edb3b1930",
+    "ink": "d5d27d01ab2f8730",
+    "rect": [
+     210,
+     463,
+     131
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d6eb8b1d72f446a3",
+    "ink": "66a5a0023d5ab82d",
+    "rect": [
+     210,
+     487,
+     131
+    ],
+    "same": []
+   }
+  },
+  "var-table|role|\"result\"": {
+   "de": {
+    "hash": "d43cc294adca07d9",
+    "ink": "4aa98d3f80e2a4df",
+    "rect": [
+     437,
+     502,
+     92
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "60bc174ae64f7439",
+    "ink": "4c70603133899554",
+    "rect": [
+     437,
+     493,
+     92
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "050ecaea7b5d0a1e",
+    "ink": "4fed537ce88b5e49",
+    "rect": [
+     437,
+     517,
+     92
+    ],
+    "same": []
+   }
+  },
+  "var-table|role|auto": {
+   "de": {
+    "hash": "0ef689dfb74717f0",
+    "ink": "c58455d28dcf5590",
+    "rect": [
+     0,
+     545,
+     208
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f8675f367046fbed",
+    "ink": "1fd5674aa6b2084a",
+    "rect": [
+     0,
+     536,
+     208
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "1a43bd3ac9d482bc",
+    "ink": "8b2c7775dd3ddeb4",
+    "rect": [
+     0,
+     560,
+     208
+    ],
+    "same": []
+   }
+  },
+  "var-table|unit|\"kN/m²\"": {
+   "de": {
+    "hash": "ae2521821fb61f0e",
+    "ink": "ce3d0a657597bb2d",
+    "rect": [
+     1582,
+     492,
+     170
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f65d4e5eda105bbd",
+    "ink": "3f9ef7c4571fa298",
+    "rect": [
+     1582,
+     483,
+     170
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "5150d4260b63f52f",
+    "ink": "bb5d191787ab4e13",
+    "rect": [
+     1582,
+     507,
+     170
+    ],
+    "same": []
+   }
+  },
+  "var-table|unit|(\"kN/m²\", \"kN\")": {
+   "de": {
+    "hash": "5cf428489d702788",
+    "ink": "e19fe649f47d99d3",
+    "rect": [
+     1754,
+     492,
+     208
+    ],
+    "same": [
+     "none"
+    ]
+   },
+   "en": {
+    "hash": "631cfbfac1eb983e",
+    "ink": "0a03925bde23bb71",
+    "rect": [
+     1754,
+     483,
+     208
+    ],
+    "same": [
+     "none"
+    ]
+   },
+   "fr": {
+    "hash": "675d8154f72ab4ed",
+    "ink": "f3bc79b309703a26",
+    "rect": [
+     1754,
+     507,
+     208
+    ],
+    "same": [
+     "none"
+    ]
+   }
+  },
+  "var-table|unit|none": {
+   "de": {
+    "hash": "b546fe4441f249a2",
+    "ink": "e19fe649f47d99d3",
+    "rect": [
+     1372,
+     492,
+     208
+    ],
+    "same": [
+     "(\"kN/m²\", \"kN\")"
+    ]
+   },
+   "en": {
+    "hash": "7964c10190a9c5b5",
+    "ink": "0a03925bde23bb71",
+    "rect": [
+     1372,
+     483,
+     208
+    ],
+    "same": [
+     "(\"kN/m²\", \"kN\")"
+    ]
+   },
+   "fr": {
+    "hash": "0bbbaa9649d7ddb3",
+    "ink": "f3bc79b309703a26",
+    "rect": [
+     1372,
+     507,
+     208
+    ],
+    "same": [
+     "(\"kN/m²\", \"kN\")"
+    ]
+   }
+  },
+  "var|descr-position|\"after\"": {
+   "de": {
+    "hash": "9ad86823dac6cd6c",
+    "ink": "35a0ab3f72dcee4d",
+    "rect": [
+     889,
+     317,
+     37
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "0806c70346c828bc",
+    "ink": "9198354ebf24d29b",
+    "rect": [
+     890,
+     307,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "732f95d712f8ee5e",
+    "ink": "37ce3b1f8ce7ba86",
+    "rect": [
+     880,
+     412,
+     37
+    ],
+    "same": []
+   }
+  },
+  "var|descr-position|\"footnote\"": {
+   "de": {
+    "hash": "9e4aa2af525235c1",
+    "ink": "885400b6fdf4ebd3",
+    "rect": [
+     928,
+     231,
+     80
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5ca08333faa2b1d1",
+    "ink": "076b44a465293bd5",
+    "rect": [
+     929,
+     231,
+     85
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "807b3ac6fecc8807",
+    "ink": "8fe5d79dfd66794e",
+    "rect": [
+     919,
+     231,
+     80
+    ],
+    "same": []
+   }
+  },
+  "var|descr-position|\"none\"": {
+   "de": {
+    "hash": "126f2326f6dc70ab",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     851,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "8cde9af1c26adf1a",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     852,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "06003c02e2d46325",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     842,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "var|descr-position|auto": {
+   "de": {
+    "hash": "5f327cbf1faadc08",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     813,
+     178,
+     36
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "en": {
+    "hash": "2ad3040eafb443bc",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     814,
+     178,
+     36
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "fr": {
+    "hash": "8e9b6df65179b13c",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     804,
+     178,
+     36
+    ],
+    "same": [
+     "\"none\""
+    ]
+   }
+  },
+  "var|display|\"none\"": {
+   "de": {
+    "blank": true,
+    "hash": "aff30ea6d1b09f5e",
+    "same": []
+   },
+   "en": {
+    "blank": true,
+    "hash": "ebb04a4ebca36b86",
+    "same": []
+   },
+   "fr": {
+    "blank": true,
+    "hash": "87b71d649e103d68",
+    "same": []
+   }
+  },
+  "var|display|\"value\"": {
+   "de": {
+    "hash": "07e0b47ac91e7a2b",
+    "ink": "42d412666738088b",
+    "rect": [
+     233,
+     61,
+     28
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "c629de3bf4671816",
+    "ink": "42d412666738088b",
+    "rect": [
+     234,
+     61,
+     28
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "bbf1ff59bae3751c",
+    "ink": "42d412666738088b",
+    "rect": [
+     234,
+     61,
+     28
+    ],
+    "same": []
+   }
+  },
+  "var|display|\"value-unit\"": {
+   "de": {
+    "hash": "2a86adf36d03b568",
+    "ink": "276e145e3905a3fa",
+    "rect": [
+     263,
+     116,
+     30
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "708e2f1ae1a29c5f",
+    "ink": "276e145e3905a3fa",
+    "rect": [
+     264,
+     116,
+     30
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "3dff83b680ff51ab",
+    "ink": "276e145e3905a3fa",
+    "rect": [
+     264,
+     116,
+     30
+    ],
+    "same": []
+   }
+  },
+  "var|display|\"variable\"": {
+   "de": {
+    "hash": "26f1484c0685e8bf",
+    "ink": "70d4444764e62073",
+    "rect": [
+     195,
+     45,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f29f98982c3301d7",
+    "ink": "70d4444764e62073",
+    "rect": [
+     196,
+     45,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "38eb60ebcbb88cc1",
+    "ink": "70d4444764e62073",
+    "rect": [
+     196,
+     45,
+     36
+    ],
+    "same": []
+   }
+  },
+  "var|display|\"variable-value-unit\"": {
+   "de": {
+    "hash": "a3d1f7e96c6a1528",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     295,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "6b339134e56ebea0",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     296,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "86f0c2b0eebe5aba",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     296,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "var|display|auto": {
+   "de": {
+    "hash": "0b6b7dbe013d34b8",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     157,
+     178,
+     36
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   },
+   "en": {
+    "hash": "f164b472da8d2e00",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     158,
+     178,
+     36
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   },
+   "fr": {
+    "hash": "383f723c3b4bf07a",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     158,
+     178,
+     36
+    ],
+    "same": [
+     "\"variable-value-unit\""
+    ]
+   }
+  },
+  "var|domain|\"id\"": {
+   "de": {
+    "hash": "3613267300b0d4ac",
+    "ink": "f67d75d5202bab18",
+    "rect": [
+     120,
+     311,
+     35
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "4fa7c87ca2ec5665",
+    "ink": "439d76723b1ee5d0",
+    "rect": [
+     125,
+     260,
+     31
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c9629a7cc2e63e09",
+    "ink": "1a287c3e3c58ba31",
+    "rect": [
+     125,
+     273,
+     31
+    ],
+    "same": []
+   }
+  },
+  "var|domain|(\"calcul\", \"cas\")": {
+   "de": {
+    "hash": "9fffb2febf3db4d3",
+    "ink": "edcf26b6d07ebc91",
+    "rect": [
+     38,
+     596,
+     80
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "2625b228c904a5a2",
+    "ink": "c8984be6a0918ff2",
+    "rect": [
+     38,
+     542,
+     85
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "ccc76f2af437d82b",
+    "ink": "06274fc65f29efcb",
+    "rect": [
+     38,
+     624,
+     85
+    ],
+    "same": []
+   }
+  },
+  "var|domain|none": {
+   "de": {
+    "hash": "537f6d50f876a00d",
+    "ink": "f3761665aa095b7a",
+    "rect": [
+     0,
+     157,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "b3e7a9d6185313ce",
+    "ink": "f3761665aa095b7a",
+    "rect": [
+     0,
+     157,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c98d03cf02e904ad",
+    "ink": "f3761665aa095b7a",
+    "rect": [
+     0,
+     157,
+     36
+    ],
+    "same": []
+   }
+  },
+  "var|label-position|\"after\"": {
+   "de": {
+    "hash": "713ddca8e1fe019d",
+    "ink": "30a065791a6fffa6",
+    "rect": [
+     688,
+     413,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "9aef79fc25d96ea0",
+    "ink": "d0129643b2f06224",
+    "rect": [
+     689,
+     367,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "8de4eaeac049fe0f",
+    "ink": "5e56fb2691bdb391",
+    "rect": [
+     684,
+     385,
+     36
+    ],
+    "same": []
+   }
+  },
+  "var|label-position|\"before\"": {
+   "de": {
+    "hash": "e754911ce7e35aad",
+    "ink": "54150cc0ff6ec4f4",
+    "rect": [
+     650,
+     398,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "cee8d34ef694ff84",
+    "ink": "6c4082457ac95a05",
+    "rect": [
+     651,
+     352,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "dced78cf132ec3ee",
+    "ink": "f5eb805f14190867",
+    "rect": [
+     646,
+     374,
+     36
+    ],
+    "same": []
+   }
+  },
+  "var|label-position|\"footnote\"": {
+   "de": {
+    "hash": "83d403610bbdfa3d",
+    "ink": "7011e221175363ea",
+    "rect": [
+     726,
+     231,
+     85
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "b2ed18df0a7bf717",
+    "ink": "39316feee9b81cdf",
+    "rect": [
+     727,
+     231,
+     85
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "a03d8b69f87a1913",
+    "ink": "4fb77b4994b6d6c7",
+    "rect": [
+     722,
+     231,
+     80
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "var|label-position|\"none\"": {
+   "de": {
+    "hash": "2656488649bf443b",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     612,
+     178,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f849bfae3919b38c",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     613,
+     178,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "2f6a9216487ae029",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     608,
+     178,
+     36
+    ],
+    "same": []
+   }
+  },
+  "var|label-position|auto": {
+   "de": {
+    "hash": "3ecb140685e9faf0",
+    "ink": "7011e221175363ea",
+    "rect": [
+     525,
+     231,
+     85
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   },
+   "en": {
+    "hash": "78064136d1bbdfd5",
+    "ink": "39316feee9b81cdf",
+    "rect": [
+     526,
+     231,
+     85
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   },
+   "fr": {
+    "hash": "600b6e78fa7a9437",
+    "ink": "4fb77b4994b6d6c7",
+    "rect": [
+     526,
+     231,
+     80
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   }
+  },
+  "var|level|0": {
+   "de": {
+    "blank": true,
+    "hash": "aa21bb2fb7a759e7",
+    "same": []
+   },
+   "en": {
+    "blank": true,
+    "hash": "8f5c49ee949cb343",
+    "same": []
+   },
+   "fr": {
+    "blank": true,
+    "hash": "e9165436940de73b",
+    "same": []
+   }
+  },
+  "var|level|1": {
+   "de": {
+    "hash": "e718dbe8f74659b7",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     1679,
+     178,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "7b0759dbaeac66cc",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     1685,
+     178,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "3de26f2553654996",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     1645,
+     178,
+     36
+    ],
+    "same": []
+   }
+  },
+  "var|level|2": {
+   "de": {
+    "hash": "c2d036eafd62cc8e",
+    "ink": "7011e221175363ea",
+    "rect": [
+     1717,
+     231,
+     85
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "073300320001675c",
+    "ink": "39316feee9b81cdf",
+    "rect": [
+     1723,
+     231,
+     85
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "8472d0be71e2641c",
+    "ink": "4fb77b4994b6d6c7",
+    "rect": [
+     1683,
+     231,
+     80
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "var|level|3": {
+   "de": {
+    "hash": "c80e39f47d729504",
+    "ink": "d1c922aac214ec8c",
+    "rect": [
+     1804,
+     445,
+     85
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "bce8e130c23d680b",
+    "ink": "a131248547853e7e",
+    "rect": [
+     1810,
+     397,
+     85
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "e344e08dad900a95",
+    "ink": "0a2beaefba57f41d",
+    "rect": [
+     1765,
+     507,
+     83
+    ],
+    "same": []
+   }
+  },
+  "var|level|auto": {
+   "de": {
+    "hash": "0b782f0b6831a887",
+    "ink": "7011e221175363ea",
+    "rect": [
+     1592,
+     231,
+     85
+    ],
+    "same": [
+     "2"
+    ]
+   },
+   "en": {
+    "hash": "faaeaf1ee4de6816",
+    "ink": "39316feee9b81cdf",
+    "rect": [
+     1598,
+     231,
+     85
+    ],
+    "same": [
+     "2"
+    ]
+   },
+   "fr": {
+    "hash": "beebec8a39db4f12",
+    "ink": "4fb77b4994b6d6c7",
+    "rect": [
+     1563,
+     231,
+     80
+    ],
+    "same": [
+     "2"
+    ]
+   }
+  },
+  "var|norm-position|\"footnote\"": {
+   "de": {
+    "hash": "a37dfe2aa67c16d7",
+    "ink": "134cccfe807ddecc",
+    "rect": [
+     1162,
+     231,
+     80
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "a4b96bf467344ff9",
+    "ink": "134cccfe807ddecc",
+    "rect": [
+     1168,
+     231,
+     80
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "4c2a22ef32d3e013",
+    "ink": "134cccfe807ddecc",
+    "rect": [
+     1153,
+     231,
+     80
+    ],
+    "same": []
+   }
+  },
+  "var|norm-position|\"in-line\"": {
+   "de": {
+    "hash": "5275160c07598dc5",
+    "ink": "07ddf3f4667817ee",
+    "rect": [
+     1086,
+     310,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "dc89c08b47a3b543",
+    "ink": "07ddf3f4667817ee",
+    "rect": [
+     1092,
+     310,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "202c4ea4087c9a6c",
+    "ink": "07ddf3f4667817ee",
+    "rect": [
+     1077,
+     310,
+     36
+    ],
+    "same": []
+   }
+  },
+  "var|norm-position|\"line-right\"": {
+   "de": {
+    "hash": "758cbfd74b3e3cbc",
+    "ink": "e8fec170897343aa",
+    "rect": [
+     1124,
+     740,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "5d4cce491daa92fa",
+    "ink": "e8fec170897343aa",
+    "rect": [
+     1130,
+     740,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d348c0cecd1b9e13",
+    "ink": "e8fec170897343aa",
+    "rect": [
+     1115,
+     740,
+     36
+    ],
+    "same": []
+   }
+  },
+  "var|norm-position|\"none\"": {
+   "de": {
+    "hash": "204ac0b1ea8bfc22",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     1048,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "6d3e9eb1ed08b4c2",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     1054,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "72388068106da78f",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     1039,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "var|norm-position|auto": {
+   "de": {
+    "hash": "52c394447070fc10",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     1010,
+     178,
+     36
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "en": {
+    "hash": "7746f28087c2d2e7",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     1016,
+     178,
+     36
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "fr": {
+    "hash": "a3f3c54a69707575",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     1001,
+     178,
+     36
+    ],
+    "same": [
+     "\"none\""
+    ]
+   }
+  },
+  "var|role|\"compute\"": {
+   "de": {
+    "hash": "70096dae2f3f4671",
+    "ink": "7011e221175363ea",
+    "rect": [
+     1418,
+     231,
+     85
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "064840f53356ae42",
+    "ink": "39316feee9b81cdf",
+    "rect": [
+     1424,
+     231,
+     85
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "6c7a42edb30d37a6",
+    "ink": "4fb77b4994b6d6c7",
+    "rect": [
+     1399,
+     231,
+     80
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   }
+  },
+  "var|role|\"data\"": {
+   "de": {
+    "hash": "8f21099f973b46a0",
+    "ink": "7011e221175363ea",
+    "rect": [
+     1331,
+     231,
+     85
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "a94f371a8aec2640",
+    "ink": "39316feee9b81cdf",
+    "rect": [
+     1337,
+     231,
+     85
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "2859e011f41020f0",
+    "ink": "4fb77b4994b6d6c7",
+    "rect": [
+     1317,
+     231,
+     80
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   }
+  },
+  "var|role|\"result\"": {
+   "de": {
+    "hash": "007f892678c4c80a",
+    "ink": "7011e221175363ea",
+    "rect": [
+     1505,
+     231,
+     85
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   },
+   "en": {
+    "hash": "d9648286e2b845ca",
+    "ink": "39316feee9b81cdf",
+    "rect": [
+     1511,
+     231,
+     85
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   },
+   "fr": {
+    "hash": "1d08dc845ae3c79a",
+    "ink": "4fb77b4994b6d6c7",
+    "rect": [
+     1481,
+     231,
+     80
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   }
+  },
+  "var|role|auto": {
+   "de": {
+    "hash": "de9580f47fb30208",
+    "ink": "7011e221175363ea",
+    "rect": [
+     1244,
+     231,
+     85
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "faf9b5d31d97fe7c",
+    "ink": "39316feee9b81cdf",
+    "rect": [
+     1250,
+     231,
+     85
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "2e979ebfd4b01138",
+    "ink": "4fb77b4994b6d6c7",
+    "rect": [
+     1235,
+     231,
+     80
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   }
+  },
+  "var|style|\"bold\"": {
+   "de": {
+    "hash": "d3b13f8379fcc866",
+    "ink": "86a97bec8425e4fa",
+    "rect": [
+     409,
+     218,
+     36
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "f9a5e9983cd6380a",
+    "ink": "86a97bec8425e4fa",
+    "rect": [
+     410,
+     218,
+     36
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "b3f52b1c7bc0a772",
+    "ink": "86a97bec8425e4fa",
+    "rect": [
+     410,
+     218,
+     36
+    ],
+    "same": []
+   }
+  },
+  "var|style|\"double\"": {
+   "de": {
+    "hash": "406b6f6cbcf9d4f1",
+    "ink": "133b6fed5d8e89f6",
+    "rect": [
+     486,
+     202,
+     37
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "04a0b2563ddf8b27",
+    "ink": "133b6fed5d8e89f6",
+    "rect": [
+     487,
+     202,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "c82a48b58b3c20b8",
+    "ink": "133b6fed5d8e89f6",
+    "rect": [
+     487,
+     202,
+     37
+    ],
+    "same": []
+   }
+  },
+  "var|style|\"normal\"": {
+   "de": {
+    "hash": "cf4e1e628db8fe80",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     371,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "721f089745180b96",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     372,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "af16bd395ded4ec3",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     372,
+     178,
+     36
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "var|style|\"underline\"": {
+   "de": {
+    "hash": "72bb85ad57edebdd",
+    "ink": "315854fb0e7ede70",
+    "rect": [
+     447,
+     198,
+     37
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "25dd70fa2287225c",
+    "ink": "315854fb0e7ede70",
+    "rect": [
+     448,
+     198,
+     37
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "07932cca69b7daf4",
+    "ink": "315854fb0e7ede70",
+    "rect": [
+     448,
+     198,
+     37
+    ],
+    "same": []
+   }
+  },
+  "var|style|auto": {
+   "de": {
+    "hash": "068ea6711e1bc919",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     333,
+     178,
+     36
+    ],
+    "same": [
+     "\"normal\""
+    ]
+   },
+   "en": {
+    "hash": "f739fbab59c0ae32",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     334,
+     178,
+     36
+    ],
+    "same": [
+     "\"normal\""
+    ]
+   },
+   "fr": {
+    "hash": "3ad8d0f02de3e60c",
+    "ink": "df2fabd10ed80b61",
+    "rect": [
+     334,
+     178,
+     36
+    ],
+    "same": [
+     "\"normal\""
+    ]
+   }
+  },
+  "verify|descr-position|\"after\"": {
+   "de": {
+    "hash": "7097e53f3e1b15a9",
+    "ink": "f7355309138e2a48",
+    "rect": [
+     616,
+     543,
+     44
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "ba1ce93893a7fed5",
+    "ink": "43f0ee690e88263c",
+    "rect": [
+     606,
+     592,
+     44
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "429d03a1057ec21b",
+    "ink": "97e8b67921d8354f",
+    "rect": [
+     606,
+     550,
+     44
+    ],
+    "same": []
+   }
+  },
+  "verify|descr-position|\"footnote\"": {
+   "de": {
+    "hash": "b7962aaf17dd98b0",
+    "ink": "ff5992b951bf534d",
+    "rect": [
+     662,
+     274,
+     99
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "30dbcfbfb0123c25",
+    "ink": "66e2f9a53de6d11d",
+    "rect": [
+     652,
+     306,
+     97
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "4b8dc9cfb40e9bba",
+    "ink": "17010def6c4be0bb",
+    "rect": [
+     652,
+     274,
+     97
+    ],
+    "same": []
+   }
+  },
+  "verify|descr-position|\"none\"": {
+   "de": {
+    "hash": "db636e1f171e4b72",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     570,
+     261,
+     44
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "1115dfa455f152a7",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     560,
+     261,
+     44
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "04e99c2c4769dfd8",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     560,
+     261,
+     44
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "verify|descr-position|auto": {
+   "de": {
+    "hash": "28e1bdeb9bde2783",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     524,
+     261,
+     44
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "en": {
+    "hash": "b3559d219d1a3fc6",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     514,
+     261,
+     44
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "fr": {
+    "hash": "de85a5350f08786a",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     514,
+     261,
+     44
+    ],
+    "same": [
+     "\"none\""
+    ]
+   }
+  },
+  "verify|display|\"none\"": {
+   "de": {
+    "blank": true,
+    "hash": "05699d217e42a5a2",
+    "same": []
+   },
+   "en": {
+    "blank": true,
+    "hash": "2c96e5b881344343",
+    "same": []
+   },
+   "fr": {
+    "blank": true,
+    "hash": "0ed70452e4c75677",
+    "same": []
+   }
+  },
+  "verify|display|\"value-unit\"": {
+   "de": {
+    "hash": "7ca32f0153173835",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     92,
+     261,
+     44
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "a859710d2ed626a0",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     92,
+     261,
+     44
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "7eab1237a81750e7",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     92,
+     261,
+     44
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "verify|display|\"variable\"": {
+   "de": {
+    "hash": "5a65652f1933e982",
+    "ink": "f5eea831789245d9",
+    "rect": [
+     46,
+     136,
+     44
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "3c75b5b10f82e461",
+    "ink": "f5eea831789245d9",
+    "rect": [
+     46,
+     136,
+     44
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d2095ec3e73f8ffe",
+    "ink": "f5eea831789245d9",
+    "rect": [
+     46,
+     136,
+     44
+    ],
+    "same": []
+   }
+  },
+  "verify|display|\"variable-value-unit\"": {
+   "de": {
+    "hash": "d32b61ee86dbf47d",
+    "ink": "594d2b531c1fac33",
+    "rect": [
+     138,
+     391,
+     44
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "0fa47b4ca47ed8b8",
+    "ink": "594d2b531c1fac33",
+    "rect": [
+     138,
+     391,
+     44
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "2834bee468fe2be3",
+    "ink": "594d2b531c1fac33",
+    "rect": [
+     138,
+     391,
+     44
+    ],
+    "same": []
+   }
+  },
+  "verify|display|auto": {
+   "de": {
+    "hash": "5af96943563bf492",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     0,
+     261,
+     44
+    ],
+    "same": [
+     "\"value-unit\""
+    ]
+   },
+   "en": {
+    "hash": "ba40a4270fed0c9b",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     0,
+     261,
+     44
+    ],
+    "same": [
+     "\"value-unit\""
+    ]
+   },
+   "fr": {
+    "hash": "5c201096de1e6abe",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     0,
+     261,
+     44
+    ],
+    "same": [
+     "\"value-unit\""
+    ]
+   }
+  },
+  "verify|label-position|\"after\"": {
+   "de": {
+    "hash": "e0912fa25d508e78",
+    "ink": "55188bd46f597ee6",
+    "rect": [
+     377,
+     444,
+     44
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "b6890d0e9f903227",
+    "ink": "eadce5a6a8c50109",
+    "rect": [
+     372,
+     468,
+     44
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "d3d826658080ace4",
+    "ink": "6ef9f7729d7b048e",
+    "rect": [
+     372,
+     523,
+     44
+    ],
+    "same": []
+   }
+  },
+  "verify|label-position|\"before\"": {
+   "de": {
+    "hash": "7498785eba5531a8",
+    "ink": "56f197a4afaa87a1",
+    "rect": [
+     331,
+     424,
+     44
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "954b9ec83de7f4ef",
+    "ink": "d7c69ea93d8f8d80",
+    "rect": [
+     326,
+     449,
+     44
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "f1454a66bed14b1d",
+    "ink": "8bc2799bfa955154",
+    "rect": [
+     326,
+     506,
+     44
+    ],
+    "same": []
+   }
+  },
+  "verify|label-position|\"footnote\"": {
+   "de": {
+    "hash": "ae5992a882b947e0",
+    "ink": "fd1e1d416df8ba0e",
+    "rect": [
+     423,
+     274,
+     99
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "70394f5ddb607393",
+    "ink": "13d9d10a30615a8b",
+    "rect": [
+     418,
+     274,
+     94
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "21acc3d16f9684b7",
+    "ink": "b055ecea5d209e3d",
+    "rect": [
+     418,
+     274,
+     94
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "verify|label-position|\"none\"": {
+   "de": {
+    "hash": "429c7776de94c571",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     285,
+     261,
+     44
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "6047c00cfbe98941",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     280,
+     261,
+     44
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "093ac469c880bd15",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     280,
+     261,
+     44
+    ],
+    "same": []
+   }
+  },
+  "verify|label-position|auto": {
+   "de": {
+    "hash": "914e0fc7443fdd84",
+    "ink": "fd1e1d416df8ba0e",
+    "rect": [
+     184,
+     274,
+     99
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   },
+   "en": {
+    "hash": "ff8fc17bc07999ca",
+    "ink": "13d9d10a30615a8b",
+    "rect": [
+     184,
+     274,
+     94
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   },
+   "fr": {
+    "hash": "38404c1c0e15df41",
+    "ink": "b055ecea5d209e3d",
+    "rect": [
+     184,
+     274,
+     94
+    ],
+    "same": [
+     "\"footnote\""
+    ]
+   }
+  },
+  "verify|level|0": {
+   "de": {
+    "blank": true,
+    "hash": "f2aa050c64b9d0a4",
+    "same": []
+   },
+   "en": {
+    "blank": true,
+    "hash": "0824fd2bbc777291",
+    "same": []
+   },
+   "fr": {
+    "blank": true,
+    "hash": "860f42487bee3322",
+    "same": []
+   }
+  },
+  "verify|level|1": {
+   "de": {
+    "hash": "e921a2b58b0da097",
+    "ink": "f5eea831789245d9",
+    "rect": [
+     1328,
+     136,
+     44
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "a9f8cd383738d184",
+    "ink": "f5eea831789245d9",
+    "rect": [
+     1311,
+     136,
+     44
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "9f87eccaa2513ffc",
+    "ink": "f5eea831789245d9",
+    "rect": [
+     1311,
+     136,
+     44
+    ],
+    "same": []
+   }
+  },
+  "verify|level|2": {
+   "de": {
+    "hash": "655cc803f296f02c",
+    "ink": "fd1e1d416df8ba0e",
+    "rect": [
+     1374,
+     274,
+     99
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "ecc10363391aee43",
+    "ink": "13d9d10a30615a8b",
+    "rect": [
+     1357,
+     274,
+     94
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "6373416e6a9cc183",
+    "ink": "b055ecea5d209e3d",
+    "rect": [
+     1357,
+     274,
+     94
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "verify|level|3": {
+   "de": {
+    "hash": "0e46c498f1b4967b",
+    "ink": "0dd5a8b8af898bff",
+    "rect": [
+     1475,
+     520,
+     99
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "b953c0382074c219",
+    "ink": "92ac4ac2ad1d8b4b",
+    "rect": [
+     1453,
+     582,
+     97
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "92b1dd4d887d7e14",
+    "ink": "4479798fc6b93d35",
+    "rect": [
+     1453,
+     598,
+     97
+    ],
+    "same": []
+   }
+  },
+  "verify|level|auto": {
+   "de": {
+    "hash": "9463b198f562e59d",
+    "ink": "fd1e1d416df8ba0e",
+    "rect": [
+     1227,
+     274,
+     99
+    ],
+    "same": [
+     "2"
+    ]
+   },
+   "en": {
+    "hash": "953615df17895a3c",
+    "ink": "13d9d10a30615a8b",
+    "rect": [
+     1215,
+     274,
+     94
+    ],
+    "same": [
+     "2"
+    ]
+   },
+   "fr": {
+    "hash": "986e78955765a933",
+    "ink": "b055ecea5d209e3d",
+    "rect": [
+     1215,
+     274,
+     94
+    ],
+    "same": [
+     "2"
+    ]
+   }
+  },
+  "verify|norm-position|\"footnote\"": {
+   "de": {
+    "hash": "e8afbdcb53c23043",
+    "ink": "b640f74fb2e358d5",
+    "rect": [
+     947,
+     274,
+     94
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "dd151e3fa5f7f983",
+    "ink": "b640f74fb2e358d5",
+    "rect": [
+     935,
+     274,
+     94
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "96e1f1be1196b1b6",
+    "ink": "b640f74fb2e358d5",
+    "rect": [
+     935,
+     274,
+     94
+    ],
+    "same": []
+   }
+  },
+  "verify|norm-position|\"in-line\"": {
+   "de": {
+    "hash": "14f0ca32237803e4",
+    "ink": "2660166784bc9cc3",
+    "rect": [
+     855,
+     394,
+     44
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "565085f45884116f",
+    "ink": "2660166784bc9cc3",
+    "rect": [
+     843,
+     394,
+     44
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "014fa1ee2f03cb85",
+    "ink": "2660166784bc9cc3",
+    "rect": [
+     843,
+     394,
+     44
+    ],
+    "same": []
+   }
+  },
+  "verify|norm-position|\"line-right\"": {
+   "de": {
+    "hash": "a9f6ec22eda5e1ae",
+    "ink": "1bbdc494f0c627cf",
+    "rect": [
+     901,
+     742,
+     44
+    ],
+    "same": []
+   },
+   "en": {
+    "hash": "afb6129f474cce22",
+    "ink": "1bbdc494f0c627cf",
+    "rect": [
+     889,
+     742,
+     44
+    ],
+    "same": []
+   },
+   "fr": {
+    "hash": "f636c529e6e74e06",
+    "ink": "1bbdc494f0c627cf",
+    "rect": [
+     889,
+     742,
+     44
+    ],
+    "same": []
+   }
+  },
+  "verify|norm-position|\"none\"": {
+   "de": {
+    "hash": "5ef1ac5915d486c9",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     809,
+     261,
+     44
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "en": {
+    "hash": "a95ba1a5a302268d",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     797,
+     261,
+     44
+    ],
+    "same": [
+     "auto"
+    ]
+   },
+   "fr": {
+    "hash": "99ae36a6c9989499",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     797,
+     261,
+     44
+    ],
+    "same": [
+     "auto"
+    ]
+   }
+  },
+  "verify|norm-position|auto": {
+   "de": {
+    "hash": "50291461345d6c88",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     763,
+     261,
+     44
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "en": {
+    "hash": "888850877a8824da",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     751,
+     261,
+     44
+    ],
+    "same": [
+     "\"none\""
+    ]
+   },
+   "fr": {
+    "hash": "09bb25f726a09d8c",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     751,
+     261,
+     44
+    ],
+    "same": [
+     "\"none\""
+    ]
+   }
+  },
+  "verify|role|\"compute\"": {
+   "de": {
+    "hash": "a1380bae3af34368",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1135,
+     261,
+     44
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "cafd78f640d80ffe",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1123,
+     261,
+     44
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "4ec749b9515da028",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1123,
+     261,
+     44
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"result\""
+    ]
+   }
+  },
+  "verify|role|\"data\"": {
+   "de": {
+    "hash": "41815b7715952516",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1089,
+     261,
+     44
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "ccc3bb9428c9394d",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1077,
+     261,
+     44
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "16a5dd8e5baab7a4",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1077,
+     261,
+     44
+    ],
+    "same": [
+     "auto",
+     "\"compute\"",
+     "\"result\""
+    ]
+   }
+  },
+  "verify|role|\"result\"": {
+   "de": {
+    "hash": "a384303589c7865c",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1181,
+     261,
+     44
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   },
+   "en": {
+    "hash": "29350ae8c07326b4",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1169,
+     261,
+     44
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   },
+   "fr": {
+    "hash": "b76ba075dbe103b7",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1169,
+     261,
+     44
+    ],
+    "same": [
+     "auto",
+     "\"data\"",
+     "\"compute\""
+    ]
+   }
+  },
+  "verify|role|auto": {
+   "de": {
+    "hash": "bd97a0a4c4dff041",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1043,
+     261,
+     44
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "en": {
+    "hash": "53bf9fc1a6579783",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1031,
+     261,
+     44
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   },
+   "fr": {
+    "hash": "d6f42df6007cfbd8",
+    "ink": "ad7974c41746fa08",
+    "rect": [
+     1031,
+     261,
+     44
+    ],
+    "same": [
+     "\"data\"",
+     "\"compute\"",
+     "\"result\""
+    ]
+   }
+  }
+ }
+}

@@ -36,7 +36,6 @@ import dependencies
 import notifications  # noqa: E402  -- every error, warning and information, gathered in one place (calc/notifications.py, v0.117)
 import notices_ui  # noqa: E402  -- the red octagon and the orange triangle at the top right, and their panel (v0.117)
 import list_order  # noqa: E402  -- the order of the window's lists and the «Formules» tab's folders, Woodcore-Datei/lists.json (issue #15)
-import variable_sources  # every variable of a project and where it comes from; instance_workbook (calc/variable_sources.py, v0.117)
 import chrome  # noqa: E402  -- the zoom's three actions, the same in the menu and on the start page (issue #85)
 import theme  # the website's look: one palette, one style sheet, light or dark (theme.py, v0.90)
 import legal  # *Fichier → À propos de Woodcore…*: the copyright, the licence and the third-party notices
@@ -45,24 +44,6 @@ import legal  # *Fichier → À propos de Woodcore…*: the copyright, the licen
 def data_file():
     """The current project's data/calculations.json, the validated export this window lists."""
     return project.current().data_dir / "calculations.json"
-
-
-def stale_workbooks(data, data_file=None):
-    """The workbooks the data was read from that were saved after it was exported -- their values may no longer be what the window shows."""
-    here = project.current()
-    data_file = data_file or here.data_dir / "calculations.json"
-    exported = data_file.stat().st_mtime
-    names = {
-        variable_sources.instance_workbook(domain, instance)
-        for domain in data["domains"].values()
-        for instance in domain["instances"].values()
-    }
-    stale = []
-    for name in sorted(n for n in names if n):
-        path = here.root / name
-        if path.exists() and path.stat().st_mtime > exported:
-            stale.append(name)
-    return stale
 
 
 def one_line(text):
@@ -202,15 +183,6 @@ class WindowMenusMixin:
             notices_ui.tell(self.t("deps_failed", output=output[-1500:]), notifications.WARNING, key="deps_failed", args=dict(output=output[-1500:]), title_key="deps_title", source="woodcore_gui")
         return ok
 
-    def stale_text(self):
-        if self.data is None:
-            return ""
-        try:
-            stale = stale_workbooks(self.data)
-        except OSError:
-            return ""
-        return self.t("stale", files=", ".join(stale)) if stale else ""
-
     def take_colours(self):
         """The colours the window states itself, read from the scheme in force (theme.py): the grey of secondary text, and the two marks of section 10quater read by dirty_mark() -- the dot in the text's own ink, white in the dark scheme, and the blank that keeps its room."""
         self.muted = theme.colour("muted")
@@ -325,9 +297,11 @@ class WindowMenusMixin:
         self.update_title()
 
     def update_title(self):
-        """«Musterprojekt — Woodcore», with «•» before it while a tab holds unsaved changes, as an editor marks a document not saved -- and «(lecture seule)» after it in a project another window holds (v0.83)."""
+        """«Musterprojekt — Sécurité structurale › Cisaillement — Woodcore»: the project, the tab open alone where the navigation stands it (issue #112, UI-001: the bar names only the tab open), with «•» before it while a tab holds unsaved changes, as an editor marks a document not saved -- and «(lecture seule)» after it in a project another window holds (v0.83)."""
         dirty = any(getattr(tab, "dirty", False) for tab in getattr(self, "tabs", ()))
-        title = f"{'• ' if dirty else ''}{project.current().name} — Woodcore"
+        nav, tabs = getattr(self, "nav", None), getattr(self, "tab_widget", None)
+        where = nav.path(tabs.currentIndex()) if nav is not None and tabs is not None else ""
+        title = f"{'• ' if dirty else ''}{project.current().name} — {where + ' — ' if where else ''}Woodcore"
         if self.read_only:
             title += f" ({self.t('read_only_suffix')})"
         self.setWindowTitle(title)

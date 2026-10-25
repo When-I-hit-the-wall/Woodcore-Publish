@@ -103,6 +103,8 @@ def test_every_folder_of_figures_is_made_with_the_project():
     folders = {path.relative_to(conftest.PROJECT.typst_root).as_posix() for path in conftest.PROJECT.structure_folders()}
     for kind in project.FIGURE_KINDS:
         assert project.figures_folder(kind) in folders, kind
+    # the wind's figure of its table of Annexe C, cut out of the norm, beside its case's file (spec 2026-10-23-onglet-vent-briques, REQ-017)
+    assert "wind-load" in project.LOAD_FIGURE_KINDS and project.figures_folder("wind-load").endswith("Variable-loads/Wind/Exports/Figures"), project.figures_folder("wind-load")
 
 
 # --- the export ------------------------------------------------------------------------------

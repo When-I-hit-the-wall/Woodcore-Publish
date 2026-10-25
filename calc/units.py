@@ -48,8 +48,27 @@ _PH_OPEN, _PH_CLOSE = chr(1), chr(2)   # a placeholder for a substituted symbol,
 _NAME_CHAR = re.compile(r"[A-Za-z0-9_]")
 
 
+# The codes a FormulaError is raised with, each with the names of the values it carries (issue #113, REQ-005, ARCH-012): what the «Domaines» tab translates its sentence by (`fm_e_<code>` in three languages, calc/tools/formula_tab_words.py), the English message staying Typst's and the report's. `formula` is the default of a refusal said in English alone.
+CODES = {
+    "formula": (), "div0": (), "add": ("a", "b"), "unit_read": ("unit", "symbol"), "nan": ("text",), "pow": ("dims", "n"),
+    "sqrt": ("dims",), "minmax": ("fn", "a", "b"), "fn_number": ("fn", "dims"), "unknown": ("names", "declared"),
+    "not_number": ("key",), "unit_of": ("key", "unit"), "cannot": ("src",), "no_relation": ("src",),
+    # raised by calc/domains/formula_domain.py's `compute` and `resolve_import`
+    "again": ("key", "declared"), "shown_unit": ("key", "unit", "wanted"), "no_value": ("key", "source"), "vdims": ("a", "b"), "circle": ("path",),
+}
+
+
 class FormulaError(validation.ValidationError, ValueError):
-    """What `#eq`, `#verify` or `#var` would stop the compile on -- a sum of two dimensions, the square root of an odd power, a name nobody declared, a unit that cannot be read -- said in the same words, so the tab refuses it before the report does. A ValidationError (v0.120, C7), so an export it stops says so as a defect of the input; still a ValueError for the callers that catch one."""
+    """What `#eq`, `#verify` or `#var` would stop the compile on -- a sum of two dimensions, the square root of an odd power, a name nobody declared, a unit that cannot be read -- said in the same words, so the tab refuses it before the report does. A ValidationError (v0.120, C7), so an export it stops says so as a defect of the input; still a ValueError for the callers that catch one.
+
+    Since issue #113 (REQ-005) it carries a `code` of `CODES` and its `values`, which the window says in its own language without cutting the message; `str()` is the English sentence, unchanged."""
+
+    def __init__(self, message, code="formula", **values):
+        if code not in CODES or set(values) - set(CODES[code]):
+            raise ValueError(f"FormulaError: code {code!r} with {sorted(values)} -- not one of units.CODES")
+        super().__init__(message)
+        self.code = code
+        self.values = values
 
 
 # --- units -------------------------------------------------------------------------------
@@ -221,7 +240,7 @@ def q_mul(a, b):
 
 def q_div(a, b):
     if b.base == 0:
-        raise FormulaError("eq: division by zero in the formula")
+        raise FormulaError("eq: division by zero in the formula", "div0")
     dims = dict(a.dims)
     for d, e in b.dims.items():
         dims[d] = dims.get(d, 0) - e
@@ -230,7 +249,7 @@ def q_div(a, b):
 
 def q_add(a, b, sign):
     if not dims_equal(a.dims, b.dims):
-        raise FormulaError(f"eq: cannot add {dims_text(a.dims)} and {dims_text(b.dims)} -- the two sides of a + or a - must have the same dimensions")
+        raise FormulaError(f"eq: cannot add {dims_text(a.dims)} and {dims_text(b.dims)} -- the two sides of a + or a - must have the same dimensions", "add", a=dims_text(a.dims), b=dims_text(b.dims))
     return Quantity(a.base + sign * b.base, clean_dims(a.dims), a.nat if a.nat else b.nat)
 
 
@@ -309,7 +328,7 @@ def present(fn, symbol, parsed, want=None, table=None):
         return parsed.base / parse_unit(u)[0], u, None
     p = parse_unit(want)
     if p is None:
-        raise FormulaError(f"{fn}: cannot read the unit {want!r} of {symbol} -- write it as the report writes one, `kN`, `N/mm²`, `kNm`")
+        raise FormulaError(f"{fn}: cannot read the unit {want!r} of {symbol} -- write it as the report writes one, `kN`, `N/mm²`, `kNm`", "unit_read", unit=want, symbol=symbol)
     if dims_equal(parsed.dims, p[1]):
         return parsed.base / p[0], want, None
     value, unit = natural()
@@ -457,7 +476,7 @@ def _tokenize(src):
             try:
                 value = float(digits + expo)
             except ValueError:
-                raise FormulaError(f"eq: {digits + expo!r} is not a number")
+                raise FormulaError(f"eq: {digits + expo!r} is not a number", "nan", text=digits + expo)
             qty = quantity(value, unit)
             if qty is None:
                 return None
@@ -528,7 +547,7 @@ def _parse(tokens, values):
         if j + 1 < len(tokens) and tokens[j] == ("op", "^") and tokens[j + 1][0] == "qty" and not clean_dims(tokens[j + 1][1].dims):
             n = tokens[j + 1][1].base
             if any((e * n) % 1 != 0 for e in clean_dims(value.dims).values()):
-                raise FormulaError(f"eq: {dims_text(value.dims)} raised to {n:g} has no unit -- a formula that holds only in given units (SIA 265 (87): d in mm) is written with its answer and its unit, value: and unit:, or with its operands as plain numbers")
+                raise FormulaError(f"eq: {dims_text(value.dims)} raised to {n:g} has no unit -- a formula that holds only in given units (SIA 265 (87): d in mm) is written with its answer and its unit, value: and unit:, or with its operands as plain numbers", "pow", dims=dims_text(value.dims), n=f"{n:g}")
             return q_pow(value, n), j + 2
         return value, j
 
@@ -577,7 +596,7 @@ def _call(name, args):
         dims = {}
         for d, e in a.dims.items():
             if e % 2 != 0:
-                raise FormulaError(f"eq: sqrt of {dims_text(a.dims)}, whose dimensions are not even")
+                raise FormulaError(f"eq: sqrt of {dims_text(a.dims)}, whose dimensions are not even", "sqrt", dims=dims_text(a.dims))
             dims[d] = e // 2
         return Quantity(math.sqrt(a.base), clean_dims(dims), _nat_pow(a.nat, 0.5))
     if name == "abs":
@@ -585,12 +604,12 @@ def _call(name, args):
     if name in ("max", "min"):
         for other in args[1:]:
             if not dims_equal(a.dims, other.dims):
-                raise FormulaError(f"eq: {name} compares {dims_text(a.dims)} with {dims_text(other.dims)}")
+                raise FormulaError(f"eq: {name} compares {dims_text(a.dims)} with {dims_text(other.dims)}", "minmax", fn=name, a=dims_text(a.dims), b=dims_text(other.dims))
         bases = [q.base for q in args]
         return Quantity(max(bases) if name == "max" else min(bases), a.dims, a.nat)
     d = clean_dims(a.dims)
     if d and d != {"deg": 1}:
-        raise FormulaError(f"eq: {name} takes a number, got {dims_text(a.dims)}")
+        raise FormulaError(f"eq: {name} takes a number, got {dims_text(a.dims)}", "fn_number", fn=name, dims=dims_text(a.dims))
     x = a.base * math.pi / 180 if d == {"deg": 1} else a.base
     fn = {"sin": math.sin, "cos": math.cos, "tan": math.tan, "asin": math.asin, "arcsin": math.asin, "acos": math.acos, "arccos": math.acos,
           "atan": math.atan, "arctan": math.atan, "ln": math.log, "log": math.log10, "exp": math.exp}[name]
@@ -604,21 +623,22 @@ def evaluate(fn, src, values):
     unknown = unknown_names(src, operands)
     if unknown:
         raise FormulaError(f"{fn}: no variable named {', '.join(repr(w) for w in unknown)} here -- "
-                           + ("declared here: " + ", ".join(values) if values else "no variable is declared yet"))
+                           + ("declared here: " + ", ".join(values) if values else "no variable is declared yet"),
+                           "unknown", names=tuple(unknown), declared=tuple(values))
     coded, qs = src, []
     for i, key in enumerate(operands):
         coded = _replace_word(coded, key, f"{_PH_OPEN}{i}{_PH_CLOSE}")
         value, unit = values[key]
         if not isinstance(value, (int, float)):
-            raise FormulaError(f"{fn}: `{key}` is {value!r}, not a number")
+            raise FormulaError(f"{fn}: `{key}` is {value!r}, not a number", "not_number", key=key)
         q = quantity(float(value), unit)
         if q is None:
-            raise FormulaError(f"{fn}: cannot read the unit {unit!r} of `{key}`")
+            raise FormulaError(f"{fn}: cannot read the unit {unit!r} of `{key}`", "unit_of", key=key, unit=unit)
         qs.append(q)
     tokens = _tokenize(coded)
     got = None if tokens is None else _parse(tokens, qs)
     if got is None or got[1] != len(tokens):
-        raise FormulaError(f"{fn}: {src.strip()!r} cannot be computed -- write it with + - * / ^, parentheses, numbers (a unit in quotes after one, 12 \"kN\") and the functions {', '.join(FUNCTIONS[:6])} …")
+        raise FormulaError(f"{fn}: {src.strip()!r} cannot be computed -- write it with + - * / ^, parentheses, numbers (a unit in quotes after one, 12 \"kN\") and the functions {', '.join(FUNCTIONS[:6])} …", "cannot", src=src.strip())
     return got[0], operands
 
 
@@ -628,7 +648,7 @@ def split_relation(src):
         at = src.find(op)
         if at >= 0:
             return src[:at], RELATION_ALIASES.get(op, op), src[at + len(op):]
-    raise FormulaError(f"verify: no relation in {src!r} -- write one of {', '.join(RELATION_OPS)}")
+    raise FormulaError(f"verify: no relation in {src!r} -- write one of {', '.join(RELATION_OPS)}", "no_relation", src=src)
 
 
 def holds(op, a, b):

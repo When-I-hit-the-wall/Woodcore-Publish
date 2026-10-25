@@ -267,44 +267,6 @@
       "conflict": [],
       "file": "/Variable-loads/Live/E.typ"
     },
-    "EL+AL-Dach mit Wasser": {
-      "kind": "dead-load",
-      "check": null,
-      "written": {
-        "form": "62e8eb",
-        "kind": "dead-load",
-        "version": 2
-      },
-      "form": {
-        "kind": "dead-load",
-        "form": "62e8eb",
-        "version": 2
-      },
-      "matches": true,
-      "gone": false,
-      "missing": [],
-      "conflict": [],
-      "file": "/Permanent-loads/EL+AL-Dach mit Wasser.typ"
-    },
-    "EL+AL-Dach ohne Wasser": {
-      "kind": "dead-load",
-      "check": null,
-      "written": {
-        "form": "62e8eb",
-        "kind": "dead-load",
-        "version": 2
-      },
-      "form": {
-        "kind": "dead-load",
-        "form": "62e8eb",
-        "version": 2
-      },
-      "matches": true,
-      "gone": false,
-      "missing": [],
-      "conflict": [],
-      "file": "/Permanent-loads/EL+AL-Dach ohne Wasser.typ"
-    },
     "EL+AL-DachRand": {
       "kind": "dead-load",
       "check": null,
@@ -320,9 +282,49 @@
       },
       "matches": true,
       "gone": false,
-      "missing": [],
+      "missing": [
+        "figure:dead-load-EL+AL-DachRand.svg"
+      ],
       "conflict": [],
       "file": "/Permanent-loads/EL+AL-DachRand.typ"
+    },
+    "EL+AL-Dach_mit_Wasser": {
+      "kind": "dead-load",
+      "check": null,
+      "written": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "dead-load",
+        "form": "62e8eb",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Permanent-loads/EL+AL-Dach_mit_Wasser.typ"
+    },
+    "EL+AL-Dach_ohne_Wasser": {
+      "kind": "dead-load",
+      "check": null,
+      "written": {
+        "form": "62e8eb",
+        "kind": "dead-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "dead-load",
+        "form": "62e8eb",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Permanent-loads/EL+AL-Dach_ohne_Wasser.typ"
     },
     "EL+AL-Wand": {
       "kind": "dead-load",
@@ -339,7 +341,9 @@
       },
       "matches": true,
       "gone": false,
-      "missing": [],
+      "missing": [
+        "figure:dead-load-EL+AL-Wand.svg"
+      ],
       "conflict": [],
       "file": "/Permanent-loads/EL+AL-Wand.typ"
     },
@@ -537,13 +541,13 @@
       "kind": "snow-load",
       "check": null,
       "written": {
-        "form": "8f7c55",
+        "form": "8f7c55-fig3",
         "kind": "snow-load",
         "version": 2
       },
       "form": {
         "kind": "snow-load",
-        "form": "8f7c55",
+        "form": "8f7c55-fig3",
         "version": 2
       },
       "matches": true,
@@ -594,55 +598,51 @@
       "kind": "connection",
       "check": null,
       "written": {
-        "form": "cbfe38-4",
+        "form": "cbfe38-4-a",
         "kind": "connection",
         "version": 2
       },
       "form": {
         "kind": "connection",
-        "form": "cbfe38-4",
-        "version": 2
-      },
-      "matches": true,
-      "gone": false,
-      "missing": [
-        "var:N",
-        "var:V",
-        "var:M"
-      ],
-      "conflict": [],
-      "file": "/Connections/VU-MP-1.typ"
-    },
-    "WL-Fluchttreppe+Geräte": {
-      "kind": "wind-load",
-      "check": null,
-      "written": {
-        "form": "82a6cf",
-        "kind": "wind-load",
-        "version": 2
-      },
-      "form": {
-        "kind": "wind-load",
-        "form": "82a6cf",
+        "form": "cbfe38-4-a",
         "version": 2
       },
       "matches": true,
       "gone": false,
       "missing": [],
       "conflict": [],
-      "file": "/Variable-loads/Wind/WL-Fluchttreppe+Geräte.typ"
+      "file": "/Connections/VU-MP-1.typ"
     },
-    "WL-Pavillon": {
+    "WL-Fluchttreppe+Geraete": {
       "kind": "wind-load",
       "check": null,
       "written": {
-        "form": "82a6cf",
+        "form": "968859",
         "kind": "wind-load",
         "version": 2
       },
       "form": {
         "kind": "wind-load",
-        "form": "82a6cf",
+        "form": "968859",
+        "version": 2
+      },
+      "matches": true,
+      "gone": false,
+      "missing": [],
+      "conflict": [],
+      "file": "/Variable-loads/Wind/WL-Fluchttreppe+Geraete.typ"
+    },
+    "WL-Pavillon": {
+      "kind": "wind-load",
+      "check": null,
+      "written": {
+        "form": "968859",
+        "kind": "wind-load",
+        "version": 2
+      },
+      "form": {
+        "kind": "wind-load",
+        "form": "968859",
         "version": 2
       },
       "matches": true,
@@ -655,13 +655,13 @@
       "kind": "wind-load",
       "check": null,
       "written": {
-        "form": "82a6cf",
+        "form": "968859",
         "kind": "wind-load",
         "version": 2
       },
       "form": {
         "kind": "wind-load",
-        "form": "82a6cf",
+        "form": "968859",
         "version": 2
       },
       "matches": true,

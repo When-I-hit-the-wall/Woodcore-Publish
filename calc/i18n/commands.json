@@ -5,9 +5,9 @@
     "cite-norm": {
       "paragraphs": [
         {
-          "en": "Cites a norm **in the prose**, as the right-hand column cites one, and registers it for the bibliography (v0.99).",
-          "fr": "Cite une norme **dans le texte**, comme la colonne de droite en cite une, et l'enregistre pour la bibliographie (v0.99).",
-          "de": "Zitiert eine Norm **im Text**, so wie die rechte Spalte eine zitiert, und meldet sie für das Literaturverzeichnis an (v0.99)."
+          "en": "Cites a norm **in the prose**, as the right-hand column cites one, and registers it for the bibliography.",
+          "fr": "Cite une norme **dans le texte**, comme la colonne de droite en cite une, et l'enregistre pour la bibliographie.",
+          "de": "Zitiert eine Norm **im Text**, so wie die rechte Spalte eine zitiert, und meldet sie für das Literaturverzeichnis an."
         },
         {
           "en": "A clause takes its §, a table and an annex take the report's own word and none -- `norm-text`'s rule, so a citation in a sentence and a citation in the right-hand column are set alike. The document is registered whether or not a clause is printed with it.",
@@ -73,9 +73,9 @@
           "de": "auto druckt jede Tabelle, die die Art von sich aus zeigt und die für d gilt; eine Nummer druckt diese Tabelle allein, eine Liste diese Tabellen in ihrer Reihenfolge -- jede abgelehnt, mit Nennung der passenden, wenn sie die Art oder dieses d nicht betrifft."
         },
         "label": {
-          "en": "the title of each table: auto the norm's own, in the report's language; none none; a string replaces it -- «Anschluss Sparren – Pfette» --, for one table (`title:` until the spec 2026-10-21-commandes-typst-refonte, REQ-016).",
-          "fr": "le titre de chaque tableau : auto celui de la norme, dans la langue du rapport ; none aucun ; une chaîne le remplace – « Anschluss Sparren – Pfette » –, pour un seul tableau (`title:` jusqu'à la spec 2026-10-21-commandes-typst-refonte, REQ-016).",
-          "de": "der Titel jeder Tabelle: auto jener der Norm, in der Sprache des Berichts; none keiner; eine Zeichenkette ersetzt ihn – «Anschluss Sparren – Pfette» –, für eine Tabelle (`title:` bis zur Spezifikation 2026-10-21-commandes-typst-refonte, REQ-016)."
+          "en": "the title of each table: auto the norm's own, in the report's language; none none; a string replaces it -- «Anschluss Sparren – Pfette» --, for one table (formerly `title:`).",
+          "fr": "le titre de chaque tableau : auto celui de la norme, dans la langue du rapport ; none aucun ; une chaîne le remplace – « Anschluss Sparren – Pfette » –, pour un seul tableau (autrefois `title:`).",
+          "de": "der Titel jeder Tabelle: auto jener der Norm, in der Sprache des Berichts; none keiner; eine Zeichenkette ersetzt ihn – «Anschluss Sparren – Pfette» –, für eine Tabelle (früher `title:`)."
         },
         "descr": {
           "en": "a footnote on the first table's title.",
@@ -103,9 +103,9 @@
           "de": "1 die Tabellen allein, ohne ihre Titel und ihr Zitat, wo `label` und `norm` auto sind; 2 mit ihnen (was ein Dokument standardmässig druckt); 3 wie 2, das Zitat der Normtabelle wird ab 2 gedruckt. auto folgt dem Bericht."
         },
         "id": {
-          "en": "the name Woodcore finds this call by in a domain it wrote, as every line's `id:` (REQ-012).",
-          "fr": "le nom par lequel Woodcore retrouve cet appel dans un domaine qu'il a écrit, comme l'`id:` de chaque ligne (REQ-012).",
-          "de": "der Name, unter dem Woodcore diesen Aufruf in einem von ihm geschriebenen Bereich findet, wie das `id:` jeder Zeile (REQ-012)."
+          "en": "the name Woodcore finds this call by in a domain it wrote, as every line's `id:`.",
+          "fr": "le nom par lequel Woodcore retrouve cet appel dans un domaine qu'il a écrit, comme l'`id:` de chaque ligne.",
+          "de": "der Name, unter dem Woodcore diesen Aufruf in einem von ihm geschriebenen Bereich findet, wie das `id:` jeder Zeile."
         }
       }
     },
@@ -122,9 +122,9 @@
           "de": "Das Ergebnis, mit dem ein Abschnitt schliesst, doppelt unterstrichen, wie `verify` eine Beziehung unterstreicht:"
         },
         {
-          "en": "**What is printed** is two fine arguments (spec 2026-10-21-commandes-typst-refonte, Q-001): `display-equation` the name and the answer -- `\"variable\"` the symbol, `\"value\"` the bare number, `\"value-unit\"` the number and its unit, `\"variable-value-unit\"` both --, `display-formula` the formula between them -- `\"variable\"` in letters, `\"value\"` with the numbers put in, `\"value-unit\"` with the numbers and their units, `\"variable-value-unit\"` the letters then the numbers. The line is `name = formula = answer`, every part left out skipped:",
-          "fr": "**Ce qui est imprimé** tient en deux réglages fins (spec 2026-10-21-commandes-typst-refonte, Q-001) : `display-equation` le nom et la réponse -- `\"variable\"` le symbole, `\"value\"` le nombre seul, `\"value-unit\"` le nombre et son unité, `\"variable-value-unit\"` les deux --, `display-formula` la formule entre eux -- `\"variable\"` en lettres, `\"value\"` avec les nombres, `\"value-unit\"` avec les nombres et leurs unités, `\"variable-value-unit\"` les lettres puis les nombres. La ligne est `name = formula = answer`, chaque partie omise étant sautée :",
-          "de": "**Was ausgegeben wird**, sind zwei Feineinstellungen (Spec 2026-10-21-commandes-typst-refonte, Q-001): `display-equation` der Name und das Ergebnis -- `\"variable\"` das Symbol, `\"value\"` die blosse Zahl, `\"value-unit\"` die Zahl und ihre Einheit, `\"variable-value-unit\"` beides --, `display-formula` die Formel dazwischen -- `\"variable\"` in Buchstaben, `\"value\"` mit eingesetzten Zahlen, `\"value-unit\"` mit Zahlen und Einheiten, `\"variable-value-unit\"` die Buchstaben, dann die Zahlen. Die Zeile ist `name = formula = answer`, jeder weggelassene Teil wird übersprungen:"
+          "en": "**What is printed** is two fine arguments: `display-equation` the name and the answer -- `\"variable\"` the symbol, `\"value\"` the bare number, `\"value-unit\"` the number and its unit, `\"variable-value-unit\"` both --, `display-formula` the formula between them -- `\"variable\"` in letters, `\"value\"` with the numbers put in, `\"value-unit\"` with the numbers and their units, `\"variable-value-unit\"` the letters then the numbers. The line is `name = formula = answer`, every part left out skipped:",
+          "fr": "**Ce qui est imprimé** tient en deux réglages fins : `display-equation` le nom et la réponse -- `\"variable\"` le symbole, `\"value\"` le nombre seul, `\"value-unit\"` le nombre et son unité, `\"variable-value-unit\"` les deux --, `display-formula` la formule entre eux -- `\"variable\"` en lettres, `\"value\"` avec les nombres, `\"value-unit\"` avec les nombres et leurs unités, `\"variable-value-unit\"` les lettres puis les nombres. La ligne est `name = formula = answer`, chaque partie omise étant sautée :",
+          "de": "**Was ausgegeben wird**, sind zwei Feineinstellungen: `display-equation` der Name und das Ergebnis -- `\"variable\"` das Symbol, `\"value\"` die blosse Zahl, `\"value-unit\"` die Zahl und ihre Einheit, `\"variable-value-unit\"` beides --, `display-formula` die Formel dazwischen -- `\"variable\"` in Buchstaben, `\"value\"` mit eingesetzten Zahlen, `\"value-unit\"` mit Zahlen und Einheiten, `\"variable-value-unit\"` die Buchstaben, dann die Zahlen. Die Zeile ist `name = formula = answer`, jeder weggelassene Teil wird übersprungen:"
         },
         {
           "en": "At `level: 0` -- both `\"none\"` -- the answer is computed, checked and stored, and nothing is printed: an intermediate value the next line names.",
@@ -132,9 +132,9 @@
           "de": "Mit `level: 0` -- beide `\"none\"` -- wird das Ergebnis berechnet, geprüft und gespeichert, und nichts wird ausgegeben: ein Zwischenwert, den die nächste Zeile nennt."
         },
         {
-          "en": "`unit:` converts the answer into another unit of its dimension; `as-unit:` gives the answer **another unit without converting it** -- the number kept, the unit replaced, as the engineer asked for a factor whose unit the formula cannot carry (REQ-003): Woodcore says so beside the domain in its window (Q-004).",
-          "fr": "`unit:` convertit la réponse dans une autre unité de sa dimension ; `as-unit:` donne à la réponse **une autre unité sans la convertir** -- le nombre gardé, l'unité remplacée, comme l'ingénieur l'a demandé pour un facteur dont la formule ne peut porter l'unité (REQ-003) : Woodcore le signale à côté du domaine dans sa fenêtre (Q-004).",
-          "de": "`unit:` rechnet das Ergebnis in eine andere Einheit seiner Dimension um; `as-unit:` gibt dem Ergebnis **eine andere Einheit, ohne umzurechnen** -- die Zahl bleibt, die Einheit wird ersetzt, wie der Ingenieur es für einen Faktor verlangt hat, dessen Einheit die Formel nicht tragen kann (REQ-003): Woodcore zeigt es neben dem Bereich in seinem Fenster an (Q-004)."
+          "en": "`unit:` converts the answer into another unit of its dimension; `as-unit:` gives the answer **another unit without converting it** -- the number kept, the unit replaced, as the engineer asked for a factor whose unit the formula cannot carry: Woodcore says so beside the domain in its window.",
+          "fr": "`unit:` convertit la réponse dans une autre unité de sa dimension ; `as-unit:` donne à la réponse **une autre unité sans la convertir** -- le nombre gardé, l'unité remplacée, comme l'ingénieur l'a demandé pour un facteur dont la formule ne peut porter l'unité : Woodcore le signale à côté du domaine dans sa fenêtre.",
+          "de": "`unit:` rechnet das Ergebnis in eine andere Einheit seiner Dimension um; `as-unit:` gibt dem Ergebnis **eine andere Einheit, ohne umzurechnen** -- die Zahl bleibt, die Einheit wird ersetzt, wie der Ingenieur es für einen Faktor verlangt hat, dessen Einheit die Formel nicht tragen kann: Woodcore zeigt es neben dem Bereich in seinem Fenster an."
         },
         {
           "en": "A `*` is a product, printed as `·`, and a word math does not know may stand in the symbol without its quotes -- `G_(1,Ed)` for `G_(1,\"Ed\")`:",
@@ -285,12 +285,38 @@
         }
       }
     },
+    "from-level": {
+      "paragraphs": [
+        {
+          "en": "Prints what it holds **from a level on**: at the level the place stands at -- the innermost `#domain` that states one, else the report's, the uniform level over both -- or above, and nothing below it. What a domain's file writes a figure in that only its most detailed print shows: the figure of the norm of a wind load, printed at level 3 alone. The figure keeps its own line, its width, its caption and its label, which «Affichage» sets; the preview of «Affichage» prints it pale where the report would hide it.",
+          "fr": "Imprime ce qu'il contient **à partir d'un niveau** : au niveau où se trouve l'endroit -- le `#domain` le plus intérieur qui en indique un, sinon celui du rapport, le niveau uniforme l'emportant sur les deux -- ou au-dessus, et rien en dessous. C'est ce dans quoi le fichier d'un domaine écrit une figure que seule son impression la plus détaillée montre : la figure de la norme d'une charge de vent, imprimée au niveau 3 seulement. La figure garde sa ligne, sa largeur, sa légende et son étiquette, que règle « Affichage » ; l'aperçu d'« Affichage » l'imprime pâle là où le rapport la cacherait.",
+          "de": "Gibt aus, was er enthält, **ab einer Stufe**: auf der Stufe, auf der die Stelle steht -- die des innersten `#domain`, der eine angibt, sonst die des Berichts, die einheitliche Stufe über beiden -- oder darüber, und darunter nichts. Darin schreibt die Datei eines Bereichs eine Abbildung, die nur ihr ausführlichster Druck zeigt: die Abbildung der Norm einer Windlast, nur auf Stufe 3 ausgegeben. Die Abbildung behält ihre Zeile, ihre Breite, ihre Legende und ihre Marke, die «Affichage» einstellt; die Vorschau von «Affichage» gibt sie blass aus, wo der Bericht sie verbergen würde."
+        },
+        {
+          "en": "At level 2 it prints nothing:",
+          "fr": "Au niveau 2, il n'imprime rien :",
+          "de": "Auf Stufe 2 gibt er nichts aus:"
+        }
+      ],
+      "arguments": {
+        "lowest": {
+          "en": "1, 2 or 3 -- the lowest level what it holds is printed at.",
+          "fr": "1, 2 ou 3 -- le niveau le plus bas auquel ce qu'il contient est imprimé.",
+          "de": "1, 2 oder 3 -- die niedrigste Stufe, auf der ausgegeben wird, was er enthält."
+        },
+        "body": {
+          "en": "what it holds, a figure on its line.",
+          "fr": "ce qu'il contient, une figure sur sa ligne.",
+          "de": "was er enthält, eine Abbildung auf ihrer Zeile."
+        }
+      }
+    },
     "find": {
       "paragraphs": [
         {
-          "en": "**What there is to name in a call**: every domain with its keys, or the variables one of them holds (v0.85). A command for *writing* a report rather than for the finished page -- one calls it, reads it, and deletes the call -- and the only thing that answers \"which variables does this connector carry?\": the catalog window's loads tab reads `data/calculations.json` alone, so a connector's own vars and a polar moment's are listed nowhere else.",
-          "fr": "**Ce qu'il y a à nommer dans un appel** : chaque domaine avec ses clés, ou les variables que l'un d'eux contient (v0.85). Une commande pour *rédiger* un rapport plutôt que pour la page finie – on l'appelle, on la lit, et on supprime l'appel – et la seule chose qui réponde à « quelles variables ce moyen d'assemblage porte-t-il ? » : l'onglet Charges de la fenêtre de Woodcore ne lit que `data/calculations.json`, si bien que les variables propres d'un moyen d'assemblage et celles d'un moment polaire ne sont listées nulle part ailleurs.",
-          "de": "**Was sich in einem Aufruf nennen lässt**: jede Domäne mit ihren Schlüsseln, oder die Variablen, die eine davon enthält (v0.85). Ein Befehl zum *Schreiben* eines Berichts statt für die fertige Seite – man ruft ihn auf, liest das Ergebnis und löscht den Aufruf – und das Einzige, was die Frage «Welche Variablen trägt dieses Verbindungsmittel?» beantwortet: der Reiter «Lasten» des Fensters von Woodcore liest nur `data/calculations.json`, sodass die eigenen Variablen eines Verbindungsmittels und die eines polaren Trägheitsmoments nirgends sonst aufgeführt sind."
+          "en": "**What there is to name in a call**: every domain with its keys, or the variables one of them holds. A command for *writing* a report rather than for the finished page -- one calls it, reads it, and deletes the call -- and the only thing that answers \"which variables does this connector carry?\": the catalog window's loads tab reads `data/calculations.json` alone, so a connector's own vars and a polar moment's are listed nowhere else.",
+          "fr": "**Ce qu'il y a à nommer dans un appel** : chaque domaine avec ses clés, ou les variables que l'un d'eux contient. Une commande pour *rédiger* un rapport plutôt que pour la page finie – on l'appelle, on la lit, et on supprime l'appel – et la seule chose qui réponde à « quelles variables ce moyen d'assemblage porte-t-il ? » : l'onglet Charges de la fenêtre de Woodcore ne lit que `data/calculations.json`, si bien que les variables propres d'un moyen d'assemblage et celles d'un moment polaire ne sont listées nulle part ailleurs.",
+          "de": "**Was sich in einem Aufruf nennen lässt**: jede Domäne mit ihren Schlüsseln, oder die Variablen, die eine davon enthält. Ein Befehl zum *Schreiben* eines Berichts statt für die fertige Seite – man ruft ihn auf, liest das Ergebnis und löscht den Aufruf – und das Einzige, was die Frage «Welche Variablen trägt dieses Verbindungsmittel?» beantwortet: der Reiter «Lasten» des Fensters von Woodcore liest nur `data/calculations.json`, sodass die eigenen Variablen eines Verbindungsmittels und die eines polaren Trägheitsmoments nirgends sonst aufgeführt sind."
         },
         {
           "en": "What the report itself has written down at this point, which is what a `#verify` refusing a name is asking about:",
@@ -382,14 +408,14 @@
     "get": {
       "paragraphs": [
         {
-          "en": "**One field of a variable already read** (`find`, a record's `vars`, or one the report declared, by its name) -- one command for the eight `get-*` of before v0.120 (spec 2026-10-19-base-saine-nettoyage, REQ-002). The rest of the engine reads a variable's fields through it, never `.value` or `.unit` directly, so a change of the variable's shape touches this one place (docs/typst/report-engine.md §6).",
-          "fr": "**Un champ d'une variable déjà lue** (`find`, les `vars` d'un enregistrement, ou une variable que le rapport a déclarée, par son nom) — une seule commande pour les huit `get-*` d'avant la v0.120 (spec 2026-10-19-base-saine-nettoyage, REQ-002). Le reste du moteur lit les champs d'une variable par elle, jamais `.value` ou `.unit` directement, si bien qu'un changement de la forme d'une variable ne touche que cet endroit (docs/typst/report-engine.md §6).",
-          "de": "**Ein Feld einer bereits gelesenen Variablen** (`find`, die `vars` eines Datensatzes, oder eine Variable, die der Bericht deklariert hat, über ihren Namen) — ein Befehl für die acht `get-*` vor v0.120 (Spezifikation 2026-10-19-base-saine-nettoyage, REQ-002). Der übrige Motor liest die Felder einer Variablen über ihn, nie direkt `.value` oder `.unit`, sodass eine Änderung der Form einer Variablen nur diese eine Stelle berührt (docs/typst/report-engine.md §6)."
+          "en": "**One field of a variable already read** (`find`, a record's `vars`, or one the report declared, by its name) -- one command for the eight `get-*` of before v0.120. The rest of the engine reads a variable's fields through it, never `.value` or `.unit` directly, so a change of the variable's shape touches this one place (docs/typst/report-engine.md §6).",
+          "fr": "**Un champ d'une variable déjà lue** (`find`, les `vars` d'un enregistrement, ou une variable que le rapport a déclarée, par son nom) — une seule commande pour les huit `get-*` d'avant la v0.120. Le reste du moteur lit les champs d'une variable par elle, jamais `.value` ou `.unit` directement, si bien qu'un changement de la forme d'une variable ne touche que cet endroit (docs/typst/report-engine.md §6).",
+          "de": "**Ein Feld einer bereits gelesenen Variablen** (`find`, die `vars` eines Datensatzes, oder eine Variable, die der Bericht deklariert hat, über ihren Namen) — ein Befehl für die acht `get-*` vor v0.120. Der übrige Motor liest die Felder einer Variablen über ihn, nie direkt `.value` oder `.unit`, sodass eine Änderung der Form einer Variablen nur diese eine Stelle berührt (docs/typst/report-engine.md §6)."
         },
         {
-          "en": "A variable the report declared is named by its name, read in the registry where the call stands -- a state, so in a `context` (spec 2026-10-21-commandes-typst-refonte, REQ-009): a sentence that depends on a result.",
-          "fr": "Une variable que le rapport a déclarée se nomme par son nom, lue dans le registre là où se trouve l'appel -- un état, donc dans un `context` (spec 2026-10-21-commandes-typst-refonte, REQ-009) : une phrase qui dépend d'un résultat.",
-          "de": "Eine Variable, die der Bericht deklariert hat, wird mit ihrem Namen genannt und in der Registry dort gelesen, wo der Aufruf steht -- ein Zustand, also in einem `context` (Spec 2026-10-21-commandes-typst-refonte, REQ-009): ein Satz, der von einem Ergebnis abhängt."
+          "en": "A variable the report declared is named by its name, read in the registry where the call stands -- a state, so in a `context`: a sentence that depends on a result.",
+          "fr": "Une variable que le rapport a déclarée se nomme par son nom, lue dans le registre là où se trouve l'appel -- un état, donc dans un `context` : une phrase qui dépend d'un résultat.",
+          "de": "Eine Variable, die der Bericht deklariert hat, wird mit ihrem Namen genannt und in der Registry dort gelesen, wo der Aufruf steht -- ein Zustand, also in einem `context`: ein Satz, der von einem Ergebnis abhängt."
         }
       ],
       "arguments": {
@@ -429,9 +455,9 @@
     "ids": {
       "paragraphs": [
         {
-          "en": "**The ids of every object of one kind the export carries** -- one command for the thirteen `*-ids` of before v0.120 (spec docs/requirements/active/2026-10-19-base-saine-nettoyage.md, REQ-002). Typst cannot list a folder, which is why `calc/export_all.py` writes the files this reads. A section that called an old name is rewritten when its project is opened (calc/renamed-commands.json).",
-          "fr": "**Les identifiants de chaque objet d'un type que porte l'export** — une seule commande pour les treize `*-ids` d'avant la v0.120 (spec docs/requirements/active/2026-10-19-base-saine-nettoyage.md, REQ-002). Typst ne sait pas lister un dossier : c'est pourquoi `calc/export_all.py` écrit les fichiers que celle-ci lit. Une section qui appelait un ancien nom est réécrite à l'ouverture de son projet (calc/renamed-commands.json).",
-          "de": "**Die Kennungen aller Objekte einer Art, die der Export führt** — ein Befehl für die dreizehn `*-ids` vor v0.120 (Spezifikation docs/requirements/active/2026-10-19-base-saine-nettoyage.md, REQ-002). Typst kann keinen Ordner auflisten; deshalb schreibt `calc/export_all.py` die Dateien, die dieser Befehl liest. Ein Abschnitt, der einen alten Namen aufrief, wird beim Öffnen seines Projekts umgeschrieben (calc/renamed-commands.json)."
+          "en": "**The ids of every object of one kind the export carries** -- one command for the thirteen `*-ids` of before v0.120. Typst cannot list a folder, which is why `calc/export_all.py` writes the files this reads. A section that called an old name is rewritten when its project is opened (calc/renamed-commands.json).",
+          "fr": "**Les identifiants de chaque objet d'un type que porte l'export** — une seule commande pour les treize `*-ids` d'avant la v0.120. Typst ne sait pas lister un dossier : c'est pourquoi `calc/export_all.py` écrit les fichiers que celle-ci lit. Une section qui appelait un ancien nom est réécrite à l'ouverture de son projet (calc/renamed-commands.json).",
+          "de": "**Die Kennungen aller Objekte einer Art, die der Export führt** — ein Befehl für die dreizehn `*-ids` vor v0.120. Typst kann keinen Ordner auflisten; deshalb schreibt `calc/export_all.py` die Dateien, die dieser Befehl liest. Ein Abschnitt, der einen alten Namen aufrief, wird beim Öffnen seines Projekts umgeschrieben (calc/renamed-commands.json)."
         }
       ],
       "arguments": {
@@ -445,9 +471,9 @@
     "project-info": {
       "paragraphs": [
         {
-          "en": "The project as its `.woodcore` file describes it, and what produced this export: `name`, `number`, `client`, `address`, `company`, `author`, `checker` -- each \"\" where the file leaves it out -- and `woodcore` (its `version` and git `revision`), `typst` and the `workbooks` read with their SHA-256 (data/project.json, docs/architecture/layout.md §11, v0.82). Data access, not a display function: what a title page is written from, so the project's name is typed once, in its file.",
-          "fr": "Le projet tel que le décrit son fichier `.woodcore`, et ce qui a produit cet export : `name`, `number`, `client`, `address`, `company`, `author`, `checker` – chacun \"\" là où le fichier l'omet – ainsi que `woodcore` (sa `version` et sa `revision` git), `typst` et les `workbooks` lus, avec leur SHA-256 (data/project.json, docs/architecture/layout.md §11, v0.82). Accès aux données, pas une fonction d'affichage : ce à partir de quoi une page de titre est écrite, de sorte que le nom du projet n'est saisi qu'une fois, dans son fichier.",
-          "de": "Das Projekt, wie seine Datei `.woodcore` es beschreibt, und was diesen Export erzeugt hat: `name`, `number`, `client`, `address`, `company`, `author`, `checker` – jeweils \"\", wo die Datei es weglässt – sowie `woodcore` (seine `version` und git-`revision`), `typst` und die gelesenen `workbooks` mit ihrem SHA-256 (data/project.json, docs/architecture/layout.md §11, v0.82). Datenzugriff, keine Anzeigefunktion: das, woraus ein Titelblatt geschrieben wird, sodass der Projektname nur einmal eingegeben wird, in seiner Datei."
+          "en": "The project as its `.woodcore` file describes it, and what produced this export: `name`, `number`, `client`, `address`, `company`, `author`, `checker` -- each \"\" where the file leaves it out -- and `woodcore` (its `version` and git `revision`), and `typst` (data/project.json 1.1, docs/architecture/layout.md §11, v0.82; the `workbooks` read and their SHA-256 until issue #109). Data access, not a display function: what a title page is written from, so the project's name is typed once, in its file.",
+          "fr": "Le projet tel que le décrit son fichier `.woodcore`, et ce qui a produit cet export : `name`, `number`, `client`, `address`, `company`, `author`, `checker` – chacun \"\" là où le fichier l'omet – ainsi que `woodcore` (sa `version` et sa `revision` git), et `typst` (data/project.json 1.1, docs/architecture/layout.md §11, v0.82 ; les `workbooks` lus et leur SHA-256 jusqu'à l'issue #109). Accès aux données, pas une fonction d'affichage : ce à partir de quoi une page de titre est écrite, de sorte que le nom du projet n'est saisi qu'une fois, dans son fichier.",
+          "de": "Das Projekt, wie seine Datei `.woodcore` es beschreibt, und was diesen Export erzeugt hat: `name`, `number`, `client`, `address`, `company`, `author`, `checker` – jeweils \"\", wo die Datei es weglässt – sowie `woodcore` (seine `version` und git-`revision`), und `typst` (data/project.json 1.1, docs/architecture/layout.md §11, v0.82; die gelesenen `workbooks` mit ihrem SHA-256 bis zur Issue #109). Datenzugriff, keine Anzeigefunktion: das, woraus ein Titelblatt geschrieben wird, sodass der Projektname nur einmal eingegeben wird, in seiner Datei."
         }
       ],
       "arguments": {}
@@ -554,9 +580,9 @@
     "show-bibliography": {
       "paragraphs": [
         {
-          "en": "**Every norm and document the report cites, listed in full** -- its designation, its full title, its edition and its publisher, in three blocks: the norms, the literature, and the documents no entry names (v0.99).",
-          "fr": "**Chaque norme et chaque document que le rapport cite, listé en entier** – sa désignation, son titre complet, son édition et son éditeur, en trois blocs : les normes, la littérature, et les documents qu'aucune entrée ne nomme (v0.99).",
-          "de": "**Jede Norm und jedes Dokument, das der Bericht zitiert, in voller Länge** – die Bezeichnung, der volle Titel, die Ausgabe und der Herausgeber, in drei Blöcken: die Normen, die Literatur, und die Dokumente, die kein Eintrag nennt (v0.99)."
+          "en": "**Every norm and document the report cites, listed in full** -- its designation, its full title, its edition and its publisher, in three blocks: the norms, the literature, and the documents no entry names.",
+          "fr": "**Chaque norme et chaque document que le rapport cite, listé en entier** – sa désignation, son titre complet, son édition et son éditeur, en trois blocs : les normes, la littérature, et les documents qu'aucune entrée ne nomme.",
+          "de": "**Jede Norm und jedes Dokument, das der Bericht zitiert, in voller Länge** – die Bezeichnung, der volle Titel, die Ausgabe und der Herausgeber, in drei Blöcken: die Normen, die Literatur, und die Dokumente, die kein Eintrag nennt."
         },
         {
           "en": "A citation stays exactly what it was where it is made -- «SIA 265 §4.2.1» in the right-hand column, «SIA 265 Tabelle 24» beside a table of distances -- and is *registered* as it is made. This prints what was registered, and nothing else: a norm the report never cites is never listed, and a norm cited without an entry is listed as it was cited.",
@@ -721,9 +747,9 @@
     "tl-of": {
       "paragraphs": [
         {
-          "en": "A string the data carries, in the language given: a term of the glossary, else the template it was composed from, else itself. Unchanged is the safe and the usual answer -- a material's name, an Excel description, a sheet's name and a value the engineer typed are not the engine's words.",
-          "fr": "Une chaîne que portent les données, dans la langue donnée : un terme du glossaire, sinon le modèle à partir duquel elle a été composée, sinon elle-même. Inchangée, c'est la réponse sûre et la plus courante – le nom d'un matériau, une description Excel, le nom d'une feuille et une valeur saisie par l'ingénieur ne sont pas des mots du moteur.",
-          "de": "Eine Zeichenkette aus den Daten, in der angegebenen Sprache: ein Begriff des Glossars, sonst die Vorlage, aus der sie zusammengesetzt wurde, sonst sie selbst. Unverändert ist die sichere und die übliche Antwort – der Name eines Materials, eine Excel-Beschreibung, der Name eines Tabellenblatts und ein vom Ingenieur eingegebener Wert sind nicht Wörter der Engine."
+          "en": "A string the data carries, in the language given: a term of the glossary, else the template it was composed from, else itself. Unchanged is the safe and the usual answer -- a material's name, a description, a case's name and a value the engineer typed are not the engine's words.",
+          "fr": "Une chaîne que portent les données, dans la langue donnée : un terme du glossaire, sinon le modèle à partir duquel elle a été composée, sinon elle-même. Inchangée, c'est la réponse sûre et la plus courante – le nom d'un matériau, une description, le nom d'un cas et une valeur saisie par l'ingénieur ne sont pas des mots du moteur.",
+          "de": "Eine Zeichenkette aus den Daten, in der angegebenen Sprache: ein Begriff des Glossars, sonst die Vorlage, aus der sie zusammengesetzt wurde, sonst sie selbst. Unverändert ist die sichere und die übliche Antwort – der Name eines Materials, eine Beschreibung, der Name eines Falls und ein vom Ingenieur eingegebener Wert sind nicht Wörter der Engine."
         }
       ],
       "arguments": {
@@ -768,9 +794,9 @@
     "show-masked": {
       "paragraphs": [
         {
-          "en": "Whether a line a domain hides is printed all the same, pale and marked «masked» -- what the «Affichage» view of a domain's file sets in its preview, so that the engineer sees every line of the file and which of them the report leaves out (spec 2026-10-22-onglet-neige-type, UI-011). A line whose display shows nothing -- `level: 0`, `display: \"none\"`, both displays of an `#eq` at `\"none\"` -- is then printed at level 3's preset. `false`, the report's, leaves it out.",
-          "fr": "Si une ligne qu'un domaine masque est tout de même imprimée, pâle et marquée « masquée » -- ce que la vue « Affichage » du fichier d'un domaine règle dans son aperçu, pour que l'ingénieur voie toutes les lignes du fichier et celles que le rapport laisse de côté (spec 2026-10-22-onglet-neige-type, UI-011). Une ligne dont l'affichage ne montre rien -- `level: 0`, `display: \"none\"`, les deux affichages d'un `#eq` à `\"none\"` -- est alors imprimée selon le préréglage du niveau 3. `false`, celui du rapport, la laisse de côté.",
-          "de": "Ob eine Zeile, die eine Domäne ausblendet, trotzdem gedruckt wird, blass und als «ausgeblendet» markiert -- was die Ansicht «Darstellung» der Datei einer Domäne in ihrer Vorschau setzt, damit der Ingenieur jede Zeile der Datei sieht und welche davon der Bericht weglässt (Spec 2026-10-22-onglet-neige-type, UI-011). Eine Zeile, deren Darstellung nichts zeigt -- `level: 0`, `display: \"none\"`, beide Darstellungen eines `#eq` auf `\"none\"` -- wird dann nach der Voreinstellung der Stufe 3 gedruckt. `false`, die des Berichts, lässt sie weg."
+          "en": "Whether a line a domain hides is printed all the same, pale and marked «masked» -- what the «Affichage» view of a domain's file sets in its preview, so that the engineer sees every line of the file and which of them the report leaves out. A line whose display shows nothing -- `level: 0`, `display: \"none\"`, both displays of an `#eq` at `\"none\"` -- is then printed at level 3's preset. `false`, the report's, leaves it out.",
+          "fr": "Si une ligne qu'un domaine masque est tout de même imprimée, pâle et marquée « masquée » -- ce que la vue « Affichage » du fichier d'un domaine règle dans son aperçu, pour que l'ingénieur voie toutes les lignes du fichier et celles que le rapport laisse de côté. Une ligne dont l'affichage ne montre rien -- `level: 0`, `display: \"none\"`, les deux affichages d'un `#eq` à `\"none\"` -- est alors imprimée selon le préréglage du niveau 3. `false`, celui du rapport, la laisse de côté.",
+          "de": "Ob eine Zeile, die eine Domäne ausblendet, trotzdem gedruckt wird, blass und als «ausgeblendet» markiert -- was die Ansicht «Darstellung» der Datei einer Domäne in ihrer Vorschau setzt, damit der Ingenieur jede Zeile der Datei sieht und welche davon der Bericht weglässt. Eine Zeile, deren Darstellung nichts zeigt -- `level: 0`, `display: \"none\"`, beide Darstellungen eines `#eq` auf `\"none\"` -- wird dann nach der Voreinstellung der Stufe 3 gedruckt. `false`, die des Berichts, lässt sie weg."
         }
       ],
       "arguments": {}
@@ -778,9 +804,9 @@
     "unit": {
       "paragraphs": [
         {
-          "en": "Sets the unit **computed** results of one dimension are printed in: for the next one (the default), for the rest of the domain, or for the rest of the document (spec 2026-10-21-commandes-typst-refonte, REQ-005).",
-          "fr": "Fixe l'unité dans laquelle les résultats **calculés** d'une dimension sont imprimés : pour le prochain (par défaut), pour le reste du domaine, ou pour le reste du document (spec 2026-10-21-commandes-typst-refonte, REQ-005).",
-          "de": "Legt die Einheit fest, in der **berechnete** Ergebnisse einer Dimension ausgegeben werden: für das nächste (Standard), für den Rest des Bereichs oder für den Rest des Dokuments (Spec 2026-10-21-commandes-typst-refonte, REQ-005)."
+          "en": "Sets the unit **computed** results of one dimension are printed in: for the next one (the default), for the rest of the domain, or for the rest of the document.",
+          "fr": "Fixe l'unité dans laquelle les résultats **calculés** d'une dimension sont imprimés : pour le prochain (par défaut), pour le reste du domaine, ou pour le reste du document.",
+          "de": "Legt die Einheit fest, in der **berechnete** Ergebnisse einer Dimension ausgegeben werden: für das nächste (Standard), für den Rest des Bereichs oder für den Rest des Dokuments."
         },
         {
           "en": "The dimension is read from the unit itself, so one call settles one kind of result and leaves the others alone: `scope: \"next\"` is spent by the first answer **of that dimension**, the lines of another dimension between them taking nothing of it. The defaults are `default-units`: mm, mm², mm³, mm⁴, s, kN, kNm, N/mm², kN/m, kg, °.",
@@ -824,9 +850,9 @@
           "de": "Schreibt eine Variable auf: sie wird unter ihrem Namen gespeichert, wo jede Formel weiter unten sie nennen kann, und ausgegeben -- **im Fliesstext**, `symbol = value unit`, wie ein Wort des Satzes, in dem sie steht, sodass mehrere hintereinander geschriebene in einem Absatz weiterlaufen und eine Leerzeile einen neuen beginnt."
         },
         {
-          "en": "**Without a value it prints a variable already declared** -- with everything it was declared with, its label, its citation and how it was shown, the level and the id aside -- and `unit:` shows it in another unit of the same dimension, for that line alone: the variable keeps its own, and the formulas below compute with it (spec 2026-10-21-commandes-typst-refonte, REQ-002, Q-011). `#val` and `#var-unit` were this until then.",
-          "fr": "**Sans valeur, elle imprime une variable déjà déclarée** -- avec tout ce avec quoi elle a été déclarée, son libellé, sa citation et la façon dont elle était montrée, sauf le niveau et l'id -- et `unit:` la montre dans une autre unité de la même dimension, pour cette ligne seule : la variable garde la sienne, et les formules plus bas calculent avec elle (spec 2026-10-21-commandes-typst-refonte, REQ-002, Q-011). C'étaient `#val` et `#var-unit` jusque-là.",
-          "de": "**Ohne Wert gibt sie eine bereits deklarierte Variable aus** -- mit allem, womit sie deklariert wurde, ihrer Bezeichnung, ihrem Zitat und wie sie gezeigt wurde, ausser Stufe und id --, und `unit:` zeigt sie in einer anderen Einheit derselben Dimension, nur für diese Zeile: die Variable behält ihre eigene, und die Formeln weiter unten rechnen damit (Spec 2026-10-21-commandes-typst-refonte, REQ-002, Q-011). Bis dahin waren das `#val` und `#var-unit`."
+          "en": "**Without a value it prints a variable already declared** -- with everything it was declared with, its label, its citation and how it was shown, the level and the id aside -- and `unit:` shows it in another unit of the same dimension, for that line alone: the variable keeps its own, and the formulas below compute with it. `#val` and `#var-unit` were this until then.",
+          "fr": "**Sans valeur, elle imprime une variable déjà déclarée** -- avec tout ce avec quoi elle a été déclarée, son libellé, sa citation et la façon dont elle était montrée, sauf le niveau et l'id -- et `unit:` la montre dans une autre unité de la même dimension, pour cette ligne seule : la variable garde la sienne, et les formules plus bas calculent avec elle. C'étaient `#val` et `#var-unit` jusque-là.",
+          "de": "**Ohne Wert gibt sie eine bereits deklarierte Variable aus** -- mit allem, womit sie deklariert wurde, ihrer Bezeichnung, ihrem Zitat und wie sie gezeigt wurde, ausser Stufe und id --, und `unit:` zeigt sie in einer anderen Einheit derselben Dimension, nur für diese Zeile: die Variable behält ihre eigene, und die Formeln weiter unten rechnen damit. Bis dahin waren das `#val` und `#var-unit`."
         },
         {
           "en": "A value written down somewhere else is named with `domain:` -- a **pair** being a calculation of the export and its instance, a **string** a `#domain` of the report. The first is the short form of `#var(\"R_d\", var-of(\"connector\", \"SD-10\", \"R_d\"))`, and the two store exactly the same thing:",
@@ -844,9 +870,9 @@
           "de": "Ein **neben** `domain:` geschriebener Wert ist ein von ihm geprüftes Literal: die geschriebene Zahl wird ausgegeben und zum Rechnen verwendet, und die des Exports wird mit ihr verglichen -- gleich, nichts weiter; eine andere, und der geschriebene Wert wird rot mit dem ausgegeben, den der Export jetzt enthält. So schreibt Woodcore eine Berechnung, die es erzeugt: der Wert ist in der Datei lesbar und kann doch nicht unbemerkt veralten:"
         },
         {
-          "en": "**What is printed, and where** (REQ-001): `display` says what of the line itself -- `\"variable\"`, `\"value\"`, `\"value-unit\"`, `\"variable-value-unit\"` or `\"none\"` --, and `label-position`, `descr-position` and `norm-position` where its label, its description and its citation go: `\"before\"` and `\"after\"` on the line, `\"footnote\"` in its one footnote, `\"in-line\"` after it in grey, `\"line-right\"` in the right-hand column, which sets the line apart. A level is a preset of them, and an argument written wins over it (`lib/display-presets.json`):",
-          "fr": "**Ce qui est imprimé, et où** (REQ-001) : `display` dit ce que montre la ligne elle-même -- `\"variable\"`, `\"value\"`, `\"value-unit\"`, `\"variable-value-unit\"` ou `\"none\"` --, et `label-position`, `descr-position` et `norm-position` où vont son libellé, sa description et sa citation : `\"before\"` et `\"after\"` sur la ligne, `\"footnote\"` dans son unique note de bas de page, `\"in-line\"` après elle en gris, `\"line-right\"` dans la colonne de droite, ce qui met la ligne à part. Un niveau en est un préréglage, et un argument écrit l'emporte sur lui (`lib/display-presets.json`) :",
-          "de": "**Was ausgegeben wird, und wo** (REQ-001): `display` sagt, was die Zeile selbst zeigt -- `\"variable\"`, `\"value\"`, `\"value-unit\"`, `\"variable-value-unit\"` oder `\"none\"` --, und `label-position`, `descr-position` und `norm-position`, wohin ihre Bezeichnung, ihre Beschreibung und ihr Zitat gehen: `\"before\"` und `\"after\"` auf die Zeile, `\"footnote\"` in ihre einzige Fussnote, `\"in-line\"` grau dahinter, `\"line-right\"` in die rechte Spalte, was die Zeile absetzt. Eine Stufe ist eine Voreinstellung davon, und ein geschriebenes Argument gewinnt (`lib/display-presets.json`):"
+          "en": "**What is printed, and where**: `display` says what of the line itself -- `\"variable\"`, `\"value\"`, `\"value-unit\"`, `\"variable-value-unit\"` or `\"none\"` --, and `label-position`, `descr-position` and `norm-position` where its label, its description and its citation go: `\"before\"` and `\"after\"` on the line, `\"footnote\"` in its one footnote, `\"in-line\"` after it in grey, `\"line-right\"` in the right-hand column, which sets the line apart. A level is a preset of them, and an argument written wins over it (`lib/display-presets.json`):",
+          "fr": "**Ce qui est imprimé, et où** : `display` dit ce que montre la ligne elle-même -- `\"variable\"`, `\"value\"`, `\"value-unit\"`, `\"variable-value-unit\"` ou `\"none\"` --, et `label-position`, `descr-position` et `norm-position` où vont son libellé, sa description et sa citation : `\"before\"` et `\"after\"` sur la ligne, `\"footnote\"` dans son unique note de bas de page, `\"in-line\"` après elle en gris, `\"line-right\"` dans la colonne de droite, ce qui met la ligne à part. Un niveau en est un préréglage, et un argument écrit l'emporte sur lui (`lib/display-presets.json`) :",
+          "de": "**Was ausgegeben wird, und wo**: `display` sagt, was die Zeile selbst zeigt -- `\"variable\"`, `\"value\"`, `\"value-unit\"`, `\"variable-value-unit\"` oder `\"none\"` --, und `label-position`, `descr-position` und `norm-position`, wohin ihre Bezeichnung, ihre Beschreibung und ihr Zitat gehen: `\"before\"` und `\"after\"` auf die Zeile, `\"footnote\"` in ihre einzige Fussnote, `\"in-line\"` grau dahinter, `\"line-right\"` in die rechte Spalte, was die Zeile absetzt. Eine Stufe ist eine Voreinstellung davon, und ein geschriebenes Argument gewinnt (`lib/display-presets.json`):"
         },
         {
           "en": "At `level: 0` -- or `display: \"none\"` -- the variable is written down and nothing is printed, so that a formula below can name a coefficient the page does not show:",
@@ -936,9 +962,9 @@
           "de": "der Name, benannt statt an erster Stelle geschrieben -- `#var(name-calc: \"l_1\", name-visible: \"l\", value: 5, unit: \"m\")`."
         },
         "name-visible": {
-          "en": "the printed symbol, written by name.",
-          "fr": "le symbole imprimé, écrit par son nom.",
-          "de": "das ausgegebene Symbol, benannt geschrieben."
+          "en": "the printed symbol, written by name. Beside `domain:` it is the symbol printed over the one read, never a value.",
+          "fr": "le symbole imprimé, écrit par son nom. À côté de `domain:`, c'est le symbole imprimé à la place de celui qui est lu, jamais une valeur.",
+          "de": "das ausgegebene Symbol, benannt geschrieben. Neben `domain:` ist es das Symbol, das statt des gelesenen ausgegeben wird, nie ein Wert."
         },
         "display": {
           "en": "what of the line is printed -- `\"none\"`, `\"variable\"` (the symbol), `\"value\"` (the number), `\"value-unit\"`, `\"variable-value-unit\"` (`symbol = value unit`). auto leaves it to the level.",
@@ -990,9 +1016,9 @@
           "de": "Eine Seite, die eine ganze Formel ist, wird mit `display: \"variable-value-unit\"` -- dem der Stufe 3 -- in Buchstaben, dann mit eingesetzten Zahlen, dann als Wert ausgegeben -- `F_Ed / R_d = 12 kN / 24 kN = 0.5 ⩽ 1`:"
         },
         {
-          "en": "**Its utilisation, named** (spec 2026-10-21-commandes-typst-refonte, REQ-004, D-12): `name-calc:` keeps the ratio of the two sides -- the left over the right for `<=` and `<`, the right over the left for `>=` and `>` -- under that name, for a line below; `name-visible:` prints the relation as that ratio against 1, under that name -- `η = σ/f = … ⩽ 1`:",
-          "fr": "**Son taux de travail, nommé** (spec 2026-10-21-commandes-typst-refonte, REQ-004, D-12) : `name-calc:` garde le rapport des deux côtés -- la gauche sur la droite pour `<=` et `<`, la droite sur la gauche pour `>=` et `>` -- sous ce nom, pour une ligne plus bas ; `name-visible:` imprime la relation comme ce rapport face à 1, sous ce nom -- `η = σ/f = … ⩽ 1` :",
-          "de": "**Ihr Ausnutzungsgrad, benannt** (Spec 2026-10-21-commandes-typst-refonte, REQ-004, D-12): `name-calc:` behält das Verhältnis der beiden Seiten -- links durch rechts für `<=` und `<`, rechts durch links für `>=` und `>` -- unter diesem Namen für eine Zeile weiter unten; `name-visible:` gibt die Beziehung als dieses Verhältnis gegen 1 aus, unter diesem Namen -- `η = σ/f = … ⩽ 1`:"
+          "en": "**Its utilisation, named**: `name-calc:` keeps the ratio of the two sides -- the left over the right for `<=` and `<`, the right over the left for `>=` and `>` -- under that name, for a line below; `name-visible:` prints the relation as that ratio against 1, under that name -- `η = σ/f = … ⩽ 1`:",
+          "fr": "**Son taux de travail, nommé** : `name-calc:` garde le rapport des deux côtés -- la gauche sur la droite pour `<=` et `<`, la droite sur la gauche pour `>=` et `>` -- sous ce nom, pour une ligne plus bas ; `name-visible:` imprime la relation comme ce rapport face à 1, sous ce nom -- `η = σ/f = … ⩽ 1` :",
+          "de": "**Ihr Ausnutzungsgrad, benannt**: `name-calc:` behält das Verhältnis der beiden Seiten -- links durch rechts für `<=` und `<`, rechts durch links für `>=` und `>` -- unter diesem Namen für eine Zeile weiter unten; `name-visible:` gibt die Beziehung als dieses Verhältnis gegen 1 aus, unter diesem Namen -- `η = σ/f = … ⩽ 1`:"
         },
         {
           "en": "At `level: 0` -- `display: \"none\"` -- the relation is still performed, two sides of different dimensions still stopping the compile, and nothing is printed:",
@@ -1091,9 +1117,9 @@
     "caption-rules": {
       "paragraphs": [
         {
-          "en": "The captions of a document, the engineer's way (v0.117): «Tableau 1 — Les documents de référence», «Figure 1 — Système statique» -- the word of its kind in the report's language (`figure.supplement_table`, `figure.supplement_image`), its number, a long dash, its title. `woodcore-document` applies it to every document of a project, so the engine's tables and figures and the author's own read alike; a project's `config.typ` saying otherwise is overridden, the format being the office's.",
-          "fr": "Les légendes d'un document, à la manière de l'ingénieur (v0.117) : «Tableau 1 — Les documents de référence», «Figure 1 — Système statique» -- le mot de son genre dans la langue du rapport (`figure.supplement_table`, `figure.supplement_image`), son numéro, un tiret long, son titre. `woodcore-document` l'applique à chaque document d'un projet, si bien que les tableaux et les figures du moteur et ceux de l'auteur se lisent de même ; un `config.typ` de projet qui dirait autre chose est remplacé, le format étant celui du bureau.",
-          "de": "Die Legenden eines Dokuments, wie der Ingenieur sie will (v0.117): «Tabelle 1 — Die Referenzdokumente», «Abbildung 1 — Statisches System» -- das Wort ihrer Art in der Sprache des Berichts (`figure.supplement_table`, `figure.supplement_image`), ihre Nummer, ein langer Gedankenstrich, ihr Titel. `woodcore-document` wendet sie auf jedes Dokument eines Projekts an, so dass die Tabellen und Abbildungen der Engine und die des Autors gleich lauten; ein `config.typ` des Projekts, das anderes sagt, wird ersetzt, das Format ist das des Büros."
+          "en": "The captions of a document, the engineer's way: «Tableau 1 — Les documents de référence», «Figure 1 — Système statique» -- the word of its kind in the report's language (`figure.supplement_table`, `figure.supplement_image`), its number, a long dash, its title. `woodcore-document` applies it to every document of a project, so the engine's tables and figures and the author's own read alike; a project's `config.typ` saying otherwise is overridden, the format being the office's.",
+          "fr": "Les légendes d'un document, à la manière de l'ingénieur : «Tableau 1 — Les documents de référence», «Figure 1 — Système statique» -- le mot de son genre dans la langue du rapport (`figure.supplement_table`, `figure.supplement_image`), son numéro, un tiret long, son titre. `woodcore-document` l'applique à chaque document d'un projet, si bien que les tableaux et les figures du moteur et ceux de l'auteur se lisent de même ; un `config.typ` de projet qui dirait autre chose est remplacé, le format étant celui du bureau.",
+          "de": "Die Legenden eines Dokuments, wie der Ingenieur sie will: «Tabelle 1 — Die Referenzdokumente», «Abbildung 1 — Statisches System» -- das Wort ihrer Art in der Sprache des Berichts (`figure.supplement_table`, `figure.supplement_image`), ihre Nummer, ein langer Gedankenstrich, ihr Titel. `woodcore-document` wendet sie auf jedes Dokument eines Projekts an, so dass die Tabellen und Abbildungen der Engine und die des Autors gleich lauten; ein `config.typ` des Projekts, das anderes sagt, wird ersetzt, das Format ist das des Büros."
         }
       ],
       "arguments": {
@@ -1107,9 +1133,9 @@
     "doc-tables": {
       "paragraphs": [
         {
-          "en": "The tables of a document written in raw Typst, the engine's way (spec 2026-10-21-commandes-typst-refonte, REQ-019): no rule but those the table writes -- the three of a report, thick above the header, thin under it, thick under the last row, `table.hline` in the table itself --, cells padded as the engine's own tables are, the caption above the table and the table set from the left. `woodcore-document` applies it to every document, so a `#table` written by hand and one Woodcore wrote read alike.",
-          "fr": "Les tableaux d'un document écrits en Typst brut, à la manière du moteur (spec 2026-10-21-commandes-typst-refonte, REQ-019) : aucun trait sinon ceux que le tableau écrit -- les trois d'un rapport, épais au-dessus de l'en-tête, fin dessous, épais sous la dernière ligne, `table.hline` dans le tableau lui-même --, des cellules aux marges des tableaux du moteur, la légende au-dessus du tableau et le tableau calé à gauche. `woodcore-document` l'applique à chaque document : un `#table` écrit à la main et un que Woodcore a écrit se lisent pareil.",
-          "de": "Die Tabellen eines Dokuments in rohem Typst, nach Art der Engine (Spec 2026-10-21-commandes-typst-refonte, REQ-019): keine Linie ausser denen, die die Tabelle selbst schreibt -- die drei eines Berichts, dick über dem Kopf, dünn darunter, dick unter der letzten Zeile, `table.hline` in der Tabelle selbst --, Zellen mit den Abständen der Tabellen der Engine, die Beschriftung über der Tabelle und die Tabelle linksbündig. `woodcore-document` wendet sie auf jedes Dokument an, sodass ein von Hand geschriebenes `#table` und eines, das Woodcore schrieb, gleich aussehen."
+          "en": "The tables of a document written in raw Typst, the engine's way: no rule but those the table writes -- the three of a report, thick above the header, thin under it, thick under the last row, `table.hline` in the table itself --, cells padded as the engine's own tables are, the caption above the table and the table set from the left. `woodcore-document` applies it to every document, so a `#table` written by hand and one Woodcore wrote read alike.",
+          "fr": "Les tableaux d'un document écrits en Typst brut, à la manière du moteur : aucun trait sinon ceux que le tableau écrit -- les trois d'un rapport, épais au-dessus de l'en-tête, fin dessous, épais sous la dernière ligne, `table.hline` dans le tableau lui-même --, des cellules aux marges des tableaux du moteur, la légende au-dessus du tableau et le tableau calé à gauche. `woodcore-document` l'applique à chaque document : un `#table` écrit à la main et un que Woodcore a écrit se lisent pareil.",
+          "de": "Die Tabellen eines Dokuments in rohem Typst, nach Art der Engine: keine Linie ausser denen, die die Tabelle selbst schreibt -- die drei eines Berichts, dick über dem Kopf, dünn darunter, dick unter der letzten Zeile, `table.hline` in der Tabelle selbst --, Zellen mit den Abständen der Tabellen der Engine, die Beschriftung über der Tabelle und die Tabelle linksbündig. `woodcore-document` wendet sie auf jedes Dokument an, sodass ein von Hand geschriebenes `#table` und eines, das Woodcore schrieb, gleich aussehen."
         }
       ],
       "arguments": {
@@ -1421,9 +1447,9 @@
     "image-polar-moment": {
       "paragraphs": [
         {
-          "en": "**A polar moment as an image, the forces in its fasteners drawn on it**: the figure of the connection Woodcore exported, and over it, for the N, V and M given, the arrows of each fastener -- its resultant F_i in yellow, labelled F1, F2, …, the part of M in green, N/n in blue and V/n in red, all at one scale, at their true length -- and, at the legend's foot, the parts too small to make out, with their value (`#show-polar-moment`'s drawing until the spec 2026-10-21-commandes-typst-refonte retired it; brought back by the spec 2026-10-22-image-polar-moment).",
-          "fr": "**Un moment polaire en image, les efforts dans ses moyens d'assemblage dessinés dessus** : la figure de l'assemblage exportée par Woodcore et, par-dessus, pour les N, V et M donnés, les flèches de chaque moyen d'assemblage -- sa résultante F_i en jaune, étiquetée F1, F2, …, la part de M en vert, N/n en bleu et V/n en rouge, toutes à une même échelle, à leur vraie longueur -- et, au pied de la légende, les parts trop petites pour être lues, avec leur valeur (le dessin de `#show-polar-moment` jusqu'à ce que la spec 2026-10-21-commandes-typst-refonte la retire ; rétabli par la spec 2026-10-22-image-polar-moment).",
-          "de": "**Ein polares Moment als Bild, die Kräfte in seinen Verbindungsmitteln darauf gezeichnet**: die von Woodcore exportierte Abbildung der Verbindung und darüber, für die gegebenen N, V und M, die Pfeile jedes Verbindungsmittels -- seine Resultierende F_i gelb, beschriftet F1, F2, …, der Anteil von M grün, N/n blau und V/n rot, alle in einem Massstab, in ihrer wahren Länge -- und am Fuss der Legende die Anteile, die zu klein sind, um sie abzulesen, mit ihrem Wert (die Zeichnung von `#show-polar-moment`, bis die Spezifikation 2026-10-21-commandes-typst-refonte sie zurückzog; wiederhergestellt durch die Spezifikation 2026-10-22-image-polar-moment)."
+          "en": "**A polar moment as an image, the forces in its fasteners drawn on it**: the figure of the connection Woodcore exported, and over it, for the N, V and M given, the arrows of each fastener -- its resultant F_i in yellow, labelled F1, F2, …, the part of M in green, N/n in blue and V/n in red, all at one scale, at their true length -- and, at the legend's foot, the parts too small to make out, with their value (the drawing `#show-polar-moment` printed, brought back as an image).",
+          "fr": "**Un moment polaire en image, les efforts dans ses moyens d'assemblage dessinés dessus** : la figure de l'assemblage exportée par Woodcore et, par-dessus, pour les N, V et M donnés, les flèches de chaque moyen d'assemblage -- sa résultante F_i en jaune, étiquetée F1, F2, …, la part de M en vert, N/n en bleu et V/n en rouge, toutes à une même échelle, à leur vraie longueur -- et, au pied de la légende, les parts trop petites pour être lues, avec leur valeur (le dessin qu'imprimait `#show-polar-moment`, rétabli en image).",
+          "de": "**Ein polares Moment als Bild, die Kräfte in seinen Verbindungsmitteln darauf gezeichnet**: die von Woodcore exportierte Abbildung der Verbindung und darüber, für die gegebenen N, V und M, die Pfeile jedes Verbindungsmittels -- seine Resultierende F_i gelb, beschriftet F1, F2, …, der Anteil von M grün, N/n blau und V/n rot, alle in einem Massstab, in ihrer wahren Länge -- und am Fuss der Legende die Anteile, die zu klein sind, um sie abzulesen, mit ihrem Wert (die Zeichnung, die `#show-polar-moment` druckte, als Bild wiederhergestellt)."
         },
         {
           "en": "It is an image to set in a native `#figure(…, kind: image, caption: […]) <label>`, which numbers it and lets `@label` cite it -- the caption and the label are the document's own. The file Woodcore writes for a polar moment (`#include domain-file(\"connection\", id)`) sets it after the lines of its forces, naming them, so that the arrows follow the values written there. It draws and publishes nothing: F_max and the F_i are the file's own `#eq`.",
@@ -1493,9 +1519,9 @@
     "image-section": {
       "paragraphs": [
         {
-          "en": "**A schematic section as an image**, for a `#place` of an export sheet (spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015): the section plan drawn in Woodcore, its storey lines and their bubbles, the storey the sheet shows highlighted in a translucent red with a dashed outline, its title above it -- what `#sheet-section` placed.",
-          "fr": "**Une coupe schématique en image**, pour un `#place` d'une feuille d'export (spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015) : le plan de coupe dessiné dans Woodcore, ses lignes d'étage et leurs bulles, l'étage que montre la feuille surligné d'un rouge translucide au contour tireté, son titre au-dessus -- ce que plaçait `#sheet-section`.",
-          "de": "**Ein schematischer Schnitt als Bild**, für ein `#place` eines Exportblatts (Spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015): der in Woodcore gezeichnete Schnittplan, seine Geschosslinien und ihre Blasen, das Geschoss, das das Blatt zeigt, in durchscheinendem Rot mit gestricheltem Umriss hervorgehoben, sein Titel darüber -- was `#sheet-section` platzierte."
+          "en": "**A schematic section as an image**, for a `#place` of an export sheet: the section plan drawn in Woodcore, its storey lines and their bubbles, the storey the sheet shows highlighted in a translucent red with a dashed outline, its title above it -- what `#sheet-section` placed.",
+          "fr": "**Une coupe schématique en image**, pour un `#place` d'une feuille d'export : le plan de coupe dessiné dans Woodcore, ses lignes d'étage et leurs bulles, l'étage que montre la feuille surligné d'un rouge translucide au contour tireté, son titre au-dessus -- ce que plaçait `#sheet-section`.",
+          "de": "**Ein schematischer Schnitt als Bild**, für ein `#place` eines Exportblatts: der in Woodcore gezeichnete Schnittplan, seine Geschosslinien und ihre Blasen, das Geschoss, das das Blatt zeigt, in durchscheinendem Rot mit gestricheltem Umriss hervorgehoben, sein Titel darüber -- was `#sheet-section` platzierte."
         }
       ],
       "arguments": {
@@ -1529,9 +1555,9 @@
     "image-legend": {
       "paragraphs": [
         {
-          "en": "**The legend of a sheet as an image**, for a `#place` of an export sheet (spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015): the symbols of the plans the sheet shows, each once, their quantities added where two plans draw one -- or the fire-protection plans' lines -- under its title, in a frame: what `#sheet-legend` and `#sheet-fire-legend` placed.",
-          "fr": "**La légende d'une feuille en image**, pour un `#place` d'une feuille d'export (spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015) : les symboles des plans que montre la feuille, chacun une fois, leurs quantités additionnées quand deux plans en dessinent un -- ou les lignes des plans de protection incendie -- sous son titre, dans un cadre : ce que plaçaient `#sheet-legend` et `#sheet-fire-legend`.",
-          "de": "**Die Legende eines Blatts als Bild**, für ein `#place` eines Exportblatts (Spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015): die Symbole der Pläne, die das Blatt zeigt, jedes einmal, ihre Mengen addiert, wo zwei Pläne eines zeichnen -- oder die Zeilen der Brandschutzpläne -- unter ihrem Titel, in einem Rahmen: was `#sheet-legend` und `#sheet-fire-legend` platzierten."
+          "en": "**The legend of a sheet as an image**, for a `#place` of an export sheet: the symbols of the plans the sheet shows, each once, their quantities added where two plans draw one -- or the fire-protection plans' lines -- under its title, in a frame: what `#sheet-legend` and `#sheet-fire-legend` placed.",
+          "fr": "**La légende d'une feuille en image**, pour un `#place` d'une feuille d'export : les symboles des plans que montre la feuille, chacun une fois, leurs quantités additionnées quand deux plans en dessinent un -- ou les lignes des plans de protection incendie -- sous son titre, dans un cadre : ce que plaçaient `#sheet-legend` et `#sheet-fire-legend`.",
+          "de": "**Die Legende eines Blatts als Bild**, für ein `#place` eines Exportblatts: die Symbole der Pläne, die das Blatt zeigt, jedes einmal, ihre Mengen addiert, wo zwei Pläne eines zeichnen -- oder die Zeilen der Brandschutzpläne -- unter ihrem Titel, in einem Rahmen: was `#sheet-legend` und `#sheet-fire-legend` platzierten."
         }
       ],
       "arguments": {
@@ -1560,9 +1586,9 @@
     "image-titleblock": {
       "paragraphs": [
         {
-          "en": "**The title block of a sheet as an image**, for a `#place` of an export sheet (spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015): STE Compact 02's cartouche -- the logo, the object and the element, the client and the architect, the phase, the project's and the plan's numbers, the latest revision, who drew it, the date, the scales of the sheet's plans and its size --, each field the project's own where it is auto: what `#sheet-titleblock` placed. Woodcore places it in the sheet's bottom right corner, `#place(bottom + right, dx: -10mm, dy: -10mm, …)`.",
-          "fr": "**Le cartouche d'une feuille en image**, pour un `#place` d'une feuille d'export (spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015) : le cartouche de STE Compact 02 -- le logo, l'objet et l'élément, le maître d'ouvrage et l'architecte, la phase, les numéros du projet et du plan, la dernière révision, qui l'a dessiné, la date, les échelles des plans de la feuille et son format --, chaque champ celui du projet là où il est auto : ce que plaçait `#sheet-titleblock`. Woodcore le place dans le coin inférieur droit de la feuille, `#place(bottom + right, dx: -10mm, dy: -10mm, …)`.",
-          "de": "**Der Plankopf eines Blatts als Bild**, für ein `#place` eines Exportblatts (Spec 2026-10-21-commandes-typst-refonte, Q-013, Q-015): der Plankopf von STE Compact 02 -- das Logo, das Objekt und das Element, die Bauherrschaft und der Architekt, die Phase, die Projekt- und die Plannummer, die letzte Revision, wer ihn gezeichnet hat, das Datum, die Massstäbe der Pläne des Blatts und sein Format --, jedes Feld das des Projekts, wo es auto ist: was `#sheet-titleblock` platzierte. Woodcore setzt ihn in die untere rechte Ecke des Blatts, `#place(bottom + right, dx: -10mm, dy: -10mm, …)`."
+          "en": "**The title block of a sheet as an image**, for a `#place` of an export sheet: STE Compact 02's cartouche -- the logo, the object and the element, the client and the architect, the phase, the project's and the plan's numbers, the latest revision, who drew it, the date, the scales of the sheet's plans and its size --, each field the project's own where it is auto: what `#sheet-titleblock` placed. Woodcore places it in the sheet's bottom right corner, `#place(bottom + right, dx: -10mm, dy: -10mm, …)`.",
+          "fr": "**Le cartouche d'une feuille en image**, pour un `#place` d'une feuille d'export : le cartouche de STE Compact 02 -- le logo, l'objet et l'élément, le maître d'ouvrage et l'architecte, la phase, les numéros du projet et du plan, la dernière révision, qui l'a dessiné, la date, les échelles des plans de la feuille et son format --, chaque champ celui du projet là où il est auto : ce que plaçait `#sheet-titleblock`. Woodcore le place dans le coin inférieur droit de la feuille, `#place(bottom + right, dx: -10mm, dy: -10mm, …)`.",
+          "de": "**Der Plankopf eines Blatts als Bild**, für ein `#place` eines Exportblatts: der Plankopf von STE Compact 02 -- das Logo, das Objekt und das Element, die Bauherrschaft und der Architekt, die Phase, die Projekt- und die Plannummer, die letzte Revision, wer ihn gezeichnet hat, das Datum, die Massstäbe der Pläne des Blatts und sein Format --, jedes Feld das des Projekts, wo es auto ist: was `#sheet-titleblock` platzierte. Woodcore setzt ihn in die untere rechte Ecke des Blatts, `#place(bottom + right, dx: -10mm, dy: -10mm, …)`."
         }
       ],
       "arguments": {
@@ -1656,9 +1682,9 @@
     "calc-defaults": {
       "paragraphs": [
         {
-          "en": "Sets the fine arguments of the lines that follow -- the next one (the default), the rest of the domain, or the rest of the document -- where they write none of their own: what to show of them, where their labels, descriptions and citations go, their style, their role, their level, and the unit of a dimension (spec 2026-10-21-commandes-typst-refonte, REQ-006). A line's own argument still wins, then its own `level:`, then these (REQ-007).",
-          "fr": "Fixe les réglages fins des lignes qui suivent -- la suivante (par défaut), le reste du domaine ou le reste du document -- là où elles n'en écrivent pas : ce qu'elles montrent, où vont leurs libellés, descriptions et citations, leur style, leur rôle, leur niveau, et l'unité d'une dimension (spec 2026-10-21-commandes-typst-refonte, REQ-006). L'argument propre d'une ligne l'emporte toujours, puis son propre `level:`, puis ceux-ci (REQ-007).",
-          "de": "Legt die Feineinstellungen der folgenden Zeilen fest -- der nächsten (Standard), des restlichen Bereichs oder des restlichen Dokuments --, wo sie selbst keine schreiben: was sie zeigen, wohin ihre Bezeichnungen, Beschreibungen und Zitate gehen, ihren Stil, ihre Rolle, ihre Stufe und die Einheit einer Dimension (Spec 2026-10-21-commandes-typst-refonte, REQ-006). Das eigene Argument einer Zeile gewinnt immer, dann ihr eigenes `level:`, dann diese (REQ-007)."
+          "en": "Sets the fine arguments of the lines that follow -- the next one (the default), the rest of the domain, or the rest of the document -- where they write none of their own: what to show of them, where their labels, descriptions and citations go, their style, their role, their level, and the unit of a dimension. A line's own argument still wins, then its own `level:`, then these.",
+          "fr": "Fixe les réglages fins des lignes qui suivent -- la suivante (par défaut), le reste du domaine ou le reste du document -- là où elles n'en écrivent pas : ce qu'elles montrent, où vont leurs libellés, descriptions et citations, leur style, leur rôle, leur niveau, et l'unité d'une dimension. L'argument propre d'une ligne l'emporte toujours, puis son propre `level:`, puis ceux-ci.",
+          "de": "Legt die Feineinstellungen der folgenden Zeilen fest -- der nächsten (Standard), des restlichen Bereichs oder des restlichen Dokuments --, wo sie selbst keine schreiben: was sie zeigen, wohin ihre Bezeichnungen, Beschreibungen und Zitate gehen, ihren Stil, ihre Rolle, ihre Stufe und die Einheit einer Dimension. Das eigene Argument einer Zeile gewinnt immer, dann ihr eigenes `level:`, dann diese."
         }
       ],
       "arguments": {
@@ -1677,9 +1703,9 @@
     "domain": {
       "paragraphs": [
         {
-          "en": "A calculation domain: keeps one set of variables apart from another, **without losing it** -- what is declared inside belongs to `id`, and stays readable further down the document through `#var(key, domain: id)` --, prints its label as a heading, and sets a level for every line it holds (spec 2026-10-21-commandes-typst-refonte, REQ-008). `var-domain` was it until then.",
-          "fr": "Un domaine de calcul : tient un ensemble de variables à l'écart d'un autre, **sans le perdre** -- ce qui est déclaré dedans appartient à `id` et reste lisible plus bas dans le document par `#var(key, domain: id)` --, imprime son libellé comme un titre, et fixe un niveau pour chaque ligne qu'il contient (spec 2026-10-21-commandes-typst-refonte, REQ-008). C'était `var-domain` jusque-là.",
-          "de": "Ein Berechnungsbereich: hält einen Satz Variablen von einem anderen getrennt, **ohne ihn zu verlieren** -- was darin deklariert wird, gehört zu `id` und bleibt weiter unten im Dokument über `#var(key, domain: id)` lesbar --, gibt seine Bezeichnung als Überschrift aus und legt eine Stufe für jede Zeile fest, die er enthält (Spec 2026-10-21-commandes-typst-refonte, REQ-008). Bis dahin war es `var-domain`."
+          "en": "A calculation domain: keeps one set of variables apart from another, **without losing it** -- what is declared inside belongs to `id`, and stays readable further down the document through `#var(key, domain: id)` --, prints its label as a heading, and sets a level for every line it holds. `var-domain` was it until then.",
+          "fr": "Un domaine de calcul : tient un ensemble de variables à l'écart d'un autre, **sans le perdre** -- ce qui est déclaré dedans appartient à `id` et reste lisible plus bas dans le document par `#var(key, domain: id)` --, imprime son libellé comme un titre, et fixe un niveau pour chaque ligne qu'il contient. C'était `var-domain` jusque-là.",
+          "de": "Ein Berechnungsbereich: hält einen Satz Variablen von einem anderen getrennt, **ohne ihn zu verlieren** -- was darin deklariert wird, gehört zu `id` und bleibt weiter unten im Dokument über `#var(key, domain: id)` lesbar --, gibt seine Bezeichnung als Überschrift aus und legt eine Stufe für jede Zeile fest, die er enthält. Bis dahin war es `var-domain`."
         },
         {
           "en": "Without it the second `F` would quietly replace the first, the registry being one dictionary for the whole document. A name is looked up in the innermost domain first and then in the default one, so what a section declares outside every domain -- R_d, a partial factor -- is readable inside all of them.",
@@ -1687,14 +1713,14 @@
           "de": "Ohne ihn würde das zweite `F` das erste stillschweigend ersetzen, da die Registry ein einziges Wörterbuch für das ganze Dokument ist. Ein Name wird zuerst im innersten Bereich gesucht und dann im Standardbereich, sodass, was ein Abschnitt ausserhalb jedes Bereichs deklariert -- R_d, ein Teilsicherheitsbeiwert --, in allen lesbar ist."
         },
         {
-          "en": "**Its level** is the level of every line inside that states none of its own: a line's own `level:`, or a fine argument it writes, wins (REQ-007). `#calc-defaults(scope: \"domain\")` sets the defaults of its lines, and a `#unit(scope: \"domain\")` the unit of a dimension -- both gone when the domain closes.",
-          "fr": "**Son niveau** est celui de chaque ligne à l'intérieur qui n'en indique pas : le propre `level:` d'une ligne, ou un réglage fin qu'elle écrit, l'emporte (REQ-007). `#calc-defaults(scope: \"domain\")` fixe les valeurs par défaut de ses lignes, et un `#unit(scope: \"domain\")` l'unité d'une dimension -- les deux disparaissent quand le domaine se ferme.",
-          "de": "**Seine Stufe** ist die Stufe jeder Zeile darin, die keine eigene angibt: das eigene `level:` einer Zeile oder eine Feineinstellung, die sie schreibt, gewinnt (REQ-007). `#calc-defaults(scope: \"domain\")` legt die Standardwerte seiner Zeilen fest und ein `#unit(scope: \"domain\")` die Einheit einer Dimension -- beide enden, wenn der Bereich schliesst."
+          "en": "**Its level** is the level of every line inside that states none of its own: a line's own `level:`, or a fine argument it writes, wins. `#calc-defaults(scope: \"domain\")` sets the defaults of its lines, and a `#unit(scope: \"domain\")` the unit of a dimension -- both gone when the domain closes.",
+          "fr": "**Son niveau** est celui de chaque ligne à l'intérieur qui n'en indique pas : le propre `level:` d'une ligne, ou un réglage fin qu'elle écrit, l'emporte. `#calc-defaults(scope: \"domain\")` fixe les valeurs par défaut de ses lignes, et un `#unit(scope: \"domain\")` l'unité d'une dimension -- les deux disparaissent quand le domaine se ferme.",
+          "de": "**Seine Stufe** ist die Stufe jeder Zeile darin, die keine eigene angibt: das eigene `level:` einer Zeile oder eine Feineinstellung, die sie schreibt, gewinnt. `#calc-defaults(scope: \"domain\")` legt die Standardwerte seiner Zeilen fest und ein `#unit(scope: \"domain\")` die Einheit einer Dimension -- beide enden, wenn der Bereich schliesst."
         },
         {
-          "en": "👉 A *domain* here is a set of names in the report. It has nothing to do with a calculation domain of the Excel workbooks (docs/domain/calculation-domains.md §3.3), which is a kind of calculation -- `snow-load`, `dead-load` -- whose instances are Excel sheets.",
-          "fr": "👉 Un *domaine* est ici un ensemble de noms du rapport. Il n'a rien à voir avec un domaine de calcul des classeurs Excel (docs/domain/calculation-domains.md §3.3), qui est un type de calcul -- `snow-load`, `dead-load` -- dont les instances sont des feuilles Excel.",
-          "de": "👉 Ein *Bereich* ist hier ein Satz von Namen im Bericht. Er hat nichts mit einem Berechnungsbereich der Excel-Arbeitsmappen zu tun (docs/domain/calculation-domains.md §3.3), der eine Art Berechnung ist -- `snow-load`, `dead-load` --, deren Instanzen Excel-Blätter sind."
+          "en": "👉 A *domain* here is a set of names in the report. It has nothing to do with a calculation domain of the export (docs/domain/calculation-domains.md §3.3), which is a kind of calculation -- `snow-load`, `dead-load` -- whose instances are the cases entered in Woodcore's tabs.",
+          "fr": "👉 Un *domaine* est ici un ensemble de noms du rapport. Il n'a rien à voir avec un domaine de calcul de l'export (docs/domain/calculation-domains.md §3.3), qui est un type de calcul -- `snow-load`, `dead-load` -- dont les instances sont les cas saisis dans les onglets de Woodcore.",
+          "de": "👉 Ein *Bereich* ist hier ein Satz von Namen im Bericht. Er hat nichts mit einem Berechnungsbereich des Exports zu tun (docs/domain/calculation-domains.md §3.3), der eine Art Berechnung ist -- `snow-load`, `dead-load` --, deren Instanzen die in den Registern von Woodcore erfassten Fälle sind."
         }
       ],
       "arguments": {
@@ -1753,14 +1779,14 @@
     "var-table": {
       "paragraphs": [
         {
-          "en": "A table of the variables of one role -- the data, the computed values or the results -- of a domain, of several, or of the whole document, **read from the registry and never copied**: the values are those the lines declare, wherever they stand, so a table at the head of a domain lists what is declared below it (spec 2026-10-21-commandes-typst-refonte, REQ-010).",
-          "fr": "Un tableau des variables d'un rôle -- les données, les valeurs calculées ou les résultats -- d'un domaine, de plusieurs ou de tout le document, **lues dans le registre et jamais recopiées** : les valeurs sont celles que déclarent les lignes, où qu'elles se trouvent, et un tableau en tête d'un domaine liste ce qui est déclaré plus bas (spec 2026-10-21-commandes-typst-refonte, REQ-010).",
-          "de": "Eine Tabelle der Variablen einer Rolle -- der Daten, der berechneten Werte oder der Ergebnisse -- eines Bereichs, mehrerer oder des ganzen Dokuments, **aus der Registry gelesen und nie kopiert**: die Werte sind die, die die Zeilen deklarieren, wo sie auch stehen, sodass eine Tabelle am Anfang eines Bereichs auflistet, was weiter unten deklariert wird (Spec 2026-10-21-commandes-typst-refonte, REQ-010)."
+          "en": "A table of the variables of one role -- the data, the computed values or the results -- of a domain, of several, or of the whole document, **read from the registry and never copied**: the values are those the lines declare, wherever they stand, so a table at the head of a domain lists what is declared below it.",
+          "fr": "Un tableau des variables d'un rôle -- les données, les valeurs calculées ou les résultats -- d'un domaine, de plusieurs ou de tout le document, **lues dans le registre et jamais recopiées** : les valeurs sont celles que déclarent les lignes, où qu'elles se trouvent, et un tableau en tête d'un domaine liste ce qui est déclaré plus bas.",
+          "de": "Eine Tabelle der Variablen einer Rolle -- der Daten, der berechneten Werte oder der Ergebnisse -- eines Bereichs, mehrerer oder des ganzen Dokuments, **aus der Registry gelesen und nie kopiert**: die Werte sind die, die die Zeilen deklarieren, wo sie auch stehen, sodass eine Tabelle am Anfang eines Bereichs auflistet, was weiter unten deklariert wird."
         },
         {
-          "en": "Over every domain and filtered by unit, it is the summary of the loads or of the results -- what `show-load-summary` and `show-result-summary` printed (Q-009):",
-          "fr": "Sur tous les domaines et filtré par unité, c'est le récapitulatif des charges ou des résultats -- ce qu'imprimaient `show-load-summary` et `show-result-summary` (Q-009) :",
-          "de": "Über alle Bereiche und nach Einheit gefiltert ist sie die Zusammenstellung der Lasten oder der Ergebnisse -- was `show-load-summary` und `show-result-summary` ausgaben (Q-009):"
+          "en": "Over every domain and filtered by unit, it is the summary of the loads or of the results -- what `show-load-summary` and `show-result-summary` printed:",
+          "fr": "Sur tous les domaines et filtré par unité, c'est le récapitulatif des charges ou des résultats -- ce qu'imprimaient `show-load-summary` et `show-result-summary` :",
+          "de": "Über alle Bereiche und nach Einheit gefiltert ist sie die Zusammenstellung der Lasten oder der Ergebnisse -- was `show-load-summary` und `show-result-summary` ausgaben:"
         },
         {
           "en": "It is a Typst `#table`, set as the document sets its tables: `#show table` and `#set table` style it like any other.",
@@ -1794,14 +1820,14 @@
     "sync": {
       "paragraphs": [
         {
-          "en": "A value Woodcore keeps in step with its project, in a document written in raw Typst -- a cell of a table, an item of a list, a word of a sentence: it prints its content and nothing else, and Woodcore finds it by its id, reads the content and rewrites it, and nothing around it (spec 2026-10-21-commandes-typst-refonte, REQ-011, calc/typst_sync.py). Taking the tag away, the content kept, ends the keeping: the value is the engineer's from then on.",
-          "fr": "Une valeur que Woodcore tient à jour avec son projet, dans un document écrit en Typst brut -- une cellule de tableau, un élément de liste, un mot d'une phrase : elle imprime son contenu et rien d'autre, et Woodcore la retrouve par son id, lit le contenu et le réécrit, sans rien toucher autour (spec 2026-10-21-commandes-typst-refonte, REQ-011, calc/typst_sync.py). Retirer la balise en gardant le contenu met fin à la synchronisation : la valeur appartient dès lors à l'ingénieur.",
-          "de": "Ein Wert, den Woodcore mit seinem Projekt abgleicht, in einem Dokument in rohem Typst -- eine Tabellenzelle, ein Listenelement, ein Wort eines Satzes: er gibt seinen Inhalt aus und sonst nichts, und Woodcore findet ihn an seiner id, liest den Inhalt und schreibt ihn neu, ohne etwas daneben zu berühren (Spec 2026-10-21-commandes-typst-refonte, REQ-011, calc/typst_sync.py). Die Markierung entfernen und den Inhalt behalten beendet den Abgleich: der Wert gehört dann dem Ingenieur."
+          "en": "A value Woodcore keeps in step with its project, in a document written in raw Typst -- a cell of a table, an item of a list, a word of a sentence: it prints its content and nothing else, and Woodcore finds it by its id, reads the content and rewrites it, and nothing around it (calc/typst_sync.py). Taking the tag away, the content kept, ends the keeping: the value is the engineer's from then on.",
+          "fr": "Une valeur que Woodcore tient à jour avec son projet, dans un document écrit en Typst brut -- une cellule de tableau, un élément de liste, un mot d'une phrase : elle imprime son contenu et rien d'autre, et Woodcore la retrouve par son id, lit le contenu et le réécrit, sans rien toucher autour (calc/typst_sync.py). Retirer la balise en gardant le contenu met fin à la synchronisation : la valeur appartient dès lors à l'ingénieur.",
+          "de": "Ein Wert, den Woodcore mit seinem Projekt abgleicht, in einem Dokument in rohem Typst -- eine Tabellenzelle, ein Listenelement, ein Wort eines Satzes: er gibt seinen Inhalt aus und sonst nichts, und Woodcore findet ihn an seiner id, liest den Inhalt und schreibt ihn neu, ohne etwas daneben zu berühren. Die Markierung entfernen und den Inhalt behalten beendet den Abgleich: der Wert gehört dann dem Ingenieur."
         },
         {
-          "en": "What the export holds is best **read** inside it, as the last cell reads it: the value printed is then the export's at every compile and never ages (Q-007). A literal is compared with the export when the project is exported, and a gap is said, never overwritten:",
-          "fr": "Ce que contient l'export se **lit** de préférence à l'intérieur, comme le fait la dernière cellule : la valeur imprimée est alors celle de l'export à chaque compilation et ne vieillit jamais (Q-007). Un littéral est comparé à l'export lors de l'export du projet, et un écart est signalé, jamais écrasé :",
-          "de": "Was der Export enthält, wird am besten darin **gelesen**, wie es die letzte Zelle tut: der ausgegebene Wert ist dann bei jeder Kompilierung der des Exports und veraltet nie (Q-007). Ein Literal wird beim Export des Projekts mit dem Export verglichen, und eine Abweichung wird gemeldet, nie überschrieben:"
+          "en": "What the export holds is best **read** inside it, as the last cell reads it: the value printed is then the export's at every compile and never ages. A literal is compared with the export when the project is exported, and a gap is said, never overwritten:",
+          "fr": "Ce que contient l'export se **lit** de préférence à l'intérieur, comme le fait la dernière cellule : la valeur imprimée est alors celle de l'export à chaque compilation et ne vieillit jamais. Un littéral est comparé à l'export lors de l'export du projet, et un écart est signalé, jamais écrasé :",
+          "de": "Was der Export enthält, wird am besten darin **gelesen**, wie es die letzte Zelle tut: der ausgegebene Wert ist dann bei jeder Kompilierung der des Exports und veraltet nie. Ein Literal wird beim Export des Projekts mit dem Export verglichen, und eine Abweichung wird gemeldet, nie überschrieben:"
         }
       ],
       "arguments": {
@@ -1820,9 +1846,9 @@
     "domain-file": {
       "paragraphs": [
         {
-          "en": "The file of a calculation domain Woodcore wrote from its data, from the Typst root -- what a section includes it by, `#include domain-file(\"check\", id)`, so that no path to it is ever written by hand (spec 2026-10-21-commandes-typst-refonte, ARCH-008). A domain the export does not list stops the compile, naming the ones it lists.",
-          "fr": "Le fichier d'un domaine de calcul que Woodcore a écrit à partir de ses données, depuis la racine Typst -- ce par quoi une section l'inclut, `#include domain-file(\"check\", id)`, pour qu'aucun chemin vers lui ne soit jamais écrit à la main (spec 2026-10-21-commandes-typst-refonte, ARCH-008). Un domaine que l'export ne liste pas arrête la compilation, en nommant ceux qu'il liste.",
-          "de": "Die Datei eines Berechnungsbereichs, den Woodcore aus seinen Daten geschrieben hat, ab der Typst-Wurzel -- woran ein Abschnitt ihn einbindet, `#include domain-file(\"check\", id)`, sodass nie ein Pfad zu ihm von Hand geschrieben wird (Spec 2026-10-21-commandes-typst-refonte, ARCH-008). Ein Bereich, den der Export nicht aufführt, stoppt die Kompilierung und nennt die aufgeführten."
+          "en": "The file of a calculation domain Woodcore wrote from its data, from the Typst root -- what a section includes it by, `#include domain-file(\"check\", id)`, so that no path to it is ever written by hand. A domain the export does not list stops the compile, naming the ones it lists.",
+          "fr": "Le fichier d'un domaine de calcul que Woodcore a écrit à partir de ses données, depuis la racine Typst -- ce par quoi une section l'inclut, `#include domain-file(\"check\", id)`, pour qu'aucun chemin vers lui ne soit jamais écrit à la main. Un domaine que l'export ne liste pas arrête la compilation, en nommant ceux qu'il liste.",
+          "de": "Die Datei eines Berechnungsbereichs, den Woodcore aus seinen Daten geschrieben hat, ab der Typst-Wurzel -- woran ein Abschnitt ihn einbindet, `#include domain-file(\"check\", id)`, sodass nie ein Pfad zu ihm von Hand geschrieben wird. Ein Bereich, den der Export nicht aufführt, stoppt die Kompilierung und nennt die aufgeführten."
         }
       ],
       "arguments": {

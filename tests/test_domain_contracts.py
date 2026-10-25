@@ -48,6 +48,20 @@ def test_every_calculation_tab_domain_is_one():
         assert isinstance(module.declaration(), contracts.Declaration)
 
 
+def test_the_permanent_loads_give_what_their_tab_and_a_drawing_of_layers_need():
+    """ARCH-007, REQ-003 of the spec 2026-10-23-onglets-types-et-services: «Poids propre et surcharge» has no declared form -- its table of layers is a service of its own -- and gives its type's services what they need (`messages`, `results`, `figure_svg`), and a drawing of layers its model (`layers`: contracts.Layer, no hatch, no visibility); the export's drawing and the tab's are one."""
+    from domains import dead_load_source
+    for name in ("messages", "results", "figure_svg", "layers"):
+        assert callable(getattr(dead_load_source, name, None)), name
+    assert not hasattr(dead_load_source, "declaration")
+    fields = {f.name for f in __import__("dataclasses").fields(contracts.Layer)}
+    assert fields == {"id", "kind", "thickness", "width", "spacing", "link", "label", "ebene", "pose", "fill_width", "air", "role", "number"}, fields   # issue #111, ARCH-003
+    src = dead_load_source.new_source("AU-01")
+    model = dead_load_source.layers_of(dead_load_source.layer_rows(src, None))
+    assert [type(l) for l in model] == [contracts.Layer] and model[0].id == "1" and model[0].thickness == 27 and model[0].pose == "continuous" and model[0].number == 1
+    assert [m.code for m in dead_load_source.messages(src)] == ["all_weighed"], "nothing to say but green (issue #111, REQ-007)"
+
+
 def test_every_export_domain_is_one():
     for name in EXPORT_DOMAINS:
         module = importlib.import_module(name)
@@ -155,7 +169,7 @@ def test_no_domain_prints_what_it_has_to_say():
     # each said in the window's three languages (woodcore_gui.note_text reads `"warn_" + code`)
     # the window's words: woodcore_gui_words.py and the tabs' own STRINGS it merges (CLAUDE.md)
     words = "".join(path.read_text(encoding="utf-8") for path in sorted((ROOT / "calc" / "tools").glob("*.py")))
-    # the codes a domain gives a Note, read off the code itself: every one of them worded (spec 2026-10-21-restes-issue-69 added the sheets' and the sources' own)
+    # the codes a domain gives a Note, read off the code itself: every one of them worded (spec 2026-10-21-restes-issue-69 added the sources' own, issue #109 the load workbook's)
     import re
     codes = set()
     for path in sorted((ROOT / "calc" / "domains").glob("*.py")) + [ROOT / "calc" / "registry.py"]:
@@ -171,7 +185,7 @@ def test_no_domain_prints_what_it_has_to_say():
                     # or the codes it names in EXPORT_CODES, where warnings() is the export's share of messages() (snow_source, spec 2026-10-22-onglet-neige-type)
                     for listed in re.findall(r"EXPORT_CODES = \(([^)]*)\)", source):
                         codes.update(first.left.value + c for c in re.findall(r'"(\w+)"', listed))
-    assert {"registry_no_sheet", "sheet_value_differs", "snow_above_limit", "wind_c_red_outside"} <= codes, codes
+    assert {"load_workbook_not_read", "snow_above_limit", "wind_c_red_outside"} <= codes and not {"registry_no_sheet", "sheet_value_differs"} & codes, codes   # the sheets' codes went with them (issue #109)
     for code in sorted(codes):
         assert words.count('"warn_%s":' % code) == 3, code
 

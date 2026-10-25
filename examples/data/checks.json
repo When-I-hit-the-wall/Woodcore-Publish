@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.5",
+  "schema_version": "1.6",
   "checks": {
     "BI-01": {
       "id": "BI-01",
@@ -126,11 +126,6 @@
           "source": "python:domains/member_check.py"
         }
       },
-      "gen": {
-        "kind": "bending",
-        "form": "(14)",
-        "version": 2
-      },
       "file": "/Timber-checks/Bending/BI-01.typ"
     },
     "BI-02": {
@@ -254,11 +249,6 @@
           "norm_ref": "Tabelle 8",
           "source": "python:domains/member_check.py"
         }
-      },
-      "gen": {
-        "kind": "bending",
-        "form": "(22)",
-        "version": 2
       },
       "file": "/Timber-checks/Bending/BI-02.typ"
     },
@@ -424,11 +414,6 @@
           "source": "python:domains/member_check.py"
         }
       },
-      "gen": {
-        "kind": "bending",
-        "form": "(21), (9), (19), (20)",
-        "version": 2
-      },
       "file": "/Timber-checks/Bending/BI-03.typ"
     },
     "DR-01": {
@@ -548,11 +533,6 @@
           "source": "python:domains/member_check.py"
         }
       },
-      "gen": {
-        "kind": "compression",
-        "form": "(11)",
-        "version": 2
-      },
       "file": "/Timber-checks/Compression/DR-01.typ"
     },
     "DR-02": {
@@ -651,11 +631,6 @@
           "norm_ref": "Tabelle 9",
           "source": "python:domains/member_check.py"
         }
-      },
-      "gen": {
-        "kind": "compression",
-        "form": "(10)",
-        "version": 2
       },
       "file": "/Timber-checks/Compression/DR-02.typ"
     },
@@ -831,11 +806,6 @@
           "norm_ref": "4.2.3.1",
           "source": "python:domains/member_check.py"
         }
-      },
-      "gen": {
-        "kind": "bending",
-        "form": "(14)",
-        "version": 2
       },
       "file": "/Timber-checks/Bending/FE-01.typ"
     },
@@ -1089,11 +1059,6 @@
           "source": "python:domains/member_check.py"
         }
       },
-      "gen": {
-        "kind": "buckling",
-        "form": "(10), (29)",
-        "version": 2
-      },
       "file": "/Timber-checks/Buckling/FE-02.typ"
     },
     "KI-01": {
@@ -1283,11 +1248,6 @@
           "norm_ref": "4.2.9",
           "source": "python:domains/member_check.py"
         }
-      },
-      "gen": {
-        "kind": "lateral-torsional",
-        "form": "(38)",
-        "version": 2
       },
       "file": "/Timber-checks/Lateral-torsional/KI-01.typ"
     },
@@ -1529,11 +1489,6 @@
           "source": "python:domains/member_check.py"
         }
       },
-      "gen": {
-        "kind": "lateral-torsional",
-        "form": "(22), (37)",
-        "version": 2
-      },
       "file": "/Timber-checks/Lateral-torsional/KI-02.typ"
     },
     "KN-01": {
@@ -1717,11 +1672,6 @@
           "source": "python:domains/member_check.py"
         }
       },
-      "gen": {
-        "kind": "buckling",
-        "form": "(10), (29)",
-        "version": 2
-      },
       "file": "/Timber-checks/Buckling/KN-01.typ"
     },
     "SC-01": {
@@ -1837,11 +1787,6 @@
           "source": "python:domains/member_check.py"
         }
       },
-      "gen": {
-        "kind": "shear",
-        "form": "(23)",
-        "version": 2
-      },
       "file": "/Timber-checks/Shear/SC-01.typ"
     },
     "ZT-01": {
@@ -1940,11 +1885,6 @@
           "norm_ref": "Tabelle 8",
           "source": "python:domains/member_check.py"
         }
-      },
-      "gen": {
-        "kind": "tension",
-        "form": "(6)",
-        "version": 2
       },
       "file": "/Timber-checks/Tension/ZT-01.typ"
     },
@@ -2064,11 +2004,6 @@
           "norm_ref": "Tabelle 9",
           "source": "python:domains/member_check.py"
         }
-      },
-      "gen": {
-        "kind": "tension",
-        "form": "(8)/(9)",
-        "version": 2
       },
       "file": "/Timber-checks/Tension/ZT-02.typ"
     }

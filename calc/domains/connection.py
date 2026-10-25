@@ -660,7 +660,7 @@ def write(data, figures, data_dir):
 
 
 def export(source_dir, data_dir, schema_dir=None, schemas=None, values=None):
-    """The connections' part of the export, on its own: what Woodcore's window runs when a connection is saved, so the report sees it without the load workbooks being read again -- the schemas they are drawn on being read here from `schema_dir` unless `schemas` is handed over, and the positions their pieces are labelled with being the ones the last full export wrote. export_all.py runs the same two steps. Returns (data, warnings)."""
+    """The connections' part of the export, on its own: what Woodcore's window runs when a connection is saved, so the report sees it without the whole export being run again -- the schemas they are drawn on being read here from `schema_dir` unless `schemas` is handed over, and the positions their pieces are labelled with being the ones the last full export wrote. export_all.py runs the same two steps. Returns (data, warnings)."""
     if schemas is None:
         schemas = schema_model.read_sources(schema_dir if schema_dir is not None else Path(source_dir).parent / "details")
     from domains import connector   # the position records the last export wrote, read as the connectors read them

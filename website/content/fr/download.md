@@ -9,8 +9,7 @@
 | Windows 10 ou 11, 64 bits | nécessaire | Woodcore est un programme Windows. |
 | Environ 250 Mo par version | nécessaire | Chaque version s'installe dans un dossier à elle. |
 | Droits d'administrateur | non | L'installation se fait pour l'utilisateur, dans `%LOCALAPPDATA%\Programs\Woodcore\`. |
-| Microsoft Excel | recommandé | Pour remplir le classeur des charges (les positions se saisissent dans Woodcore). Woodcore lit les valeurs qu'Excel a calculées : enregistrez le classeur dans Excel avant d'importer. |
-| Le classeur des charges Belastungsannahmen | pour les charges | Woodcore en lit les feuilles `SL-`, `EL+AL-` et `WL-` au format du modèle 3.2. Il n'est pas livré avec Woodcore. |
+| Microsoft Excel et un classeur des charges | non | Le vent, la neige et les charges permanentes se saisissent dans les onglets de Woodcore, comme les positions. Un classeur `Belastungsannahmen` n'est jamais ouvert. |
 | Visual Studio Code et l'extension Tinymist | recommandé | Pour écrire le rapport, avec la documentation de chaque commande au survol. |
 | Typst | inclus | Typst 0.14.2 est livré avec Woodcore : rien à installer. |
 | Une connexion Internet | facultative | Seulement pour savoir si une nouvelle version est publiée. |

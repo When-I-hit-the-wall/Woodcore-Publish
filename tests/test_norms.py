@@ -58,7 +58,7 @@ def _good(name):
 # --- calc/norms/ as a whole ---------------------------------------------------
 
 # <norm>-<year>-<table or clause>-<designation>.json: sia265-2021-tab08-vollholz, sia265-2021-6.2.1.1-k-alpha, sn-en-14592-2022-stabduebel-werkstoff, szs-c5-2018-edv-kurzbezeichnungen (v0.94: a page of the SZS's tables, named by what it is headed, «EDV»)
-FILE_NAME = re.compile(r"^(sia\d{3}|sn-en-\d{4,5}|szs-c\d+|vkf)-(19|20)\d{2}-(tab\d{2}|\d+(\.\d+)+|[a-z]+)-[a-z0-9-]+\.json$")
+FILE_NAME = re.compile(r"^(sia\d{3}(-\d)?|sn-en-\d{4,5}|szs-c\d+|vkf)-(19|20)\d{2}-(tab\d{2}|\d+(\.\d+)+|[a-z]+)-[a-z0-9-]+\.json$")
 
 
 # The one file of the folder that carries no value of a norm but the **name** of one -- the designation, the
@@ -81,11 +81,19 @@ def test_every_norm_file_is_named_and_read():
     read |= {n + ".json" for n in (sia261.TAB08, sia261.TAB28, sia261.TAB29, sia261.TAB30)}
     read |= {n + ".json" for n in sia261_snow.FILES}
     read |= {n + ".json" for n in sia261_wind.FILES}
+    from domains import wind_geometry
+    read.add(wind_geometry.GEOMETRY + ".json")   # the 37 buildings of Annexe C as numbers (spec 2026-10-23-onglet-vent-briques, D-23)
+    read.add("sia261-2020-wind-excerpts.json")   # the wind's excerpts, read by norms/excerpts.py for the wind's tab (spec 2026-10-23-onglet-vent-briques, ARCH-012)
+    from norms import sia265_1
+    read |= {n + ".json" for n in sia265_1.FILES}   # SIA 265/1, the wood-based panels (issue #110)
+    read |= {n + ".json" for n in ("sia265-2021-materials-excerpts", "sia261-2020-materials-excerpts", "sia265-1-2018-materials-excerpts")}   # the excerpts the «Matériaux» tab shows as a material's source (issue #110, UI-008)
     read.add(sn_en_14592.NAME + ".json")
     read.add(szs_c5.NAME + ".json")
     read |= {n + ".json" for n in szs_c5.TABLE_NAMES}   # the profile tables (issue #50)
     read.add(vkf.NAME + ".json")
     read.add(vkf.REQUIREMENT_NAME + ".json")   # VKF 15-15's resistances of the load-bearing structure (issue #46)
+    from norms import excerpts
+    read |= {n + ".json" for n in excerpts.CITABLE}   # the excerpts a domain's line cites, found by its citation (issue #113, REQ-014)
     read.add(CATALOGUE)
     assert on_disk == read, "read by no module: %s; named by a module, not on disk: %s" % (sorted(on_disk - read), sorted(read - on_disk))
 

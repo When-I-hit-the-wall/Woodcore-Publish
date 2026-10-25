@@ -383,11 +383,11 @@ def test_a_load_follows_another_load_and_a_formula_domain_in_the_order_its_links
     _write(snow_dir, "SN-02.json", snow_source.stamp_version(bad))
     notes = []
     with project.using(here):
-        data = registry.build_calculations([], here, {}, notes)
+        data = registry.build_calculations(here, {}, notes)
         graph = registry.load_graph(here)
     # a project laid out by folders names a build-up's drawing from the Typst root: 1.7, which contains 1.6 (issue #64)
     drawn = any(f["file"].startswith("/") for d in data["domains"].values() for i in d["instances"].values() for f in i.get("figures") or ())
-    assert data["schema_version"] == registry.LEVELS_SCHEMA_VERSION   # 1.8 since v0.120 holds 1.6's links and 1.7's rooted drawings (UI-002)
+    assert data["schema_version"] == registry.SCHEMA_VERSION   # 1.9 since issue #109 holds 1.6's links and 1.7's rooted drawings
     validation.validate_structure(data, "calculations")
     wind = data["domains"]["wind-load"]["instances"]["WI-01"]
     snow = data["domains"]["snow-load"]["instances"]["SN-01"]
@@ -398,7 +398,7 @@ def test_a_load_follows_another_load_and_a_formula_domain_in_the_order_its_links
     assert any("SN-02" in str(n) and "h_0" in str(n) for n in notes), notes
     gk = data["domains"]["dead-load"]["instances"]["AU-01"]["vars"]["gk_ak"]["value"]
     assert data["domains"]["wind-load"]["instances"]["WI-02"]["vars"]["qp0"]["value"] == gk
-    assert list(data["domains"]["snow-load"]["instances"]) == ["SN-01", "SN-02"], "file-name order kept"
+    assert [i for i in data["domains"]["snow-load"]["instances"] if i.startswith("SN-")] == ["SN-01", "SN-02"], "file-name order kept"   # beside the example's own SL (issue #109)
     assert graph[("snow-load", "SN-01")] == {("wind-load", "WI-01")} and graph[("wind-load", "WI-01")] == set()
 
 
@@ -414,7 +414,7 @@ def test_loads_that_follow_each_other_in_a_circle_stop_the_export_naming_the_cha
     sn["links"] = {"h_0": links.make("wind-load", "WI-09", "b")}
     _write(here.sources_dir / snow_source.FOLDER, "SN-09.json", snow_source.stamp_version(sn))
     with project.using(here):
-        message = _refused(lambda: registry.build_calculations([], here, {}, []), "SN-09", "WI-09", "circle")
+        message = _refused(lambda: registry.build_calculations(here, {}, []), "SN-09", "WI-09", "circle")
         graph = registry.load_graph(here)
     assert "→" in message
     # and through a third: a dead load following the wind load, the snow load following the dead load
@@ -432,7 +432,7 @@ def test_loads_that_follow_each_other_in_a_circle_stop_the_export_naming_the_cha
     (here.sources_dir / wind_source.FOLDER / "WI-09.json").unlink()
     (here.sources_dir / snow_source.FOLDER / "SN-09.json").unlink()
     with project.using(here):
-        message = _refused(lambda: registry.build_calculations([], here, {}, []), "SN-08", "WI-08", "AU-09", "circle")
+        message = _refused(lambda: registry.build_calculations(here, {}, []), "SN-08", "WI-08", "AU-09", "circle")
         chain = links.find_cycle(registry.load_graph(here), ("snow-load", "SN-08"))
     assert len(chain) == 4 and chain[0] == chain[-1], chain
     assert links.find_cycle(graph, ("snow-load", "SN-09")) in ([("snow-load", "SN-09"), ("wind-load", "WI-09"), ("snow-load", "SN-09")],)

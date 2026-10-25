@@ -33,8 +33,9 @@ DOMAIN_KINDS = ("check", "steel") + LOAD_KINDS + ("connector", "connection", "sc
 class _Kind:
     """How the mechanism reads the domains of one kind: `EXPORT_FILE` under data/, `records(data)` {id: record, `id` in it}, `is_unfolded(record)`, `form_of(record)`."""
 
-    def __init__(self, export_file, records, is_unfolded, form_of):
+    def __init__(self, export_file, records, is_unfolded, form_of, after_unfold=None):
         self.EXPORT_FILE, self.records, self.is_unfolded, self.form_of = export_file, records, is_unfolded, form_of
+        self.after_unfold = after_unfold   # what the kind writes onto its files after their lines, from its own store (a member check's display, issue #112)
 
 
 def _calc_form(kind):
@@ -60,7 +61,7 @@ def _module(kind):
     from domains import member_check, steel_check
     if kind in ("check", "steel"):
         module = member_check if kind == "check" else steel_check
-        return _Kind(module.EXPORT_FILE, lambda data: (data or {}).get("checks", {}), module.is_unfolded, module.form_of)
+        return _Kind(module.EXPORT_FILE, lambda data: (data or {}).get("checks", {}), module.is_unfolded, module.form_of, getattr(module, "after_unfold", None))
     if kind in LOAD_KINDS:
         form_of = _calc_form(kind)
         if kind == "snow-load":
@@ -179,7 +180,9 @@ _KIND_WORDS = {"tension": "Zug parallel zur Faserrichtung", "compression": "Druc
                "buckling": "Stabilität", "lateral-torsional": "Kippen"}
 _PART = "Tragsicherheit"
 # The member's own values, which come first (#member's order); every other row -- the action, the stresses, the factors of stability, the utilisations -- is the verdict's part, after its heading
-_MEMBER_KEYS = {"A", "eta_w", "eta_t", "eta_w_E", "f_c_0_k", "E_0_05", "k_fi", "t_fi", "beta_n", "d_char_n", "d_red", "d_ef", "b", "h", "d"}
+# The words of a panel's loading in the member's line, German as the export carries them (issue #112): plate, shear wall, in its plane
+PANEL_LOADING_WORDS = {"plaque": "Plattenbeanspruchung", "voile": "Scheibenbeanspruchung", "tc": "Zug/Druck in der Plattenebene"}
+_MEMBER_KEYS = {"A", "eta_w", "eta_t", "eta_mod", "gamma_M", "eta_w_E", "f_c_0_k", "E_0_05", "k_fi", "t_fi", "beta_n", "d_char_n", "d_red", "d_ef", "b", "h", "d"}
 
 
 def _member_row(key):
@@ -203,6 +206,13 @@ def member_line(record, lang):
     here = project.current()
     head, kind = record["id"], None
     material = record["grade"]
+    library = record.get("material") or {}
+    if library and not record["grade"]:
+        # a material of the library that is no class of SIA 265 (issue #112, REQ-009): its name in the document's language, a panel's loading after it
+        from domains import materials_contract
+        material = materials_contract.name(library, lang)
+        if record.get("loading"):
+            material += " (" + strings.term(PANEL_LOADING_WORDS[record["loading"]["mode"]], lang) + " " + ("∥" if record["loading"]["direction"] == "par" else "⊥") + ")"
     if record.get("position") and record.get("position_found"):
         head = record["position"]
         try:
@@ -210,7 +220,7 @@ def member_line(record, lang):
         except (OSError, ValueError):
             pos = {}
         kind = positions_store.type_label(pos.get("type", ""), lang) if pos.get("type") else None
-        if pos.get("material"):
+        if pos.get("material") and record["grade"] and not library:
             material = strings.term(pos["material"], lang) + " " + record["grade"]
     parts = ([kind] if kind else []) + [material, record["section"].get("text") or "", strings.text("moisture_class", lang) + " " + str(record["moisture_class"])]
     return f"*{head}*: " + ", ".join(p for p in parts if p) + " " + _label(record["id"], "member")
@@ -259,8 +269,7 @@ def _generate_member(record, lang="de"):
             target.append(eq(row))
         else:
             target.append(var(row["key"], row["symbol"], published[row["key"]]["value"], row["unit"]))
-    words = strings.term(_FORM_WORDS.get(gen["form"], _KIND_WORDS[record["kind"]]), lang)
-    title = f"{words} – {rid}"
+    title = check_title(record, lang)
     relation = result["relation"]
     import documents
     try:
@@ -268,22 +277,55 @@ def _generate_member(record, lang="de"):
     except project.ProjectError:
         here = None
     # the domain and its presets (spec 2026-10-21-commandes-typst-refonte, REQ-008, Q-014): the form the file is written from is kept in the base, not in the file
+    # the options of «Affichage» the check's source keeps (issue #112, REQ-010, ARCH-010): its header, its member's line, its verdict -- none given, the file as before
+    from domains import member_check_material
+    display = member_check_material.display_of(record)
+    head_line = member_line(record, lang)
+    if display["member_line"] in (1, 2, 3):   # «none» is the line masked by `unfold_display.apply_check_display`, as «Affichage» masks a table
+        head_line = "#from-level(%d)[%s]" % (display["member_line"], head_line)
     lines = [documents.root_import_line(here), "",
-             "#domain(" + ref.typst_str(rid) + ", label: " + ref.typst_str(title) + ")[",
+             check_header(rid, title, record, display),
              '#calc-defaults(presets: "block", scope: "domain") ' + _label(rid, "presets"),
-             member_line(record, lang), ""]
+             head_line, ""]
     lines += member
     lines += ["", "_" + strings.term(_PART, lang) + "_ " + _label(rid, "part"), ""]
     lines += check
     lines.append("  " + ref.call_command("verify", ref.Raw("`" + relation + "`"), id="v-" + re.sub(r"[^0-9a-z]+", "-", gen["form"].lower()).strip("-")))
     eta = next(row for row in result["rows"] if row["key"] == "eta")
+    percent = display["verdict"] == "percent"
     if eta.get("keys"):
-        lines.append("  " + ref.call_command("eq", "eta", ref.Raw("`" + eta["keys"] + "`"), unit="%", id="eta"))
-    else:
+        lines.append("  " + ref.call_command("eq", "eta", ref.Raw("`" + eta["keys"] + "`"), **({"unit": "%"} if percent else {}), id="eta"))
+    elif percent:
         # η the largest of several utilisations (max(…)): a literal in percent, checked against the export's
         lines.append("  " + ref.call_command("var", "eta", published["eta"]["value"] * 100, "%", domain=list(where), id="eta"))
+    else:
+        lines.append("  " + ref.call_command("var", "eta", published["eta"]["value"], domain=list(where), id="eta"))
     lines += ["]", ""]
     return "\n".join(lines)
+
+
+def check_title(record, lang="de"):
+    """The title of a check's file, «Zug parallel zur Faserrichtung – ZT-01»: SIA 265's heading of its form, else of its kind, in the document's language."""
+    from domains import member_check
+    from i18n import strings
+    gen = member_check.form_of(record) or {}
+    words = strings.term(_FORM_WORDS.get(gen.get("form"), _KIND_WORDS[record["kind"]]), lang)
+    return f"{words} – {record['id']}"
+
+
+def check_header(rid, title, record, display=None):
+    """The header of a check's file, `#domain(id, label: title)[` -- with the options of «Affichage» its source keeps (issue #112, REQ-010): the description printed (`descr:`), the title hidden (`label-position: "none"`), the report's level (`level:`). What the export writes again over the header of a file, every other argument of it as it stands (`unfold_display.apply_check_header`)."""
+    import build_reference as ref
+    from domains import member_check_material
+    display = display or member_check_material.display_of(record)
+    parts = ["#domain(" + ref.typst_str(rid) + ", label: " + ref.typst_str(title)]
+    if display.get("description") and (record.get("label") or "").strip():
+        parts.append("descr: " + ref.typst_str(record["label"].strip()))
+    if display.get("title") is False:
+        parts.append('label-position: "none"')
+    if display.get("level") is not None:
+        parts.append("level: %d" % display["level"])
+    return ", ".join(parts) + ")["
 
 
 def _calc_body(record, lang, where):
@@ -332,7 +374,7 @@ def _calc_body(record, lang, where):
             body.append("  " + ref.call_command("var", *head, line["value"], *([unit] if unit else []), domain=where, **shown, **cite(line), id=line["key"]))
     # each table of the calculation (the walls of a section's class, a connector's spacings): its lines labelled, what the export says of it taken again where it changes and the file does not (REQ-008)
     for i, table in enumerate(record.get("tables", []), 1):
-        body += [""] + _table_lines(table, rid, i, words)
+        body += [""] + _table_lines(table, rid, i, words, record.get("vars") or {})
     for i, note in enumerate(record.get("notes", []), 1):
         body += ["", _prose(words(note)) + " " + _label(rid, f"note-{i}")]
     # a check of a calculation (engine.Calculation `checks`: {name, eta, unit, status}): its utilisation, a literal the export takes again where it changes
@@ -359,11 +401,12 @@ def _calc_file(rid, title, what, body, tail):
     return "\n".join(lines)
 
 
-def figure_line(file, caption, label, width="80%", written=None):
-    """A figure of a domain's file, on one labelled line: `#figure(image("<file>", width: 80%), caption: [<caption>]) <label>` -- the line a load's drawing, a connector's, a steel section's are written with, and what «Affichage» changes the width, the caption and the label of (spec 2026-10-22-onglet-neige-type, ARCH-RISK-F07)."""
+def figure_line(file, caption, label, width="80%", written=None, level=None):
+    """A figure of a domain's file, on one labelled line: `#figure(image("<file>", width: 80%), caption: [<caption>]) <label>` -- the line a load's drawing, a connector's, a steel section's are written with, and what «Affichage» changes the width, the caption and the label of (spec 2026-10-22-onglet-neige-type, ARCH-RISK-F07). `level`, a figure printed from that level on: the same line in `#from-level(<level>)[…]`, which Typst resolves at the compile (spec 2026-10-23-onglet-vent-briques, D-29)."""
     # `written`: a caption as the file already holds it, written back as it stands -- never escaped twice
     caption_part = ", caption: [" + written + "]" if written else ", caption: [" + _cell(caption) + "]" if caption else ""
-    return "#figure(image(" + _typst_string(file) + ", width: " + width + ")" + caption_part + ") <" + label + ">"
+    line = "#figure(image(" + _typst_string(file) + ", width: " + width + ")" + caption_part + ") <" + label + ">"
+    return "#from-level(%d)[%s]" % (level, line) if level else line
 
 
 def _generate_load(record, lang="de"):
@@ -375,7 +418,9 @@ def _generate_load(record, lang="de"):
     # its drawings -- a permanent load's build-up, entered in Woodcore --, each a figure on a labelled line with its caption, as #show-calc printed them (a load is written out in a project laid out by folders only, where a figure's file is named from the Typst root)
     head = []
     for i, figure in enumerate(record.get("figures") or [], 1):
-        head += [figure_line(figure["file"], strings.translate(figure["title"], lang) if figure.get("title") else "", _label(rid, f"figure-{i}")[1:-1]), ""]
+        # a figure of an edition per language -- the wind's figure of the norm, French and German, English reading German -- and one printed from a level on (D-29)
+        file = (figure.get("files") or {}).get(lang) or (figure.get("files") or {}).get("de") or figure["file"]
+        head += [figure_line(file, strings.translate(figure["title"], lang) if figure.get("title") else "", _label(rid, f"figure-{i}")[1:-1], level=figure.get("from_level")), ""]
     return _calc_file(rid, title, None, head + _calc_body(record, lang, [kind, rid]), [])
 
 
@@ -505,9 +550,11 @@ def _generate_steel(record, lang="de"):
     return _calc_file(rid, title, what, _calc_body(record, lang, ["steel", rid]), lines)
 
 
-def _table_lines(table, rid, i, words):
-    """A table of the export written in raw Typst, each line labelled: its title, its figures (a connector's k_beta), the `#table` on one line -- the columns' groups over their labels and units, the rows, the totals in bold --, its note. A cell of kind `math` is set as math, a text keeps the math it carries (`$7 d$`)."""
+def _table_lines(table, rid, i, words, vars_=None):
+    """A table of the export written in raw Typst, each line labelled: its title, its figures (a connector's k_beta), the `#table` on one line -- the columns' groups over their labels and units, the rows, the totals in bold --, its note. A cell of kind `math` is set as math, a text keeps the math it carries (`$7 d$`); a cell naming a variable of the record its value, as the window shows it (contracts.table_cell); a column `strong` in bold; `widths` "first-auto" a wide, low table (spec 2026-10-23-onglet-vent-briques, REQ-014)."""
+    from domains import contracts
     translated = words
+    vars_ = vars_ or {}
 
     def words(text):
         return translated(text) or ""   # an empty label or cell is an empty cell
@@ -522,6 +569,12 @@ def _table_lines(table, rid, i, words):
     columns = table.get("columns", [])
     if columns:
         def cell(value, column):
+            value = contracts.table_cell(value, column, vars_)
+            if column.get("strong") and value not in (None, ""):
+                return "[*" + plain(value, column)[1:-1] + "*]"
+            return plain(value, column)
+
+        def plain(value, column):
             if isinstance(value, str):
                 return "[$" + value + "$]" if column.get("kind") == "math" and value else "[" + _prose(words(value) if column.get("kind") != "math" else value) + "]"
             text = _number(value)
@@ -545,9 +598,13 @@ def _table_lines(table, rid, i, words):
             header.append("[*" + label + unit + "*]" if label or unit else "[]")
         rows = [cell(v, c) for row in table.get("rows", []) for v, c in zip(row, columns)]
         totals = ["[*" + cell(v, c)[1:-1] + "*]" if cell(v, c) != "[]" else "[]" for row in table.get("totals", []) for v, c in zip(row, columns)]
-        out.append(f"#table(columns: {len(columns)}, table.header({', '.join(header)}), {', '.join(rows + totals)}) " + _label(rid, f"table-{i}"))
+        widths = f"(auto,) + (1fr,) * {len(columns) - 1}" if table.get("widths") == "first-auto" else str(len(columns))
+        out.append(f"#table(columns: {widths}, table.header({', '.join(header)}), {', '.join(rows + totals)}) " + _label(rid, f"table-{i}"))
     if table.get("note"):
         out.append(_prose(words(table["note"])) + " " + _label(rid, f"table-{i}-note"))
+    if table.get("from_level"):
+        # a table printed from a level on, as a figure is (D-29): the permanent loads' layers at level 3 (spec 2026-10-24-poids-propre-repense, REQ-013, P05)
+        out = ["#from-level(%d)[%s]" % (table["from_level"], line) for line in out]
     return out
 
 
@@ -624,6 +681,24 @@ def domain_path(here, rid, record=None, kind=None):
     return here.domain_dir(kind, next(iter(folders))) / f"{rid}.typ"
 
 
+def move_domain(here, rid, old_kind, new_kind, kind="check"):
+    """The file of the domain `rid` moved from the folder of its old kind to the new one's -- a compression whose stability is ticked becomes a buckling, `Timber-checks/Compression/<id>.typ` going to `Timber-checks/Buckling/` (issue #112, REQ-011, ARCH-009) --, the engineer's lines in it kept and its entry of the base, keyed by its id, kept with it: there is never a file in each folder. Called by the save before the export, which then writes the lines of the new form (`regenerate`, the changed lines kept). Returns the new path, or None where there was nothing to move (no folders, the same folder, no file)."""
+    if not here.has_folders or old_kind == new_kind:
+        return None
+    folders = project.KIND_FOLDERS[kind]
+    if old_kind not in folders or new_kind not in folders:
+        return None
+    old = here.domain_dir(kind, old_kind) / f"{rid}.typ"
+    new = here.domain_dir(kind, new_kind) / f"{rid}.typ"
+    if not old.is_file():
+        return None
+    if new.exists():
+        raise UnfoldError(f"unfold: {here.rel(new)} exists already -- {rid} cannot move from {old_kind} to {new_kind} without two files", "move_exists", id=rid)
+    new.parent.mkdir(parents=True, exist_ok=True)
+    old.replace(new)
+    return new
+
+
 def empty_base():
     return {"format": BASE_FORMAT, "schema_version": BASE_SCHEMA_VERSION, "domains": {}}
 
@@ -677,8 +752,14 @@ def text_lines(raw):
 
 
 def is_masked(line):
-    """Whether a figure's line is commented out -- masked in «Affichage» (D-23)."""
+    """Whether a line Woodcore writes -- a figure's, a table's, its title's, its note's -- is commented out: masked in «Affichage» (D-23; a table since spec 2026-10-23-onglet-vent-briques, ARCH-008)."""
     return line.lstrip().startswith("//")
+
+
+def unmasked(line):
+    """A line as it stands without the `// ` that masks it."""
+    stripped = line.strip()
+    return stripped[2:].lstrip() if stripped.startswith("//") else stripped
 
 
 def _display_free(item):
@@ -737,6 +818,10 @@ def unfold_checks(here, checks, lang=None, notes=None):
     return unfold_domains(here, "check", checks, lang, notes)
 
 
+# The kinds whose file is a calculation tab's (docs/ui/calc-tab.md): regenerated at every save and export where its form changed, never asked (spec 2026-10-23-neige-correctifs-issues-96-99, D-4, reversing D-18 of the spec 2026-10-22-onglet-neige-type). The checks, the connectors and the polar moments keep «Régénérer», asked line by line in the «Formules» tab.
+AUTO_REGENERATE = frozenset({"snow-load", "dead-load", "wind-load"})   # the permanent loads since issue #95, on the type «Calcul» (spec 2026-10-23-onglets-types-et-services, D-21): their file follows their case too; the wind since spec 2026-10-23-onglet-vent-briques (ARCH-013): a file of the old form is written again at the first save
+
+
 def unfold_domains(here, kind, data, lang=None, notes=None):
     """Writes, for each check of the export `checks` printed unfolded whose domain the project does not hold yet, its file -- `Timber-checks/<Kind>/<id>.typ` laid out by folders, `Formules/<id>.typ` before -- and its base -- what saving a check and an export run (REQ-002) --, and refreshes the domains already there: their lines whose export changed and not their file (REQ-008). Returns the ids written.
 
@@ -767,13 +852,25 @@ def unfold_domains(here, kind, data, lang=None, notes=None):
         written.append(rid)
     if written:
         write_base(here, base, kind)
-    # a domain already there: the lines whose export changed, and not their file, follow it (REQ-008)
+    # a domain already there: the lines whose export changed, and not their file, follow it (REQ-008) -- and the file of a calculation tab whose form changed (a roof of another shape) is written again in the new one, without a question (D-4)
     for rid, record in sorted(module.records(data).items()):
         if module.is_unfolded(record) and rid not in written and is_domain_file(domain_path(here, rid, record, kind)):
             try:
-                refresh(here, rid, lang, kind)
+                if kind in AUTO_REGENERATE and not status(here, rid, lang, kind).matches:
+                    regenerate(here, rid, lang=lang, kind=kind, keep_changed=False)
+                else:
+                    refresh(here, rid, lang, kind)
             except UnfoldError:
                 pass   # a domain that cannot be read or compared is left as it is, and the tab says why
+    # what a kind writes onto its files after them from its own store -- a member check's options of «Affichage», kept in its source (issue #112, ARCH-010)
+    after = module.after_unfold
+    if after is not None:
+        for rid, record in sorted(module.records(data).items()):
+            if module.is_unfolded(record):
+                try:
+                    after(here, rid, record)
+                except UnfoldError:
+                    pass
     return written
 
 
@@ -962,7 +1059,8 @@ def status(here, rid, lang=None, kind=None):
         if not held[1].is_text and held[1].options.get("own") is True:
             out.lines.append(LineState(line_id, "own", mine, fresh))
             continue
-        if line_id.startswith("figure:") and is_masked(mine):
+        if is_masked(mine) and held[1].is_text:
+            # masked in «Affichage», the engineer's choice: a figure never written over (D-23), a table's line taken again masked where its numbers change (`refresh`)
             out.lines.append(LineState(line_id, "masked", mine, fresh))
             continue
         recorded = entry["lines"].get(line_id)
@@ -1030,7 +1128,7 @@ def _replace_line(items, index, line_id, fresh_item):
     if old.is_text:
         new_line = _line_text(line_id, fresh_item)
         lines = old.raw.split("\n")
-        lines = [(l[:len(l) - len(l.lstrip())] + new_line) if any(lid == line_id for lid, _l in text_lines(l)) else l for l in lines]
+        lines = [(l[:len(l) - len(l.lstrip())] + ("// " if is_masked(l) else "") + new_line) if any(lid == line_id for lid, _l in text_lines(l)) else l for l in lines]
         from domains import formula_domain as fd
         items[index] = fd.Command(old.kind, raw="\n".join(lines))
     else:
@@ -1049,7 +1147,8 @@ def refresh(here, rid, lang=None, kind=None):
     st = status(here, rid, lang, kind)
     if not st.unfolded or not st.matches:
         return []
-    todo = [line for line in st.lines if line.state == "data"]
+    # a table's line masked whose numbers changed is taken again masked: shown again, it says what the export says (spec 2026-10-23-onglet-vent-briques, ARCH-008)
+    todo = [line for line in st.lines if line.state == "data" or (line.state == "masked" and line.id.startswith("label:") and unmasked(line.mine) != line.fresh)]
     if not todo:
         return []
     domain = _read_domain(here, rid, kind)
@@ -1233,8 +1332,10 @@ def reinsert(here, rid, line_id, lang=None, kind=None):
     _write(here, domain, items, base, rid, entry, kind=kind)
 
 
-def regenerate(here, rid, choices=None, lang=None, kind=None):
-    """«Régénérer» (REQ-010): the domain written again from its check's form now, line by line against the file and the base: a line the engineer did not change takes the new writing; one he changed is kept where the new writing has it, and one the new writing changes too is a conflict asked line by line (`choices` {line id: "mine" | "theirs"}); a line the new form adds is put in its place, one it drops is taken out unless the engineer changed it; his own items -- a sentence, a command of his -- stay after the line they followed. The header takes the new `gen:`. Returns {"conflicts": [...]}: nothing is written while one is left without a choice."""
+def regenerate(here, rid, choices=None, lang=None, kind=None, keep_changed=True):
+    """«Régénérer» (REQ-010): the domain written again from its check's form now, line by line against the file and the base: a line the engineer did not change takes the new writing; one he changed is kept where the new writing has it, and one the new writing changes too is a conflict asked line by line (`choices` {line id: "mine" | "theirs"}); a line the new form adds is put in its place, one it drops is taken out unless the engineer changed it; his own items -- a sentence, a command of his -- stay after the line they followed. The header takes the new `gen:`. Returns {"conflicts": [...]}: nothing is written while one is left without a choice.
+
+    `keep_changed=False` is the regeneration of a calculation tab's file, made at every save and export without a question (`AUTO_REGENERATE`, spec 2026-10-23-neige-correctifs-issues-96-99, D-4): every line takes the writing, the display set in «Affichage» carried onto it (D-17) -- a line is never "changed" by its display --, a line the form drops goes, and no conflict is left; only the figure keeps the engineer's line (its width, caption, label and whether it is shown, D-23). His own sentences and commands stay after the line they followed."""
     import positions_store
     import sync
     lang = lang or positions_store.project_language(here)
@@ -1261,6 +1362,11 @@ def regenerate(here, rid, choices=None, lang=None, kind=None):
             now = _line_text(line_id, fresh[line_id][1])
             if sync.digest(now) != _pair(ours.get(line_id))[1] and now != _line_text(line_id, item):
                 conflicts.append(line_id)
+    if not keep_changed:
+        # the figure's line as «Affichage» set it -- masked, its width, caption or label -- recorded as Woodcore's own by its writer, so it is compared with the writing itself
+        changed = {lid for lid, (_i, item) in held.items() if lid in fresh and item.is_text and (lid.startswith("figure:") or is_masked(_line_text(lid, item))) and _line_text(lid, item) != _line_text(lid, fresh[lid][1])}
+        choices = dict(choices, **{lid: "mine" for lid in changed})
+        conflicts = []
     if conflicts:
         return {"conflicts": conflicts}
     # the engineer's own line in place of a line of the writing the file no longer holds (`_own_line`): kept in that line's place, never doubled by the writing's -- which would declare its id twice and stop the compile (spec 2026-10-22-image-polar-moment)
@@ -1290,10 +1396,15 @@ def regenerate(here, rid, choices=None, lang=None, kind=None):
     for c in fresh_items:
         ids = list(_items_by_line([c]))
         lid = ids[0] if ids else None
+        # a text carries several lines (the presets' label, then the figure): the one the engineer changed is the one that keeps his
+        lid = next((each for each in ids if each in changed), lid)
         if lid is not None and lid in changed and choices.get(lid, "mine") == "mine":
             mine = held[lid][1]
             items.append(mine)
             entry["lines"][lid] = [sync.digest(_line_text(lid, mine)), sync.digest(_line_text(lid, c))]
+            for each in ids:
+                if each != lid and any(other == each for other, _l in text_lines(mine.raw if mine.is_text else "")):
+                    entry["lines"][each] = [sync.digest(_line_text(each, mine)), sync.digest(_line_text(each, c))]
         elif lid in owned:
             items.append(owned[lid])
             digest = sync.digest(_line_text(lid, c))

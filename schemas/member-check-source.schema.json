@@ -20,9 +20,10 @@
       "enum": [
         "1.0",
         "1.1",
-        "1.2"
+        "1.2",
+        "1.3"
       ],
-      "description": "-- accepted: 1.0; 1.1, the same with `links`, which Woodcore writes only where a field follows a variable; 1.2, the same with `fire` (and `links` or not), which Woodcore writes only for a check in the fire situation (issue #46)."
+      "description": "-- accepted: 1.0; 1.1, the same with `links`, which Woodcore writes only where a field follows a variable; 1.2, the same with `fire` (and `links` or not), which Woodcore writes only for a check in the fire situation (issue #46); 1.3, the same with a field of the library -- `material`, `loading`, `kled`, `accidental`, `display` -- (and `links`, `fire` or not), which Woodcore writes only where one is given (issue #112)."
     },
     "id": {
       "type": "string",
@@ -375,6 +376,41 @@
           "type": "boolean",
           "description": "The member is on the top storey: VKF 15-15 notes [1] and [8]. Optional, false."
         }
+      }
+    },
+    "material": {
+      "type": "string",
+      "description": "Issue #112, at 1.3: the material of the library the check computes with -- `sia265:<class>` (SIA 265 Tabelle 8 or 9), `sia265-1:<panel>` (SIA 265/1 Tableaux 11 to 23) or `u-<8 hex>` (the engineer's own, copied into the project's Woodcore-Datei/materials.json at the save). Absent follows the position's strength class; never with `grade`."
+    },
+    "loading": {
+      "type": "object",
+      "description": "Issue #112, at 1.3, a panel's only: how it is loaded -- `mode` plaque (plate, out of its plane), voile (shear wall, in its plane) or tc (tension / compression in its plane) -- and the `direction` of SIA 265/1's tables, par (∥) or perp (⊥). Absent is plaque ∥.",
+      "required": ["mode", "direction"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"type": "string", "enum": ["plaque", "voile", "tc"]},
+        "direction": {"type": "string", "enum": ["par", "perp"]}
+      }
+    },
+    "kled": {
+      "type": "string",
+      "enum": ["permanent", "long", "medium", "short", "very_short"],
+      "description": "Issue #112, at 1.3, a panel's only: the load-duration class (SIA 265/1 Tableaux 7 and 8) η_mod is read for (Tableau 9). Absent is medium."
+    },
+    "accidental": {
+      "type": "boolean",
+      "description": "Issue #112, at 1.3, a panel's only: true is an accidental design situation, γ_M = 1,0 (SIA 265/1 Tableau 6, note 1). Absent is false."
+    },
+    "display": {
+      "type": "object",
+      "description": "Issue #112, at 1.3: the options of «Affichage» -- the report's `level` (0 to 3, absent auto), the `member_line` (none, or printed from level 1, 2, 3; absent always), the `verdict` (ratio or percent, absent percent), the `description` and the `title` printed (absent false and true). What the file of the check is written with; only the options the engineer changed are kept.",
+      "additionalProperties": false,
+      "properties": {
+        "level": {"type": "integer", "enum": [0, 1, 2, 3]},
+        "member_line": {"enum": ["none", 1, 2, 3]},
+        "verdict": {"type": "string", "enum": ["ratio", "percent"]},
+        "description": {"type": "boolean"},
+        "title": {"type": "boolean"}
       }
     },
     "links": {

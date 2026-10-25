@@ -15,9 +15,11 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`conventions/naming.md`](conventions/naming.md) | — | One thing, one name: what the code calls each thing the window and the report show, the names history left beside it and why they stay. | 3 KB |
 | [`conventions/testing.md`](conventions/testing.md) | §11ter | tests/, how to prepare a machine and run them, pinned versions of Python, Typst and packages. | 18 KB |
 | [`conventions/testing-catalogue.md`](conventions/testing-catalogue.md) | §11ter | What each test file guards: the engine, the norms, the documents, the build. | 84 KB |
+| [`conventions/testing-catalogue-materials.md`](conventions/testing-catalogue-materials.md) | §11ter | What each test file of the materials guards: the library, SIA 265/1, the shipped materials, the design values, the project's copy, the «Matériaux» tab. | 6 KB |
 | [`conventions/testing-catalogue-window.md`](conventions/testing-catalogue-window.md) | §11ter | What each test file of the window guards, built off-screen. | 41 KB |
 | [`conventions/testing-catalogue-typst.md`](conventions/testing-catalogue-typst.md) | §11ter | What each test file of the report's Typst commands guards: the calculations written by hand and their display, the citations and the bibliography, the summaries, the timber checks, the commands' documentation. | 11 KB |
 | [`conventions/testing-catalogue-guards.md`](conventions/testing-catalogue-guards.md) | §11ter | What each test file that guards the repository as a whole guards: the runner and the CI, the docs, the code's size, duplicates and line endings, the figures held to the byte. | 6 KB |
+| [`conventions/testing-catalogue-domains.md`](conventions/testing-catalogue-domains.md) | §11ter | What each test file of the calculation domains of the «Domaines» tab guards, without Qt: the model, its rows, its state, what is typed. | 5 KB |
 | [`conventions/build-and-release.md`](conventions/build-and-release.md) | §12 | woodcore-cli, the engine copy, archives, new projects, migration, installer, publishing, website. | 53 KB |
 | [`conventions/changelog-and-commits.md`](conventions/changelog-and-commits.md) | §15 | Where the journal lives and what every commit must carry. | 2 KB |
 
@@ -42,7 +44,7 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`domain/connectors.md`](domain/connectors.md) | §3.3nonies, §7bis | A connector file and its SIA 265 6.2.1 shear resistance; the descriptive keys. | 29 KB |
 | [`domain/connections.md`](domain/connections.md) | §3.3quinquies | A connection drawn on a schema; geometry in Python, forces distributed in Typst. | 24 KB |
 | [`domain/detail-schemas.md`](domain/detail-schemas.md) | §3.3decies | The one drawing of a connection detail, modified and consumed by connectors and polar moments. | 25 KB |
-| [`domain/member-checks.md`](domain/member-checks.md) | §3.3undecies, §3.3septdecies, §3.3unvicies | #member and the verify-* commands, and checks saved in Woodcore (the keyword lines of §3.3septdecies were retired in 0.117: archive/formules-dsl/). | 25 KB |
+| [`domain/member-checks.md`](domain/member-checks.md) | §3.3undecies, §3.3septdecies, §3.3unvicies, §3.3unvicies-bis | #member and the verify-* commands, and checks saved in Woodcore (the keyword lines of §3.3septdecies were retired in 0.117: archive/formules-dsl/); the material of the library, a panel's resistance, the options of «Affichage» in the source (issue #112). | 49 KB |
 | [`domain/position-plans.md`](domain/position-plans.md) | §3.3sexies | Plans drawn over the architect's plan: source, export, Typst, types, load symbols, superposition, sheets, the stiffness centre and the mass centre. | 36 KB |
 | [`domain/fire-plans.md`](domain/fire-plans.md) | §3.3vicies | A second kind of plan on the same documents and engine. | 12 KB |
 | [`domain/static-models.md`](domain/static-models.md) | §3.3octies | Static systems drawn in Woodcore and exported as figures; nothing solved. | 23 KB |
@@ -53,6 +55,7 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`domain/fire-resistance.md`](domain/fire-resistance.md) | §3.3tervicies | Member checks in the design situation fire (SIA 265 4.5.2), the fire resistance VKF 15-15 requires, and the comparison with the reference workbooks and the AEAI directives. | 10 KB |
 | [`domain/steel.md`](domain/steel.md) | §3.3quatervicies | Steel profiles (SZS C5 tables, free profiles), the section class and the member checks of SIA 263:2013, computed once in Python. | 7 KB |
 | [`domain/dependencies.md`](domain/dependencies.md) | §3.3quinvicies | The graph of dependencies: which object reads which, data/dependencies.json, what a change touches at the export. | 6 KB |
+| [`domain/materials.md`](domain/materials.md) | §3.3sexvicies | The engineer's library of materials and the ones Woodcore ships (SIA 265, SIA 265/1, SIA 261, the workbook's), the design values deduced, the copy a project keeps, the 1.0 file poured into the library. | 9 KB |
 | [`domain/variable-links.md`](domain/variable-links.md) | §3.3duovicies, §3.3duovicies-bis | A field of the window that follows a variable of the export: its shape, units, resolution, versions and what it may name; a text placed on a drawing and the variables it prints. | 14 KB |
 
 ## Typst report engine
@@ -83,17 +86,21 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`ui/tab-positions.md`](ui/tab-positions.md) | §10quater | The positions tab, and the list of the positions. | 9 KB |
 | [`ui/tab-journal.md`](ui/tab-journal.md) | §10quater | The journal tab. | 2 KB |
 | [`ui/tab-annexes.md`](ui/tab-annexes.md) | §10quater | The annexes tab. | 3 KB |
-| [`ui/tab-member-checks.md`](ui/tab-member-checks.md) | §10quater | The member checks tabs. | 8 KB |
+| [`ui/tab-member-checks.md`](ui/tab-member-checks.md) | §10quater | The member checks tabs: Traction, Compression, Flexion, Cisaillement on the type «Calcul» (issue #112). | 9 KB |
 | [`ui/tab-fire-resistance.md`](ui/tab-fire-resistance.md) | §10quater | The «Résistance au feu» tab. | 4 KB |
 | [`ui/tab-steel.md`](ui/tab-steel.md) | §10quater | The «Acier» tabs: profiles, section class, tension, compression, bending, shear. | 4 KB |
 | [`ui/tab-python.md`](ui/tab-python.md) | §10quater | The Python tab. | 2 KB |
-| [`ui/tab-formulas.md`](ui/tab-formulas.md) | §10quater | The «Formules» tab. | 6 KB |
-| [`ui/tab-variables.md`](ui/tab-variables.md) | §10quater | The variables tab. | 14 KB |
+| [`ui/tab-formulas.md`](ui/tab-formulas.md) | §10quater | The «Domaines» tab (formerly «Formules»): Formulaire, Code, Affichage on a domain's file, its modules (issue #113). | 15 KB |
+| [`ui/tab-variables.md`](ui/tab-variables.md) | §10quater | The variables tab. | 16 KB |
 | [`ui/tab-dependencies.md`](ui/tab-dependencies.md) | §10quater | The dependencies tab: the graph of the project's objects, «dépend de» and «utilisé par». | 2 KB |
 | [`ui/tab-project.md`](ui/tab-project.md) | §10quater | The «Projet» tab: the title page, the language, the form, the documents made one by one and their content templates, the preview of the templates. | 8 KB |
 | [`ui/command-palette.md`](ui/command-palette.md) | §10quater | The command palette, Ctrl+K: what it finds, where it reads it, and how it is used with the mouse. | 6 KB |
+| [`ui/building-a-tab.md`](ui/building-a-tab.md) | §10quater | Building a tab from a type and its services, never copied: the host, the context, the service's contract, the five types, a complete example (issue #95). | 9 KB |
 | [`ui/calc-tab.md`](ui/calc-tab.md) | §10quater | Building a tab of calculation on the common base: what the base does once, what a domain declares, the snow as the complete example, what the wind, the permanent loads, the seismic action and the member checks will bring. | 8 KB |
+| [`ui/tab-dead-load.md`](ui/tab-dead-load.md) | §10quater | The «Poids propre et surcharge» tab: the table of layers at the keyboard, «Couche n», the section and the contributions, the overview, the templates, «Affichage». | 5 KB |
 | [`ui/tab-snow.md`](ui/tab-snow.md) | §10quater | The «Neige» tab: the building, the site, the roof among five tiles, the norm under each datum, the modules of the right pane, «Affichage» of the case's file. | 4 KB |
+| [`ui/tab-materials.md`](ui/tab-materials.md) | §10quater | The «Matériaux» tab on the type «Bibliothèque»: the list, the sheet in folds, the source on the right, the first tab that is not the project's. | 6 KB |
+| [`ui/tab-wind.md`](ui/tab-wind.md) | §10quater | The «Vent» tab: four sections, the building in 3D, the coloured tables of the norm, hovers by keys, the results in 3D, «Affichage» with the norm's figure at level 3. | 5 KB |
 
 ## Decisions and open questions
 
@@ -112,12 +119,23 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | [`test-report-2026-10-10.md`](test-report-2026-10-10.md) | — | The test suite's report of 10.10.2026 (issue #24): a dated snapshot, not kept up to date. | 17 KB |
 | [`history/2026-10-21-commandes-typst-refonte-journal-lots-0-12.md`](history/2026-10-21-commandes-typst-refonte-journal-lots-0-12.md) | — | The progress journal of lots 0 to 12 of the Typst commands' overhaul (spec 2026-10-21-commandes-typst-refonte, §16), moved verbatim so that the spec stays under 100 KB. | 15 KB |
 | [`history/2026-10-21-commandes-typst-refonte-journal-lots-13-18.md`](history/2026-10-21-commandes-typst-refonte-journal-lots-13-18.md) | — | The progress journal of lots 13 to 18 of the Typst commands' overhaul (spec 2026-10-21-commandes-typst-refonte), moved verbatim on 2026-10-22 to keep the spec under 100 KB. | 11 KB |
+| [`history/load-workbook-sheets.md`](history/load-workbook-sheets.md) | §3.3, §3.3bis, §3.3ter, §3.3quater, §3.3sexies-bis | How Woodcore read the `SL-*`, `WL-*` and `EL+AL-*` sheets of the Belastungsannahmen workbooks (v0.18 to v0.124), moved verbatim from `domain/loads.md` and `domain/calculation-domains.md` on 2026-10-25 when issue #109 retired the reading. | 40 KB |
+| [`history/2026-10-25-tab-member-checks-before-112.md`](history/2026-10-25-tab-member-checks-before-112.md) | — | The member checks tabs before issue #112 (MemberCheckTab's three panes, «Flambage», «Déversement», the shear's list), moved verbatim from `ui/tab-member-checks.md` on 2026-10-25. | 12 KB |
 | [`history/typst-retired-commands.md`](history/typst-retired-commands.md) | §10bis | The reference rows of the commands the Typst commands' overhaul retired (spec 2026-10-21-commandes-typst-refonte, lot 19), moved verbatim from `typst/api-conventions.md` on 2026-10-22; what each becomes is `calc/renamed-commands.json`. | 42 KB |
 | [`history/formulas-retired-commands.md`](history/formulas-retired-commands.md) | §10quinquies | The sections of `typst/formulas.md` on `#val`, `#var-line`, `#var-unit`, `#var-domain` and the arguments `note:`, `sep:`, `summary:`, retired by the Typst commands' overhaul (spec 2026-10-21-commandes-typst-refonte, lot 19), moved verbatim on 2026-10-22. | 16 KB |
 | [`history/report-engine-retired-commands.md`](history/report-engine-retired-commands.md) | §5, §9 | The sections of `typst/report-engine.md` on `#calc-block`, `#show-input` and the levels the retired commands printed their lines at, retired by the Typst commands' overhaul (spec 2026-10-21-commandes-typst-refonte, lot 19), moved verbatim on 2026-10-22. | 7 KB |
+| [`history/2026-10-25-tab-formulas-pills.md`](history/2026-10-25-tab-formulas-pills.md) | §10quater | The «Formules» tab of v0.117 to v0.124 -- one text, a pill a command (issues #15, #40) --, moved verbatim from `ui/tab-formulas.md` when issue #113 rebuilt it. | 11 KB |
 | [`history/2026-10-22-niveau-manuel.md`](history/2026-10-22-niveau-manuel.md) | §10quater, §4 | The paragraphs that described the level of detail -1 «Sélection manuelle» as current -- the window, the member checks, report-engine §4, the data contracts --, moved verbatim when the spec 2026-10-22-retrait-niveau-manuel took it out of the window (issue #93). | 7 KB |
 | [`history/2026-10-22-onglet-neige-type-journal-lots-1-8.md`](history/2026-10-22-onglet-neige-type-journal-lots-1-8.md) | — | The progress journal of lots 1 to 8 of the snow tab rebuilt as the first tab of calculation (spec 2026-10-22-onglet-neige-type, §16), moved verbatim on 2026-10-22 to keep the spec under 100 KB. | 6 KB |
 | [`history/2026-10-22-onglet-neige-type-risques-revue.md`](history/2026-10-22-onglet-neige-type-risques-revue.md) | — | The risks of the three architecture reviews of the snow tab rebuilt as the first tab of calculation and what the spec made of each (spec 2026-10-22-onglet-neige-type, §13.3), moved verbatim on 2026-10-22 to keep the spec under 100 KB. | 10 KB |
+| [`history/2026-10-24-onglet-commandes-pages-source.md`](history/2026-10-24-onglet-commandes-pages-source.md) | — | The source (§2, issue #115 cut into points T) of the spec 2026-10-24-onglet-commandes-pages, moved verbatim on 2026-10-24 to keep the spec under 100 KB. | 18 KB |
+| [`history/2026-10-24-onglet-domaines-formulaire-code-source.md`](history/2026-10-24-onglet-domaines-formulaire-code-source.md) | — | The source (§2, issue #113 cut into points T) of the spec 2026-10-24-onglet-domaines-formulaire-code, moved verbatim on 2026-10-24 to keep the spec under 100 KB. | 26 KB |
+| [`history/2026-10-24-onglet-domaines-formulaire-code-tracabilite.md`](history/2026-10-24-onglet-domaines-formulaire-code-tracabilite.md) | — | The traceability table (§12) of the spec 2026-10-24-onglet-domaines-formulaire-code, moved verbatim on 2026-10-24 to keep the spec under 100 KB. | 4 KB |
+| [`history/2026-10-24-onglet-domaines-formulaire-code-revue.md`](history/2026-10-24-onglet-domaines-formulaire-code-revue.md) | — | The architecture review (§13) of the spec 2026-10-24-onglet-domaines-formulaire-code, moved verbatim on 2026-10-24 to keep the spec under 100 KB. | 25 KB |
+| [`history/2026-10-24-onglet-variables-groupes-source.md`](history/2026-10-24-onglet-variables-groupes-source.md) | — | The source (§2, issue #114 cut into points T) of the spec 2026-10-24-onglet-variables-groupes, moved verbatim on 2026-10-24 to keep the spec under 100 KB. | 22 KB |
+| [`history/2026-10-25-tab-variables-before-114.md`](history/2026-10-25-tab-variables-before-114.md) | §10quater | The variables tab as it was from v0.100 to v0.124 -- «Affichage», the provenance in a column, the ★, «Tous les domaines» --, moved verbatim from `ui/tab-variables.md` on 2026-10-25 when issue #114 rebuilt the tab. | 17 KB |
+| [`history/2026-10-24-onglet-variables-groupes-revue.md`](history/2026-10-24-onglet-variables-groupes-revue.md) | — | The architecture review (§13) of the spec 2026-10-24-onglet-variables-groupes, moved verbatim on 2026-10-25 to keep the spec under 100 KB. | 16 KB |
+| [`history/2026-10-24-verifications-elements-v3-source.md`](history/2026-10-24-verifications-elements-v3-source.md) | — | The source (§2, issue #112 cut into points T) of the spec 2026-10-24-verifications-elements-v3, moved verbatim on 2026-10-25 to keep the spec under 100 KB. | 22 KB |
 | [`history/open-questions-closed.md`](history/open-questions-closed.md) | §14 | The open points that were closed or settled, moved verbatim from `open-questions.md`. | 3 KB |
 
 ## Section → file
@@ -151,6 +169,7 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | §3.3undecies | [`domain/member-checks.md`](domain/member-checks.md) |
 | §3.3septdecies | [`domain/member-checks.md`](domain/member-checks.md) |
 | §3.3unvicies | [`domain/member-checks.md`](domain/member-checks.md) |
+| §3.3unvicies-bis | [`domain/member-checks.md`](domain/member-checks.md) |
 | §3.3duodecies | retired in 0.117: [`archive/rfem/docs/domain/rfem.md`](../archive/rfem/docs/domain/rfem.md) |
 | §3.3quindecies | retired in 0.117: [`archive/rfem/docs/domain/rfem.md`](../archive/rfem/docs/domain/rfem.md) |
 | §3.3terdecies | [`domain/journal.md`](domain/journal.md) |
@@ -164,6 +183,7 @@ Specifications of work in progress are in [`requirements/`](requirements/README.
 | §3.3tervicies | [`domain/fire-resistance.md`](domain/fire-resistance.md) |
 | §3.3quatervicies | [`domain/steel.md`](domain/steel.md) |
 | §3.3quinvicies | [`domain/dependencies.md`](domain/dependencies.md) |
+| §3.3sexvicies | [`domain/materials.md`](domain/materials.md) |
 | §4 | [`typst/report-engine.md`](typst/report-engine.md) |
 | §5 | [`typst/report-engine.md`](typst/report-engine.md) |
 | §6 | [`typst/report-engine.md`](typst/report-engine.md) |

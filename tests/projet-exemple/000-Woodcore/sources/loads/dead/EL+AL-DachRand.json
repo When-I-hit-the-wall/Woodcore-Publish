@@ -1,0 +1,49 @@
+{
+  "schema_version": "2.0",
+  "id": "EL+AL-DachRand",
+  "name": "",
+  "label": "",
+  "group": "",
+  "chosen": 0.6,
+  "layers": [
+    {
+      "kind": "ak",
+      "thickness": null,
+      "width": null,
+      "spacing": null,
+      "label": "Blech Aluminium 2mm",
+      "load": 0.08,
+      "role": "protection",
+      "pose": "typed",
+      "material": null,
+      "link": false,
+      "fill": true
+    },
+    {
+      "kind": "ak",
+      "thickness": 30,
+      "width": null,
+      "spacing": null,
+      "label": "",
+      "load": null,
+      "role": "lining",
+      "material": "ext:129",
+      "pose": "continuous",
+      "link": false,
+      "fill": true
+    },
+    {
+      "kind": "gk",
+      "thickness": 60,
+      "width": null,
+      "spacing": null,
+      "label": "",
+      "load": null,
+      "role": "bracing_panel",
+      "material": "ext:65",
+      "pose": "continuous",
+      "link": false,
+      "fill": true
+    }
+  ]
+}

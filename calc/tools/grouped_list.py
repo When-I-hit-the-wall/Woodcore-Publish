@@ -115,6 +115,7 @@ class GroupedList(QTreeWidget):
         self._empty = []                    # folders holding nothing, kept by the window alone
         self._dropped = set()               # folders removed or renamed here: not kept when they empty
         self._expanded = None               # None until the first fill, which opens what it finds
+        self.roots_first = False            # the entries of no folder listed before the folders (the «Domaines» tab's own domains above the groups of the specialised tabs, issue #113, UI-002)
         self._seen = set()
         self._filling = False
         self._deferred = None               # (item, point) -- a press on a selected entry of a multiple selection, not yet a click or a drag
@@ -152,7 +153,7 @@ class GroupedList(QTreeWidget):
         self._order = (key, store, groups, regroup)
 
     def set_entries(self, entries, empty_folders=(), select=None, archived=()):
-        """`entries` is a list of {id, text, group, children?, colour?, tooltip?, fixed?} -- a child {id, text, italic?}; `fixed` keeps an entry in the `group` it is given, whatever folder the kept order files it in (the «Domaines» tab's group of a specialised tab's domain, issue #64); `empty_folders` the ones the project cannot record; `archived` the archived sources as source_archive.entries() lists them, set under «Archives», the last row. `colour` paints a row's text and `tooltip` says why.
+        """`entries` is a list of {id, text, group, children?, colour?, tooltip?, fixed?, folded?} -- a child {id, text, italic?}; `fixed` keeps an entry in the `group` it is given, whatever folder the kept order files it in (the «Domaines» tab's group of a specialised tab's domain, issue #64); `folded` shuts its folder the first time it is seen (the same groups, issue #113, UI-002); `empty_folders` the ones the project cannot record; `archived` the archived sources as source_archive.entries() lists them, set under «Archives», the last row. `colour` paints a row's text and `tooltip` says why.
 
         What was selected is selected again, and a folder the previous contents used stays when nothing is left in it -- unless it was removed or renamed here.
         """
@@ -184,6 +185,7 @@ class GroupedList(QTreeWidget):
             item.setFont(0, font)
             self.addTopLevelItem(item)
             folders[name] = item
+        roots = 0
         for entry in self._entries:
             group = entry.get("group") or ROOT_GROUP
             leaf = QTreeWidgetItem([entry.get("text") or entry["id"]])
@@ -197,6 +199,9 @@ class GroupedList(QTreeWidget):
                 leaf.setToolTip(0, entry["tooltip"])
             if group in folders:
                 folders[group].addChild(leaf)
+            elif self.roots_first:
+                self.insertTopLevelItem(roots, leaf)
+                roots += 1
             else:
                 self.addTopLevelItem(leaf)
             for child in entry.get("children") or ():
@@ -232,9 +237,10 @@ class GroupedList(QTreeWidget):
             if entry.get("tooltip"):
                 row.setToolTip(0, entry["tooltip"])
             shelf.addChild(row)
+        shut = {e.get("group") for e in self._entries if e.get("folded")}
         if self._expanded is None:          # first fill: a folder nobody has closed yet is open
-            self._expanded = set(names) | {ARCHIVES_KEY}   # «Archives» open too, so a file just deleted is seen where it went
-        self._expanded |= {n for n in names if n not in self._seen}
+            self._expanded = (set(names) - shut) | {ARCHIVES_KEY}   # «Archives» open too, so a file just deleted is seen where it went
+        self._expanded |= {n for n in names if n not in self._seen and n not in shut}
         self._seen |= set(names)            # a folder seen for the first time opens; one closed stays closed
         for name, item in folders.items():
             item.setExpanded(name in self._expanded)

@@ -152,20 +152,18 @@ def test_an_example_of_several_lines_is_coloured_the_same_way():
 
 
 def test_the_symbols_of_the_loads_are_set_as_mathematics():
-    """The loads are the Variables tab's since v0.117 (issue 13), their symbols set as the page sets them there."""
+    """The loads are the Variables tab's since v0.117 (issue 13), their symbols set as the page sets them there -- in its list grouped by domain since issue #114."""
     window = _window()
     import richtext
+    import variables_list
     import variables_tab
     tab = next(t for t in window.tabs if isinstance(t, variables_tab.VariablesTab))
-    column = variables_tab.SYMBOL
-    assert isinstance(tab.tree.itemDelegateForColumn(column), richtext.MathDelegate), "the Symbole column shows Typst's source"
-    tab.all_domains_box.setChecked(True)
-    try:
-        rows = [tab.tree.topLevelItem(n) for n in range(tab.tree.topLevelItemCount())]
-        assert rows, "the export lists no variable"
-        assert any("_" in row.text(column) for row in rows), "the item lost the source the search reads"
-    finally:
-        tab.all_domains_box.setChecked(False)
+    view = tab.service("browser").list
+    assert isinstance(view.itemDelegate(), richtext.MathDelegate) and variables_list.SYMBOL in view.itemDelegate().columns, "the Symbole column shows Typst's source"
+    model_ = view.list_model
+    texts = [model_.data(model_.index(r, variables_list.SYMBOL)) for r in range(model_.rowCount()) if model_.key(r) is not None]
+    assert texts, "the export lists no variable"
+    assert any("_" in text for text in texts), "the item lost the source the search reads"
 
 
 def _calls(tab):
@@ -190,11 +188,11 @@ def test_every_call_of_the_rewritten_tabs_is_a_coloured_field():
             tab.dirty = False
     import variables_tab
     found = next(t for t in window.tabs if isinstance(t, variables_tab.VariablesTab))
-    domain = next(d for d in found.export.domains if d.variables)
-    found.select_key(("export", domain.name, domain.variables[0].key))
+    domain = next(d for d in found.service("browser").export.domains if d.variables)
+    found.select_key(("export", domain.name, domain.variables[0].key))   # its card shows the call to copy (issue #114)
     _pump(app)
     commands = next(t for t in window.tabs if isinstance(t, commands_tab.CommandsTab))
-    commands.tree.setCurrentItem(commands.nodes["cmd|eq"])
+    commands.service("browser").list.select("cmd|eq")
     _pump(app)
     kinds = (plan_tab.PlanTab, variables_tab.VariablesTab, woodcore_gui.PolarTab, statics_tab.StaticsTab, connectors_tab.ConnectorsTab, commands_tab.CommandsTab)
     for kind in kinds:
@@ -212,8 +210,8 @@ def test_every_call_of_the_rewritten_tabs_is_a_coloured_field():
     from PySide6.QtWidgets import QPlainTextEdit
     examples = [w for w in commands.findChildren(QPlainTextEdit) if w.objectName() == "code"]
     assert examples, "the examples of the commands tab are not set on the site's code ground"
-    signature = dict(commands.parts)["signature"]
-    assert signature.objectName() == "code" and "#eq" in signature.text() and "color:" in signature.text(), "the commands tab's signature is not coloured on the site's code ground"
+    line = commands.service("browser").page.line   # the line of the command, on the code ground and coloured (issue #115)
+    assert line.objectName() == "code" and "#eq" in line.toPlainText() and "color:" in line.toHtml(), "the commands tab's line is not coloured on the site's code ground"
     schema = next(t for t in window.tabs if isinstance(t, schema_tab.SchemaTab))
     # the schemas' block of calls is the «Affichage» view's coloured field since v0.117
     import richtext

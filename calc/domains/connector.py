@@ -982,7 +982,7 @@ def write(data, images, data_dir):
 
 
 def export(source_dir, data_dir, positions=None, schema_dir=None, schemas=None, values=None):
-    """prepare() then write() -- what Woodcore's window runs when a connector is saved, so that one connector can be exported without the load workbooks being read again. The detail schemas are read from `schema_dir` (details/ beside the connectors by default) unless `schemas` is handed over."""
+    """prepare() then write() -- what Woodcore's window runs when a connector is saved, so that one connector can be exported without the whole export being run again. The detail schemas are read from `schema_dir` (details/ beside the connectors by default) unless `schemas` is handed over."""
     if positions is None:
         positions = known_positions(data_dir)
     if schemas is None:

@@ -3,6 +3,22 @@
   "schema_version": "1.0",
   "releases": [
     {
+      "version": "0.125.0",
+      "notes": {
+        "fr": "Une grande version. À faire une fois : cliquer « Import données » dans chaque projet (les données de 0.120 à 0.124 ne sont plus lues), et ressaisir dans les onglets Vent, Neige et Poids propre les cas qui venaient du classeur de charges, qui n'est plus jamais lu. Nouveau : l'onglet Matériaux, la bibliothèque de tous les projets (SIA 265, panneaux de la SIA 265/1, SIA 261) ; Poids propre et surcharge refait (tableau au clavier, quatre poses, valeur retenue calculée, coupe à l'échelle, modèles Lignum) ; l'onglet Vent repensé ; les vérifications Traction, Compression, Flexion et Cisaillement refaites, matériau de la bibliothèque, facteurs de la norme, cisaillement en trois figures, stabilité en accordéon, liste par position ; l'onglet Domaines en Formulaire, Code et Affichage ; l'onglet Variables rangé (menu des onglets, filtre dans la recherche, choix multiple) ; l'onglet Commandes condensé, chaque valeur montrée imprimée, sur le site aussi.",
+        "de": "Eine grosse Version. Einmal zu tun: in jedem Projekt einmal «Daten importieren» klicken (die Daten von 0.120 bis 0.124 werden nicht mehr gelesen), und die Fälle aus der Lastannahmen-Arbeitsmappe, die nie mehr gelesen wird, in den Registern Wind, Schnee und Eigenlasten neu erfassen. Neu: das Register Materialien, die Bibliothek aller Projekte (SIA 265, Platten der SIA 265/1, SIA 261); Eigen- und Auflasten neu (Tabelle per Tastatur, vier Arten, berechneter gewählter Wert, massstäblicher Schnitt, Lignum-Vorlagen); das Register Wind neu gedacht; die Nachweise Zug, Druck, Biegung und Schub neu, Material aus der Bibliothek, Faktoren der Norm, Schub in drei Figuren, Stabilität als Akkordeon, Liste nach Position; das Register Domänen als Formular, Code und Darstellung; das Register Variablen geordnet (Menü der Register, Filter in der Suche, Mehrfachauswahl); das Register Befehle verdichtet, jeder Wert gedruckt gezeigt, auch auf der Website.",
+        "en": "A large version. To do once: click «Import data» in each project (the data of 0.120 to 0.124 is no longer read), and enter again in the Wind, Snow and Permanent loads tabs the cases that came from the load workbook, which is never read again. New: the Materials tab, the library of every project (SIA 265, the panels of SIA 265/1, SIA 261); Permanent loads rebuilt (a table at the keyboard, four poses, the retained value computed, the section to scale, Lignum templates); the Wind tab rethought; the Tension, Compression, Bending and Shear checks rebuilt, the material from the library, the norm's factors, shear in three figures, stability in an accordion, a list by position; the Domains tab as Form, Code and Display; the Variables tab tidied (a menu of the tabs, the filter in the search, several at once); the Commands tab condensed, each value shown printed, on the site too."
+      },
+      "installer": {
+        "file": "Woodcore-0.125.0-setup.exe",
+        "size": 250771592,
+        "sha256": "80a427cc61cc9b5b885870c295270272c9641e192124d580d853d8905cf610fb",
+        "hosted": "github",
+        "url": "https://github.com/When-I-hit-the-wall/woodcore-releases/releases/download/v0.125.0/Woodcore-0.125.0-setup.exe"
+      },
+      "date": "2026-10-25"
+    },
+    {
       "version": "0.124.0",
       "notes": {
         "fr": "L'onglet Neige repensé, premier onglet de calcul type : la norme sous chaque donnée (survol : le texte de la SIA 261 puis l'extrait ; clic : l'épingler ; Ctrl+clic : le chapitre dans le lecteur de Woodcore, ou la carte de 261.sia.ch pour Δh), les normes livrées avec Woodcore, un volet droit fait de modules (état du calcul, résultats, figure 3, figure 2 interactive, extraits), la section Bâtiment, C_e libre, les toitures dessinées comme la figure 3, et l'Affichage ligne par ligne du fichier du cas, dont les réglages restent à l'export. Le fichier d'un cas de neige imprime la figure 3 de sa toiture et s_k selon l'équation (10). Avec la 0.123 : la « Sélection manuelle » retirée de la fenêtre, une compression ou une flexion simple imprimant son verdict une fois.",

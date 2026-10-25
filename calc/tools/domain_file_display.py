@@ -4,10 +4,13 @@
 
 **On the right, one card** (D-7): the file, the command a section prints it by -- `#include domain-file("snow-load", "SN-01")`, which «Copier» copies --, the domain's **level of detail**, auto (the report's), 1, 2 or 3, written `#domain(…, level: n)` (D-30); then the section **«Éléments du fichier»**: every element with its command, its symbol and its label, and for a line its levels **0 1 2 3** -- the one it follows dotted, a click sets the line's own `level:`, a second click gives it back to the domain. A click on a line opens its arguments under it -- for `#var`, `#eq` and `#verify` those of its display (calc/line_display.py, read from lib/display-presets.json, the values lib/formula.typ takes), for an `#eq` its formula, units, label and description too, for the figure its width, caption, label and whether it is shown --, the line as the file writes it, and «Voir le fichier entier» (D-28: what Woodcore writes, read only). Every change is written into the file at once (calc/domains/unfold_display.py), and an export keeps it (D-17).
 
-A subclass of display_view.DisplayView: the page, its banner and its compile are DisplayView's (`PdfPane.request_snippet`), the right pane is this module's. Every write goes through the tab's guarded writers (`write_line_display`, `write_figure`, `write_domain_level`: tab_guard.WRITERS), refused in a project open read-only. No word of a domain here.
+**The file comes from a source** (issue #113, ARCH-009): by default the case's file the export writes (`CaseSource`, unfold_display, the base of unfold); the «Domaines» tab hands its own (calc/tools/formula_display.py), the engineer's `Domains/<id>.typ` read and written through calc/domains/formula_domain.py -- never through the base of unfold --, which adds the domain's options and the line «lire une valeur ailleurs», and every argument of a line.
+
+A subclass of display_view.DisplayView: the page, its banner and its compile are DisplayView's (`PdfPane.request_snippet`), the right pane is this module's. Every write goes through the tab's guarded writers (`write_line_display`, `write_figure`, `write_table`, `write_domain_level`: tab_guard.WRITERS), refused in a project open read-only. A table of the file is an element too (spec 2026-10-23-onglet-vent-briques, UI-024): shown or not, with or without its title and its note, and no level. No word of a domain here.
 """
 
 import json
+import re
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit,
@@ -27,6 +30,19 @@ LEVELS = (0, 1, 2, 3)
 WIDTHS = ("100%", "80%", "60%", "50%", "40%")
 # The page the preview is set on: as tall as an A4, so that a note goes to its foot as in the PDF (UI-011)
 PAGE_HEIGHT = "#set page(height: 29.7cm)"
+
+
+def _empty(layout):
+    """Every item of `layout` taken out and its widgets deleted -- a row laid out in a layout of its own (the command and its copy button, the levels, a check's options) emptied first, then dropped.
+
+    ⚠️ A sub-layout taken out whole and dropped by Python is deleted with its items, but PySide keeps the wrappers of those items as children of the outer layout: wrappers of freed memory, read again when Qt reuses the address or when PySide tears the application down -- an access violation, in a test (test_member_check_tab, issue #112, about a run in three) or in the window. The items are taken out one by one, as formula_modules._clear_layout and statics_tab_build.clear_layout do."""
+    while layout.count():
+        item = layout.takeAt(0)
+        widget = item.widget()
+        if widget is not None:
+            widget.setParent(None)
+        elif item.layout() is not None:
+            _empty(item.layout())
 
 
 class _LevelButtons(QWidget):
@@ -54,17 +70,49 @@ class _LevelButtons(QWidget):
             self.buttons[level] = button
 
 
-class DomainFileDisplay(display_view.DisplayView):
-    """The «Affichage» view of a calculation tab -- see the module's docstring. `tab` is the tab (its words, its writers, its case)."""
+class CaseSource:
+    """Where the view reads its file and its elements: the case's file of a calculation tab, written by the export (unfold_display, unfold's base) -- the default."""
 
-    def __init__(self, tab, cache_key):
+    def __init__(self, view):
+        self.view = view
+
+    def path(self):
+        tab = self.view.tab
+        return unfold_display.case_file(self.view.here, tab.current_id, tab.MODULE.DOMAIN)
+
+    def elements(self):
+        here, tab = self.view.here, self.view.tab
+        with project.using(here):
+            return unfold_display.elements(here, tab.current_id, tab.MODULE.DOMAIN)
+
+    def matches(self):
+        here, tab = self.view.here, self.view.tab
+        try:
+            with project.using(here):
+                return unfold.status(here, tab.current_id, kind=tab.MODULE.DOMAIN).matches
+        except unfold.UnfoldError:
+            return True
+
+    def extra(self, body, header):
+        """What a source adds to the card under the domain's level: nothing for a case."""
+
+    def arguments(self, element, form):
+        """Rows a source adds to the arguments of an element, False where the default ones stand: the default for a case."""
+        return False
+
+
+class DomainFileDisplay(display_view.DisplayView):
+    """The «Affichage» view of a calculation tab -- see the module's docstring. `tab` is what holds the case -- its words, its writers, the id open: the display service of a tab built on a type (calc_display.DomainDisplay) --, `parent` the QObject that owns the view (the tab's widget); `source` where the file is read (CaseSource where None)."""
+
+    def __init__(self, tab, cache_key, parent=None, source=None):
         super().__init__(tab.t, mono_font=tab.app.mono_font, copy=tab.app.copy, cache_key=cache_key, import_line=False, lang=tab.app.lang,
-                         parent=tab, import_fn=lambda: tab.app.reexport(), import_text=tab.t("reexport"))
+                         parent=parent if parent is not None else tab, import_fn=lambda: tab.app.reexport(), import_text=tab.t("reexport"))
         self.tab = tab
         self.entry = None
         self.opened = None          # the element whose arguments are open
         self.whole = False
         self.elements = []
+        self.src = source(self) if source is not None else CaseSource(self)
         # DisplayView's own right pane, with its drop-down of the commands, kept alive and out of sight: the window and its tests read `chooser`, which lists the one command this view prints
         self.command_pane = self.right
         self.right = QWidget()
@@ -99,10 +147,7 @@ class DomainFileDisplay(display_view.DisplayView):
 
     def path(self):
         """The case's file, or None where it is not written yet."""
-        if self.here is None or not self.tab.current_id:
-            return None
-        found = unfold.domain_path(self.here, self.tab.current_id, kind=self.tab.MODULE.DOMAIN)
-        return found if found.is_file() else None
+        return self.src.path()
 
     def source(self):
         """The page compiled: the snippet's header on a page an A4 high, `show-masked` set, then the case's file -- its masked figure drawn pale and marked."""
@@ -111,14 +156,19 @@ class DomainFileDisplay(display_view.DisplayView):
             return None
         lines = structure_preview.header(self.here, self.mode) + [PAGE_HEIGHT, "#show-masked.update(true)", ""]
         mark = self.t("ct_masked")
+        pale = "#block[#set text(fill: luma(150))\n%s\n#align(center, text(size: 0.75em, style: \"italic\")[(%s)])]"
         for line in path.read_text(encoding="utf-8").split("\n"):
             if line.lstrip().startswith("#import"):
                 continue
             parts = unfold_display.figure_parts(line)
             if parts and parts["masked"]:
-                body = line.lstrip()[2:].lstrip()
-                body = body[:body.rfind(" <")] if body.endswith(">") else body
-                line = "#block[#set text(fill: luma(150))\n%s\n#align(center, text(size: 0.75em, style: \"italic\")[(%s)])]" % (body, mark)
+                caption = (", caption: [%s]" % parts["caption"]) if parts["caption"] else ""
+                line = pale % ('#figure(image("%s", width: %s)%s)' % (parts["file"], parts["width"], caption), mark)
+            elif unfold.is_masked(line) and unfold_display.is_table_line(line, self.tab.current_id):
+                # a table, its title or its note masked: drawn pale, without its label, which the file holds once
+                body = unfold.unmasked(line)
+                body = re.sub(r" <[A-Za-z0-9_.:-]+>(\]?)$", r"\1", body)   # its label, at the end or inside a `#from-level(n)[…]` (issue #111)
+                line = pale % (body if body.startswith("#") else "[" + body + "]", mark)
             lines.append(line)
         return "\n".join(lines) + "\n"
 
@@ -132,10 +182,9 @@ class DomainFileDisplay(display_view.DisplayView):
 
     def rebuild(self):
         """The card again: the file, the command, the domain's level, the elements -- read from the file as it stands."""
-        while self.body.count():
-            item = self.body.takeAt(0)
-            if item.widget() is not None:
-                item.widget().setParent(None)
+        if hasattr(self.tab, "forget_lit"):
+            self.tab.forget_lit("display")   # the rows below are deleted: the «Domaines» tab's hovers forget them first
+        _empty(self.body)
         path = self.path()
         here = self.here
         name = QLabel(here.from_root(path) if path is not None and here is not None else self.t("ct_not_written"))
@@ -155,25 +204,19 @@ class DomainFileDisplay(display_view.DisplayView):
         if path is None or here is None:
             return
         try:
-            with project.using(here):
-                self.elements = unfold_display.elements(here, self.tab.current_id, self.tab.MODULE.DOMAIN)
+            self.elements = self.src.elements()
         except unfold.UnfoldError as exc:
             self.body.addWidget(QLabel(str(exc)))
             return
-        try:
-            with project.using(here):
-                matches = unfold.status(here, self.tab.current_id, kind=self.tab.MODULE.DOMAIN).matches
-        except unfold.UnfoldError:
-            matches = True
+        if not self.elements:
+            return
+        matches = self.src.matches()
         if not matches:
-            # a file of an earlier form (D-18): said, and written again only on the engineer's word
-            said = QLabel(self.t("ct_form_changed"))
+            # a file of another form is written again at every save and export, never asked (unfold.AUTO_REGENERATE, D-4 of the spec 2026-10-23-neige-correctifs-issues-96-99): one still of another form here is one that could not be -- said in red, with no button
+            said = QLabel(self.t("ct_regenerate_failed"))
             said.setWordWrap(True)
-            said.setProperty("callout", "warning")
+            said.setProperty("callout", "danger")
             self.body.addWidget(said)
-            self.regenerate_button = QPushButton(self.t("ct_regenerate"))
-            self.regenerate_button.clicked.connect(lambda: self.tab.write_unfold_regenerate())
-            self.body.addWidget(self.regenerate_button)
         header = self.elements[0]
         level_row = QHBoxLayout()
         level_row.addWidget(QLabel(self.t("ct_level")))
@@ -190,6 +233,7 @@ class DomainFileDisplay(display_view.DisplayView):
             self.level_buttons[value] = button
         level_row.addStretch(1)
         self.body.addLayout(level_row)
+        self.src.extra(self.body, header)
         title = QLabel(self.t("ct_elements"))
         title.setStyleSheet("font-weight: 600; margin-top: 8px;")
         title.setToolTip(self.t("ct_elements_tip"))
@@ -200,30 +244,34 @@ class DomainFileDisplay(display_view.DisplayView):
             self.body.addWidget(self._row(element, followed))
             if element["id"] == self.opened:
                 self.body.addWidget(self._arguments(element))
+        if hasattr(self.src, "lit"):
+            self.src.lit()
 
     def _row(self, element, followed):
         row = QFrame()
         row.setObjectName("elementRow")
         layout = QHBoxLayout(row)
         layout.setContentsMargins(2, 2, 2, 2)
-        command = QLabel("#figure" if element["kind"] == "figure" else "#" + element["kind"])
+        command = QLabel("#" + element["kind"])
         command.setStyleSheet("color: %s; font-family: monospace;" % theme.colour("syn-call"))
         layout.addWidget(command)
         if element["kind"] == "figure":
             symbol = QLabel(element.get("caption") or element.get("label") or "")
+        elif element["kind"] == "table":
+            symbol = QLabel(element.get("label") or "")
         else:
             symbol = QLabel(richtext.math_html(element["symbol"]))
             symbol.setTextFormat(Qt.TextFormat.RichText)
         layout.addWidget(symbol)
-        label = QLabel(element.get("label", "") if element["kind"] != "figure" else "")
+        label = QLabel(element.get("label", "") if element["kind"] not in ("figure", "table") else "")
         label.setStyleSheet("color: %s;" % theme.colour("muted"))
         layout.addWidget(label, 1)
-        masked = element.get("masked") or element.get("level") == 0 or (element.get("level") is None and followed == 0)
+        masked = element.get("masked") or element.get("shown") is False or element.get("level") == 0 or (element.get("level") is None and followed == 0)
         if masked:
             mark = QLabel(self.t("ct_masked"))
             mark.setStyleSheet("color: %s; font-style: italic;" % theme.colour("muted"))
             layout.addWidget(mark)
-        if element["kind"] != "figure":
+        if element["kind"] not in ("figure", "table"):   # a figure and a table have no level (UI-024)
             layout.addWidget(_LevelButtons(element, followed, lambda level, lid=element["id"]: self.tab.write_line_display(lid, {"level": level})))
         row.setCursor(Qt.CursorShape.PointingHandCursor)
         row.mousePressEvent = lambda _event, lid=element["id"]: self.open(lid)
@@ -244,7 +292,9 @@ class DomainFileDisplay(display_view.DisplayView):
         column.setContentsMargins(12, 4, 4, 8)
         form = QFormLayout()
         lid = element["id"]
-        if element["kind"] == "figure":
+        if self.src.arguments(element, form) is not False:
+            pass
+        elif element["kind"] == "figure":
             show = QCheckBox(self.t("ct_show_figure"))
             show.setChecked(not element["masked"])
             show.toggled.connect(lambda on: self.tab.write_figure(lid, shown=on))
@@ -260,14 +310,22 @@ class DomainFileDisplay(display_view.DisplayView):
                 line = QLineEdit(element[key])
                 line.editingFinished.connect(lambda k=key, l=line: self.tab.write_figure(lid, **{k: l.text()}))
                 form.addRow(self.t(words), line)
+        elif element["kind"] == "table":
+            number = lid.partition(":")[2]
+            for part, words in (("shown", "ct_show_table"), ("title", "ct_table_title"), ("note", "ct_table_note")):
+                if element.get(part) is None:
+                    continue
+                tick = QCheckBox(self.t(words))
+                tick.setChecked(bool(element[part]))
+                tick.toggled.connect(lambda on, p=part: self.tab.write_table(number, **{p: on}))
+                form.addRow("", tick)
         else:
-            values = line_display.fine_values()
             for name in line_display.display_args(element["kind"]):
                 if name == "level":
                     continue
                 combo = QComboBox()
                 combo.addItem(self.t("ct_level_auto"), None)
-                for value in values.get(name, ()):
+                for value in line_display.values(element["kind"], name):
                     combo.addItem(value, value)
                 combo.setCurrentIndex(max(combo.findData(element["options"].get(name)), 0))
                 combo.activated.connect(lambda _i, n=name, c=combo: self.tab.write_line_display(lid, {n: c.currentData()}))

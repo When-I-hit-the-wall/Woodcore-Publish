@@ -183,7 +183,7 @@ def test_every_text_the_window_sets_is_readable_in_both_schemes():
     theme = _theme()
     pairs = [("ink", "bg"), ("ink-soft", "bg"), ("muted", "bg"), ("muted", "bg-soft"), ("override", "bg"), ("warning", "bg"),
              ("danger", "bg"), ("ok", "bg"), ("ink", "accent-soft"), ("ink", "wood-soft"), ("ink", "danger-soft"), ("ink", "bg-sunk"),
-             ("on-primary", "primary"), ("on-primary", "primary-hover"), ("lit-ink", "lit")]
+             ("on-primary", "primary"), ("on-primary", "primary-hover"), ("lit-ink", "lit"), ("hover-ink", "hover")]
     weak = []
     for scheme in theme.SCHEMES:
         table = theme.tokens(scheme)

@@ -9,8 +9,7 @@
 | Windows 10 or 11, 64-bit | required | Woodcore is a Windows program. |
 | About 250 MB per version | required | Every version is installed into a folder of its own. |
 | Administrator rights | no | It installs for the user, into `%LOCALAPPDATA%\Programs\Woodcore\`. |
-| Microsoft Excel | recommended | To fill in the load workbook (the positions are entered in Woodcore). Woodcore reads the values Excel calculated: save the workbook in Excel before importing. |
-| The Belastungsannahmen load workbook | for the loads | Woodcore reads its `SL-`, `EL+AL-` and `WL-` sheets in the layout of template 3.2. It does not ship with Woodcore. |
+| Microsoft Excel and a load workbook | no | Wind, snow and permanent loads are entered in Woodcore's tabs, as the positions are. A `Belastungsannahmen` workbook is never opened. |
 | Visual Studio Code with the Tinymist extension | recommended | To write the report, with every command's documentation on hover. |
 | Typst | included | Typst 0.14.2 ships with Woodcore: nothing to install. |
 | An Internet connection | optional | Only to learn whether a new version is published. |

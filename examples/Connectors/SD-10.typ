@@ -6,9 +6,9 @@
 
 Stabdübel 4x 10mm Durchmesser <SD-10-description>
 
-#figure(image("/Connectors/Exports/Figures/SD-10-pattern-de.svg", width: 60%)) <SD-10-figure-pattern>
+#figure(image("/Connectors/Exports/Figures/SD-10-pattern-de.svg", width: 60%), caption: [Anordnung der Verbindungsmittel]) <SD-10-figure-pattern>
 
-#figure(image("/Connectors/Exports/Figures/SD-10-section.svg", width: 60%)) <SD-10-figure-section>
+#figure(image("/Connectors/Exports/Figures/SD-10-section.svg", width: 60%), caption: [Schnitt durch die Verbindung]) <SD-10-figure-section>
 
   #var("d", 10, "mm", domain: ("connector", "SD-10"), label: "Durchmesser", norm: "SIA 265", norm-section: "6.2.1.1", id: "d")
   #var("n_tot", "n_\"tot\"", 4, domain: ("connector", "SD-10"), label: "Anzahl Verbinder", norm: "SIA 265", norm-section: "6.2.1.1", id: "n_tot")

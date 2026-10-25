@@ -1,0 +1,367 @@
+{
+  "_source": "SIA 265/1:2018, Tableau 11a and 11b -- transcribed from the French edition, SIA265-1-2018-FR.pdf p. 31: the numbers taken from the page's text layer and every row checked on a render of the page (issue #110). The only copy of these values in the project.",
+  "_note": "Footnote 1 of a: the properties hold at hygroscopic equilibrium, 65 % relative humidity and 20 °C. Footnote 2 of a: the 5 % fractile of a modulus is 0,8 times its mean. The b table gives the design values for moisture class 1 and medium load duration (KLED moyenne); for any other, 6.1.2.1 (f_d = η_mod · f_k / γ_M, Tableaux 6 and 9). A cell the norm marks «valeurs non disponibles» is null and listed in the product's `unavailable`. Columns: (t_min, t_max] in mm, `from_inclusive` where the norm writes «≥».",
+  "edition": "SIA 265/1:2018",
+  "table_11": {
+    "number": "11",
+    "title": "Propriétés caractéristiques du contreplaqué de la classe de résistance à la flexion F25/10 d'une densité caractéristique ≥ 400 kg/m³",
+    "title_b": "Valeurs de calcul (classe d'humidité 1 et KLED moyenne) pour le contreplaqué de classe de résistance à la flexion F25/10 d'une densité caractéristique ≥ 400 kg/m³",
+    "norm": "SIA 265/1",
+    "page": 31,
+    "fractile": "0,8",
+    "products": [
+      {
+        "id": "plywood-f25-10-5",
+        "product": "plywood",
+        "label": "Contreplaqué F25/10, au moins 5 plis",
+        "isotropic": false,
+        "columns": [],
+        "rho_k": [
+          400
+        ],
+        "rho_k_is_minimum": true,
+        "grid": {
+          "plate": {
+            "f_m_k": {
+              "par": [
+                25.0
+              ],
+              "perp": [
+                10.0
+              ]
+            },
+            "f_c_90_k": {
+              "par": [
+                6.5
+              ],
+              "perp": [
+                6.5
+              ]
+            },
+            "f_v_k": {
+              "par": [
+                1.1
+              ],
+              "perp": [
+                0.65
+              ]
+            },
+            "E_m_mean": {
+              "par": [
+                5500
+              ],
+              "perp": [
+                1500
+              ]
+            },
+            "G_mean": {
+              "par": [
+                250
+              ],
+              "perp": [
+                250
+              ]
+            },
+            "f_m_d": {
+              "par": [
+                16.7
+              ],
+              "perp": [
+                6.7
+              ]
+            },
+            "f_c_90_d": {
+              "par": [
+                4.3
+              ],
+              "perp": [
+                4.3
+              ]
+            },
+            "f_v_d": {
+              "par": [
+                0.75
+              ],
+              "perp": [
+                0.45
+              ]
+            }
+          },
+          "shear": {
+            "f_m_k": {
+              "par": [
+                22.0
+              ],
+              "perp": [
+                14.0
+              ]
+            },
+            "f_v_k": {
+              "par": [
+                8.0
+              ],
+              "perp": [
+                8.0
+              ]
+            },
+            "E_m_mean": {
+              "par": [
+                4500
+              ],
+              "perp": [
+                2500
+              ]
+            },
+            "G_mean": {
+              "par": [
+                500
+              ],
+              "perp": [
+                500
+              ]
+            },
+            "f_m_d": {
+              "par": [
+                14.7
+              ],
+              "perp": [
+                9.3
+              ]
+            },
+            "f_v_d": {
+              "par": [
+                5.3
+              ],
+              "perp": [
+                5.3
+              ]
+            }
+          },
+          "axial": {
+            "f_t_k": {
+              "par": [
+                18.0
+              ],
+              "perp": [
+                9.0
+              ]
+            },
+            "f_c_k": {
+              "par": [
+                18.0
+              ],
+              "perp": [
+                9.0
+              ]
+            },
+            "E_tc_mean": {
+              "par": [
+                4500
+              ],
+              "perp": [
+                2500
+              ]
+            },
+            "f_t_d": {
+              "par": [
+                12.0
+              ],
+              "perp": [
+                6.0
+              ]
+            },
+            "f_c_d": {
+              "par": [
+                12.0
+              ],
+              "perp": [
+                6.0
+              ]
+            }
+          }
+        },
+        "notes": [
+          "3"
+        ]
+      },
+      {
+        "id": "plywood-f25-10-3",
+        "product": "plywood",
+        "label": "Contreplaqué F25/10, 3 plis",
+        "isotropic": false,
+        "columns": [],
+        "rho_k": [
+          400
+        ],
+        "rho_k_is_minimum": true,
+        "grid": {
+          "plate": {
+            "f_m_k": {
+              "par": [
+                25.0
+              ],
+              "perp": [
+                10.0
+              ]
+            },
+            "f_c_90_k": {
+              "par": [
+                6.5
+              ],
+              "perp": [
+                6.5
+              ]
+            },
+            "f_v_k": {
+              "par": [
+                1.1
+              ],
+              "perp": [
+                0.65
+              ]
+            },
+            "E_m_mean": {
+              "par": [
+                8000
+              ],
+              "perp": [
+                400
+              ]
+            },
+            "G_mean": {
+              "par": [
+                250
+              ],
+              "perp": [
+                250
+              ]
+            },
+            "f_m_d": {
+              "par": [
+                16.7
+              ],
+              "perp": [
+                6.7
+              ]
+            },
+            "f_c_90_d": {
+              "par": [
+                4.3
+              ],
+              "perp": [
+                4.3
+              ]
+            },
+            "f_v_d": {
+              "par": [
+                0.75
+              ],
+              "perp": [
+                0.45
+              ]
+            }
+          },
+          "shear": {
+            "f_m_k": {
+              "par": [
+                22.0
+              ],
+              "perp": [
+                14.0
+              ]
+            },
+            "f_v_k": {
+              "par": [
+                5.0
+              ],
+              "perp": [
+                5.0
+              ]
+            },
+            "E_m_mean": {
+              "par": [
+                4500
+              ],
+              "perp": [
+                1000
+              ]
+            },
+            "G_mean": {
+              "par": [
+                500
+              ],
+              "perp": [
+                500
+              ]
+            },
+            "f_m_d": {
+              "par": [
+                14.7
+              ],
+              "perp": [
+                9.3
+              ]
+            },
+            "f_v_d": {
+              "par": [
+                3.3
+              ],
+              "perp": [
+                3.3
+              ]
+            }
+          },
+          "axial": {
+            "f_t_k": {
+              "par": [
+                18.0
+              ],
+              "perp": [
+                9.0
+              ]
+            },
+            "f_c_k": {
+              "par": [
+                18.0
+              ],
+              "perp": [
+                9.0
+              ]
+            },
+            "E_tc_mean": {
+              "par": [
+                4500
+              ],
+              "perp": [
+                1000
+              ]
+            },
+            "f_t_d": {
+              "par": [
+                12.0
+              ],
+              "perp": [
+                6.0
+              ]
+            },
+            "f_c_d": {
+              "par": [
+                12.0
+              ],
+              "perp": [
+                6.0
+              ]
+            }
+          }
+        },
+        "notes": [
+          "4"
+        ]
+      }
+    ],
+    "notes": {
+      "3": "Contreplaqué avec au min. 5 plis.",
+      "4": "Contreplaqué à 3 plis."
+    }
+  }
+}

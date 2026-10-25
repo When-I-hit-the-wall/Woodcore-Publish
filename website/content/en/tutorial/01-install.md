@@ -13,9 +13,8 @@ Leave **Open .woodcore files with Woodcore** ticked. A Woodcore project is a fol
 
 ## The tools beside it
 
-Woodcore reads Excel workbooks and writes a report in Typst. Two tools make the work comfortable:
+Woodcore calculates the loads in its window and writes a report in Typst. One tool makes the work comfortable:
 
-- **Microsoft Excel**, to fill in the load workbook;
 - **Visual Studio Code** with the **Tinymist** extension, to write the report: Tinymist shows every command's documentation on hover and a live preview of the PDF.
 
 Typst itself ships with Woodcore: there is nothing more to install.

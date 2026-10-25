@@ -48,6 +48,8 @@ sys.path[:0] = [str(ROOT / "calc" / "tools"), str(ROOT / "calc")]
 import build_examples as bex  # noqa: E402
 import build_reference as ref  # noqa: E402
 import command_docs as docs  # noqa: E402
+import command_page  # noqa: E402  -- a command's condensed page as data, Woodcore's commands tab's too (issue #115)
+import command_pages  # noqa: E402
 import command_preview as preview  # noqa: E402
 import project  # noqa: E402
 import theme  # noqa: E402  -- the colours and the fonts, which dress Woodcore's window too: site.css's tokens are written in from them (v0.90)
@@ -115,6 +117,11 @@ def prose_html(text):
     """A paragraph of a /// block, as Woodcore's window sets it: code in <code>, **bold**, *italic*, the rest escaped (command_docs.prose)."""
     return docs.prose(text, lambda code: f"<code>{html.escape(code)}</code>",
                       lambda words: html.escape(words, quote=False), r"<strong>\1</strong>", r"<em>\1</em>")
+
+
+def rich_page(text):
+    """A sentence of a condensed page: its code between backticks in <code>, the rest escaped (command_docs.prose, as the window sets it)."""
+    return docs.prose(text, lambda code: f"<code>{html.escape(code)}</code>", lambda words: html.escape(words, quote=False), r"<strong>\1</strong>", r"<em>\1</em>")
 
 
 def prose_plain(text):
@@ -437,11 +444,6 @@ class Site:
     def masked(stem):
         return any(fnmatch.fnmatch(stem, pattern) for pattern in CONFIG["masked"])
 
-    def localised(self, command, lang):
-        if lang == "en":
-            return command["block"], 0
-        return docs.localise(command["name"], command["block"], lang)
-
     def _tutorial(self, lang):
         pages = []
         for path in sorted((CONTENT / lang / "tutorial").glob("*.md")):
@@ -515,6 +517,13 @@ class Site:
                 else:
                     shutil.copy2(path, self.out / "assets" / path.name)
         shutil.copy2(ICON, self.out / "assets" / "logo.svg")
+        # the prints of the commands' values, one sheet a command and a language (examples/out/values/, issue #115): the bubbles cut them by CSS; a command whose examples are masked keeps its sheets off the site too
+        for sheet in bex.values_index().get("sheets", {}).values():
+            command = sheet["file"].split("-", 1)[1].rsplit(".", 1)[0]
+            source = bex.VALUES / sheet["file"]
+            if source.is_file() and not self.masked_values(command):
+                (self.out / "values").mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, self.out / "values" / sheet["file"])
         for name in LEGAL_FILES:
             (self.out / "legal" / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(LEGAL / name, self.out / "legal" / name)
@@ -617,8 +626,13 @@ class Site:
                 parts.append(f'<div class="callout note"><p>{esc(t(lang, "example_missing"))}</p></div>')
             else:
                 levels = sorted(shown)
+                note = command_page.levels_note(command["name"], example["index"], lang) if len(levels) > 1 else None
+                kept = command_page.shown_levels(command["name"], example["index"], tuple(levels))
+                levels = [lvl for lvl in levels if lvl in kept]   # three levels printing one page: one page, and the note (REQ-008)
                 default = preview.DEFAULT_LEVEL if preview.DEFAULT_LEVEL in shown else levels[0]
                 parts.append('<div class="preview" data-levels>')
+                if note:
+                    parts.append(f'<p class="same">{esc(note)}</p>')
                 if len(levels) > 1:
                     parts.append(f'<div class="levels" role="tablist" aria-label="{esc(rw(lang, "level"))}"><span>{esc(rw(lang, "level"))}</span>'
                                  + "".join(f'<button type="button" role="tab" data-level="{lvl}" aria-selected="{"true" if lvl == default else "false"}">{lvl}</button>' for lvl in levels)
@@ -1015,51 +1029,57 @@ class Site:
             toc.append((2, anchor, docs.category_label(key, lang)))
             parts.append(f'<h2 id="{anchor}"><a class="anchor" href="#{anchor}" aria-hidden="true">#</a>{esc(docs.category_label(key, lang))}</h2><p>{inline(docs.category_lead(key, lang), page)}</p><div class="cards">')
             for command in (c for c in self.commands if c["category"] == key):
-                block, _missing = self.localised(command, lang)
-                summary = prose_plain(block["paragraphs"][0]) if block["paragraphs"] else ""
-                if len(summary) > 180:
-                    summary = summary[:177].rsplit(" ", 1)[0] + "…"
+                summary = prose_plain(command_page.lead(command, lang))   # the lead the tab shows under the name (issue #115)
                 parts.append(f'<a class="card" href="{esc(page.url(f"{lang}/docs/{command["name"]}/"))}"><code>{esc(command["name"])}</code><span>{esc(summary)}</span></a>')
             parts.append("</div>")
         parts.append("</article>")
         self.write(page.path, self.frame(page, f"{rw(lang, 'commands')} — Woodcore", "".join(parts), sidebar=self.sidebar_docs(page, ("docs", None)), toc=toc))
 
     def page_command(self, lang, command):
+        """One command's condensed page (spec 2026-10-24-onglet-commandes-pages, UI-011, ARCH-008): command_page's data -- the one Woodcore's commands tab shows -- set as HTML: the head and the lead, the line of the command whose names and defaults open their bubbles (site.js: the pointer's hover, a touch on a phone), the key points, the arguments in groups, the lines to copy and the examples. Each bubble's content is written into the page, in a <template> beside the line, from the same model: site.js only opens, places and keeps it."""
         name = command["name"]
         page = Page(self, lang, f"{lang}/docs/{name}/index.html", "docs")
-        block, missing = self.localised(command, lang)
-        returns = command["block"]["returns"]
-        signature = f"#{name}({command['params']})" if command["kind"] == "function" else command["signature"]
-        if returns:
-            signature += f" -> {returns}"
-        parts = [f'<article class="prose command"><p class="crumbs"><a href="{esc(page.url(f"{lang}/docs/"))}">{esc(rw(lang, "commands"))}</a> › <a href="{esc(page.url(f"{lang}/docs/"))}#cat-{command["category"]}">{esc(docs.category_label(command["category"], lang))}</a></p>',
-                 f'<h1><code>{esc(name)}</code></h1>',
-                 f'<div class="signature"><pre><code>{highlight(signature)}</code></pre></div>']
-        for paragraph in block["paragraphs"]:
-            parts.append(f"<p>{prose_html(paragraph)}</p>")
-        if missing:
-            parts.append(f'<div class="callout note"><p>{esc(rw(lang, "untranslated", n=missing))}</p></div>')
-        toc = []
-        if block["bullets"]:
+        view = command_page.view(command, lang)
+        mono = lambda text: rich_page(text)
+        parts = [f'<article class="prose command cpage"><p class="crumbs"><a href="{esc(page.url(f"{lang}/docs/"))}">{esc(rw(lang, "commands"))}</a> › <a href="{esc(page.url(f"{lang}/docs/"))}#cat-{command["category"]}">{esc(docs.category_label(command["category"], lang))}</a></p>',
+                 f'<h1><code>#{esc(name)}</code> <span class="cat">{esc(view["category_label"])}</span></h1>',
+                 f'<p class="lead">{mono(view["lead"])}</p>',
+                 f'<div class="cmdline"><pre><code>{self.line_html(view["line"])}</code></pre></div>',
+                 f'<p class="hint">{esc(view["hint"])}</p>']
+        parts.append(self.bubbles_html(command, lang))
+        toc = [(2, "essentials", rw(lang, "essentials"))]
+        parts.append(f'<h2 id="essentials"><a class="anchor" href="#essentials" aria-hidden="true">#</a>{esc(rw(lang, "essentials"))}</h2><div class="keys">')
+        parts += [f'<div class="key"><b>{mono(k["title"])}</b><span>{mono(k["text"])}</span></div>' for k in view["keys"]]
+        parts.append("</div>")
+        if view["groups"]:
             toc.append((2, "arguments", rw(lang, "arguments")))
-            parts.append(f'<h2 id="arguments"><a class="anchor" href="#arguments" aria-hidden="true">#</a>{esc(rw(lang, "arguments"))}</h2><dl class="params">')
-            for arg, kind, text in block["bullets"]:
-                default = command["defaults"].get(arg)
-                types = "".join(f'<span class="type">{esc(x.strip())}</span>' for x in re.split(r"[,|]", kind) if x.strip())
-                badge = (f'<span class="default">{esc(t(lang, "default"))} <code>{esc(default)}</code></span>' if default is not None
-                         else (f'<span class="required">{esc(t(lang, "required"))}</span>' if not arg.startswith("..") else f'<span class="required">{esc(t(lang, "variadic"))}</span>'))
-                parts.append(f'<dt id="arg-{esc(arg.lstrip("."))}"><code>{esc(arg)}</code>{types}{badge}</dt><dd>{prose_html(text.strip())}</dd>')
-            parts.append("</dl>")
+            parts.append(f'<h2 id="arguments"><a class="anchor" href="#arguments" aria-hidden="true">#</a>{esc(rw(lang, "arguments"))}</h2>')
+            parts.append('<div class="scrollx"><table class="atab"><thead><tr>' + "".join(f"<th>{esc(c)}</th>" for c in view["columns"]) + "</tr></thead><tbody>")
+            for group in view["groups"]:
+                parts.append(f'<tr class="gh"><td colspan="3">{esc(group["label"])}</td></tr>')
+                for row in group["rows"]:
+                    arg = esc(row["name"])
+                    status = (f'<span class="st rq">{esc(row["status"])}</span>' if row["required"] else
+                              f'<span class="st op">{esc(row["status"])}</span>' + (f' <button type="button" class="dv" data-tip="val-{arg}">{esc(row["default"])} ▾</button>' if row["default"] is not None else ""))
+                    examples_html = ""
+                    for e in row["examples"]:
+                        shows = f'<span>{mono(e["shows"])}</span>' if e["shows"] else ""
+                        examples_html += f'<div class="exl"><code>{highlight(e["code"])}</code>{shows}</div>'
+                    parts.append(f'<tr id="arg-{esc(row["name"].lstrip("."))}"><td class="an2"><button type="button" class="an{" rq" if row["required"] else ""}" data-tip="arg-{arg}">{arg}</button></td>'
+                                 f'<td class="stc">{status}</td><td><div class="ad">{mono(row["text"])}</div><div class="exs">{examples_html}</div></td></tr>')
+            if view["named"]:
+                parts.append(f'<tr class="gh"><td colspan="3">{esc(view["named"]["label"])}</td></tr><tr><td colspan="3" class="named">{mono(view["named"]["text"])}</td></tr>')
+            parts.append("</tbody></table></div>")
+        if view["note"]:
+            parts.append(f'<p class="note">{mono(view["note"])}</p>')
         if command["kind"] == "function" or name in ref.WRITTEN_CALLS:
-            toc.append((2, "calls", t(lang, "calls")))
-            complete, minimal = ref.call_complete(command, self.samples), ref.call_minimal(command, self.samples)
-            parts.append(f'<h2 id="calls"><a class="anchor" href="#calls" aria-hidden="true">#</a>{esc(t(lang, "calls"))}</h2>')
-            parts.append(f'<p class="label">{esc(rw(lang, "call_minimal"))}</p>' + code_block(minimal, "typ", t(lang, "copy")))
-            if complete != minimal:
-                parts.append(f'<p class="label">{esc(rw(lang, "call_complete"))}</p>' + code_block(complete, "typ", t(lang, "copy")))
+            toc.append((2, "calls", rw(lang, "lines_to_copy")))
+            parts.append(f'<h2 id="calls"><a class="anchor" href="#calls" aria-hidden="true">#</a>{esc(rw(lang, "lines_to_copy"))}</h2>')
+            for key, call in docs.calls(command, self.samples):
+                parts.append(f'<p class="label">{esc(rw(lang, "copy_minimal" if key == "call_minimal" else "copy_complete"))}</p>' + code_block(call, "typ", t(lang, "copy")))
         if command["examples"]:
-            toc.append((2, "examples", t(lang, "examples")))
-            parts.append(f'<h2 id="examples"><a class="anchor" href="#examples" aria-hidden="true">#</a>{esc(t(lang, "examples"))}</h2>')
+            toc.append((2, "examples", rw(lang, "examples")))
+            parts.append(f'<h2 id="examples"><a class="anchor" href="#examples" aria-hidden="true">#</a>{esc(rw(lang, "examples"))}</h2>')
             for example in command["examples"]:
                 parts.append(self._example_html(command, example, page, esc(rw(lang, "example", n=example["index"] + 1)), True))
         parts.append(f'<p class="defined">{esc(rw(lang, "defined_in"))} <code>lib/{esc(command["file"])}:{command["line"]}</code></p>')
@@ -1069,8 +1089,82 @@ class Site:
         next_ = siblings[position + 1] if position + 1 < len(siblings) else None
         parts.append(self.pager(page, prev_ and (f"{lang}/docs/{prev_['name']}/", prev_["name"]), next_ and (f"{lang}/docs/{next_['name']}/", next_["name"])))
         parts.append("</article>")
-        summary = prose_plain(block["paragraphs"][0]) if block["paragraphs"] else ""
-        self.write(page.path, self.frame(page, f"{name} — Woodcore", "".join(parts), sidebar=self.sidebar_docs(page, ("command", name)), toc=toc, description=summary[:200]))
+        self.write(page.path, self.frame(page, f"{name} — Woodcore", "".join(parts), sidebar=self.sidebar_docs(page, ("command", name)), toc=toc, description=prose_plain(view["lead"])[:200]))
+
+    @staticmethod
+    def line_html(lines):
+        """The line of the command (command_page.line): each name a button opening its argument's bubble, each default one opening the bubble of its values."""
+        out = []
+        for row in lines:
+            parts = []
+            for segment in row:
+                text = esc(segment["text"])
+                if segment["kind"] == "cmd":
+                    parts.append(f'<span class="fn">{text}</span>')
+                elif segment["kind"] == "arg":
+                    parts.append(f'<button type="button" class="an{" rq" if segment["required"] else ""}" data-tip="arg-{esc(segment["arg"])}">{text}</button>')
+                elif segment["kind"] == "value":
+                    parts.append(f'<button type="button" class="av" data-tip="val-{esc(segment["arg"])}">{text} <i>▾</i></button>')
+                else:
+                    parts.append(text)
+            out.append("".join(parts))
+        return "\n".join(out)
+
+    def masked_values(self, name):
+        """Whether the prints of a command's values are kept off the public site -- the norm tables in full (site.json's `masked`), as its examples' pages are."""
+        return any(fnmatch.fnmatch(f"{name}-1", pattern) for pattern in CONFIG["masked"])
+
+    def bubbles_html(self, command, lang):
+        """Every bubble of the page, a <template> each, written from command_page's bubble data: an argument's head and sentence; a value's head, its list, and for each value its call and its print cut out of the committed sheet by CSS (the sheet published under values/), or what is said in its place."""
+        name = command["name"]
+        page_entry = command_pages.entry(name)
+        if page_entry is None:
+            return ""
+        index = bex.values_index()
+        out = []
+        for arg in page_entry["arguments"]:
+            data = command_page.argument_bubble(command, arg, lang)
+            out.append(f'<template id="tip-arg-{esc(arg)}"><div class="tiph"><code>{esc(arg)}</code><span class="tips">{esc(data["status"])}</span></div><div>{rich_page(data["text"])}</div></template>')
+            if command_page.default_of(command, arg, page_entry["arguments"][arg]) is None:
+                continue
+            data = command_page.value_bubble(command, arg, lang, index=index)
+            head = f'<div class="tiph"><code>{esc(arg)}</code><span class="tips">{esc(data["status"])}</span></div>'
+            if data["free"] is not None:
+                free = data["free"]
+                body = f'<div class="vl"><div class="on"><code>{esc(free["default"])}</code></div><div>{esc(free["text"])} <code>{esc(free["example"])}</code></div></div>'
+                out.append(f'<template id="tip-val-{esc(arg)}" data-wide="0">{head}{body}</template>')
+                continue
+            rows, previews = [], []
+            for i, value in enumerate(data["values"]):
+                on = " on" if value["value"] == data["current"] else ""
+                rows.append(f'<div class="vrow{on}" data-pv="{i}"><code>{esc(value["value"])}</code><span>{rich_page(value["text"])}</span></div>')
+                previews.append(f'<div class="vprev" data-pv="{i}"{"" if on else " hidden"}>{self.preview_html(name, value["preview"], lang)}</div>')
+            body = f'<div class="vgrid"><div class="vl">{"".join(rows)}<div class="vhint">{esc(data["hover"])}</div></div><div class="vp">{"".join(previews)}</div></div><div class="vfoot">{esc(data["foot"])}</div>'
+            out.append(f'<template id="tip-val-{esc(arg)}" data-wide="1">{head}{body}</template>')
+        return f'<div class="tip" data-tipbox hidden></div>' + "".join(out)
+
+    def preview_html(self, command, preview_data, lang):
+        """One value's call and print in the bubble: the set-up in grey, the call, «Ce qu'il imprime», the print as a window on its sheet -- or nothing printed, the masked note, what is missing; then the note (the same print as, the role)."""
+        parts = []
+        if preview_data["state"] == "unrendered":
+            return f'<div class="pnote2">{esc(preview_data["note"] or "")}</div>'
+        code = (f'<span class="pset">{esc(preview_data["setup"])}</span>\n' if preview_data["setup"] else "") + esc(preview_data["call"])
+        parts.append(f'<pre class="pcode">{code}</pre><div class="plab">{esc(rw(lang, "prints"))}</div>')
+        if self.masked_values(command):
+            parts.append(f'<div class="pimg blank">{esc(t(lang, "masked_note", commands=rw(lang, "commands")))}</div>')
+        elif preview_data["state"] == "missing":
+            parts.append(f'<div class="pimg blank">{esc(rw(lang, "render_missing"))}</div>')
+        elif preview_data["blank"]:
+            parts.append(f'<div class="pimg blank">{esc(rw(lang, "blank"))}</div>')
+        elif preview_data["rect"]:
+            top, width, height = preview_data["rect"]
+            size = bex.values_index()["sheets"][preview_data["sheet"]]["size"]
+            k = bex.VALUE_SCALE
+            parts.append(f'<div class="pimg"><div class="spr" style="width:{round(width * k)}px;height:{round(height * k)}px;'
+                         f'background-image:url(../../../values/{esc(preview_data["file"])});background-size:{round(size[0] * k)}px {round(size[1] * k)}px;background-position:0 {-round(top * k)}px"></div></div>')
+        if preview_data["note"]:
+            parts.append(f'<div class="pnote2">{rich_page(preview_data["note"])}</div>')
+        return "".join(parts)
 
     def pager(self, page, prev_, next_):
         lang = page.lang
@@ -1161,12 +1255,10 @@ class Site:
         """The entries the sidebar's search reads: `t` the title, `u` the address, `k` the kind, `c` its category, `s` the line shown, `a` the arguments and `x` the rest of the text, matched and never shown -- so «Schnee» finds the tutorial page and the example about snow, where only the first paragraph was read."""
         entries = []
         for command in self.commands:
-            block, _m = self.localised(command, lang)
+            # a command is found by its name and its lead, nothing else (REQ-011, D-11): the window's search
             entries.append({"t": command["name"], "u": f"{lang}/docs/{command['name']}/", "k": "cmd",
                             "c": docs.category_label(command["category"], lang),
-                            "s": prose_plain(block["paragraphs"][0])[:200] if block["paragraphs"] else "",
-                            "a": " ".join(b[0] for b in block["bullets"]),
-                            "x": " ".join(prose_plain(p) for p in block["paragraphs"][1:])[:1500]})
+                            "s": prose_plain(command_page.lead(command, lang))})
         for position, step in enumerate(self.tutorial[lang]):
             entries.append({"t": prose_plain(step["title"]), "u": f"{lang}/tutorial/{step['slug']}/", "k": "tut",
                             "c": t(lang, "tutorial_step", n=position + 1, total=len(self.tutorial[lang])),

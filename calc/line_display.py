@@ -10,6 +10,9 @@ PRESETS = Path(__file__).resolve().parent.parent / "lib" / "display-presets.json
 # Beside the fine arguments: the line's emphasis, its role and its level. `#verify` has no `style:` (lib/formula.typ: its double rule says whether the relation holds).
 EXTRA = {"var": ("style", "role", "level"), "eq": ("style", "role", "level"), "verify": ("role", "level")}
 
+# The one fine value a command refuses among `fine-values`: `#verify` has no `display: "value"` -- its sides are not printed bare (lib/formula.typ, `check-fine`, where the engine writes the same exception). What «Affichage» and the «Domaines» tab offer is `values(command, name)`, never the list bare (issue #113: the module «Arguments de la ligne» found it offered).
+EXCLUDED = {("verify", "display"): frozenset({"value"})}
+
 _cache = {}
 
 
@@ -22,6 +25,12 @@ def _read():
 def fine_values():
     """{argument: the values it takes} -- lib/display-presets.json `fine-values`."""
     return {name: tuple(values) for name, values in _read()["fine-values"].items()}
+
+
+def values(command, name):
+    """The values argument `name` takes on a line of `command`: `fine-values` without what the command refuses (`EXCLUDED`)."""
+    gone = EXCLUDED.get((command, name), ())
+    return tuple(v for v in fine_values().get(name, ()) if v not in gone)
 
 
 def display_args(command):

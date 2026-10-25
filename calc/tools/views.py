@@ -14,8 +14,9 @@ WORDS = {
     "typst": "view_display",     # a plan's #show-plan, compiled: named «Affichage» as every tab's display view (the engineer, 07.10.2026: «renomme en haut dans les 4 affichages "Typst" en "Affichage"»); the key stays `typst`
     "export": "view_export",     # a plan's export sheets and their bundles
     "calc": "view_calc",         # a calculation's inputs and its Python result
+    "form": "view_form",         # a domain of the «Domaines» tab as a form, a row a line of its file (issue #113)
+    "code": "view_code",         # the same domain as its file, coloured, the arguments of the line of the cursor beside it (issue #113)
     "entry": "view_entry",       # what is typed by hand: a position, a revision
-    "data": "view_data",         # what the variables tab lists
     "display": "view_display",   # how the report prints it: the compiled call, its options, the call to copy
     "details": "view_details",   # the «Projet» tab's cards: the title page, the language, the templates, the documents (issue #87)
     "templates": "view_templates",   # the «Projet» tab's preview of a document with the templates chosen (issue #88)
@@ -23,7 +24,7 @@ WORDS = {
 # What each view's button says when the pointer rests on it. Named here and not composed, so tests/test_i18n.py finds every key by the code that names it.
 TIPS = {
     "import": "view_import_tip", "draw": "view_draw_tip", "typst": "view_typst_tip", "export": "view_export_tip",
-    "calc": "view_calc_tip", "entry": "view_entry_tip", "data": "view_data_tip", "display": "view_display_tip",
+    "calc": "view_calc_tip", "form": "view_form_tip", "code": "view_code_tip", "entry": "view_entry_tip", "display": "view_display_tip",
     "details": "view_details_tip", "templates": "view_templates_tip",
 }
 
@@ -31,10 +32,9 @@ PLAN_VIEWS = ("draw", "import", "typst", "export")   # «Dessin» first as the d
 CALC_VIEWS = ("calc", "display")
 DRAW_VIEWS = ("draw", "display")
 ENTRY_VIEWS = ("entry", "display")
-DATA_VIEWS = ("data", "display")
 
 # The order the switch shows a tab's views in, whatever order the tab declares them in (its first being its default): the engineer's own for the plans, «document import, dessin, typst et document export».
-ORDER = ("details", "templates", "import", "draw", "typst", "export", "calc", "entry", "data", "display")
+ORDER = ("details", "templates", "import", "draw", "typst", "export", "form", "code", "calc", "entry", "display")
 
 STRINGS = {
     "fr": {
@@ -48,10 +48,12 @@ STRINGS = {
         "view_export_tip": "Les documents d'export : les feuilles et leurs dossiers",
         "view_calc": "Calcul",
         "view_calc_tip": "Les données du calcul et son résultat Python",
+        "view_form": "Formulaire",
+        "view_form_tip": "Le domaine en rangées, une par ligne de son fichier : symboles, calculs et résultats",
+        "view_code": "Code",
+        "view_code_tip": "Le fichier .typ du domaine lui-même, coloré, et les arguments de la ligne du curseur",
         "view_entry": "Saisie",
         "view_entry_tip": "Ce qui est saisi à la main",
-        "view_data": "Données",
-        "view_data_tip": "Ce que l'export et les documents contiennent",
         "view_display": "Affichage",
         "view_display_tip": "Comme le rapport l'imprime : l'aperçu compilé, les options de la commande et la commande à copier",
         "view_details": "Informations",
@@ -72,10 +74,12 @@ STRINGS = {
         "view_export_tip": "Die Exportdokumente: die Blätter und ihre Ordner",
         "view_calc": "Berechnung",
         "view_calc_tip": "Die Eingaben der Berechnung und ihr Python-Ergebnis",
+        "view_form": "Formular",
+        "view_form_tip": "Der Bereich in Zeilen, eine je Zeile seiner Datei: Symbole, Berechnungen und Ergebnisse",
+        "view_code": "Code",
+        "view_code_tip": "Die .typ-Datei des Bereichs selbst, eingefärbt, und die Argumente der Zeile des Cursors",
         "view_entry": "Erfassung",
         "view_entry_tip": "Was von Hand erfasst wird",
-        "view_data": "Daten",
-        "view_data_tip": "Was der Export und die Dokumente enthalten",
         "view_display": "Darstellung",
         "view_display_tip": "Wie der Bericht es druckt: die kompilierte Vorschau, die Optionen des Befehls und der Befehl zum Kopieren",
         "view_details": "Angaben",
@@ -96,10 +100,12 @@ STRINGS = {
         "view_export_tip": "The export documents: the sheets and their folders",
         "view_calc": "Calculation",
         "view_calc_tip": "The calculation's inputs and its Python result",
+        "view_form": "Form",
+        "view_form_tip": "The domain in rows, one a line of its file: symbols, calculations and results",
+        "view_code": "Code",
+        "view_code_tip": "The domain's .typ file itself, coloured, and the arguments of the line of the cursor",
         "view_entry": "Entry",
         "view_entry_tip": "What is typed in by hand",
-        "view_data": "Data",
-        "view_data_tip": "What the export and the documents hold",
         "view_display": "Display",
         "view_display_tip": "As the report prints it: the compiled preview, the command's options and the command to copy",
         "view_details": "Details",

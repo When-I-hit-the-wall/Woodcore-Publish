@@ -46,6 +46,7 @@ ICONS = {
     # Names at the left and their values at the right, which is what the tab lists: two columns, and no chevron, which `tab_python` and `tab_commands` both already are.
     "tab_variables": '<path d="M4 7h3M11 7h9"/><path d="M4 12h3M11 12h6"/><path d="M4 17h3M11 17h8"/>',
     "tab_commands": '<path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/>',
+    "tab_materials": '<path d="M4 20V5h3v15M8.5 20V3h3v17"/><path d="M13.5 6.2l2.9-.8 3.9 14.5-2.9.8z"/><path d="M3 20.5h18"/>',   # books on a shelf: the library of materials (issue #110)
     # Three objects, one reading the two others: what the «Dépendances» tab lists (issue #71).
     "tab_dependencies": '<circle cx="5" cy="12" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M7 11l9.8-4M7 13l9.8 4"/>',
     # The member checks of SIA 265 chapter 4 (member_check_tab.py), each drawn as the action it checks: a bar pulled at both ends, pressed at both ends, bent under a load, sheared, twisted, a column bowed and a beam tipping over, then -- serviceability -- a beam sagging under its original line and a wave.
@@ -54,8 +55,6 @@ ICONS = {
     "tab_mc_bending": '<path d="M3 9q9 9 18 0"/><path d="M12 2v7M9.5 6.5L12 9l2.5-2.5"/>',
     "tab_mc_shear": '<rect x="7" y="8" width="10" height="8"/><path d="M5 18V6M3 8.5L5 6l2 2.5"/><path d="M19 6v12M17 15.5L19 18l2-2.5"/>',
     "tab_mc_torsion": '<path d="M4 12h16"/><path d="M8 6c3 2 3 10 0 12"/><path d="M16 6c-3 2-3 10 0 12"/>',
-    "tab_mc_buckling": '<path d="M12 3c-4 6 4 12 0 18"/><path d="M8 3h8M8 21h8"/>',
-    "tab_mc_ltb": '<path d="M4 6h10M9 6v12M4 18h10"/><path d="M17 8l4 4-4 4"/>',
     # issue #46: a beam's section under a flame -- the section and, over it, the flame the residual section is computed for
     "tab_mc_fire": '<rect x="7" y="13" width="10" height="8"/><path d="M12 2c2 3 4 4 4 7a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-2-1-4 0-6z"/>',
     "tab_sls_deformation": '<path d="M3 8h18" stroke-dasharray="3 3"/><path d="M3 8q9 10 18 0"/>',
@@ -631,6 +630,14 @@ class SideNav(QWidget):
     def current(self):
         item = self.list.currentItem()
         return item.data(INDEX) if item is not None else None
+
+    def path(self, index):
+        """Where the row of tab `index` stands, as the window's bar names it: «Sécurité structurale › Cisaillement» -- its group's title, then its name (issue #112, UI-001); "" for a tab the navigation does not list."""
+        for head, members in self.groups:
+            for item in members:
+                if item.data(INDEX) == index:
+                    return f"{head.data(TITLE)} › {item.text()}" if head.data(TITLE) else item.text()
+        return ""
 
     def set_dirty(self, index, dirty):
         item = self.rows.get(index)

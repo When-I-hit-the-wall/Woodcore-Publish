@@ -377,6 +377,17 @@ QLabel#cardBadge {{ background: {accent_soft}; color: {accent_strong}; border-ra
 QLabel[callout="info"] {{ background: {accent_soft}; color: {ink}; border: none; border-left: 3px solid {accent}; border-radius: 4px; padding: 5px 10px; }}
 QLabel[callout="warning"] {{ background: {wood_soft}; color: {ink}; border: none; border-left: 3px solid {wood}; border-radius: 4px; padding: 5px 10px; }}
 QLabel[callout="danger"] {{ background: {danger_soft}; color: {ink}; border: none; border-left: 3px solid {danger}; border-radius: 4px; padding: 5px 10px; }}
+
+QFrame#treeMenu {{ background: {card}; border: 1px solid {line_strong}; border-radius: 8px; }}
+QFrame[tagbar="true"] {{ background: {bg}; border: 1px solid {line_strong}; border-radius: 7px; }}
+QFrame[tagbar="true"] QLineEdit {{ border: none; background: transparent; padding: 2px 2px; }}
+QFrame[tag="true"] {{ background: {accent_soft}; border: none; border-radius: 10px; }}
+QFrame[tag="true"] QLabel {{ color: {accent_strong}; font-weight: 600; background: transparent; }}
+QFrame[tag="true"] QToolButton {{ color: {accent_strong}; border: none; background: transparent; padding: 0 3px; font-weight: 600; }}
+QFrame[tag="true"] QToolButton:hover {{ background: {card}; border-radius: 8px; }}
+QLabel[badge="export"] {{ color: {wood}; border: 1px solid {wood}; border-radius: 8px; padding: 0 5px; }}
+QLabel[badge="file"] {{ color: {accent_strong}; border: 1px solid {accent}; border-radius: 8px; padding: 0 5px; }}
+QLabel[badge="document"] {{ color: {ok}; border: 1px solid {ok}; border-radius: 8px; padding: 0 5px; }}
 """
 
 

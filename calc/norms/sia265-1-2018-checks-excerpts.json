@@ -1,0 +1,35 @@
+{
+ "_source": "SIA 265/1:2018 -- the clause the member checks cite for a panel's design value (issue #112, UI-012): 6.1.2.1, read off the French edition shipped in norm-library/, held to the PDF by tests/test_norm_excerpts.py. One edition only: every language is shown the French one.",
+ "edition": "SIA 265/1:2018",
+ "editions": {
+  "fr": {
+   "file": "SIA265-1-2018-FR.pdf",
+   "chapter": [
+    25,
+    28
+   ]
+  }
+ },
+ "excerpts": {
+  "6.1.2.1": {
+   "kind": "text",
+   "editions": {
+    "fr": {
+     "ref": "6.1.2.1",
+     "page": 25,
+     "box": [
+      60.0,
+      341.2,
+      540.0,
+      512.7
+     ],
+     "text": "6.1.2.1 À partir de la valeur caractéristique de la résistance ultime Rk, la valeur de calcul de la résistance\nultime Rd est définie par la relation:\nRd = Rk = Rk  où Ʃmod = ƩM Ʃt Ʃw (4)\nÀ partir de la valeur caractéristique de la résistance fk, la valeur de calcul de la résistance fd est\ndéfinie par la relation:\nfd = fk = fk  où Ʃmod = ƩM Ʃt Ʃw (5)\nRk, fk  selon chiffre 6.1.2.2\nƥM  facteur de résistance des dérivés du bois selon tableau 6\n\u0002Ʃ mod  facteur tenant compte de la durée de chargement ainsi que de la teneur en eau du matériau\nselon tableau 9",
+     "chapter": [
+      25,
+      25
+     ]
+    }
+   }
+  }
+ }
+}

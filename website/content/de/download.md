@@ -9,8 +9,7 @@
 | Windows 10 oder 11, 64 Bit | nötig | Woodcore ist ein Windows-Programm. |
 | Rund 250 MB pro Version | nötig | Jede Version wird in einen eigenen Ordner installiert. |
 | Administratorrechte | nein | Installiert wird für den Benutzer, in `%LOCALAPPDATA%\Programs\Woodcore\`. |
-| Microsoft Excel | empfohlen | Zum Ausfüllen der Lasten-Arbeitsmappe (die Positionen werden in Woodcore erfasst). Woodcore liest die Werte, die Excel berechnet hat: die Arbeitsmappe vor dem Import in Excel speichern. |
-| Die Lasten-Arbeitsmappe Belastungsannahmen | für die Lasten | Woodcore liest ihre Blätter `SL-`, `EL+AL-` und `WL-` im Format der Vorlage 3.2. Sie wird nicht mit Woodcore geliefert. |
+| Microsoft Excel und eine Lasten-Arbeitsmappe | nein | Wind, Schnee und ständige Lasten werden in den Registern von Woodcore erfasst, wie die Positionen. Eine Arbeitsmappe `Belastungsannahmen` wird nie geöffnet. |
 | Visual Studio Code mit der Erweiterung Tinymist | empfohlen | Zum Schreiben des Berichts, mit der Dokumentation jedes Befehls beim Überfahren. |
 | Typst | inbegriffen | Typst 0.14.2 wird mit Woodcore geliefert: nichts zu installieren. |
 | Internetverbindung | freiwillig | Nur, um zu erfahren, ob eine neue Version veröffentlicht ist. |

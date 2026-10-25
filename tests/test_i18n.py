@@ -24,6 +24,9 @@ MIN_WORDS = 12
 SAME_IN_TWO_LANGUAGES = {
     "vertical + horizontal",          # fr/en
     "x = {x} m   z = {z} m",          # a coordinate readout: no words at all
+    "Compression ∥",                  # fr/en: a strength of a member, the «Matériaux» tab (issue #110)
+    "Compression ⊥",
+    "γ_M = {g} · η_mod = {e}",        # SIA 265/1's two factors: symbols alone
 }
 
 _HOLE = re.compile(r"\{\w+\}")
@@ -365,6 +368,13 @@ def _window_strings_named():
                 prefixes.add(node.values[0].value)
             elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add) and isinstance(node.left, ast.Constant) and isinstance(node.left.value, str):
                 prefixes.add(node.left.value)
+    # the Qt-free models of a tab under calc/ name the keys of its words the tab then says (the «Variables» tab's card and tags, issue #114, ARCH-001: «Vient de» and what to include, in keys of the window's words)
+    for path in sorted((ROOT / "calc").glob("variable_*.py")):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                literals.add(node.value)
+            elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add) and isinstance(node.left, ast.Constant) and isinstance(node.left.value, str):
+                prefixes.add(node.left.value)
     # a tab of sources names its list's words by its prefix and the suffixes of its base (source_editor.WORD_SUFFIXES, spec 2026-10-19-base-saine-nettoyage)
     editor = ast.parse((tools / "source_editor.py").read_text(encoding="utf-8"))
     suffixes = next(ast.literal_eval(n.value) for n in editor.body if isinstance(n, ast.Assign) and any(getattr(t, "id", None) == "WORD_SUFFIXES" for t in n.targets))
@@ -382,6 +392,20 @@ def _window_strings_named():
         for node in ast.parse(path.read_text(encoding="utf-8")).body:
             if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "PREFIX" for t in node.targets) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
                 prefixes.add(node.value.value)
+    # a tab that names its own prefix (`PREFIX = "ld_"`, the dead load's, whose domain declares none) gets the words the base composes with it -- `ctx.prefix() + "module_drawing"` (calc_modules) -- and those only (spec 2026-10-23-onglet-vent-briques, V5: load_tab.py, which named them, gone)
+    tab_prefixes, composed, tab_words, named = set(), set(), set(), set()
+    for path in sorted(tools.glob("*.py")):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.ClassDef):
+                tab_prefixes.update(n.value.value for n in node.body if isinstance(n, ast.Assign) and any(getattr(t, "id", None) == "PREFIX" for t in n.targets) and isinstance(n.value, ast.Constant) and isinstance(n.value.value, str))
+                tab_words.update(n.value.value for n in node.body if isinstance(n, ast.Assign) and any(getattr(t, "id", None) == "WORDS" for t in n.targets) and isinstance(n.value, ast.Constant) and isinstance(n.value.value, str) and n.value.value)
+            elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add) and isinstance(node.right, ast.Constant) and isinstance(node.right.value, str) and isinstance(node.left, ast.Call) and getattr(node.left.func, "attr", None) == "prefix":
+                composed.add(node.right.value)
+            elif isinstance(node, ast.Call) and getattr(node.func, "attr", None) == "word" and node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+                named.add(node.args[0].value)
+    literals.update(p + suffix for p in tab_prefixes for suffix in composed)
+    # and the sentences that name its object, `self.word("saved")` read as `<WORDS>_saved` (tab_host.TabHost.word, D-12): CalcTab's `WORDS = "ld"`
+    literals.update(f"{w}_{suffix}" for w in tab_words for suffix in named)
     dead = sorted((module, key) for key, module in defined.items()
                   if key not in literals and not any(len(p) >= 3 and key.startswith(p) for p in prefixes))
     return defined, dead
@@ -526,7 +550,7 @@ def test_the_editors_warnings_speak_the_window_s_language():
 # The labels that name the level of detail -- `level:` --, by module and key: issue #20 has the French call it «Niveau de détail» everywhere. A «Niveau» that is not the level of detail stays (the storey, a heading's level, the level a load is carried at).
 DETAIL_LEVEL_LABELS = {
     "display_options.py": ("ds_opt_level",),
-    "variables_tab.py": ("vr_level",),
+    "variables_words.py": ("vr_level",),
     "journal_tab.py": ("jo_levels",),
     "woodcore_gui.py": ("pdf_base_level", "pdf_uniform_level"),
 }
@@ -580,9 +604,10 @@ def test_the_words_of_a_calculation_tab_take_no_key_of_another_module():
     names = {n for n in re.findall(r"for _lang, _texts in (\w+)\.STRINGS\.items\(\)", source) if not n.startswith("_")}   # a loop's own variable is no module
     for group in re.findall(r"for _module in \(([^)]*)\)", source):
         names |= {n.strip() for n in group.split(",") if n.strip()}
-    new = {"calc_tab_words", "snow_tab_words"}
-    assert new <= names, names
     words = importlib.import_module("woodcore_gui_words")
+    names |= {m.__name__ for m in words.SERVICE_WORDS}   # the registry of the services' words (spec 2026-10-23-onglets-types-et-services, ARCH-008)
+    new = {"calc_tab_words", "snow_tab_words"} | {m.__name__ for m in words.SERVICE_WORDS}
+    assert new <= names, names
     own = {name: set(getattr(words, name).STRINGS["fr"]) for name in names if hasattr(getattr(words, name, None), "STRINGS")}   # each as woodcore_gui_words names it
     base = set(words.STRINGS["fr"]) - set().union(*own.values())
     for name in new:

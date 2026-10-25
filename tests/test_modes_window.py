@@ -296,39 +296,63 @@ def test_the_journal_follows_the_document():
             _choose(window, "rs")
 
 
-def test_the_variables_tab_marks_each_value_with_where_it_comes_from():
-    """Since v0.117 (issue 13) a column of provenance -- Excel, Woodcore, or Typst and the document's letters -- where the Document column said Export, CU, BP or RS."""
+def test_the_variables_tab_lists_each_document_s_own_domains_under_its_entry():
+    """Issue #114 (D-14, UI-002): a domain a document declares itself is listed under that document's entry of the menu, «Document › <le document>», and its source tag is the document's letters; the root domain of a document is not listed (REQ-005)."""
     window, here = _window()
     import variable_sources
     import variables
     import variables_tab
     tab = next(t for t in window.tabs if isinstance(t, variables_tab.VariablesTab))
+    b = tab.service("browser")
     with project.using(here):
-        reading = variables.Registry(stamp="pinned", domains={"": [variables.Variable(key="R_d", domain="", value=2.5, unit="kN", symbol="R_d")]})
-        tab.readings = {"cu": reading, "rs": reading}
-        tab.errors = {}
-        tab.export = variable_sources.read_export(here)
-        tab.domain_key = None
-        tab.refresh()
-        provenances = [tab.domain_list.topLevelItem(i).text(2) for i in range(tab.domain_list.topLevelItemCount())]
-        typst = tab.t("vr_prov_typst")
-        assert provenances[0] == f"{typst} · RS" and f"{typst} · CU" in provenances, provenances
-        assert not provenances[-1].startswith(typst), "the export's domains come last"
-        # the export's values are named by their calculation and its instance, as `val` reads them
-        domain = next(d for d in tab.export.domains if d.variables)
-        var = domain.variables[0]
-        tab.select_key((variables_tab.EXPORT, domain.name, var.key))
-        import display_view
-        calls = [display_view.entry_call(entry) for entry in tab.display_entries()]   # the «Affichage» view's since v0.117
-        import build_reference as ref
-        calc, instance = tab.address(tab.selected_key())
-        assert ref.call_var_domain(calc, instance, var.key) in calls, calls
-        # one document alone, over every domain
-        tab.all_domains_box.setChecked(True)
-        tab.provenance_box.setCurrentIndex(tab.provenance_box.findData(f"{variables.TYPST}:cu"))
-        assert {tab.tree.topLevelItem(i).text(variables_tab.PROVENANCE) for i in range(tab.tree.topLevelItemCount())} == {f"{typst} · CU"}
-        tab.provenance_box.setCurrentIndex(0)
-        tab.all_domains_box.setChecked(False)
+        reading = variables.Registry(stamp="pinned", domains={"": [variables.Variable(key="R_d", domain="", value=2.5, unit="kN", symbol="R_d")],
+                                                              "Pfette": [variables.Variable(key="M", domain="Pfette", value=1.5, unit="kNm", symbol="M")]})
+        b.readings = {"cu": reading, "rs": reading}
+        b.errors = {}
+        b.export = variable_sources.read_export(here)
+        b.refresh()
+        assert ("cu", "") not in b.domains and ("cu", "Pfette") in b.domains and ("rs", "Pfette") in b.domains
+        for mode in ("cu", "rs"):
+            node = b.catalogue.nodes["doc:" + mode]
+            assert node.title == window.document_name(mode) and b.catalogue.count(node.id, "all") == 1
+        b.choose_source("document")
+        assert {k[0] for k in b.list.shown()} == {"cu", "rs"}
+        b.select_key(("cu", "Pfette", "M"))
+        assert "[CU]" in b.detail.path.text()
+        assert b.detail.command_field.text() == '#var("M", domain: "Pfette")'
+        b.choose_source("all")
+
+
+def test_the_window_says_why_a_tab_cannot_be_brought_forward():
+    """ARCH-010: `can_open_tab` refuses, naming why, a tab the document shown does not show, a document not made, a reserved tab and a field's choice under way; `show_tab` brings forward the one it may, `open_object` unchanged."""
+    window, here = _window()
+    with project.using(here):
+        window.mode = "cu"
+        window.apply_mode()
+        try:
+            assert window.can_open_tab("tab_ac_snow") == (False, "open_tab_not_shown")
+            window.mode = "rs"
+            window.apply_mode()
+            assert window.can_open_tab("tab_ac_seismic") == (False, "open_tab_reserved")
+            with _patched(window, available=lambda key: False):
+                assert window.can_open_tab("tab_ac_snow") == (False, "open_tab_not_made")
+            with _patched(window, picking=True):
+                assert window.can_open_tab("tab_ac_snow") == (False, "open_tab_picking")
+                assert not window.show_tab("tab_ac_snow")
+            if window.available("tab_ac_snow"):
+                assert window.can_open_tab("tab_ac_snow") == (True, None)
+                assert window.show_tab("tab_python")
+                assert window.tabs[window.tab_widget.currentIndex()] is next(t for (k, _f), t in zip(window_keys(), window.tabs) if k == "tab_python")
+            for key in ("open_tab_not_shown", "open_tab_not_made", "open_tab_reserved", "open_tab_picking"):
+                assert window.t(key, tab="X", document="Y")
+        finally:
+            window.mode = "rs"
+            window.apply_mode()
+
+
+def window_keys():
+    import woodcore_gui
+    return woodcore_gui.TABS
 
 
 # --- the PDF ------------------------------------------------------------------------------------

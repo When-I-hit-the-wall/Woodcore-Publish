@@ -1,13 +1,13 @@
 """A domain invented for tests/test_calc_tab_base.py (spec 2026-10-22-onglet-neige-type, ARCH-003): a beam's load, a span and a load per metre, nothing of the snow -- what proves the calculation tabs' base (calc/tools/calc_tab.py) draws a domain it was never written for.
 
-It has a field of each kind the base draws (a number that may follow a variable, buttons with a free value, tiles, a check box, a drop-down list), a red message and an orange one each on its field, results that are not its inputs, a drawing and a chart, and two excerpts of a norm -- SIA 261's, the file the snow reads, so that the bubble shows real words. Not a module of calc/: Woodcore never loads it.
+It has a field of each kind the base draws (a number that may follow a variable, buttons with a free value, tiles, a check box, a drop-down list), a red message and an orange one each on its field, results that are not its inputs, a drawing and a chart, and two excerpts of a norm -- SIA 261's, the file the snow reads, so that the bubble shows real words. Since spec 2026-10-23-onglet-vent-briques (V2) a third section holds what a section may hold besides fields: two fields on one line, a number whose special value writes null, a text, a coloured table that may be pinned, a formula and a select on the line of a text -- and `key_links`, what each cell of the table is read from. Not a module of calc/: Woodcore never loads it.
 """
 
 import re
 
 import validation
 from domains import links
-from domains.contracts import Choice, Declaration, Field, Message
+from domains.contracts import Block, Choice, Declaration, Field, Message
 
 DOMAIN = "fake-load"
 FOLDER = "loads/fake"
@@ -21,7 +21,7 @@ SHAPES = ("box", "slab")
 
 def new_source(cid):
     return {"schema_version": SOURCE_SCHEMA_VERSION, "id": cid, "name": "", "label": "", "group": "",
-            "span": 4.0, "kind": "light", "factor": 1.0, "shape": "box", "braced": False, "grade": "C24"}
+            "span": 4.0, "kind": "light", "factor": 1.0, "shape": "box", "braced": False, "grade": "C24", "width": 2.0, "depth": 3.0, "height": None, "side": "A"}
 
 
 def stamp_version(src):
@@ -30,14 +30,50 @@ def stamp_version(src):
 
 
 def declaration():
-    return Declaration(PREFIX, NORM, (("main", ("span", "kind", "shape")), ("more", ("braced", "grade"))), (
-        Field("span", "number", "m", excerpts=("5.2.2",), minimum=0.0, maximum=50.0, decimals=2, linkable=True),
+    return Declaration(PREFIX, NORM, (("main", ("span", "kind", "shape")), ("more", ("braced", "grade")),
+                                      ("blocks", (("width", "depth"), "height", "note", "coeffs", "rule", "side_row", "model"))), (
+        Field("span", "number", "m", excerpts=("5.2.2",), minimum=0.0, maximum=50.0, decimals=2, linkable=True, var="span"),
         Field("kind", "buttons", "", choices=(Choice("light", PREFIX + "c_light", 0.5), Choice("heavy", PREFIX + "c_heavy", 2.0)),
-              excerpts=("5.2.4",), minimum=0.0, maximum=10.0, free_id="custom", free_key="factor"),
+              excerpts=("5.2.4",), minimum=0.0, maximum=10.0, free_id="custom", free_key="factor", var="q"),
         Field("shape", "tiles", "", choices=tuple(Choice(s, PREFIX + "c_" + s, excerpts=("fig3",)) for s in SHAPES), excerpts=("fig3",)),
         Field("braced", "checkbox", "", excerpts=("5.3.4",)),
         Field("grade", "select", "", choices=(Choice("C24", PREFIX + "c_C24"), Choice("GL24h", PREFIX + "c_GL24h"))),
-    ))
+        Field("width", "number", "m", minimum=0.0, maximum=50.0),
+        Field("depth", "number", "m", minimum=0.0, maximum=50.0),
+        Field("height", "number", "m", minimum=0.0, maximum=50.0, special_word="same"),
+        Field("side", "select", "", choices=(Choice("A", PREFIX + "c_A"), Choice("B", PREFIX + "c_B"))),
+    ), (Block("note", "text"), Block("coeffs", "heat_table", pinnable=True, wide=True, min_width=200), Block("rule", "formula"), Block("side_row", "row_select", field="side"), Block("model", "model3d", pinnable=True)))
+
+
+def blocks(src, instance):
+    """The data of the third section's blocks: a sentence, a table of two columns whose second is the side chosen, the formula of M_d."""
+    marked = src.get("side")
+    rows = [{"label": "0°", "cells": [{"value": 0.8, "id": "cell:A:0"}, {"value": [0.2, -0.2], "id": "cell:B:0"}]},
+            {"label": "90°", "cells": [{"value": -0.5, "id": "cell:A:1"}, {"value": None, "id": "cell:B:1"}]}]
+    out = {"note": {"word": "note", "params": {"span": src.get("span")}},
+           "coeffs": {"columns": [{"label": "A", "marked": marked == "A"}, {"label": "B", "marked": marked == "B"}], "rows": rows, "legend": True},
+           "side_row": {"word": "side_words"},
+           "model": {"build": box, "views": [("Front", -90.0, 0.0), ("Iso", -131.0, 28.0)], "phi": True, "phi_label": "angle", "directions": ["0°", "90°"], "max": "all", "signs": [("+", "up"), ("-", "down")],
+                     "key_prefix": "face:"}}
+    if instance is not None:
+        out["rule"] = {"formula": "M_d = q dot l^2 / 8", "values": "%g dot %g^2 / 8" % (instance["vars"]["q"]["value"], src["span"]), "ref": "5.2.2"}
+    return out
+
+
+def box(state):
+    """A box of 2 × 1 × 1 m, its front face keyed: the 3D brick's test model, no word of a domain (spec 2026-10-23-onglet-vent-briques, ARCH-007)."""
+    from domains import model3d as m3
+    sc = m3.Scene(centre=(1.0, 0.5, 0.5), radius=1.5, half_height=1.0, width=2.3)
+    sc.add(m3.Polygon([(0, 0, 0), (0, 1, 0), (0, 1, 1), (0, 0, 1)], key="front", normal=(-1, 0, 0)),
+           m3.Polygon([(0, 0, 1), (2, 0, 1), (2, 1, 1), (0, 1, 1)], key="top", normal=(0, 0, 1), role="roof"),
+           m3.Polygon([(0, 0, 0), (2, 0, 0), (2, 0, 1), (0, 0, 1)], key="side", normal=(0, -1, 0)),
+           m3.Text((0, 0.5, 0.5), "front", owner=(-1, 0, 0)))
+    return sc
+
+
+def key_links(src, instance):
+    """What each element is read from: the result M_d lights the first cell, which lights M_d and frames the cell beside it."""
+    return {"var:M_d": {"lit": ["cell:A:0"]}, "cell:A:0": {"lit": ["var:M_d"], "emphasis": ["cell:B:0"]}}
 
 
 def visible_fields(src):
@@ -72,7 +108,7 @@ def build_instance(src, here=None, inputs=None):
     m = q * src["span"] ** 2 / 8
     vars_ = {"span": {"value": src["span"], "unit": "m", "symbol": "l"}, "q": {"value": q, "unit": "kN/m", "symbol": "q"},
              "M_d": {"value": m, "unit": "kNm", "symbol": "M_d"}}
-    return {"vars": vars_, "results": ["M_d"], "steps": []}
+    return {"vars": vars_, "results": ["M_d"], "steps": [{"result": "M_d", "uses": ["span", "q"]}]}
 
 
 def results(instance):
@@ -96,5 +132,7 @@ def chart(src):
 WORDS = {lang: {"fk_list": "Beams", "fk_empty": "No beam", "fk_s_main": "Main", "fk_s_more": "More", "fk_f_span": "Span", "fk_f_kind": "Kind",
                 "fk_f_shape": "Shape", "fk_f_braced": "Braced", "fk_f_grade": "Grade", "fk_c_light": "light", "fk_c_heavy": "heavy", "fk_c_box": "box",
                 "fk_c_slab": "slab", "fk_c_C24": "C24", "fk_c_GL24h": "GL24h", "fk_msg_span": "The span is missing", "fk_msg_long": "A long span: {span} m",
-                "fk_module_drawing": "Beam", "fk_module_chart": "Moment", "fk_x_5.2.2": "q_k", "fk_x_5.2.4": "C_e", "fk_x_fig3": "Figure 3", "fk_x_5.3.4": "hindered"}
+                "fk_module_drawing": "Beam", "fk_module_chart": "Moment", "fk_x_5.2.2": "q_k", "fk_x_5.2.4": "C_e", "fk_x_fig3": "Figure 3", "fk_x_5.3.4": "hindered",
+                "fk_s_blocks": "Blocks", "fk_f_width": "b", "fk_f_depth": "d", "fk_f_height": "h", "fk_f_side": "Side", "fk_same": "h = l", "fk_c_A": "A", "fk_c_B": "B",
+                "fk_note": "A beam of {span} m", "fk_side_words": "c_pi of the side", "fk_b_coeffs": "Coefficients", "fk_b_model": "Model"}
          for lang in ("fr", "de", "en")}

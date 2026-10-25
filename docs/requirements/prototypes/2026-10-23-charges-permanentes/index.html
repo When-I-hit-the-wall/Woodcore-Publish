@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Charges permanentes v3</title>
+<style>
+/* The page: a reading column, and inside it a wide mock of the Woodcore window, three panes. Colours are Woodcore's theme.json tokens, light and dark. */
+:root{
+  --bg:#ffffff; --bg-soft:#f5f6f9; --bg-sunk:#eef0f4; --ink:#17161d; --ink-soft:#3d3c48; --muted:#6a6977;
+  --line:#e3e5eb; --line-strong:#cfd3dc; --accent:#239dad; --accent-strong:#1a7e8b; --accent-soft:#e3f4f6;
+  --wood:#d4944f; --wood-soft:#fbf1e6; --ok:#1b7a3a; --ok-soft:#e7f5ec; --bad:#b42318; --bad-soft:#fdecea; --warn:#b35c00; --warn-soft:#fff3e6;
+  --card:#ffffff; --paper:#fffdf8; --hov:#d7e9fb; --hov-ink:#0e2238; --shadow:0 1px 2px rgba(23,22,29,.06),0 8px 24px rgba(23,22,29,.08);
+  --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; --mono:"JetBrains Mono","Cascadia Mono",ui-monospace,Consolas,Menlo,monospace;
+  --veil:rgba(17,17,23,.45);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111117; --bg-soft:#17171f; --bg-sunk:#1d1d27; --ink:#ececf1; --ink-soft:#cfcfd8; --muted:#9a99a8;
+  --line:#2a2a36; --line-strong:#3a3a48; --accent:#3cbccd; --accent-strong:#5fd0de; --accent-soft:#10323a;
+  --wood:#e0a768; --wood-soft:#2d2217; --ok:#6fd08c; --ok-soft:#163222; --bad:#ff8a7a; --bad-soft:#3a1c18; --warn:#f0a050; --warn-soft:#33240f;
+  --card:#1d1d27; --paper:#25231d; --hov:#27486f; --hov-ink:#f2f7ff; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.4); --veil:rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111117; --bg-soft:#17171f; --bg-sunk:#1d1d27; --ink:#ececf1; --ink-soft:#cfcfd8; --muted:#9a99a8;
+  --line:#2a2a36; --line-strong:#3a3a48; --accent:#3cbccd; --accent-strong:#5fd0de; --accent-soft:#10323a;
+  --wood:#e0a768; --wood-soft:#2d2217; --ok:#6fd08c; --ok-soft:#163222; --bad:#ff8a7a; --bad-soft:#3a1c18; --warn:#f0a050; --warn-soft:#33240f;
+  --card:#1d1d27; --paper:#25231d; --hov:#27486f; --hov-ink:#f2f7ff; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.4); --veil:rgba(0,0,0,.6); color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;padding:0 16px 64px}
+.page{max-width:1480px;margin:0 auto}
+.read{max-width:1000px;margin:0 auto}
+header.top{padding:36px 0 18px;border-bottom:1px solid var(--line);max-width:1000px;margin:0 auto}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-strong);font-weight:600}
+h1{font-size:34px;line-height:1.15;margin:8px 0 12px;letter-spacing:-.01em}
+h2{font-size:24px;margin:48px 0 10px}
+h3{font-size:18px;margin:24px 0 6px}
+p{margin:0 0 12px;max-width:72ch}
+.lede{font-size:17px;color:var(--ink-soft)}
+.muted{color:var(--muted)}
+.small{font-size:13.5px}
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:var(--bg-sunk);padding:1px 5px;border-radius:4px}
+ul.kept{margin:8px 0 0;padding-left:20px}
+ul.kept li{margin:0 0 5px;max-width:80ch}
+.tblr{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+.tblr th,.tblr td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+.tblr th{font-size:12px;color:var(--muted);font-weight:600}
+.tblr td ul{margin:0;padding-left:18px}
+.scrollx{overflow-x:auto}
+.reco{border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:12px;padding:14px 16px;margin-top:14px}
+.reco p{margin:0;max-width:none}
+.q{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px;background:var(--card)}
+.q ol{margin:6px 0 0;padding-left:20px}
+.find{border-left:3px solid var(--warn);background:var(--warn-soft);border-radius:0 8px 8px 0;padding:10px 14px;margin:10px 0}
+.find p{margin:0;max-width:none}
+.figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:10px}
+.figs figure{margin:0;border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff}
+.figs img{width:100%;height:auto;display:block}
+.figs figcaption{font-size:12.5px;color:#555;margin-top:4px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---- the controls above the window ---- */
+.ctl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:22px 0 10px;font-size:13.5px}
+.ctl .grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.chipb{border:1px solid var(--line-strong);background:var(--card);color:var(--ink);border-radius:999px;padding:3px 11px;font:inherit;font-size:13px;cursor:pointer}
+.chipb.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-strong);font-weight:600}
+.help{font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 16px;margin-bottom:8px}
+kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line-strong);border-radius:4px;padding:0 4px;background:var(--bg-soft)}
+
+/* ---- the window ---- */
+.win{border:1px solid var(--line-strong);border-radius:12px;background:var(--bg-soft);box-shadow:var(--shadow);overflow:hidden}
+.wbar{display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid var(--line);background:var(--bg-sunk);font-size:12.5px}
+.wbar b{font-weight:600}
+.wbar .tabs{display:flex;gap:2px;margin-left:12px}
+.wbar .tabs span{padding:3px 10px;border-radius:6px;color:var(--muted)}
+.wbar .tabs span.on{background:var(--card);color:var(--ink);font-weight:600;border:1px solid var(--line)}
+.ro{margin-left:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.ui{display:grid;grid-template-columns:350px minmax(0,1fr) 360px;gap:8px;padding:8px;height:860px;font-size:13px;line-height:1.4}
+@media (max-width:1180px){.ui{grid-template-columns:300px minmax(0,1fr);height:auto}.ui .right{grid-column:1 / -1}}
+@media (max-width:760px){.ui{grid-template-columns:1fr}}
+.pane{background:var(--card);border:1px solid var(--line);border-radius:10px;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.pane>.ph{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);font-weight:600}
+.pane>.pb{overflow:auto;flex:1;padding:6px 8px 10px}
+.right{background:transparent;border:0;overflow:auto;gap:8px;display:flex;flex-direction:column}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-left:1px solid var(--line-strong);background:var(--card);color:var(--ink-soft);font:inherit;font-size:12px;padding:3px 9px;cursor:pointer}
+.seg button:first-child{border-left:0}
+.seg button.on{background:var(--accent-soft);color:var(--accent-strong);font-weight:600}
+
+/* the list of the left pane */
+.lhead{display:grid;grid-template-columns:minmax(0,1fr) 86px 58px;gap:6px;font-size:11px;color:var(--muted);padding:4px 6px 4px 22px;border-bottom:1px solid var(--line);font-weight:600}
+.lgrp{border-bottom:1px solid var(--line)}
+.lg{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:6px;align-items:center;padding:6px 6px;cursor:pointer;border-radius:6px}
+.lg:hover,.lr:hover,.lg.hov,.lr.hov{background:var(--hov);color:var(--hov-ink)}
+.lg.sel{background:var(--accent-soft)}
+.lg .car{color:var(--muted);font-size:10px}
+.lg .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg .nm b{font-weight:600}
+.lg .nm span{color:var(--muted);font-size:12px}
+.lr{display:grid;grid-template-columns:minmax(0,1fr) 86px 58px;gap:6px;align-items:center;padding:4px 6px 4px 22px;cursor:pointer;border-radius:6px}
+.lr.sel{background:var(--accent-soft)}
+.lr .id{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr .id code{background:none;padding:0;font-size:11.5px;color:var(--ink-soft);margin-right:4px}
+.lr .tb{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rate{font-family:var(--mono);font-size:12px;text-align:right;white-space:nowrap;font-weight:600}
+.rate.ok{color:var(--ok)} .rate.bad{color:var(--bad)} .rate.none{color:var(--muted);font-weight:400}
+.pill{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.none{background:var(--bg-sunk);color:var(--muted);font-weight:400}
+.empty{color:var(--muted);font-style:italic;padding:4px 6px 6px 22px;font-size:12px}
+
+/* the centre: the group's card, then one accordion per check */
+.gcard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg-soft);margin-bottom:8px}
+.gcard .t{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.gcard .t b{font-size:16px}
+.gcard .facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.fact{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:1px 8px;font-size:12px}
+.gcard .sum{margin-top:6px;font-size:12.5px;color:var(--ink-soft)}
+.lock{font-size:11.5px;color:var(--muted);margin-top:4px}
+.acc{border:1px solid var(--line);border-radius:10px;background:var(--card);margin-bottom:6px}
+.flash{animation:fl 1.2s ease 2}
+@keyframes fl{50%{box-shadow:0 0 0 3px var(--accent)}}
+.ah{display:grid;grid-template-columns:14px minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:7px 10px;cursor:pointer;border-radius:10px}
+.ah:hover,.acc.hov>.ah{background:var(--hov);color:var(--hov-ink)}
+.ah .car{color:var(--muted);font-size:10px}
+.ah .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ah .nm code{background:none;padding:0;font-size:12px;color:var(--muted);margin-left:6px}
+.ah .tbc{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.ah .eqn{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.go{border:1px solid var(--line-strong);background:var(--card);color:var(--accent-strong);border-radius:6px;font:inherit;font-size:11.5px;padding:2px 8px;cursor:pointer;white-space:nowrap}
+.go:hover{border-color:var(--accent)}
+.ab{border-top:1px solid var(--line);padding:8px 12px 10px}
+.ab .lab{font-size:12px;color:var(--muted);margin-bottom:6px}
+.rt{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.rt td{padding:3px 4px;border-bottom:1px solid var(--line);vertical-align:baseline}
+.rt td.s{white-space:nowrap;width:1%}
+.rt td.f{color:var(--ink-soft);font-size:12px}
+.rt td.f .n{color:var(--muted)}
+.rt td.v{text-align:right;white-space:nowrap;width:1%}
+.rt td.c{width:1%;white-space:nowrap;text-align:right}
+.rt tr.gov td{background:var(--accent-soft)}
+.rt tr.hov td{background:var(--hov);color:var(--hov-ink)}
+.cref{font-family:var(--mono);font-size:10.5px;color:var(--accent-strong);background:var(--accent-soft);padding:1px 6px;border-radius:4px;white-space:nowrap;border:0;cursor:pointer}
+.cref.plain{cursor:default;background:var(--bg-sunk);color:var(--muted)}
+.ib{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1.3px solid var(--accent);color:var(--accent-strong);font:600 10px/1 var(--font);cursor:pointer;margin-left:4px;vertical-align:-2px;background:transparent;padding:0}
+.ib.on{background:var(--accent);color:var(--card)}
+.verdict{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;padding:7px 10px;border-radius:8px;font-weight:600}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.bad{background:var(--bad-soft);color:var(--bad)}
+.verdict small{font-weight:400;color:var(--ink-soft)}
+.figrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,420px));gap:8px;margin-top:10px}
+.figc{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--card)}
+.figc .fh{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:4px}
+.figc .fh b{color:var(--ink);font-weight:600}
+.figc img{width:100%;height:auto;display:block;background:#fff;border-radius:4px}
+.figc svg{display:block;width:100%;height:auto}
+.fnote{font-size:11.5px;color:var(--muted);margin-top:3px}
+svg text{font-family:var(--font)}
+.ax{stroke:var(--line-strong);stroke-width:1}
+.gr{stroke:var(--line);stroke-width:1}
+.tk{fill:var(--muted);font-size:10px}
+.cv{fill:none;stroke:var(--ink);stroke-width:1.6}
+.cv2{fill:none;stroke:var(--muted);stroke-width:1.3;stroke-dasharray:5 3}
+.zone{fill:var(--ok-soft)}
+.pt{stroke:var(--card);stroke-width:2}
+.pt.ok{fill:var(--ok)} .pt.bad{fill:var(--bad)} .pt.min{fill:var(--muted)}
+.pl{font-size:11px;font-weight:700}
+.cur{stroke:var(--accent);stroke-width:1;stroke-dasharray:3 3}
+.tip{font-size:11px;fill:var(--accent-strong);font-weight:600}
+
+/* the modules of the right pane */
+.mod{background:var(--card);border:1px solid var(--line);border-radius:10px}
+.mod.drag{opacity:.4}
+.mod.over{box-shadow:0 -3px 0 var(--accent)}
+.mh{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:grab;user-select:none}
+.mh b{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mh .sumr{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.mh button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;padding:0 3px}
+.mb{border-top:1px solid var(--line);padding:8px 10px 10px}
+.st{display:grid;grid-template-columns:16px minmax(0,1fr);gap:6px;padding:5px 7px;border-radius:7px;border:1px solid var(--line);margin-bottom:5px;cursor:pointer;font-size:12.5px}
+.st .ic{font-weight:700;text-align:center}
+.st.red{border-color:var(--bad);background:var(--bad-soft)} .st.red .ic{color:var(--bad)}
+.st.orange{border-color:var(--warn);background:var(--warn-soft)} .st.orange .ic{color:var(--warn)}
+.st.green{border-color:var(--ok);background:var(--ok-soft);cursor:default} .st.green .ic{color:var(--ok)}
+.step{border:1px solid var(--line);border-radius:7px;margin-bottom:4px}
+.step .sh{display:grid;grid-template-columns:12px minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:4px 7px;cursor:pointer}
+.step .sh:hover,.step.hov .sh{background:var(--hov);color:var(--hov-ink);border-radius:7px}
+.step .sh .car{color:var(--muted);font-size:9px}
+.step .sh .v{font-family:var(--mono);font-size:12px;white-space:nowrap}
+.step .sd{padding:2px 9px 7px 25px;font-size:12px;color:var(--ink-soft)}
+.step .sd .n{color:var(--muted)}
+.step.gov{border-color:var(--accent)}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:4px 6px;border-radius:6px;cursor:pointer}
+.prow:hover,.prow.hov{background:var(--hov);color:var(--hov-ink)}
+.prow .gv{font-size:10.5px;color:var(--accent-strong);border:1px solid var(--accent);border-radius:4px;padding:0 4px}
+.ext{margin-bottom:8px}
+.ext .eh{font-size:12px;color:var(--muted);margin-bottom:3px}
+.ext .tx{font-size:12px;color:var(--ink-soft);margin-bottom:5px}
+.ext img{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--line);border-radius:4px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:13.5px;z-index:90;box-shadow:var(--shadow);max-width:90vw}
+
+/* the bubble of the norm, and Woodcore's PDF reader */
+.pop{position:fixed;z-index:80;width:400px;max-width:calc(100vw - 24px);background:var(--card);border:1px solid var(--line-strong);border-radius:10px;box-shadow:var(--shadow);padding:10px 12px;overflow:auto}
+.pop .ph2{display:flex;gap:8px;align-items:baseline;margin-bottom:6px}
+.pop .ph2 b{font-size:13px}
+.pop .ph2 span{font-size:11.5px;color:var(--muted)}
+.pop .tx{font-size:12.5px;color:var(--ink-soft);margin-bottom:8px}
+.pop img{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--line);border-radius:4px}
+.pop .ft{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted);margin-top:6px}
+.reader{position:fixed;inset:0;z-index:85;background:var(--veil);display:flex;align-items:center;justify-content:center}
+.reader .rw{width:min(900px,94vw);height:90vh;background:var(--card);border-radius:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.reader .rt2{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.reader .rt2 b{flex:1}
+.reader .rb{overflow:auto;flex:1;background:var(--bg-sunk);padding:12px}
+.reader .pg{position:relative;margin:0 auto 12px;width:100%;max-width:820px;background:#fff;box-shadow:var(--shadow)}
+.reader .pg img{width:100%;display:block}
+.reader .frame{position:absolute;border:2.5px solid #e67e22;border-radius:3px;box-shadow:0 0 0 2000px rgba(0,0,0,.08)}
+.reader button{border:1px solid var(--line-strong);background:var(--card);color:var(--ink);border-radius:6px;padding:2px 10px;cursor:pointer;font:inherit}
+/* ---- the permanent loads, second version ---- */
+:root{--f-tile:#c97b58;--f-wood:#e6bf86;--f-board:#c79f72;--f-ins:#f2da72;--f-gyps:#d8dbe1;--f-memb:#7d8a9b;--f-direct:#b9c7d6;--f-conc:#b9b9b2;--f-metal:#9aa2ad;--f-floor:#c9a98b;--f-fill:#d9cdb4;--edge:#6b5a48}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--f-tile:#9c5639;--f-wood:#8c6a3e;--f-board:#765a3b;--f-ins:#7a6a28;--f-gyps:#4c5059;--f-memb:#8f9db0;--f-direct:#3b4a5c;--f-conc:#5a5a55;--f-metal:#5d6570;--f-floor:#6e5a48;--f-fill:#5e5646;--edge:#d6c3a6}}
+:root[data-theme="dark"]{--f-tile:#9c5639;--f-wood:#8c6a3e;--f-board:#765a3b;--f-ins:#7a6a28;--f-gyps:#4c5059;--f-memb:#8f9db0;--f-direct:#3b4a5c;--f-conc:#5a5a55;--f-metal:#5d6570;--f-floor:#6e5a48;--f-fill:#5e5646;--edge:#d6c3a6}
+.ui{grid-template-columns:240px minmax(0,1fr) 420px;height:880px}
+@media (max-width:1180px){.ui{grid-template-columns:220px minmax(0,1fr);height:auto}.ui .right{grid-column:1 / -1}}
+@media (max-width:760px){.ui{grid-template-columns:1fr}}
+.li,.lo{display:flex;justify-content:space-between;gap:8px;padding:5px 7px;border-radius:6px;cursor:pointer}
+.li code{background:none;padding:0;font-size:11px;color:var(--muted);margin-right:5px}
+.li:hover,.lo:hover{background:var(--hov);color:var(--hov-ink)}
+.li.sel,.lo.sel{background:var(--accent-soft)}
+.lo{font-weight:600;border-bottom:1px solid var(--line);border-radius:6px 6px 0 0;margin-bottom:4px}
+.num{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.num.bad{color:var(--bad)}
+.pane>.pf{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line)}
+.btn{border:1px solid var(--line-strong);background:var(--card);color:var(--ink);border-radius:6px;font:inherit;font-size:12.5px;padding:3px 10px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent)} .btn[disabled]{opacity:.5;cursor:default}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.inp{border:1px solid var(--line-strong);background:var(--card);color:var(--ink);border-radius:6px;font:inherit;font-size:12.5px;padding:2px 6px;min-width:0}
+.inp:focus{outline:2px solid var(--accent);outline-offset:0}
+.inp.nm{font-size:14.5px;font-weight:600;flex:1}
+.inp.num{width:74px;text-align:right}
+.inp.wide{width:100%}
+.inp[disabled]{background:var(--bg-sunk);color:var(--accent-strong);font-weight:600}
+.idc{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line-strong);border-radius:999px;padding:0 7px;color:var(--ink-soft)}
+/* the table of layers: one line per layer, as dense as a spreadsheet */
+.lt{width:100%;border-collapse:collapse;font-size:12.5px}
+.lt th{font-size:10.5px;color:var(--muted);font-weight:600;text-align:left;padding:3px 4px;border-bottom:1px solid var(--line-strong);white-space:nowrap}
+.lt td{padding:0 4px;height:25px;border-bottom:1px solid var(--line);white-space:nowrap}
+.lt .r{text-align:right} .lt .c{text-align:center}
+.lt td.g{color:var(--muted);font-size:9px;letter-spacing:-1px;cursor:grab;width:12px} .lt td.n{width:18px;color:var(--muted);font-family:var(--mono);font-size:11px}
+.lt td.lk{width:12px;padding:0;position:relative} .lt td.sw{width:16px} .lt td.x{width:16px}
+.lt td.mc{width:auto;min-width:160px}
+.lt tr.ly{cursor:pointer}
+.lt tr.ly:hover td{background:var(--hov);color:var(--hov-ink)}
+.lt tr.open td{background:var(--accent-soft)}
+.lt tr.open td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.lt tr.bad td.mc input{color:var(--bad)}
+.lt tr.over td{box-shadow:inset 0 2px 0 var(--accent)}
+.lt tr.flash td{animation:fl 1.2s ease 2}
+.cell{border:0;background:transparent;font:inherit;color:inherit;width:100%;padding:3px 2px;border-radius:4px}
+.cell:focus{outline:1.5px solid var(--accent);background:var(--card)}
+.swb{display:inline-block;width:13px;height:13px;border-radius:3px;border:1px solid var(--edge);vertical-align:-2px;flex:none}
+.f-wood{background:var(--f-wood)} .f-board{background:var(--f-board)} .f-ins{background:var(--f-ins)} .f-tile{background:var(--f-tile)} .f-memb{background:var(--f-memb)} .f-gyps{background:var(--f-gyps)} .f-conc{background:var(--f-conc)} .f-metal{background:var(--f-metal)} .f-floor{background:var(--f-floor)} .f-fill{background:var(--f-fill)} .f-direct{background:var(--f-direct)} .f-none{background:var(--bg-sunk);border-style:dashed}
+.ga{font-family:var(--mono);font-size:11px;font-weight:600;padding:0 5px;border-radius:4px}
+.ga.g{background:var(--wood-soft);color:var(--wood)} .ga.a{background:var(--accent-soft);color:var(--accent-strong)}
+/* a value replaced by hand: a small orange line, in the window only */
+.ovr{box-shadow:inset 3px 0 0 var(--warn)}
+td.ovr{color:var(--warn)}
+/* the bracket that joins lines on the same level */
+.br{position:absolute;left:3px;width:6px;border-left:2px solid var(--accent);top:0;bottom:0}
+.br.top{top:50%;border-top:2px solid var(--accent);border-radius:3px 0 0 0}
+.br.bot{bottom:50%;border-bottom:2px solid var(--accent);border-radius:0 0 0 3px}
+.lt tr.grp td{background:linear-gradient(var(--bg-soft),var(--bg-soft))}
+.lt tr.grp.open td{background:var(--accent-soft)}
+.del{border:0;background:none;color:var(--muted);cursor:pointer;opacity:0;font-size:13px}
+tr.ly:hover .del{opacity:1}
+.lt tfoot td{border-bottom:0;height:24px}
+.lt.ov td{height:40px}
+.row{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;padding:1px 7px;border-radius:999px}
+.chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.bad{background:var(--bad-soft);color:var(--bad)}
+/* the right pane */
+.mh .seg.sm button{font-size:11px;padding:1px 7px}
+.ico{border:1px solid var(--line-strong);background:var(--card);color:var(--ink);border-radius:5px;cursor:pointer;font-size:12px;padding:0 6px;line-height:20px}
+.st.info{border-color:var(--line)} .st.info .ic{color:var(--accent-strong)}
+.ol{display:flex;align-items:center;gap:6px;margin-bottom:7px;flex-wrap:wrap}
+.ol .lab{font-size:11.5px;color:var(--muted);min-width:78px}
+.ol .u{font-size:11.5px;color:var(--muted)}
+.ol.ldl{padding:4px 6px;border-radius:6px;background:var(--bg-soft)}
+.mcard{display:flex;align-items:center;gap:8px}
+.mcard small{display:block;color:var(--muted);font-size:11px}
+.srct{font-size:10px;font-weight:700;letter-spacing:.02em;padding:0 6px;border-radius:4px;border:1px solid var(--line-strong);color:var(--ink-soft);white-space:nowrap;margin-left:auto}
+.srct.sia{border-color:var(--accent);color:var(--accent-strong)} .srct.ext{border-color:var(--line-strong);color:var(--muted)} .srct.perso{border-color:var(--wood);color:var(--wood)}
+.mfil{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0}
+.mfil.fams .chipb{display:inline-flex;gap:4px;align-items:center;font-size:11px;padding:1px 7px}
+.mlist{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:6px;margin-bottom:5px}
+.mi{display:grid;grid-template-columns:14px minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:3px 6px;cursor:pointer;font-size:12px}
+.mi .mn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mi:hover,.mi.on{background:var(--accent-soft)}
+.np{border:1px dashed var(--line-strong);border-radius:6px;padding:6px;margin-top:5px;display:flex;flex-direction:column;gap:5px}
+.seg.poses button{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 6px;color:var(--ink)}
+.vb{width:20px;height:20px;border:1px solid var(--line-strong);border-radius:5px;background:var(--bg-soft);color:var(--accent-strong);font:italic 600 11.5px/1 Georgia,serif;cursor:pointer;padding:0}
+.vb.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer}
+.chk input{accent-color:var(--accent)}
+.vmenu{position:fixed;z-index:95;background:var(--card);border:1px solid var(--line-strong);border-radius:8px;box-shadow:var(--shadow);padding:8px;min-width:280px;font-size:12.5px}
+.vmenu button{display:flex;justify-content:space-between;gap:12px;width:100%;border:0;background:transparent;color:var(--ink);font:inherit;padding:4px 6px;border-radius:5px;cursor:pointer;text-align:left}
+.vmenu button:hover{background:var(--hov);color:var(--hov-ink)}
+/* the results: one line, one size, no bubbles */
+.resl{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;font-size:12.5px}
+.resl b{font-weight:600}
+.resl .ret{display:inline-flex;align-items:center;gap:5px;padding-left:6px}
+.resl .rin{width:56px}
+.resl a{font-size:11.5px}
+/* the section */
+.figbox{color:var(--ink);overflow:hidden}
+svg.sec{display:block;max-width:100%;height:auto;font-family:var(--font)}
+svg.sec .be{stroke:var(--edge);stroke-width:.7}
+svg.sec .air{stroke-dasharray:3 3;stroke-width:.5}
+svg.sec .hl{stroke:var(--edge);stroke-width:.55;fill:none;opacity:.6}
+svg.sec .hd{fill:var(--edge);opacity:.5}
+svg.sec .dm{stroke:var(--muted);stroke-width:.8}
+svg.sec .frame{fill:none;stroke:var(--edge);stroke-width:1}
+svg.sec .sel{fill:none;stroke:var(--accent);stroke-width:2.4}
+svg.sec .tm{fill:var(--muted)} svg.sec .tm.ov{fill:var(--warn)}
+svg.sec .tx{fill:var(--ink);cursor:pointer} svg.sec .tx.b{font-weight:700;fill:var(--accent-strong)}
+svg.sec .ld{fill:none;stroke:var(--muted);stroke-width:.6}
+svg.sec .bandg{cursor:pointer}
+svg.mini .be{stroke:var(--edge);stroke-width:.5}
+.ctbs{display:grid;grid-template-columns:1fr;gap:10px}
+.ctbs.big{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.cth{display:flex;justify-content:space-between;border-bottom:1px solid var(--line-strong);padding-bottom:2px;margin-bottom:3px;font-size:12px}
+.crow{display:grid;grid-template-columns:14px minmax(0,1fr) 54px auto 46px;gap:6px;align-items:center;font-size:11.5px;padding:1px 3px;border-radius:4px;cursor:pointer}
+.crow.on{background:var(--accent-soft)}
+.crow .cn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow .cb{height:7px;background:var(--bg-sunk);border-radius:3px;overflow:hidden}
+.crow .cb i{display:block;height:100%;background:var(--accent)}
+.crow .num{text-align:right;font-size:11px}
+/* the pop-up and the templates */
+.popfig,.tpl{position:fixed;inset:0;z-index:85;background:var(--veil);display:flex;align-items:center;justify-content:center}
+.popfig .pw{width:min(1180px,94vw);max-height:92vh;background:var(--card);border-radius:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;resize:horizontal;min-width:340px}
+.popfig .ph,.tpl .ph{display:flex;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.popfig .pb{overflow:auto;padding:14px;color:var(--ink)}
+.tpl .tw{width:min(1100px,94vw);max-height:90vh;overflow:auto;background:var(--card);border-radius:12px;box-shadow:var(--shadow);font-size:12.5px}
+.tg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;padding:12px}
+.tc{border:1px solid var(--line);border-radius:9px;padding:8px;display:flex;flex-direction:column;gap:4px;cursor:pointer}
+.tc.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.tc small{font-size:11px;color:var(--ink-soft)} .tc small.muted{color:var(--muted)}
+.tc svg{width:100%;height:auto}
+.ac{position:fixed;z-index:90;background:var(--card);border:1px solid var(--line-strong);border-radius:8px;box-shadow:var(--shadow);padding:3px;max-height:260px;overflow:auto}
+/* the reading part */
+.poses-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:10px}
+.poses-g figure{margin:0;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card);color:var(--ink)}
+.poses-g figure svg{display:block;width:100%;height:auto}
+.poses-g figcaption{font-size:13px;margin-top:6px}
+.poses-g figcaption b{display:block}
+.poses-g .new{border-style:dashed}
+
+.mfil .chipb{font-size:11px;padding:0 8px;line-height:18px}
+.mfil.fams{flex-wrap:nowrap;overflow-x:auto;padding-bottom:3px}
+.mfil.fams .chipb{flex:none}
+.mlist{max-height:132px}
+.seg.poses{flex-wrap:wrap}
+.seg.poses button{white-space:nowrap}
+.mcard b{font-size:12.5px}
+/* ---- version 3 ---- */
+.ovb{display:block;width:100%;text-align:left;border:1px solid var(--line-strong);background:var(--bg-soft);color:var(--ink);border-radius:7px;font:inherit;font-weight:600;padding:5px 8px;margin-bottom:6px;cursor:pointer}
+.ovb:hover{border-color:var(--accent)} .ovb.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-strong)}
+.num.ov,.ovt,svg.sec .tm.ov{color:var(--warn) !important;fill:var(--warn)}
+.cell.num{text-align:right;font-family:var(--mono);font-size:12px;width:62px}
+.lt td.r .cell{width:62px}
+.cell[disabled]{color:var(--muted);background:transparent}
+.cell.auto{font-style:italic;color:var(--accent-strong)}
+.lt td{padding:0 3px}
+.ga{cursor:pointer;user-select:none}
+.ga:focus{outline:1.5px solid var(--accent);outline-offset:1px}
+.empty-zone{min-height:340px}
+.rst{border:1px solid var(--warn);background:var(--card);color:var(--warn);border-radius:5px;font:inherit;font-size:11px;padding:0 6px;margin-left:4px;cursor:pointer}
+.ol.top{align-items:flex-start} .ol.top .lab{padding-top:3px}
+.num.auto{font-style:italic;color:var(--accent-strong)}
+.vbar{display:flex;align-items:center;gap:12px;padding:8px 10px 0}
+.vsw{display:inline-flex;border:1px solid var(--line-strong);border-radius:7px;overflow:hidden;background:var(--card)}
+.vsw button{font:inherit;font-size:12.5px;border:0;background:transparent;color:var(--ink-soft);padding:5px 16px;cursor:pointer}
+.vsw button.on{background:var(--ink);color:var(--bg);font-weight:600}
+.vnote{font-size:12px;color:var(--muted)}
+.paperw{max-width:720px}
+.paper{background:#fff;color:#111;border:1px solid var(--line);border-radius:4px;padding:22px 28px;font-family:"Libertinus Serif","Linux Libertine",Georgia,serif;font-size:13.5px;box-shadow:var(--shadow)}
+.paper h4{font-size:15px;margin:0 0 12px;font-family:var(--font)}
+.ptab{border-collapse:collapse;width:100%;font-size:12.5px;margin-bottom:4px}
+.ptab th{border-bottom:1px solid #111;font-weight:600;text-align:left;padding:2px 5px}
+.ptab td{padding:1.5px 5px;border-bottom:.5px solid #ddd}
+.ptab .r{text-align:right}
+.ptab tfoot td{border-bottom:0}
+.pnote{font-size:11.5px;color:#444;margin:2px 0 12px}
+.pfig{margin:8px 0 12px;--ink:#111;--muted:#555;--card:#fff;--edge:#555;--accent:#555;--accent-strong:#111;color:#111}
+.pfig svg{width:100%;height:auto}
+.pcap{font-size:11.5px;color:#444;text-align:center}
+.pval{margin:2px 0}
+.pval.b{font-weight:700;margin-top:6px}
+.erow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+pre.typ{font-family:var(--mono);font-size:10.5px;white-space:pre-wrap;word-break:break-word;background:var(--bg-sunk);border-radius:6px;padding:8px;margin:0}
+
+</style>
+</head>
+<body>
+<div class="page">
+<header class="top">
+  <div class="eyebrow">Woodcore · onglet « Poids propre et surcharge » · troisième version · SIA 261:2020, annexe A</div>
+  <h1>Charges permanentes, troisième version</h1>
+  <p class="lede">La deuxième version avec toutes vos remarques. On saisit au clavier, d'une cellule à l'autre avec Tab. La coupe est à sa vraie proportion, 1 m de large. La ligne liée remplit la largeur restante. Une charge remplacée s'écrit en orange et se rétablit depuis les avertissements. La vue Affichage montre ce que le rapport imprime. Les matériaux viennent de la bibliothèque de Woodcore, qui a son propre onglet et son propre artefact ; on ne les crée plus ici.</p>
+  <ul class="kept">
+    <li><b>Au clavier</b> : clic sur une ligne, le nom du matériau est sélectionné, on tape par-dessus. La bibliothèque propose, catégories comprises (« isolation », « étanchéité », « béton », « acier »…). Entrée ou Tab choisit le matériau, puis Tab passe à l'épaisseur, l'entraxe, la largeur, g ou a (↑ ↓ pour changer) et les kN/m².</li>
+    <li><b>Une charge écrasée</b> dans la colonne kN/m² s'écrit en orange au centre. L'avertissement orange, avec son bouton « Rétablir », est en haut à droite. La valeur retenue suit la même règle.</li>
+    <li><b>Échap ou un clic dans le vide</b> sous les couches ferme la ligne ouverte, et ses options quittent le volet droit. La composition reste ouverte ; la vue d'ensemble est le bouton en haut de la liste.</li>
+    <li><b>« Lier à la ligne du dessous »</b> crée la ligne si elle n'existe pas, le curseur dans son matériau. La ligne liée « remplit » : sa largeur sur 1 m est ce que laissent les pièces (deux carrelets de 100 tous les 500 laissent 800 mm). Décochez « Remplir » pour écrire la vôtre.</li>
+    <li><b>Les poses</b> du volet droit sont continue, à entraxe et par surface. La charge saisie ne se crée qu'au centre, par « + Charge saisie ».</li>
+    <li><b>Affichage</b> : la barre au-dessus de la fenêtre passe de Calcul à Affichage, comme pour la neige et le vent.</li>
+  </ul>
+</header>
+
+<div class="ctl">
+  <div class="grp"><span class="muted">Langue de la fenêtre</span><button class="chipb on" data-lang="fr">FR</button><button class="chipb" data-lang="de">DE</button><button class="chipb" data-lang="en">EN</button></div>
+</div>
+<div class="help"><span><b>Taper</b> : la bibliothèque propose, <kbd>↑</kbd><kbd>↓</kbd> <kbd>Entrée</kbd></span><span><kbd>Tab</kbd> : cellule suivante</span><span><kbd>Échap</kbd> ou clic dans le vide : fermer la ligne</span><span><b>Glisser</b> ⋮⋮ : déplacer</span><span><b>⤢</b> : la coupe en grand</span></div>
+
+<div class="win"><div class="vbar"><span class="vsw"><button type="button" data-mode="calc" class="on">Calcul</button><button type="button" data-mode="disp">Affichage</button></span><span class="vnote">Le même onglet, deux vues.</span></div>
+  <div class="wbar"><b>Woodcore</b><span class="muted">Projet d'exemple</span><div class="tabs" id="tabs"></div></div>
+  <div class="ui">
+    <div class="pane"><div class="ph"><span id="lt" style="flex:1"></span></div><div class="pb" id="left"></div><div class="pf" id="leftBtns"></div></div>
+    <div class="pane"><div class="pb" id="centre" style="padding:10px"></div></div>
+    <div class="right" id="right"></div>
+  </div>
+</div>
+
+<div class="read">
+<h2>Vos remarques sur la deuxième version, et ce que celle-ci en fait</h2>
+<div class="scrollx"><table class="tblr">
+<tr><th>Remarque</th><th>Dans cette version</th></tr>
+<tr><td>Un onglet Matériaux, en bas de la liste des onglets : la bibliothèque de tout Woodcore, pour un ordinateur, avec les barres, les panneaux, leurs résistances, le poids, un commentaire et une source.</td><td>Son propre artefact, <a href="https://claude.ai/artifact/AU4GedhBHSR96S4rtEHqM1" target="_blank" rel="noopener">« Onglet Matériaux »</a>, avec trois dispositions à comparer. Ici, le choix d'un matériau lit cette bibliothèque. « + Nouveau matériau personnel » a disparu : un lien mène à l'onglet Matériaux.</td></tr>
+<tr><td>Le dessin du volet droit est trop étiré : 1 m de large doit être à l'échelle de ses 311,5 mm de haut.</td><td>La coupe est à sa vraie proportion : 1000 mm de large, coté sous le dessin, les hauteurs à la même échelle. Une couche sans épaisseur (tuiles en kN/m², lés) reste visible par un trait.</td></tr>
+<tr><td>Échap, ou un clic dans le vide du centre, ferme la ligne sans quitter la composition, et ses options disparaissent à droite. La vue d'ensemble était introuvable.</td><td>Fait. La vue d'ensemble est un bouton en tête de la liste des compositions.</td></tr>
+<tr><td>La recherche d'un matériau cherche aussi dans les catégories.</td><td>« isolation », « étanchéité », « béton », « acier », « bois »… trouvent toute la catégorie, en FR, DE et EN. Chaque proposition dit sa catégorie.</td></tr>
+<tr><td>Un clic sur une ligne sélectionne tout le nom du matériau : ce qu'on tape le remplace.</td><td>Fait.</td></tr>
+<tr><td>La pose du volet droit ne propose pas « charge saisie ».</td><td>Continue, à entraxe, par surface. La charge saisie ne se crée qu'au centre.</td></tr>
+<tr><td>Au centre, Tab va du matériau à l'épaisseur, l'entraxe, la largeur, g/a (↑ ↓) et les kN/m², que l'on peut écraser. La valeur écrasée est orange au centre ; l'avertissement orange et son bouton « Rétablir » sont en haut à droite, jamais dans l'export.</td><td>Fait, et de même pour la valeur retenue. Entrée ou Tab dans la liste des matériaux choisit et passe à l'épaisseur. Une cellule qui ne sert pas à la pose de la ligne est grisée, et Tab la saute.</td></tr>
+<tr><td>« Lier à la ligne du dessous » sur la dernière ligne crée la ligne suivante, le curseur dans son matériau.</td><td>Fait.</td></tr>
+<tr><td>La ligne liée a l'option « Remplir », cochée par défaut : sur 1 m, elle remplit le vide autour des pièces (deux carrelets de 100 tous les 500 laissent 800 mm). Décochée, on écrit sa largeur.</td><td>Fait. La largeur calculée s'écrit en italique dans la colonne Largeur ; décochée, la cellule s'écrit.</td></tr>
+<tr><td>Le mode Affichage manque.</td><td>La barre Calcul | Affichage au-dessus de la fenêtre. Au centre, la page telle que le rapport l'imprime ; à droite, le niveau, les éléments (auto, toujours, jamais) et le fichier écrit pour Typst.</td></tr>
+</table></div>
+
+<h2>« Remplir » change la somme</h2>
+<p>La deuxième version comptait la ligne liée sur toute la largeur, comme le classeur Belastungsannahmen et comme <code>dead_load_source</code> aujourd'hui (votre réponse 5). « Remplir », coché par défaut, la compte sur la largeur que laissent les pièces. Pour AU-01, la laine de roche entre les chevrons 60/200 e = 625 passe de 0,076 à 0,069 kN/m², et la somme de 0,916 à 0,909 kN/m². La valeur retenue reste 1,0.</p>
+<div class="find"><p><b>Une composition saisie dans le classeur et recopiée dans Woodcore ne donne plus la même somme</b>, de l'épaisseur de bois près. Le test qui compare Woodcore à la feuille « Flachdach » du classeur compte la pleine largeur ; il resterait juste si les fichiers d'aujourd'hui (<code>beside</code>) se lisent « Remplir » décoché, à 1000 mm (question 1).</p></div>
+
+<h2>Les types de pose</h2>
+<p>Votre question 4 restait ouverte. Voici à nouveau les types, mis à jour :</p>
+<div class="poses-g">
+<figure><svg viewBox="0 0 220 96"><rect x="10" y="30" width="200" height="22" fill="var(--f-board)" stroke="var(--edge)"/><line x1="10" y1="62" x2="210" y2="62" stroke="currentColor" stroke-width=".6"/><text x="110" y="76" text-anchor="middle" font-size="11" fill="currentColor" font-style="italic">t</text><text x="10" y="20" font-size="10" fill="currentColor">panneau, chape, isolation pleine</text></svg><figcaption><b>Continue</b>Toute la surface, sur l'épaisseur t. Poids : γ · t.</figcaption></figure>
+<figure><svg viewBox="0 0 220 96"><g fill="var(--f-wood)" stroke="var(--edge)"><rect x="22" y="30" width="16" height="22"/><rect x="102" y="30" width="16" height="22"/><rect x="182" y="30" width="16" height="22"/></g><path d="M30 64 H110" stroke="currentColor" stroke-width=".7"/><text x="70" y="78" text-anchor="middle" font-size="11" fill="currentColor" font-style="italic">e</text><text x="110" y="24" text-anchor="middle" font-size="11" fill="currentColor" font-style="italic">b</text><text x="10" y="14" font-size="10" fill="currentColor">lattes, chevrons, solives</text></svg><figcaption><b>À entraxe</b>Des pièces de largeur b, toutes les e. Poids : γ · t · b / e.</figcaption></figure>
+<figure><svg viewBox="0 0 220 96"><path d="M10 52 q12 -22 25 0 q12 -22 25 0 q12 -22 25 0 q12 -22 25 0 q12 -22 25 0 q12 -22 25 0 q12 -22 25 0 q12 -22 25 0" fill="var(--f-tile)" stroke="var(--edge)"/><text x="10" y="20" font-size="10" fill="currentColor">tuiles, lés, tôles</text><text x="110" y="76" text-anchor="middle" font-size="11" fill="currentColor">kN/m², sans épaisseur</text></svg><figcaption><b>Par surface</b>Un poids par m², déjà connu (SIA 261, tableau 29). L'épaisseur ne sert qu'au dessin.</figcaption></figure>
+<figure><svg viewBox="0 0 220 96"><rect x="10" y="44" width="200" height="12" fill="none" stroke="currentColor" stroke-dasharray="4 3"/><g stroke="currentColor" fill="none"><path d="M50 14 v24 M45 32 l5 6 l5 -6"/><path d="M110 14 v24 M105 32 l5 6 l5 -6"/><path d="M170 14 v24 M165 32 l5 6 l5 -6"/></g><text x="110" y="76" text-anchor="middle" font-size="11" fill="currentColor">0,5 kN/m² tapés</text></svg><figcaption><b>Charge saisie</b>Sans matériau : installations, cloisons. Seulement par « + Charge saisie », au centre.</figcaption></figure>
+<figure><svg viewBox="0 0 220 96"><rect x="10" y="22" width="200" height="40" fill="var(--card)" stroke="var(--edge)" stroke-dasharray="3 3"/><rect x="10" y="32" width="200" height="30" fill="var(--f-ins)" stroke="var(--edge)"/><g fill="var(--f-wood)" stroke="var(--edge)"><rect x="30" y="22" width="14" height="40"/><rect x="110" y="22" width="14" height="40"/><rect x="190" y="22" width="14" height="40"/></g><text x="60" y="30" font-size="9" fill="currentColor">air</text><text x="10" y="80" font-size="10" fill="currentColor">ligne liée : même niveau</text></svg><figcaption><b>Deux lignes liées</b>Pas une pose : « lier à la ligne du dessous ». La ligne liée remplit la largeur que laissent les chevrons ; plus mince, elle laisse de l'air au-dessus.</figcaption></figure>
+<figure class="new"><svg viewBox="0 0 220 96"><rect x="10" y="22" width="200" height="12" fill="var(--f-conc)" stroke="var(--edge)"/><g fill="var(--f-memb)" stroke="var(--edge)"><rect x="34" y="34" width="12" height="18"/><rect x="104" y="34" width="12" height="18"/><rect x="174" y="34" width="12" height="18"/></g><line x1="10" y1="52" x2="210" y2="52" stroke="currentColor"/><text x="110" y="74" text-anchor="middle" font-size="11" fill="currentColor">n pièces/m² × poids d'une pièce</text></svg><figcaption><b>Ponctuelle</b> <span class="muted">(proposée)</span>Des plots sous des dalles de terrasse, des supports de panneaux solaires : un nombre par m² et le poids d'une pièce.</figcaption></figure>
+<figure class="new"><svg viewBox="0 0 220 96"><g fill="var(--f-wood)" stroke="var(--edge)"><rect x="10" y="24" width="200" height="8"/><rect x="10" y="40" width="200" height="8"/></g><g fill="var(--f-wood)" stroke="var(--edge)" opacity=".9"><rect x="30" y="32" width="10" height="8"/><rect x="90" y="32" width="10" height="8"/><rect x="150" y="32" width="10" height="8"/></g><text x="110" y="70" text-anchor="middle" font-size="11" fill="currentColor">poids de l'élément fini, en kg/m²</text></svg><figcaption><b>Élément du fabricant</b> <span class="muted">(proposé)</span>Un élément vendu tout fait (caisson Lignatur, élément Ligno), dont la fiche donne le poids par m² avec ses couches. C'est « par surface », mais avec une épaisseur vraie pour la coupe.</figcaption></figure>
+</div>
+
+<h2>La coupe à sa vraie proportion</h2>
+<ul class="kept">
+<li>Le dessin a 1 m de large, coté « 1000 » sous la coupe. Les hauteurs sont à la même échelle : AU-01, 311,5 mm, est trois fois plus large que haut. Une couche sans épaisseur reste un trait.</li>
+<li>Les noms restent dans leur colonne à droite, un par ligne, centrés sur le dessin et reliés à leur couche. Comme le dessin est bas, les traits s'ouvrent en éventail.</li>
+<li>Les cotes de gauche ne s'écrivent que là où elles tiennent ; l'épaisseur est aussi dans le nom.</li>
+<li>Agrandie, la coupe garde sa proportion à la largeur de la fenêtre.</li>
+</ul>
+
+<h2>La vue Affichage</h2>
+<p>Ce que le rapport imprime d'une composition, selon <code>docs/domain/loads.md</code> (§3.3ter) :</p>
+<ul class="kept">
+<li>au niveau 1, la valeur retenue, en gras ;</li>
+<li>au niveau 2, g<sub>k</sub>, a<sub>k</sub>, leur somme et la valeur retenue, ainsi que la coupe (<code>show-calc</code> l'imprime dès le niveau 2) ;</li>
+<li>au niveau 3, le tableau des couches au-dessus, avec ses deux totaux et la note sur le calcul d'une couche.</li>
+</ul>
+<p>Chaque élément peut suivre le niveau (auto), toujours s'imprimer ou jamais. Le fichier écrit pour Typst est une esquisse, sur le modèle de celui du vent (<code>WL-01.typ</code>) ; le rapport d'aujourd'hui passe par <code>show-calc("dead-load", …)</code>. Une valeur remplacée s'imprime sans marque, comme vous le demandiez.</p>
+
+<h2>Les modèles, tirés de Lignum « Holzbau mit System »</h2>
+<p>Avec « Remplir » : les lignes liées comptent la largeur que laissent les pièces.</p>
+<div class="scrollx" id="tplcheck"></div>
+
+<h2>Ce que cela change dans Woodcore</h2>
+<div class="scrollx"><table class="tblr">
+<tr><th>Quoi</th><th>Où</th><th>Coût, ce qu'il faut décider</th></tr>
+<tr><td>La bibliothèque des matériaux</td><td>un onglet nouveau, Matériaux</td><td>Voir son artefact. Cet onglet-ci ne fait que lire la bibliothèque.</td></tr>
+<tr><td>Le lien et « Remplir »</td><td><code>schemas/dead-load-source.schema.json</code>, <code>dead_load_source</code>, <code>dead_load_svg</code></td><td><code>beside</code> devient <code>link</code> (vers le bas), avec <code>fill</code> (vrai par défaut) et <code>width</code> quand il est faux. La largeur remplie est 1000 · (1 − Σ b/e) mm sur 1 m. C'est une version de schéma, et la lecture des anciens fichiers est à décider (question 1).</td></tr>
+<tr><td>La coupe à l'échelle</td><td><code>dead_load_svg</code></td><td>Le dessin a aujourd'hui une échelle vraie au-dessus d'un plancher de 7 unités par bande. À l'échelle stricte, les lés deviennent un trait. Le rapport imprime le même dessin (question 4).</td></tr>
+<tr><td>La saisie au clavier</td><td>la fenêtre</td><td>Un tableau dont chaque cellule s'écrit, Tab de l'une à l'autre, la liste des matériaux sous la cellule.</td></tr>
+<tr><td>Une charge ou une valeur retenue remplacée</td><td>la source, la fenêtre</td><td>La source garde la valeur, ou la variable, comme <code>links</code> le fait. L'export imprime la valeur sans marque.</td></tr>
+<tr><td>La valeur retenue automatique</td><td><code>dead_load.instance_from_layers</code></td><td>Le dixième supérieur quand rien n'est écrit.</td></tr>
+</table></div>
+
+<h2>Questions</h2>
+<p class="muted">L'option recommandée est la première.</p>
+<div class="q"><b>1. Les compositions d'aujourd'hui</b>, écrites avec « à côté » (pleine largeur) :<ol><li>Se lisent avec « Remplir » décoché et 1000 mm : leur somme ne change pas</li><li>Se lisent avec « Remplir » coché : leur somme baisse un peu, de la part du bois</li></ol></div>
+<div class="q"><b>2. Les types de pose</b> (votre question 4) :<ol><li>Continue, à entraxe, par surface, plus la charge saisie au centre</li><li>Les mêmes, plus « ponctuelle » (plots, supports)</li><li>Les mêmes, plus « ponctuelle » et « élément du fabricant »</li></ol></div>
+<div class="q"><b>3. Le lattis compté deux fois sous des tuiles « lattis compris »</b> :<ol><li>Un avertissement, sans rien changer</li><li>Rien</li><li>Woodcore retire la ligne de lattes de lui-même</li></ol></div>
+<div class="q"><b>4. La coupe imprimée dans le rapport</b> :<ol><li>La même que dans la fenêtre, à sa vraie proportion</li><li>Une proportion libre dans le rapport, pour que les couches minces se lisent</li></ol></div>
+<div class="q"><b>5. Une somme qui tombe juste sur un dixième</b> (0,900) :<ol><li>Retenir 0,9</li><li>Retenir 1,0</li></ol></div>
+<div class="q"><b>6. Les lignes liées</b> :<ol><li>Autant qu'il faut sur un niveau ; la plus épaisse donne la hauteur, et chaque ligne qui remplit partage la largeur restante</li><li>Deux au plus</li></ol></div>
+
+</div>
+</div>
+<div class="popfig" id="popfig" hidden><div class="pw"><div class="ph"></div><div class="pb"></div></div></div>
+<div class="tpl" id="tpl" hidden></div>
+<div class="ac" id="ac" hidden></div>
+<script>
+var LIB = [{"id": "sia28-aluminium", "de": "Aluminium", "fr": "Aluminium", "en": "Aluminium", "fam": "metal", "v": 27, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-baustahl", "de": "Baustahl", "fr": "Acier", "en": "Steel", "fam": "metal", "v": 78.5, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-beton_unbewehrt", "de": "Beton, unbewehrt", "fr": "Béton non armé", "en": "Concrete, plain", "fam": "conc", "v": 24, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-beton_bewehrt", "de": "Beton, bewehrt", "fr": "Béton armé", "en": "Concrete, reinforced", "fam": "conc", "v": 25, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-holz_nadelhoelzer_allgemein", "de": "Holz, Nadelhölzer, allgemein", "fr": "Bois résineux en général", "en": "Softwood, general", "fam": "wood", "v": 5, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-holz_laubhoelzer_allgemein", "de": "Holz, Laubhölzer, allgemein", "fr": "Bois feuillus en général", "en": "Hardwood, general", "fam": "wood", "v": 7.5, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-holz_verleimte_nadelhoelzer", "de": "Holz, verleimte Nadelhölzer", "fr": "Bois résineux collés", "en": "Glued softwood", "fam": "wood", "v": 5, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-holz_spanplatten", "de": "Holz, Spanplatten", "fr": "Panneaux en bois aggloméré", "en": "Particle board", "fam": "board", "v": 8, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-natursteinmauerwerk_bruchstein_kalkstein", "de": "Natursteinmauerwerk, Bruchstein (Kalkstein)", "fr": "Maçonnerie en moellons (calcaire)", "en": "Rubble masonry (limestone)", "fam": "conc", "v": 24, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-natursteinmauerwerk_granit", "de": "Natursteinmauerwerk, Granit", "fr": "Maçonnerie en granite", "en": "Granite masonry", "fam": "conc", "v": 27, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-natursteinmauerwerk_basalt", "de": "Natursteinmauerwerk, Basalt", "fr": "Maçonnerie en basalte", "en": "Basalt masonry", "fam": "conc", "v": 30, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-natursteinmauerwerk_molasse_sandstein", "de": "Natursteinmauerwerk, Molasse-Sandstein", "fr": "Maçonnerie en molasse, grès", "en": "Molasse, sandstone masonry", "fam": "conc", "v": 24, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-moertelueberzuege_kalkmoertel", "de": "Kalkmörtel", "fr": "Mortier de chaux", "en": "Lime mortar", "fam": "gyps", "v": 19, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-moertelueberzuege_zementmoertel", "de": "Zementmörtel", "fr": "Mortier de ciment", "en": "Cement mortar", "fam": "gyps", "v": 22, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-moertelueberzuege_gipsmoertel", "de": "Gipsmörtel", "fr": "Mortier de plâtre", "en": "Gypsum mortar", "fam": "gyps", "v": 12, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-moertelueberzuege_wandverputz_aussen", "de": "Wandverputz aussen", "fr": "Crépi mural extérieur", "en": "External render", "fam": "gyps", "v": 18, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-moertelueberzuege_wandverputz_innen", "de": "Wandverputz innen", "fr": "Crépi mural intérieur", "en": "Internal plaster", "fam": "gyps", "v": 14, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_backsteine_voll", "de": "Mauerwerk, unverputzt, Backsteine, voll", "fr": "Briques de terre cuite pleines", "en": "Clay bricks, solid", "fam": "conc", "v": 18, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_backsteine_gelocht", "de": "Mauerwerk, unverputzt, Backsteine, gelocht", "fr": "Briques de terre cuite perforées", "en": "Clay bricks, perforated", "fam": "conc", "v": 13, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_backsteine_schalldaemmend", "de": "Mauerwerk, unverputzt, Backsteine, schalldämmend", "fr": "Briques à haute isolation phonique", "en": "Sound-insulating bricks", "fam": "conc", "v": 17, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_sichtbacksteine_gelocht", "de": "Mauerwerk, unverputzt, Sichtbacksteine, gelocht", "fr": "Briques apparentes perforées", "en": "Facing bricks, perforated", "fam": "conc", "v": 15, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_zementsteine_voll", "de": "Mauerwerk, unverputzt, Zementsteine, voll", "fr": "Agglomérés de béton pleins", "en": "Concrete blocks, solid", "fam": "conc", "v": 22, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_zementsteine_gelocht", "de": "Mauerwerk, unverputzt, Zementsteine, gelocht", "fr": "Agglomérés de béton perforés", "en": "Concrete blocks, perforated", "fam": "conc", "v": 18, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_zementsteine_schalldaemmend", "de": "Mauerwerk, unverputzt, Zementsteine, schalldämmend", "fr": "Agglomérés isolants phoniquement", "en": "Sound-insulating concrete blocks", "fam": "conc", "v": 20, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_kalksandsteine_voll", "de": "Mauerwerk, unverputzt, Kalksandsteine, voll", "fr": "Briques silico-calcaires pleines", "en": "Sand-lime bricks, solid", "fam": "conc", "v": 20, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_kalksandsteine_gelocht", "de": "Mauerwerk, unverputzt, Kalksandsteine, gelocht", "fr": "Briques silico-calcaires perforées", "en": "Sand-lime bricks, perforated", "fam": "conc", "v": 18, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_gasbetonsteine_normale_qualitaet", "de": "Mauerwerk, unverputzt, Gasbetonsteine, normale Qualität", "fr": "Béton cellulaire, qualité normale", "en": "Aerated concrete, normal", "fam": "conc", "v": 6, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_gasbetonsteine_hochwertig", "de": "Mauerwerk, unverputzt, Gasbetonsteine, hochwertig", "fr": "Béton cellulaire, haute qualité", "en": "Aerated concrete, high grade", "fam": "conc", "v": 7, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_glasbausteine_voll", "de": "Mauerwerk, unverputzt, Glasbausteine, voll", "fr": "Briques de verre pleines", "en": "Glass blocks, solid", "fam": "metal", "v": 25, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_glasbausteine_hohl", "de": "Mauerwerk, unverputzt, Glasbausteine, hohl", "fr": "Briques de verre creuses", "en": "Glass blocks, hollow", "fam": "metal", "v": 14, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_zelltonplatten", "de": "Mauerwerk, unverputzt, Zelltonplatten", "fr": "Plaques d'argile cellulaire", "en": "Cellular clay slabs", "fam": "conc", "v": 12, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-mauerwerk_unverputzt_gipsplatten", "de": "Mauerwerk, unverputzt, Gipsplatten", "fr": "Plaques de plâtre", "en": "Gypsum boards", "fam": "gyps", "v": 12, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-bodenbelaege_keramikplatten", "de": "Keramikplatten", "fr": "Dallage en céramique", "en": "Ceramic tiles", "fam": "floor", "v": 20, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-bodenbelaege_natursteine", "de": "Natursteine", "fr": "Revêtement en pierre naturelle", "en": "Natural stone flooring", "fam": "floor", "v": 30, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-bodenbelaege_holzparkett_geklebt", "de": "Holzparkett, geklebt", "fr": "Parquet en bois collé", "en": "Glued wood parquet", "fam": "floor", "v": 8, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-bodenbelaege_linoleum", "de": "Linoleum", "fr": "Linoléum", "en": "Linoleum", "fam": "floor", "v": 15, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-bituminoese_belaege_gussasphalt", "de": "Bituminöse Beläge, Gussasphalt", "fr": "Asphalte coulé", "en": "Mastic asphalt", "fam": "floor", "v": 24, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia28-bituminoese_belaege_bituminoeser_belag_hmt", "de": "Bituminöse Beläge, Bituminöser Belag (HMT)", "fr": "Revêtement bitumineux (HMT)", "en": "Bituminous surfacing (HMT)", "fam": "floor", "v": 24, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 28, p. 77"}, {"id": "sia29-faserzement", "de": "Faserzement", "fr": "Ciment armé de fibres", "en": "Fibre cement", "fam": "tile", "v": 0.18, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-profilbleche_hoehe_80_mm_dicke_0_8_mm_stahlblech", "de": "Profilbleche, Höhe 80 mm, Dicke 0,8 mm, Stahlblech", "fr": "Tôles profilées en acier, h = 80, d = 0,8 mm", "en": "Profiled steel sheets, h 80, t 0.8 mm", "fam": "metal", "v": 0.12, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-profilbleche_hoehe_80_mm_dicke_0_8_mm_aluminiumblech", "de": "Profilbleche, Höhe 80 mm, Dicke 0,8 mm, Aluminiumblech", "fr": "Tôles profilées en aluminium, h = 80, d = 0,8 mm", "en": "Profiled aluminium sheets, h 80, t 0.8 mm", "fam": "metal", "v": 0.04, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-faserzementschieferdach_einfachdeckung", "de": "Faserzementschieferdach, Einfachdeckung", "fr": "Ardoise fibres-ciment, recouvrement simple", "en": "Fibre-cement slates, single lap", "fam": "tile", "v": 0.23, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-faserzementschieferdach_doppeldeckung", "de": "Faserzementschieferdach, Doppeldeckung", "fr": "Ardoise fibres-ciment, recouvrement double", "en": "Fibre-cement slates, double lap", "fam": "tile", "v": 0.3, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-tonziegeldach_inkl_lattung_biberschwanz_doppeldeckung", "de": "Tonziegeldach inkl. Lattung, Biberschwanz, Doppeldeckung", "fr": "Tuiles plates en terre cuite, recouvrement double, lattis compris", "en": "Clay plain tiles, double lap, battens incl.", "fam": "tile", "v": 0.75, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78", "battens": "norm"}, {"id": "sia29-tonziegeldach_inkl_lattung_pfannenziegel", "de": "Tonziegeldach inkl. Lattung, Pfannenziegel", "fr": "Tuiles flamandes en terre cuite, lattis compris", "en": "Clay pantiles, battens incl.", "fam": "tile", "v": 0.47, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78", "battens": "norm"}, {"id": "sia29-betonziegeldach_inkl_lattung_flachziegel", "de": "Betonziegeldach inkl. Lattung, Flachziegel", "fr": "Tuiles plates en béton, lattis compris", "en": "Concrete plain tiles, battens incl.", "fam": "tile", "v": 0.55, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78", "battens": "norm"}, {"id": "sia29-betonziegeldach_inkl_lattung_pfannenziegel", "de": "Betonziegeldach inkl. Lattung, Pfannenziegel", "fr": "Tuiles flamandes en béton, lattis compris", "en": "Concrete pantiles, battens incl.", "fam": "tile", "v": 0.48, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78", "battens": "norm"}, {"id": "sia29-unterdaecher_schindelunterzug", "de": "Unterdächer, Schindelunterzug", "fr": "Sous-toiture en bardeaux", "en": "Shingle underlay", "fam": "board", "v": 0.1, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-unterdaecher_hartfaserplatten", "de": "Unterdächer, Hartfaserplatten", "fr": "Sous-toiture en panneaux de fibres durs", "en": "Hardboard underlay", "fam": "board", "v": 0.05, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-unterdaecher_faserzementplatten", "de": "Unterdächer, Faserzementplatten", "fr": "Sous-toiture en panneaux fibres-ciment", "en": "Fibre-cement underlay", "fam": "board", "v": 0.12, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-unterdaecher_holzschalung_24_mm_inkl_eine_lage_bitumenpappe_oder_kunststofffolie", "de": "Unterdächer, Holzschalung, 24 mm, inkl. eine Lage Bitumenpappe oder Kunststofffolie", "fr": "Lambris de 24 mm, y.c. carton bitumé ou feuille plastique", "en": "24 mm boarding incl. bitumen felt or foil", "fam": "wood", "v": 0.14, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-verglasung_inkl_rahmenkonstruktion_normalglas_5_mm", "de": "Verglasung inkl. Rahmenkonstruktion, Normalglas, 5 mm", "fr": "Vitrage, verre normal 5 mm, châssis compris", "en": "Glazing, 5 mm glass incl. frame", "fam": "metal", "v": 0.25, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-verglasung_inkl_rahmenkonstruktion_armiertes_glas_6_mm", "de": "Verglasung inkl. Rahmenkonstruktion, Armiertes Glas, 6 mm", "fr": "Vitrage, verre armé 6 mm, châssis compris", "en": "Glazing, 6 mm wired glass incl. frame", "fam": "metal", "v": 0.35, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-feinkiesauflage_pro_10_mm_dicke", "de": "Feinkiesauflage, pro 10 mm Dicke", "fr": "Gravillon, par 10 mm d'épaisseur", "en": "Fine gravel, per 10 mm", "fam": "fill", "v": 20, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78 : 0,20 kN/m² par 10 mm, soit 20 kN/m³"}, {"id": "sia29-bitumenpappe_pro_lage", "de": "Bitumenpappe, pro Lage", "fr": "Carton bitumé, par couche", "en": "Bitumen felt, per layer", "fam": "memb", "v": 0.02, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-kunststofffolie", "de": "Kunststofffolie", "fr": "Feuille plastique", "en": "Plastic foil", "fam": "memb", "v": 0.02, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia29-moertelueberzuege", "de": "Mörtelüberzüge", "fr": "Enduits de mortier", "en": "Mortar coatings", "fam": "gyps", "v": 0.02, "u": "kN/m²", "src": "sia", "ref": "SIA 261:2020, tableau 29, p. 78"}, {"id": "sia30-sable", "de": "Sand", "fr": "Sable", "en": "Sand", "fam": "fill", "v": 15, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 30, p. 78"}, {"id": "sia30-tout", "de": "Kies-Sand-Gemisch", "fr": "Tout venant, mélangé", "en": "Gravel-sand mix", "fam": "fill", "v": 20, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 30, p. 78"}, {"id": "sia30-ballast", "de": "Schotter, gebrochen", "fr": "Ballast, concassé", "en": "Crushed ballast", "fam": "fill", "v": 18, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 30, p. 78"}, {"id": "sia30-terre_s", "de": "Erde, trocken", "fr": "Terre, sèche", "en": "Soil, dry", "fam": "fill", "v": 16, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 30, p. 78"}, {"id": "sia30-terre_h", "de": "Erde, feucht", "fr": "Terre, humide", "en": "Soil, moist", "fam": "fill", "v": 21, "u": "kN/m³", "src": "sia", "ref": "SIA 261:2020, tableau 30, p. 78"}, {"id": "wb-parkett-hartholz-800", "de": "Parkett Hartholz", "fr": "Parquet bois dur", "en": "Hardwood parquet", "fam": "floor", "v": 8.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 14 · « SIA 261 »", "roles": ["revêtement de sol"], "info": ""}, {"id": "wb-natursteinboden-3000", "de": "Natursteinboden", "fr": "Sol en pierre naturelle", "en": "Natural stone floor", "fam": "floor", "v": 30.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 15", "roles": ["revêtement de sol"], "info": ""}, {"id": "wb-keramikplatten-2000", "de": "Keramikplatten", "fr": "Carrelage céramique", "en": "Ceramic tiles", "fam": "floor", "v": 20.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 16", "roles": ["revêtement de sol"], "info": ""}, {"id": "wb-steinholzb-den-1600", "de": "Steinholzböden", "fr": "Sol en xylolithe", "en": "Magnesite-wood floor", "fam": "floor", "v": 16.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 17, 27 · « Repoxit AG, Winterthur »", "roles": ["chape", "revêtement de sol"], "info": ""}, {"id": "wb-anhydritestrich-2000", "de": "Anhydritestrich", "fr": "Chape anhydrite", "en": "Anhydrite screed", "fam": "conc", "v": 20.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 18, 34 · « Fixit AG, 5113 Holderbank »", "roles": ["chape", "revêtement de sol"], "info": ""}, {"id": "wb-bodenriemen-fi-ta-500", "de": "Bodenriemen Fi/Ta", "fr": "Lames de plancher épicéa/sapin", "en": "Spruce/fir floorboards", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 19", "roles": ["revêtement de sol"], "info": ""}, {"id": "wb-zement-ub-2200", "de": "Zement UB", "fr": "Chape ciment", "en": "Cement screed", "fam": "conc", "v": 22.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 20, 28", "roles": ["chape", "revêtement de sol"], "info": ""}, {"id": "wb-linoleum-1160", "de": "Linoleum", "fr": "Linoléum", "en": "Linoleum", "fam": "floor", "v": 11.6, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 21 · « DLW, Marmorette »", "roles": ["revêtement de sol"], "info": ""}, {"id": "wb-gussasphalt-2400", "de": "Gussasphalt", "fr": "Asphalte coulé", "en": "Mastic asphalt", "fam": "floor", "v": 24.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 22, 35 · « Veras, Bern www.gussasphalt.ch »", "roles": ["chape", "revêtement de sol"], "info": ""}, {"id": "wb-hartbeton-leichtbeansprucht-2050", "de": "Hartbeton leichtbeansprucht", "fr": "Béton dur, faible sollicitation", "en": "Hard concrete, light duty", "fam": "conc", "v": 20.5, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 23 · « Repoxit AG, Winterthur »", "roles": ["revêtement de sol"], "info": ""}, {"id": "wb-hartbeton-schwerbeansprucht-2100", "de": "Hartbeton schwerbeansprucht", "fr": "Béton dur, forte sollicitation", "en": "Hard concrete, heavy duty", "fam": "conc", "v": 21.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 24, 37 · « Repoxit AG, Winterthur »", "roles": ["chape", "revêtement de sol"], "info": ""}, {"id": "wb-3-schichtplatte-500", "de": "3-Schichtplatte", "fr": "Panneau trois plis", "en": "Three-layer board", "fam": "board", "v": 5.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 25, 61, 129 · « SIA 261 »", "roles": ["panneau de contreventement", "revêtement de sol", "revêtement intérieur", "sous-toiture"], "info": ""}, {"id": "wb-haltopex-walo-1200", "de": "Haltopex (Walo)", "fr": "Haltopex (Walo)", "en": "Haltopex (Walo)", "fam": "floor", "v": 12.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 26", "roles": ["revêtement de sol"], "info": ""}, {"id": "wb-magnesit-ub-1500", "de": "Magnesit UB", "fr": "Chape magnésie", "en": "Magnesite screed", "fam": "conc", "v": 15.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 29", "roles": ["chape"], "info": ""}, {"id": "wb-spanplatten-800", "de": "Spanplatten", "fr": "Panneaux de particules", "en": "Particle boards", "fam": "board", "v": 8.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 30, 66, 134 · « SIA 261 »", "roles": ["chape", "panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-osb-platten-680", "de": "OSB-Platten", "fr": "Panneaux OSB", "en": "OSB boards", "fam": "board", "v": 6.8, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 31", "roles": ["chape"], "info": ""}, {"id": "wb-fermacell-estrich-1200", "de": "Fermacell Estrich", "fr": "Chape sèche Fermacell", "en": "Fermacell dry screed", "fam": "gyps", "v": 12.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 32", "roles": ["chape"], "info": ""}, {"id": "wb-duripanel-1300", "de": "Duripanel (Unterlagsboden)", "fr": "Duripanel (chape)", "en": "Duripanel (Unterlagsboden)", "fam": "board", "v": 13.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 33, 67, 135 · « Eternit AG, Niederurnen www.eternit.ch »", "roles": ["chape", "panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-blindboden-tanne-500", "de": "Blindboden Tanne", "fr": "Faux plancher sapin", "en": "Fir subfloor", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 36", "roles": ["chape"], "info": ""}, {"id": "wb-blindboden-fi-ta-500", "de": "Blindboden Fi/Ta", "fr": "Faux plancher épicéa/sapin", "en": "Spruce/fir subfloor", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 38", "roles": ["chape"], "info": ""}, {"id": "wb-stahlbeton-holzbetonverbund-2400", "de": "Stahlbeton (Holzbetonverbund)", "fr": "Béton armé (mixte bois-béton)", "en": "Reinforced concrete (timber-concrete)", "fam": "conc", "v": 24.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 39", "roles": ["chape"], "info": ""}, {"id": "wb-flumroc-trittschall-110", "de": "Flumroc Trittschall", "fr": "Flumroc phonique", "en": "Flumroc impact sound", "fam": "ins", "v": 1.1, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 40, 56 · « Flumroc »", "roles": ["isolation", "isolation phonique"], "info": "Trittschall"}, {"id": "wb-isover-trittschall-ps81-80", "de": "Isover Trittschall PS81", "fr": "Isover phonique PS81", "en": "Isover impact sound PS81", "fam": "ins", "v": 0.8, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 41, 57 · « Isover »", "roles": ["isolation", "isolation phonique"], "info": "Trittschall"}, {"id": "wb-weichfaserplatte-pavapor-135", "de": "Weichfaserplatte Pavapor", "fr": "Panneau fibres tendres Pavapor", "en": "Softboard Pavapor", "fam": "ins", "v": 1.35, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 42, 58 · « Pavatex, Cham »", "roles": ["isolation", "isolation phonique"], "info": "Trittschall"}, {"id": "wb-isover-uniroll-20", "de": "Isover uniroll", "fr": "Isover uniroll", "en": "Isover uniroll", "fam": "ins", "v": 0.2, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 43 · « Isover »", "roles": ["isolation"], "info": "Standardprodukt für Dach. Geeignet für Dach-/Decken-/Wandkonstruktionen ohne Brandschutzanforderungen."}, {"id": "wb-isover-pbm-032-034-20", "de": "Isover PBM 032 / 034", "fr": "Isover PBM 032 / 034", "en": "Isover PBM 032 / 034", "fam": "ins", "v": 0.2, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 44 · « Isover »", "roles": ["isolation"], "info": "Hochleistungsdämmung, Ausnahmeprodukt"}, {"id": "wb-isover-isolene-p-60", "de": "Isover Isolene P", "fr": "Isover Isolene P", "en": "Isover Isolene P", "fam": "ins", "v": 0.6, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 45 · « Isover »", "roles": ["isolation"], "info": "Hochleistungsdämmung, Ausnahmeprodukt"}, {"id": "wb-flumroc-typ-1-38", "de": "Flumroc Typ 1", "fr": "Laine de roche Flumroc 1", "en": "Flumroc stone wool 1", "fam": "ins", "v": 0.38, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 46 · « Flumroc »", "roles": ["isolation"], "info": "Typische Brandschutzdämmung, geeignet für Dach-/Decken-/Wandkonstruktionen mit Brandschutzanforderungen"}, {"id": "wb-flumroc-typ-3-60", "de": "Flumroc Typ 3", "fr": "Laine de roche Flumroc 3", "en": "Flumroc stone wool 3", "fam": "ins", "v": 0.6, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 47 · « Flumroc »", "roles": ["isolation"], "info": "Schwere Brandschutzdämmung, Ausnahmeprodukt"}, {"id": "wb-flumroc-solo-38", "de": "Flumroc Solo", "fr": "Laine de roche Flumroc Solo", "en": "Flumroc Solo", "fam": "ins", "v": 0.38, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 48 · « Flumroc »", "roles": ["isolation"], "info": "Typische Brandschutzdämmung, geeignet für Dach-/Decken-/Wandkonstruktionen mit Brandschutzanforderungen"}, {"id": "wb-weichfaserplatte-pavatherm-115", "de": "Weichfaserplatte Pavatherm", "fr": "Panneau fibres tendres Pavatherm", "en": "Softboard Pavatherm", "fam": "ins", "v": 1.15, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 49 · « Pavatherm »", "roles": ["isolation"], "info": "Typische Aufdachdämmung, druckfest"}, {"id": "wb-weichfaserplatte-thermoflex-50", "de": "Weichfaserplatte Thermoflex", "fr": "Fibre de bois Thermoflex", "en": "Wood fibre Thermoflex", "fam": "ins", "v": 0.5, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 50 · « GUTEX »", "roles": ["isolation"], "info": "Zwischendämmung bei Dach-/Decken-/Wandkonstruktionen"}, {"id": "wb-zellulosefaserplatte-flexcl-70", "de": "Zellulosefaserplatte FlexCL", "fr": "Panneau cellulose FlexCL", "en": "Cellulose board FlexCL", "fam": "ins", "v": 0.7, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 51 · « Homatherm »", "roles": ["isolation"], "info": "Zwischendämmung bei Dach-/Decken-/Wandkonstruktionen"}, {"id": "wb-zellulosefasern-1-60", "de": "Zellulosefasern 1", "fr": "Ouate de cellulose 1", "en": "Cellulose fibre 1", "fam": "ins", "v": 0.6, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 52 · « Isofloc »", "roles": ["isolation"], "info": "Dach- und Wandkonstruktionen ohne Brandschutzanforderungen"}, {"id": "wb-zellulosefasern-2-55", "de": "Zellulosefasern 2", "fr": "Ouate de cellulose 2", "en": "Cellulose fibre 2", "fam": "ins", "v": 0.55, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 53 · « Isofloc »", "roles": ["isolation"], "info": "Dach- und Wandkonstruktionen ohne Brandschutzanforderungen"}, {"id": "wb-schlacke-500", "de": "Schlacke (Dämmung)", "fr": "Scories (isolation)", "en": "Slag (Dämmung)", "fam": "fill", "v": 5.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 54 · « Annahme »", "roles": ["isolation"], "info": ""}, {"id": "wb-kalksplittsch-ttung-trocken-1400", "de": "Kalksplittschüttung trocken", "fr": "Gravillon calcaire sec", "en": "Dry limestone chippings", "fam": "fill", "v": 14.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 55, 105 · « H&F, H&F Kalksplittschüttung »", "roles": ["isolation", "lestage"], "info": ""}, {"id": "wb-flumroc-prima-120", "de": "Flumroc prima", "fr": "Laine de roche Flumroc prima", "en": "Flumroc prima", "fam": "ins", "v": 1.2, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 59 · « Flumroc »", "roles": ["isolation"], "info": "typische Flachdachdämmung, begehbar, Mineralwolle RF1"}, {"id": "wb-pur-pir-d-mmung-30", "de": "PUR / PIR Dämmung", "fr": "Isolant PUR / PIR", "en": "PUR / PIR insulation", "fam": "ins", "v": 0.3, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 60 · « Sager PIR Premium »", "roles": ["isolation"], "info": "Flachdachdämmung, begehbar"}, {"id": "wb-osb3-680", "de": "OSB3", "fr": "Panneau OSB/3", "en": "OSB/3 board", "fam": "board", "v": 6.8, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 62, 130 · « Kronospan, 6122 Menznau www.kronospan.ch »", "roles": ["panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-kerto-t-500", "de": "Kerto-T", "fr": "LVL Kerto-T", "en": "LVL Kerto-T", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 63, 99, 123 · « SIA 261 »", "roles": ["contre-lattes", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "panneau de contreventement", "revêtement intérieur", "structure"], "info": ""}, {"id": "wb-kerto-s-500", "de": "Kerto-S", "fr": "LVL Kerto-S", "en": "LVL Kerto-S", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 64, 100, 124 · « SIA 261 »", "roles": ["contre-lattes", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "panneau de contreventement", "revêtement intérieur", "structure"], "info": ""}, {"id": "wb-kerto-q-500", "de": "Kerto-Q", "fr": "LVL Kerto-Q", "en": "LVL Kerto-Q", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 65, 101, 125 · « SIA 261 »", "roles": ["contre-lattes", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "panneau de contreventement", "revêtement intérieur", "structure"], "info": ""}, {"id": "wb-schalung-500", "de": "Schalung", "fr": "Lambris, coffrage", "en": "Boarding", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 68, 136", "roles": ["panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-fermacell-1200", "de": "Fermacell", "fr": "Plaque fibres-gypse Fermacell", "en": "Fermacell gypsum fibre board", "fam": "gyps", "v": 12.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 69, 137", "roles": ["panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-rigips-1200", "de": "Rigips", "fr": "Plaque de plâtre", "en": "Plasterboard", "fam": "gyps", "v": 12.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 70, 138", "roles": ["panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-sperrholzplatte-600", "de": "Sperrholzplatte", "fr": "Contreplaqué", "en": "Plywood", "fam": "board", "v": 6.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 71, 139", "roles": ["panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-weichfaserplatte-200", "de": "Weichfaserplatte", "fr": "Panneau fibres tendres", "en": "Softboard", "fam": "board", "v": 2.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 72, 140", "roles": ["panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-heraklith-bm-350", "de": "Heraklith-BM", "fr": "Heraklith-BM", "en": "Heraklith-BM", "fam": "board", "v": 3.5, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 73, 141, 233 · « ZZ Wancor, 8197 Rafz »", "roles": ["façade", "panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-kalk-kalkzementputz-1800", "de": "Kalk, Kalkzementputz", "fr": "Enduit chaux, chaux-ciment", "en": "Lime, lime-cement plaster", "fam": "gyps", "v": 18.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 74, 142", "roles": ["panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-gipsdecke-auf-l-ttli-1200", "de": "Gipsdecke auf Lättli", "fr": "Plafond plâtre sur lattis", "en": "Plaster ceiling on laths", "fam": "gyps", "v": 12.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 75, 143", "roles": ["panneau de contreventement", "revêtement intérieur"], "info": ""}, {"id": "wb-substrat-nass-1500", "de": "Substrat nass", "fr": "Substrat humide (végétalisation)", "en": "Wet substrate (green roof)", "fam": "fill", "v": 15.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 76 · « Anfrage bei Ernst Gerber AG, durch Modifizierung auch weniger Gewicht möglich »", "roles": ["couche de protection"], "info": ""}, {"id": "wb-ziegelschrot-1100", "de": "Ziegelschrot", "fr": "Brique concassée", "en": "Crushed brick", "fam": "fill", "v": 11.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 77 · « ZZ Wancor, 8197 Rafz »", "roles": ["couche de protection"], "info": ""}, {"id": "wb-gartenplatten-2200", "de": "Gartenplatten (Beschichtung)", "fr": "Dalles de jardin (couche de protection)", "en": "Garden slabs (Beschichtung)", "fam": "floor", "v": 22.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 78", "roles": ["couche de protection"], "info": ""}, {"id": "wb-kiesauflage-2000", "de": "Kiesauflage", "fr": "Gravier de toiture", "en": "Roof gravel", "fam": "fill", "v": 20.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 79", "roles": ["couche de protection"], "info": ""}, {"id": "wb-natursteinplatten-2000", "de": "Natursteinplatten", "fr": "Dalles en pierre naturelle", "en": "Natural stone slabs", "fam": "floor", "v": 20.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 80", "roles": ["couche de protection"], "info": ""}, {"id": "wb-erde-2100", "de": "Erde", "fr": "Terre", "en": "Soil", "fam": "fill", "v": 21.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 81", "roles": ["couche de protection"], "info": ""}, {"id": "wb-sand-1500", "de": "Sand (Beschichtung)", "fr": "Sable (couche de protection)", "en": "Sand (Beschichtung)", "fam": "fill", "v": 15.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 82", "roles": ["couche de protection"], "info": ""}, {"id": "wb-granit-2700", "de": "Granit", "fr": "Granite", "en": "Granite", "fam": "conc", "v": 27.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 83", "roles": ["couche de protection"], "info": ""}, {"id": "wb-bruchstein-2400", "de": "Bruchstein", "fr": "Moellons", "en": "Rubble stone", "fam": "conc", "v": 24.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 84", "roles": ["couche de protection"], "info": ""}, {"id": "wb-blech-aluminium-2mm-5-4", "de": "Blech Aluminium 2mm", "fr": "Tôle aluminium 2 mm", "en": "Aluminium sheet 2 mm", "fam": "metal", "v": 0.054000000000000006, "u": "kN/m²", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 85, 160 · « SIA 261 Tab 28 »", "roles": ["couche de protection", "lé de protection"], "info": "Korrigiert: das Arbeitsblatt gibt 8 kg/m²; SIA 261 Tabelle 28, Aluminium 27 kN/m³ × 2 mm: 0.054 kN/m²"}, {"id": "wb-blech-kupfer-2mm-16", "de": "Blech Kupfer 2mm", "fr": "Tôle cuivre 2 mm", "en": "Copper sheet 2 mm", "fam": "metal", "v": 0.16, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 86, 161", "roles": ["couche de protection", "lé de protection"], "info": ""}, {"id": "wb-blech-stahl-2mm-16", "de": "Blech Stahl 2mm", "fr": "Tôle acier 2 mm", "en": "Steel sheet 2 mm", "fam": "metal", "v": 0.16, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 87, 162", "roles": ["couche de protection", "lé de protection"], "info": ""}, {"id": "wb-xps-roofmate-33", "de": "xps Roofmate", "fr": "XPS Roofmate", "en": "XPS Roofmate", "fam": "ins", "v": 0.33, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 88 · « Dow Europe GmbH, »", "roles": ["couche de protection"], "info": ""}, {"id": "wb-l-rchenrost-500", "de": "Lärchenrost", "fr": "Caillebotis mélèze", "en": "Larch decking", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 89 · « SIA 261 »", "roles": ["couche de protection"], "info": ""}, {"id": "wb-gummischrotmatte-1000", "de": "Gummischrotmatte", "fr": "Natte en granulat de caoutchouc", "en": "Rubber granulate mat", "fam": "memb", "v": 10.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 90 · « Schätzung »", "roles": ["couche de protection"], "info": ""}, {"id": "wb-pv-anlage-80", "de": "PV-Anlage (Beschichtung)", "fr": "Installation photovoltaïque (couche de protection)", "en": "PV system (Beschichtung)", "fam": "metal", "v": 0.8, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 91", "roles": ["couche de protection"], "info": ""}, {"id": "wb-gl24h-500", "de": "GL24h", "fr": "Lamellé-collé GL24h", "en": "Glulam GL24h", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 92, 116, 168 · « SIA 261 »", "roles": ["contre-lattes", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "structure"], "info": ""}, {"id": "wb-c24-500", "de": "C24", "fr": "Bois massif C24", "en": "Solid timber C24", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 93, 117, 169 · « SIA 261 »", "roles": ["contre-lattes", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "structure"], "info": ""}, {"id": "wb-fi-ta-500", "de": "Fi/Ta", "fr": "Épicéa/sapin", "en": "Spruce/fir", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 94, 118, 170 · « SIA 261 »", "roles": ["contre-lattes", "façade", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "structure"], "info": ""}, {"id": "wb-eiche-750", "de": "Eiche", "fr": "Chêne", "en": "Oak", "fam": "wood", "v": 7.5, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 95, 119, 171 · « SIA 261 »", "roles": ["contre-lattes", "façade", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "structure"], "info": ""}, {"id": "wb-buche-750", "de": "Buche", "fr": "Hêtre", "en": "Beech", "fam": "wood", "v": 7.5, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 96, 120, 172 · « SIA 261 »", "roles": ["contre-lattes", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "structure"], "info": ""}, {"id": "wb-robinie-750", "de": "Robinie", "fr": "Robinier", "en": "Robinia", "fam": "wood", "v": 7.5, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 97, 121, 173 · « SIA 261 »", "roles": ["contre-lattes", "façade", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "structure"], "info": ""}, {"id": "wb-kastanie-750", "de": "Kastanie", "fr": "Châtaignier", "en": "Chestnut", "fam": "wood", "v": 7.5, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 98, 122, 174 · « SIA 261 »", "roles": ["contre-lattes", "façade", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "structure"], "info": ""}, {"id": "wb-stahlbeton-2500", "de": "Stahlbeton", "fr": "Béton armé", "en": "Reinforced concrete", "fam": "conc", "v": 25.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 102, 126, 178", "roles": ["contre-lattes", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "structure"], "info": ""}, {"id": "wb-mauerwerk-bn-1300", "de": "Mauerwerk BN", "fr": "Maçonnerie BN", "en": "Masonry BN", "fam": "conc", "v": 13.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 103, 127, 179", "roles": ["contre-lattes", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "structure"], "info": ""}, {"id": "wb-fi-ta-auf-federb-gel-550", "de": "Fi/Ta auf Federbügel", "fr": "Épicéa/sapin sur suspentes élastiques", "en": "Spruce/fir on resilient hangers", "fam": "wood", "v": 5.5, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 104, 128, 180 · « Schätzung »", "roles": ["contre-lattes", "lattage", "lattage croisé", "lattage de pente", "lattes de toiture", "structure"], "info": ""}, {"id": "wb-gartenplatten-2000", "de": "Gartenplatten (Beschwerung)", "fr": "Dalles de jardin (lestage)", "en": "Garden slabs (Beschwerung)", "fam": "floor", "v": 20.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 106", "roles": ["lestage"], "info": ""}, {"id": "wb-lehmsteine-lecca-940", "de": "Lehmsteine Lecca", "fr": "Briques de terre crue Lecca", "en": "Clay blocks Lecca", "fam": "fill", "v": 9.4, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 107", "roles": ["lestage"], "info": ""}, {"id": "wb-lehmsteine-voll-lehm-1990", "de": "Lehmsteine Voll-Lehm", "fr": "Briques de terre crue pleines", "en": "Solid clay blocks", "fam": "fill", "v": 19.9, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 108", "roles": ["lestage"], "info": ""}, {"id": "wb-kies-2200", "de": "Kies", "fr": "Gravier", "en": "Gravel", "fam": "fill", "v": 22.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 109", "roles": ["lestage"], "info": ""}, {"id": "wb-sand-2200", "de": "Sand (Beschwerung)", "fr": "Sable (lestage)", "en": "Sand (Beschwerung)", "fam": "fill", "v": 22.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 110", "roles": ["lestage"], "info": ""}, {"id": "wb-liapor-lecca-350", "de": "Liapor (Lecca)", "fr": "Argile expansée Liapor", "en": "Expanded clay Liapor", "fam": "fill", "v": 3.5, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 111 · « liapor.com »", "roles": ["lestage"], "info": ""}, {"id": "wb-fermacell-ausgleichssch-ttung-400", "de": "Fermacell Ausgleichsschüttung", "fr": "Granulat d'égalisation Fermacell", "en": "Fermacell levelling fill", "fam": "fill", "v": 4.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 112", "roles": ["lestage"], "info": ""}, {"id": "wb-fermacell-wabensch-ttung-1500", "de": "Fermacell Wabenschüttung", "fr": "Granulat nid d'abeille Fermacell", "en": "Fermacell honeycomb fill", "fam": "fill", "v": 15.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 113", "roles": ["lestage"], "info": ""}, {"id": "wb-fermacell-gebundene-sch-ttung-350", "de": "Fermacell Gebundene Schüttung", "fr": "Granulat lié Fermacell", "en": "Fermacell bonded fill", "fam": "fill", "v": 3.5, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 114", "roles": ["lestage"], "info": ""}, {"id": "wb-schlacke-1400", "de": "Schlacke (Beschwerung)", "fr": "Scories (lestage)", "en": "Slag (Beschwerung)", "fam": "fill", "v": 14.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 115", "roles": ["lestage"], "info": ""}, {"id": "wb-biberschw-einf-50", "de": "Biberschw. einf.", "fr": "Tuiles plates, recouvrement simple", "en": "Plain tiles, single lap", "fam": "tile", "v": 0.5, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 144", "roles": ["couverture"], "info": ""}, {"id": "wb-biberschw-doppelt-75", "de": "Biberschw. Doppelt", "fr": "Tuiles plates, recouvrement double", "en": "Plain tiles, double lap", "fam": "tile", "v": 0.75, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 145", "roles": ["couverture"], "info": ""}, {"id": "wb-betonziegel-55", "de": "Betonziegel", "fr": "Tuiles en béton", "en": "Concrete tiles", "fam": "tile", "v": 0.55, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 146 · « Etenit AG, »", "roles": ["couverture"], "info": ""}, {"id": "wb-pfannenziegel-47", "de": "Pfannenziegel", "fr": "Tuiles flamandes", "en": "Pantiles", "fam": "tile", "v": 0.47, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 147", "roles": ["couverture"], "info": "", "battens": "same"}, {"id": "wb-welleternit-18", "de": "Welleternit", "fr": "Plaques ondulées fibres-ciment", "en": "Corrugated fibre cement", "fam": "tile", "v": 0.18, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 148", "roles": ["couverture"], "info": ""}, {"id": "wb-eternitschiefer-30", "de": "Eternitschiefer", "fr": "Ardoises fibres-ciment", "en": "Fibre-cement slates", "fam": "tile", "v": 0.3, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 149", "roles": ["couverture"], "info": ""}, {"id": "wb-glas-5000", "de": "Glas", "fr": "Verre", "en": "Glass", "fam": "metal", "v": 50.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 150, 234", "roles": ["couverture", "façade"], "info": ""}, {"id": "wb-scobalit-500", "de": "Scobalit (Dachhaut)", "fr": "Scobalit (couverture)", "en": "Scobalit (Dachhaut)", "fam": "tile", "v": 5.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 151", "roles": ["couverture"], "info": ""}, {"id": "wb-aluwellblech-4", "de": "Aluwellblech", "fr": "Tôle ondulée aluminium", "en": "Corrugated aluminium", "fam": "metal", "v": 0.04, "u": "kN/m²", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 152 · « SIA 261 Tab 29 »", "roles": ["couverture"], "info": "Korrigiert: das Arbeitsblatt gibt 40 kg/m²; SIA 261 Tabelle 29, Profilblech Aluminium 80 mm × 0.8 mm: 0.04 kN/m²"}, {"id": "wb-profilblech-12", "de": "Profilblech", "fr": "Tôle profilée", "en": "Profiled sheet", "fam": "metal", "v": 0.12, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 153", "roles": ["couverture"], "info": ""}, {"id": "wb-pv-anlage-50", "de": "PV-Anlage (Dachhaut)", "fr": "Installation photovoltaïque (couverture)", "en": "PV system (Dachhaut)", "fam": "metal", "v": 0.5, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 154", "roles": ["couverture"], "info": ""}, {"id": "wb-dachpappe-5", "de": "Dachpappe", "fr": "Carton bitumé", "en": "Bitumen felt", "fam": "memb", "v": 0.05, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 155, 163, 220", "roles": ["lé de protection", "lé de sous-toiture", "étanchéité"], "info": ""}, {"id": "wb-epdm-10", "de": "EPDM", "fr": "Lé EPDM", "en": "EPDM membrane", "fam": "memb", "v": 0.1, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 156, 164, 221", "roles": ["lé de protection", "lé de sous-toiture", "étanchéité"], "info": ""}, {"id": "wb-sarnafil-5", "de": "Sarnafil", "fr": "Lé Sarnafil", "en": "Sarnafil membrane", "fam": "memb", "v": 0.05, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 157, 165, 222", "roles": ["lé de protection", "lé de sous-toiture", "étanchéité"], "info": ""}, {"id": "wb-ampack-5", "de": "Ampack", "fr": "Lé Ampack", "en": "Ampack membrane", "fam": "memb", "v": 0.05, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 158, 166, 223", "roles": ["lé de protection", "lé de recouvrement", "lé de sous-toiture", "étanchéité"], "info": ""}, {"id": "wb-polyesterflies-1", "de": "Polyesterflies", "fr": "Non-tissé polyester", "en": "Polyester fleece", "fam": "memb", "v": 0.01, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 159, 167, 224", "roles": ["lé de protection", "lé de sous-toiture", "étanchéité"], "info": ""}, {"id": "wb-weichfaserplatte-isoroof-200", "de": "Weichfaserplatte Isoroof", "fr": "Panneau fibres tendres Isoroof", "en": "Softboard Isoroof", "fam": "board", "v": 2.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 225 · « Pavatex »", "roles": ["sous-toiture"], "info": ""}, {"id": "wb-duripanel-1250", "de": "Duripanel (Unterdach)", "fr": "Duripanel (sous-toiture)", "en": "Duripanel (Unterdach)", "fam": "board", "v": 12.5, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 226, 232 · « Eternit, eternit.ch »", "roles": ["façade", "sous-toiture"], "info": ""}, {"id": "wb-weichfaserplatte-isolair-250", "de": "Weichfaserplatte ISOLAIR", "fr": "Panneau fibres tendres ISOLAIR", "en": "Softboard ISOLAIR", "fam": "board", "v": 2.5, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 228 · « Pavatex, Cham »", "roles": ["sous-toiture"], "info": ""}, {"id": "wb-faserzement-swisspearl-1800", "de": "Faserzement Swisspearl", "fr": "Fibres-ciment Swisspearl", "en": "Swisspearl fibre cement", "fam": "board", "v": 18.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 229 · « Eternit »", "roles": ["sous-toiture"], "info": ""}, {"id": "wb-schalung-fi-ta-500", "de": "Schalung Fi/Ta", "fr": "Lambris épicéa/sapin", "en": "Spruce/fir boarding", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 230 · « SIA 261 »", "roles": ["sous-toiture"], "info": ""}, {"id": "wb-fermacell-hd-1000", "de": "Fermacell HD", "fr": "Fermacell HD", "en": "Fermacell HD", "fam": "gyps", "v": 10.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 231 · « fermacell.ch »", "roles": ["façade"], "info": ""}, {"id": "wb-scobalit-0", "de": "Scobalit (Fassade)", "fr": "Scobalit (façade)", "en": "Scobalit (Fassade)", "fam": "tile", "v": 0.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 235", "roles": ["façade"], "info": ""}, {"id": "wb-l-rche-500", "de": "Lärche", "fr": "Mélèze", "en": "Larch", "fam": "wood", "v": 5.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 239 · « SIA 261 »", "roles": ["façade"], "info": ""}, {"id": "wb-eternit-1400", "de": "Eternit", "fr": "Fibres-ciment Eternit", "en": "Eternit fibre cement", "fam": "board", "v": 14.0, "u": "kN/m³", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 240, 242", "roles": ["façade"], "info": ""}, {"id": "wb-blech-aluminium-2700", "de": "Blech Aluminium", "fr": "Tôle aluminium", "en": "Aluminium sheet", "fam": "metal", "v": 27.0, "u": "kN/m³", "src": "sia", "ref": "Classeur Belastungsannahmen, ligne 243 · « SIA 261 Tab 28 »", "roles": ["façade"], "info": "Korrigiert: das Arbeitsblatt gibt 3500 kg/m³; SIA 261 Tabelle 28, Aluminium: 27 kN/m³"}, {"id": "wb-stamisol-fa-1", "de": "Stamisol FA", "fr": "Lé de façade Stamisol FA", "en": "Stamisol FA facade membrane", "fam": "memb", "v": 0.01, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 244", "roles": ["lé de recouvrement"], "info": ""}, {"id": "wb-stamisol-1", "de": "Stamisol", "fr": "Lé Stamisol", "en": "Stamisol membrane", "fam": "memb", "v": 0.01, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 245", "roles": ["lé de recouvrement"], "info": ""}, {"id": "wb-flammex-5", "de": "Flammex", "fr": "Lé Flammex", "en": "Flammex membrane", "fam": "memb", "v": 0.05, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 247", "roles": ["lé de recouvrement"], "info": ""}, {"id": "wb-sisalex-5", "de": "Sisalex", "fr": "Lé Sisalex", "en": "Sisalex membrane", "fam": "memb", "v": 0.05, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 248", "roles": ["lé de recouvrement"], "info": ""}, {"id": "wb-fassadenbahn-1", "de": "Fassadenbahn", "fr": "Lé de façade", "en": "Facade membrane", "fam": "memb", "v": 0.01, "u": "kN/m²", "src": "ext", "ref": "Classeur Belastungsannahmen, ligne 249", "roles": ["lé de recouvrement"], "info": ""}, {"id": "perso-3s-meleze", "de": "Dreischichtplatte Lärche (Muster)", "fr": "Panneau trois plis mélèze (exemple)", "en": "Three-layer larch board (example)", "fam": "board", "v": 5.2, "u": "kN/m³", "src": "perso", "ref": "Bibliothèque personnelle · exemple saisi pour le prototype"}, {"id": "perso-installations", "de": "Installationen und Innenwände (Muster)", "fr": "Installations et cloisons (exemple)", "en": "Services and partitions (example)", "fam": "direct", "v": 0.5, "u": "kN/m²", "src": "perso", "ref": "Bibliothèque personnelle · exemple saisi pour le prototype"}, {"id": "perso-foamglas", "de": "Schaumglas (Muster)", "fr": "Verre cellulaire (exemple)", "en": "Cellular glass (example)", "fam": "ins", "v": 1.15, "u": "kN/m³", "src": "perso", "ref": "Bibliothèque personnelle · exemple saisi pour le prototype, 115 kg/m³ à vérifier sur la fiche du fabricant"}];
+var DATA = {"templates": [{"id": "T-toit-entre", "kind": "roof", "fr": "Toiture inclinée, isolée entre chevrons", "de": "Geneigtes Dach, zwischengedämmt", "en": "Pitched roof, insulated between rafters", "src": "Lignum, Holzbau mit System, C4 Geneigte Dächer, tableau 6", "assume": "chevrons 80/220 e = 625, isolation 200, contre-lattes 60/50 e = 625, lattage 50/30 e = 400", "layers": [{"mat": "sia29-tonziegeldach_inkl_lattung_pfannenziegel", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "couverture", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "a", "t": 50, "b": 60, "e": 625, "link": false, "role": "contre-lattes", "count": "full"}, {"mat": "sia29-unterdaecher_hartfaserplatten", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "sous-toiture", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "g", "t": 220, "b": 80, "e": 625, "link": true, "role": "structure", "count": "full"}, {"mat": "wb-flumroc-typ-1-38", "pose": "cont", "k": "a", "t": 200, "b": null, "e": null, "link": false, "role": "isolation", "count": "full"}, {"mat": "sia29-kunststofffolie", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "pare-vapeur", "count": "full"}, {"mat": "wb-fi-ta-500", "pose": "ent", "k": "a", "t": 30, "b": 50, "e": 400, "link": false, "role": "lattage", "count": "full"}, {"mat": "wb-rigips-1200", "pose": "cont", "k": "a", "t": 15, "b": null, "e": null, "link": false, "role": "revêtement intérieur", "count": "full"}]}, {"id": "T-toit-sur", "kind": "roof", "fr": "Toiture inclinée, isolée sur chevrons", "de": "Geneigtes Dach, aussen gedämmt", "en": "Pitched roof, insulated above rafters", "src": "Lignum, Holzbau mit System, C4 Geneigte Dächer, tableau 10", "assume": "isolation 200 sur lambris 27, chevrons 120/240 e = 1000 apparents", "layers": [{"mat": "sia29-betonziegeldach_inkl_lattung_pfannenziegel", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "couverture", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "a", "t": 50, "b": 60, "e": 625, "link": false, "role": "contre-lattes", "count": "full"}, {"mat": "wb-ampack-5", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "lé de sous-toiture", "count": "full"}, {"mat": "wb-flumroc-typ-3-60", "pose": "cont", "k": "a", "t": 200, "b": null, "e": null, "link": false, "role": "isolation", "count": "full"}, {"mat": "sia29-kunststofffolie", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "pare-vapeur", "count": "full"}, {"mat": "wb-schalung-500", "pose": "cont", "k": "g", "t": 27, "b": null, "e": null, "link": false, "role": "lambris", "count": "full"}, {"mat": "wb-gl24h-500", "pose": "ent", "k": "g", "t": 240, "b": 120, "e": 1000, "link": false, "role": "structure", "count": "full"}]}, {"id": "T-toit-plat", "kind": "flat", "fr": "Toit plat compact sur bois massif", "de": "Flachdach, Verbunddach auf Massivholz", "en": "Compact flat roof on solid timber", "src": "Lignum, Holzbau mit System, C5 Flachdächer, tableau 13", "assume": "verre cellulaire 200 (matériau personnel), bois massif 100 mm", "layers": [{"mat": "wb-kiesauflage-2000", "pose": "cont", "k": "a", "t": 60, "b": null, "e": null, "link": false, "role": "couche de protection", "count": "full"}, {"mat": "wb-polyesterflies-1", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "couche de protection", "count": "full"}, {"mat": "wb-epdm-10", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "étanchéité", "count": "full"}, {"mat": "perso-foamglas", "pose": "cont", "k": "a", "t": 200, "b": null, "e": null, "link": false, "role": "isolation", "count": "full"}, {"mat": "wb-dachpappe-5", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "pare-vapeur", "count": "full"}, {"mat": "sia28-holz_verleimte_nadelhoelzer", "pose": "cont", "k": "g", "t": 100, "b": null, "e": null, "link": false, "role": "structure", "count": "full"}]}, {"id": "T-paroi-ossature", "kind": "wall", "fr": "Paroi à ossature bois, façade ventilée", "de": "Holzrahmenbau, hinterlüftet", "en": "Timber-frame wall, ventilated facade", "src": "Lignum, Holzbau mit System, A2, figure 24", "assume": "montants 60/240 e = 625, lattage 30/50 e = 600", "layers": [{"mat": "wb-l-rche-500", "pose": "cont", "k": "a", "t": 21, "b": null, "e": null, "link": false, "role": "façade", "count": "full"}, {"mat": "wb-fi-ta-500", "pose": "ent", "k": "a", "t": 30, "b": 50, "e": 600, "link": false, "role": "lattage", "count": "full"}, {"mat": "wb-fassadenbahn-1", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "lé de façade", "count": "full"}, {"mat": "wb-fermacell-1200", "pose": "cont", "k": "a", "t": 15, "b": null, "e": null, "link": false, "role": "panneau de contreventement", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "g", "t": 240, "b": 60, "e": 625, "link": true, "role": "structure", "count": "full"}, {"mat": "wb-flumroc-typ-1-38", "pose": "cont", "k": "a", "t": 240, "b": null, "e": null, "link": false, "role": "isolation", "count": "full"}, {"mat": "wb-osb3-680", "pose": "cont", "k": "g", "t": 15, "b": null, "e": null, "link": false, "role": "panneau de contreventement", "count": "full"}, {"mat": "wb-fermacell-1200", "pose": "cont", "k": "a", "t": 18, "b": null, "e": null, "link": false, "role": "revêtement intérieur", "count": "full"}]}, {"id": "T-paroi-clt", "kind": "wall", "fr": "Paroi en bois lamellé-croisé, isolation crépie", "de": "Massivholzbau, Brettsperrholz", "en": "Cross-laminated timber wall, rendered insulation", "src": "Lignum, Holzbau mit System, A2, figure 24", "assume": "crépi 15 mm", "layers": [{"mat": "sia28-moertelueberzuege_wandverputz_aussen", "pose": "cont", "k": "a", "t": 15, "b": null, "e": null, "link": false, "role": "façade", "count": "full"}, {"mat": "wb-flumroc-typ-3-60", "pose": "cont", "k": "a", "t": 200, "b": null, "e": null, "link": false, "role": "isolation", "count": "full"}, {"mat": "sia28-holz_verleimte_nadelhoelzer", "pose": "cont", "k": "g", "t": 120, "b": null, "e": null, "link": false, "role": "structure", "count": "full"}]}, {"id": "T-plancher-sable", "kind": "floor", "fr": "Plancher à solives, sable entre lattes", "de": "Holzbalkendecke, Sand zwischen Lattung", "en": "Joisted floor, sand between battens", "src": "Lignum, Holzbau mit System, C7, figure 13, exemple 2, p. 415", "book": 127, "assume": "lattes 50/50 e = 500, solives 140/200 e = 600, sable compté au prorata", "layers": [{"mat": "wb-spanplatten-800", "pose": "cont", "k": "a", "t": 25, "b": null, "e": null, "link": false, "role": "chape", "count": "full"}, {"mat": "wb-polyesterflies-1", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "isolation phonique", "count": "full"}, {"mat": "wb-fi-ta-500", "pose": "ent", "k": "a", "t": 50, "b": 50, "e": 500, "link": true, "role": "lattage", "count": "full"}, {"mat": "sia30-sable", "pose": "cont", "k": "a", "t": 50, "b": null, "e": null, "link": false, "role": "lestage", "count": "prorata"}, {"mat": "wb-polyesterflies-1", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "couche de protection", "count": "full"}, {"mat": "wb-schalung-500", "pose": "cont", "k": "g", "t": 21, "b": null, "e": null, "link": false, "role": "structure", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "g", "t": 200, "b": 140, "e": 600, "link": false, "role": "structure", "count": "full"}]}, {"id": "T-plancher-chape", "kind": "floor", "fr": "Plancher à solives, chape ciment", "de": "Holzbalkendecke, Zementestrich", "en": "Joisted floor, cement screed", "src": "Lignum, Holzbau mit System, C7, figure 11, exemple 2, p. 415", "book": 150, "assume": "chape 50 mm, solives 140/200 e = 600", "layers": [{"mat": "wb-zement-ub-2200", "pose": "cont", "k": "a", "t": 50, "b": null, "e": null, "link": false, "role": "chape", "count": "full"}, {"mat": "sia29-kunststofffolie", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "couche de protection", "count": "full"}, {"mat": "wb-flumroc-trittschall-110", "pose": "cont", "k": "a", "t": 15, "b": null, "e": null, "link": false, "role": "isolation phonique", "count": "full"}, {"mat": "wb-schalung-500", "pose": "cont", "k": "g", "t": 21, "b": null, "e": null, "link": false, "role": "structure", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "g", "t": 200, "b": 140, "e": 600, "link": false, "role": "structure", "count": "full"}]}, {"id": "T-plancher-caisson", "kind": "floor", "fr": "Plancher caisson, gravillon entre nervures", "de": "Hohlkastendecke, Kalksplittschüttung", "en": "Box floor, chippings between ribs", "src": "Lignum, Holzbau mit System, A2, figure 19", "assume": "nervures 80/200 e = 625 ; gravillon 120 sous 80 mm d'air", "layers": [{"mat": "wb-3-schichtplatte-500", "pose": "cont", "k": "g", "t": 27, "b": null, "e": null, "link": false, "role": "structure", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "g", "t": 200, "b": 80, "e": 625, "link": true, "role": "structure", "count": "full"}, {"mat": "wb-kalksplittsch-ttung-trocken-1400", "pose": "cont", "k": "a", "t": 120, "b": null, "e": null, "link": false, "role": "lestage", "count": "full"}, {"mat": "wb-3-schichtplatte-500", "pose": "cont", "k": "g", "t": 27, "b": null, "e": null, "link": false, "role": "structure", "count": "full"}]}], "project": [{"id": "AU-01", "kind": "roof", "fr": "Toiture inclinée, tuiles", "desc": "Le cas de la première version : sept couches, chevrons 60/200 e = 625", "layers": [{"mat": "wb-pfannenziegel-47", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "couverture", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "a", "t": 24, "b": 48, "e": 330, "link": false, "role": "lattes de toiture", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "a", "t": 40, "b": 60, "e": 625, "link": false, "role": "contre-lattes", "count": "full"}, {"mat": "wb-weichfaserplatte-isolair-250", "pose": "cont", "k": "a", "t": 35, "b": null, "e": null, "link": false, "role": "sous-toiture", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "g", "t": 200, "b": 60, "e": 625, "link": true, "role": "structure", "count": "full"}, {"mat": "wb-flumroc-typ-1-38", "pose": "cont", "k": "a", "t": 200, "b": null, "e": null, "link": false, "role": "isolation", "count": "full"}, {"mat": "wb-rigips-1200", "pose": "cont", "k": "a", "t": 12.5, "b": null, "e": null, "link": false, "role": "revêtement intérieur", "count": "full"}]}, {"id": "PL-01", "kind": "floor", "fr": "Plancher à solives, sable entre lattes", "de": "Holzbalkendecke, Sand zwischen Lattung", "en": "Joisted floor, sand between battens", "src": "Lignum, Holzbau mit System, C7, figure 13, exemple 2, p. 415", "book": 127, "assume": "lattes 50/50 e = 500, solives 140/200 e = 600, sable compté au prorata", "layers": [{"mat": "wb-spanplatten-800", "pose": "cont", "k": "a", "t": 25, "b": null, "e": null, "link": false, "role": "chape", "count": "full"}, {"mat": "wb-polyesterflies-1", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "isolation phonique", "count": "full"}, {"mat": "wb-fi-ta-500", "pose": "ent", "k": "a", "t": 50, "b": 50, "e": 500, "link": true, "role": "lattage", "count": "full"}, {"mat": "sia30-sable", "pose": "cont", "k": "a", "t": 50, "b": null, "e": null, "link": false, "role": "lestage", "count": "prorata"}, {"mat": "wb-polyesterflies-1", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "couche de protection", "count": "full"}, {"mat": "wb-schalung-500", "pose": "cont", "k": "g", "t": 21, "b": null, "e": null, "link": false, "role": "structure", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "g", "t": 200, "b": 140, "e": 600, "link": false, "role": "structure", "count": "full"}], "from": "T-plancher-sable"}, {"id": "PA-01", "kind": "wall", "fr": "Paroi à ossature bois, façade ventilée", "de": "Holzrahmenbau, hinterlüftet", "en": "Timber-frame wall, ventilated facade", "src": "Lignum, Holzbau mit System, A2, figure 24", "assume": "montants 60/240 e = 625, lattage 30/50 e = 600", "layers": [{"mat": "wb-l-rche-500", "pose": "cont", "k": "a", "t": 21, "b": null, "e": null, "link": false, "role": "façade", "count": "full"}, {"mat": "wb-fi-ta-500", "pose": "ent", "k": "a", "t": 30, "b": 50, "e": 600, "link": false, "role": "lattage", "count": "full"}, {"mat": "wb-fassadenbahn-1", "pose": "surf", "k": "a", "t": null, "b": null, "e": null, "link": false, "role": "lé de façade", "count": "full"}, {"mat": "wb-fermacell-1200", "pose": "cont", "k": "a", "t": 15, "b": null, "e": null, "link": false, "role": "panneau de contreventement", "count": "full"}, {"mat": "wb-c24-500", "pose": "ent", "k": "g", "t": 240, "b": 60, "e": 625, "link": true, "role": "structure", "count": "full"}, {"mat": "wb-flumroc-typ-1-38", "pose": "cont", "k": "a", "t": 240, "b": null, "e": null, "link": false, "role": "isolation", "count": "full"}, {"mat": "wb-osb3-680", "pose": "cont", "k": "g", "t": 15, "b": null, "e": null, "link": false, "role": "panneau de contreventement", "count": "full"}, {"mat": "wb-fermacell-1200", "pose": "cont", "k": "a", "t": 18, "b": null, "e": null, "link": false, "role": "revêtement intérieur", "count": "full"}], "from": "T-paroi-ossature"}]};
+/* ---------------- the words of the window, de fr en ---------------- */
+var W = {
+fr:{tab:"Poids propre et surcharge",comps:"Compositions",overview:"Vue d'ensemble",archives:"Archives",nouveau:"Nouveau…",dupliquer:"Dupliquer",desc:"+ description",
+ cMat:"Matériau",cT:"Ép.",cE:"Entraxe",cB:"Largeur",cGA:"g/a",cLoad:"kN/m²",addLayer:"+ Couche",addDirect:"+ Charge saisie",annuler:"Annuler",enregistrer:"Enregistrer",sum:"Somme",
+ warnT:"Avertissements",optsT:"Couche {n}",figT:"Coupe",coupe:"Coupe",contrib:"Contributions",big:"Agrandir",resT:"Résultats",retained:"retenu",retAuto:"au dixième supérieur",restore:"Rétablir le calcul",
+ matL:"Matériau",search:"Chercher un matériau…",all:"Toutes",sia:"SIA 261",ext:"Externe",perso:"Personnel",newPerso:"+ Nouveau matériau personnel",poseL:"Pose",pose_cont:"continue",pose_ent:"à entraxe",pose_surf:"par surface",pose_direct:"charge saisie",
+ tL:"Épaisseur",bL:"Largeur",eL:"Entraxe",kL:"Compte en",roleL:"Rôle",linkL:"Lier à la ligne du dessous : même niveau",countL:"Compter le remplissage",count_full:"sur toute la largeur",count_prorata:"au prorata",
+ loadL:"Charge de la couche",overL:"Remplacer",overManual:"remplacée à la main",overVar:"remplacée par {v}",varT:"Une variable du projet en kN/m²",directV:"Charge",noMat:"aucun matériau",
+ fam_wood:"Bois massif",fam_board:"Panneaux",fam_ins:"Isolants",fam_tile:"Couvertures",fam_memb:"Lés et membranes",fam_gyps:"Plâtres et enduits",fam_conc:"Béton, chapes, maçonnerie",fam_metal:"Métaux et verre",fam_floor:"Revêtements de sol",fam_fill:"Granulats et lestage",fam_direct:"Charges saisies",
+ w_ok:"Toutes les couches ont leur poids.",w_zero:"Couche {n} : {m} pèse 0 dans la bibliothèque. Donnez-lui un poids dans votre bibliothèque personnelle.",w_unknown:"Couche {n} : « {m} » n'est dans aucune bibliothèque.",w_nomat:"Couche {n} : choisissez un matériau.",
+ w_t:"Couche {n} : il manque l'épaisseur.",w_e:"Couche {n} : il manque la largeur ou l'entraxe.",w_full:"Couche {n} : {m} est compté sur toute la largeur, {s} compris (+{d} kN/m², du côté de la sécurité).",
+ w_thick:"Couche {n} : {m} ({t} mm) est plus épais que la couche à laquelle il est lié ({u} mm).",w_air:"Couche {n} : {a} mm d'air au-dessus de {m}.",w_over:"Couche {n} : charge remplacée, {v} kN/m² au lieu de {c}.",
+ w_ret:"Valeur retenue écrasée : {v} kN/m² (au dixième supérieur : {c}).",w_retlow:"La valeur retenue {v} kN/m² est inférieure à la somme {s} : l'export s'arrête.",w_perso:"Couche {n} : {m} vient de votre bibliothèque personnelle ; le projet en garde une copie.",
+ w_battens:"Couche {n} : les tuiles comprennent déjà leur lattis (SIA 261, tableau 29) ; la couche {k} le compte une seconde fois (+{d} kN/m², du côté de la sécurité).",w_dirty:"Modifié, pas enregistré : le rapport imprime le dernier export.",
+ air:"air",top_roof:"haut · extérieur",bot_roof:"bas · intérieur",top_flat:"haut · extérieur",bot_flat:"bas · intérieur",top_wall:"extérieur",bot_wall:"intérieur",top_floor:"dessus",bot_floor:"dessous",
+ gkOnly:"g_k seul",akOnly:"a_k seul",both:"g_k + a_k",ovName:"Composition",ovLayers:"Couches",ovState:"État",complete:"complète",toFix:"{n} à corriger",kg:"≈ {v} kg/m²",
+ tplT:"Nouvelle composition",tplLignum:"Modèles Lignum",tplMine:"Mes modèles",tplMineNone:"Une composition enregistrée comme modèle vient ici, sur cet ordinateur.",tplEmpty:"Composition vide",tplCreate:"Créer depuis ce modèle",book:"Lignum : {v} kg/m²",assume:"Supposé : {a}",layersN:"{n} couches",close:"Fermer",
+ npName:"Nom",npFam:"Famille",npVal:"Poids",npAdd:"Ajouter à ma bibliothèque",toastSave:"Prototype : rien n'est écrit.",unknownT:"inconnu",help:"Clic sur une ligne : ses options à droite. Un second clic la ferme.",
+ roles:["structure","isolation","couverture","sous-toiture","contre-lattes","lattes de toiture","lattage","lambris","pare-vapeur","étanchéité","couche de protection","lestage","chape","isolation phonique","revêtement de sol","panneau de contreventement","revêtement intérieur","façade","lé de façade","lé de sous-toiture"],
+ linkedT:"lié à la ligne du dessous",same:"même niveau",refL:"Source",unitV:"kN/m³",unitS:"kN/m²",clickBand:"Clic sur une couche : l'ouvrir",fam_wood:"Bois",fam_board:"Panneaux",fam_ins:"Isolation",fam_tile:"Couverture",fam_memb:"Étanchéité et lés",fam_gyps:"Plâtres et enduits",fam_conc:"Béton et maçonnerie",fam_metal:"Acier, métaux et verre",fam_floor:"Revêtements de sol",fam_fill:"Granulats et lestage",fillL:"Remplir",fillH:"la largeur restante sur 1 m, autour des pièces de la ligne liée",wL:"Largeur sur 1 m",restoreB:"Rétablir",libLink:"Les matériaux se créent dans l'onglet Matériaux",toastLib:"Dans Woodcore : l'onglet Matériaux s'ouvre.",vCalc:"Calcul",vDisp:"Affichage",lvl:"Niveau du rapport",el_head:"Titre",el_tab:"Tableau des couches",el_fig:"Figure : la coupe",el_vals:"g_k, a_k, g_k + a_k",el_ret:"Valeur retenue",dAuto:"auto",dShow:"toujours",dHide:"jamais",tFile:"Le fichier écrit pour Typst (esquisse)",pTitle:"Charges permanentes",noteL:"Charge par couche = poids · épaisseur · largeur / entraxe ; une charge par surface sans l'épaisseur ; kg → kN avec g = 10 m/s².",colW:"Poids",cap:"Coupe de la composition, largeur 1 m",help3:"Clic sur une ligne : ses options à droite. Échap ou clic dans le vide : la fermer. Tab : cellule suivante.",ovBtn:"⊞ Vue d'ensemble",dispElems:"Éléments",inExport:"L'export imprime les valeurs, sans dire qu'elles ont été remplacées.",m1:"1 m"},
+de:{tab:"Eigen- und Auflast",comps:"Aufbauten",overview:"Übersicht",archives:"Archiv",nouveau:"Neu…",dupliquer:"Duplizieren",desc:"+ Beschreibung",
+ cMat:"Material",cT:"Dicke",cE:"Abstand",cB:"Breite",cGA:"g/a",cLoad:"kN/m²",addLayer:"+ Schicht",addDirect:"+ Direkte Last",annuler:"Verwerfen",enregistrer:"Speichern",sum:"Summe",
+ warnT:"Hinweise",optsT:"Schicht {n}",figT:"Schnitt",coupe:"Schnitt",contrib:"Anteile",big:"Vergrössern",resT:"Resultate",retained:"gewählt",retAuto:"auf das nächste Zehntel",restore:"Berechnung wiederherstellen",
+ matL:"Material",search:"Material suchen…",all:"Alle",sia:"SIA 261",ext:"Extern",perso:"Persönlich",newPerso:"+ Neues persönliches Material",poseL:"Verlegung",pose_cont:"durchgehend",pose_ent:"im Abstand",pose_surf:"pro Fläche",pose_direct:"direkte Last",
+ tL:"Dicke",bL:"Breite",eL:"Abstand",kL:"Zählt zu",roleL:"Ebene",linkL:"Mit der Zeile darunter verbinden: gleiche Ebene",countL:"Füllung zählen",count_full:"über die ganze Breite",count_prorata:"anteilig",
+ loadL:"Last der Schicht",overL:"Ersetzen",overManual:"von Hand ersetzt",overVar:"ersetzt durch {v}",varT:"Eine Variable des Projekts in kN/m²",directV:"Last",noMat:"kein Material",
+ fam_wood:"Vollholz",fam_board:"Platten",fam_ins:"Dämmstoffe",fam_tile:"Bedachungen",fam_memb:"Bahnen",fam_gyps:"Gips und Putze",fam_conc:"Beton, Unterlagsböden, Mauerwerk",fam_metal:"Metalle und Glas",fam_floor:"Bodenbeläge",fam_fill:"Schüttungen und Beschwerung",fam_direct:"Direkte Lasten",
+ w_ok:"Alle Schichten haben ihr Gewicht.",w_zero:"Schicht {n}: {m} wiegt 0 in der Bibliothek. Geben Sie ihm ein Gewicht in Ihrer persönlichen Bibliothek.",w_unknown:"Schicht {n}: «{m}» ist in keiner Bibliothek.",w_nomat:"Schicht {n}: Material wählen.",
+ w_t:"Schicht {n}: die Dicke fehlt.",w_e:"Schicht {n}: Breite oder Abstand fehlt.",w_full:"Schicht {n}: {m} zählt über die ganze Breite, {s} inbegriffen (+{d} kN/m², auf der sicheren Seite).",
+ w_thick:"Schicht {n}: {m} ({t} mm) ist dicker als die verbundene Schicht ({u} mm).",w_air:"Schicht {n}: {a} mm Luft über {m}.",w_over:"Schicht {n}: Last ersetzt, {v} kN/m² statt {c}.",
+ w_ret:"Gewählter Wert überschrieben: {v} kN/m² (nächstes Zehntel: {c}).",w_retlow:"Der gewählte Wert {v} kN/m² liegt unter der Summe {s}: der Export bricht ab.",w_perso:"Schicht {n}: {m} stammt aus Ihrer persönlichen Bibliothek; das Projekt behält eine Kopie.",
+ w_battens:"Schicht {n}: die Ziegel enthalten ihre Lattung schon (SIA 261, Tabelle 29); Schicht {k} zählt sie ein zweites Mal (+{d} kN/m², auf der sicheren Seite).",w_dirty:"Geändert, nicht gespeichert: der Bericht druckt den letzten Export.",
+ air:"Luft",top_roof:"oben · aussen",bot_roof:"unten · innen",top_flat:"oben · aussen",bot_flat:"unten · innen",top_wall:"aussen",bot_wall:"innen",top_floor:"oben",bot_floor:"unten",
+ gkOnly:"nur g_k",akOnly:"nur a_k",both:"g_k + a_k",ovName:"Aufbau",ovLayers:"Schichten",ovState:"Stand",complete:"vollständig",toFix:"{n} zu beheben",kg:"≈ {v} kg/m²",
+ tplT:"Neuer Aufbau",tplLignum:"Vorlagen Lignum",tplMine:"Meine Vorlagen",tplMineNone:"Ein als Vorlage gespeicherter Aufbau erscheint hier, auf diesem Computer.",tplEmpty:"Leerer Aufbau",tplCreate:"Aus dieser Vorlage erstellen",book:"Lignum: {v} kg/m²",assume:"Angenommen: {a}",layersN:"{n} Schichten",close:"Schliessen",
+ npName:"Name",npFam:"Familie",npVal:"Gewicht",npAdd:"In meine Bibliothek",toastSave:"Prototyp: nichts wird geschrieben.",unknownT:"unbekannt",help:"Klick auf eine Zeile: ihre Optionen rechts. Ein zweiter Klick schliesst sie.",
+ roles:["Konstruktion","Dämmung","Dachhaut","Unterdach","Konterlattung","Dachlattung","Lattung","Schalung","Dampfbremse","Abdichtung","Schutzschicht","Beschwerung","Unterlagsboden","Trittschalldämmung","Bodenbelag","Beplankung","Bekleidung","Fassade","Fassadenbahn","Unterdachbahn"],
+ linkedT:"mit der Zeile darunter verbunden",same:"gleiche Ebene",refL:"Quelle",unitV:"kN/m³",unitS:"kN/m²",clickBand:"Klick auf eine Schicht: öffnen",fam_wood:"Holz",fam_board:"Platten",fam_ins:"Dämmung",fam_tile:"Bedachung",fam_memb:"Abdichtung und Bahnen",fam_gyps:"Gips und Putze",fam_conc:"Beton und Mauerwerk",fam_metal:"Stahl, Metalle und Glas",fam_floor:"Bodenbeläge",fam_fill:"Schüttungen und Beschwerung",fillL:"Füllen",fillH:"die übrige Breite auf 1 m, um die Teile der verbundenen Zeile",wL:"Breite auf 1 m",restoreB:"Wiederherstellen",libLink:"Materialien entstehen im Register Materialien",toastLib:"In Woodcore: das Register Materialien öffnet sich.",vCalc:"Berechnung",vDisp:"Anzeige",lvl:"Stufe des Berichts",el_head:"Titel",el_tab:"Schichttabelle",el_fig:"Figur: der Schnitt",el_vals:"g_k, a_k, g_k + a_k",el_ret:"Gewählter Wert",dAuto:"auto",dShow:"immer",dHide:"nie",tFile:"Die für Typst geschriebene Datei (Skizze)",pTitle:"Ständige Lasten",noteL:"Last je Schicht = Wichte · Dicke · Breite / Abstand; eine Flächenlast ohne die Dicke; kg → kN mit g = 10 m/s².",colW:"Gewicht",cap:"Schnitt des Aufbaus, Breite 1 m",help3:"Klick auf eine Zeile: ihre Optionen rechts. Esc oder Klick ins Leere: schliessen. Tab: nächste Zelle.",ovBtn:"⊞ Übersicht",dispElems:"Elemente",inExport:"Der Export druckt die Werte, ohne zu sagen, dass sie ersetzt wurden.",m1:"1 m"},
+en:{tab:"Dead and superimposed load",comps:"Build-ups",overview:"Overview",archives:"Archives",nouveau:"New…",dupliquer:"Duplicate",desc:"+ description",
+ cMat:"Material",cT:"Thick.",cE:"Spacing",cB:"Width",cGA:"g/a",cLoad:"kN/m²",addLayer:"+ Layer",addDirect:"+ Typed load",annuler:"Discard",enregistrer:"Save",sum:"Sum",
+ warnT:"Warnings",optsT:"Layer {n}",figT:"Section",coupe:"Section",contrib:"Contributions",big:"Enlarge",resT:"Results",retained:"retained",retAuto:"next tenth up",restore:"Restore the calculation",
+ matL:"Material",search:"Search a material…",all:"All",sia:"SIA 261",ext:"External",perso:"Personal",newPerso:"+ New personal material",poseL:"Laying",pose_cont:"continuous",pose_ent:"at spacing",pose_surf:"per area",pose_direct:"typed load",
+ tL:"Thickness",bL:"Width",eL:"Spacing",kL:"Counts as",roleL:"Role",linkL:"Link to the line below: same level",countL:"Count the filling",count_full:"over the full width",count_prorata:"pro rata",
+ loadL:"Load of the layer",overL:"Replace",overManual:"replaced by hand",overVar:"replaced by {v}",varT:"A variable of the project in kN/m²",directV:"Load",noMat:"no material",
+ fam_wood:"Solid timber",fam_board:"Boards",fam_ins:"Insulation",fam_tile:"Roof coverings",fam_memb:"Membranes",fam_gyps:"Gypsum and plaster",fam_conc:"Concrete, screeds, masonry",fam_metal:"Metals and glass",fam_floor:"Floor finishes",fam_fill:"Fills and ballast",fam_direct:"Typed loads",
+ w_ok:"Every layer has its weight.",w_zero:"Layer {n}: {m} weighs 0 in the library. Give it a weight in your personal library.",w_unknown:"Layer {n}: «{m}» is in no library.",w_nomat:"Layer {n}: choose a material.",
+ w_t:"Layer {n}: the thickness is missing.",w_e:"Layer {n}: the width or the spacing is missing.",w_full:"Layer {n}: {m} counts over the full width, {s} included (+{d} kN/m², on the safe side).",
+ w_thick:"Layer {n}: {m} ({t} mm) is thicker than the layer it is linked to ({u} mm).",w_air:"Layer {n}: {a} mm of air above {m}.",w_over:"Layer {n}: load replaced, {v} kN/m² instead of {c}.",
+ w_ret:"Retained value overridden: {v} kN/m² (next tenth up: {c}).",w_retlow:"The retained value {v} kN/m² is below the sum {s}: the export stops.",w_perso:"Layer {n}: {m} comes from your personal library; the project keeps a copy.",
+ w_battens:"Layer {n}: the tiles already include their battens (SIA 261, Table 29); layer {k} counts them a second time (+{d} kN/m², on the safe side).",w_dirty:"Edited, not saved: the report prints the last export.",
+ air:"air",top_roof:"top · outside",bot_roof:"bottom · inside",top_flat:"top · outside",bot_flat:"bottom · inside",top_wall:"outside",bot_wall:"inside",top_floor:"top",bot_floor:"underside",
+ gkOnly:"g_k only",akOnly:"a_k only",both:"g_k + a_k",ovName:"Build-up",ovLayers:"Layers",ovState:"State",complete:"complete",toFix:"{n} to fix",kg:"≈ {v} kg/m²",
+ tplT:"New build-up",tplLignum:"Lignum templates",tplMine:"My templates",tplMineNone:"A build-up saved as a template comes here, on this computer.",tplEmpty:"Empty build-up",tplCreate:"Create from this template",book:"Lignum: {v} kg/m²",assume:"Assumed: {a}",layersN:"{n} layers",close:"Close",
+ npName:"Name",npFam:"Family",npVal:"Weight",npAdd:"Add to my library",toastSave:"Prototype: nothing is written.",unknownT:"unknown",help:"Click a line: its options on the right. A second click closes it.",
+ roles:["structure","insulation","roof covering","sarking","counter-battens","roof battens","battens","boarding","vapour barrier","waterproofing","protection layer","ballast","screed","impact-sound insulation","floor finish","sheathing","lining","facade","facade membrane","sarking membrane"],
+ linkedT:"linked to the line below",same:"same level",refL:"Source",unitV:"kN/m³",unitS:"kN/m²",clickBand:"Click a layer: open it",fam_wood:"Timber",fam_board:"Boards",fam_ins:"Insulation",fam_tile:"Roofing",fam_memb:"Waterproofing and membranes",fam_gyps:"Gypsum and plaster",fam_conc:"Concrete and masonry",fam_metal:"Steel, metals and glass",fam_floor:"Floor finishes",fam_fill:"Fills and ballast",fillL:"Fill",fillH:"the remaining width on 1 m, around the pieces of the linked line",wL:"Width on 1 m",restoreB:"Restore",libLink:"Materials are created in the Materials tab",toastLib:"In Woodcore: the Materials tab opens.",vCalc:"Calculation",vDisp:"Display",lvl:"Report level",el_head:"Title",el_tab:"Table of layers",el_fig:"Figure: the section",el_vals:"g_k, a_k, g_k + a_k",el_ret:"Retained value",dAuto:"auto",dShow:"always",dHide:"never",tFile:"The file written for Typst (sketch)",pTitle:"Permanent loads",noteL:"Load per layer = weight · thickness · width / spacing; a load per area without the thickness; kg → kN with g = 10 m/s².",colW:"Weight",cap:"Section of the build-up, 1 m wide",help3:"Click a line: its options on the right. Esc or a click in the empty space: close it. Tab: next cell.",ovBtn:"⊞ Overview",dispElems:"Elements",inExport:"The export prints the values without saying they were replaced.",m1:"1 m"}
+};
+var S = {lang:"fr", comp:"AU-01", open:null, view:"coupe", mode:"calc", dl:2, del:{fig:null, tab:null}, coll:{}, msearch:"", mfam:null, msrc:"all", tpl:null, dirty:{}};
+function t(k, o){ var s = (W[S.lang][k] != null ? W[S.lang][k] : W.fr[k]); if (s == null) s = k; if (o) Object.keys(o).forEach(function(x){ s = String(s).split("{" + x + "}").join(o[x]); }); return s; }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function $(id){ return document.getElementById(id); }
+function sub(s){ return esc(s).replace(/([gak])_k/g, "$1<sub>k</sub>"); }
+function f3(v){ return v == null || isNaN(v) ? "—" : (Math.round(v*1000)/1000).toFixed(3); }
+function fn(v){ return v == null || v === "" ? "—" : String(+(+v).toPrecision(6)); }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+
+/* ---------------- the library: SIA 261, the workbook (Externe), the engineer's own (Personnel) ---------------- */
+var LIBM = {}; LIB.forEach(function(m){ LIBM[m.id] = m; });
+var FAMS = ["wood", "board", "ins", "tile", "memb", "gyps", "conc", "metal", "floor", "fill", "direct"];
+function mname(m){ return m ? (m[S.lang] || m.fr) : ""; }
+function srcWord(s){ return t(s); }
+// a search finds a material by its name and by its category, in the three languages (the engineer, 23.10.2026)
+var SYN = {wood:"bois holz timber wood", board:"panneau panneaux platte platten board", ins:"isolation isolant dämmung dämmstoff insulation", tile:"couverture tuile bedachung dach ziegel roofing roof tile", memb:"étanchéité étanchéite lé lés membrane abdichtung bahn waterproofing", gyps:"plâtre enduit gips putz plaster", conc:"béton beton maçonnerie chape mauerwerk unterlagsboden concrete masonry screed", metal:"acier métal métaux verre stahl metall glas steel metal glass", floor:"sol revêtement boden belag floor", fill:"granulat lestage gravier sable schüttung beschwerung kies fill ballast", direct:""};
+function hay(m){ return (m.fr + " " + m.de + " " + m.en + " " + SYN[m.fam] + " " + W.fr["fam_" + m.fam] + " " + W.de["fam_" + m.fam] + " " + W.en["fam_" + m.fam]).toLowerCase(); }
+function search(q){ q = q.trim().toLowerCase(); if (!q) return LIB.slice(); var ws = q.split(/\s+/); return LIB.filter(function(m){ var h = hay(m); return ws.every(function(w){ return h.indexOf(w) >= 0; }); }).sort(function(a, b){ return rank(a, q) - rank(b, q); }); }
+// a word that names a category brings its materials first; otherwise the names that hold the word
+function rank(m, q){ var cat = (SYN[m.fam] + " " + W.fr["fam_" + m.fam] + " " + W.de["fam_" + m.fam] + " " + W.en["fam_" + m.fam]).toLowerCase(); if (cat.indexOf(q) >= 0) return 0; return mname(m).toLowerCase().indexOf(q) >= 0 ? 1 : 2; }
+
+/* ---------------- the project ---------------- */
+var COMPS = {}, ORDER = [];
+DATA.project.forEach(function(c){ addComp(c); });
+function addComp(c, name){ var x = {id:c.id, kind:c.kind, name:name || c.fr, desc:c.desc || (c.src ? c.src : ""), layers:clone(c.layers), ret:null, from:c.from || null}; x.layers.forEach(function(l){ l.over = null; if (l.fill == null) l.fill = true; if (l.w === undefined) l.w = null; delete l.count; }); COMPS[c.id] = x; ORDER.push(c.id); return x; }
+// the variables of the example project in kN/m² (examples/data/calculations.json), and the build-ups of this one
+var PVARS = [{id:"EL+AL-Dach mit Wasser", v:2.5}, {id:"EL+AL-Dach ohne Wasser", v:1.9}, {id:"EL+AL-DachRand", v:0.6}, {id:"EL+AL-Wand", v:0.5}];
+function varsList(except){ return ORDER.filter(function(k){ return k !== except; }).map(function(k){ return {id:k, label:k + " · " + COMPS[k].name, v:retained(COMPS[k])}; }).concat(PVARS.map(function(p){ return {id:p.id, label:p.id + " · (g_k + a_k) gew", v:p.v}; })); }
+// a variable read by name; a build-up that leads back to itself reads as missing
+var VST = {};
+function varVal(id){ var p = PVARS.filter(function(v){ return v.id === id; })[0]; if (p) return p.v; var c = COMPS[id]; if (!c || VST[id]) return null; VST[id] = 1; try { return retained(c); } finally { delete VST[id]; } }
+
+/* ---------------- the calculation, as dead_load_source weighs a layer ---------------- */
+function groups(c){ var g = [], cur = []; c.layers.forEach(function(l, i){ cur.push(i); if (!l.link || i === c.layers.length - 1){ g.push(cur); cur = []; } }); return g; }
+function groupOf(c, i){ return groups(c).filter(function(g){ return g.indexOf(i) >= 0; })[0]; }
+function members(c, g){ return g.filter(function(j){ return c.layers[j].pose === "ent"; }); }
+function frac(c, g){ return members(c, g).reduce(function(a, j){ var l = c.layers[j]; return a + (l.b && l.e ? l.b/l.e : 0); }, 0); }
+function calcLoad(c, i){
+  var l = c.layers[i]; if (l.pose === "direct") return l.v != null ? +l.v : null;
+  var m = LIBM[l.mat]; if (!m) return null;
+  if (m.u === "kN/m²") return m.v;
+  if (!l.t) return null; var tt = l.t/1000;
+  if (l.pose === "ent"){ if (!l.b || !l.e) return null; return m.v*tt*l.b/l.e; }
+  var w = fillerWidth(c, i); return m.v*tt*(w == null ? 1 : w/1000);
+}
+// a line linked below pieces at a spacing fills the rest of 1 m, unless its own width is written (the engineer, 23.10.2026)
+function isFiller(c, i){ var l = c.layers[i], g = groupOf(c, i); return l.pose === "cont" && g.length > 1 && members(c, g).length > 0; }
+function fillerWidth(c, i){ if (!isFiller(c, i)) return null; var l = c.layers[i]; if (l.fill) return Math.max(0, 1000*(1 - frac(c, groupOf(c, i)))); return l.w != null ? +l.w : 1000; }
+function loadOf(c, i){ var l = c.layers[i]; if (l.over){ if (l.over.var != null){ var v = varVal(l.over.var); return v; } return +l.over.v; } return calcLoad(c, i); }
+function sums(c){ var gk = 0, ak = 0; c.layers.forEach(function(l, i){ var v = loadOf(c, i) || 0; if (l.k === "g") gk += v; else ak += v; }); return {gk:gk, ak:ak, sum:gk + ak}; }
+// the retained value: the next tenth up, unless written by hand (the engineer, 23.10.2026)
+function autoRet(sum){ return Math.ceil(Math.round(sum*1e6)/1e5 - 1e-6)/10; }
+function retained(c){ var s = sums(c).sum; if (c.ret){ if (c.ret.var != null) return varVal(c.ret.var); return +c.ret.v; } return autoRet(s); }
+function formulaOf(c, i){
+  var l = c.layers[i], m = LIBM[l.mat]; if (l.pose === "direct" || !m) return "";
+  if (m.u === "kN/m²") return fn(m.v) + " kN/m²";
+  if (!l.t) return "";
+  var s = fn(m.v) + " kN/m³ × " + fn(l.t/1000) + " m";
+  if (l.pose === "ent") s += " × " + fn(l.b) + "/" + fn(l.e);
+  else if (isFiller(c, i)) s += " × " + fn(fillerWidth(c, i)) + "/1000";
+  return s + " = " + f3(calcLoad(c, i)) + " kN/m²";
+}
+function warnings(c){
+  var out = [];
+  c.layers.forEach(function(l, i){
+    var n = i + 1, m = LIBM[l.mat];
+    if (l.pose !== "direct" && !m){ out.push({c:l.typed ? "red" : "red", text:l.typed ? t("w_unknown", {n:n, m:l.typed}) : t("w_nomat", {n:n}), row:i}); return; }
+    if (m && m.v === 0){ out.push({c:"red", text:t("w_zero", {n:n, m:mname(m)}), row:i}); return; }
+    if (m && m.u === "kN/m³" && !l.t){ out.push({c:"red", text:t("w_t", {n:n}), row:i}); return; }
+    if (l.pose === "ent" && (!l.b || !l.e)){ out.push({c:"red", text:t("w_e", {n:n}), row:i}); return; }
+  });
+  c.layers.forEach(function(l, i){
+    var n = i + 1, m = LIBM[l.mat];
+    if (l.over){ out.push({c:"orange", text:t("w_over", {n:n, v:f3(loadOf(c, i)), c:f3(calcLoad(c, i))}), row:i, restore:"row:" + i}); }
+    var g = groupOf(c, i);
+    if (g.length > 1 && l.pose !== "ent" && members(c, g).length && m && m.u === "kN/m³"){
+      var mem = c.layers[members(c, g)[0]], hm = Math.max.apply(null, members(c, g).map(function(j){ return c.layers[j].t || 0; }));
+      if (l.t > hm) out.push({c:"orange", text:t("w_thick", {n:n, m:mname(m), t:fn(l.t), u:fn(hm)}), row:i});
+      else if (l.t < hm) out.push({c:"info", text:t("w_air", {n:n, a:fn(hm - l.t), m:mname(m)}), row:i});
+    }
+    if (m && m.src === "perso") out.push({c:"info", text:t("w_perso", {n:n, m:mname(m)}), row:i});
+    if (m && m.battens){ c.layers.forEach(function(o, j){ if (o.pose === "ent" && /latt|Dachlatt|roof batten/i.test(o.role || "") && !/contre|Konter|counter/i.test(o.role || "")) out.push({c:"info", text:t("w_battens", {n:n, k:j + 1, d:f3(loadOf(c, j))}), row:j}); }); }
+  });
+  var s = sums(c).sum;
+  if (c.ret){ var rv = retained(c); if (rv < s - 1e-9) out.unshift({c:"red", text:t("w_retlow", {v:fn(rv), s:f3(s)}), row:"ret", restore:"ret"}); else out.push({c:"orange", text:t("w_ret", {v:fn(rv), c:fn(autoRet(s))}), row:"ret", restore:"ret"}); }
+  if (S.dirty[c.id]) out.push({c:"info", text:t("w_dirty")});
+  if (!out.some(function(x){ return x.c === "red"; })) out.unshift({c:"green", text:t("w_ok")});
+  return out;
+}
+
+
+// a retained value is written with its tenth: 1.0, not 1
+function fr1(v){ return v == null || isNaN(v) ? "—" : Math.abs(v*10 - Math.round(v*10)) < 1e-9 ? (+v).toFixed(1) : fn(v); }
+/* ---------------- the left pane: the overview first, then the build-ups ---------------- */
+function renderLeft(){
+  $("lt").textContent = t("comps");
+  var h = '<button type="button" class="ovb' + (S.comp === null ? ' on' : '') + '" data-overview="1">' + esc(t("ovBtn")) + '</button>';
+  h += ORDER.map(function(k){ var c = COMPS[k], red = warnings(c).some(function(w){ return w.c === "red"; }); return '<div class="li' + (S.comp === k ? ' sel' : '') + '" data-comp="' + k + '"><span><code>' + k + '</code>' + esc(c.name) + '</span><span class="num' + (red ? ' bad' : c.ret ? ' ov' : '') + '">' + (red ? '—' : fr1(retained(c))) + '</span></div>'; }).join("");
+  h += '<div class="li muted" style="font-style:italic">' + esc(t("archives")) + '</div>';
+  $("left").innerHTML = h;
+  $("leftBtns").innerHTML = '<button type="button" class="btn" data-new="1">' + esc(t("nouveau")) + '</button><button type="button" class="btn" data-dup="1"' + (S.comp ? '' : ' disabled') + '>' + esc(t("dupliquer")) + '</button>';
+}
+
+/* ---------------- the centre: one line per layer, every cell reached with Tab ---------------- */
+function cellsOf(c, i){
+  var l = c.layers[i], m = LIBM[l.mat], fil = isFiller(c, i), dir = l.pose === "direct";
+  return {name:dir ? (l.label || "") : m ? mname(m) : (l.typed || ""), t:dir || (m && m.u === "kN/m²" && !l.t) ? null : l.t, tOn:!dir && !(m && m.u === "kN/m²"),
+    e:l.pose === "ent" ? l.e : null, eOn:l.pose === "ent", b:l.pose === "ent" ? l.b : fil ? fillerWidth(c, i) : null, bOn:l.pose === "ent" || (fil && !l.fill), bAuto:fil && l.fill};
+}
+function renderCentre(){
+  if (S.mode === "disp"){ renderPage(); return; }
+  if (S.comp === null){ renderOverview(); return; }
+  var c = COMPS[S.comp], h = '<div class="hd"><input class="inp nm" data-cname="1" value="' + esc(c.name) + '"><span class="idc">' + c.id + '</span><span class="muted small">' + esc(c.desc || t("desc")) + '</span></div>';
+  h += '<table class="lt"><thead><tr><th class="g"></th><th class="n">#</th><th class="lk"></th><th class="sw"></th><th>' + esc(t("cMat")) + '</th><th class="r">' + esc(t("cT")) + '</th><th class="r">' + esc(t("cE")) + '</th><th class="r">' + esc(t("cB")) + '</th><th class="c">' + esc(t("cGA")) + '</th><th class="r">' + esc(t("cLoad")) + '</th><th class="x"></th></tr></thead><tbody>';
+  c.layers.forEach(function(l, i){
+    var g = groupOf(c, i), pos = g.length > 1 ? (g[0] === i ? "top" : g[g.length - 1] === i ? "bot" : "mid") : "", m = LIBM[l.mat], v = loadOf(c, i), bad = warnings(c).some(function(w){ return w.c === "red" && w.row === i; }), k = cellsOf(c, i), dir = l.pose === "direct";
+    h += '<tr class="ly' + (S.open === i ? ' open' : '') + (pos ? ' grp ' + pos : '') + (bad ? ' bad' : '') + '" data-row="' + i + '" draggable="true">' +
+      '<td class="g">⋮⋮</td><td class="n">' + (i + 1) + '</td><td class="lk">' + (pos ? '<span class="br ' + pos + '" title="' + esc(t("same")) + '"></span>' : '') + '</td>' +
+      '<td class="sw"><span class="swb f-' + (dir ? "direct" : m ? m.fam : "none") + '"></span></td>' +
+      '<td class="mc"><input class="cell" ' + (dir ? 'data-dlabel="' + i + '" placeholder="' + esc(t("pose_direct")) + '"' : 'data-mat="' + i + '" placeholder="' + esc(t("search")) + '"') + ' value="' + esc(k.name) + '" autocomplete="off"></td>' +
+      '<td class="r"><input class="cell num" data-cf="t|' + i + '" value="' + (k.t != null ? fn(k.t) : '') + '"' + (k.tOn ? '' : ' disabled') + ' placeholder="—"></td>' +
+      '<td class="r"><input class="cell num" data-cf="e|' + i + '" value="' + (k.e != null ? fn(k.e) : '') + '"' + (k.eOn ? '' : ' disabled') + ' placeholder="—"></td>' +
+      '<td class="r"><input class="cell num' + (k.bAuto ? ' auto' : '') + '" data-cf="' + (l.pose === "ent" ? "b" : "w") + '|' + i + '" value="' + (k.b != null ? fn(Math.round(k.b*10)/10) : '') + '"' + (k.bOn ? '' : ' disabled') + ' placeholder="—"' + (k.bAuto ? ' title="' + esc(t("fillL") + " : " + t("fillH")) + '"' : '') + '></td>' +
+      '<td class="c"><span class="ga ' + l.k + '" tabindex="0" data-gak="' + i + '" title="↑ ↓">' + l.k + '</span></td>' +
+      '<td class="r"><input class="cell num' + (l.over ? ' ovt' : '') + '" data-cf="' + (dir ? "v" : "load") + '|' + i + '" value="' + f3(v) + '"' + (l.over && l.over.var != null ? ' disabled title="' + esc(t("overVar", {v:l.over.var})) + '"' : '') + '></td>' +
+      '<td class="x"><button type="button" class="del" data-del="' + i + '" title="×" tabindex="-1">×</button></td></tr>';
+  });
+  var s = sums(c);
+  h += '</tbody><tfoot><tr><td colspan="9" class="r muted">' + esc(t("sum")) + '</td><td class="r num"><b>' + f3(s.sum) + '</b></td><td></td></tr></tfoot></table>';
+  h += '<div class="row"><button type="button" class="btn" data-add="1">' + esc(t("addLayer")) + '</button><button type="button" class="btn" data-adddirect="1">' + esc(t("addDirect")) + '</button><span class="muted small" style="flex:1">' + esc(t("help3")) + '</span><button type="button" class="btn" data-save="0">' + esc(t("annuler")) + '</button><button type="button" class="btn pri" data-save="1">' + esc(t("enregistrer")) + '</button></div><div class="empty-zone" data-empty="1"></div>';
+  $("centre").innerHTML = h;
+}
+// after a cell is changed, the computed values follow in place: the focus stays where Tab took it
+function refreshValues(){
+  var c = COMPS[S.comp]; if (!c || S.mode !== "calc") return;
+  c.layers.forEach(function(l, i){ var k = cellsOf(c, i), a = document.activeElement;
+    var ld = document.querySelector('[data-cf="load|' + i + '"],[data-cf="v|' + i + '"]'); if (ld && ld !== a){ ld.value = f3(loadOf(c, i)); ld.classList.toggle("ovt", !!l.over); }
+    var bw = document.querySelector('[data-cf="w|' + i + '"]'); if (bw && bw !== a && k.bAuto) bw.value = fn(Math.round(k.b*10)/10);
+    var row = document.querySelector('#centre tr[data-row="' + i + '"]'); if (row) row.classList.toggle("bad", warnings(c).some(function(w){ return w.c === "red" && w.row === i; })); });
+  var ft = document.querySelector("#centre tfoot b"); if (ft) ft.textContent = f3(sums(c).sum);
+  renderLeft(); renderRight(); renderPop();
+}
+function renderOverview(){
+  var h = '<div class="hd"><b style="font-size:15px">' + esc(t("overview")) + '</b></div><table class="lt ov"><thead><tr><th></th><th>' + esc(t("ovName")) + '</th><th class="r">' + esc(t("ovLayers")) + '</th><th class="r">g<sub>k</sub></th><th class="r">a<sub>k</sub></th><th class="r">g<sub>k</sub> + a<sub>k</sub></th><th class="r">' + esc(t("retained")) + '</th><th>' + esc(t("ovState")) + '</th></tr></thead><tbody>';
+  ORDER.forEach(function(k){ var c = COMPS[k], s = sums(c), w = warnings(c), nr = w.filter(function(x){ return x.c === "red"; }).length;
+    h += '<tr class="ly" data-comp="' + k + '"><td>' + miniSVG(c, 92, 34) + '</td><td><code>' + k + '</code> ' + esc(c.name) + '</td><td class="r num">' + c.layers.length + '</td><td class="r num">' + f3(s.gk) + '</td><td class="r num">' + f3(s.ak) + '</td><td class="r num">' + f3(s.sum) + '</td><td class="r num' + (c.ret ? ' ov' : '') + '"><b>' + (nr ? '—' : fr1(retained(c))) + '</b></td><td>' + (nr ? '<span class="chip bad">' + esc(t("toFix", {n:nr})) + '</span>' : '<span class="chip ok">' + esc(t("complete")) + '</span>') + '</td></tr>'; });
+  $("centre").innerHTML = h + '</tbody></table><div class="muted small" style="margin-top:6px">kN/m²</div>';
+}
+
+/* ---------------- the section at its true proportion: 1 m wide, the heights to the same scale ---------------- */
+var FILL = {wood:"var(--f-wood)", board:"var(--f-board)", ins:"var(--f-ins)", tile:"var(--f-tile)", memb:"var(--f-memb)", gyps:"var(--f-gyps)", conc:"var(--f-conc)", metal:"var(--f-metal)", floor:"var(--f-floor)", fill:"var(--f-fill)", direct:"var(--f-direct)", none:"var(--bg-sunk)"};
+function famOf(c, i){ var l = c.layers[i]; return l.pose === "direct" ? "direct" : LIBM[l.mat] ? LIBM[l.mat].fam : "none"; }
+function pattern(fam, x, y, w, h, k){
+  var s = ""; if (h < 3) return s;
+  if (fam === "wood"){ for (var yy = y + 2.5*k; yy < y + h - 1; yy += 3.5*k) s += '<line x1="' + x + '" y1="' + yy + '" x2="' + (x + w) + '" y2="' + yy + '" class="hl"/>'; }
+  else if (fam === "ins"){ var p = "M" + x + "," + (y + h - 1), st = Math.max(5, Math.min(14, h*0.6)); for (var xx = x; xx < x + w; xx += st) p += " L" + (xx + st/2) + "," + (y + 1) + " L" + (xx + st) + "," + (y + h - 1); s += '<path d="' + p + '" class="hl"/>'; }
+  else if (fam === "board"){ for (var x2 = x - h; x2 < x + w; x2 += 6*k) s += '<line x1="' + x2 + '" y1="' + (y + h) + '" x2="' + (x2 + h) + '" y2="' + y + '" class="hl"/>'; }
+  else if (fam === "tile"){ var st2 = 14*k; for (var x3 = x; x3 < x + w; x3 += st2) s += '<path d="M' + x3 + ',' + (y + h) + ' q' + (st2/2) + ',' + (-h*0.9) + ' ' + st2 + ',0" class="hl"/>'; }
+  else if (fam === "fill" || fam === "conc"){ for (var x4 = x + 2; x4 < x + w; x4 += 6*k) for (var y4 = y + 2; y4 < y + h - 1; y4 += 4.5*k) s += '<circle cx="' + (x4 + (Math.round(y4) % 2)*2) + '" cy="' + y4 + '" r="' + (fam === "fill" ? 0.9 : 0.6) + '" class="hd"/>'; }
+  else if (fam === "gyps"){ for (var x5 = x + 3; x5 < x + w; x5 += 8*k) s += '<circle cx="' + x5 + '" cy="' + (y + h/2) + '" r=".6" class="hd"/>'; }
+  else if (fam === "floor"){ for (var x6 = x + 24*k; x6 < x + w; x6 += 32*k) s += '<line x1="' + x6 + '" y1="' + y + '" x2="' + x6 + '" y2="' + (y + h) + '" class="hl"/>'; }
+  return s;
+}
+function sectionSVG(c, W, opt){
+  opt = opt || {}; var big = !!opt.big, print = !!opt.print, fs = big ? 13 : 11, lh = big ? 17 : 14, n = c.layers.length; if (!n) return '<div class="muted small">—</div>';
+  // a narrow pane: numbers beside the drawing and the names in a legend under it; a wide one: the names beside it
+  var leg = !big && W < 560, gs = groups(c), labW = leg ? 30 : Math.max(160, Math.min(big ? 440 : 300, W*0.44)), left = big ? 56 : 44, strip = Math.max(90, W - left - labW - 10), sc = strip/1000, minH = 1.6;
+  var thick = gs.map(function(g){ return Math.max.apply(null, g.map(function(j){ return c.layers[j].t || 0; })); });
+  var hs = thick.map(function(tm){ return Math.max(minH, tm*sc); }), drawH = hs.reduce(function(a, b){ return a + b; }, 0);
+  var labH = leg ? 0 : n*lh, top = (big ? 30 : 24) + Math.max(0, (labH - drawH)/2), s = '<defs>', body = "", y = top, bands = [];
+  gs.forEach(function(g, gi){
+    var h = hs[gi], id = "cl" + (opt.uid || "") + gi; s += '<clipPath id="' + id + '"><rect x="' + left + '" y="' + y + '" width="' + strip + '" height="' + h + '"/></clipPath>';
+    var inner = "", mem = members(c, g), fillers = g.filter(function(j){ return mem.indexOf(j) < 0; }), hm = thick[gi];
+    fillers.forEach(function(j){ var l = c.layers[j], fam = famOf(c, j), hh = l.t && hm ? Math.max(minH, h*l.t/hm) : h, yy = y + h - hh, ww = isFiller(c, j) && !l.fill && l.w != null ? strip*Math.min(1, l.w/1000) : strip;
+      if (hh < h - 0.5) inner += '<rect x="' + left + '" y="' + y + '" width="' + strip + '" height="' + (h - hh) + '" fill="var(--card)" class="be air"/>';
+      inner += '<rect x="' + left + '" y="' + yy + '" width="' + ww + '" height="' + hh + '" fill="' + FILL[fam] + '" class="be"/>' + pattern(fam, left, yy, ww, hh, big ? 1.3 : 1);
+      bands.push({row:j, y:yy, h:hh}); });
+    mem.forEach(function(j){ var l = c.layers[j], fam = famOf(c, j), e = l.e || 625, b = l.b || 50, bw = Math.max(1.5, b*sc), hh = l.t && hm ? h*l.t/hm : h, yy = y + h - hh;
+      if (!fillers.length) inner += '<rect x="' + left + '" y="' + y + '" width="' + strip + '" height="' + h + '" fill="var(--card)" class="be air"/>';
+      for (var p = e/2; p - b/2 < 1000; p += e){ var x = left + p*sc - bw/2; inner += '<rect x="' + x + '" y="' + yy + '" width="' + bw + '" height="' + hh + '" fill="' + FILL[fam] + '" class="be"/>' + (bw > 5 ? pattern(fam, x, yy, bw, hh, big ? 1.3 : 1) : ''); }
+      bands.push({row:j, y:yy, h:hh}); });
+    body += '<g clip-path="url(#' + id + ')" data-band="' + g[0] + '" class="bandg">' + inner + '</g>';
+    if (!print && g.indexOf(S.open) >= 0) body += '<rect x="' + (left - 2) + '" y="' + (y - 1) + '" width="' + (strip + 4) + '" height="' + (h + 2) + '" class="sel"/>';
+    body += '<line x1="' + (left - 10) + '" y1="' + y + '" x2="' + (left - 2) + '" y2="' + y + '" class="dm"/>';
+    if (h >= fs) body += '<text x="' + (left - 12) + '" y="' + (y + h/2 + 4) + '" text-anchor="end" class="tm" font-size="' + (fs - 1) + '">' + (hm ? fn(hm) : "—") + '</text>';
+    y += h;
+  });
+  body += '<line x1="' + (left - 10) + '" y1="' + y + '" x2="' + (left - 2) + '" y2="' + y + '" class="dm"/><rect x="' + left + '" y="' + top + '" width="' + strip + '" height="' + (y - top) + '" class="frame"/>';
+  var total = thick.reduce(function(a, b){ return a + b; }, 0);
+  body += '<line x1="' + (left - 26) + '" y1="' + top + '" x2="' + (left - 26) + '" y2="' + y + '" class="dm"/>' + (y - top > 40 ? '<text transform="translate(' + (left - 30) + ',' + ((top + y)/2) + ') rotate(-90)" text-anchor="middle" class="tm" font-size="' + (fs - 1) + '">' + fn(total) + '</text>' : '<text x="' + (left - 30) + '" y="' + (top - 3) + '" text-anchor="middle" class="tm" font-size="' + (fs - 1) + '">' + fn(total) + '</text>');
+  // the width of the drawing: one metre
+  var yb = y + fs + 6; body += '<line x1="' + left + '" y1="' + yb + '" x2="' + (left + strip) + '" y2="' + yb + '" class="dm"/><line x1="' + left + '" y1="' + (yb - 4) + '" x2="' + left + '" y2="' + (yb + 4) + '" class="dm"/><line x1="' + (left + strip) + '" y1="' + (yb - 4) + '" x2="' + (left + strip) + '" y2="' + (yb + 4) + '" class="dm"/><text x="' + (left + strip/2) + '" y="' + (yb - 3) + '" text-anchor="middle" class="tm" font-size="' + (fs - 1) + '">1000</text>';
+  body += '<text x="' + left + '" y="' + (top - 8) + '" class="tm" font-size="' + (fs - 1) + '">' + esc(t("top_" + c.kind)) + '</text><text x="' + left + '" y="' + (yb + fs + 4) + '" class="tm" font-size="' + (fs - 1) + '">' + esc(t("bot_" + c.kind)) + '</text>';
+  var fm = c.layers.map(function(l, i){ return i; }).filter(function(i){ return c.layers[i].pose === "ent"; });
+  if (fm.length){ var L0 = c.layers[fm[fm.length - 1]]; body += '<text x="' + (left + strip) + '" y="' + (yb + fs + 4) + '" text-anchor="end" class="tm" font-size="' + (fs - 1) + '">e = ' + fn(L0.e) + ' · ' + fn(L0.b) + '/' + fn(L0.t) + '</text>'; }
+  // the labels: one per layer, pushed apart so none overlaps, each joined to its band
+  var labs = c.layers.map(function(l, i){ var b = bands.filter(function(x){ return x.row === i; })[0]; return {i:i, want:b ? b.y + b.h/2 : top}; }).sort(function(a, b){ return a.want - b.want || a.i - b.i; });
+  var mid = (top + y)/2, start = Math.max(12, mid - labH/2 + lh/2);
+  if (leg){
+    // numbers beside the drawing, spread so they never touch; the legend under it
+    var nh = 11, s0 = Math.max(top - 6, mid - n*nh/2 + nh/2); labs.forEach(function(a, q){ a.y = s0 + q*nh; });
+    var nx = left + strip + 18, ly0 = yb + fs + 22;
+    labs.forEach(function(a){ body += '<path d="M' + (left + strip) + ',' + a.want + ' L' + (nx - 6) + ',' + (a.y - 3) + '" class="ld"/><text x="' + nx + '" y="' + a.y + '" font-size="9.5" class="tm' + (S.open === a.i && !print ? ' b' : '') + '" data-band="' + a.i + '">' + (a.i + 1) + '</text>'; });
+    c.layers.forEach(function(l, i){ var m = LIBM[l.mat], nm = (i + 1) + " · " + (l.pose === "direct" ? (l.label || t("pose_direct")) : m ? mname(m) : (l.typed || "—")) + (l.t ? " " + fn(l.t) : ""), yy = ly0 + i*lh, maxC = Math.floor((W - 60)/(fs*0.55));
+      if (nm.length > maxC) nm = nm.slice(0, maxC - 1) + "…";
+      body += '<text x="4" y="' + yy + '" font-size="' + fs + '" class="tx' + (!print && S.open === i ? ' b' : '') + '" data-band="' + i + '">' + esc(nm) + '<title>' + esc(nm) + '</title></text><text x="' + (W - 4) + '" y="' + yy + '" text-anchor="end" font-size="' + (fs - 1) + '" class="tm' + (l.over && !print ? ' ov' : '') + '">' + f3(loadOf(c, i)) + '</text>'; });
+    var Hl = ly0 + n*lh;
+    return '<svg class="sec" viewBox="0 0 ' + W + ' ' + Hl + '" width="' + W + '" height="' + Hl + '" role="img">' + s + '</defs>' + body + '</svg>';
+  }
+  labs.forEach(function(a, q){ a.y = start + q*lh; });
+  var lx = left + strip + 8, tx = lx + 26, vx = W - 4, maxCh = Math.max(8, Math.floor((vx - tx - (big ? 64 : 46))/(fs*0.56)));
+  labs.forEach(function(a){ var l = c.layers[a.i], m = LIBM[l.mat], nm = (a.i + 1) + " · " + (l.pose === "direct" ? (l.label || t("pose_direct")) : m ? mname(m) : (l.typed || "—")) + (l.t ? " " + fn(l.t) : "");
+    if (nm.length > maxCh) nm = nm.slice(0, maxCh - 1) + "…";
+    var sel = !print && S.open === a.i;
+    body += '<path d="M' + (left + strip) + ',' + a.want + ' L' + (lx + 6) + ',' + a.want + ' L' + (tx - 3) + ',' + (a.y - 4) + '" class="ld"/>';
+    body += '<text x="' + tx + '" y="' + a.y + '" font-size="' + fs + '" class="tx' + (sel ? ' b' : '') + '" data-band="' + a.i + '">' + esc(nm) + '<title>' + esc(nm) + '</title></text><text x="' + vx + '" y="' + a.y + '" text-anchor="end" font-size="' + (fs - 1) + '" class="tm' + (l.over && !print ? ' ov' : '') + '">' + f3(loadOf(c, a.i)) + '</text>'; });
+  var Hf = Math.max(yb + fs + 12, start + labH + 8);
+  return '<svg class="sec" viewBox="0 0 ' + W + ' ' + Hf + '" width="' + W + '" height="' + Hf + '" role="img">' + s + '</defs>' + body + '</svg>';
+}
+function miniSVG(c, w, h){
+  var gs = groups(c), th = gs.map(function(g){ return Math.max(6, Math.max.apply(null, g.map(function(j){ return c.layers[j].t || 0; }))); }), tot = th.reduce(function(a, b){ return a + b; }, 0), y = 1, s = "";
+  gs.forEach(function(g, gi){ var hh = Math.max(1.5, th[gi]/tot*(h - 2)); g.forEach(function(j){ var l = c.layers[j], fam = famOf(c, j);
+      if (l.pose === "ent"){ for (var x = 4; x < w; x += 22) s += '<rect x="' + x + '" y="' + y + '" width="5" height="' + hh + '" fill="' + FILL[fam] + '" class="be"/>'; }
+      else { var f = l.t && th[gi] ? l.t/th[gi] : 1; s += '<rect x="0" y="' + (y + hh*(1 - f)) + '" width="' + w + '" height="' + hh*f + '" fill="' + FILL[fam] + '" class="be"/>'; } }); y += hh; });
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" class="mini">' + s + '</svg>';
+}
+function contribHTML(c, big){
+  var rows = c.layers.map(function(l, i){ return {i:i, k:l.k, v:loadOf(c, i) || 0, fam:famOf(c, i), n:(i + 1) + " · " + (l.pose === "direct" ? (l.label || t("pose_direct")) : LIBM[l.mat] ? mname(LIBM[l.mat]) : "—")}; });
+  function list(title, f){ var r = rows.filter(f).sort(function(a, b){ return b.v - a.v; }), tot = r.reduce(function(a, x){ return a + x.v; }, 0);
+    return '<div class="ctb"><div class="cth"><b>' + sub(title) + '</b><span class="num">' + f3(tot) + ' kN/m²</span></div>' + r.map(function(x){ var p = tot ? x.v/tot*100 : 0; return '<div class="crow' + (S.open === x.i ? ' on' : '') + '" data-band="' + x.i + '"><span class="swb f-' + x.fam + '"></span><span class="cn">' + esc(x.n) + '</span><span class="cb"><i style="width:' + p.toFixed(1) + '%"></i></span><span class="num">' + f3(x.v) + '</span><span class="num muted">' + p.toFixed(1) + ' %</span></div>'; }).join("") + '</div>'; }
+  return '<div class="ctbs' + (big ? ' big' : '') + '">' + list(t("gkOnly"), function(x){ return x.k === "g"; }) + list(t("akOnly"), function(x){ return x.k === "a"; }) + list(t("both"), function(){ return true; }) + '</div>';
+}
+
+/* ---------------- the right pane: warnings, the open line's options, the section, the results ---------------- */
+function mod(id, title, body, extra){ var coll = !!S.coll[id]; return '<div class="mod" data-mod="' + id + '"><div class="mh"><button type="button" data-coll="' + id + '">' + (coll ? "▸" : "▾") + '</button><b>' + title + '</b>' + (extra || '') + '</div>' + (coll ? '' : '<div class="mb">' + body + '</div>') + '</div>'; }
+function warnHTML(c){ return warnings(c).map(function(w){ return '<div class="st ' + w.c + '"' + (w.row != null ? ' data-gorow="' + w.row + '"' : '') + '><span class="ic">' + {red:"✕", orange:"!", info:"i", green:"✓"}[w.c] + '</span><span>' + sub(w.text) + (w.restore ? ' <button type="button" class="rst" data-restore="' + w.restore + '">' + esc(t("restoreB")) + '</button>' : '') + '</span></div>'; }).join(""); }
+function renderRight(ret){
+  if (S.mode === "disp") return renderDispRight();
+  var c = S.comp && COMPS[S.comp]; if (!c){ var ov = mod("warn", esc(t("warnT")), ORDER.map(function(k){ var w = warnings(COMPS[k]).filter(function(x){ return x.c === "red"; }); return w.map(function(x){ return '<div class="st red" data-gocomp="' + k + '"><span class="ic">✕</span><span><b>' + k + '</b> · ' + esc(x.text) + '</span></div>'; }).join(""); }).join("") || '<div class="st green"><span class="ic">✓</span><span>' + esc(t("w_ok")) + '</span></div>'); if (ret) return ov; $("right").innerHTML = ov; return; }
+  var h = mod("warn", esc(t("warnT")), warnHTML(c));
+  if (S.open != null && c.layers[S.open]) h += mod("opts", esc(t("optsT", {n:S.open + 1})) + ' <span class="muted" style="font-weight:400">' + esc(c.layers[S.open].pose === "direct" ? t("pose_direct") : LIBM[c.layers[S.open].mat] ? mname(LIBM[c.layers[S.open].mat]) : "") + '</span>', optsHTML(c, S.open));
+  var fw = Math.max(260, ($("right").clientWidth || 380) - 26);
+  h += mod("fig", esc(t("figT")), '<div class="figbox" id="figbox">' + (S.view === "coupe" ? sectionSVG(c, fw, {uid:"r"}) : contribHTML(c, false)) + '</div>', '<span class="seg sm"><button type="button" data-view="coupe" class="' + (S.view === "coupe" ? 'on' : '') + '">' + esc(t("coupe")) + '</button><button type="button" data-view="contrib" class="' + (S.view === "contrib" ? 'on' : '') + '">' + esc(t("contrib")) + '</button></span><button type="button" class="ico" data-big="1" title="' + esc(t("big")) + '">⤢</button>');
+  var s = sums(c), rv = retained(c);
+  h += mod("res", esc(t("resT")), '<div class="resl"><span>g<sub>k</sub> <b class="num">' + f3(s.gk) + '</b></span><span>a<sub>k</sub> <b class="num">' + f3(s.ak) + '</b></span><span>g<sub>k</sub> + a<sub>k</sub> <b class="num">' + f3(s.sum) + '</b></span><span class="ret">' + esc(t("retained")) + ' <input class="inp rin num' + (c.ret ? ' ovt' : '') + '" data-ret="1" value="' + fr1(rv) + '"' + (c.ret && c.ret.var ? ' disabled' : '') + '> kN/m² <button type="button" class="vb' + (c.ret && c.ret.var ? ' on' : '') + '" data-rvar="1" title="' + esc(t("varT")) + '">x</button>' + (c.ret ? '' : '<span class="muted">· ' + esc(t("retAuto")) + '</span>') + '</span></div>');
+  if (ret) return h; $("right").innerHTML = h;
+}
+function optsHTML(c, i){
+  var l = c.layers[i], m = LIBM[l.mat], h = "";
+  if (l.pose === "direct"){
+    h += '<div class="ol"><span class="lab">' + esc(t("directV")) + '</span>' + numF("v", l.v, "kN/m²") + '</div>';
+  } else {
+    h += '<div class="ol top"><span class="lab">' + esc(t("matL")) + '</span><div style="flex:1;min-width:0">';
+    h += m ? '<div class="mcard"><span class="swb f-' + m.fam + '" style="width:20px;height:20px"></span><span><b>' + esc(mname(m)) + '</b><small>' + esc(t("fam_" + m.fam)) + ' · ' + fn(m.v) + ' ' + esc(m.u) + '</small></span><span class="srct ' + m.src + '">' + esc(srcWord(m.src)) + '</span></div><div class="small muted" style="margin:2px 0 5px">' + esc(m.ref) + '</div>' : '';
+    h += '<input class="inp wide" data-msearch="1" value="' + esc(S.msearch) + '" placeholder="' + esc(t("search")) + '" autocomplete="off"><div class="mfil">' + ["all", "sia", "ext", "perso"].map(function(x){ return '<button type="button" class="chipb' + (S.msrc === x ? ' on' : '') + '" data-msrc="' + x + '">' + esc(t(x)) + '</button>'; }).join("") + '</div><div class="mfil fams">' + FAMS.filter(function(f){ return f !== "direct"; }).map(function(f){ return '<button type="button" class="chipb fam' + (S.mfam === f ? ' on' : '') + '" data-mfam="' + f + '"><span class="swb f-' + f + '"></span>' + esc(t("fam_" + f)) + '</button>'; }).join("") + '</div><div class="mlist" id="mlist">' + mlistHTML() + '</div>';
+    h += '<a href="#" class="small" data-golib="1">→ ' + esc(t("libLink")) + '</a></div></div>';
+    // the right pane offers three ways of laying; a typed load is only made from the centre (the engineer, 23.10.2026)
+    h += '<div class="ol"><span class="lab">' + esc(t("poseL")) + '</span><span class="seg poses">' + ["cont", "ent", "surf"].map(function(p){ return '<button type="button" data-pose="' + p + '" class="' + (l.pose === p ? 'on' : '') + '" title="' + esc(t("pose_" + p)) + '">' + poseIcon(p) + '<span>' + esc(t("pose_" + p)) + '</span></button>'; }).join("") + '</span></div>';
+    if (l.pose === "cont" || l.pose === "ent" || (l.pose === "surf" && l.t)) h += '<div class="ol"><span class="lab">' + esc(t("tL")) + '</span>' + numF("t", l.t, "mm") + '</div>';
+    if (l.pose === "ent") h += '<div class="ol"><span class="lab">' + esc(t("bL")) + '</span>' + numF("b", l.b, "mm") + '<span class="lab" style="min-width:0">' + esc(t("eL")) + '</span>' + numF("e", l.e, "mm") + '</div>';
+    if (isFiller(c, i)) h += '<div class="ol"><label class="chk"><input type="checkbox" data-fill="1"' + (l.fill ? ' checked' : '') + '> <b>' + esc(t("fillL")) + '</b></label><span class="muted small">' + esc(t("fillH")) + '</span></div><div class="ol"><span class="lab">' + esc(t("wL")) + '</span>' + (l.fill ? '<span class="num auto">' + fn(Math.round(fillerWidth(c, i)*10)/10) + ' mm</span>' : numF("w", l.w != null ? l.w : 1000, "mm")) + '</div>';
+  }
+  h += '<div class="ol"><span class="lab">' + esc(t("kL")) + '</span><span class="seg"><button type="button" data-k="g" class="' + (l.k === "g" ? 'on' : '') + '">g<sub>k</sub></button><button type="button" data-k="a" class="' + (l.k === "a" ? 'on' : '') + '">a<sub>k</sub></button></span>' + (l.pose !== "direct" ? '<span class="lab" style="min-width:0;margin-left:8px">' + esc(t("roleL")) + '</span><select class="inp" data-role="1"><option value="">—</option>' + W[S.lang].roles.map(function(r, ri){ var fr = W.fr.roles[ri]; return '<option value="' + esc(fr) + '"' + (l.role === fr ? ' selected' : '') + '>' + esc(r) + '</option>'; }).join("") + '</select>' : '') + '</div>';
+  h += '<div class="ol"><label class="chk"><input type="checkbox" data-link="1"' + (l.link ? ' checked' : '') + '> ' + esc(t("linkL")) + '</label></div>';
+  var cv = calcLoad(c, i), ov = l.over;
+  if (l.pose !== "direct"){
+    h += '<div class="ol ldl"><span class="lab">' + esc(t("loadL")) + '</span><span style="flex:1;min-width:0"><b class="num' + (ov ? ' ov' : '') + '">' + f3(loadOf(c, i)) + ' kN/m²</b> <span class="muted small">' + (ov ? esc(ov.var != null ? t("overVar", {v:ov.var}) : t("overManual")) + ' · ' + f3(cv) : esc(formulaOf(c, i))) + '</span></span></div>';
+    h += '<div class="ol"><span class="lab">' + esc(t("overL")) + '</span><input class="inp num' + (ov ? ' ovt' : '') + '" data-over="1" value="' + (ov && ov.var == null ? fn(ov.v) : '') + '" placeholder="' + f3(cv) + '"' + (ov && ov.var != null ? ' disabled' : '') + '><span class="u">kN/m²</span><button type="button" class="vb' + (ov && ov.var != null ? ' on' : '') + '" data-ovar="1" title="' + esc(t("varT")) + '">x</button></div>';
+  }
+  return h;
+}
+function numF(f, v, u){ return '<input class="inp num" data-lf="' + f + '" value="' + (v == null ? '' : fn(v)) + '"><span class="u">' + u + '</span><button type="button" class="vb" title="' + esc(t("varT").replace("kN/m²", u)) + '" data-nvar="' + f + '">x</button>'; }
+function mlistHTML(){
+  var r = search(S.msearch).filter(function(m){ return (S.msrc === "all" || m.src === S.msrc) && (!S.mfam || m.fam === S.mfam); });
+  var cur = S.comp && S.open != null ? COMPS[S.comp].layers[S.open].mat : null;
+  return r.slice(0, 60).map(function(m){ return '<div class="mi' + (m.id === cur ? ' on' : '') + '" data-mpick="' + m.id + '"><span class="swb f-' + m.fam + '"></span><span class="mn">' + esc(mname(m)) + '</span><span class="num">' + fn(m.v) + ' ' + esc(m.u) + '</span><span class="srct ' + m.src + '">' + esc(srcWord(m.src)) + '</span></div>'; }).join("") + (r.length > 60 ? '<div class="muted small" style="padding:4px">+ ' + (r.length - 60) + '</div>' : '') + (!r.length ? '<div class="muted small" style="padding:4px">—</div>' : '');
+}
+function poseIcon(p){
+  var s = '<svg viewBox="0 0 36 18" width="30" height="15" aria-hidden="true">';
+  if (p === "cont") s += '<rect x="2" y="5" width="32" height="8" fill="var(--f-board)" stroke="currentColor" stroke-width=".8"/>';
+  if (p === "ent") s += [3, 15, 27].map(function(x){ return '<rect x="' + x + '" y="4" width="6" height="10" fill="var(--f-wood)" stroke="currentColor" stroke-width=".8"/>'; }).join("");
+  if (p === "surf") s += '<path d="M2 13 q4 -8 8 0 q4 -8 8 0 q4 -8 8 0 q4 -8 8 0" fill="var(--f-tile)" stroke="currentColor" stroke-width=".8"/>';
+  return s + '</svg>';
+}
+
+/* ---------------- the Affichage view: the build-up as the report prints it, level by level ---------------- */
+function shown(el){ var o = S.del[el]; if (o === "show") return true; if (o === "hide") return false; return el === "tab" ? S.dl >= 3 : el === "fig" ? S.dl >= 2 : el === "vals" ? S.dl >= 2 : true; }
+function renderPage(){
+  var c = S.comp ? COMPS[S.comp] : null; if (!c){ $("centre").innerHTML = '<div class="muted">' + esc(t("overview")) + ' : —</div>'; return; }
+  var s = sums(c), h = '<div class="paperw"><div class="paper"><h4>' + esc(t("pTitle")) + ' – ' + esc(c.id) + ' · ' + esc(c.name) + '</h4>';
+  if (shown("tab")){
+    h += '<table class="ptab"><thead><tr><th></th><th>' + esc(t("cMat")) + '</th><th class="r">' + esc(t("colW")) + '</th><th class="r">' + esc(t("cT")) + ' [mm]</th><th class="r">' + esc(t("cB")) + ' [mm]</th><th class="r">' + esc(t("cE")) + ' [mm]</th><th class="r">[kN/m²]</th></tr></thead><tbody>';
+    c.layers.forEach(function(l, i){ var m = LIBM[l.mat], k = cellsOf(c, i); h += '<tr><td><i>' + l.k + '</i><sub>k</sub></td><td>' + esc(l.pose === "direct" ? (l.label || t("pose_direct")) : m ? mname(m) : "—") + '</td><td class="r">' + (m ? fn(m.u === "kN/m³" ? m.v*100 : m.v*100) + ' ' + (m.u === "kN/m³" ? 'kg/m³' : 'kg/m²') : '') + '</td><td class="r">' + (k.t != null ? fn(k.t) : '') + '</td><td class="r">' + (k.b != null ? fn(Math.round(k.b*10)/10) : '') + '</td><td class="r">' + (k.e != null ? fn(k.e) : '') + '</td><td class="r">' + f3(loadOf(c, i)) + '</td></tr>'; });
+    h += '</tbody><tfoot><tr><td colspan="6" class="r"><i>g</i><sub>k</sub> =</td><td class="r">' + f3(s.gk) + '</td></tr><tr><td colspan="6" class="r"><i>a</i><sub>k</sub> =</td><td class="r">' + f3(s.ak) + '</td></tr></tfoot></table><div class="pnote">' + esc(t("noteL")) + '</div>';
+  }
+  if (shown("fig")) h += '<div class="pfig">' + sectionSVG(c, 560, {uid:"d", print:true}) + '<div class="pcap">' + esc(t("cap")) + '</div></div>';
+  if (shown("vals")) h += '<div class="pval"><i>g</i><sub>k</sub> = ' + f3(s.gk) + ' kN/m²</div><div class="pval"><i>a</i><sub>k</sub> = ' + f3(s.ak) + ' kN/m²</div><div class="pval"><i>g</i><sub>k</sub> + <i>a</i><sub>k</sub> = ' + f3(s.sum) + ' kN/m²</div>';
+  if (shown("ret")) h += '<div class="pval b">(<i>g</i><sub>k</sub> + <i>a</i><sub>k</sub>)<sub>gew</sub> = ' + fr1(retained(c)) + ' kN/m²</div>';
+  $("centre").innerHTML = h + '</div><div class="muted small" style="margin-top:6px">' + esc(t("inExport")) + '</div></div>';
+}
+function renderDispRight(){
+  var c = S.comp ? COMPS[S.comp] : null;
+  var h = mod("lvl", esc(t("lvl")), '<span class="seg">' + [1, 2, 3].map(function(v){ return '<button type="button" data-dl="' + v + '" class="' + (S.dl === v ? 'on' : '') + '">' + v + '</button>'; }).join("") + '</span>');
+  h += mod("els", esc(t("dispElems")), [["tab", "el_tab"], ["fig", "el_fig"], ["vals", "el_vals"], ["ret", "el_ret"]].map(function(x){ var o = S.del[x[0]] || null; return '<div class="erow"><span class="elab">' + sub(t(x[1])) + '</span>' + (x[0] === "ret" ? '<span class="muted small">' + esc(t("dShow")) + '</span>' : '<span class="seg sm">' + [[null, "dAuto"], ["show", "dShow"], ["hide", "dHide"]].map(function(y){ return '<button type="button" data-del="' + x[0] + '|' + (y[0] || "") + '" class="' + (o === y[0] ? 'on' : '') + '">' + esc(t(y[1])) + '</button>'; }).join("") + '</span>') + '</div>'; }).join(""));
+  if (c) h += mod("typ", esc(t("tFile")), '<pre class="typ">' + esc(typFile(c)) + '</pre>');
+  $("right").innerHTML = h;
+}
+// the file Woodcore would write for this build-up, on the pattern of the wind's WL-01.typ
+function typFile(c){
+  var s = sums(c), d = '("dead-load", "' + c.id + '")', lv = function(x){ return S.del[x] === "show" ? ', level: 1' : S.del[x] === "hide" ? ', level: 0' : ''; };
+  var out = '#domain("' + c.id + '", label: "' + t("pTitle") + ' – ' + c.id + '", level: ' + S.dl + ')[\n';
+  out += '  #table(…' + c.layers.length + ' rows…' + lv("tab") + ') <' + c.id + '-table-1>\n';
+  out += '  #figure(image("/Permanent-loads/Exports/Figures/' + c.id + '.svg")' + lv("fig") + ', caption: [' + t("cap") + ']) <' + c.id + '-figure-1>\n';
+  out += '  #var("gk", "g_k", ' + +s.gk.toFixed(6) + ', "kN/m²", domain: ' + d + lv("vals") + ', id: "gk")\n';
+  out += '  #var("ak", "a_k", ' + +s.ak.toFixed(6) + ', "kN/m²", domain: ' + d + lv("vals") + ', id: "ak")\n';
+  out += '  #var("gk_ak", "g_k + a_k", ' + +s.sum.toFixed(6) + ', "kN/m²", domain: ' + d + lv("vals") + ', id: "gk_ak")\n';
+  out += '  #var("gk_ak_gew", "(g_k + a_k)_\\"gew\\"", ' + fr1(retained(c)) + ', "kN/m²", domain: ' + d + ', level: 1, id: "gk_ak_gew")\n]';
+  return out;
+}
+
+/* ---------------- the pop-up of the section, drawn at its own width ---------------- */
+function renderPop(){
+  var c = COMPS[S.comp], p = $("popfig"); if (!c || p.hidden) return;
+  var w = Math.max(320, p.querySelector(".pw").clientWidth - 30);
+  p.querySelector(".ph").innerHTML = '<b>' + esc(c.id + " · " + c.name) + '</b><span class="seg sm"><button type="button" data-view="coupe" class="' + (S.view === "coupe" ? 'on' : '') + '">' + esc(t("coupe")) + '</button><button type="button" data-view="contrib" class="' + (S.view === "contrib" ? 'on' : '') + '">' + esc(t("contrib")) + '</button></span><span style="flex:1"></span><span class="muted small">' + esc(t("clickBand")) + '</span><button type="button" class="ico" data-popclose="1">×</button>';
+  p.querySelector(".pb").innerHTML = S.view === "coupe" ? sectionSVG(c, w, {big:true, uid:"p"}) : contribHTML(c, true);
+}
+var popRO = null;
+function openPop(){ var p = $("popfig"); p.hidden = false; renderPop(); if (!popRO && window.ResizeObserver){ popRO = new ResizeObserver(function(){ renderPop(); }); popRO.observe(p.querySelector(".pw")); } }
+
+/* ---------------- the templates ---------------- */
+function renderTpl(){
+  var d = $("tpl"); if (d.hidden) return;
+  var sel = S.tpl || DATA.templates[0].id;
+  var h = '<div class="tw"><div class="ph"><b>' + esc(t("tplT")) + '</b><span class="seg sm"><button type="button" class="on">' + esc(t("tplLignum")) + '</button><button type="button" data-tplmine="1">' + esc(t("tplMine")) + '</button></span><span style="flex:1"></span><button type="button" class="ico" data-tplclose="1">×</button></div><div class="tg">';
+  DATA.templates.forEach(function(tp){ var c = {kind:tp.kind, layers:clone(tp.layers)}; c.layers.forEach(function(l){ l.over = null; if (l.fill == null) l.fill = true; }); var s = sums(c);
+    h += '<div class="tc' + (sel === tp.id ? ' on' : '') + '" data-tpl="' + tp.id + '">' + miniSVG(c, 200, 54) + '<b>' + esc(tp[S.lang] || tp.fr) + '</b><small>' + esc(t("layersN", {n:tp.layers.length})) + ' · ' + esc(tp.src) + '</small><span class="num">' + f3(s.sum) + ' kN/m² · ' + esc(t("kg", {v:Math.round(s.sum*100)})) + '</span>' + (tp.book ? '<span class="num"><b>' + esc(t("book", {v:tp.book})) + '</b></span>' : '') + '<small class="muted">' + esc(t("assume", {a:tp.assume})) + '</small></div>'; });
+  h += '</div><div class="row" style="padding:10px 12px;border-top:1px solid var(--line)"><button type="button" class="btn" data-tplempty="1">' + esc(t("tplEmpty")) + '</button><span style="flex:1"></span><button type="button" class="btn pri" data-tplcreate="' + sel + '">' + esc(t("tplCreate")) + '</button></div></div>';
+  d.innerHTML = h;
+}
+
+/* ---------------- the material field of a line: it searches the library, categories included, as one types ---------------- */
+var AC = {row:null, items:[], hi:0};
+function acShow(inp){
+  var q = inp.value, r = q.trim() ? search(q).slice(0, 14) : [];
+  AC.row = +inp.dataset.mat; AC.items = r; AC.hi = 0; var box = $("ac");
+  if (!r.length){ box.hidden = true; return; }
+  box.innerHTML = r.map(function(m, k){ return '<div class="mi' + (k === 0 ? ' on' : '') + '" data-acpick="' + m.id + '"><span class="swb f-' + m.fam + '"></span><span class="mn">' + esc(mname(m)) + ' <span class="muted small">' + esc(t("fam_" + m.fam)) + '</span></span><span class="num">' + fn(m.v) + ' ' + esc(m.u) + '</span><span class="srct ' + m.src + '">' + esc(srcWord(m.src)) + '</span></div>'; }).join("");
+  var rc = inp.getBoundingClientRect(); box.style.left = rc.left + "px"; box.style.top = (rc.bottom + 2) + "px"; box.style.width = Math.max(420, rc.width) + "px"; box.hidden = false;
+}
+function acHide(){ $("ac").hidden = true; AC.items = []; }
+function setMat(c, i, id){ var l = c.layers[i], m = LIBM[id]; l.mat = id; delete l.typed; if (m.u === "kN/m²"){ l.pose = "surf"; } else if (l.pose === "surf" || l.pose === "direct"){ l.pose = "cont"; if (!l.t) l.t = 20; } dirty(); }
+function focusCell(sel){ var e = document.querySelector(sel); if (e){ e.focus(); if (e.select) e.select(); } return e; }
+// from the material, Tab goes on to the next cell of the line that can be written
+function nextCell(row, from){ var order = ["mat", "t", "e", "b", "w", "gak", "load", "v"], k = order.indexOf(from); for (var j = k + 1; j < order.length; j++){ var f = order[j], e = f === "mat" ? null : f === "gak" ? document.querySelector('[data-gak="' + row + '"]') : document.querySelector('[data-cf="' + f + '|' + row + '"]'); if (e && !e.disabled){ e.focus(); if (e.select) e.select(); return; } } focusCell('[data-mat="' + (row + 1) + '"],[data-dlabel="' + (row + 1) + '"]'); }
+
+/* ---------------- everything, and the gestures ---------------- */
+function dirty(){ if (S.comp) S.dirty[S.comp] = true; }
+function render(){ document.documentElement.lang = S.lang; $("tabs").innerHTML = '<span class="on">' + esc(t("tab")) + '</span>'; document.querySelectorAll("[data-mode]").forEach(function(b){ b.classList.toggle("on", b.dataset.mode === S.mode); b.textContent = t(b.dataset.mode === "calc" ? "vCalc" : "vDisp"); }); renderLeft(); renderCentre(); renderRight(); renderPop(); renderTpl(); }
+function soft(){
+  renderLeft(); renderCentre();
+  var tmp = document.createElement("div"); tmp.innerHTML = renderRight(true) || ""; var cur = $("right");
+  tmp.querySelectorAll(".mod").forEach(function(nm){ var id = nm.dataset.mod, old = cur.querySelector('[data-mod="' + id + '"]'); if (!old) return; if (id === "opts"){ var a = nm.querySelector(".ldl"), b = old.querySelector(".ldl"); if (a && b) b.parentNode.replaceChild(a, b); } else old.parentNode.replaceChild(nm, old); });
+  renderPop();
+}
+function toast(msg){ var d = document.createElement("div"); d.className = "toast"; d.textContent = msg; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 2400); }
+function openRow(i, keepFocus){ S.open = i; S.msearch = ""; document.querySelectorAll("#centre tr.ly").forEach(function(r){ r.classList.toggle("open", +r.dataset.row === S.open); }); renderRight(); renderPop(); if (!keepFocus && i != null) focusCell('[data-mat="' + i + '"],[data-dlabel="' + i + '"]'); }
+function closeRow(){ S.open = null; acHide(); if (document.activeElement && document.activeElement.closest && document.activeElement.closest("#centre")) document.activeElement.blur(); document.querySelectorAll("#centre tr.ly").forEach(function(r){ r.classList.remove("open"); }); renderRight(); renderPop(); }
+function newRow(c, at, opt){ var l = Object.assign({mat:null, pose:"cont", k:"a", t:null, b:null, e:null, link:false, role:null, fill:true, w:null, over:null}, opt || {}); c.layers.splice(at, 0, l); dirty(); return l; }
+document.addEventListener("click", function(ev){
+  var e, c = S.comp && COMPS[S.comp];
+  if (!ev.target.closest("#ac") && !ev.target.closest("[data-mat]")) acHide();
+  if (!ev.target.closest(".vmenu") && !ev.target.closest("[data-ovar],[data-rvar],[data-nvar]")) closeVar();
+  if ((e = ev.target.closest("[data-lang]"))){ S.lang = e.dataset.lang; document.querySelectorAll("[data-lang]").forEach(function(b){ b.classList.toggle("on", b === e); }); render(); return; }
+  if ((e = ev.target.closest("[data-mode]"))){ S.mode = e.dataset.mode; acHide(); render(); return; }
+  if ((e = ev.target.closest("[data-dl]"))){ S.dl = +e.dataset.dl; render(); return; }
+  if ((e = ev.target.closest("[data-del]")) && S.mode === "disp"){ var dd = e.dataset.del.split("|"); S.del[dd[0]] = dd[1] || null; render(); return; }
+  if ((e = ev.target.closest("[data-acpick]"))){ var row = AC.row; setMat(c, row, e.dataset.acpick); acHide(); S.open = row; render(); nextCell(row, "mat"); return; }
+  if ((e = ev.target.closest("[data-pickvar]"))){ var pv = e.dataset.pickvar.split("|"); if (pv[0] === "ret") c.ret = {var:pv[1]}; else if (pv[0] === "over") c.layers[S.open].over = {var:pv[1]}; dirty(); closeVar(); render(); return; }
+  if ((e = ev.target.closest("[data-overview]"))){ S.comp = null; S.open = null; render(); return; }
+  if ((e = ev.target.closest("[data-gocomp]"))){ S.comp = e.dataset.gocomp; S.open = null; render(); return; }
+  if ((e = ev.target.closest("[data-comp]"))){ S.comp = e.dataset.comp; S.open = null; render(); return; }
+  if ((e = ev.target.closest("[data-new]"))){ $("tpl").hidden = false; renderTpl(); return; }
+  if ((e = ev.target.closest("[data-tplclose]"))){ $("tpl").hidden = true; return; }
+  if ((e = ev.target.closest("[data-tplmine]"))){ toast(t("tplMineNone")); return; }
+  if ((e = ev.target.closest("[data-golib]"))){ ev.preventDefault(); toast(t("toastLib")); return; }
+  if ((e = ev.target.closest("[data-tplcreate]"))){ var tp = DATA.templates.filter(function(x){ return x.id === e.dataset.tplcreate; })[0], n = 1, pre = {roof:"TO", flat:"TP", wall:"PA", floor:"PL"}[tp.kind]; while (COMPS[pre + "-0" + n]) n++; var nc = addComp(Object.assign({}, tp, {id:pre + "-0" + n, desc:tp.src}), tp[S.lang] || tp.fr); S.dirty[nc.id] = true; S.comp = nc.id; S.open = null; $("tpl").hidden = true; render(); return; }
+  if ((e = ev.target.closest("[data-tplempty]"))){ var m2 = 1; while (COMPS["CO-0" + m2]) m2++; var ne = addComp({id:"CO-0" + m2, kind:"roof", fr:"—", layers:[{mat:null, pose:"cont", k:"a", t:null, b:null, e:null, link:false, role:null}]}); S.dirty[ne.id] = true; S.comp = ne.id; S.open = 0; $("tpl").hidden = true; render(); focusCell('[data-mat="0"]'); return; }
+  if ((e = ev.target.closest("[data-tpl]"))){ S.tpl = e.dataset.tpl; renderTpl(); return; }
+  if ((e = ev.target.closest("[data-popclose]"))){ $("popfig").hidden = true; return; }
+  if ((e = ev.target.closest("[data-big]"))){ openPop(); return; }
+  if ((e = ev.target.closest("[data-view]"))){ S.view = e.dataset.view; renderRight(); renderPop(); return; }
+  if ((e = ev.target.closest("[data-coll]"))){ S.coll[e.dataset.coll] = !S.coll[e.dataset.coll]; renderRight(); return; }
+  if (!c) return;
+  if ((e = ev.target.closest("[data-restore]"))){ ev.stopPropagation(); var r = e.dataset.restore; if (r === "ret") c.ret = null; else c.layers[+r.split(":")[1]].over = null; dirty(); render(); return; }
+  if ((e = ev.target.closest("[data-dup]"))){ var k = 1, base = c.id.split("-")[0]; while (COMPS[base + "-0" + k]) k++; var dc = addComp(Object.assign({}, c, {id:base + "-0" + k, fr:c.name + " (2)"})); dc.layers = clone(c.layers); S.dirty[dc.id] = true; S.comp = dc.id; S.open = null; render(); return; }
+  if ((e = ev.target.closest("[data-save]"))){ if (e.dataset.save === "1"){ S.dirty[c.id] = false; toast(t("toastSave")); } render(); return; }
+  if ((e = ev.target.closest("[data-del]"))){ ev.stopPropagation(); var di = +e.dataset.del; c.layers.splice(di, 1); if (S.open === di) S.open = null; else if (S.open > di) S.open--; dirty(); render(); return; }
+  if ((e = ev.target.closest("[data-add]"))){ newRow(c, c.layers.length); S.open = c.layers.length - 1; render(); focusCell('[data-mat="' + S.open + '"]'); return; }
+  if ((e = ev.target.closest("[data-adddirect]"))){ newRow(c, c.layers.length, {pose:"direct", v:0.5, label:""}); S.open = c.layers.length - 1; render(); focusCell('[data-dlabel="' + S.open + '"]'); return; }
+  if ((e = ev.target.closest("[data-gorow]"))){ var gr = e.dataset.gorow; if (gr === "ret"){ focusCell("[data-ret]"); return; } openRow(+gr); var rw = document.querySelector('#centre tr[data-row="' + gr + '"]'); if (rw){ rw.scrollIntoView({block:"nearest"}); rw.classList.remove("flash"); void rw.offsetWidth; rw.classList.add("flash"); } return; }
+  if ((e = ev.target.closest("[data-band]"))){ openRow(+e.dataset.band); return; }
+  // a click in the empty space of the centre closes the open line, the build-up stays open (the engineer, 23.10.2026)
+  if (ev.target.closest("#centre") && !ev.target.closest("tr,button,input,select,a,.hd")){ closeRow(); return; }
+  if ((e = ev.target.closest("#centre tr[data-row]"))){ var ri = +e.dataset.row; if (ev.target.closest("input,[data-gak]")){ if (S.open !== ri) openRow(ri, true); return; } if (S.open === ri) closeRow(); else openRow(ri); return; }
+  var l = S.open != null ? c.layers[S.open] : null;
+  if (l && (e = ev.target.closest("[data-mpick]"))){ setMat(c, S.open, e.dataset.mpick); render(); return; }
+  if (l && (e = ev.target.closest("[data-msrc]"))){ S.msrc = e.dataset.msrc; $("mlist").innerHTML = mlistHTML(); document.querySelectorAll("[data-msrc]").forEach(function(b){ b.classList.toggle("on", b === e); }); return; }
+  if (l && (e = ev.target.closest("[data-mfam]"))){ S.mfam = S.mfam === e.dataset.mfam ? null : e.dataset.mfam; $("mlist").innerHTML = mlistHTML(); document.querySelectorAll("[data-mfam]").forEach(function(b){ b.classList.toggle("on", b.dataset.mfam === S.mfam); }); return; }
+  if (l && (e = ev.target.closest("[data-pose]"))){ l.pose = e.dataset.pose; if (l.pose === "ent"){ l.b = l.b || 60; l.e = l.e || 625; l.t = l.t || 60; } dirty(); render(); return; }
+  if (l && (e = ev.target.closest("[data-k]"))){ l.k = e.dataset.k; dirty(); render(); return; }
+  if ((e = ev.target.closest("[data-ovar]"))){ openVar(e, "over"); return; }
+  if ((e = ev.target.closest("[data-rvar]"))){ openVar(e, "ret"); return; }
+  if ((e = ev.target.closest("[data-nvar]"))){ openVar(e, "n"); return; }
+});
+function num(v){ var x = parseFloat(String(v).replace(",", ".")); return isNaN(x) ? null : x; }
+document.addEventListener("input", function(ev){
+  var e = ev.target, c = S.comp && COMPS[S.comp]; if (!c) return;
+  if (e.dataset.mat != null){ acShow(e); return; }
+  if (e.dataset.cname){ c.name = e.value; dirty(); renderLeft(); return; }
+  if (e.dataset.dlabel != null){ c.layers[+e.dataset.dlabel].label = e.value; dirty(); return; }
+  var l = S.open != null ? c.layers[S.open] : null;
+  if (l && e.dataset.lf){ l[e.dataset.lf] = num(e.value); dirty(); soft(); return; }
+  if (l && e.dataset.over){ var o = num(e.value); l.over = o == null ? null : {v:o}; dirty(); soft(); return; }
+  if (l && e.dataset.msearch != null){ S.msearch = e.value; $("mlist").innerHTML = mlistHTML(); return; }
+});
+document.addEventListener("change", function(ev){
+  var e = ev.target, c = S.comp && COMPS[S.comp]; if (!c) return; var l = S.open != null ? c.layers[S.open] : null;
+  // a cell of the centre: the value goes in, the computed cells follow in place
+  if (e.dataset.cf){ var p = e.dataset.cf.split("|"), f = p[0], i = +p[1], L = c.layers[i], v = num(e.value);
+    if (f === "load"){ var cv = calcLoad(c, i); L.over = v == null || (cv != null && Math.abs(v - cv) < 5e-4) ? null : {v:v}; }
+    else if (f === "w"){ L.w = v; L.fill = false; } else L[f] = v;
+    dirty(); refreshValues(); return; }
+  if (e.dataset.ret){ var r = num(e.value); c.ret = r == null || Math.abs(r - autoRet(sums(c).sum)) < 1e-9 ? null : {v:r}; dirty(); render(); return; }
+  if (l && e.dataset.role != null){ l.role = e.value || null; dirty(); render(); return; }
+  if (l && e.dataset.fill){ l.fill = e.checked; if (!l.fill && l.w == null) l.w = Math.round(fillerWidth(c, S.open) || 1000); dirty(); render(); return; }
+  if (l && e.dataset.link){ l.link = e.checked;
+    // linking the last line makes the line below it, ready to type its material (the engineer, 23.10.2026)
+    if (l.link && S.open === c.layers.length - 1){ newRow(c, S.open + 1, {fill:true}); render(); focusCell('[data-mat="' + (S.open + 1) + '"]'); return; }
+    if (l.link){ var below = c.layers[S.open + 1]; if (below && below.pose === "cont"){ below.fill = true; } }
+    dirty(); render(); return; }
+  if (e.dataset.lf || e.dataset.over){ render(); return; }
+});
+document.addEventListener("focusin", function(ev){ var e = ev.target; if (e.dataset && (e.dataset.mat != null || e.dataset.cf || e.dataset.dlabel != null) && e.select) setTimeout(function(){ try { e.select(); } catch (x) {} }, 0); });
+document.addEventListener("keydown", function(ev){
+  var e = ev.target, c = S.comp && COMPS[S.comp];
+  if (e.dataset && e.dataset.mat != null && !$("ac").hidden && AC.items.length){
+    if (ev.key === "ArrowDown" || ev.key === "ArrowUp"){ ev.preventDefault(); AC.hi = (AC.hi + (ev.key === "ArrowDown" ? 1 : -1) + AC.items.length) % AC.items.length; $("ac").querySelectorAll(".mi").forEach(function(x, k){ x.classList.toggle("on", k === AC.hi); x.scrollIntoView && k === AC.hi && x.scrollIntoView({block:"nearest"}); }); return; }
+    if (ev.key === "Enter" || (ev.key === "Tab" && !ev.shiftKey)){ ev.preventDefault(); var row = AC.row; setMat(c, row, AC.items[AC.hi].id); acHide(); S.open = row; render(); nextCell(row, "mat"); return; }
+  }
+  // g or a: the arrows switch it
+  if (e.dataset && e.dataset.gak != null && (ev.key === "ArrowUp" || ev.key === "ArrowDown" || ev.key === " ")){ ev.preventDefault(); var L = c.layers[+e.dataset.gak]; L.k = L.k === "g" ? "a" : "g"; dirty(); e.textContent = L.k; e.className = "ga " + L.k; refreshValues(); return; }
+  if (e.dataset && e.dataset.cf && ev.key === "Enter"){ ev.preventDefault(); e.blur(); return; }
+  if (ev.key === "Escape"){
+    if (!$("ac").hidden){ acHide(); return; }
+    if (document.querySelector(".vmenu")){ closeVar(); return; }
+    if (!$("popfig").hidden){ $("popfig").hidden = true; return; }
+    if (!$("tpl").hidden){ $("tpl").hidden = true; return; }
+    if (S.open != null){ closeRow(); return; }
+  }
+});
+document.addEventListener("focusout", function(ev){
+  var e = ev.target; if (!e.dataset || e.dataset.mat == null) return;
+  setTimeout(function(){ if (!e.isConnected) return; if (document.activeElement && document.activeElement.closest && document.activeElement.closest("#ac")) return; var c = COMPS[S.comp]; if (!c) return; var i = +e.dataset.mat, l = c.layers[i]; if (!l || l.pose === "direct") return; var cur = l.mat && LIBM[l.mat] ? mname(LIBM[l.mat]) : (l.typed || ""); if (e.value.trim() !== cur){ var exact = LIB.filter(function(m){ return [m.fr, m.de, m.en].some(function(x){ return x.toLowerCase() === e.value.trim().toLowerCase(); }); })[0]; if (exact) setMat(c, i, exact.id); else if (e.value.trim()){ l.mat = null; l.typed = e.value.trim(); dirty(); } var a = document.activeElement, sel = a && a.dataset && a.dataset.cf ? '[data-cf="' + a.dataset.cf + '"]' : null; render(); if (sel) focusCell(sel); } }, 150);
+});
+var DRAG = null;
+document.addEventListener("dragstart", function(ev){ var r = ev.target.closest && ev.target.closest("#centre tr[data-row]"); if (!r) return; DRAG = +r.dataset.row; try { ev.dataTransfer.setData("text/plain", String(DRAG)); } catch (x) {} });
+document.addEventListener("dragover", function(ev){ var r = ev.target.closest && ev.target.closest("#centre tr[data-row]"); if (r && DRAG != null){ ev.preventDefault(); document.querySelectorAll("#centre tr.over").forEach(function(x){ x.classList.remove("over"); }); r.classList.add("over"); } });
+document.addEventListener("drop", function(ev){ var r = ev.target.closest && ev.target.closest("#centre tr[data-row]"); if (!r || DRAG == null) return; ev.preventDefault(); var c = COMPS[S.comp], to = +r.dataset.row, it = c.layers.splice(DRAG, 1)[0]; c.layers.splice(to, 0, it); S.open = to; DRAG = null; dirty(); render(); });
+function openVar(btn, what){
+  closeVar(); var c = COMPS[S.comp], u = what === "n" ? "mm" : "kN/m²", list = what === "n" ? [] : varsList(c.id), m = document.createElement("div"); m.className = "vmenu";
+  m.innerHTML = '<div class="small muted" style="margin-bottom:4px">' + esc(t("varT").replace("kN/m²", u)) + '</div>' + (list.length ? list.map(function(v){ return '<button type="button" data-pickvar="' + what + '|' + esc(v.id) + '"><span>' + esc(v.label) + '</span><span class="num">' + fn(v.v) + ' ' + u + '</span></button>'; }).join("") : '<div class="small muted">—</div>');
+  document.body.appendChild(m); var r = btn.getBoundingClientRect(); m.style.top = (r.bottom + 4) + "px"; m.style.left = Math.max(8, Math.min(window.innerWidth - m.offsetWidth - 8, r.right - m.offsetWidth)) + "px";
+}
+function closeVar(){ document.querySelectorAll(".vmenu").forEach(function(m){ m.remove(); }); }
+window.addEventListener("resize", function(){ renderRight(); });
+render();
+
+
+// the reading part's table of templates, computed by the same arithmetic as the window
+(function(){ var h = '<table class="tblr"><tr><th>Modèle</th><th>Source dans le livre</th><th>Hypothèses</th><th class="r">Calcul</th><th class="r">Livre</th></tr>';
+  DATA.templates.forEach(function(tp){ var c = {kind:tp.kind, layers:clone(tp.layers)}; c.layers.forEach(function(l){ l.over = null; if (l.fill == null) l.fill = true; }); var s = sums(c);
+    h += '<tr><td>' + esc(tp.fr) + '</td><td>' + esc(tp.src) + '</td><td>' + esc(tp.assume) + '</td><td class="r num">' + f3(s.sum) + ' kN/m²</td><td class="r num">' + (tp.book ? tp.book + ' kg/m²' : '—') + '</td></tr>'; });
+  document.getElementById("tplcheck").innerHTML = h + '</table>'; })();
+
+</script>
+</body>
+</html>

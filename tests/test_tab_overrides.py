@@ -20,6 +20,7 @@ METHODS = ("confirm_leave", "update_list_marker", "reload_list", "on_list_change
 
 # (class, method): why it is not the base's
 PERMITTED = {
+    ("LibraryTab", "confirm_leave"): "a library's entry is the engineer's file for every project (issue #110): asked -- saved, discarded or stayed on --, never saved without a question; the type has no `save`, so the autosave never writes a half-typed one",
     ("DrawingTab", "confirm_leave"): "finishes the export of a layer switched, then saves without asking where it can (autosave ask=True): a plan's draft is saved, not discarded",
     ("PythonTab", "confirm_leave"): "a script is saved without a question, never discarded: the question is only asked where it cannot be saved",
     ("PythonTab", "update_list_marker"): "the dot is an icon on a row of a QListWidget, the scripts' list",
@@ -37,14 +38,14 @@ PERMITTED = {
     ("ProfileTab", "update_list_marker"): "the profiles' list is a QListWidget walked row by row",
     ("ProfileTab", "reload_list"): "the profiles' list is a QListWidget, filled from the catalogue and the project's own",
     ("ProfileTab", "on_list_change"): "a row is chosen by its text in a QListWidget",
-    ("StructureTab", "confirm_leave"): "a document's structure is written as it is edited: nothing is left to ask about, the host flushed",
-    ("VariablesTab", "confirm_leave"): "a browser of the export, which edits nothing: it waits for its reader and never asks",
-    ("ProjectTab", "confirm_leave"): "the project's basic data and not a list of sources: its one draft is the title page, discarded by reading the project file again (issues #87, #90)",
 }
 
 
 def _tab_classes():
+    """The classes of the editor tabs up to `SourceEditorTab`; a tab built on a type stops at its type, which the next tests hold, and at the frame every type stands on (tab_frame.TabFrame, issue #107)."""
     import source_editor
+    import tab_frame
+    import tab_host
     import tab_registry
     seen = []
     for spec in tab_registry.SPECS:
@@ -52,11 +53,107 @@ def _tab_classes():
         if not inspect.isclass(factory):
             continue   # a reserved tab's factory: a function, no list of its own
         for cls in factory.__mro__:
-            if cls is source_editor.SourceEditorTab or cls is object:
+            if cls is source_editor.SourceEditorTab or cls is object or cls in _types() or cls is tab_host.TabHost or cls is tab_frame.TabFrame:
                 break
             if cls not in seen:
                 seen.append(cls)
     return seen
+
+
+def _types():
+    """The types a tab is built on (spec 2026-10-23-onglets-types-et-services, ARCH-003): the thin bases of the host, and of the frame (issue #107: «Document»; issue #106: «Données»)."""
+    import calc_tab
+    import data_tab
+    import document_tab
+    return (calc_tab.CalcTab, data_tab.DataTab, document_tab.DocumentTab)
+
+
+def _unauthorised(cls):
+    """What a tab built on a type writes on its class beyond its parameters and its type's hooks -- a method, or any other name: none is allowed (REQ-005). A name a data tab declares in `EXPOSES` is allowed where the type set it, an `Exposed` (issue #106, ARCH-007), and refused where anything else stands under it."""
+    import data_tab
+    import tab_host
+    kind = next(t for t in cls.__mro__ if t in _types())
+    allowed = set(tab_host.PARAMS) | set(kind.HOOKS) | {"staticMetaObject"}
+    found = []
+    for klass in cls.__mro__:
+        if klass is kind:
+            break
+        exposed = {name for name in vars(klass).get("EXPOSES", {}) if isinstance(vars(klass).get(name), data_tab.Exposed)}
+        found += ["%s.%s" % (klass.__name__, name) for name in vars(klass) if not (name.startswith("__") and name.endswith("__")) and name not in allowed | exposed]
+    return found
+
+
+def test_a_tab_built_on_a_type_writes_only_its_parameters():
+    """REQ-005 of the spec 2026-10-23-onglets-types-et-services: a tab on a type defines no method -- not `confirm_leave`, not a `lambda` assigned -- but the hooks its type declares (none for «Calcul»)."""
+    import calc_tab
+    import tab_registry
+    built = [spec.factory for spec in tab_registry.SPECS if inspect.isclass(spec.factory) and issubclass(spec.factory, _types())]
+    assert {cls.__name__ for cls in built} >= {"SnowTab", "DeadLoadTab", "ProjectTab", "StructureTab"}, built
+    for cls in built:
+        assert not _unauthorised(cls), _unauthorised(cls)
+    assert calc_tab.CalcTab.HOOKS == ()
+
+    class Redefines(calc_tab.CalcTab):
+        KEY = "tab_x"
+
+        def confirm_leave(self):
+            return True
+
+    class Assigns(calc_tab.CalcTab):
+        refresh = lambda self, preview=True: None   # noqa: E731
+    assert _unauthorised(Redefines) == ["Redefines.confirm_leave"]
+    assert _unauthorised(Assigns) == ["Assigns.refresh"]
+
+
+def test_a_tab_of_a_document_writes_only_its_parameters():
+    """REQ-008 of the spec 2026-10-24-type-document (issue #107): «Projet» and «Structure du document» name their parameters only -- their `confirm_leave` of before is the type's --, and a tab of the type that redefines one or assigns a `lambda` is refused."""
+    import document_tab
+    import project_tab
+    import structure_tab
+    assert document_tab.DocumentTab.HOOKS == ()
+    for cls in (project_tab.ProjectTab, structure_tab.StructureTab):
+        assert issubclass(cls, document_tab.DocumentTab) and not _unauthorised(cls), _unauthorised(cls)
+        assert "confirm_leave" not in vars(cls) and cls.confirm_leave is document_tab.DocumentTab.confirm_leave
+
+    class Redefines(document_tab.DocumentTab):
+        KEY = "tab_x"
+
+        def confirm_leave(self):
+            return True
+
+    class Assigns(document_tab.DocumentTab):
+        on_mode = lambda self, mode=None: None   # noqa: E731
+    assert _unauthorised(Redefines) == ["Redefines.confirm_leave"]
+    assert _unauthorised(Assigns) == ["Assigns.on_mode"]
+
+
+def test_a_data_tab_writes_only_its_parameters():
+    """REQ-011 of the spec 2026-10-24-type-donnees (issue #106): «Variables», «Métré», «Dépendances» and «Commandes» name their parameters only -- the names others call on «Variables» are `EXPOSES`, set by the type --, `confirm_leave` is the frame's; a tab of the type that redefines one, assigns a `lambda`, or puts one under a name it exposes is refused."""
+    import data_tab
+    import tab_frame
+    import tab_registry
+    assert data_tab.DataTab.HOOKS == ()
+    built = [spec.factory for spec in tab_registry.SPECS if inspect.isclass(spec.factory) and issubclass(spec.factory, data_tab.DataTab)]
+    assert {cls.__name__ for cls in built} == {"VariablesTab", "MetreTab", "DependenciesTab", "CommandsTab"}, built
+    for cls in built:
+        assert not _unauthorised(cls), _unauthorised(cls)
+        assert "confirm_leave" not in vars(cls) and cls.confirm_leave is tab_frame.TabFrame.confirm_leave, cls.__name__
+
+    class Redefines(data_tab.DataTab):
+        KEY = "tab_x"
+
+        def on_shown(self):
+            pass
+
+    class Assigns(data_tab.DataTab):
+        on_mode = lambda self, mode=None: None   # noqa: E731
+
+    class Hides(data_tab.DataTab):
+        EXPOSES = {"pick": "browser"}
+    Hides.pick = lambda self: None   # noqa: E731  -- a lambda put where the type had set the redirection
+    assert _unauthorised(Redefines) == ["Redefines.on_shown"]
+    assert _unauthorised(Assigns) == ["Assigns.on_mode"]
+    assert _unauthorised(Hides) == ["Hides.pick"]
 
 
 def _redefined():

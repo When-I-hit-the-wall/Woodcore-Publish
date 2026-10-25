@@ -15,7 +15,7 @@
   #eq("I_p", `I_px + I_pz`, unit: "mm²", label: "Polares Flächenträgheitsmoment", norm: "bauforumstahl, Arbeitshilfe: Tragwerksplanung im Stahlbau – Gelenkige Anschlüsse", id: "I_p")
 
 _Lage der Verbindungsmittel_ <VU-MP-1-table-1-title>
-#table(columns: 7, table.header([*Nr.*], [*x [mm]*], [*z [mm]*], [*Δx [mm]*], [*Δz [mm]*], [*Δx² [mm²]*], [*Δz² [mm²]*]), [1], [−60], [−60], [−60], [−60], [3600], [3600], [2], [60], [−60], [60], [−60], [3600], [3600], [3], [60], [60], [60], [60], [3600], [3600], [4], [−60], [60], [−60], [60], [3600], [3600], [*Σ*], [], [], [], [], [*I\_px*], [*I\_pz*]) <VU-MP-1-table-1>
+#table(columns: 7, table.header([*Nr.*], [*x [mm]*], [*z [mm]*], [*Δx [mm]*], [*Δz [mm]*], [*Δx² [mm²]*], [*Δz² [mm²]*]), [1], [−60], [−60], [−60], [−60], [3600], [3600], [2], [60], [−60], [60], [−60], [3600], [3600], [3], [60], [60], [60], [60], [3600], [3600], [4], [−60], [60], [−60], [60], [3600], [3600], [*Σ*], [], [], [], [], [*14400*], [*14400*]) <VU-MP-1-table-1>
 x, z: Koordinaten im Rahmen des Schemas, x nach rechts, z nach unten; Δx, Δz: Abstände zum Drehpunkt. <VU-MP-1-table-1-note>
 
 $N$, $V$, $M$ <VU-MP-1-forces>

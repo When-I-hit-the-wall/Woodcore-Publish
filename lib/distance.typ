@@ -220,6 +220,7 @@
   render-table((title: title, columns: columns, rows: rows, note: if notes.len() == 0 { none } else { notes.join(" ") }), above: 0.4em)
 }
 
+// References of the block below (moved out of it, issue #115): `title:` until the spec 2026-10-21-commandes-typst-refonte, REQ-016; REQ-012.
 /// Prints the minimum distances and timber thicknesses SIA 265:2021 gives for a kind of fastener, each multiple of d computed in mm for the diameter `d` -- Tabellen 24, 27, 28, 32, 33 and 36 to 41, read from `calc/norms/`.
 ///
 /// ```typ
@@ -253,13 +254,13 @@
 /// - d (int, float, str, dictionary): the fastener's diameter in mm; or a var object, or the name of a variable declared with `#var`, in mm, cm or m. For a ring, its outer diameter (6.8.3.1).
 /// - connector (str): the kind of fastener -- "dowel", "bolt", "nail", "screw", "ring" -- or its German name as Woodcore's connectors carry it: "Stabdübel", "Passbolzen", "Bolzen", "Vollgewindeschraube", "Teilgewindeschraube", "Nagel", "Dübel besonderer Bauart". "staple" ("Klammer") and "threaded-rod" ("eingeklebte Gewindestange") are refused, SIA 265 giving them no table.
 /// - table (auto, int, str, array): auto prints every table the kind is shown by itself and that holds for d; a number prints that table alone, a list those tables in its order -- each refused, naming the ones that do, where it does not concern the kind or that d.
-/// - label (auto, none, str): the title of each table: auto the norm's own, in the report's language; none none; a string replaces it -- «Anschluss Sparren – Pfette» --, for one table (`title:` until the spec 2026-10-21-commandes-typst-refonte, REQ-016).
+/// - label (auto, none, str): the title of each table: auto the norm's own, in the report's language; none none; a string replaces it -- «Anschluss Sparren – Pfette» --, for one table (formerly `title:`).
 /// - descr (str, none): a footnote on the first table's title.
 /// - norm (auto, none, str): the citation in the right-hand column: auto is the norm's own, "SIA 265"; none prints none.
 /// - norm-section (auto, str): auto cites the table by its number, «Tabelle 28»; a string replaces it, for one table.
 /// - alpha (none, int, float): the angle between force and grain in degrees, 0 to 90, for the one value that depends on it, Tabelle 41's spacing between rings along the grain; refused where no table shown depends on it.
 /// - level (auto, int): 1 the tables alone, without their titles and their citation where `label` and `norm` are auto; 2 with them (what a document prints by default); 3 the same as 2, the citation of the norm's table being printed from 2. auto follows the report.
-/// - id (str, none): the name Woodcore finds this call by in a domain it wrote, as every line's `id:` (REQ-012).
+/// - id (str, none): the name Woodcore finds this call by in a domain it wrote, as every line's `id:`.
 /// -> content
 #let distance(d, connector, table: auto, label: auto, descr: none, norm: auto, norm-section: auto, alpha: none, id: none, level: auto) = bib-note(distance-norm()) + context {
   // the uniform names (spec 2026-10-21-commandes-typst-refonte, REQ-016): `table` was `tab`, `label` was `title`, `norm-section` was `norm-ref` -- the old names said by the export with what to write (calc/renamed-commands.json)

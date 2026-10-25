@@ -137,6 +137,16 @@ def c_red(h, beta):
             return along(lower) + (along(upper) - along(lower)) * t
 
 
+def area(column, b, d, h):
+    """A_ref of a force coefficient's column, m², from the closed table of 6.2.3.2 (`forces.areas`) times the header's factor (0,96·d·h) -- None for a header the table does not hold, one naming a dimension the building is not given by (h1, d1, hs): its force is then given per m² only (spec 2026-10-23-onglet-vent-briques, REQ-002). Never an evaluation of the label."""
+    terms = clause()["forces"]["areas"].get(column["area"])
+    if terms is None:
+        return None
+    dims = {"b": b, "d": d, "h": h}
+    total = sum(t["k"] * math.pi ** t.get("pi", 0) * math.prod(dims[x] ** t.get(x, 0) for x in dims) for t in terms)
+    return (column.get("area_factor") or 1) * total
+
+
 DIRECTION = re.compile(r"^([−-]?\d+(?:\.\d+)?)°$")
 
 

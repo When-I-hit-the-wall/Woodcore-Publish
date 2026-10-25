@@ -336,7 +336,8 @@
   out
 }
 
-/// **Every norm and document the report cites, listed in full** -- its designation, its full title, its edition and its publisher, in three blocks: the norms, the literature, and the documents no entry names (v0.99).
+// References of the block below (moved out of it, issue #115): v0.99.
+/// **Every norm and document the report cites, listed in full** -- its designation, its full title, its edition and its publisher, in three blocks: the norms, the literature, and the documents no entry names.
 ///
 /// A citation stays exactly what it was where it is made -- «SIA 265 §4.2.1» in the right-hand column, «SIA 265 Tabelle 24» beside a table of distances -- and is *registered* as it is made. This prints what was registered, and nothing else: a norm the report never cites is never listed, and a norm cited without an entry is listed as it was cited.
 ///
@@ -393,7 +394,8 @@
   }
 }
 
-/// Cites a norm **in the prose**, as the right-hand column cites one, and registers it for the bibliography (v0.99).
+// References of the block below (moved out of it, issue #115): v0.99.
+/// Cites a norm **in the prose**, as the right-hand column cites one, and registers it for the bibliography.
 ///
 /// A clause takes its §, a table and an annex take the report's own word and none -- `norm-text`'s rule, so a citation in a sentence and a citation in the right-hand column are set alike. The document is registered whether or not a clause is printed with it.
 ///

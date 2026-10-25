@@ -10,8 +10,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "enum": ["1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6"],
-      "description": "-- 1.0, or 1.1 where a record carries `links`, or 1.2 where a record carries `fire` (issue #46): an export written at another version is refused rather than read as this one. 1.3 where a record carries `vars` and `gen`, a check printed unfolded (spec 2026-10-15-calculs-deplies-balises-figures-natives, ARCH-007). 1.4 where such a record carries `file`, the file of its domain (issue #64). 1.5 where a record's `fire` carries `required`, the citation of a duration VKF 15-15 requires (spec 2026-10-20-indices-et-niveaux, REQ-001); 1.5 holds everything 1.4 does. 1.6 where a check is printed unfolded, with its `vars` and its `file` and without `gen`, the form being the regeneration base's alone (spec 2026-10-21-commandes-typst-refonte, ARCH-011); 1.6 holds everything 1.5 does but `gen`."
+      "enum": ["1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7"],
+      "description": "-- 1.0, or 1.1 where a record carries `links`, or 1.2 where a record carries `fire` (issue #46): an export written at another version is refused rather than read as this one. 1.3 where a record carries `vars` and `gen`, a check printed unfolded (spec 2026-10-15-calculs-deplies-balises-figures-natives, ARCH-007). 1.4 where such a record carries `file`, the file of its domain (issue #64). 1.5 where a record's `fire` carries `required`, the citation of a duration VKF 15-15 requires (spec 2026-10-20-indices-et-niveaux, REQ-001); 1.5 holds everything 1.4 does. 1.6 where a check is printed unfolded, with its `vars` and its `file` and without `gen`, the form being the regeneration base's alone (spec 2026-10-21-commandes-typst-refonte, ARCH-011); 1.6 holds everything 1.5 does but `gen`. 1.7 where a record carries the material of the library (issue #112, spec 2026-10-24-verifications-elements-v3, REQ-015): `material`, a panel's `loading`, `kled`, `accidental`, the `resistance` the export froze, `reason_code` and `reason_params`, `notes`, `display`; 1.7 holds everything 1.6 does."
     },
     "checks": {
       "type": "object",
@@ -251,6 +251,40 @@
               },
               "description": "What the export printed about this check."
             },
+            "material": {
+              "type": "object",
+              "description": "Issue #112, 1.7: the material of the library the source names -- its id, type (member, panel), origin (sia265, sia265-1, user), names {fr, de, en} and where it came from (stated: written over the position). Absent where the check follows its position's strength class.",
+              "required": ["id", "type", "origin", "names", "from"],
+              "properties": {
+                "id": {"type": "string"},
+                "type": {"type": ["string", "null"], "enum": ["member", "panel", "other", null]},
+                "origin": {"type": ["string", "null"]},
+                "names": {"type": "object"},
+                "from": {"type": "string", "enum": ["stated"]}
+              }
+            },
+            "loading": {
+              "type": "object",
+              "description": "Issue #112, 1.7: a panel's loading {mode: plaque | voile | tc, direction: par | perp}.",
+              "required": ["mode", "direction"],
+              "properties": {"mode": {"type": "string", "enum": ["plaque", "voile", "tc"]}, "direction": {"type": "string", "enum": ["par", "perp"]}}
+            },
+            "kled": {"type": "string", "enum": ["permanent", "long", "medium", "short", "very_short"], "description": "Issue #112, 1.7: a panel's load-duration class (SIA 265/1 Tableau 7)."},
+            "accidental": {"type": "boolean", "description": "Issue #112, 1.7: a panel in an accidental design situation, γ_M = 1,0."},
+            "resistance": {
+              "type": "object",
+              "description": "Issue #112, 1.7 (ARCH-008): what the export read of a material that is no class of SIA 265 -- a member of the engineer's own (its design values and how each was had) or a panel (its column, thickness and range, η_mod, γ_M, the values of its loading) --, so that the check computes from the record alone, alike on any computer.",
+              "required": ["type", "values"],
+              "properties": {"type": {"type": "string", "enum": ["member", "panel"]}, "values": {"type": "object"}}
+            },
+            "reason_code": {"type": "string", "description": "Issue #112, 1.7: the code of a refusal of the material (member_check_material.Refusal), which the window says in its words; `reason` says it in English."},
+            "reason_params": {"type": "object", "description": "Issue #112, 1.7: the numbers of that refusal."},
+            "notes": {
+              "type": "array",
+              "description": "Issue #112, 1.7: what is only said, in orange -- a class written over the position's, a panel's thickness not the side its loading supposes: {code, params}.",
+              "items": {"type": "object", "required": ["code", "params"], "properties": {"code": {"type": "string"}, "params": {"type": "object"}}}
+            },
+            "display": {"type": "object", "description": "Issue #112, 1.7: the options of «Affichage» the source keeps (REQ-010), which the file of the check is written with."},
             "case": {
               "type": [
                 "string",

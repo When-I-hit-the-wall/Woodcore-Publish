@@ -1,0 +1,1204 @@
+{
+  "_source": "The names and the category of every material Woodcore ships (issue #110, spec docs/requirements/active/2026-10-24-onglet-materiaux.md, ARCH-004, ARCH-008). The French names of SIA 261:2020 Tabellen 28 to 30 are read on the French edition, pp. 77-78; their German names are the norm files' own (calc/norms/sia261-2020-tab28/29/30-*.json) and are not repeated here. The workbook's names are the dead-load prototype's translations (docs/requirements/prototypes/2026-10-23-charges-permanentes/lib.py).",
+  "_note": "No value lives here: every number is read at its source (calc/norms/, calc/libraries/materials-library.json) -- tests/test_materials_catalogue.py refuses a number in this file. `weights` names, for a material of resistance, the line whose weight a layer of it is weighed with: a member's family, a panel of SIA 265/1 -- a panel without one has no weight, and the tab says so. `includes_battens` names, for a tile of the workbook, the line of SIA 261 Tabelle 29 «… inkl. Lattung» it weighs as (issue #111, P11): the material then carries its battens as the norm's line does -- tests/test_materials_catalogue.py holds the two weights equal.",
+  "grades": {
+    "Vollholz": {
+      "fr": "Bois massif {id}",
+      "de": "Vollholz {id}",
+      "en": "Solid timber {id}"
+    },
+    "Brettschichtholz": {
+      "fr": "Lamellé-collé {id}",
+      "de": "Brettschichtholz {id}",
+      "en": "Glulam {id}"
+    }
+  },
+  "panels": {
+    "plywood-f25-10-5": {
+      "fr": "Contreplaqué F25/10, au moins 5 plis",
+      "de": "Sperrholz F25/10, mindestens 5 Lagen",
+      "en": "Plywood F25/10, at least 5 plies"
+    },
+    "plywood-f25-10-3": {
+      "fr": "Contreplaqué F25/10, 3 plis",
+      "de": "Sperrholz F25/10, 3 Lagen",
+      "en": "Plywood F25/10, 3 plies"
+    },
+    "plywood-f40-40-5": {
+      "fr": "Contreplaqué F40/40 E60/40, au moins 5 plis",
+      "de": "Sperrholz F40/40 E60/40, mindestens 5 Lagen",
+      "en": "Plywood F40/40 E60/40, at least 5 plies"
+    },
+    "plywood-f40-40-3": {
+      "fr": "Contreplaqué F40/40 E60/40, 3 plis",
+      "de": "Sperrholz F40/40 E60/40, 3 Lagen",
+      "en": "Plywood F40/40 E60/40, 3 plies"
+    },
+    "plywood-f50-25-5": {
+      "fr": "Contreplaqué F50/25 E70/25, au moins 5 plis",
+      "de": "Sperrholz F50/25 E70/25, mindestens 5 Lagen",
+      "en": "Plywood F50/25 E70/25, at least 5 plies"
+    },
+    "plywood-f50-25-3": {
+      "fr": "Contreplaqué F50/25 E70/25, 3 plis",
+      "de": "Sperrholz F50/25 E70/25, 3 Lagen",
+      "en": "Plywood F50/25 E70/25, 3 plies"
+    },
+    "plywood-f60-10-5": {
+      "fr": "Contreplaqué F60/10 E90/10, au moins 5 plis",
+      "de": "Sperrholz F60/10 E90/10, mindestens 5 Lagen",
+      "en": "Plywood F60/10 E90/10, at least 5 plies"
+    },
+    "plywood-f60-10-3": {
+      "fr": "Contreplaqué F60/10 E90/10, 3 plis",
+      "de": "Sperrholz F60/10 E90/10, 3 Lagen",
+      "en": "Plywood F60/10 E90/10, 3 plies"
+    },
+    "particle-p4": {
+      "fr": "Panneau de particules P4",
+      "de": "Spanplatte P4",
+      "en": "Particleboard P4"
+    },
+    "particle-p5": {
+      "fr": "Panneau de particules P5",
+      "de": "Spanplatte P5",
+      "en": "Particleboard P5"
+    },
+    "particle-p6": {
+      "fr": "Panneau de particules P6",
+      "de": "Spanplatte P6",
+      "en": "Particleboard P6"
+    },
+    "particle-p7": {
+      "fr": "Panneau de particules P7",
+      "de": "Spanplatte P7",
+      "en": "Particleboard P7"
+    },
+    "cement": {
+      "fr": "Panneau de particules liées au ciment",
+      "de": "Zementgebundene Spanplatte",
+      "en": "Cement-bonded particleboard"
+    },
+    "osb2": {
+      "fr": "Panneau OSB/2",
+      "de": "OSB/2-Platte",
+      "en": "OSB/2 board"
+    },
+    "osb3": {
+      "fr": "Panneau OSB/3",
+      "de": "OSB/3-Platte",
+      "en": "OSB/3 board"
+    },
+    "osb4": {
+      "fr": "Panneau OSB/4",
+      "de": "OSB/4-Platte",
+      "en": "OSB/4 board"
+    },
+    "hb": {
+      "fr": "Panneau de fibres dur HB.HLA2",
+      "de": "Harte Faserplatte HB.HLA2",
+      "en": "Hardboard HB.HLA2"
+    },
+    "mbh": {
+      "fr": "Panneau de fibres mi-dur MBH.LA2",
+      "de": "Mittelharte Faserplatte MBH.LA2",
+      "en": "Medium board MBH.LA2"
+    },
+    "mdf-la": {
+      "fr": "Panneau MDF.LA",
+      "de": "MDF-Platte MDF.LA",
+      "en": "MDF board MDF.LA"
+    },
+    "mdf-hls": {
+      "fr": "Panneau MDF.HLS",
+      "de": "MDF-Platte MDF.HLS",
+      "en": "MDF board MDF.HLS"
+    }
+  },
+  "sia261": {
+    "aluminium": {
+      "fr": "Aluminium",
+      "en": "Aluminium",
+      "category": "metal"
+    },
+    "baustahl": {
+      "fr": "Acier",
+      "en": "Steel",
+      "category": "metal"
+    },
+    "beton_unbewehrt": {
+      "fr": "Béton non armé",
+      "en": "Concrete, plain",
+      "category": "conc"
+    },
+    "beton_bewehrt": {
+      "fr": "Béton armé",
+      "en": "Concrete, reinforced",
+      "category": "conc"
+    },
+    "holz_nadelhoelzer_allgemein": {
+      "fr": "Bois résineux en général",
+      "en": "Softwood, general",
+      "category": "wood"
+    },
+    "holz_laubhoelzer_allgemein": {
+      "fr": "Bois feuillus en général",
+      "en": "Hardwood, general",
+      "category": "wood"
+    },
+    "holz_verleimte_nadelhoelzer": {
+      "fr": "Bois résineux collés",
+      "en": "Glued softwood",
+      "category": "wood"
+    },
+    "holz_spanplatten": {
+      "fr": "Panneaux en bois aggloméré",
+      "en": "Particle board",
+      "category": "board"
+    },
+    "natursteinmauerwerk_bruchstein_kalkstein": {
+      "fr": "Maçonnerie en moellons (calcaire)",
+      "en": "Rubble masonry (limestone)",
+      "category": "conc"
+    },
+    "natursteinmauerwerk_granit": {
+      "fr": "Maçonnerie en granite",
+      "en": "Granite masonry",
+      "category": "conc"
+    },
+    "natursteinmauerwerk_basalt": {
+      "fr": "Maçonnerie en basalte",
+      "en": "Basalt masonry",
+      "category": "conc"
+    },
+    "natursteinmauerwerk_molasse_sandstein": {
+      "fr": "Maçonnerie en molasse, grès",
+      "en": "Molasse, sandstone masonry",
+      "category": "conc"
+    },
+    "moertelueberzuege_kalkmoertel": {
+      "fr": "Mortier de chaux",
+      "en": "Lime mortar",
+      "category": "gyps"
+    },
+    "moertelueberzuege_zementmoertel": {
+      "fr": "Mortier de ciment",
+      "en": "Cement mortar",
+      "category": "gyps"
+    },
+    "moertelueberzuege_gipsmoertel": {
+      "fr": "Mortier de plâtre",
+      "en": "Gypsum mortar",
+      "category": "gyps"
+    },
+    "moertelueberzuege_wandverputz_aussen": {
+      "fr": "Crépi mural extérieur",
+      "en": "External render",
+      "category": "gyps"
+    },
+    "moertelueberzuege_wandverputz_innen": {
+      "fr": "Crépi mural intérieur",
+      "en": "Internal plaster",
+      "category": "gyps"
+    },
+    "mauerwerk_unverputzt_backsteine_voll": {
+      "fr": "Briques de terre cuite pleines",
+      "en": "Clay bricks, solid",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_backsteine_gelocht": {
+      "fr": "Briques de terre cuite perforées",
+      "en": "Clay bricks, perforated",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_backsteine_schalldaemmend": {
+      "fr": "Briques à haute isolation phonique",
+      "en": "Sound-insulating bricks",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_sichtbacksteine_gelocht": {
+      "fr": "Briques apparentes perforées",
+      "en": "Facing bricks, perforated",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_zementsteine_voll": {
+      "fr": "Agglomérés de béton pleins",
+      "en": "Concrete blocks, solid",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_zementsteine_gelocht": {
+      "fr": "Agglomérés de béton perforés",
+      "en": "Concrete blocks, perforated",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_zementsteine_schalldaemmend": {
+      "fr": "Agglomérés isolants phoniquement",
+      "en": "Sound-insulating concrete blocks",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_kalksandsteine_voll": {
+      "fr": "Briques silico-calcaires pleines",
+      "en": "Sand-lime bricks, solid",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_kalksandsteine_gelocht": {
+      "fr": "Briques silico-calcaires perforées",
+      "en": "Sand-lime bricks, perforated",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_gasbetonsteine_normale_qualitaet": {
+      "fr": "Béton cellulaire, qualité normale",
+      "en": "Aerated concrete, normal",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_gasbetonsteine_hochwertig": {
+      "fr": "Béton cellulaire, haute qualité",
+      "en": "Aerated concrete, high grade",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_glasbausteine_voll": {
+      "fr": "Briques de verre pleines",
+      "en": "Glass blocks, solid",
+      "category": "metal"
+    },
+    "mauerwerk_unverputzt_glasbausteine_hohl": {
+      "fr": "Briques de verre creuses",
+      "en": "Glass blocks, hollow",
+      "category": "metal"
+    },
+    "mauerwerk_unverputzt_zelltonplatten": {
+      "fr": "Plaques d'argile cellulaire",
+      "en": "Cellular clay slabs",
+      "category": "conc"
+    },
+    "mauerwerk_unverputzt_gipsplatten": {
+      "fr": "Plaques de plâtre",
+      "en": "Gypsum boards",
+      "category": "gyps"
+    },
+    "bodenbelaege_keramikplatten": {
+      "fr": "Dallage en céramique",
+      "en": "Ceramic tiles",
+      "category": "floor"
+    },
+    "bodenbelaege_natursteine": {
+      "fr": "Revêtement en pierre naturelle",
+      "en": "Natural stone flooring",
+      "category": "floor"
+    },
+    "bodenbelaege_holzparkett_geklebt": {
+      "fr": "Parquet en bois collé",
+      "en": "Glued wood parquet",
+      "category": "floor"
+    },
+    "bodenbelaege_linoleum": {
+      "fr": "Linoléum",
+      "en": "Linoleum",
+      "category": "floor"
+    },
+    "bituminoese_belaege_gussasphalt": {
+      "fr": "Asphalte coulé",
+      "en": "Mastic asphalt",
+      "category": "floor"
+    },
+    "bituminoese_belaege_bituminoeser_belag_hmt": {
+      "fr": "Revêtement bitumineux (HMT)",
+      "en": "Bituminous surfacing (HMT)",
+      "category": "floor"
+    },
+    "faserzement": {
+      "fr": "Ciment armé de fibres",
+      "en": "Fibre cement",
+      "category": "tile"
+    },
+    "profilbleche_hoehe_80_mm_dicke_0_8_mm_stahlblech": {
+      "fr": "Tôles profilées en acier, h = 80, d = 0,8 mm",
+      "en": "Profiled steel sheets, h 80, t 0.8 mm",
+      "category": "metal"
+    },
+    "profilbleche_hoehe_80_mm_dicke_0_8_mm_aluminiumblech": {
+      "fr": "Tôles profilées en aluminium, h = 80, d = 0,8 mm",
+      "en": "Profiled aluminium sheets, h 80, t 0.8 mm",
+      "category": "metal"
+    },
+    "faserzementschieferdach_einfachdeckung": {
+      "fr": "Ardoise fibres-ciment, recouvrement simple",
+      "en": "Fibre-cement slates, single lap",
+      "category": "tile"
+    },
+    "faserzementschieferdach_doppeldeckung": {
+      "fr": "Ardoise fibres-ciment, recouvrement double",
+      "en": "Fibre-cement slates, double lap",
+      "category": "tile"
+    },
+    "tonziegeldach_inkl_lattung_biberschwanz_doppeldeckung": {
+      "fr": "Tuiles plates en terre cuite, recouvrement double, lattis compris",
+      "en": "Clay plain tiles, double lap, battens incl.",
+      "category": "tile"
+    },
+    "tonziegeldach_inkl_lattung_pfannenziegel": {
+      "fr": "Tuiles flamandes en terre cuite, lattis compris",
+      "en": "Clay pantiles, battens incl.",
+      "category": "tile"
+    },
+    "betonziegeldach_inkl_lattung_flachziegel": {
+      "fr": "Tuiles plates en béton, lattis compris",
+      "en": "Concrete plain tiles, battens incl.",
+      "category": "tile"
+    },
+    "betonziegeldach_inkl_lattung_pfannenziegel": {
+      "fr": "Tuiles flamandes en béton, lattis compris",
+      "en": "Concrete pantiles, battens incl.",
+      "category": "tile"
+    },
+    "unterdaecher_schindelunterzug": {
+      "fr": "Sous-toiture en bardeaux",
+      "en": "Shingle underlay",
+      "category": "board"
+    },
+    "unterdaecher_hartfaserplatten": {
+      "fr": "Sous-toiture en panneaux de fibres durs",
+      "en": "Hardboard underlay",
+      "category": "board"
+    },
+    "unterdaecher_faserzementplatten": {
+      "fr": "Sous-toiture en panneaux fibres-ciment",
+      "en": "Fibre-cement underlay",
+      "category": "board"
+    },
+    "unterdaecher_holzschalung_24_mm_inkl_eine_lage_bitumenpappe_oder_kunststofffolie": {
+      "fr": "Lambris de 24 mm, y.c. carton bitumé ou feuille plastique",
+      "en": "24 mm boarding incl. bitumen felt or foil",
+      "category": "wood"
+    },
+    "verglasung_inkl_rahmenkonstruktion_normalglas_5_mm": {
+      "fr": "Vitrage, verre normal 5 mm, châssis compris",
+      "en": "Glazing, 5 mm glass incl. frame",
+      "category": "metal"
+    },
+    "verglasung_inkl_rahmenkonstruktion_armiertes_glas_6_mm": {
+      "fr": "Vitrage, verre armé 6 mm, châssis compris",
+      "en": "Glazing, 6 mm wired glass incl. frame",
+      "category": "metal"
+    },
+    "feinkiesauflage_pro_10_mm_dicke": {
+      "fr": "Gravillon, par 10 mm d'épaisseur",
+      "en": "Fine gravel, per 10 mm",
+      "category": "fill"
+    },
+    "bitumenpappe_pro_lage": {
+      "fr": "Carton bitumé, par couche",
+      "en": "Bitumen felt, per layer",
+      "category": "memb"
+    },
+    "kunststofffolie": {
+      "fr": "Feuille plastique",
+      "en": "Plastic foil",
+      "category": "memb"
+    },
+    "moertelueberzuege": {
+      "fr": "Enduits de mortier",
+      "en": "Mortar coatings",
+      "category": "gyps"
+    },
+    "erdauflasten_und_gleisschotter_sand": {
+      "fr": "Sable",
+      "en": "Sand",
+      "category": "fill"
+    },
+    "erdauflasten_und_gleisschotter_kiessand_gemischt": {
+      "fr": "Tout venant, mélangé",
+      "en": "Gravel-sand, mixed",
+      "category": "fill"
+    },
+    "erdauflasten_und_gleisschotter_schotter_gebrochen": {
+      "fr": "Ballast, concassé",
+      "en": "Ballast, crushed",
+      "category": "fill"
+    },
+    "erdauflasten_und_gleisschotter_erde_trocken": {
+      "fr": "Terre, sèche",
+      "en": "Soil, dry",
+      "category": "fill"
+    },
+    "erdauflasten_und_gleisschotter_erde_nass": {
+      "fr": "Terre, humide",
+      "en": "Soil, wet",
+      "category": "fill"
+    },
+    "erdauflasten_und_gleisschotter_bauschutt_im_mittel": {
+      "fr": "Gravats (en moyenne)",
+      "en": "Rubble (average)",
+      "category": "fill"
+    },
+    "brennstoffe_steinkohle": {
+      "fr": "Houille",
+      "en": "Hard coal",
+      "category": "fill"
+    },
+    "brennstoffe_briketts_geschuettet": {
+      "fr": "Briquettes, en vrac",
+      "en": "Briquettes, loose",
+      "category": "fill"
+    },
+    "brennstoffe_briketts_gestapelt": {
+      "fr": "Briquettes, empilées",
+      "en": "Briquettes, stacked",
+      "category": "fill"
+    },
+    "brennstoffe_koks_geschuettet": {
+      "fr": "Coke, en vrac",
+      "en": "Coke, loose",
+      "category": "fill"
+    },
+    "brennstoffe_holz_in_scheitern_nadelholz_trocken": {
+      "fr": "Bois en bûches : conifère, sec",
+      "en": "Firewood logs: softwood, dry",
+      "category": "fill"
+    },
+    "brennstoffe_holz_in_scheitern_nadelholz_nass": {
+      "fr": "Bois en bûches : conifère, humide",
+      "en": "Firewood logs: softwood, wet",
+      "category": "fill"
+    },
+    "brennstoffe_holz_in_scheitern_laubholz_trocken": {
+      "fr": "Bois en bûches : feuillu, sec",
+      "en": "Firewood logs: hardwood, dry",
+      "category": "fill"
+    },
+    "brennstoffe_holz_in_scheitern_laubholz_nass": {
+      "fr": "Bois en bûches : feuillu, humide",
+      "en": "Firewood logs: hardwood, wet",
+      "category": "fill"
+    },
+    "brennstoffe_holzspaene_geschuettet": {
+      "fr": "Bois en copeaux, en vrac",
+      "en": "Wood chips, loose",
+      "category": "fill"
+    },
+    "brennstoffe_holzspaene_gut_gepresst": {
+      "fr": "Bois en copeaux, compacté",
+      "en": "Wood chips, compacted",
+      "category": "fill"
+    },
+    "bindemittel_hydraulischer_kalk": {
+      "fr": "Chaux hydraulique",
+      "en": "Hydraulic lime",
+      "category": "fill"
+    },
+    "bindemittel_zement_im_silo": {
+      "fr": "Ciment en silo",
+      "en": "Cement in silo",
+      "category": "fill"
+    },
+    "bindemittel_zement_in_saecken": {
+      "fr": "Ciment en sacs",
+      "en": "Cement in bags",
+      "category": "fill"
+    },
+    "bindemittel_zementklinker_geschuettet": {
+      "fr": "Clinker de ciment, en vrac",
+      "en": "Cement clinker, loose",
+      "category": "fill"
+    },
+    "fluessige_stoffe_benzin": {
+      "fr": "Essence",
+      "en": "Petrol",
+      "category": "fill"
+    },
+    "fluessige_stoffe_petrol_diesel_und_heizoel": {
+      "fr": "Pétrole, diesel et mazout",
+      "en": "Kerosene, diesel and heating oil",
+      "category": "fill"
+    },
+    "fluessige_stoffe_steinkohleteer_bitumen": {
+      "fr": "Goudron de houille, bitume",
+      "en": "Coal tar, bitumen",
+      "category": "fill"
+    },
+    "fluessige_stoffe_mineralschmieroel": {
+      "fr": "Huile minérale de graissage",
+      "en": "Mineral lubricating oil",
+      "category": "fill"
+    },
+    "fluessige_stoffe_pflanzenoel": {
+      "fr": "Huile végétale",
+      "en": "Vegetable oil",
+      "category": "fill"
+    },
+    "papier_buecher_auf_gestellen": {
+      "fr": "Livres sur étagères",
+      "en": "Books on shelves",
+      "category": "fill"
+    },
+    "papier_papier_geschichtet": {
+      "fr": "Papier empilé",
+      "en": "Paper, stacked",
+      "category": "fill"
+    },
+    "papier_papier_in_rollen": {
+      "fr": "Papier en rouleaux",
+      "en": "Paper, in rolls",
+      "category": "fill"
+    },
+    "futtermittel_getreide_geschuettet": {
+      "fr": "Céréales en vrac",
+      "en": "Grain, loose",
+      "category": "fill"
+    },
+    "futtermittel_kartoffeln_zuckerrueben": {
+      "fr": "Pommes de terre, betteraves fourragères",
+      "en": "Potatoes, sugar beet",
+      "category": "fill"
+    },
+    "futtermittel_heu_und_stroh_geschuettet": {
+      "fr": "Foin et paille en vrac",
+      "en": "Hay and straw, loose",
+      "category": "fill"
+    },
+    "futtermittel_gruenfutter_geschuettet": {
+      "fr": "Herbe en vrac",
+      "en": "Green fodder, loose",
+      "category": "fill"
+    },
+    "stallmist_verrottet": {
+      "fr": "Fumier",
+      "en": "Manure, rotted",
+      "category": "fill"
+    },
+    "nahrungsmittel_mehl_geschuettet": {
+      "fr": "Farine en vrac",
+      "en": "Flour, loose",
+      "category": "fill"
+    },
+    "nahrungsmittel_zucker_geschuettet": {
+      "fr": "Sucre en vrac",
+      "en": "Sugar, loose",
+      "category": "fill"
+    },
+    "nahrungsmittel_salz_geschuettet": {
+      "fr": "Sel en vrac",
+      "en": "Salt, loose",
+      "category": "fill"
+    },
+    "nahrungsmittel_salz_in_saecken": {
+      "fr": "Sel en sacs",
+      "en": "Salt, in bags",
+      "category": "fill"
+    }
+  },
+  "sia261_per_10_mm": [
+    "feinkiesauflage_pro_10_mm_dicke"
+  ],
+  "workbook": {
+    "Parkett Hartholz": {
+      "fr": "Parquet bois dur",
+      "en": "Hardwood parquet",
+      "category": "floor"
+    },
+    "Natursteinboden": {
+      "fr": "Sol en pierre naturelle",
+      "en": "Natural stone floor",
+      "category": "floor"
+    },
+    "Keramikplatten": {
+      "fr": "Carrelage céramique",
+      "en": "Ceramic tiles",
+      "category": "floor"
+    },
+    "Steinholzböden": {
+      "fr": "Sol en xylolithe",
+      "en": "Magnesite-wood floor",
+      "category": "floor"
+    },
+    "Anhydritestrich": {
+      "fr": "Chape anhydrite",
+      "en": "Anhydrite screed",
+      "category": "conc"
+    },
+    "Bodenriemen Fi/Ta": {
+      "fr": "Lames de plancher épicéa/sapin",
+      "en": "Spruce/fir floorboards",
+      "category": "wood"
+    },
+    "Zement UB": {
+      "fr": "Chape ciment",
+      "en": "Cement screed",
+      "category": "conc"
+    },
+    "Linoleum": {
+      "fr": "Linoléum",
+      "en": "Linoleum",
+      "category": "floor"
+    },
+    "Gussasphalt": {
+      "fr": "Asphalte coulé",
+      "en": "Mastic asphalt",
+      "category": "floor"
+    },
+    "Hartbeton leichtbeansprucht": {
+      "fr": "Béton dur, faible sollicitation",
+      "en": "Hard concrete, light duty",
+      "category": "conc"
+    },
+    "Hartbeton schwerbeansprucht": {
+      "fr": "Béton dur, forte sollicitation",
+      "en": "Hard concrete, heavy duty",
+      "category": "conc"
+    },
+    "3-Schichtplatte": {
+      "fr": "Panneau trois plis",
+      "en": "Three-layer board",
+      "category": "board"
+    },
+    "Haltopex (Walo)": {
+      "fr": "Haltopex (Walo)",
+      "en": "Haltopex (Walo)",
+      "category": "floor"
+    },
+    "Magnesit UB": {
+      "fr": "Chape magnésie",
+      "en": "Magnesite screed",
+      "category": "conc"
+    },
+    "Spanplatten": {
+      "fr": "Panneaux de particules",
+      "en": "Particle boards",
+      "category": "board"
+    },
+    "OSB-Platten": {
+      "fr": "Panneaux OSB",
+      "en": "OSB boards",
+      "category": "board"
+    },
+    "Fermacell Estrich": {
+      "fr": "Chape sèche Fermacell",
+      "en": "Fermacell dry screed",
+      "category": "gyps"
+    },
+    "Duripanel": {
+      "fr": "Duripanel",
+      "en": "Duripanel",
+      "category": "board"
+    },
+    "Blindboden Tanne": {
+      "fr": "Faux plancher sapin",
+      "en": "Fir subfloor",
+      "category": "wood"
+    },
+    "Blindboden Fi/Ta": {
+      "fr": "Faux plancher épicéa/sapin",
+      "en": "Spruce/fir subfloor",
+      "category": "wood"
+    },
+    "Stahlbeton (Holzbetonverbund)": {
+      "fr": "Béton armé (mixte bois-béton)",
+      "en": "Reinforced concrete (timber-concrete)",
+      "category": "conc"
+    },
+    "Flumroc Trittschall": {
+      "fr": "Flumroc phonique",
+      "en": "Flumroc impact sound",
+      "category": "ins"
+    },
+    "Isover Trittschall PS81": {
+      "fr": "Isover phonique PS81",
+      "en": "Isover impact sound PS81",
+      "category": "ins"
+    },
+    "Weichfaserplatte Pavapor": {
+      "fr": "Panneau fibres tendres Pavapor",
+      "en": "Softboard Pavapor",
+      "category": "ins"
+    },
+    "Isover uniroll": {
+      "fr": "Isover uniroll",
+      "en": "Isover uniroll",
+      "category": "ins"
+    },
+    "Isover PBM 032 / 034": {
+      "fr": "Isover PBM 032 / 034",
+      "en": "Isover PBM 032 / 034",
+      "category": "ins"
+    },
+    "Isover Isolene P": {
+      "fr": "Isover Isolene P",
+      "en": "Isover Isolene P",
+      "category": "ins"
+    },
+    "Flumroc Typ 1": {
+      "fr": "Laine de roche Flumroc 1",
+      "en": "Flumroc stone wool 1",
+      "category": "ins"
+    },
+    "Flumroc Typ 3": {
+      "fr": "Laine de roche Flumroc 3",
+      "en": "Flumroc stone wool 3",
+      "category": "ins"
+    },
+    "Flumroc Solo": {
+      "fr": "Laine de roche Flumroc Solo",
+      "en": "Flumroc Solo",
+      "category": "ins"
+    },
+    "Weichfaserplatte Pavatherm": {
+      "fr": "Panneau fibres tendres Pavatherm",
+      "en": "Softboard Pavatherm",
+      "category": "ins"
+    },
+    "Weichfaserplatte Thermoflex": {
+      "fr": "Fibre de bois Thermoflex",
+      "en": "Wood fibre Thermoflex",
+      "category": "ins"
+    },
+    "Zellulosefaserplatte FlexCL": {
+      "fr": "Panneau cellulose FlexCL",
+      "en": "Cellulose board FlexCL",
+      "category": "ins"
+    },
+    "Zellulosefasern 1": {
+      "fr": "Ouate de cellulose 1",
+      "en": "Cellulose fibre 1",
+      "category": "ins"
+    },
+    "Zellulosefasern 2": {
+      "fr": "Ouate de cellulose 2",
+      "en": "Cellulose fibre 2",
+      "category": "ins"
+    },
+    "Schlacke": {
+      "fr": "Scories",
+      "en": "Slag",
+      "category": "fill"
+    },
+    "Kalksplittschüttung trocken": {
+      "fr": "Gravillon calcaire sec",
+      "en": "Dry limestone chippings",
+      "category": "fill"
+    },
+    "Flumroc prima": {
+      "fr": "Laine de roche Flumroc prima",
+      "en": "Flumroc prima",
+      "category": "ins"
+    },
+    "PUR / PIR Dämmung": {
+      "fr": "Isolant PUR / PIR",
+      "en": "PUR / PIR insulation",
+      "category": "ins"
+    },
+    "OSB3": {
+      "fr": "Panneau OSB/3",
+      "en": "OSB/3 board",
+      "category": "board"
+    },
+    "Kerto-T": {
+      "fr": "LVL Kerto-T",
+      "en": "LVL Kerto-T",
+      "category": "wood"
+    },
+    "Kerto-S": {
+      "fr": "LVL Kerto-S",
+      "en": "LVL Kerto-S",
+      "category": "wood"
+    },
+    "Kerto-Q": {
+      "fr": "LVL Kerto-Q",
+      "en": "LVL Kerto-Q",
+      "category": "wood"
+    },
+    "Schalung": {
+      "fr": "Lambris, coffrage",
+      "en": "Boarding",
+      "category": "wood"
+    },
+    "Fermacell": {
+      "fr": "Plaque fibres-gypse Fermacell",
+      "en": "Fermacell gypsum fibre board",
+      "category": "gyps"
+    },
+    "Rigips": {
+      "fr": "Plaque de plâtre",
+      "en": "Plasterboard",
+      "category": "gyps"
+    },
+    "Sperrholzplatte": {
+      "fr": "Contreplaqué",
+      "en": "Plywood",
+      "category": "board"
+    },
+    "Weichfaserplatte": {
+      "fr": "Panneau fibres tendres",
+      "en": "Softboard",
+      "category": "board"
+    },
+    "Heraklith-BM": {
+      "fr": "Heraklith-BM",
+      "en": "Heraklith-BM",
+      "category": "board"
+    },
+    "Kalk, Kalkzementputz": {
+      "fr": "Enduit chaux, chaux-ciment",
+      "en": "Lime, lime-cement plaster",
+      "category": "gyps"
+    },
+    "Gipsdecke auf Lättli": {
+      "fr": "Plafond plâtre sur lattis",
+      "en": "Plaster ceiling on laths",
+      "category": "gyps"
+    },
+    "Substrat nass": {
+      "fr": "Substrat humide (végétalisation)",
+      "en": "Wet substrate (green roof)",
+      "category": "fill"
+    },
+    "Ziegelschrot": {
+      "fr": "Brique concassée",
+      "en": "Crushed brick",
+      "category": "fill"
+    },
+    "Gartenplatten": {
+      "fr": "Dalles de jardin",
+      "en": "Garden slabs",
+      "category": "floor"
+    },
+    "Kiesauflage": {
+      "fr": "Gravier de toiture",
+      "en": "Roof gravel",
+      "category": "fill"
+    },
+    "Natursteinplatten": {
+      "fr": "Dalles en pierre naturelle",
+      "en": "Natural stone slabs",
+      "category": "floor"
+    },
+    "Erde": {
+      "fr": "Terre",
+      "en": "Soil",
+      "category": "fill"
+    },
+    "Sand": {
+      "fr": "Sable",
+      "en": "Sand",
+      "category": "fill"
+    },
+    "Granit": {
+      "fr": "Granite",
+      "en": "Granite",
+      "category": "conc"
+    },
+    "Bruchstein": {
+      "fr": "Moellons",
+      "en": "Rubble stone",
+      "category": "conc"
+    },
+    "Blech Aluminium 2mm": {
+      "fr": "Tôle aluminium 2 mm",
+      "en": "Aluminium sheet 2 mm",
+      "category": "metal"
+    },
+    "Blech Kupfer 2mm": {
+      "fr": "Tôle cuivre 2 mm",
+      "en": "Copper sheet 2 mm",
+      "category": "metal"
+    },
+    "Blech Stahl 2mm": {
+      "fr": "Tôle acier 2 mm",
+      "en": "Steel sheet 2 mm",
+      "category": "metal"
+    },
+    "xps Roofmate": {
+      "fr": "XPS Roofmate",
+      "en": "XPS Roofmate",
+      "category": "ins"
+    },
+    "Lärchenrost": {
+      "fr": "Caillebotis mélèze",
+      "en": "Larch decking",
+      "category": "wood"
+    },
+    "Gummischrotmatte": {
+      "fr": "Natte en granulat de caoutchouc",
+      "en": "Rubber granulate mat",
+      "category": "memb"
+    },
+    "PV-Anlage": {
+      "fr": "Installation photovoltaïque",
+      "en": "PV system",
+      "category": "metal"
+    },
+    "GL24h": {
+      "fr": "Lamellé-collé GL24h",
+      "en": "Glulam GL24h",
+      "category": "wood"
+    },
+    "C24": {
+      "fr": "Bois massif C24",
+      "en": "Solid timber C24",
+      "category": "wood"
+    },
+    "Fi/Ta": {
+      "fr": "Épicéa/sapin",
+      "en": "Spruce/fir",
+      "category": "wood"
+    },
+    "Eiche": {
+      "fr": "Chêne",
+      "en": "Oak",
+      "category": "wood"
+    },
+    "Buche": {
+      "fr": "Hêtre",
+      "en": "Beech",
+      "category": "wood"
+    },
+    "Robinie": {
+      "fr": "Robinier",
+      "en": "Robinia",
+      "category": "wood"
+    },
+    "Kastanie": {
+      "fr": "Châtaignier",
+      "en": "Chestnut",
+      "category": "wood"
+    },
+    "Stahlbeton": {
+      "fr": "Béton armé",
+      "en": "Reinforced concrete",
+      "category": "conc"
+    },
+    "Mauerwerk BN": {
+      "fr": "Maçonnerie BN",
+      "en": "Masonry BN",
+      "category": "conc"
+    },
+    "Fi/Ta auf Federbügel": {
+      "fr": "Épicéa/sapin sur suspentes élastiques",
+      "en": "Spruce/fir on resilient hangers",
+      "category": "wood"
+    },
+    "Lehmsteine Lecca": {
+      "fr": "Briques de terre crue Lecca",
+      "en": "Clay blocks Lecca",
+      "category": "fill"
+    },
+    "Lehmsteine Voll-Lehm": {
+      "fr": "Briques de terre crue pleines",
+      "en": "Solid clay blocks",
+      "category": "fill"
+    },
+    "Kies": {
+      "fr": "Gravier",
+      "en": "Gravel",
+      "category": "fill"
+    },
+    "Liapor (Lecca)": {
+      "fr": "Argile expansée Liapor",
+      "en": "Expanded clay Liapor",
+      "category": "fill"
+    },
+    "Fermacell Ausgleichsschüttung": {
+      "fr": "Granulat d'égalisation Fermacell",
+      "en": "Fermacell levelling fill",
+      "category": "fill"
+    },
+    "Fermacell Wabenschüttung": {
+      "fr": "Granulat nid d'abeille Fermacell",
+      "en": "Fermacell honeycomb fill",
+      "category": "fill"
+    },
+    "Fermacell Gebundene Schüttung": {
+      "fr": "Granulat lié Fermacell",
+      "en": "Fermacell bonded fill",
+      "category": "fill"
+    },
+    "Biberschw. einf.": {
+      "fr": "Tuiles plates, recouvrement simple",
+      "en": "Plain tiles, single lap",
+      "category": "tile"
+    },
+    "Biberschw. Doppelt": {
+      "fr": "Tuiles plates, recouvrement double",
+      "en": "Plain tiles, double lap",
+      "category": "tile"
+    },
+    "Betonziegel": {
+      "fr": "Tuiles en béton",
+      "en": "Concrete tiles",
+      "category": "tile"
+    },
+    "Pfannenziegel": {
+      "fr": "Tuiles flamandes",
+      "en": "Pantiles",
+      "category": "tile"
+    },
+    "Welleternit": {
+      "fr": "Plaques ondulées fibres-ciment",
+      "en": "Corrugated fibre cement",
+      "category": "tile"
+    },
+    "Eternitschiefer": {
+      "fr": "Ardoises fibres-ciment",
+      "en": "Fibre-cement slates",
+      "category": "tile"
+    },
+    "Glas": {
+      "fr": "Verre",
+      "en": "Glass",
+      "category": "metal"
+    },
+    "Scobalit": {
+      "fr": "Scobalit",
+      "en": "Scobalit",
+      "category": "tile"
+    },
+    "Aluwellblech": {
+      "fr": "Tôle ondulée aluminium",
+      "en": "Corrugated aluminium",
+      "category": "metal"
+    },
+    "Profilblech": {
+      "fr": "Tôle profilée",
+      "en": "Profiled sheet",
+      "category": "metal"
+    },
+    "Dachpappe": {
+      "fr": "Carton bitumé",
+      "en": "Bitumen felt",
+      "category": "memb"
+    },
+    "EPDM": {
+      "fr": "Lé EPDM",
+      "en": "EPDM membrane",
+      "category": "memb"
+    },
+    "Sarnafil": {
+      "fr": "Lé Sarnafil",
+      "en": "Sarnafil membrane",
+      "category": "memb"
+    },
+    "Ampack": {
+      "fr": "Lé Ampack",
+      "en": "Ampack membrane",
+      "category": "memb"
+    },
+    "Polyesterflies": {
+      "fr": "Non-tissé polyester",
+      "en": "Polyester fleece",
+      "category": "memb"
+    },
+    "Weichfaserplatte Isoroof": {
+      "fr": "Panneau fibres tendres Isoroof",
+      "en": "Softboard Isoroof",
+      "category": "board"
+    },
+    "Weichfaserplatte ISOLAIR": {
+      "fr": "Panneau fibres tendres ISOLAIR",
+      "en": "Softboard ISOLAIR",
+      "category": "board"
+    },
+    "Faserzement Swisspearl": {
+      "fr": "Fibres-ciment Swisspearl",
+      "en": "Swisspearl fibre cement",
+      "category": "board"
+    },
+    "Schalung Fi/Ta": {
+      "fr": "Lambris épicéa/sapin",
+      "en": "Spruce/fir boarding",
+      "category": "wood"
+    },
+    "Fermacell HD": {
+      "fr": "Fermacell HD",
+      "en": "Fermacell HD",
+      "category": "gyps"
+    },
+    "Lärche": {
+      "fr": "Mélèze",
+      "en": "Larch",
+      "category": "wood"
+    },
+    "Eternit": {
+      "fr": "Fibres-ciment Eternit",
+      "en": "Eternit fibre cement",
+      "category": "board"
+    },
+    "Blech Aluminium": {
+      "fr": "Tôle aluminium",
+      "en": "Aluminium sheet",
+      "category": "metal"
+    },
+    "Stamisol FA": {
+      "fr": "Lé de façade Stamisol FA",
+      "en": "Stamisol FA facade membrane",
+      "category": "memb"
+    },
+    "Stamisol": {
+      "fr": "Lé Stamisol",
+      "en": "Stamisol membrane",
+      "category": "memb"
+    },
+    "Flammex": {
+      "fr": "Lé Flammex",
+      "en": "Flammex membrane",
+      "category": "memb"
+    },
+    "Sisalex": {
+      "fr": "Lé Sisalex",
+      "en": "Sisalex membrane",
+      "category": "memb"
+    },
+    "Fassadenbahn": {
+      "fr": "Lé de façade",
+      "en": "Facade membrane",
+      "category": "memb"
+    }
+  },
+  "workbook_roles": {
+    "Fussboden": "revêtement de sol",
+    "Unterlagsboden": "chape",
+    "Trittschalldämmung": "isolation phonique",
+    "Dämmung": "isolation",
+    "Beplankung": "panneau de contreventement",
+    "Bekleidung": "revêtement intérieur",
+    "Konstruktion": "structure",
+    "Lattung": "lattage",
+    "Gefällslattung": "lattage de pente",
+    "Rostung": "lattage croisé",
+    "Dachlattung": "lattes de toiture",
+    "Konterlattung": "contre-lattes",
+    "Fassade": "façade",
+    "Beschwerung": "lestage",
+    "Beschichtung": "couche de protection",
+    "Dachhaut": "couverture",
+    "Schutzbahn/Dachhaut": "lé de protection",
+    "Unterdach": "sous-toiture",
+    "Abdeckbahn": "lé de recouvrement",
+    "Abdichtung": "étanchéité",
+    "Unterdachbahn": "lé de sous-toiture"
+  },
+  "weights": {
+    "softwood": "sia261:holz_nadelhoelzer_allgemein",
+    "hardwood": "sia261:holz_laubhoelzer_allgemein",
+    "glulam": "sia261:holz_verleimte_nadelhoelzer",
+    "sia265-1:plywood-f25-10-5": "ext:71",
+    "sia265-1:plywood-f25-10-3": "ext:71",
+    "sia265-1:plywood-f40-40-5": "ext:71",
+    "sia265-1:plywood-f40-40-3": "ext:71",
+    "sia265-1:plywood-f50-25-5": "ext:71",
+    "sia265-1:plywood-f50-25-3": "ext:71",
+    "sia265-1:plywood-f60-10-5": "ext:71",
+    "sia265-1:plywood-f60-10-3": "ext:71",
+    "sia265-1:particle-p4": "sia261:holz_spanplatten",
+    "sia265-1:particle-p5": "sia261:holz_spanplatten",
+    "sia265-1:particle-p6": "sia261:holz_spanplatten",
+    "sia265-1:particle-p7": "sia261:holz_spanplatten",
+    "sia265-1:cement": "ext:33",
+    "sia265-1:osb2": "ext:62",
+    "sia265-1:osb3": "ext:62",
+    "sia265-1:osb4": "ext:62"
+  },
+  "includes_battens": {
+    "Pfannenziegel": "sia261:tonziegeldach_inkl_lattung_pfannenziegel",
+    "Biberschw. Doppelt": "sia261:tonziegeldach_inkl_lattung_biberschwanz_doppeldeckung",
+    "Betonziegel": "sia261:betonziegeldach_inkl_lattung_flachziegel"
+  }
+}

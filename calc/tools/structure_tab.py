@@ -14,7 +14,9 @@
 
 **The files are the source of truth, and the engineer edits them elsewhere**: the tab watches the document's `Sections/` folder, its entry file and its structure.json (`QFileSystemWatcher`, **while it is shown**: a watch holds a directory on Windows) and reads the tree again, debounced, when what is on disk is not what it last read -- the pane of the object chosen included. The files it writes itself are not read again: what it read last is what it wrote.
 
-**Nothing is computed or compiled before the tab is shown.** The window builds every tab when it opens, and a preview is a compile: the pane is given its document the first time the tab is shown (`showEvent`), and compiles of itself only where there is nothing to show yet. The tab reads the document the window shows (`current_document`) and is told when it changes (`on_mode`); it is one of MODE_BOUND, so an edit pending in a pane is written before another document is shown (`confirm_leave`). It has no `dirty`: it writes at once.
+**Nothing is computed or compiled before the tab is shown.** The window builds every tab when it opens, and a preview is a compile: the pane is given its document the first time the tab is shown (`showEvent`), and compiles of itself only where there is nothing to show yet. The tab reads the document the window shows (`current_document`) and is told when it changes (`on_mode`); it is one of MODE_BOUND, so an edit pending in a pane is written before another document is shown (`confirm_leave`). It has no draft: it writes at once.
+
+**On the type «Document»** (document_tab.py, issue #107): the tab's class, `StructureTab`, names its parameters only; what it was until then is the widget `StructureView`, mounted whole by the one service `DocumentStructure`, which forwards to it the type's phases -- the window's `on_mode`, `on_shown`, `confirm_leave`, `flush_pending`, a rebuild's `view_state` and `restore`.
 """
 
 import functools
@@ -51,6 +53,9 @@ import notices_ui  # what was a message box is a notice since v0.117 (notices_ui
 from structure_tab_view import STRINGS, StructureTabViewMixin  # split out of this module (issue #30): every name it had is still importable from it
 from structure_tab_write import WHY, _Safe, _lines, shared_block_text, StructureTabWriteMixin  # split out of this module (issue #30): every name it had is still importable from it
 from structure_tab_share import SYNC_RANK, StructureTabShareMixin  # split out of this module (issue #30): every name it had is still importable from it
+import document_tab
+from document_tab import DocumentTab
+from tab_frame import Service
 
 # The objects a menu offers to add, in the order a document is written in.
 OBJECT_KINDS = tuple(kind for kind in typst_objects.DOCUMENT_TYPES if "st_kind_" + kind in STRINGS["en"])
@@ -83,8 +88,8 @@ def document_mode(app):
     return mode if mode in project.current().modes else "rs"
 
 
-class StructureTab(StructureTabShareMixin, StructureTabWriteMixin, StructureTabViewMixin, QWidget):
-    """A document's tree, the page of what is chosen in it, and the options of what is chosen -- and the one place that writes a document's structure and the objects of its sections."""
+class StructureView(StructureTabShareMixin, StructureTabWriteMixin, StructureTabViewMixin, QWidget):
+    """A document's tree, the page of what is chosen in it, and the options of what is chosen -- and the one place that writes a document's structure and the objects of its sections. The tab's class until issue #107, now the widget the service `DocumentStructure` wraps whole (ARCH-006): its tree is read when the service is given its state (`restore_state`), what the window calls on the tab reaches it through the service."""
 
     def __init__(self, app):
         super().__init__()
@@ -126,7 +131,6 @@ class StructureTab(StructureTabShareMixin, StructureTabWriteMixin, StructureTabV
         self.sync_timer.setSingleShot(True)
         self.sync_timer.setInterval(SYNC_DEBOUNCE_MS)
         self.sync_timer.timeout.connect(self.refresh_sync)
-        self.restore(app.views.get("tab_structure"))
 
     # -- building ---------------------------------------------------------------------
 
@@ -412,11 +416,8 @@ class StructureTab(StructureTabShareMixin, StructureTabWriteMixin, StructureTabV
     # -- the buttons -------------------------------------------------------------------------------------------
 
     def writable(self):
-        """Whether the project may be written; the window says it may not, once, where it may not."""
-        if self.read_only():
-            self.app.refuse_read_only()
-            return False
-        return True
+        """Whether the project may be written; the window says it may not, once, where it may not (document_tab.writable)."""
+        return document_tab.writable(self.app)
 
     def set_button(self, key, enabled, reason=None):
         """A button enabled, or disabled with its reason as its tooltip -- a disabled control with nothing to say is one the engineer cannot account for."""
@@ -545,19 +546,9 @@ class StructureTab(StructureTabShareMixin, StructureTabWriteMixin, StructureTabV
         """Something worth knowing, said in the status line (an information notice, v0.117) rather than in a box the engineer closes."""
         notices_ui.tell(text, notifications.INFO, source="structure_tab")
 
-    def flush_pending(self):
-        """What a pane holds pending written now -- the tab left, the window left for VS Code (autosave.py, v0.117): the files are the source of truth, and VS Code must find the edit in them."""
-        self.host.flush()
-
-    def confirm_leave(self):
-        """True: what a pane holds pending is written before another document is shown -- this tab being one of MODE_BOUND -- and nothing in it can be kept unsaved, every change being written as it is made."""
-        self._in_tree_signal = False
-        self.host.flush()
-        return True
-
     # -- surviving a rebuild --------------------------------------------------------------------------------------------
 
-    def view_state(self):
+    def kept_state(self):
         """What the window carries through a rebuild -- which is the only time it asks: it replaces this tab, so what a pane held is written, the page's compile is stopped (a new page would compile over the same file) and asked for again by the new tab where one was running, and the watch is let go of."""
         self.host.flush()
         pending = self.pane.is_pending()
@@ -566,7 +557,8 @@ class StructureTab(StructureTabShareMixin, StructureTabWriteMixin, StructureTabV
         return {"splitter": self.splitter.sizes() if self.sized else None, "tree": self.tree.state(), "pending": pending,
                 "stopped": {mode: sorted(ids) for mode, ids in self.stopped.items() if ids}}
 
-    def restore(self, state):
+    def restore_state(self, state):
+        """What `kept_state` gave -- or nothing, the tree read from the files: the one reading of the tree as the tab is built (ARCH-RISK-012)."""
         state = state or {}
         self.resume = bool(state.get("pending"))
         self.stopped = {mode: set(ids) for mode, ids in (state.get("stopped") or {}).items()}      # the greyed link marks of the files whose sharing was stopped
@@ -575,3 +567,51 @@ class StructureTab(StructureTabShareMixin, StructureTabWriteMixin, StructureTabV
         self.sized = bool(sizes)
         if sizes:
             self.splitter.setSizes(sizes)
+
+
+class DocumentStructure(Service):
+    """The document's structure, one whole service (issue #107, Q-002 A, D-05): it mounts `StructureView` and forwards to it what the window calls on the tab, by the type's phases -- brought to the front (`shown`), another document (`mode_changed`), what a pane holds pending written (`flush`, `leave`), a form applied (`properties_changed`), a rebuild (`state`, `restore`). Its writers are the widget's own, guarded where they are defined (`WIDGET`, tab_registry.GUARDED_WIDGETS). Cutting it into the tree, the page and the options is an issue of its own."""
+
+    NAME = "structure"
+    ZONE = "page"
+    IN_VIEWS = ()
+    WIDGET = StructureView
+    NEEDS = ("tree", "set_enabled", "set_title", "add_section", "add_group", "remove_section", "rename_section", "move_node", "tag_section")
+    NEEDS_MODULE = structure
+
+    def mount(self, ctx):
+        super().mount(ctx)
+        self.view = self.WIDGET(ctx.app)
+        self.splitter = self.view.splitter
+        return self.view
+
+    def shown(self):
+        self.view.on_shown()
+
+    def mode_changed(self, mode):
+        self.view.on_mode(mode)
+
+    def flush(self):
+        """What a pane holds pending written now -- the tab left, the window left for VS Code (autosave.py, v0.117): the files are the source of truth, and VS Code must find the edit in them."""
+        self.view.host.flush()
+
+    def leave(self):
+        """What a pane holds pending written before another document is shown -- the tab being one of MODE_BOUND --: nothing in it can be kept unsaved, every change being written as it is made."""
+        self.view._in_tree_signal = False
+        self.view.host.flush()
+
+    def properties_changed(self, look_changed):
+        self.view.on_properties_changed(look_changed)
+
+    def state(self):
+        return self.view.kept_state()
+
+    def restore(self, state):
+        self.view.restore_state(state)
+
+
+class StructureTab(DocumentTab):
+    """«Structure du document»: a tab of the type «Document», its parameters only (issue #107)."""
+
+    KEY = "tab_structure"
+    SERVICES = (DocumentStructure,)

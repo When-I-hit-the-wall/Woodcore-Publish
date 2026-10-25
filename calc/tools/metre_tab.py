@@ -1,6 +1,8 @@
 """The «Métré» tab, under «Positions» (spec docs/requirements/completed/2026-10-21-commandes-typst-refonte.md, UI-003, Q-003: «la carte devient un onglet « Métré » sous Positions, lit data/quantities.json et écrit son fichier .typ»): what the position plans draw, by material then section -- pieces, length, volume -- with a total per material, of everything drawn, of one plan or of chosen positions.
 
-**Read, never measured here**: the rows are the export's (`data/quantities.json`, calc/domains/quantities.py), added up for the scope by `quantities.summary`, the report's own rule -- no plan is read again in the window. The export's date is said, and a banner says when a plan was saved after it (the quantities then lag behind it until the next export). Its file, `Positions/quantities.typ`, is written once and added to (list_file_card.py). Until the spec the card «Métrés» of the «Positions» tab measured the plans itself.
+**Read, never measured here**: the rows are the export's (`data/quantities.json`, calc/domains/quantities.py), added up for the scope by `quantities.summary`, the report's own rule -- no plan is read again in the window. The export's date is said, and a banner says when a plan was saved after it (the quantities then lag behind it until the next export). Its file, `Positions/quantities.typ`, is written once and added to (list_file_card.py, whose two writers are refused in a project open read-only since issue #106). Until the spec the card «Métrés» of the «Positions» tab measured the plans itself.
+
+Since issue #106 the tab is a class of parameters on the type «Données» (data_tab.DataTab): the banner is the type's (`ExportBanner`, the `callout` look of every banner of the window, D-10), the rest one whole service, `MetreBrowser`, found by `tab.service("browser")`.
 """
 
 import datetime
@@ -14,9 +16,10 @@ from PySide6.QtWidgets import (QAbstractItemView, QComboBox, QHBoxLayout, QLabel
 import cards
 import list_file_card
 import project
-import theme
+from data_tab import DataTab
 from domains import quantities
 from i18n import strings as engine_words
+from tab_frame import Service
 
 STRINGS = {
     "fr": {
@@ -81,19 +84,20 @@ def stale_plans(here):
     return sorted(p.stem for p in folder.glob("*.json") if p.stat().st_mtime > since) if folder.is_dir() else []
 
 
-class MetreTab(QWidget):
-    """The tab: the scope, the table of the export's quantities for it, the export's date and its banner, and the card of its file."""
+class MetreBrowser(Service):
+    """The tab's content, one whole service (D-03 of the spec 2026-10-24-type-donnees): the scope, the table of the export's quantities for it, the export's date, and the card of its file; what is out of date said to the type's banner."""
 
-    def __init__(self, app):
-        super().__init__()
-        self.app = app
-        self.t = app.t
+    NAME = "browser"
+    ZONE = "body"
+    NEEDS = ("summary", "metres")
+
+    def mount(self, ctx):
+        super().mount(ctx)
+        app = ctx.app
+        self.t = ctx.t
         self.data = None
-        outer = QVBoxLayout(self)
-        self.banner = QLabel("")
-        self.banner.setWordWrap(True)
-        self.banner.setStyleSheet(f"color: {theme.colour('warning')}; font-weight: bold;")
-        outer.addWidget(self.banner)
+        self.widget = QWidget()
+        outer = QVBoxLayout(self.widget)
         card = cards.card(engine_words.text("quantities.title", app.lang))
         column = QVBoxLayout(card)
         row = QHBoxLayout()
@@ -116,7 +120,7 @@ class MetreTab(QWidget):
         self.position_list = QListWidget()
         self.position_list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.position_list.itemSelectionChanged.connect(self.refresh_table)
-        self.position_list.setMaximumHeight(8 * self.fontMetrics().height())
+        self.position_list.setMaximumHeight(8 * self.position_list.fontMetrics().height())
         column.addWidget(self.position_list)
         self.table = QTreeWidget()
         words = lambda key: engine_words.text(key, app.lang)
@@ -133,11 +137,11 @@ class MetreTab(QWidget):
         self.file_card = list_file_card.ListFileCard(app, "quantities")
         outer.addWidget(self.file_card.card)
         self.reload()
-        self.restore(getattr(app, "views", {}).get("tab_metre"))
+        return self.widget
 
     # -- surviving a rebuild: the scope, the plan and the positions chosen ---------------------
 
-    def view_state(self):
+    def state(self):
         return {"scope": self.scope_combo.currentData(), "plan": self.plan_combo.currentData(), "positions": self.chosen_positions()}
 
     def restore(self, state):
@@ -154,7 +158,7 @@ class MetreTab(QWidget):
             self.position_list.item(i).setSelected(self.position_list.item(i).text() in chosen)
         self.refresh_table()
 
-    def on_shown(self):
+    def shown(self):
         """The tab brought to the front: the export read again -- an export run meanwhile is what it shows."""
         self.reload()
 
@@ -165,8 +169,7 @@ class MetreTab(QWidget):
             return
         self.data = read_export(here)
         stale = stale_plans(here)
-        self.banner.setText(self.t("mt_stale", plans=", ".join(stale)) if stale else "")
-        self.banner.setVisible(bool(stale))
+        self.ctx.say(self.t("mt_stale", plans=", ".join(stale)) if stale else "")
         if self.data is None:
             self.exported.setText(self.t("mt_not_exported"))
         else:
@@ -227,3 +230,11 @@ class MetreTab(QWidget):
         for column in (2, 3, 4):
             item.setTextAlignment(column, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         return item
+
+
+class MetreTab(DataTab):
+    """The tab: the type's banner, and the browser of the export's quantities. Parameters only (tests/test_tab_overrides.py)."""
+
+    KEY = "tab_metre"
+    MODULE = quantities
+    SERVICES = DataTab.SERVICES + (MetreBrowser,)

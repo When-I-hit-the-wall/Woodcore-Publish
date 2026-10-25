@@ -183,8 +183,9 @@ class Actions:
         return text.format(**values) if values else text
 
     def _ask(self, text):
-        from PySide6.QtWidgets import QMessageBox
-        return QMessageBox.question(self.tab, self._t("grp_archives", "Archives"), text) == QMessageBox.StandardButton.Yes
+        from PySide6.QtWidgets import QMessageBox, QWidget
+        parent = self.tab if isinstance(self.tab, QWidget) else self.tab.list   # a tab's list service (case_list.CaseList) is no widget: its list is
+        return QMessageBox.question(parent, self._t("grp_archives", "Archives"), text) == QMessageBox.StandardButton.Yes
 
     def _fail(self, error):
         from PySide6.QtWidgets import QMessageBox

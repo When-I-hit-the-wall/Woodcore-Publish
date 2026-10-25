@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "The condensed pages of the Typst commands",
+  "description": "calc/i18n/command-pages.json, schema 1.0 (spec 2026-10-24-onglet-commandes-pages, REQ-001, D-10, D-15) -- what Woodcore's commands tab and the website show of each public command, written by hand in French, German and English: its one-sentence lead, three or four key points, and for each argument of its /// block its group, its status, its own sentence, two or three examples and, for an argument taking a fixed list of values, every value with what it does and the Typst call that shows it (compiled once by calc/tools/build_examples.py into examples/out/values/). The signature, the order of the arguments, their defaults and their types are NOT here: they are read from the signature and the /// block of lib/ (REQ-003), and calc/tools/command_pages.py refuses a disagreement between the two. Read by calc/tools/command_pages.py alone, which validates it against this schema and then checks what the walker cannot say: every text carries the three languages, a value's `text` names a set of `value-texts` that has it, a group is one of command_pages.GROUPS.",
+  "type": "object",
+  "required": ["schema_version", "value-texts", "commands"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "_comment": {"type": "string"},
+    "value-texts": {
+      "type": "object",
+      "description": "Sets of what a value does, shared by the arguments that take the same values (display, style, role, the three positions, scope): by set, by the value as Typst reads it without its quotes, the sentence in three languages. A value names its set by its `text` being the set's name.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "patternProperties": {".*": {"type": "object", "required": ["fr", "de", "en"]}}
+        }
+      }
+    },
+    "commands": {
+      "type": "object",
+      "description": "By public command (build_reference.CATEGORIES), its page. A command without an entry has none: the tests refuse it (REQ-004, REQ-013).",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "required": ["lead", "keys", "arguments"],
+          "properties": {
+            "lead": {"type": "object", "required": ["fr", "de", "en"], "description": "One sentence: what the command does. The tree shows it under the name and the search reads it (REQ-011)."},
+            "keys": {
+              "type": "array",
+              "description": "«L'essentiel»: three or four cards, a bold title and two lines (UI-004).",
+              "items": {
+                "type": "object",
+                "required": ["title", "text"],
+                "properties": {
+                  "title": {"type": "object", "required": ["fr", "de", "en"]},
+                  "text": {"type": "object", "required": ["fr", "de", "en"]}
+                }
+              }
+            },
+            "line": {"type": "string", "description": "The line of the command where it is not a call -- a state, used as `#report-level.update(2)` -- written as it is used. Absent for a function: the line is composed from its arguments."},
+            "note": {"type": "object", "required": ["fr", "de", "en"], "description": "One line under the arguments: what is not an argument and still decides what is printed (#unit's defaults)."},
+            "named": {
+              "type": "object",
+              "required": ["members", "text"],
+              "description": "The arguments that are only another way to write one of the line's (name-calc:, value:, norm-ref:, ..rest), said in one sentence instead of a row each (UI-005).",
+              "properties": {
+                "members": {"type": "array", "items": {"type": "string"}},
+                "text": {"type": "object", "required": ["fr", "de", "en"]}
+              }
+            },
+            "arguments": {
+              "type": "object",
+              "description": "By argument, as its /// bullet names it, in the order the page lists them inside each group.",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "required": ["group", "status", "text", "examples"],
+                  "properties": {
+                    "group": {"type": "string", "enum": ["pos", "show", "text", "cite", "other"]},
+                    "status": {"type": "string", "enum": ["required", "optional"]},
+                    "positional": {"type": "boolean", "description": "Written in the line without its name -- `#var(key, symbol, value, unit)` --, though the signature may also take it by name."},
+                    "via": {"type": "string", "description": "The sink of the signature this argument is read from (`..defaults` of #calc-defaults), where the signature does not declare it."},
+                    "default": {"type": "string", "description": "Its default, for an argument read from a sink alone (`via`): the signature cannot say it."},
+                    "text": {"type": "object", "required": ["fr", "de", "en"], "description": "Its own sentence: what it does."},
+                    "examples": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["code"],
+                        "properties": {
+                          "code": {"type": ["string", "object"], "description": "The code shown: a string, or {fr, de, en} where it holds words."},
+                          "context": {"type": "string", "description": "What a whole call assumes above it -- a variable it prints again --: compiled with it by tests/test_command_pages.py, not shown."},
+                          "shows": {"type": "object", "required": ["fr", "de", "en"]}
+                        }
+                      }
+                    },
+                    "unrendered": {"type": "object", "required": ["fr", "de", "en"], "description": "Why the values of this argument have no print (their calls are not given): what each of them prints is a page of its own, #show-annexes'."},
+                    "values": {
+                      "type": "array",
+                      "description": "Every value the argument takes, as Typst writes it (a fine value between quotes, `none` too), with what it does and the call that shows it: the call's text in three languages where it holds words.",
+                      "items": {
+                        "type": "object",
+                        "required": ["value", "text"],
+                        "properties": {
+                          "value": {"type": "string"},
+                          "text": {"type": ["string", "object"]},
+                          "call": {"type": ["string", "object"]},
+                          "setup": {"type": ["string", "object"]}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

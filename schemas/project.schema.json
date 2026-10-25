@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Project record",
-  "description": "data/project.json -- the project as its .woodcore file describes it, and what produced this export: Woodcore's version and git revision, Typst's version, and the SHA-256 of every workbook read (calc/project.py record, v0.82). The report's title page and the PDF's metadata print from it (lib/calc-engine.typ project-info, woodcore-document), and every archive of an export keeps it. It carries no date, so an export repeated on the same inputs writes the same bytes.",
+  "description": "data/project.json -- the project as its .woodcore file describes it, and what produced this export: Woodcore's version and git revision, Typst's version (calc/project.py record, v0.82; 1.1 since issue #109, without the SHA-256 of the workbooks read that 1.0 carried as `workbooks`). The report's title page and the PDF's metadata print from it (lib/calc-engine.typ project-info, woodcore-document), and every archive of an export keeps it. It carries no date, so an export repeated on the same inputs writes the same bytes.",
   "type": "object",
   "required": [
     "schema_version",
@@ -13,14 +13,13 @@
     "author",
     "checker",
     "woodcore",
-    "typst",
-    "workbooks"
+    "typst"
   ],
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.0",
-      "description": "-- pinned: a record written at another version is refused rather than read as this one."
+      "const": "1.1",
+      "description": "-- pinned: a record written at another version is refused rather than read as this one; a 1.0 record is written again by the next export, or at once by the «Projet» tab."
     },
     "name": {
       "type": "string"
@@ -63,15 +62,6 @@
     "typst": {
       "type": "string",
       "description": "The version of the Typst found to compile the report, empty where none answered."
-    },
-    "workbooks": {
-      "type": "object",
-      "description": "{file name: SHA-256} of Positionen.xlsx and of every load workbook the export read.",
-      "patternProperties": {
-        ".*": {
-          "type": "string"
-        }
-      }
     },
     "revision": {
       "type": "object",

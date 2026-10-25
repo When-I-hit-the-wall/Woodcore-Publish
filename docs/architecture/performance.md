@@ -47,7 +47,7 @@ The tabs' own constructors add up to 6.5–12 s of the 12–21 s: `tab_fire` 1.2
 
 ### The export a window starts
 
-`calc/cli.py export --data-only` on the example: **6.6 s**, of which imports ≈ 2.2 s at its head: `export_all` → `registry` → `io_excel` → `openpyxl` (2.0 s, `numpy` 0.6 s) and `pypdf` (0.6 s). Every re-export pays them again, and the window then runs `rebuild()` (cause 4).
+`calc/cli.py export --data-only` on the example: **6.6 s**, of which imports ≈ 2.2 s at its head: `export_all` → `registry` → `io_excel` (gone since v0.125, issue #109) → `openpyxl` (2.0 s, `numpy` 0.6 s) and `pypdf` (0.6 s). Every re-export pays them again, and the window then runs `rebuild()` (cause 4).
 
 ## Causes measured afterwards
 
@@ -83,7 +83,7 @@ And no event of the session crosses into Python any more once nothing is held: p
 
 ### 3. openpyxl only where a workbook is read (08.10.2026)
 
-`io_excel` imports openpyxl when it reads a workbook, `build_reference` when it writes `docs/typst-reference.xlsx` -- and it writes it only where its rows changed since the last time (their digest kept in `%LOCALAPPDATA%\Woodcore\reference-digests.json`, with the file's size and time).
+`positions_store` imports openpyxl when it imports a Positionen.xlsx (`io_excel` did for the load workbooks until v0.125), `build_reference` when it writes `docs/typst-reference.xlsx` -- and it writes it only where its rows changed since the last time (their digest kept in `%LOCALAPPDATA%\Woodcore\reference-digests.json`, with the file's size and time).
 
 | `cli.py export --data-only`, the example | Before | After |
 |---|---:|---:|

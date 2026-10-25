@@ -1,0 +1,15 @@
+{
+  "_source": "SIA 265:2021, clause 3.4.2.2 -- transcribed by hand from the German edition, SIA265-2021-DE.pdf p. 26 (issue #110). Clause 3.4.2.4 (p. 27) sets the same two values for glulam with universal finger joints and composite glulam members.",
+  "_note": "The design values of glulam of a strength class Tabelle 9 does not list: shear and tension perpendicular to the grain are set here, every other strength is deduced «gemäss 2.2.2» (f_d = f_k / (γ_M/η_M), Tabelle 1); density and moduli are SN EN 14080's. Tabelle 9's own classes carry the same two values (held equal by tests/test_materials_domain.py).",
+  "edition": "SIA 265:2021",
+  "clause": {
+    "norm": "SIA 265",
+    "norm_ref": "3.4.2.2",
+    "page": 26,
+    "label": "Andere Festigkeitsklassen von Brettschichtholz: Bemessungswerte der Festigkeit",
+    "families": {
+      "glulam": {"label": "Brettschichtholz, Festigkeitsklasse GL20h und höher", "f_v_d": 1.8, "f_t_90_d": 0.15}
+    },
+    "note": "Bemessungswerte der Festigkeit: generell gemäss 2.2.2; Schub: f_v,d = 1,8 N/mm2 für Festigkeitsklasse GL20h und höher; Zug rechtwinklig zur Faserrichtung: f_t,90,d = 0,15 N/mm2 für Festigkeitsklasse GL20h und höher."
+  }
+}

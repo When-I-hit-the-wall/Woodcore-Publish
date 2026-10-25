@@ -57,17 +57,17 @@
       "title": "Nutzlasten – E",
       "file": "Variable-loads/Live/E.typ"
     },
-    "EL+AL-Dach mit Wasser": {
-      "title": "Eigen- und Auflasten – EL+AL-Dach mit Wasser",
-      "file": "Permanent-loads/EL+AL-Dach mit Wasser.typ"
-    },
-    "EL+AL-Dach ohne Wasser": {
-      "title": "Eigen- und Auflasten – EL+AL-Dach ohne Wasser",
-      "file": "Permanent-loads/EL+AL-Dach ohne Wasser.typ"
-    },
     "EL+AL-DachRand": {
       "title": "Eigen- und Auflasten – EL+AL-DachRand",
       "file": "Permanent-loads/EL+AL-DachRand.typ"
+    },
+    "EL+AL-Dach_mit_Wasser": {
+      "title": "Eigen- und Auflasten – EL+AL-Dach_mit_Wasser",
+      "file": "Permanent-loads/EL+AL-Dach_mit_Wasser.typ"
+    },
+    "EL+AL-Dach_ohne_Wasser": {
+      "title": "Eigen- und Auflasten – EL+AL-Dach_ohne_Wasser",
+      "file": "Permanent-loads/EL+AL-Dach_ohne_Wasser.typ"
     },
     "EL+AL-Wand": {
       "title": "Eigen- und Auflasten – EL+AL-Wand",
@@ -129,9 +129,9 @@
       "title": "Anschluss VU-MP-1: Velo Unterstand: Stabdübel 4x 10mm Durchmesser",
       "file": "Connections/VU-MP-1.typ"
     },
-    "WL-Fluchttreppe+Geräte": {
-      "title": "Windlast – WL-Fluchttreppe+Geräte",
-      "file": "Variable-loads/Wind/WL-Fluchttreppe+Geräte.typ"
+    "WL-Fluchttreppe+Geraete": {
+      "title": "Windlast – WL-Fluchttreppe+Geraete",
+      "file": "Variable-loads/Wind/WL-Fluchttreppe+Geraete.typ"
     },
     "WL-Pavillon": {
       "title": "Windlast – WL-Pavillon",
@@ -148,6 +148,10 @@
     "ZT-02": {
       "title": "Zug unter einem Winkel zur Faserrichtung – ZT-02",
       "file": "Timber-checks/Tension/ZT-02.typ"
+    },
+    "dreigelenk": {
+      "title": "Horizontalkraft im Dreigelenkrahmen",
+      "file": "Scripts/dreigelenk.typ"
     },
     "poutre-p1": {
       "title": "Poutre P1",

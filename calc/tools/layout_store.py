@@ -127,26 +127,29 @@ def bind(splitter, key, store=None):
     return Binding(splitter, key, store or Store())
 
 
-# What a calculation tab keeps of its pane of modules on this machine (spec 2026-10-22-onglet-neige-type, REQ-010, D-26): the order of its modules and which are folded, by tab -- not by the screens' signature, an order having no reason to change with a screen plugged in.
+# What a calculation tab keeps of its pane of modules on this machine (spec 2026-10-22-onglet-neige-type, REQ-010, D-26): the order of its modules and which are folded, by tab -- not by the screens' signature, an order having no reason to change with a screen plugged in. And the sections of its form folded (`sections`, the accordion of the spec 2026-10-23-neige-correctifs-issues-96-99, UI-005), beside them: each writer puts its own keys and keeps the others' (ARCH-RISK-010).
 MODULES = "modules"
+STATE_KEYS = ("order", "folded", "sections")
 
 
 def get_state(tab, store=None):
-    """The state a calculation tab's pane of modules was left in on this machine -- {"order": [...], "folded": [...]} -- or {} where none was kept."""
+    """The state a calculation tab was left in on this machine -- {"order": [...], "folded": [...], "sections": [...]}, the keys kept -- or {} where none was kept."""
     store = store or Store()
     node = store.read().get(MODULES)
     node = node.get(tab) if isinstance(node, dict) else None
     if not isinstance(node, dict):
         return {}
-    return {key: [str(v) for v in node[key] if isinstance(v, str)] for key in ("order", "folded") if isinstance(node.get(key), list)}
+    return {key: [str(v) for v in node[key] if isinstance(v, str)] for key in STATE_KEYS if isinstance(node.get(key), list)}
 
 
 def put_state(tab, state, store=None):
-    """`state` ({"order", "folded"}, lists of module ids) kept for `tab` on this machine."""
+    """The keys of `state` ({"order", "folded"}, lists of module ids; {"sections"}, the sections folded) kept for `tab` on this machine, the keys it does not name as they were -- the pane of modules and the form write apart."""
     store = store or Store()
     settings = store.read()
     table = dict(settings.get(MODULES) or {}) if isinstance(settings.get(MODULES), dict) else {}
-    table[tab] = {key: [str(v) for v in state.get(key, [])] for key in ("order", "folded")}
+    node = dict(table.get(tab) or {}) if isinstance(table.get(tab), dict) else {}
+    node.update({key: [str(v) for v in state[key]] for key in STATE_KEYS if key in state})
+    table[tab] = node
     settings[MODULES] = table
     store.write(settings)
 

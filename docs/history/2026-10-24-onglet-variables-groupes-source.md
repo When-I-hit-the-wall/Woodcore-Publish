@@ -1,0 +1,107 @@
+# Source de la spec 2026-10-24-onglet-variables-groupes (§2, déplacée telle quelle)
+
+La §2 de [la spécification](../requirements/active/2026-10-24-onglet-variables-groupes.md) déplacée mot pour mot, pour que la spec reste sous 100 KB tant qu'elle est active (`tests/test_docs_coherence.py`). Les points T restent cités par leur numéro dans la spec.
+
+L'issue #114, par points. Le prototype (artefact claude.ai « Onglet Variables », version 2) en est la référence visuelle ; ce que l'issue dit l'emporte sur lui. Les décisions et les retours sont gardés ligne par ligne.
+
+> **T1** — « L'ingénieur a revu deux versions d'un prototype HTML de l'**onglet « Variables »** (`tab_variables`, groupe Référence) le 24.10.2026, et **validé la version 2**, avec l'**encadré** pour montrer qu'une valeur est un résultat. Cette issue décrit ce qui est à implémenter, dans une autre session. »
+>
+> **T2** — « L'onglet sert à trouver une valeur que le projet a calculée, pour l'imprimer ailleurs dans le rapport (copier sa commande `#var`) ou pour qu'un champ d'un autre onglet la suive (le mode de choix de l'issue #42). »
+>
+> **T3** — « Aujourd'hui (master `57172dd`), l'onglet est celui de la v0.117 […] : `calc/tools/variables_tab.py` (1193 lignes) : trois volets (domaines | variables | détail) et la vue Affichage (`install_display`, `display_entries`) ; `calc/variable_sources.py` : le `Domain` de chaque source […] ; `calc/variables.py` : la lecture du registre d'un document compilé […] ; `calc/build_reference_calls.py` : `call_var_domain`, `call_var_registry`, `call_find`, `call_include_domain` ; les mots `vr_*`. Sur le projet d'exemple, l'onglet liste **935 variables dans 78 domaines**. »
+>
+> **T4** — « **L'artefact** […] **Sa version 2 (24.10.2026) est celle validée** : la proposition A et les retours de l'ingénieur. Sa version 1 […] comparait quatre propositions (A trois volets, B la recherche d'abord, C le rapport pour sommaire, D un tableur) ; B, C et D sont écartées. **Ses données sont réelles** : lues par le vrai onglet de Woodcore (master `57172dd`) sur une copie de `tests/projet-exemple`, après la lecture des trois documents (`VariablesTab.all_domains()`). Sans les variables propres des documents (réponse 5) : **918 variables dans 75 domaines**. »
+>
+> **T5** — « **Ce que le script de l'artefact contient**, à reprendre : `TABNAME`, `NAV`, `NODE`, `TABORDER` : la navigation de Woodcore en arbre (groupe › section › onglet) et les onglets qu'un nœud couvre ; `inScope`, `words`, `match`, `ordered` : le filtre du menu, de la source, du domaine, de la recherche (chaque mot doit se trouver), de l'unité et de « Résultats seulement » ; l'ordre de la navigation ; `printed`, `siblings`, `origin` : imprimé ou non, le même calcul dans les autres sources, la source qui le calcule ; `cmdOf`, `incOf` : la commande à copier selon la source, et ce qu'il faut inclure plus haut ; `pick` : la sélection « comme dans Windows » ; `renderCentre` […] ; `rz` et `S.cw` : les largeurs de colonnes glissées et gardées ; `renderRight` : la fiche ; `accepts` : le mode « Choisir pour un champ » ; `build_data2.py` […] : l'onglet qui calcule chaque domaine. »
+>
+> **T6** — « 1. La proposition — **A** : trois volets, rangés. »
+>
+> **T7** — « 2. Un calcul que plusieurs sources portent (l'export, le fichier `.typ` que Woodcore écrit, un document compilé) — **Réponse 2 : une ligne par source**, comme aujourd'hui, avec un filtre par source. Ses mots : « un calcul n'est porté normalement que par une seule source, et toutes les autres ne font que la rappeler. La commande var qui va chercher dans un domaine ne fait que rappeler, elle ne recrée pas. » »
+>
+> **T8** — « 3. Les désignations écrites en allemand dans le classeur — **Réponse 1 : telles qu'écrites.** « À l'avenir, il n'y aura plus de classeurs » (#109). »
+>
+> **T9** — « 4. La vue Affichage de l'onglet — **Réponse 2 : retirée.** La fiche suffit. »
+>
+> **T10** — « 5. Les variables déclarées à la racine d'un document — **Réponse 2 : cachées.** »
+>
+> **T11** — « 6. Montrer qu'une valeur est un résultat — **Réponse 2 : un encadré** autour de la valeur. »
+>
+> **T12** — « Le volet de gauche — **Un menu déroulant, « Tous » par défaut**, qui contient **les groupes d'onglets et les onglets de Woodcore** : Actions › Actions permanentes › Poids propre et surcharge ; Actions variables › Charge utile, Neige, Vent, Séisme ; Assemblages ; Sécurité structurale et ses onglets ; etc. Il trie ce qui apparaît à gauche. »
+>
+> **T13** — « Le filtre — **Le filtre choisi à gauche apparaît dans la barre de recherche** du volet central, en haut ; on peut l'enlever. On sait ainsi ce que l'on est en train de chercher. »
+>
+> **T14** — « La recherche — **Elle reste triée par domaine** : les variables d'un même domaine sous **une ligne de titre** par domaine. »
+>
+> **T15** — « Les colonnes — **Le symbole seul**, pas le nom. **Largeur des colonnes réglable** ; chaque variable sur **une ligne** ; les largeurs **ne changent pas à chaque recherche**. »
+>
+> **T16** — « La fiche — **Ouvrir directement l'onglet** où la valeur a été calculée. »
+>
+> **T17** — « Le choix multiple — **Une case à cocher à gauche** de chaque variable ; **Ctrl+clic** pour en ajouter, **Maj+clic** pour une plage, comme dans Windows ; **copier la commande de toutes les variables choisies**. »
+>
+> **T18** — « Les résultats — **Plus d'étoiles.** Une autre manière de montrer un résultat → l'encadré (question 6). »
+>
+> **T19** — « La fenêtre — Trois volets (`QSplitter`) : **à gauche les domaines**, **au centre les variables**, **à droite la fiche**. **Pas de « Données · Affichage »** (réponse 4) : l'onglet n'a plus `VIEWS = views.DATA_VIEWS` ni `install_display`. Le bandeau, la lecture des documents (« Relire les documents », le cache, la pièce jointe du PDF) et le message d'une lecture qui échoue **ne changent pas**. »
+>
+> **T20** — « Le volet de gauche — **En haut, le menu des onglets** (un bouton qui ouvre une liste en arbre), « Tous les onglets » par défaut. Il reprend **la navigation de Woodcore, dans son ordre et ses mots** (`tab_registry.NAV_GROUPS`, `NAV_SECTIONS`) : **Actions** › **Actions permanentes** › Poids propre et surcharge ; **Actions variables** › Charge utile, Neige, Vent, Séisme ; Combinaisons de charges ; **Structure** › Modèles statiques, Schémas ; **Assemblages** › Moyens d'assemblage, Moments polaires ; **Sécurité structurale** › Traction, Compression, Flexion, Cisaillement (#112), Torsion, Flambage, Déversement, Résistance au feu ; **Aptitude au service** › Déformations, Vibrations ; **Acier** › Section › Profilés, Classe de section ; Sécurité structurale › Traction, Compression, Flexion, Effort tranchant ; **Données** › Python ; **Référence** › Domaines ; **Document** › Rapport de statique (les domaines que le rapport déclare lui-même, « S10 - 1 kN Mitte »…). »
+>
+> **T21** — « Choisir **un groupe ou une section prend tous ses onglets**. Chaque entrée dit **son nombre de variables** (dans la source choisie) ; une entrée à zéro est grisée et ne se choisit pas. Échap ou un clic ailleurs ferme le menu. »
+>
+> **T22** — « **Dessous, la source** : Toutes · Export · Fichiers · Rapport (réponse 2). »
+>
+> **T23** — « **Dessous, les domaines du filtre**, rangés sous le titre de leur onglet, dans l'ordre de la navigation : le cas (`SL`, `A1`, `BI-01`), une étiquette de sa source (**export**, **fichier**, **RS** / BP / CU), son nombre de variables. Un domaine qu'**aucun document n'imprime** est en gris (infobulle « aucun document ne l'imprime »). Un clic le choisit ; un second clic le relâche. »
+>
+> **T24** — « Une légende des étiquettes en bas. La colonne est assez large pour les noms (260 px dans le prototype) ; aujourd'hui, avec 110 px, les noms sont coupés et le nombre et la provenance hors de vue. »
+>
+> **T25** — « Le volet central — **La barre de recherche porte le filtre en étiquettes**, devant le texte tapé : l'entrée du menu (« Actions › Actions variables »), la source (« source : export »), le domaine choisi (« Charge utile · A1 [export] »). **Le × d'une étiquette l'enlève** ; **⌫ dans une barre vide** enlève la dernière (le domaine, puis la source, puis le menu). La recherche cherche **dans ce filtre**. »
+>
+> **T26** — « La recherche trouve par nom, symbole, désignation, description, unité, clause, valeur, cas, onglet ; **chaque mot tapé doit se trouver** (« kn neige »), comme aujourd'hui. »
+>
+> **T27** — « À côté : le filtre d'**unité** (les unités du projet, les plus fréquentes d'abord), **« Résultats seulement »**, et le compte (« 49 variable(s) dans 26 domaine(s) »). »
+>
+> **T28** — « **La liste est toujours groupée par domaine** : une ligne de titre par domaine (son cas, son étiquette de source, son onglet, sa désignation, « pas imprimé » s'il y a lieu, son nombre), ses variables dessous, avec ou sans recherche. »
+>
+> **T29** — « **Les colonnes** : la case, **le symbole** (composé comme le rapport l'imprime, `richtext.MathDelegate` ; le nom à écrire en infobulle), la valeur (à droite, chiffres tabulaires), l'unité, la désignation. **Pas de colonne du nom, ni de la provenance, ni du domaine** : le domaine est dans la ligne de titre. »
+>
+> **T30** — « **Une variable, une ligne** : un texte trop long est coupé par « … », entier en infobulle. »
+>
+> **T31** — « **Des largeurs fixes** : symbole 120 px, valeur 120 px, unité 76 px, la désignation prend le reste. **Elles ne changent jamais avec une recherche.** On les règle en **glissant le bord droit d'un en-tête** ; un double-clic sur ce bord rend la largeur d'origine. **Woodcore les garde** avec l'état de la vue (`view_state` / `restore`). »
+>
+> **T32** — « **Un résultat est encadré** (réponse 6) : la valeur dans un cadre fin de la couleur d'accent, le texte en accent et en gras. Pas d'étoile. Un résultat est ce que le calcul déclare comme tel (`results` de l'export, η d'une vérification), **dans chaque source qui rappelle le calcul** (aujourd'hui le fichier « A1 » ne marque pas le q<sub>k</sub> que l'export marque). »
+>
+> **T33** — « Le choix d'une ou de plusieurs variables (comme dans Windows) — **Clic** : cette variable seule, sa fiche à droite. **Ctrl+clic**, ou **un clic sur la case** : l'ajoute ou la retire, et devient la dernière cliquée. **Maj+clic** : la plage depuis la dernière cliquée, dans l'ordre affiché, **à travers les domaines** ; Ctrl+Maj l'ajoute à ce qui est déjà choisi. **La case de l'en-tête** prend toutes les variables affichées, ou les relâche. **Les cases suivent la sélection** et la sélection suit les cases : une seule notion. »
+>
+> **T34** — « Une barre au-dessus de la liste : « **3 choisie(s)** · **Copier les 3 commandes** · **Tout désélectionner** ». « Copier » met dans le presse-papier **une ligne `#var` par variable**, dans l'ordre de la liste. La fiche montre la dernière cliquée. »
+>
+> **T35** — « La fiche — **En tête** : symbole = **valeur** unité (la valeur encadrée si c'est un résultat, et « Résultat du calcul » dessous), la désignation, le chemin « Actions › Actions variables › Neige · SL [export] ». »
+>
+> **T36** — « **« Ouvrir l'onglet Neige ↗ »** : amène devant **l'onglet qui calcule la valeur**, ouvert sur ce cas et cette ligne. C'est l'onglet de la source qui calcule (ci-dessous), même si la variable a été choisie dans le rapport qui la rappelle. »
+>
+> **T37** — « **La commande à copier**, et son bouton « Copier » : export `#var("q_k1", domain: ("snow-load", "SL"))` — « Lu dans l'export : rien à inclure avant. » ; fichier `.typ` `#var("eta", domain: "BI-01")` — « Le domaine doit être inclus plus haut dans le rapport : `#include domain-file("check", "BI-01")` » (une charge : `domain-file("snow-load", "SL")` ; un domaine de l'onglet Domaines : `#include "/Domains/poutre-p1.typ"`) ; document compilé `#var("F", domain: "S10 - 1 kN Mitte")` — « Le domaine est déclaré dans le rapport de statique : la ligne doit être plus bas que lui. » »
+>
+> **T38** — « **Les champs** : nom à écrire, description, clause, calcul (la formule de l'étape, `formulas` de l'export), choix (la valeur courante en gras), niveau, **« Vient de »** en mots (le classeur et sa feuille, Woodcore, la norme, le rapport) au lieu de la source brute (`excel:Belastungsannahmen.xlsm!SL!E14`). Une ligne vide est cachée. »
+>
+> **T39** — « **« Le même calcul ailleurs »** (réponse 2) : « Calculé dans **export** ; celle-ci le rappelle. », puis un bouton par autre source du même calcul (« [RS] SL · 1.115 · rappelle », « [fichier] SL · 1.115 · rappelle »), qui y mène. La source qui calcule est **l'export s'il a la valeur, sinon le fichier, sinon le document**. »
+>
+> **T40** — « **Un domaine choisi seul** (aucune variable) : son nom et sa source, son chemin, « Ouvrir l'onglet … », **le domaine entier** à copier (`#include domain-file(…)` quand il y en a un), le nombre de ses variables et de ses résultats. Aujourd'hui sa fiche met ce nombre sous « Valeur » et sa sorte sous « Désignation ». »
+>
+> **T41** — « « Choisir pour un champ » (issue #42), inchangé dans son rôle — `begin_variable_pick` amène l'onglet devant ; la barre dit « Choisir une variable pour N<sub>c,d</sub> de la vérification DR-01, en kN ». **Seules les valeurs que le champ peut suivre sont offertes** (`variable_sources.linkable` : un nombre de la dimension du champ, de l'export ou d'un domaine de l'onglet Domaines, jamais d'un document compilé) ; les menus, la liste de gauche et les nombres ne comptent qu'elles. La fiche porte un encadré « N<sub>c,d</sub> de DR-01 · suivra Q<sub>k</sub> de A1 · **Importer** » ; une valeur refusée dit pourquoi. »
+>
+> **T42** — « L'onglet qui calcule un domaine — Chaque domaine doit savoir **l'onglet de Woodcore qui le calcule**, pour le menu, les titres de la liste et « Ouvrir l'onglet ». Dans le prototype : export `snow-load` / `wind-load` / `dead-load` / `live-load` → Neige / Vent / Poids propre et surcharge / Charge utile ; export `connector` / `connection` / `script` → Moyens d'assemblage / Moments polaires / Python ; fichier d'une vérification bois → le dossier où Woodcore l'écrit : `Timber-checks/<Tension|Compression|Bending|Shear|Buckling|Lateral-torsional>/` → Traction, Compression, Flexion, Cisaillement, Flambage, Déversement ; fichier d'une vérification au feu (FE-01, FE-02) → Résistance au feu ; fichier d'une vérification acier → `Steel-checks/<Bending|Shear>/` → Acier › Flexion, Effort tranchant ; fichier ou domaine du rapport qui porte le cas d'un calcul de l'export (SL, WL-…, EL+AL-…, A1…H, SD-10, VU-MP-1) → l'onglet de ce calcul ; domaine de l'onglet Domaines (`Domains/poutre-p1.typ`) → Référence › Domaines ; un autre domaine déclaré dans le rapport (S10 …) → Document › Rapport de statique. »
+>
+> **T43** — « ⚠️ Le prototype rapproche un domaine d'un document de son calcul **par le nom du cas** : c'est une heuristique. L'implémentation doit le lire d'une donnée (le `gen:` d'un domaine déplié, `domain-files.json`, ou le registre) — à trancher dans la spec. »
+>
+> **T44** — « Les défauts de l'onglet d'aujourd'hui — 1. La colonne des domaines a 110 px : noms coupés […]. 2. Les noms sont ceux du code (« snow-load · SL », « live-load · A1 ») et un fichier « A1 » ne dit pas qu'il est une charge utile, ni « BI-01 » une flexion. 3. Trois lignes « Document » que rien ne distingue (les racines des trois documents) → cachées (réponse 5). 4. « Tous les domaines » donne une liste à plat (q_k : plus de 60 lignes), le domaine dans une colonne → groupée par domaine. 5. Le ★ dépend de la source […]. 6. La fiche d'un domaine seul met son nombre de variables sous « Valeur » et « un domaine nommé » sous « Désignation ». 7. La provenance dit où la valeur a été lue (« Typst · RS » pour une valeur du classeur) et la fiche montre la source brute ; « Classeur » et « Source » sont seuls sur leur ligne. 8. L'Affichage offre `#find`, coupé, et un aperçu vide pour une valeur lue dans un document → retiré (réponse 4). »
+>
+> **T45** — « 9. **Hors de cet onglet** : les fichiers dépliés arrondissent les valeurs d'entrée à six décimales (k<sub>β</sub> de SD-10 écrit 1.265678 ; R<sub>d</sub> 5,726197608 dans l'export, 5,726196580 dans le rapport compilé, 2·10<sup>-7</sup>). Négligeable ici ; à trancher à part (`calc/domains/unfold.py`). »
+>
+> **T46** — « Ce qui change dans Woodcore » (tableau) : « L'onglet de chaque domaine — `calc/variable_sources.py` (`Domain`) — Un champ `tab` (la clé de `tab_registry`), rempli par l'export, par le dossier d'un fichier, par le rapprochement d'un domaine de document ; ses tests (`tests/test_variable_sources.py`). » ; « Le menu des onglets — `variables_tab.build_domains` — Un bouton et un menu en arbre (`QMenu` ou un `QTreeView` en popup), lus de `tab_registry.NAV_GROUPS` et `NAV_SECTIONS` et de leurs mots, avec les nombres. » ; « La source — Un segment Toutes · Export · Fichiers · Rapport ; le filtre de provenance d'aujourd'hui (`provenance_box`) disparaît. » ; « La barre à étiquettes — Un champ de recherche précédé d'étiquettes amovibles ; une brique commune si d'autres onglets la veulent. » ; « La liste groupée — Un `QTreeView` à deux niveaux (domaine, variable) toujours déplié, ou un modèle plat avec des lignes de titre ; `SelectionMode.ExtendedSelection` (Ctrl, Maj) ; une colonne de cases liée à la sélection ; `Interactive` pour les largeurs, sans `ResizeToContents`. » ; « L'encadré des résultats — un délégué de la colonne valeur […]. » ; « Les largeurs gardées — `view_state`, `restore` — Les trois largeurs ; une vue gardée par une version d'avant reprend les largeurs par défaut. » ; « La copie multiple — la barre de sélection, `build_reference_calls` — Une ligne par variable, la commande selon la source. » ; « La fiche — `build_detail`, `show_selected` — […] » ; « « Ouvrir l'onglet » — la fenêtre (`MainWindow`) — Amener l'onglet devant et y choisir le cas et la ligne : chaque onglet doit offrir de quoi choisir un cas (à vérifier onglet par onglet). » ; « Plus de vue Affichage — `VIEWS`, `install_display`, `display_entries`, `chosen` — Retirés ; une décision qui change celle de la v0.117 (§13). » ; « Les variables des documents — `variable_sources.registry_domains` — Le domaine vide (racine) d'un document n'est plus listé. »
+>
+> **T47** — « Demandes — **Le modèle** (`calc/`, sans Qt) : `Domain.tab` : l'onglet qui calcule le domaine, pour chaque source ; ses tests sur le projet d'exemple (les 75 domaines). La source qui calcule un calcul et celles qui le rappellent. Les résultats d'un calcul marqués dans chaque source qui le rappelle. La commande d'une variable selon sa source, et ce qu'il faut inclure ; la copie de plusieurs. Les racines des documents retirées de la liste. »
+>
+> **T48** — « Demandes — **L'onglet** : le menu des onglets (groupes, sections, onglets, nombres, entrées vides grisées), « Tous » par défaut. Le segment de la source ; la liste des domaines rangés sous leur onglet, l'étiquette de source, le gris « pas imprimé ». La barre de recherche à étiquettes (×, ⌫). La liste toujours groupée par domaine, une ligne par variable, le symbole seul. Les largeurs fixes, réglables, gardées. L'encadré des résultats ; plus d'étoile. Le choix multiple (clic, Ctrl, Maj, cases, case d'en-tête) et « Copier les n commandes ». La fiche : « Ouvrir l'onglet », la commande, « Vient de », « Le même calcul ailleurs », la fiche d'un domaine. Plus de vue Affichage. « Choisir pour un champ » : seules les valeurs acceptées, partout ; l'encadré « Importer » dans la fiche. »
+>
+> **T49** — « Demandes — **Partout** : Les mots en de, fr et en (`tests/test_i18n.py`) ; les mots `vr_*` qui ne servent plus retirés. Les tests de l'onglet (`tests/test_variables*.py`, `tests/test_window.py` pour un onglet sans vues) ; une ligne au catalogue des tests. La documentation : `docs/ui/tab-variables.md` réécrit, `docs/decisions.md` §13 (la vue Affichage retirée de cet onglet, une ligne par source, les racines cachées) ; `CHANGELOG.md` ; la page « Nouveautés » en trois langues. Une copie du prototype dans `docs/requirements/prototypes/2026-10-24-onglet-variables/`, lue par `action: "read"` sur l'artefact. »
+>
+> **T50** — « Points à étudier dans la spec — Ce travail touche un contrat de données (`variable_sources.Domain`) et plusieurs modules : il passe par `/big-feature`, avec sa revue d'architecture. **Le contrat que d'autres onglets lisent** (`selected_key`, `variable`, `address`, `select_key` ; le choix pour un champ, l'onglet Domaines) : ce qui change avec le choix multiple — la sélection rendue est-elle la dernière cliquée ? **Le rapprochement d'un domaine de document avec son calcul**, sans heuristique de nom. **« Ouvrir l'onglet » sur un cas et une ligne** : quels onglets savent choisir un cas aujourd'hui, et lesquels ont besoin d'une méthode. **En mode « Choisir pour un champ »**, le choix multiple est-il coupé (un champ suit une valeur) ? **Le menu** : un `QMenu` à sous-menus ou une liste en arbre dans un popup ; le prototype montre une liste en arbre, tout visible d'un coup. **Le nom « Cisaillement »** dans le menu suit la décision de #112 ; le registre dit encore « Effort tranchant ». »
+>
+> **T51** — « Lien avec les autres issues — **#42** : les variables liées des champs, le mode de choix. **#113** : l'onglet Domaines, dont la fenêtre « Lier une variable… » lit la même source. **#112** : les vérifications d'éléments, le nom « Cisaillement ». **#109** : la fin de la lecture du classeur (réponse 3). **#71** : l'onglet Dépendances, l'autre navigateur du groupe Référence. »

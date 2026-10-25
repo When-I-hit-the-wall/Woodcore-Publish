@@ -21,8 +21,8 @@ TABLE_PLACES = {"above", "below"}
 # The kinds of action a load domain may declare (SIA 260): permanent (G) or variable (Q). A load combination picks its partial factors by this, so a misspelt one must stop the export rather than leave a load unclassified.
 ACTIONS = {"permanent", "variable"}
 
-# Where a domain's numbers come from (docs/domain/calculation-domains.md §3.3): the sheet computed them (`excel`), Python computed them from what the sheet holds (`python`), or they are read from a norm table and computed by nobody (`norm`, the Nutzlasten of SIA 261 Tabelle 8, section 3.3septies). A norm domain has no sheet prefix and its instances name no workbook and no sheet; the other two must have all three, or Woodcore's window and the report would point at a case with nothing behind it.
-ENGINES = {"excel", "python", "norm"}
+# Where a domain's numbers come from (docs/domain/calculation-domains.md §3.3): Woodcore computed them from the cases entered in its tabs (`python`), or they are read from a norm table and computed by nobody (`norm`, the Nutzlasten of SIA 261 Tabelle 8, section 3.3septies). `excel`, a sheet of a load workbook, went with the workbooks' reading (issue #109, D-33).
+ENGINES = {"python", "norm"}
 NORM_ENGINE = "norm"
 
 
@@ -63,7 +63,7 @@ _TYPE_MAP = {
 
 
 def _check_type(value, expected, path):
-    # a schema may list several accepted types, as a load var's `value` does: a number for a coefficient, a string for a text entry the Schnee sheet offers as a dropdown (docs/domain/loads.md §3.3bis)
+    # a schema may list several accepted types, as a load var's `value` does: a number for a coefficient, a string for a text entry chosen from a list (docs/domain/loads.md §3.3bis)
     accepted = expected if isinstance(expected, list) else [expected]
     # a bool is an int to Python, and must not pass for a number
     if ("number" in accepted or "integer" in accepted) and isinstance(value, bool):
@@ -79,6 +79,22 @@ def _check_type(value, expected, path):
         )
 
 
+def _older_remedy(path, value, allowed):
+    """What to do with a file at a `schema_version` older than every one this code reads -- an export of an earlier Woodcore (issue #109: calculations.json at 1.8): «Import données» once writes it again. "" for any other field or version."""
+    if not str(path).endswith("schema_version"):
+        return ""
+
+    def version(text):
+        try:
+            return tuple(int(p) for p in str(text).split("."))
+        except ValueError:
+            return None
+    mine, known = version(value), [version(v) for v in allowed]
+    if mine is None or None in known or not known or mine >= min(known):
+        return ""
+    return " -- written by an earlier version of Woodcore: run «Import données» (calc/export_all.py) once to write it again"
+
+
 def _validate_node(value, schema, path):
     if "type" in schema:
         _check_type(value, schema["type"], path)
@@ -92,7 +108,7 @@ def _validate_node(value, schema, path):
     if "enum" in schema and value not in schema["enum"]:
         allowed = ", ".join(repr(v) for v in schema["enum"])
         raise ValidationError(
-            f"{path}: is {value!r}, expected one of {allowed}"
+            f"{path}: is {value!r}, expected one of {allowed}" + _older_remedy(path, value, schema["enum"])
         )
     declared = schema.get("type")
     accepted = declared if isinstance(declared, list) else [declared]
@@ -234,7 +250,8 @@ def validate_checks_business(data):
             continue
         if entry["reason"]:
             raise ValidationError(f"{where}: calculable and carries a reason {entry['reason']!r}")
-        if not entry["grade"] or entry["section"] is None or entry["moisture_class"] is None:
+        # a strength class of SIA 265, or a material of the library the export froze the resistance of (issue #112, ARCH-008)
+        if not (entry["grade"] or entry.get("resistance")) or entry["section"] is None or entry["moisture_class"] is None:
             raise ValidationError(f"{where}: calculable with no strength class, section or moisture class")
         if entry["moisture_class"] not in moisture_classes():
             raise ValidationError(f"{where}: moisture class {entry['moisture_class']!r}")
@@ -364,49 +381,25 @@ def validate_calculations_business(data):
                 f"of {', '.join(sorted(ENGINES))} (set ENGINE in its domain module)"
             )
         from_norm = domain["engine"] == NORM_ENGINE
-        # A domain read from a workbook is addressed through its sheets, and every one of its instances says which sheet of which file it is; a domain read from a norm table has neither, and carrying one would name a file nobody can open (docs/domain/calculation-domains.md §3.3, docs/domain/loads.md §3.3septies).
-        if from_norm and domain["sheet_prefix"]:
-            raise ValidationError(
-                f"{domain_name}: engine is '{NORM_ENGINE}' but it declares the "
-                f"sheet prefix {domain['sheet_prefix']!r} -- a norm table is read "
-                f"from no workbook (set SHEET_PREFIX = None)"
-            )
-        if not from_norm and not domain["sheet_prefix"]:
-            raise ValidationError(
-                f"{domain_name}: no sheet_prefix -- a domain whose engine is "
-                f"'{domain['engine']}' finds its instances by the prefix of the "
-                f"sheets carrying them (set SHEET_PREFIX in its domain module)"
-            )
-        for sheet, instance in domain["instances"].items():
-            path = f"{domain_name}.{sheet}"
+        for case, instance in domain["instances"].items():
+            path = f"{domain_name}.{case}"
             _check_calculation(instance, path)
 
-            # An instance entered in Woodcore (schema 1.5, D-04) names the source it was computed from, and no workbook and no sheet
+            # A case entered in Woodcore (schema 1.5, D-04) names the source it was computed from; a row of a norm table names none (docs/domain/calculation-domains.md §3.3, docs/domain/loads.md §3.3septies). Since issue #109 nothing else is a case: no workbook, no sheet (1.9).
             if instance.get("source_file"):
+                if from_norm:
+                    raise ValidationError(f"{path}: computed from {instance['source_file']} although its domain is read from a norm table")
                 if instance.get("engine") != "python":
                     raise ValidationError(f"{path}: computed from {instance['source_file']} and its engine is {instance.get('engine')!r} -- 'python'")
-                for field in ("workbook", "sheet"):
-                    if instance.get(field):
-                        raise ValidationError(f"{path}: computed from {instance['source_file']} and names a {field} ({instance[field]!r}) as well")
                 # a load's drawing lies in its own Exports/Figures/ -- the build-up's under Permanent-loads/, the snow's column of Figur 3 under Variable-loads/Snow/ (spec 2026-10-22-onglet-neige-type, D-32) -- or in data/calculations/ in a project laid out before
                 import project
                 for figure in instance.get("figures") or ():
                     if not any(_starts_figure(str(figure.get("file", "")), kind, "") for kind in project.LOAD_FIGURE_KINDS):
                         raise ValidationError(f"{path}: a figure's file {figure.get('file')!r} is not under data/calculations/ nor " + " nor ".join(figure_names(kind, '')[1] for kind in project.LOAD_FIGURE_KINDS))
+            elif not from_norm:
+                raise ValidationError(f"{path}: no source_file -- a case of '{domain_name}' is computed from the source it was entered in (Woodcore-Datei/loads/)")
             elif instance.get("engine") not in (None, domain["engine"]):
-                raise ValidationError(f"{path}: engine {instance['engine']!r} and no source_file -- an instance of another engine than its domain's names the source it was computed from")
-            for field in (() if instance.get("source_file") else ("workbook", "sheet")):
-                held = instance.get(field, "")
-                if from_norm and held:
-                    raise ValidationError(
-                        f"{path}: names a {field} ({held!r}) although its domain "
-                        f"is read from a norm table, not from a workbook"
-                    )
-                if not from_norm and not held:
-                    raise ValidationError(
-                        f"{path}: no {field} -- an instance read from a workbook "
-                        f"names the file and the sheet it came from"
-                    )
+                raise ValidationError(f"{path}: engine {instance['engine']!r} -- a row of a norm table is its domain's, '{NORM_ENGINE}'")
 
             var_names = set(instance.get("vars", {}).keys())
             if not instance["results"]:
